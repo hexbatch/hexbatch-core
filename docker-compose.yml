@@ -1,0 +1,66 @@
+version: '3.7'
+
+volumes:
+  mysql_data:
+    name: "hbc_db"
+
+networks:
+  dev_hbc_network:
+
+services:
+
+  webserver_hbc:
+    build:
+      context: ./docker
+    ports:
+      - "${HBC_PHP_WEBSERVER_PORT}:80"
+    volumes:
+      - ./:/var/www/html
+      -   type: bind
+          source: ./storage/app/public/
+          target: /var/www/html/public/storage/
+      -   type: bind
+          source: ./storage/app/uploads/
+          target: /var/www/html/public/uploads/
+    environment:
+      XDEBUG_CONFIG: client_host=host.docker.internal
+      APACHE_DOCUMENT_ROOT: /var/www/html/public
+    networks:
+      - dev_hbc_network
+    restart: on-failure
+    # after container running in its terminal
+    #  bash docker/resources/post_run_compose.sh
+
+
+
+  db_hbc:
+    image: mysql:8.0.34
+    ports:
+      - "${HBC_DATABASE_PORT}:3306"
+    expose:
+      - "3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: "${HBC_DATABASE_NAME}"
+      MYSQL_ROOT_PASSWORD: "${HBC_DATABASE_ROOT_PW}"
+      MYSQL_USER: "${HBC_DATABASE_USER_NAME}"
+      MYSQL_PASSWORD: "${HBC_DATABASE_USER_PW}"
+    networks:
+      - dev_hbc_network
+    restart: always
+
+  phpmyadmin:
+    depends_on:
+      - db_hbc
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - "${HBC_PHP_ADMIN_PORT}:80"
+    environment:
+      PMA_HOST: db_hbc
+      MYSQL_ROOT_PASSWORD: "${HBC_DATABASE_ROOT_PW}"
+      UPLOAD_LIMIT: "1G"
+      MEMORY_LIMIT: "1G"
+    networks:
+      - dev_hbc_network
