@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchAuthException;
+use App\Exceptions\RefCodes;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,10 @@ class AuthenticationController extends Controller
         $user = User::where('username',$request->username)->first();
 
         if (!$user || !Hash::check($request->password,$user->password) ) {
-            throw new HexbatchAuthException(__("auth.failed"),401);
+            throw new HexbatchAuthException(
+                __("auth.failed"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNAUTHORIZED,
+                RefCodes::BAD_LOGIN);
         }
 
         $user->tokens()->delete(); //change later to keep reserved tokens
@@ -55,6 +59,6 @@ class AuthenticationController extends Controller
     public function register(Request $request): JsonResponse
     {
         (new CreateNewUser)->create($request->all());
-        return response()->json(["message" => __("auth.registered")], 204);
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NO_CONTENT);
     }
 }

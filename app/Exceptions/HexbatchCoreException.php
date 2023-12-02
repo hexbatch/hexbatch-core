@@ -2,4 +2,27 @@
 
 namespace App\Exceptions;
 
-class HexbatchCoreException extends \RuntimeException {}
+use Throwable;
+
+class HexbatchCoreException extends \RuntimeException {
+
+
+    protected ?int $ref_code = null;
+    public function __construct(string $message,int $http_code,?int $ref_code,?Throwable $prev = null)
+    {
+        parent::__construct($message,$http_code,$prev);
+        $this->ref_code = $ref_code;
+    }
+
+    public function getRefCode(): ?int
+    {
+        return $this->ref_code;
+    }
+
+    public function getRefCodeUrl(): ?string
+    {
+        return (RefCodes::URLS[$this->ref_code]??null);
+    }
+
+
+}

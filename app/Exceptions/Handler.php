@@ -37,8 +37,11 @@ class Handler extends ExceptionHandler
             $status = $e->getCode();
             if (empty($status)) {$status = 400;}
             $response = [
+                'status' => $status,
+                'message'=> $e->getMessage(),
+                'code' => $e->getRefCode(),
+                'more_info' => $e->getRefCodeUrl(),
                 'errors'=> [],
-                'message'=> $e->getMessage()
             ];
             $other = $e->getPrevious();
             while($other) {
