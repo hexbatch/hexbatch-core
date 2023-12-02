@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +27,32 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        if ($request->wantsJson() && (  $e instanceof HexbatchCoreException))
+        {
+            // Default response of 400
+            $status = $e->getCode();
+            if (empty($status)) {$status = 400;}
+            $response = [
+                'errors'=> [],
+                'message'=> $e->getMessage()
+            ];
+            $other = $e->getPrevious();
+            while($other) {
+                $response['errors'][] = $other->getMessage();
+                $other = $other->getPrevious();
+            }
+            if (empty($response['errors'])) {
+                unset($response['errors']);
+            }
+
+
+            // Return a JSON response with the response array and status code
+            return response()->json($response, $status);
+        }
+        return parent::render($request, $e);
     }
 }
