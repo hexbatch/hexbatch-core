@@ -19,5 +19,6 @@ return [
     'logged_out' => 'Logged out successfully',
     'password' => 'The provided password is incorrect.',
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'invalid_name' => 'name should have only letters and numbers and underscrores and not start with a number '
 
 ];

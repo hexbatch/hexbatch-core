@@ -19,7 +19,8 @@ return new class extends Migration
             $table->text('abilities')->nullable();
             $table->timestamp('last_used_at')->nullable();
             $table->timestamp('expires_at')->nullable();
-            $table->timestamps();
+            $table->jsonb('passthrough')->nullable()->default(null)
+                ->comment('data stored with the token when its created, not meant to be changed');
         });
     }
 
