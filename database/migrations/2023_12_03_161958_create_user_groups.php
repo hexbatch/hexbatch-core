@@ -21,29 +21,25 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-            $table->foreignId('element_id')
-                ->nullable(false)
-                ->comment("The user element that stores the user data")
-                ->index('idx_group_element_id')
-                ->constrained('elements')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
 
             $table->foreignId('user_id')
                 ->nullable(false)
                 ->comment("The owner")
-                ->index('idx_group_member_user_id')
+                ->index('idx_group_owner_user_id')
                 ->constrained('users')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->boolean('is_admin')->default(false)->nullable(false)
-                ->comment('if true then member is admin');
+            $table->string('group_name',128)
+                ->nullable(false)
+                ->comment("The unique name of the group, using the naming rules");
+
+
 
             $table->timestamps();
 
-            $table->unique('element_id','user_id');
+            $table->unique(['user_id','group_name']);
         });
 
         DB::statement('ALTER TABLE user_groups ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

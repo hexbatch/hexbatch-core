@@ -34,6 +34,17 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
+
+            $table->foreignId('user_group_id')
+                ->after('element_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The dedicated group for this user")
+                ->unique('udx_user_dedicated_group_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable()
@@ -49,6 +60,8 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+
+
     }
 
     /**
@@ -59,7 +72,11 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['element_id']);
             $table->dropForeign(['element_type_id']);
-            $table->dropColumn('element_id','element_type_id','ref_uuid');
+            $table->dropForeign(['user_group_id']);
+            $table->dropColumn('element_id','element_type_id','user_group_id');
+            $table->dropColumn('ref_uuid');
         });
+
+        DB::statement("DROP TRIGGER update_modified_time ON users");
     }
 };

@@ -34,8 +34,10 @@ return new class extends Migration
             $table->boolean('is_retired')->default(false)->nullable(false)
                 ->comment('if true then cannot be added to token types or make new tokens');
 
-            $table->string('type_name',4096)->nullable(false)->unique()
+            $table->string('type_name',128)->nullable(false)->index()
                 ->comment("The unique name of the type, using the naming rules");
+
+            $table->unique(['user_id','type_name']);
         });
 
         DB::statement('ALTER TABLE element_types ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

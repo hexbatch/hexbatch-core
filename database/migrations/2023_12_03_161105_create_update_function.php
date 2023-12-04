@@ -27,7 +27,7 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement("
-            DROP FUNCTION update_modified_column() IF EXISTS;
+            DROP FUNCTION IF EXISTS update_modified_column();
         ");
     }
 };
