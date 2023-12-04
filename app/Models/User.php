@@ -25,6 +25,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string two_factor_secret
  * @property string two_factor_recovery_codes
  * @property string two_factor_confirmed_at
+ * @property int element_type_id
+ * @property int element_id
+ * @property int user_group_id
+ * @property string ref_uuid
  *
  */
 class User extends Authenticatable
