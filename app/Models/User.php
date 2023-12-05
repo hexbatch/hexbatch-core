@@ -3,8 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -25,6 +29,12 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string two_factor_secret
  * @property string two_factor_recovery_codes
  * @property string two_factor_confirmed_at
+ * @property int element_type_id
+ * @property int element_id
+ * @property int user_group_id
+ * @property string ref_uuid
+ *
+ * @property Element user_element
  *
  */
 class User extends Authenticatable
@@ -66,4 +76,53 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function user_element() : BelongsTo {
+        return $this->belongsTo('App\Models\Element','element_id');
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        if ($field) {
+            return $this->where($field, $value)->firstOrFail();
+        } else {
+            if (Utilities::is_uuid($value)) {
+                //the ref
+                $what =  $this->where('ref_uuid',$value)->firstOrFail();
+                if ($what) {return $what;}
+                return static::getUserByTokenRef($value,true);
+
+            } else {
+                //the name
+                return $this->where('username',$value)->firstOrFail();
+            }
+        }
+
+    }
+
+    public static function getUserByTokenRef(string $token_ref, bool $fail = false) : ?User {
+        $builder =  User::select('users.*')
+            ->join('elements',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($token_ref) {
+                    $join
+                        ->on('elements.id','=','users.element_id')
+                        ->where('elements.ref_uuid',$token_ref);
+                }
+            );
+        if ($fail) {
+            return $builder->firstOrFail();
+        }
+
+       return  $builder->first();
+    }
 }

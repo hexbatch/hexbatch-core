@@ -5,7 +5,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class UserNameReq implements ValidationRule
+class ResourceNameReq implements ValidationRule
 {
     /**
      * Run the validation rule.
@@ -15,7 +15,7 @@ class UserNameReq implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
 
-        if ((!preg_match('/^[A-Za-z0-9_]+$/', $value) ) || preg_match('/^\d/', $value)) {
+        if (!preg_match('/^\p{L}[\p{L}0-9_]{2,}$/', $value) ) {
             $fail('auth.invalid_name')->translate();
         }
     }

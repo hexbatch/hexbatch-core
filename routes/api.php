@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthenticationController;
+use App\Http\Controllers\API\UserGroupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,19 @@ Route::prefix('v1')->group(function () {
             Route::delete('/delete', [AuthenticationController::class, 'delete_this_token'])
                 ->name('core.user.auth.delete');
         });
+
+        Route::get('/groups', [UserGroupController::class, 'list_my_groups'])->name('core.user.groups.list');
+    });
+
+
+    Route::prefix('group')->middleware('auth:sanctum')->group(function () {
+        Route::post('/create/{group_name}', [UserGroupController::class, 'group_create'])->name('core.group.create');
+        Route::delete('/{user_group}/destroy', [UserGroupController::class, 'group_destroy'])->name('core.group.destroy');
+        Route::get('/{user_group}/list', [UserGroupController::class, 'group_list_members'])->name('core.group.list');
+        Route::put('/{user_group}/member/add/{user}', [UserGroupController::class, 'group_member_add'])->name('core.group.member.add');
+        Route::delete('/{user_group}/member/remove/{user}', [UserGroupController::class, 'group_member_remove'])->name('core.group.member.remove');
+        Route::put('/{user_group}/admin/add/{user}', [UserGroupController::class, 'group_admin_add'])->name('core.group.admin.add');
+        Route::patch('/{user_group}/admin/remove/{user}', [UserGroupController::class, 'group_admin_remove'])->name('core.group.admin.remove');
     });
 });
 
