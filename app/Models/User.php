@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -90,20 +92,33 @@ class User extends Authenticatable
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        if ($field) {
-            return $this->where($field, $value)->firstOrFail();
-        } else {
-            if (Utilities::is_uuid($value)) {
-                //the ref
-                $what =  $this->where('ref_uuid',$value)->firstOrFail();
-                if ($what) {return $what;}
-                return static::getUserByTokenRef($value,true);
-
+        $ret = null;
+        try {
+            if ($field) {
+                $ret = $this->where($field, $value)->first();
             } else {
-                //the name
-                return $this->where('username',$value)->firstOrFail();
+                if (Utilities::is_uuid($value)) {
+                    //the ref
+                    $ret = $this->where('ref_uuid', $value)->first();
+                    if (!$ret) {
+                        $ret = static::getUserByTokenRef($value);
+                    }
+
+                } else {
+                    //the name
+                    $ret = $this->where('username', $value)->first();
+                }
+            }
+        } finally {
+            if (empty($ret)) {
+                throw new HexbatchNotFound(
+                    __('msg.user_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::USER_NOT_FOUND
+                );
             }
         }
+        return $ret;
 
     }
 

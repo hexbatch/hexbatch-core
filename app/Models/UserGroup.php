@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ResourceNameReq;
 use Illuminate\Database\Eloquent\Builder;
@@ -84,21 +86,33 @@ class UserGroup extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        if ($field) {
-            return $this->where($field, $value)->firstOrFail();
-        } else {
-            if (Utilities::is_uuid($value)) {
-                //the ref
-                return $this->where('ref_uuid',$value)->firstOrFail();
+        $ret = null;
+        try {
+            if ($field) {
+                $ret = $this->where($field, $value)->firstOrFail();
             } else {
-                //the name, but scope to the user id logged in
-                /**
-                 * @var User $user
-                 */
-                $user = auth()->user();
-                return $this->where('user_id', $user?->id)->where('group_name',$value)->firstOrFail();
+                if (Utilities::is_uuid($value)) {
+                    //the ref
+                    $ret = $this->where('ref_uuid', $value)->firstOrFail();
+                } else {
+                    //the name, but scope to the user id logged in
+                    /**
+                     * @var User $user
+                     */
+                    $user = auth()->user();
+                    $ret = $this->where('user_id', $user?->id)->where('group_name', $value)->firstOrFail();
+                }
+            }
+        } finally {
+            if (empty($ret)) {
+                throw new HexbatchNotFound(
+                    __('msg.group_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::GROUP_NOT_FOUND
+                );
             }
         }
+        return $ret;
 
     }
 

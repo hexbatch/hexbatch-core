@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string updated_at
  *
  * @property User member_user
+ * @property UserGroup parent_group
  *
  */
 class UserGroupMember extends Model
@@ -52,5 +53,9 @@ class UserGroupMember extends Model
 
     public function member_user() : BelongsTo {
         return $this->belongsTo('App\Models\User','user_id');
+    }
+
+    public function parent_group() : BelongsTo {
+        return $this->belongsTo('App\Models\UserGroup','user_group_id');
     }
 }

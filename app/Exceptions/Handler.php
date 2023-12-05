@@ -3,7 +3,6 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -31,30 +30,37 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
-        if ($request->wantsJson() && (  $e instanceof HexbatchCoreException))
+        if ($request->wantsJson() )
         {
-            // Default response of 400
-            $status = $e->getCode();
-            if (empty($status)) {$status = 400;}
-            $response = [
-                'status' => $status,
-                'message'=> $e->getMessage(),
-                'code' => $e->getRefCode(),
-                'more_info' => $e->getRefCodeUrl(),
-                'errors'=> [],
-            ];
-            $other = $e->getPrevious();
-            while($other) {
-                $response['errors'][] = $other->getMessage();
-                $other = $other->getPrevious();
-            }
-            if (empty($response['errors'])) {
-                unset($response['errors']);
-            }
+            if ($e instanceof HexbatchCoreException) {
+                // Default response of 400
+                $status = $e->getCode();
+                if (empty($status)) {
+                    $status = 400;
+                }
+                $response = [
+                    'status' => $status,
+                    'message' => $e->getMessage(),
+                    'code' => $e->getRefCode(),
+                    'more_info' => $e->getRefCodeUrl(),
+                    'errors' => [],
+                ];
+                $other = $e->getPrevious();
+                while ($other) {
+                    $response['errors'][] = $other->getMessage();
+                    $other = $other->getPrevious();
+                }
+                if (empty($response['errors'])) {
+                    unset($response['errors']);
+                }
 
 
-            // Return a JSON response with the response array and status code
-            return response()->json($response, $status);
+                // Return a JSON response with the response array and status code
+                return response()->json($response, $status);
+            }
+        }
+        if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+            return response()->json(['status'=>$e->getCode(),'message'=> $e->getMessage()], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
         }
         return parent::render($request, $e);
     }

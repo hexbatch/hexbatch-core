@@ -131,7 +131,7 @@ class UserGroupController extends Controller
     public function list_my_groups(): JsonResponse {
 
         $user = auth()->user();
-        $ret = UserGroup::select('user_groups.*')
+        $ret = UserGroup::select('user_groups.*','user_group_members.is_admin')
             /** @uses UserGroup::group_owner() */
             ->with('group_owner')
             ->join('user_group_members',

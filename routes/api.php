@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthenticationController;
+use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\UserGroupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('user')->group(function () {
         Route::post('/login', [AuthenticationController::class, 'login'])->name('core.user.login');
         Route::post('/register', [AuthenticationController::class, 'register'])->name('core.user.register');
+        Route::get('/get/{user}', [ElementController::class, 'get_user'])->name('core.user.read');
     });
 
     Route::prefix('user')->middleware('auth:sanctum')->group(function () {

@@ -6,21 +6,21 @@ use App\Exceptions\HexbatchNotFound;
 use App\Models\User;
 use Illuminate\Console\Command;
 
-class LogoutUser extends Command
+class DeleteUser extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'hbc:logout_user {username_or_id}';
+    protected $signature = 'hbc:delete_user {username_or_id}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Logs the user out';
+    protected $description = 'Deletes the user if no elements or types they own are in sets of other people';
 
     /**
      * Execute the console command.
@@ -34,8 +34,7 @@ class LogoutUser extends Command
             $this->error($e->getMessage());
             return;
         }
-
-        $num = $user->tokens()->delete();
-        $this->info("Deleted $num token for $user->username");
+        $user->delete();
+        $this->info("Deleted $user->username");
     }
 }
