@@ -1,8 +1,19 @@
 {
-    "name": "laravel/laravel",
+    "name": "hexbatch/core",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "The core api for the hexbatch concept.",
+    "keywords": ["laravel","core-api", "api","set","element","hexbatch"],
+    "homepage": "https://github.com/hexbatch/hexbatch-core",
+    "authors": [
+        {
+            "name": "Will Woodlief",
+            "homepage": "https://badgreenwolf.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/hexbatch/hexbatch-core/issues"
+    },
     "license": "Apache-2.0",
     "require": {
         "php": "^8.1",
