@@ -7,10 +7,10 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\HasApiTokens;
 
 
@@ -33,6 +33,8 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int element_id
  * @property int user_group_id
  * @property string ref_uuid
+ *
+ * @property Element user_element
  *
  */
 class User extends Authenticatable
@@ -74,6 +76,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function user_element() : BelongsTo {
+        return $this->belongsTo('App\Models\Element','element_id');
+    }
 
     /**
      * Retrieve the model for a bound value.

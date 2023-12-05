@@ -46,13 +46,13 @@ Route::prefix('v1')->group(function () {
 
 
     Route::prefix('group')->middleware('auth:sanctum')->group(function () {
-        Route::post('/create', [UserGroupController::class, 'group_create'])->name('core.group.create');
+        Route::post('/create/{group_name}', [UserGroupController::class, 'group_create'])->name('core.group.create');
         Route::delete('/{user_group}/destroy', [UserGroupController::class, 'group_destroy'])->name('core.group.destroy');
         Route::get('/{user_group}/list', [UserGroupController::class, 'group_list_members'])->name('core.group.list');
         Route::put('/{user_group}/member/add/{user}', [UserGroupController::class, 'group_member_add'])->name('core.group.member.add');
         Route::delete('/{user_group}/member/remove/{user}', [UserGroupController::class, 'group_member_remove'])->name('core.group.member.remove');
         Route::put('/{user_group}/admin/add/{user}', [UserGroupController::class, 'group_admin_add'])->name('core.group.admin.add');
-        Route::delete('/{user_group}/admin/remove/{user}', [UserGroupController::class, 'group_admin_remove'])->name('core.group.admin.remove');
+        Route::patch('/{user_group}/admin/remove/{user}', [UserGroupController::class, 'group_admin_remove'])->name('core.group.admin.remove');
     });
 });
 
