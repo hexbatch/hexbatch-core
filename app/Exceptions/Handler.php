@@ -59,6 +59,30 @@ class Handler extends ExceptionHandler
                 return response()->json($response, $status);
             }
         }
+        if ($e instanceof \Illuminate\Validation\ValidationException) {
+
+            $status = $e->status;
+
+            $response = [
+                'status' => $status,
+                'message' => $e->getMessage(),
+                'code' => RefCodes::VALIDATION,
+                'more_info' => '',
+                'errors' => $e->errors(),
+            ];
+            $other = $e->getPrevious();
+            while ($other) {
+                $response['errors'][] = $other->getMessage();
+                $other = $other->getPrevious();
+            }
+            if (empty($response['errors'])) {
+                unset($response['errors']);
+            }
+
+
+            // Return a JSON response with the response array and status code
+            return response()->json($response, $status);
+        }
         if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
             return response()->json(['status'=>$e->getCode(),'message'=> $e->getMessage()], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
         }

@@ -25,7 +25,7 @@ class UserGroupMember extends Model
 {
 
     protected $table = 'user_group_members';
-
+    public $timestamps = false;
     /**
      * The attributes that are mass assignable.
      *

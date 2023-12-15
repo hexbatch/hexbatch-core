@@ -17,7 +17,6 @@ trait PasswordValidationRules
             'required',
             'string',
             (new Password)
-            ->requireUppercase()
             ->requireNumeric()
             ->requireSpecialCharacter()
             ->length(10)

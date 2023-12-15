@@ -4,17 +4,27 @@ namespace App\Exceptions;
 
 class RefCodes {
     //users start at 1
-    const BAD_LOGIN = 1;
-    const RESOURCE_NAME_UNIQUE_PER_USER = 2;
-    const USER_NOT_FOUND = 3;
 
-    //groups start at 1000
-    const ONLY_OWNERS_CAN_DELETE_GROUPS = 1001;
-    const ONLY_ADMINS_CAN_CHANGE_MEMBERSHIP = 1002;
-    const ONLY_OWNERS_CAN_CHANGE_ADMINS = 1003;
-    const GROUP_OPERATION_MISSING_MEMBER = 1004;
+    const VALIDATION = 1;
+    //users start at 1000
+    const BAD_LOGIN = 1000;
+    const RESOURCE_NAME_UNIQUE_PER_USER = 1002;
+    const USER_NOT_FOUND = 1003;
 
-    const GROUP_NOT_FOUND = 1005;
+    //groups start at 2000
+    const ONLY_OWNERS_CAN_DELETE_GROUPS = 2001;
+    const ONLY_ADMINS_CAN_CHANGE_MEMBERSHIP = 2002;
+    const ONLY_OWNERS_CAN_CHANGE_ADMINS = 2003;
+    const GROUP_OPERATION_MISSING_MEMBER = 2004;
+
+    const GROUP_NOT_FOUND = 2005;
+
+    //time bounds start at 3000
+
+    const TIME_BOUND_NOT_FOUND = 3001;
+    const TIME_BOUND_INVALID_CRON = 3002;
+    const TIME_BOUND_INVALID_PERIOD = 3003;
+    const TIME_BOUND_INVALID_START_STOP = 3004;
 
     const URLS = [
         self::BAD_LOGIN => '',
@@ -25,5 +35,9 @@ class RefCodes {
         self::ONLY_OWNERS_CAN_CHANGE_ADMINS => '',
         self::GROUP_OPERATION_MISSING_MEMBER => '',
         self::GROUP_NOT_FOUND => '',
+        self::TIME_BOUND_NOT_FOUND => '',
+        self::TIME_BOUND_INVALID_CRON => '',
+        self::TIME_BOUND_INVALID_PERIOD => '',
+        self::TIME_BOUND_INVALID_START_STOP => '',
     ];
 }

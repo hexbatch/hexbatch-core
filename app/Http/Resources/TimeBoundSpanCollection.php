@@ -5,10 +5,8 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-/**
- * @uses \App\Models\UserGroupMember::parent_group()
- */
-class UserGroupMemberCollection extends ResourceCollection
+
+class TimeBoundSpanCollection extends ResourceCollection
 {
     /**
      * Transform the resource collection into an array.
@@ -17,9 +15,6 @@ class UserGroupMemberCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
-        return [
-            'group' => new UserGroupResource($this->collection->first()?->parent_group),
-            'members' => $this->collection
-        ];
+        return parent::toArray($request);
     }
 }
