@@ -63,6 +63,7 @@ class AuthenticationController extends Controller
     public function register(Request $request): JsonResponse
     {
         $user = (new CreateNewUser)->create($request->all());
+        $user->initUser();
         $user->refresh();
         return response()->json(new UserResource($user), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }

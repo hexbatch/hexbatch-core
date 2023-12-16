@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ResourceNameReq;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
@@ -31,11 +35,12 @@ use InvalidArgumentException;
  * @property string created_at
  * @property string updated_at
  *
- * @property int bound_start_at_ts
- * @property int bound_stop_at_ts
- * @property int created_at__ts
+ * @property int bound_start_ts
+ * @property int bound_stop_ts
+ * @property int created_at_ts
  * @property int updated_at_ts
  * @property TimeBoundSpan[] time_spans
+ * @property User bound_owner
  */
 class TimeBound extends Model
 {
@@ -59,9 +64,18 @@ class TimeBound extends Model
     const MAKE_PERIOD_SECONDS = 60*60*6;
     const MAKE_REPEAT_SECONDS = 60*30;
 
+
+    public function bound_owner() : BelongsTo {
+        return $this->belongsTo('App\Models\User','user_id');
+    }
+
     public function time_spans() : HasMany {
         return $this->hasMany('App\Models\TimeBoundSpan')
             ->orderBy('span_start');
+    }
+
+    public function isInUse() : bool {
+        return false;
     }
 
     /**
@@ -73,7 +87,7 @@ class TimeBound extends Model
         $now_ts = time();
         $unix_timestamp = $now_ts + static::MAKE_PERIOD_SECONDS;
         $query = TimeBound::select('*')
-            ->selectRaw(" extract(epoch from  bound_start_at) as bound_start_at_ts,  extract(epoch from  bound_stop_at) as bound_stop_at_ts")
+            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts")
             ->whereRaw('bound_stop > NOW()')
             ->join('time_bound_spans',
                 /**
@@ -121,7 +135,7 @@ class TimeBound extends Model
                 $this->insertSpan($next_time_ts,$next_time_ts + ($this->bound_period_length??1 ));
             }
         } else {
-            $this->insertSpan($this->bound_start_at_ts,$this->bound_stop_at_ts);
+            $this->insertSpan($this->bound_start_ts,$this->bound_stop_ts);
         }
     }
 
@@ -138,14 +152,6 @@ class TimeBound extends Model
         );
     }
 
-    public static function checkCronString(string $cron_string) : bool {
-        try {
-            $cron = new \Cron\CronExpression($cron_string);
-            return true;
-        } catch (InvalidArgumentException) {
-            return false;
-        }
-    }
     public static function convertTsToSqlTime(int $unix_ts) : string  {
         return DB::selectOne("SELECT to_timestamp(:unix_ts) as da_time",['unix_ts'=>$unix_ts])->da_time;
     }
@@ -153,7 +159,7 @@ class TimeBound extends Model
 
     public static function buildTimeBound(?int $user_id = null,?int $id = null) : Builder {
         $build =  TimeBound::select('time_bounds.*')
-            ->selectRaw(" extract(epoch from  bound_start_at) as bound_start_at_ts,  extract(epoch from  bound_stop_at) as bound_stop_at_ts")
+            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts")
             /** @uses TimeBound::time_spans() */
             ->with('time_spans');
 
@@ -162,7 +168,7 @@ class TimeBound extends Model
        }
 
        if ($id) {
-           $build->where('id',$user_id);
+           $build->where('id',$id);
        }
 
        return $build;
@@ -175,9 +181,36 @@ class TimeBound extends Model
      */
     public function setBoundName(?string $group_name) {
         Validator::make(['bound_name'=>$group_name], [
-            'group_name'=>['required','string','max:128',new ResourceNameReq],
+            'bound_name'=>['required','string','max:128',new ResourceNameReq],
         ])->validate();
         $this->bound_name = $group_name;
+    }
+
+    public function setPeriodLength(int $p) {
+        if ($p < 1) {
+            throw new HexbatchCoreException(__("msg.time_bound_period_must_be_with_cron"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TIME_BOUND_INVALID_PERIOD);
+        }
+        $this->bound_period_length = $p;
+    }
+    public function setCronString(string $cron_string) {
+        try {
+            new \Cron\CronExpression($cron_string);
+        } catch (InvalidArgumentException $er_c) {
+            throw new HexbatchNameConflictException(__("msg.time_bounds_invalid_cron_string"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TIME_BOUND_INVALID_CRON,$er_c);
+        }
+        $this->bound_cron = $cron_string;
+    }
+
+    public function checkIsInUse() : void {
+        if (!$this->isInUse()) {return;}
+        throw new HexbatchNotPossibleException(__("msg.time_bounds_in_use_cannot_change"),
+            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+            RefCodes::TIME_BOUND_CANNOT_EDIT,);
+
     }
 
     /**

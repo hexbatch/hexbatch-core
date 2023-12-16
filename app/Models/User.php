@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,6 +38,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string ref_uuid
  *
  * @property Element user_element
+ * @property UserGroup user_group
  *
  */
 class User extends Authenticatable
@@ -81,6 +83,10 @@ class User extends Authenticatable
 
     public function user_element() : BelongsTo {
         return $this->belongsTo('App\Models\Element','element_id');
+    }
+
+    public function user_group() : BelongsTo {
+        return $this->belongsTo('App\Models\UserGroup','user_group_id');
     }
 
     /**
@@ -139,5 +145,29 @@ class User extends Authenticatable
         }
 
        return  $builder->first();
+    }
+
+    public function initUser() {
+        if (!$this->user_group_id) {
+            $group =  new UserGroup();
+            $group->setGroupName($this->username);
+            $group->user_id = $this->id;
+            $group->save();
+            $group->addMember($this->id,true);
+            $this->user_group_id = $group->id;
+            $this->save();
+        }
+    }
+
+    public function checkAdminGroup(int $user_id) : void {
+        $this->initUser();
+        $group = $this->user_group;
+        if ($this->id === $user_id) {return;}
+
+        if (!$group->isAdmin($user_id)) {
+            throw new HexbatchPermissionException(__("msg.user_not_priv"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+                RefCodes::USER_NOT_PRIV);
+        }
     }
 }

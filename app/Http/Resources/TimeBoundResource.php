@@ -20,12 +20,12 @@ class TimeBoundResource extends JsonResource
         return [
             'uuid' => $this->ref_uuid,
             'bound_name' => $this->bound_name,
-            'bound_start' => $this->bound_start_ts,
-            'bound_stop' => $this->bound_stop_ts,
+            'bound_start' => (float)$this->bound_start_ts,
+            'bound_stop' => (float)$this->bound_stop_ts,
             'is_retired' => $this->is_retired,
             'bound_period_length' => $this->bound_period_length,
             'bound_cron' => $this->bound_cron,
-            'spans' => TimeBoundSpanCollection::collection($this->time_spans),
+            'spans' => new TimeBoundSpanCollection($this->time_spans)
         ];
     }
 }

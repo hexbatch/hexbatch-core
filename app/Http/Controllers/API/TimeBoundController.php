@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\RefCodes;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TimeBoundCollection;
 use App\Http\Resources\TimeBoundResource;
 use App\Models\TimeBound;
+use App\Models\User;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\JsonResponse;
@@ -17,14 +18,40 @@ use Illuminate\Validation\ValidationException;
 /*
  | Method | Path                     | Route Name | Operation                                        | Args                                        |
 |--------|--------------------------|------------|--------------------------------------------------|---------------------------------------------|
-| Delete | bounds/schedule/:id      |            | Deletes an unused schedule                       |                                             |
-| Get    | bounds/schedule/:id      |            | shows the time data with maybe list of schedules | optional time range for scheduling          |
-| Get    | bounds/schedules/list    |            | Shows a list of all the bounds the user has      | iterator , optional range to show schedules |
 | Get    | bounds/schedule/:id/ping |            | returns true or false if a time in bounds        | date time or none for now                   |
 
  */
 class TimeBoundController extends Controller
 {
+    /**
+     * @uses TimeBound::bound_owner()
+     */
+    protected function adminCheck(TimeBound $bound) {
+        $user = auth()->user();
+        $bound->bound_owner->checkAdminGroup($user->id);
+    }
+
+    public function time_bound_get(TimeBound $bound) {
+        $this->adminCheck($bound);
+        $out = TimeBound::buildTimeBound(id: $bound->id)->first();
+        return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function time_bound_list(?User $user = null) {
+        $logged_user = auth()->user();
+        if (!$user) {$user = $logged_user;}
+        $user->checkAdminGroup($logged_user->id);
+        $out = TimeBound::buildTimeBound(user_id: $user->id)->cursorPaginate();
+        return response()->json(new TimeBoundCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function time_bound_delete(TimeBound $bound) {
+        $this->adminCheck($bound);
+        $bound->checkIsInUse();
+        $out = TimeBound::buildTimeBound(id: $bound->id)->first();
+        $bound->delete();
+        return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
     /**
      * @throws ValidationException
      * @throws \Exception
@@ -68,26 +95,15 @@ class TimeBoundController extends Controller
 
         $bound->bound_cron = null;
         if ($request->request->has('bound_cron')) {
-            $bound->bound_cron = $request->request->getString('bound_cron');
-            if (!TimeBound::checkCronString($bound->bound_cron) ) {
-                throw new HexbatchNameConflictException(__("msg.time_bounds_invalid_cron_string"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::TIME_BOUND_INVALID_CRON);
-            }
-
-            $bound->bound_period_length = $request->request->getInt('bound_period_length');
-            if ($bound->bound_period_length < 1) {
-                throw new HexbatchCoreException(__("msg.time_bound_period_must_be_with_cron"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::TIME_BOUND_INVALID_PERIOD);
-            }
+            $bound->setCronString($request->request->getString('bound_cron')) ;
+            $bound->setPeriodLength($request->request->getInt('bound_period_length'));
         }
 
 
         $bound->save();
 
         $bound->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);
-        $out = TimeBound::buildTimeBound(id: $bound->id);
+        $out = TimeBound::buildTimeBound(id: $bound->id)->first();
         return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 }

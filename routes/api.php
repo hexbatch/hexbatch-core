@@ -62,7 +62,10 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('bounds')->group(function () {
             Route::prefix('schedule')->group(function () {
+                Route::get('/{time_bound}/get', [TimeBoundController::class, 'time_bound_get'])->name('core.bounds.schedule.get');
+                Route::delete('/{time_bound}/delete', [TimeBoundController::class, 'time_bound_delete'])->name('core.bounds.schedule.delete');
                 Route::post('/create', [TimeBoundController::class, 'time_bound_create'])->name('core.bounds.schedule.create');
+                Route::get('/list/{user?}', [TimeBoundController::class, 'time_bound_list'])->name('core.bounds.schedule.list');
             });
         });
     });
