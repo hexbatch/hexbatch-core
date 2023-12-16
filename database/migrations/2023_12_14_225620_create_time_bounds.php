@@ -48,9 +48,14 @@ return new class extends Migration
             $table->string('bound_cron',64)->nullable()->default(null)
                 ->comment("The rule to make time bound spans");
 
+            $table->string('bound_cron_timezone',35)->nullable()->default(null)
+                ->comment("If provided, the cron generated spans will use this timezone");
+
 
             $table->string('bound_name',128)->nullable(false)->index()
                 ->comment("The unique name of the time bound, using the naming rules");
+
+
 
             $table->unique(['user_id','bound_name']);
         });

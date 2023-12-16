@@ -27,6 +27,7 @@ class RefCodes {
     const TIME_BOUND_INVALID_PERIOD = 3003;
     const TIME_BOUND_INVALID_START_STOP = 3004;
     const TIME_BOUND_CANNOT_EDIT = 3005;
+    const TIME_BOUND_NEEDS_MIN_INFO = 3006;
 
     const URLS = [
         self::BAD_LOGIN => '',
@@ -43,5 +44,6 @@ class RefCodes {
         self::TIME_BOUND_INVALID_PERIOD => '',
         self::TIME_BOUND_INVALID_START_STOP => '',
         self::TIME_BOUND_CANNOT_EDIT => '',
+        self::TIME_BOUND_NEEDS_MIN_INFO => '',
     ];
 }

@@ -26,5 +26,7 @@ return [
     'time_bound_period_must_be_with_cron' => 'Time bound must have a period defined when a cron string is defined',
     'time_bounds_valid_stop_start' => 'Time bounds must have a valid start and stop, and the start happens before the stop',
     'time_bounds_invalid_cron_string' => 'Time bounds was given an invalid cron string',
-    'time_bounds_in_use_cannot_change' => 'Time bounds cannot be edited or deleted because its in use',
+    'time_bounds_invalid_time_zone' => 'Time zone is not valid',
+    'time_bounds_in_use_cannot_change' => 'Time bounds cannot edited or deleted because its in use',
+    'time_bounds_needs_minimum_info' => 'Time bounds require at least name,start and stop',
 ];

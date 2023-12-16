@@ -10,6 +10,8 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ResourceNameReq;
 use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
+use Carbon\Exceptions\InvalidTimeZoneException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -32,6 +34,7 @@ use InvalidArgumentException;
  * @property string bound_stop
  * @property int bound_period_length
  * @property string bound_cron
+ * @property string bound_cron_timezone
  * @property string created_at
  * @property string updated_at
  *
@@ -41,6 +44,7 @@ use InvalidArgumentException;
  * @property int updated_at_ts
  * @property TimeBoundSpan[] time_spans
  * @property User bound_owner
+ *
  */
 class TimeBound extends Model
 {
@@ -130,7 +134,7 @@ class TimeBound extends Model
             $next_time_ts = time();
             $skip = 0;
             while($next_time_ts < $unix_timestamp) {
-                $next_date_time = $cron->getNextRunDate('now',$skip++,true);
+                $next_date_time = $cron->getNextRunDate('now',$skip++,true,$this->bound_cron_timezone);
                 $next_time_ts = Carbon::create($next_date_time)->unix();
                 $this->insertSpan($next_time_ts,$next_time_ts + ($this->bound_period_length??1 ));
             }
@@ -175,18 +179,27 @@ class TimeBound extends Model
     }
 
     /**
-     * @param string|null $group_name
+     * @param string $bound_name
+     * @param User $owner
      * @return void
      * @throws ValidationException
      */
-    public function setBoundName(?string $group_name) {
-        Validator::make(['bound_name'=>$group_name], [
+    public function setBoundName(string $bound_name, User $owner) {
+        Validator::make(['bound_name'=>$bound_name], [
             'bound_name'=>['required','string','max:128',new ResourceNameReq],
         ])->validate();
-        $this->bound_name = $group_name;
+
+        $conflict =  TimeBound::where('user_id', $owner->id)->where('bound_name',$bound_name)->first();
+        if ($conflict) {
+            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$bound_name]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::RESOURCE_NAME_UNIQUE_PER_USER);
+        }
+
+        $this->bound_name = $bound_name;
     }
 
-    public function setPeriodLength(int $p) {
+    protected function setPeriodLength(int $p) {
         if ($p < 1) {
             throw new HexbatchCoreException(__("msg.time_bound_period_must_be_with_cron"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -194,7 +207,7 @@ class TimeBound extends Model
         }
         $this->bound_period_length = $p;
     }
-    public function setCronString(string $cron_string) {
+    protected function setCronString(string $cron_string) {
         try {
             new \Cron\CronExpression($cron_string);
         } catch (InvalidArgumentException $er_c) {
@@ -203,6 +216,67 @@ class TimeBound extends Model
                 RefCodes::TIME_BOUND_INVALID_CRON,$er_c);
         }
         $this->bound_cron = $cron_string;
+    }
+
+    protected function setTimezone(?string $timezone) {
+        if (empty(trim($timezone))) {$this->bound_cron_timezone = null; return;}
+
+        try {
+            Carbon::now()->timezone($timezone);
+        } catch (InvalidTimeZoneException $er_c) {
+            throw new HexbatchNameConflictException(__("msg.time_bounds_invalid_time_zone"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TIME_BOUND_INVALID_CRON,$er_c);
+        }
+        $this->bound_cron_timezone = $timezone;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function setTimes(string|int $start, string|int $stop,
+                             ?string $bound_cron = null, ?int $period_length = null,?string $bound_cron_timezone = null
+    ) :void
+    {
+        if (empty($start) || empty($stop)) {
+            throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TIME_BOUND_INVALID_START_STOP);
+        }
+
+        try {
+            $bound_start_ts = Carbon::create($start)->unix();
+            $bound_stop_ts = Carbon::create($stop)->unix();
+        } catch (InvalidFormatException $ie) {
+            throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TIME_BOUND_INVALID_START_STOP,$ie);
+        }
+
+        if ($bound_stop_ts < $bound_start_ts) {
+            throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TIME_BOUND_INVALID_START_STOP);
+        }
+        $this->bound_start = TimeBound::convertTsToSqlTime($bound_start_ts);
+        $this->bound_stop = TimeBound::convertTsToSqlTime($bound_stop_ts);
+
+        $this->bound_cron = $bound_cron;
+        if ($bound_cron) {
+            $this->setCronString($bound_cron) ;
+            $this->setPeriodLength($period_length);
+        }
+        $this->setTimezone($bound_cron_timezone);
+        $this->save();
+        $this->redoTimeSpans();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function redoTimeSpans() {
+        TimeBoundSpan::where('time_bound_id',$this->id)->delete();
+        $this->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);
     }
 
     public function checkIsInUse() : void {

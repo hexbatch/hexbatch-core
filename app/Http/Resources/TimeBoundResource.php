@@ -17,7 +17,7 @@ class TimeBoundResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $ret =  [
             'uuid' => $this->ref_uuid,
             'bound_name' => $this->bound_name,
             'bound_start' => (float)$this->bound_start_ts,
@@ -27,5 +27,9 @@ class TimeBoundResource extends JsonResource
             'bound_cron' => $this->bound_cron,
             'spans' => new TimeBoundSpanCollection($this->time_spans)
         ];
+        if ($request->query->getBoolean('skip_spans')) {
+            unset($ret['spans']);
+        }
+        return $ret;
     }
 }

@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exceptions\HexbatchNameConflictException;
+use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TimeBoundCollection;
 use App\Http\Resources\TimeBoundResource;
+use App\Http\Resources\TimeBoundSpanResource;
 use App\Models\TimeBound;
+use App\Models\TimeBoundSpan;
 use App\Models\User;
 use Carbon\Carbon;
-use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -37,11 +38,27 @@ class TimeBoundController extends Controller
         return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function time_bound_list(?User $user = null) {
+    public function time_bound_ping(TimeBound $bound,?string $time_to_ping) {
+        $this->adminCheck($bound);
+        if ($time_to_ping) {
+            $ping_ts = Carbon::create($time_to_ping)->unix();
+        } else {
+            $ping_ts = Carbon::now()->unix();
+        }
+        $hit = TimeBoundSpan::where('id',$bound)->where('span_start','>=',$ping_ts)->where('span_stop','>=',$ping_ts)->first();
+        if ($hit) {
+            return response()->json(new TimeBoundSpanResource($hit), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        }
+        return response()->json(['bound_id'=>$bound->id,'ping_ts'=>$ping_ts], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
+    }
+
+    public function time_bound_list(Request $request,?User $user = null) {
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
         $user->checkAdminGroup($logged_user->id);
+        /** @var TimeBound $out */
         $out = TimeBound::buildTimeBound(user_id: $user->id)->cursorPaginate();
+        $request->query->set('skip_spans',true);
         return response()->json(new TimeBoundCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -52,57 +69,73 @@ class TimeBoundController extends Controller
         $bound->delete();
         return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
+
+    /**
+     * @throws ValidationException
+     * @throws \Exception
+     */
+    public function time_bound_edit(TimeBound $bound, Request $request) {
+        $this->adminCheck($bound);
+
+        $is_retired = $request->request->getBoolean('is_retired');
+        $bound_name = $request->request->getString('bound_name');
+        $start = $request->request->getString('bound_start');
+        $stop = $request->request->getString('bound_stop');
+        $bound_cron = $request->request->getString('bound_cron');
+        $cron_timezone = $request->request->getString('bound_cron_timezone');
+        $period_length = $request->request->getInt('bound_period_length');
+        if ($bound_name || $start || $stop || $period_length  || (empty($bound_cron) && $bound->bound_cron)
+            || $bound_cron || $cron_timezone
+        ) {
+            $bound->checkIsInUse();
+        }
+
+        $bound->is_retired = $is_retired;
+        if ($bound_name) {
+            $bound->setBoundName($bound_name,$bound->bound_owner);
+        }
+
+        if($start || $stop || $period_length  || (empty($bound_cron) && $bound->bound_cron) || $bound_cron || $cron_timezone) {
+            $bound->setTimes(start: $start,stop:$stop,
+                            bound_cron: $bound_cron,period_length: $period_length,
+                            bound_cron_timezone: $cron_timezone); //saves and processes
+        }
+
+
+        $out = TimeBound::buildTimeBound(id: $bound->id)->first();
+
+        return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
     /**
      * @throws ValidationException
      * @throws \Exception
      */
     public function time_bound_create(Request $request): JsonResponse {
-        $bound = new TimeBound();
+
         $bound_name = $request->request->getString('bound_name');
-        $bound->setBoundName($bound_name);
-        $user = auth()->user();
-        $conflict =  TimeBound::where('user_id', $user?->id)->where('bound_name',$bound->bound_name)->first();
-        if ($conflict) {
-            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$bound->bound_name]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::RESOURCE_NAME_UNIQUE_PER_USER);
-        }
-        $bound->user_id = $user->id;
         $start = $request->request->getString('bound_start');
         $stop = $request->request->getString('bound_stop');
-        if (empty($start) || empty($stop)) {
-            throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
+        if (!$bound_name || !$stop || !$start) {
+            throw new HexbatchCoreException(__("msg.time_bounds_needs_minimum_info"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_START_STOP);
+                RefCodes::TIME_BOUND_NEEDS_MIN_INFO);
         }
-
-        try {
-            $bound_start_ts = Carbon::create($start)->unix();
-            $bound_stop_ts = Carbon::create($stop)->unix();
-        } catch (InvalidFormatException $ie) {
-            throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_START_STOP,$ie);
-        }
-
-        if ($bound_stop_ts < $bound_start_ts) {
-            throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_START_STOP);
-        }
-        $bound->bound_start = TimeBound::convertTsToSqlTime($bound_start_ts);
-        $bound->bound_stop = TimeBound::convertTsToSqlTime($bound_stop_ts);
-
-        $bound->bound_cron = null;
-        if ($request->request->has('bound_cron')) {
-            $bound->setCronString($request->request->getString('bound_cron')) ;
-            $bound->setPeriodLength($request->request->getInt('bound_period_length'));
-        }
+        $bound_cron = $request->request->getString('bound_cron');
+        $period_length = $request->request->getInt('bound_period_length');
+        $cron_timezone = $request->request->getString('bound_cron_timezone');
 
 
-        $bound->save();
+        $bound = new TimeBound();
+        $user = auth()->user();
+        $bound->setBoundName($bound_name,$user);
 
-        $bound->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);
+        $bound->user_id = $user->id;
+
+        $bound->setTimes(start: $start,stop:$stop,
+            bound_cron: $bound_cron,period_length: $period_length,
+            bound_cron_timezone: $cron_timezone); //saves and processes
+
         $out = TimeBound::buildTimeBound(id: $bound->id)->first();
         return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
