@@ -45,7 +45,7 @@ class TimeBoundController extends Controller
         } else {
             $ping_ts = Carbon::now()->unix();
         }
-        $hit = TimeBoundSpan::where('id',$bound)->where('span_start','>=',$ping_ts)->where('span_stop','>=',$ping_ts)->first();
+        $hit = TimeBoundSpan::where('id',$bound)->where('span_start','>=',$ping_ts)->where('span_stop','<=',$ping_ts)->first();
         if ($hit) {
             return response()->json(new TimeBoundSpanResource($hit), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
