@@ -84,7 +84,10 @@ class Handler extends ExceptionHandler
             return response()->json($response, $status);
         }
         if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
-            return response()->json(['status'=>$e->getCode(),'message'=> $e->getMessage()], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
+            return response()->json(['status'=>($e->getCode()?: 404),'message'=> $e->getMessage()], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
+        }
+        if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            return response()->json(['status'=>($e->getCode()?: 404),'message'=> $e->getMessage()], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
         }
         return parent::render($request, $e);
     }
