@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Actions\Fortify\PasswordValidationRules;
+use App\Exceptions\HexbatchNotFound;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
@@ -32,13 +33,10 @@ class ChangeUserPw extends Command
     public function handle()
     {
         $user_id_or_name = $this->argument('username_or_id');
-        if (ctype_digit($user_id_or_name)) {
-            $user = User::where('id',$user_id_or_name)->first();
-        } else {
-            $user = User::where('username',$user_id_or_name)->first();
-        }
-        if (empty($user)) {
-            $this->error("Could not find user with $user_id_or_name");
+        try {
+            $user = (new User)->resolveRouteBinding($user_id_or_name);
+        } catch (HexbatchNotFound $e) {
+            $this->error($e->getMessage());
             return;
         }
         $new_password = $this->argument('new_password');

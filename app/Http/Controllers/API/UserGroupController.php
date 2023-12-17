@@ -13,7 +13,6 @@ use App\Http\Resources\UserGroupResource;
 use App\Models\User;
 use App\Models\UserGroup;
 use App\Models\UserGroupMember;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
@@ -129,23 +128,14 @@ class UserGroupController extends Controller
     }
 
     public function list_my_groups(): JsonResponse {
-
-        $user = auth()->user();
-        $ret = UserGroup::select('user_groups.*')
-            /** @uses UserGroup::group_owner() */
-            ->with('group_owner')
-            ->join('user_group_members',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($user) {
-                    $join
-                        ->on('user_groups.id','=','user_group_members.user_group_id')
-                        ->where('user_group_members.user_id',$user?->id);
-                }
-            )->cursorPaginate();
-
+        $ret = UserGroup::buildGroup(auth()?->user()->id)->cursorPaginate();
         return (new UserGroupCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function group_get(UserGroup $group) {
+        $this->memberCheck($group,auth()->user());
+        $ret = UserGroup::buildGroup(auth()?->user()->id)->first();
+        return response()->json(new UserGroupResource($ret), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 }

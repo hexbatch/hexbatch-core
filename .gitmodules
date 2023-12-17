@@ -1,0 +1,3 @@
+[submodule "api-docs"]
+	path = api-docs
+	url = git@github.com:hexbatch/apple-core.git

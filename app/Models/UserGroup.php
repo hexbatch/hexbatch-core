@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ResourceNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -30,7 +33,7 @@ class UserGroup extends Model
 {
 
     protected $table = 'user_groups';
-
+    public $timestamps = false;
     /**
      * The attributes that are mass assignable.
      *
@@ -84,22 +87,61 @@ class UserGroup extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        if ($field) {
-            return $this->where($field, $value)->firstOrFail();
-        } else {
-            if (Utilities::is_uuid($value)) {
-                //the ref
-                return $this->where('ref_uuid',$value)->firstOrFail();
+        $ret = null;
+        try {
+            if ($field) {
+                $ret = $this->where($field, $value)->first();
             } else {
-                //the name, but scope to the user id logged in
-                /**
-                 * @var User $user
-                 */
-                $user = auth()->user();
-                return $this->where('user_id', $user?->id)->where('group_name',$value)->firstOrFail();
+                if (Utilities::is_uuid($value)) {
+                    //the ref
+                    $ret = $this->where('ref_uuid', $value)->first();
+                } else {
+                    if (is_string($value)) {
+                        //the name, but scope to the user id of the owner
+                        //if this user is not the owner, then the group owner id can be scoped
+                        $parts = explode('.', $value);
+                        if (count($parts) === 1) {
+                            //must be owned by the user
+                            $user = auth()->user();
+                            $ret = $this->where('user_id', $user?->id)->where('group_name', $value)->first();
+                        } else {
+                            $owner = $parts[0];
+                            $maybe_name = $parts[1];
+                            $owner = (new User)->resolveRouteBinding($owner);
+                            $ret = $this->where('user_id', $owner?->id)->where('group_name', $maybe_name)->first();
+                        }
+
+
+                    }
+                }
+            }
+        } finally {
+            if (empty($ret)) {
+                throw new HexbatchNotFound(
+                    __('msg.group_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::GROUP_NOT_FOUND
+                );
             }
         }
+        return $ret;
 
+    }
+
+    public static function buildGroup(int $user_id) : Builder {
+        return UserGroup::select('user_groups.*','user_group_members.is_admin')
+            /** @uses UserGroup::group_owner() */
+            ->with('group_owner')
+            ->join('user_group_members',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($user_id) {
+                    $join
+                        ->on('user_groups.id','=','user_group_members.user_group_id')
+                        ->where('user_group_members.user_id',$user_id);
+                }
+            );
     }
 
 

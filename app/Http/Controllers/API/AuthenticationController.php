@@ -6,6 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchAuthException;
 use App\Exceptions\RefCodes;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -61,8 +62,10 @@ class AuthenticationController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
-        (new CreateNewUser)->create($request->all());
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NO_CONTENT);
+        $user = (new CreateNewUser)->create($request->all());
+        $user->initUser();
+        $user->refresh();
+        return response()->json(new UserResource($user), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
 

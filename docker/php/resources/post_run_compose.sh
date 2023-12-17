@@ -1,7 +1,5 @@
 # when docker-compose starts, some directors may not be readable to the php or web, Run this script in the container terminal
 chown -R www-data:root /var/www/html/storage/
-chown -R www-data:root /var/www/html/public/build
-chown -R www-data:root /var/www/html/public/hot
 chown -R www-data:root /var/www/html/public/storage
 chown -R www-data:root /var/www/html/bootstrap/cache
 

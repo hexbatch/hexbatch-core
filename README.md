@@ -14,7 +14,9 @@ Versions
 When initializing the db for the first time, need to manually change the ownership of the db to the user in the php:
 `ALTER DATABASE hbc_core_dev OWNER TO hbc_core_dev;`
 
-
+## SSL on localhost
+https://github.com/FiloSottile/mkcert#installation
+https://dockerwebdev.com/tutorials/docker-php-development/
 
 ## Snippits 
 

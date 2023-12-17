@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\TimeBound;
 use App\Models\User;
 use App\Models\UserGroup;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,6 +33,7 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::model('user', User::class);
         Route::model('user_group', UserGroup::class);
+        Route::model('time_bound', TimeBound::class);
 
         $this->routes(function () {
             Route::middleware('api')
