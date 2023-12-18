@@ -69,7 +69,6 @@ return new class extends Migration
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON time_bounds FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
 
-        DB::statement('ALTER TABLE time_bounds ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
         DB::statement('ALTER TABLE time_bounds ADD CONSTRAINT time_bound_start_before_stop_constraint CHECK (bound_start < bound_stop)');
         DB::statement('ALTER TABLE time_bounds ADD CONSTRAINT bound_period_length_positive_constraint CHECK (bound_period_length > 0 OR bound_period_length IS NULL)');
