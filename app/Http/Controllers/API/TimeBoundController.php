@@ -120,7 +120,7 @@ class TimeBoundController extends Controller
         if (!$bound_name || !$stop || !$start) {
             throw new HexbatchCoreException(__("msg.time_bounds_needs_minimum_info"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_NEEDS_MIN_INFO);
+                RefCodes::BOUND_NEEDS_MIN_INFO);
         }
         $bound_cron = $request->request->getString('bound_cron');
         $period_length = $request->request->getInt('bound_period_length');

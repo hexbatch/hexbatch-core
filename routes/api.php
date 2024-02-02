@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\ElementController;
+use App\Http\Controllers\API\LocationBoundController;
 use App\Http\Controllers\API\TimeBoundController;
 use App\Http\Controllers\API\UserGroupController;
+use App\Models\Enums\LocationTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +70,15 @@ Route::prefix('v1')->group(function () {
                 Route::get('/{time_bound}/ping/{time_to_ping}', [TimeBoundController::class, 'time_bound_ping'])->name('core.bounds.schedule.ping');
                 Route::post('/create', [TimeBoundController::class, 'time_bound_create'])->name('core.bounds.schedule.create');
                 Route::get('/list/{user?}', [TimeBoundController::class, 'time_bound_list'])->name('core.bounds.schedule.list');
+            });
+
+            Route::prefix('location')->group(function () {
+                Route::get('/{location_bound}/get', [LocationBoundController::class, 'location_bound_get'])->name('core.bounds.location.get');
+                Route::delete('/{location_bound}/delete', [LocationBoundController::class, 'location_bound_delete'])->name('core.bounds.location.delete');
+                Route::patch('/{location_bound}/edit', [LocationBoundController::class, 'location_bound_edit'])->name('core.bounds.location.edit');
+                Route::get('/{location_bound}/ping/{location_json_to_ping}', [LocationBoundController::class, 'location_bound_ping'])->name('core.bounds.location.ping');
+                Route::post('/create/{location_type}', [LocationBoundController::class, 'location_bound_create'])->name('core.bounds.location.create');
+                Route::get('/list/{user?}', [LocationBoundController::class, 'location_bound_list'])->name('core.bounds.location.list');
             });
         });
     });

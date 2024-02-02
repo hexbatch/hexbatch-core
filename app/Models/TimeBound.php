@@ -4,11 +4,8 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNameConflictException;
-use App\Exceptions\HexbatchNotFound;
-use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Utilities;
-use App\Rules\ResourceNameReq;
+use App\Models\Traits\TBoundsCommon;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Carbon\Exceptions\InvalidTimeZoneException;
@@ -18,8 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 /**
@@ -48,6 +43,8 @@ use InvalidArgumentException;
  */
 class TimeBound extends Model
 {
+    use TBoundsCommon;
+
     protected $table = 'time_bounds';
     public $timestamps = false;
     /**
@@ -178,32 +175,13 @@ class TimeBound extends Model
        return $build;
     }
 
-    /**
-     * @param string $bound_name
-     * @param User $owner
-     * @return void
-     * @throws ValidationException
-     */
-    public function setBoundName(string $bound_name, User $owner) {
-        Validator::make(['bound_name'=>$bound_name], [
-            'bound_name'=>['required','string','max:128',new ResourceNameReq],
-        ])->validate();
 
-        $conflict =  TimeBound::where('user_id', $owner->id)->where('bound_name',$bound_name)->first();
-        if ($conflict) {
-            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$bound_name]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::RESOURCE_NAME_UNIQUE_PER_USER);
-        }
-
-        $this->bound_name = $bound_name;
-    }
 
     protected function setPeriodLength(int $p) {
         if ($p < 1) {
             throw new HexbatchCoreException(__("msg.time_bound_period_must_be_with_cron"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_PERIOD);
+                RefCodes::BOUND_INVALID_PERIOD);
         }
         $this->bound_period_length = $p;
     }
@@ -213,7 +191,7 @@ class TimeBound extends Model
         } catch (InvalidArgumentException $er_c) {
             throw new HexbatchNameConflictException(__("msg.time_bounds_invalid_cron_string"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_CRON,$er_c);
+                RefCodes::BOUND_INVALID_CRON,$er_c);
         }
         $this->bound_cron = $cron_string;
     }
@@ -226,7 +204,7 @@ class TimeBound extends Model
         } catch (InvalidTimeZoneException $er_c) {
             throw new HexbatchNameConflictException(__("msg.time_bounds_invalid_time_zone"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_CRON,$er_c);
+                RefCodes::BOUND_INVALID_CRON,$er_c);
         }
         $this->bound_cron_timezone = $timezone;
     }
@@ -241,7 +219,7 @@ class TimeBound extends Model
         if (empty($start) || empty($stop)) {
             throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_START_STOP);
+                RefCodes::BOUND_INVALID_START_STOP);
         }
 
         try {
@@ -250,13 +228,13 @@ class TimeBound extends Model
         } catch (InvalidFormatException $ie) {
             throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_START_STOP,$ie);
+                RefCodes::BOUND_INVALID_START_STOP,$ie);
         }
 
         if ($bound_stop_ts < $bound_start_ts) {
             throw new HexbatchNameConflictException(__("msg.time_bounds_valid_stop_start"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TIME_BOUND_INVALID_START_STOP);
+                RefCodes::BOUND_INVALID_START_STOP);
         }
         $this->bound_start = TimeBound::convertTsToSqlTime($bound_start_ts);
         $this->bound_stop = TimeBound::convertTsToSqlTime($bound_stop_ts);
@@ -279,61 +257,5 @@ class TimeBound extends Model
         $this->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);
     }
 
-    public function checkIsInUse() : void {
-        if (!$this->isInUse()) {return;}
-        throw new HexbatchNotPossibleException(__("msg.time_bounds_in_use_cannot_change"),
-            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-            RefCodes::TIME_BOUND_CANNOT_EDIT,);
 
-    }
-
-    /**
-     * Retrieve the model for a bound value.
-     *
-     * @param  mixed  $value
-     * @param  string|null  $field
-     * @return Model|null
-     */
-    public function resolveRouteBinding($value, $field = null)
-    {
-        $ret = null;
-        try {
-            if ($field) {
-                $ret = $this->where($field, $value)->first();
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    //the ref
-                    $ret = $this->where('ref_uuid', $value)->first();
-                } else {
-                    if (is_string($value)) {
-                        //the name, but scope to the user id of the owner
-                        //if this user is not the owner, then the group owner id can be scoped
-                        $parts = explode('.', $value);
-                        if (count($parts) === 1) {
-                            //must be owned by the user
-                            $user = auth()->user();
-                            $ret = $this->where('user_id', $user?->id)->where('bound_name', $value)->first();
-                        } else {
-                            $owner = $parts[0];
-                            $maybe_name = $parts[1];
-                            $owner = (new User)->resolveRouteBinding($owner);
-                            $ret = $this->where('user_id', $owner?->id)->where('bound_name', $maybe_name)->first();
-                        }
-
-
-                    }
-                }
-            }
-        } finally {
-            if (empty($ret)) {
-                throw new HexbatchNotFound(
-                    __('msg.time_bound_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::TIME_BOUND_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
-
-    }
 }

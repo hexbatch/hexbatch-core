@@ -20,14 +20,17 @@ class RefCodes {
 
     const GROUP_NOT_FOUND = 2005;
 
-    //time bounds start at 3000
+    // bounds start at 3000
 
-    const TIME_BOUND_NOT_FOUND = 3001;
-    const TIME_BOUND_INVALID_CRON = 3002;
-    const TIME_BOUND_INVALID_PERIOD = 3003;
-    const TIME_BOUND_INVALID_START_STOP = 3004;
-    const TIME_BOUND_CANNOT_EDIT = 3005;
-    const TIME_BOUND_NEEDS_MIN_INFO = 3006;
+    const BOUND_NOT_FOUND = 3001;
+    const BOUND_INVALID_CRON = 3002;
+    const BOUND_INVALID_PERIOD = 3003;
+    const BOUND_INVALID_START_STOP = 3004;
+    const BOUND_CANNOT_EDIT = 3005;
+    const BOUND_NEEDS_MIN_INFO = 3006;
+
+    const BOUND_CANNOT_PING = 3007;
+    const BOUND_TYPE_DEF = 3008;
 
     const URLS = [
         self::BAD_LOGIN => '',
@@ -39,11 +42,13 @@ class RefCodes {
         self::ONLY_OWNERS_CAN_CHANGE_ADMINS => '',
         self::GROUP_OPERATION_MISSING_MEMBER => '',
         self::GROUP_NOT_FOUND => '',
-        self::TIME_BOUND_NOT_FOUND => '',
-        self::TIME_BOUND_INVALID_CRON => '',
-        self::TIME_BOUND_INVALID_PERIOD => '',
-        self::TIME_BOUND_INVALID_START_STOP => '',
-        self::TIME_BOUND_CANNOT_EDIT => '',
-        self::TIME_BOUND_NEEDS_MIN_INFO => '',
+        self::BOUND_NOT_FOUND => '',
+        self::BOUND_INVALID_CRON => '',
+        self::BOUND_INVALID_PERIOD => '',
+        self::BOUND_INVALID_START_STOP => '',
+        self::BOUND_CANNOT_EDIT => '',
+        self::BOUND_NEEDS_MIN_INFO => '',
+        self::BOUND_CANNOT_PING => '',
+        self::BOUND_TYPE_DEF => '',
     ];
 }
