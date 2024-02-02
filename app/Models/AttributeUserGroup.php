@@ -13,15 +13,14 @@ use Illuminate\Database\Eloquent\Model;
  * @property string ref_uuid
  * @property int user_id
  * @property boolean is_retired
- * @property string type_name
  * @property string created_at
  * @property string updated_at
  *
  */
-class ElementType extends Model
+class AttributeUserGroup extends Model
 {
 
-    protected $table = 'element_types';
+    protected $table = 'attribute_user_groups';
     public $timestamps = false;
 
     /**
@@ -30,9 +29,7 @@ class ElementType extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'is_retired',
-        'type_name',
-        'user_id'
+
     ];
 
     /**

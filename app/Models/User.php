@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\HasApiTokens;
 
 
@@ -147,6 +148,9 @@ class User extends Authenticatable
        return  $builder->first();
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function initUser() {
         if (!$this->user_group_id) {
             $group =  new UserGroup();

@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Model;
 class Element extends Model
 {
 
+    protected $table = 'elements';
+    public $timestamps = false;
+
     /**
      * The attributes that are mass assignable.
      *
