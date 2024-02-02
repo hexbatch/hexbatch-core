@@ -48,7 +48,7 @@ return new class extends Migration
                     ");
 
         Schema::table('location_bounds', function (Blueprint $table) {
-            $table->jsonb('original')->comment("the original json that is used to make this geom");
+            $table->jsonb('geo_json')->comment("the original json that is used to make this geom");
             $table->timestamps();
 
             $table->string('bound_name',128)->nullable(false)->index()
@@ -68,7 +68,7 @@ return new class extends Migration
             CREATE OR REPLACE FUNCTION update_location_bounds_geo_column()
                 RETURNS TRIGGER AS $$
             BEGIN
-                NEW.geom = ST_AsText(ST_GeomFromGeoJSON(New.original));
+                NEW.geom = ST_AsText(ST_GeomFromGeoJSON(New.geo_json));
                 RETURN NEW;
             END;
             $$ language 'plpgsql';

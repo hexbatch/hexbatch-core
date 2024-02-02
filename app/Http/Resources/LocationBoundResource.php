@@ -21,10 +21,10 @@ class LocationBoundResource extends JsonResource
         $ret =  [
             'uuid' => $this->ref_uuid,
             'name' => $this->bound_name,
-            'geo_json' => $this->original,
+            'geo_json' => json_decode($this->geom_as_geo_json),
             'location_type' => $this->location_type,
             'is_retired' => $this->is_retired,
-            'created_at' => $this->created_at_ts,
+            'created_at' => round($this->created_at_ts),
         ];
 
         if ($request->query->getString('tz')) {

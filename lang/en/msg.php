@@ -38,4 +38,6 @@ return [
     'location_bound_geo_json_not_polygon' => 'Location bound needs polygon or multipolygon geojson',
     'location_bounds_needs_minimum_info' => 'Location bound needs a name and a geo json',
     'location_bounds_only_pings_these' => 'Location bound can only ping with a polygon, a multipology or a point',
+    'location_bounds_shape_is_3d' => 'Location bounds shapes must be 3d and all coordinates must have x,y,z',
+    'location_bounds_map_is_2d' => 'Location bounds map must be 2d and not cross date line and be in normal numbers, and all coodrinates have lat and long',
 ];

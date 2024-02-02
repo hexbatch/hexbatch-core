@@ -8,7 +8,7 @@ use App\Exceptions\RefCodes;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationBoundCollection;
 use App\Http\Resources\LocationBoundResource;
-use App\Models\Enums\ELocationType;
+use App\Models\Enums\LocationTypes;
 use App\Models\LocationBound;
 
 use App\Models\User;
@@ -60,8 +60,8 @@ class LocationBoundController extends Controller
         }
 
 
-        $where = "ST_Contains(geom,ST_AsText(ST_GeomFromGeoJSON(:json_string)));";
-        $hit = LocationBound::buildLocationBound(id: $bound->id)->whereRaw($where,['json_string'=>$location_json_to_ping])->first();
+        $where = "ST_Contains(geom,ST_AsText(ST_GeomFromGeoJSON('$location_json_to_ping')))";
+        $hit = LocationBound::buildLocationBound(id: $bound->id)->whereRaw($where)->first();
         if ($hit) {
             return response()->json(new LocationBoundResource($hit), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
@@ -101,7 +101,6 @@ class LocationBoundController extends Controller
             $bound->checkIsInUse();
         }
 
-        $bound = new LocationBound();
         $user = auth()->user();
 
         if ($bound_name) {
@@ -124,10 +123,10 @@ class LocationBoundController extends Controller
      * @throws ValidationException
      * @throws \Exception
      */
-    public function location_bound_create(Request $request,ELocationType $location_type): JsonResponse {
+    public function location_bound_create(Request $request, LocationTypes $location_type): JsonResponse {
 
         $bound_name = $request->request->getString('bound_name');
-        $geo_json = $request->request->getString('geo_json');
+        $geo_json = $request->request->all('geo_json');
 
         if (!$bound_name || !$geo_json ) {
             throw new HexbatchCoreException(__("msg.location_bounds_needs_minimum_info"),
@@ -140,7 +139,7 @@ class LocationBoundController extends Controller
         $bound->setBoundName($bound_name,$user);
 
         $bound->user_id = $user->id;
-        $bound->setShape($geo_json,$location_type);
+        $bound->setShape(json_encode($geo_json),$location_type);
         $bound->save();
 
         $out = LocationBound::buildLocationBound(id: $bound->id)->first();

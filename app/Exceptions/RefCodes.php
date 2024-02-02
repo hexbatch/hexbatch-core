@@ -30,6 +30,7 @@ class RefCodes {
     const BOUND_NEEDS_MIN_INFO = 3006;
 
     const BOUND_CANNOT_PING = 3007;
+    const BOUND_TYPE_DEF = 3008;
 
     const URLS = [
         self::BAD_LOGIN => '',
@@ -48,5 +49,6 @@ class RefCodes {
         self::BOUND_CANNOT_EDIT => '',
         self::BOUND_NEEDS_MIN_INFO => '',
         self::BOUND_CANNOT_PING => '',
+        self::BOUND_TYPE_DEF => '',
     ];
 }
