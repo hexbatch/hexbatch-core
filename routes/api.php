@@ -5,7 +5,7 @@ use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\LocationBoundController;
 use App\Http\Controllers\API\TimeBoundController;
 use App\Http\Controllers\API\UserGroupController;
-use App\Models\Enums\LocationTypes;
+use App\Models\Enums\LocationType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

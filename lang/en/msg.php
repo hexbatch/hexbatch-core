@@ -22,7 +22,7 @@ return [
     'group_this_member_does_not_exist' => 'This user :username is not a member in the group',
 
     //bounds
-    'bound_not_found' => 'Time bound not found using :ref',
+    'bound_not_found' => 'Bound not found using :ref',
     'bounds_in_use_cannot_change' => 'Bounds cannot edited or deleted because its in use',
 
     //time bounds
@@ -40,4 +40,8 @@ return [
     'location_bounds_only_pings_these' => 'Location bound can only ping with a polygon, a multipology or a point',
     'location_bounds_shape_is_3d' => 'Location bounds shapes must be 3d and all coordinates must have x,y,z',
     'location_bounds_map_is_2d' => 'Location bounds map must be 2d and not cross date line and be in normal numbers, and all coodrinates have lat and long',
+
+    //attributes
+    'attribute_not_found' => 'Attribute not found using :ref',
+    'attribute_ping_missing_data' => 'Cannot ping, check the ping type and data given for missing inputs',
 ];

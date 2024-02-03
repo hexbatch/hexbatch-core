@@ -32,6 +32,10 @@ class RefCodes {
     const BOUND_CANNOT_PING = 3007;
     const BOUND_TYPE_DEF = 3008;
 
+    // attributes start at 5000
+    const ATTRIBUTE_NOT_FOUND = 5001;
+    const ATTRIBUTE_PING_DATA_MISSING = 5002;
+
     const URLS = [
         self::BAD_LOGIN => '',
         self::USER_NOT_FOUND => '',
@@ -50,5 +54,7 @@ class RefCodes {
         self::BOUND_NEEDS_MIN_INFO => '',
         self::BOUND_CANNOT_PING => '',
         self::BOUND_TYPE_DEF => '',
+        self::ATTRIBUTE_NOT_FOUND => '',
+        self::ATTRIBUTE_PING_DATA_MISSING => '',
     ];
 }

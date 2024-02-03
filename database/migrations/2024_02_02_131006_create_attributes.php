@@ -251,8 +251,6 @@ return new class extends Migration
             $table->string('attribute_name',128)->nullable(false)->index()
                 ->comment("The unique name of the attribute, using the naming rules");
 
-            $table->text('attribute_description')->nullable()->default(null)
-                ->comment("Markdown description");
 
             $table->timestamps();
         });

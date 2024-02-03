@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Attribute;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
 use App\Models\User;
@@ -36,6 +37,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('user_group', UserGroup::class);
         Route::model('time_bound', TimeBound::class);
         Route::model('location_bound', LocationBound::class);
+        Route::model('attribute', Attribute::class);
 
         $this->routes(function () {
             Route::middleware('api')

@@ -1,0 +1,229 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\AttributeCollection;
+use App\Http\Resources\AttributeResource;
+use App\Http\Resources\LocationBoundResource;
+use App\Models\Attribute;
+use App\Models\AttributeUserGroup;
+use App\Models\Enums\AttributePingType;
+use App\Models\Enums\AttributeUserGroupType;
+
+use App\Models\User;
+use App\Models\UserGroup;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+
+
+/*
+ | Post   | attribute                   |            | Makes a new attribute with caller as owner            | Required name: optional requirements, permissions, bounds, and value  |
+| Patch  | attribute/edit/:id          |            | Edit Attributes, if possible, sparse                  | Any detail of the attribute, sparse update                            |
+| Put    | attribute/edit/:id          |            | Edit Value , if possible, full replacement            | All the values for the definition                                     |
+| Get    | attribute/:id               |            | returns full attribute info                           |                                                                       |
+| Get    | attribute/:id/bounds/ping   |            | Determines if the attribute is in bounds              | Location, Time and Set                                                |
+| Delete | attribute/:id               |            | Delete Attribute, if the user can                     |                                                                       |
+Get    | attribute/:id/list/owner    |         |            | Show attribute owned by user                        | can provide a search,iterator
+ */
+
+class AttributeController extends Controller
+{
+    /**
+     * @uses Attribute::attribute_owner()
+     */
+    protected function adminCheck(Attribute $att) {
+        $user = auth()->user();
+        $att->attribute_owner->checkAdminGroup($user->id);
+    }
+
+    public function attribute_get(Attribute $attribute) {
+        $this->adminCheck($attribute);
+        $out = Attribute::buildAttribute(id: $attribute->id)->first();
+        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+    /**
+     * @param Request $request
+     * @param Attribute $attribute
+     * @param AttributePingType $ping_type
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function attribute_bound_ping(Request $request,Attribute $attribute, AttributePingType $ping_type) {
+
+        $location_json_to_ping = $request->query->getString('location_json_to_ping');
+        $shape_json_to_ping = $request->query->getString('shape_json_to_ping');
+        $time_string = $request->query->getString('time_string');
+        $user_lookup = $request->query->getString('user');
+
+        $check_user = null;
+        if ($user_lookup) {
+            $check_user = (new User)->resolveRouteBinding($user_lookup);
+        }
+
+
+        $this->adminCheck($attribute);
+
+        $ret = [];
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_TIME || $ping_type === AttributePingType::READ_TIME) {
+            if ($attribute->read_time_bound) {
+                $ret['read_time'] = $attribute->read_time_bound?->ping($time_string);
+            }
+        }
+
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_TIME || $ping_type === AttributePingType::WRITE_TIME) {
+            if($attribute->write_time_bound) {
+                $ret['write_time'] = $attribute->write_time_bound?->ping($time_string);
+            }
+        }
+
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_MAP || $ping_type === AttributePingType::READ_MAP) {
+            if (!$location_json_to_ping) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->read_map_bound) {
+                $ret['read_map'] = $attribute->read_map_bound?->ping($location_json_to_ping);
+            }
+        }
+
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_MAP || $ping_type === AttributePingType::WRITE_MAP) {
+            if (!$location_json_to_ping) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->write_map_bound) {
+                $ret['write_map'] = $attribute->write_map_bound?->ping($location_json_to_ping);
+            }
+        }
+
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_SHAPE || $ping_type === AttributePingType::READ_SHAPE) {
+            if (!$shape_json_to_ping) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->read_shape_bound) {
+                $ret['read_shape'] = $attribute->read_shape_bound?->ping($shape_json_to_ping);
+            }
+        }
+
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_SHAPE || $ping_type === AttributePingType::WRITE_SHAPE) {
+            if (!$shape_json_to_ping) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->write_shape_bound) {
+                $ret['write_shape'] = $attribute->write_shape_bound?->ping($shape_json_to_ping);
+            }
+        }
+
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_USER || $ping_type === AttributePingType::READ_USER) {
+            if (!$check_user) {
+                 throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                     RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            /**
+             * @var UserGroup $read_group
+             */
+            $read_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
+                ->where('group_type',AttributeUserGroupType::READ->value)
+                /** @uses AttributeUserGroup::target_user_group() */
+                ->with('target_user_group')
+                ->first();
+            if($read_group) {
+                $ret['read_user'] = (bool)$read_group->isMember($check_user->id);
+            }
+        }
+
+        if ($ping_type === AttributePingType::ALL || $ping_type === AttributePingType::ALL_USER || $ping_type === AttributePingType::WRITE_USER) {
+            if (!$check_user) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            /**
+             * @var UserGroup $write_group
+             */
+            $write_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
+                ->where('group_type',AttributeUserGroupType::WRITE->value)
+                /** @uses AttributeUserGroup::target_user_group() */
+                ->with('target_user_group')
+                ->first();
+            if($write_group) {
+                $ret['write_user'] = (bool)$write_group->isMember($check_user->id);
+            }
+        }
+
+        $resp = \Symfony\Component\HttpFoundation\Response::HTTP_OK;
+        foreach ($ret as $part) {
+            if (!$part) {
+                $resp = \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND;
+                break;
+            }
+        }
+
+
+        return response()->json(['attribute_id'=>$attribute->id,'results'=>$ret], $resp);
+    }
+
+    public function attribute_list_owner(?User $user = null) {
+        $logged_user = auth()->user();
+        if (!$user) {$user = $logged_user;}
+        $out = Attribute::buildAttribute(readable_user: $user->id)->cursorPaginate();
+        return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function attribute_delete(Attribute $attribute) {
+        $this->adminCheck($attribute);
+        $attribute->checkIsInUse();
+        $out = Attribute::buildAttribute(id: $attribute->id)->first();
+        $attribute->delete();
+        return response()->json(new LocationBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+    public function attribute_edit_post(Attribute $attribute, Request $request) {
+        $this->adminCheck($attribute);
+
+
+        $is_retired = $request->request->getBoolean('is_retired');
+        $attribute_name = $request->request->getString('attribute_name');
+
+        //todo implement more
+        $out = Attribute::buildAttribute(id: $attribute->id)->first();
+
+        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function attribute_edit_put(Attribute $attribute, Request $request) {
+        $this->adminCheck($attribute);
+
+
+        $is_retired = $request->request->getBoolean('is_retired');
+        $attribute_name = $request->request->getString('attribute_name');
+        //todo implement more
+
+        $out = Attribute::buildAttribute(id: $attribute->id)->first();
+
+        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+    public function attribute_create(Request $request): JsonResponse {
+        //todo implement more
+
+        $attribute = null;
+        $out = Attribute::buildAttribute(id: $attribute->id)->first();
+        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+    }
+}

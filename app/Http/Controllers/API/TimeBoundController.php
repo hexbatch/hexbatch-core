@@ -41,14 +41,9 @@ class TimeBoundController extends Controller
     public function time_bound_ping(TimeBound $bound,string $time_to_ping ) {
 
         $this->adminCheck($bound);
-        if ($time_to_ping) {
-            $ping_ts = Carbon::create($time_to_ping)->unix();
-        } else {
-            $ping_ts = Carbon::now()->unix();
-        }
-        $hit = TimeBoundSpan::where('time_bound_id',$bound->id)->where('span_start','<=',$ping_ts)->where('span_stop','>=',$ping_ts)->first();
-        if ($hit) {
-            return response()->json(new TimeBoundSpanResource($hit), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        $ping_ts = $bound->ping($time_to_ping);
+        if ($ping_ts) {
+            return response()->json(new TimeBoundSpanResource($bound), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
         return response()->json(['bound_id'=>$bound->id,'ping_ts'=>$ping_ts], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
     }
