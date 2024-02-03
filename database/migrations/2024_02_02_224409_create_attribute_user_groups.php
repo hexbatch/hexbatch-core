@@ -46,7 +46,7 @@ return new class extends Migration
             'read','write','usage'
             );");
 
-        DB::statement("ALTER TABLE attribute_user_groups Add COLUMN group__type type_of_attribute_user_group NOT NULL default 'inactive';");
+        DB::statement("ALTER TABLE attribute_user_groups Add COLUMN group_type type_of_attribute_user_group NOT NULL default 'inactive';");
 
         DB::statement("ALTER TABLE attribute_user_groups ALTER COLUMN created_at SET DEFAULT NOW();");
 
