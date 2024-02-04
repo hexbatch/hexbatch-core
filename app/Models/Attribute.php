@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Models\Enums\AttributeUserGroupType;
 use App\Models\Enums\AttributeValueType;
 use App\Models\Traits\TResourceCommon;
+use App\Rules\ResourceNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 
 /**
@@ -143,6 +148,8 @@ class Attribute extends Model
 
     public function permission_groups() : HasMany {
         return $this->hasMany('App\Models\AttributeUserGroup')
+            /** @uses AttributeUserGroup::group_parent() */
+            ->with('group_parent')
             ->orderBy('group_type','created_at');
     }
 
@@ -152,6 +159,60 @@ class Attribute extends Model
             ->exists()
             ;
         //todo also check for the element type
+    }
+
+    /**
+     * @param string $name
+     * @param User $owner
+     * @return void
+     * @throws ValidationException
+     */
+    public function setName(string $name, User $owner) {
+        Validator::make(['attribute_name'=>$name], [
+            'attribute_name'=>['required','string','max:128',new ResourceNameReq],
+        ])->validate();
+
+        $conflict =  static::where('user_id', $owner->id)->where('attribute_name',$name)->first();
+        if ($conflict) {
+            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$name]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::RESOURCE_NAME_UNIQUE_PER_USER);
+        }
+
+        $this->attribute_name = $name;
+    }
+
+    public function setParent(?string $parent_hint) {
+
+        if (empty($parent_hint) ) {
+            $this->parent_attribute_id = null;
+            return;
+        }
+        /**
+         * @var Attribute $parent
+         */
+        $parent = (new Attribute())->resolveRouteBinding($parent_hint);
+        $user = auth()->user();
+        //check if this user can use the parent attribute
+        $maybe_group = $this->getPermissionGroup(AttributeUserGroupType::USAGE);
+        if ($maybe_group) {
+            if (!$maybe_group->target_user_group->isMember($user->id)) {
+                throw new HexbatchNameConflictException(__("msg.attribute_cannot_be_used_at_parent",['ref'=>$parent->attribute_name]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
+            }
+        }
+        $this->parent_attribute_id = $parent->id;
+
+    }
+
+    public function getPermissionGroup(AttributeUserGroupType $type_group) : ?AttributeUserGroup{
+        foreach ($this->permission_groups as $perm_group) {
+            if ($perm_group->group_type === $type_group) {
+                return $perm_group;
+            }
+        }
+        return null;
     }
 
     public static function buildAttribute(

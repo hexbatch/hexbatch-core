@@ -88,7 +88,7 @@ class TimeBoundController extends Controller
 
         $bound->is_retired = $is_retired;
         if ($bound_name) {
-            $bound->setBoundName($bound_name,$bound->bound_owner);
+            $bound->setName($bound_name,$bound->bound_owner);
         }
 
         if($start || $stop || $period_length  || (empty($bound_cron) && $bound->bound_cron) || $bound_cron || $cron_timezone) {
@@ -124,7 +124,7 @@ class TimeBoundController extends Controller
 
         $bound = new TimeBound();
         $user = auth()->user();
-        $bound->setBoundName($bound_name,$user);
+        $bound->setName($bound_name,$user);
 
         $bound->user_id = $user->id;
 

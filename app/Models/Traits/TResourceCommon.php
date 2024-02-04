@@ -28,24 +28,24 @@ trait TResourceCommon
     }
 
     /**
-     * @param string $bound_name
+     * @param string $name
      * @param User $owner
      * @return void
      * @throws ValidationException
      */
-    public function setBoundName(string $bound_name, User $owner) {
-        Validator::make(['bound_name'=>$bound_name], [
+    public function setName(string $name, User $owner) {
+        Validator::make(['bound_name'=>$name], [
             'bound_name'=>['required','string','max:128',new ResourceNameReq],
         ])->validate();
 
-        $conflict =  static::where('user_id', $owner->id)->where('bound_name',$bound_name)->first();
+        $conflict =  static::where('user_id', $owner->id)->where('bound_name',$name)->first();
         if ($conflict) {
-            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$bound_name]),
+            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$name]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::RESOURCE_NAME_UNIQUE_PER_USER);
         }
 
-        $this->bound_name = $bound_name;
+        $this->bound_name = $name;
     }
 
     /**

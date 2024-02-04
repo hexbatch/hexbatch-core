@@ -44,4 +44,5 @@ return [
     //attributes
     'attribute_not_found' => 'Attribute not found using :ref',
     'attribute_ping_missing_data' => 'Cannot ping, check the ping type and data given for missing inputs',
+    'attribute_cannot_be_used_at_parent' => 'This attribute :ref cannot be used as a parent, you do not have permissions',
 ];

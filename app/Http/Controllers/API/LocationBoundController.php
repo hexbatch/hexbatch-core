@@ -92,7 +92,7 @@ class LocationBoundController extends Controller
         $user = auth()->user();
 
         if ($bound_name) {
-            $bound->setBoundName($bound_name,$user);
+            $bound->setName($bound_name,$user);
         }
 
         if ($geo_json) {
@@ -124,7 +124,7 @@ class LocationBoundController extends Controller
 
         $bound = new LocationBound();
         $user = auth()->user();
-        $bound->setBoundName($bound_name,$user);
+        $bound->setName($bound_name,$user);
 
         $bound->user_id = $user->id;
         $bound->setShape(json_encode($geo_json),$location_type);
