@@ -10,6 +10,8 @@ use App\Models\Traits\TResourceCommon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -45,6 +47,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int created_at_ts
  * @property int updated_at_ts
+ *
  * @property Attribute attribute_parent
  * @property User attribute_owner
  * @property TimeBound read_time_bound
@@ -53,6 +56,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property LocationBound write_map_bound
  * @property LocationBound read_shape_bound
  * @property LocationBound write_shape_bound
+ *
+ * @property AttributeMetum[] attribute_meta_default
+ * @property AttributeMetum[] attribute_meta_all
+ * @property AttributeRule[] da_rules
+ * @property AttributeUserGroup[] permission_groups
  */
 class Attribute extends Model
 {
@@ -118,6 +126,26 @@ class Attribute extends Model
         return $this->belongsTo('App\Models\LocationBound','write_shape_location_bounds_id');
     }
 
+    public function attribute_meta_all() : HasMany {
+        return $this->hasMany('App\Models\AttributeMetum')
+            ->orderBy('meta_type','meta_iso_lang');
+    }
+    public function attribute_meta_default() : HasMany {
+        return $this->hasMany('App\Models\AttributeMetum')
+            ->where('meta_type',AttributeMetum::ANY_LANGUAGE)
+            ->orderBy('meta_type');
+    }
+
+    public function da_rules() : HasMany {
+        return $this->hasMany('App\Models\AttributeRule')
+            ->orderBy('rule_type','target_attribute_id');
+    }
+
+    public function permission_groups() : HasMany {
+        return $this->hasMany('App\Models\AttributeUserGroup')
+            ->orderBy('group_type','created_at');
+    }
+
     public function isInUse() : bool {
         if (!$this->id) {return false;}
         return Attribute::where('parent_attribute_id',$this->id)
@@ -126,24 +154,61 @@ class Attribute extends Model
         //todo also check for the element type
     }
 
-    public static function buildAttribute(?int $id = null,?int $readable_user = null) : Builder {
+    public static function buildAttribute(
+        ?int $id = null,?int $admin_user_id = null)
+    : Builder
+    {
 
         $build =  Attribute::select('attributes.*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
             /** @uses Attribute::attribute_parent(),Attribute::attribute_owner(),Attribute::read_time_bound(),Attribute::write_time_bound() */
             ->with('attribute_parent attribute_owner read_time_bound write_time_bound')
 
             /** @uses Attribute::read_map_bound(),Attribute::write_map_bound(),Attribute::read_shape_bound(),Attribute::write_shape_bound() */
             ->with('read_map_bound write_map_bound read_shape_bound write_shape_bound')
+
+            /** @uses Attribute::attribute_meta_default(),Attribute::da_rules(),Attribute::permission_groups() */
+            ->with('attribute_meta_default da_rules permission_groups')
        ;
 
         if ($id) {
-            $build->where('id',$id);
+            $build->where('attributes.id',$id);
         }
 
-        if ($readable_user) {
-            //condition on the user group join read
-            //todo implement more
+
+        if ($admin_user_id) {
+
+            $build->join('users',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('users.id','=','attributes.user_id')
+                        ->whereNotNull('attributes.user_id');
+                }
+            );
+
+            $build->join('user_groups',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('user_groups.id','=','users.user_group_id');
+                }
+            );
+
+            $build->join('user_group_members',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($admin_user_id) {
+                    $join
+                        ->on('user_group_members.user_group_id','=','user_groups.id')
+                        ->where('user_group_members.user_id',$admin_user_id);
+                }
+            );
         }
 
         return $build;

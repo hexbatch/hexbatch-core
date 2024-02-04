@@ -21,13 +21,7 @@ use Illuminate\Validation\ValidationException;
 
 
 /*
- | Post   | attribute                   |            | Makes a new attribute with caller as owner            | Required name: optional requirements, permissions, bounds, and value  |
-| Patch  | attribute/edit/:id          |            | Edit Attributes, if possible, sparse                  | Any detail of the attribute, sparse update                            |
-| Put    | attribute/edit/:id          |            | Edit Value , if possible, full replacement            | All the values for the definition                                     |
-| Get    | attribute/:id               |            | returns full attribute info                           |                                                                       |
 | Get    | attribute/:id/bounds/ping   |            | Determines if the attribute is in bounds              | Location, Time and Set                                                |
-| Delete | attribute/:id               |            | Delete Attribute, if the user can                     |                                                                       |
-Get    | attribute/:id/list/owner    |         |            | Show attribute owned by user                        | can provide a search,iterator
  */
 
 class AttributeController extends Controller
@@ -54,7 +48,7 @@ class AttributeController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function attribute_bound_ping(Request $request,Attribute $attribute, AttributePingType $ping_type) {
+    public function attribute_ping(Request $request, Attribute $attribute, AttributePingType $ping_type) {
 
         $location_json_to_ping = $request->query->getString('location_json_to_ping');
         $shape_json_to_ping = $request->query->getString('shape_json_to_ping');
@@ -176,10 +170,10 @@ class AttributeController extends Controller
         return response()->json(['attribute_id'=>$attribute->id,'results'=>$ret], $resp);
     }
 
-    public function attribute_list_owner(?User $user = null) {
+    public function attribute_list_manage(?User $user = null) {
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
-        $out = Attribute::buildAttribute(readable_user: $user->id)->cursorPaginate();
+        $out = Attribute::buildAttribute(admin_user_id: $user->id)->cursorPaginate();
         return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -192,25 +186,17 @@ class AttributeController extends Controller
     }
 
 
-    public function attribute_edit_post(Attribute $attribute, Request $request) {
+
+
+    public function attribute_edit_patch(Attribute $attribute, Request $request) {
         $this->adminCheck($attribute);
 
 
         $is_retired = $request->request->getBoolean('is_retired');
         $attribute_name = $request->request->getString('attribute_name');
 
-        //todo implement more
-        $out = Attribute::buildAttribute(id: $attribute->id)->first();
-
-        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
-    }
-
-    public function attribute_edit_put(Attribute $attribute, Request $request) {
-        $this->adminCheck($attribute);
-
-
-        $is_retired = $request->request->getBoolean('is_retired');
-        $attribute_name = $request->request->getString('attribute_name');
+        // if this is in use then can only edit retired, meta
+        // otherwise can edit all but the ownership
         //todo implement more
 
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
@@ -221,7 +207,15 @@ class AttributeController extends Controller
 
     public function attribute_create(Request $request): JsonResponse {
         //todo implement more
-
+        /*
+         * parent,user,name,retired,
+         * bounds (all 6),
+            requirements ( required_siblings,forbidden_siblings,allergies,affinities,set read,set write) read_policy write_policy
+            meta (any given)
+            permissions(usage,read,write)
+            value (all the fields)
+            options
+         */
         $attribute = null;
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);

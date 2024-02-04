@@ -163,8 +163,12 @@ class User extends Authenticatable
         }
     }
 
+
+
     public function checkAdminGroup(int $user_id) : void {
+        /** @noinspection PhpUnhandledExceptionInspection */
         $this->initUser();
+        /** @uses User::user_group() */
         $group = $this->user_group;
         if ($this->id === $user_id) {return;}
 
