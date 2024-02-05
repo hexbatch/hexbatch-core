@@ -108,49 +108,65 @@ class Attribute extends Model
     }
 
     public function read_time_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\TimeBound','read_time_bounds_id');
+        return $this->belongsTo('App\Models\TimeBound','read_time_bounds_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts");
     }
 
     public function write_time_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\TimeBound','write_time_bounds_id');
+        return $this->belongsTo('App\Models\TimeBound','write_time_bounds_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts");
     }
 
     public function read_map_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','read_map_location_bounds_id');
+        return $this->belongsTo('App\Models\LocationBound','read_map_location_bounds_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
     }
 
     public function write_map_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','write_map_location_bounds_id');
+        return $this->belongsTo('App\Models\LocationBound','write_map_location_bounds_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
     }
 
     public function read_shape_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','read_shape_location_bounds_id');
+        return $this->belongsTo('App\Models\LocationBound','read_shape_location_bounds_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
     }
 
     public function write_shape_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','write_shape_location_bounds_id');
+        return $this->belongsTo('App\Models\LocationBound','write_shape_location_bounds_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
+
     }
 
     public function attribute_meta_all() : HasMany {
-        return $this->hasMany('App\Models\AttributeMetum')
-            ->orderBy('meta_type','meta_iso_lang');
+        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id')
+            ->orderBy('meta_type')
+            ->orderBy('meta_iso_lang');
     }
     public function attribute_meta_default() : HasMany {
-        return $this->hasMany('App\Models\AttributeMetum')
-            ->where('meta_type',AttributeMetum::ANY_LANGUAGE)
+        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id')
+            ->where('meta_iso_lang',AttributeMetum::ANY_LANGUAGE)
             ->orderBy('meta_type');
     }
 
     public function da_rules() : HasMany {
-        return $this->hasMany('App\Models\AttributeRule')
-            ->orderBy('rule_type','target_attribute_id');
+        return $this->hasMany('App\Models\AttributeRule','rule_parent_attribute_id','id')
+            ->orderBy('rule_type')
+            ->orderBy('target_attribute_id');
     }
 
     public function permission_groups() : HasMany {
-        return $this->hasMany('App\Models\AttributeUserGroup')
+        return $this->hasMany('App\Models\AttributeUserGroup','group_parent_attribute_id','id')
             /** @uses AttributeUserGroup::group_parent() */
             ->with('group_parent')
-            ->orderBy('group_type','created_at');
+            ->orderBy('group_type')
+            ->orderBy('created_at');
     }
 
     public function isInUse() : bool {
@@ -223,13 +239,13 @@ class Attribute extends Model
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
             /** @uses Attribute::attribute_parent(),Attribute::attribute_owner(),Attribute::read_time_bound(),Attribute::write_time_bound() */
-            ->with('attribute_parent attribute_owner read_time_bound write_time_bound')
+            ->with('attribute_parent', 'attribute_owner', 'read_time_bound', 'write_time_bound')
 
             /** @uses Attribute::read_map_bound(),Attribute::write_map_bound(),Attribute::read_shape_bound(),Attribute::write_shape_bound() */
-            ->with('read_map_bound write_map_bound read_shape_bound write_shape_bound')
+            ->with('read_map_bound', 'write_map_bound', 'read_shape_bound', 'write_shape_bound')
 
             /** @uses Attribute::attribute_meta_default(),Attribute::da_rules(),Attribute::permission_groups() */
-            ->with('attribute_meta_default da_rules permission_groups')
+            ->with('attribute_meta_default', 'da_rules', 'permission_groups')
        ;
 
         if ($id) {
@@ -302,12 +318,12 @@ class Attribute extends Model
                         if (count($parts) === 1) {
                             //must be owned by the user
                             $user = auth()->user();
-                            $build = $this->where('user_id', $user?->id)->where('bound_name', $value);
+                            $build = $this->where('user_id', $user?->id)->where('attribute_name', $value);
                         } else {
                             $owner = $parts[0];
                             $maybe_name = $parts[1];
                             $owner = (new User)->resolveRouteBinding($owner);
-                            $build = $this->where('user_id', $owner?->id)->where('bound_name', $maybe_name);
+                            $build = $this->where('user_id', $owner?->id)->where('attribute_name', $maybe_name);
                         }
                     }
                 }

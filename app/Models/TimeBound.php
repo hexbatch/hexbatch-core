@@ -75,6 +75,10 @@ class TimeBound extends Model
             ->orderBy('span_start');
     }
 
+    public function getName() {
+        return $this->bound_owner->username . '.' .$this->bound_name;
+    }
+
     public function isInUse() : bool {
         if (!$this->id) {return false;}
         return Attribute::where('read_time_bounds_id',$this->id)

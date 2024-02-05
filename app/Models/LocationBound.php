@@ -62,6 +62,11 @@ class LocationBound extends Model
     {
         return $this->belongsTo('App\Models\User', 'user_id');
     }
+
+    public function getName() {
+        return $this->bound_owner->username . '.' .$this->bound_name;
+    }
+
      public static function buildLocationBound(?int $user_id = null,?int $id = null) : Builder {
         /** @var Builder $build */
         $build =  LocationBound::select('location_bounds.*')

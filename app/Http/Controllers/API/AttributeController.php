@@ -4,6 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Attributes\AttributeBinaryOptions;
+use App\Helpers\Attributes\AttributeBounds;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
@@ -34,11 +36,13 @@ class AttributeController extends Controller
         $att->attribute_owner->checkAdminGroup($user->id);
     }
 
-    public function attribute_get(Attribute $attribute) {
+    public function attribute_get(Attribute $attribute,?string $full = null) {
         $this->adminCheck($attribute);
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
-        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        $b_brief = !$full;
+        return response()->json(new AttributeResource($out,$b_brief), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
+
 
 
     /**
@@ -205,6 +209,9 @@ class AttributeController extends Controller
     }
 
 
+    /**
+     * @throws ValidationException
+     */
     public function attribute_create(Request $request): JsonResponse {
         //todo implement more
         /*
@@ -216,7 +223,17 @@ class AttributeController extends Controller
             value (all the fields)
             options
          */
-        $attribute = null;
+        $attribute = new Attribute();
+        $user = auth()->user();
+        $attribute->setName($request->request->getString('attribute_name'),$user);
+        $attribute->setParent($request->request->getString('parent_attribute'));
+        $attribute->user_id = $user->id;
+
+
+        (new AttributeBinaryOptions($request) )->assign($attribute);
+        (new AttributeBounds($request) )->assign($attribute);
+
+        $attribute->save();
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }

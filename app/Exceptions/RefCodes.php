@@ -36,6 +36,7 @@ class RefCodes {
     const ATTRIBUTE_NOT_FOUND = 5001;
     const ATTRIBUTE_PING_DATA_MISSING = 5002;
     const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 5003;
+    const ATTRIBUTE_SCHEMA_ISSUE = 5004;
 
     const URLS = [
         self::BAD_LOGIN => '',
@@ -58,5 +59,6 @@ class RefCodes {
         self::ATTRIBUTE_NOT_FOUND => '',
         self::ATTRIBUTE_PING_DATA_MISSING => '',
         self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
+        self::ATTRIBUTE_SCHEMA_ISSUE => '',
     ];
 }
