@@ -186,4 +186,11 @@ class UserGroup extends Model
         $member?->delete();
         return $member;
     }
+
+    public function isInUse() : bool {
+        if (!$this->id) {return false;}
+        if( AttributeUserGroup::where('target_user_group_id',$this->id)->exists() ) {return true;}
+        if( User::where('user_group_id',$this->id)->exists() ) {return true;}
+        return false;
+    }
 }

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Schema;
       write_bounds: []
 
     requirements:
-      tokens:
+      elements:
           required_siblings: [attribute ids] for sharing the same token type or token
           forbidden_siblings: [attribute ids] cannot be in the same token or type
       sets:
@@ -29,8 +29,8 @@ use Illuminate\Support\Facades\Schema;
           read: []  if empty anyone can read the attribute value
           write: [] if empty the admin group can change the attribute value.
       set_requirements:
-          read_policy: all|one
-          write_policy: all|one
+          is_read_policy_all: bool
+          is_write_policy_all: bool
           read: [] attribute ids  : based on policy, if one, then any matches in a set makes it readable, or all must match
           write: [] attribute ids : based on policy, if one, then any matches in a set makes it readable, or all must match
     value:

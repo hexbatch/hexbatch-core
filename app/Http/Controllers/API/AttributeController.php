@@ -10,6 +10,7 @@ use App\Helpers\Attributes\AttributeMetaGathering;
 use App\Helpers\Attributes\AttributePermissionGathering;
 use App\Helpers\Attributes\AttributeRuleGathering;
 use App\Helpers\Attributes\AttributeValue;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
@@ -194,24 +195,54 @@ class AttributeController extends Controller
     }
 
 
-
-
+    /**
+     * @param Attribute $attribute
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
+     * @throws \Exception
+     */
     public function attribute_edit_patch(Attribute $attribute, Request $request) {
         $this->adminCheck($attribute);
 
 
-        $is_retired = $request->request->getBoolean('is_retired');
-        $attribute_name = $request->request->getString('attribute_name');
-
         // if this is in use then can only edit retired, meta
         // otherwise can edit all but the ownership
-        //todo implement more
+        if ($attribute->isInUse()) {
+            (new AttributeMetaGathering($request) )->assign($attribute);
+        } else {
+            $user = auth()->user();
+            $attribute->setName($request->request->getString('attribute_name'),$user);
+            $attribute->setParent($request->request->getString('parent_attribute'));
+            $this->updateAllAttribute($attribute,$request);
+        }
+
+        if ($request->request->has('is_retired')) {
+            $attribute->is_retired = Utilities::boolishToBool($request->request->get('is_retired'));
+            $attribute->save();
+        }
+
 
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
 
         return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    /**
+     * @throws \Exception
+     */
+    protected function updateAllAttribute(Attribute $attribute, Request $request) {
+        (new AttributeBinaryOptions($request) )->assign($attribute);
+        (new AttributeBounds($request) )->assign($attribute);
+
+
+        $attribute->save();
+
+        (new AttributeValue(request:$request,attribute: $attribute) )->assign($attribute);
+        (new AttributeMetaGathering($request) )->assign($attribute);
+        (new AttributePermissionGathering($request) )->assign($attribute);
+        (new AttributeRuleGathering($request) )->assign($attribute);
+    }
 
     /**
      * @throws ValidationException
@@ -222,7 +253,7 @@ class AttributeController extends Controller
         /*
          * parent,user,name,retired,
          * bounds (all 6),
-            requirements ( required_siblings,forbidden_siblings,allergies,affinities,set read,set write) read_policy write_policy
+            requirements ( required_siblings,forbidden_siblings,allergies,affinities,set read,set write) is_read_policy_all is_write_policy_all
             meta (any given)
             permissions(usage,read,write)
             value (all the fields)
@@ -233,20 +264,9 @@ class AttributeController extends Controller
         $attribute->setName($request->request->getString('attribute_name'),$user);
         $attribute->setParent($request->request->getString('parent_attribute'));
         $attribute->user_id = $user->id;
+        $this->updateAllAttribute($attribute,$request);
 
 
-        (new AttributeBinaryOptions($request) )->assign($attribute);
-        (new AttributeBounds($request) )->assign($attribute);
-
-
-        $attribute->save();
-
-        (new AttributeValue(request:$request) )->assign($attribute);
-        $attribute->save(); //again
-
-        (new AttributeMetaGathering($request) )->assign($attribute);
-        (new AttributePermissionGathering($request) )->assign($attribute);
-        (new AttributeRuleGathering($request) )->assign($attribute);
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }

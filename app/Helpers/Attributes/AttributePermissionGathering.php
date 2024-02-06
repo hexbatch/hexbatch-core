@@ -56,8 +56,7 @@ class AttributePermissionGathering
         try {
             DB::beginTransaction();
             /** @var AttributeUserGroup $what */
-            foreach ($this as $what) {
-                if (!$what) {continue;}
+            foreach ($this->permission_groups as $what) {
                 $what->group_parent_attribute_id = $attribute->id;
                 if ($what->delete_mode) {
                     $what->deleteModeActivate();

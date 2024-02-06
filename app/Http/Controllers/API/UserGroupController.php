@@ -78,6 +78,11 @@ class UserGroupController extends Controller
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ONLY_OWNERS_CAN_DELETE_GROUPS);
         }
+        if ($group->isInUse()) {
+            throw new HexbatchPermissionException(__("msg.group_can_only_be_deleted_if_not_in_use"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+                RefCodes::ONLY_OWNERS_CAN_DELETE_GROUPS);
+        }
         $group->delete();
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NO_CONTENT);
     }

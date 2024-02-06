@@ -128,6 +128,13 @@ class AttributeValuePointer extends Model
         return null;
     }
 
+    /**
+     * Does not save
+     * @param Attribute $attribute
+     * @param $maybe_value
+     * @param AttributeValueType|null $hint
+     * @return AttributeValuePointer
+     */
     public static function createAttributeValue(Attribute $attribute,$maybe_value,?AttributeValueType $hint = null ) : AttributeValuePointer {
 
         $ret = new AttributeValuePointer();
@@ -201,7 +208,7 @@ class AttributeValuePointer extends Model
                 }
 
             }//end switch
-            $ret->save();
+
             return $ret;
         } //end is string
         elseif(is_object($maybe_value)) {
@@ -241,7 +248,7 @@ class AttributeValuePointer extends Model
                         RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                 }
             }
-            $ret->save();
+
             return $ret;
         } else {
             throw new \LogicException("neither string nor class");

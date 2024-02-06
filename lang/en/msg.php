@@ -17,6 +17,7 @@ return [
     //groups
     'group_not_found' => 'Group not found using :ref',
     'group_only_owner_can_delete' => 'Only the group owner can delete a group',
+    'group_can_only_be_deleted_if_not_in_use' => 'The group cannot be deleted, its in use somewhere',
     'group_only_owner_can_change_admins' => 'Only the group owner can add or remove admins',
     'group_only_admin_changes_membership' => 'Only an admin of the group can change its membership',
     'group_this_member_does_not_exist' => 'This user :username is not a member in the group',
@@ -62,6 +63,8 @@ return [
     'attribute_schema_bad_mime_language' => 'Meta language needs an iso language or empty or missing',
     'attribute_schema_bad_mime_url' => 'Meta url needs to start with a http or https and have only question marks for punctuation, no spaces and be less than 100 chars',
     'attribute_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
+    'attribute_schema_missing_rule_attribute' => 'When adding rules as object, need the attribute key to hold the name or id',
+    'attribute_schema_rule_bad_regex' => 'When making an attribute rule, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
 
     //element types
     'element_type_not_found' => 'Element type not found using :ref',

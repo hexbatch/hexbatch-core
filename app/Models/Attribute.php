@@ -164,6 +164,8 @@ class Attribute extends Model
 
     public function da_rules() : HasMany {
         return $this->hasMany('App\Models\AttributeRule','rule_parent_attribute_id','id')
+            /** @uses AttributeRule::rule_target() */
+            ->with('rule_target')
             ->orderBy('rule_type')
             ->orderBy('target_attribute_id');
     }
