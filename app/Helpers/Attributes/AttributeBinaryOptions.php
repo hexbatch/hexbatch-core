@@ -2,6 +2,7 @@
 
 namespace App\Helpers\Attributes;
 
+use App\Helpers\Utilities;
 use App\Models\Attribute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -31,8 +32,7 @@ class AttributeBinaryOptions
 
         foreach ($options_block as $key => $val) {
             if (property_exists($this,$key)) {
-                $boolval = ( is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val );
-                $this->$key = ( $boolval===null  ? false : $boolval );
+                $this->$key = Utilities::boolishToBool($val);
             }
         }
     }

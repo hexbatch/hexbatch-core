@@ -31,8 +31,8 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_attribute_metum AS ENUM (
             'none',
-            'description','name','standard-family',
-            'author','copywrite','url','rating','interal'
+            'description','name','standard_family',
+            'author','copywrite','url','rating','internal'
             );");
 
         DB::statement("ALTER TABLE attribute_meta Add COLUMN meta_type type_of_attribute_metum NOT NULL default 'none';");

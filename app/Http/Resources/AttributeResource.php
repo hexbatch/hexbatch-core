@@ -2,12 +2,15 @@
 
 namespace App\Http\Resources;
 
+use App\Models\AttributeMetum;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\TimeBound::time_spans()
+ * @uses \App\Models\AttributeValuePointer::getValueDisplayForResource()
+ * @uses \App\Models\Attribute::getPermissionGroupsForResource()
+ * @method getPermissionGroupsForResource
  */
 class AttributeResource extends JsonResource
 {
@@ -40,13 +43,41 @@ class AttributeResource extends JsonResource
                     "write_shape" => $this->b_brief? ($this->write_shape_bound?->getName() ) : ($this->write_shape_bound ? new LocationBoundResource($this->write_shape_bound) : null),
                 ]
             ],
+            'permissions' => [
+                'user_groups' => $this->getPermissionGroupsForResource(),
+                'set_requirements' => [],
+            ],
             'options'=> [
                 'is_constant' => $this->is_constant,
                 'is_static' => $this->is_static,
                 'is_final' => $this->is_final,
                 'is_human' => $this->is_human,
+            ],
+            'value'=> [
+                'is_nullable' => $this->is_nullable,
+                'value_type' => $this->value_type->value,
+                'value_numeric_min' => $this->value_numeric_min,
+                'value_numeric_max' => $this->value_numeric_max,
+                'value_regex' => $this->value_regex,
+                'value_default' => empty($this->attribute_pointer)? $this->value_default : $this->attribute_pointer->getValueDisplayForResource($this->b_brief),
+
             ]
+
         ];
+
+        $meta_part = [];
+        /**
+         * @var AttributeMetum $meta
+         */
+        foreach ($this->attribute_meta_all as $meta) {
+            if ($this->b_brief) {
+                $meta_part[] = $meta->getName();
+            } else {
+                $meta_part[] = new AttributeMetaResource($meta);
+            }
+        }
+        $ret['meta'] = $meta_part;
+
 
         if ($request->query->getString('tz')) {
             $ret['alt'] = [

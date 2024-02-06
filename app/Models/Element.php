@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -46,4 +49,68 @@ class Element extends Model
      * @var array<string, string>
      */
     protected $casts = [];
+
+
+    public static function buildElement(
+        ?int $id = null)
+    : Builder
+    {
+
+        /**
+         * @var Builder $build
+         */
+        $build = Element::select('elements.*')
+            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
+        ;
+
+        if ($id) {
+            $build->where('elements.id', $id);
+        }
+
+        return $build;
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $build = null;
+        $ret = null;
+        $first_id = null;
+        try {
+            if ($field) {
+                $build = $this->where($field, $value);
+            } else {
+                if (Utilities::is_uuid($value)) {
+                    //the ref
+                    $build = $this->where('ref_uuid', $value);
+                }
+            }
+            if ($build) {
+                $first_id = (int)$build->value('id');
+                if ($first_id) {
+                    $ret = Element::buildElement(id:$first_id)->first();
+                }
+            }
+        } finally {
+            if (empty($ret) || empty($first_id) || empty($build)) {
+                throw new HexbatchNotFound(
+                    __('msg.element_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::ELEMENT_NOT_FOUND
+                );
+            }
+        }
+        return $ret;
+
+    }
+
+    public function getName() :string {
+        return $this->ref_uuid;
+    }
 }

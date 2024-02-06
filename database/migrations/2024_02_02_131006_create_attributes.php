@@ -45,6 +45,15 @@ use Illuminate\Support\Facades\Schema;
       static: (can be static or constant)
       final:
       human:
+meta:
+            (can be in different langs or default lang)
+            description: (in plain text or markup)
+            name: (translate the name or a name that does not fit in the name rules for the legal name)
+            standard_family: if named here this is a standard attribute
+            author: who made this
+            copywrite: any copywrite on the attribute content
+            url: where to go for more info
+            rating: marks adult or otherwise sensitive content (includes trigger warnings)
 
 
 attributes:
@@ -72,7 +81,7 @@ attributes:
 
 
     name string
-    description text
+
 
 
 attribute_force_rules:
@@ -214,7 +223,7 @@ return new class extends Migration
             $table->boolean('is_write_policy_all')->default(false)->nullable(false)
                 ->comment('if true then all the attibutes need to be in the set to write this in a set context');
 
-            $table->boolean('is_nullable')->default(false)->nullable(false)
+            $table->boolean('is_nullable')->default(true)->nullable(false)
                 ->comment('if true then value is nullable');
 
 
@@ -242,16 +251,17 @@ return new class extends Migration
             $table->float('value_numeric_max')->nullable()->default(null)
                 ->comment("if set and this value type is number, then this is the max allowed for the value");
 
-            $table->string('value_regex')->nullable()->default(null)
-                ->comment("if set and this is plain string, then regex filters this");
 
-            $table->string('value_default')->nullable()->default(null)
+            $table->jsonb('value_default')->nullable()->default(null)
                 ->comment("if set this is default, cast to the type, when attribute is applied to type or live");
 
             $table->string('attribute_name',128)->nullable(false)->index()
                 ->comment("The unique name of the attribute, using the naming rules");
 
+            $table->string('value_regex')->nullable()->default(null)
+                ->comment("if set and this is plain string, then regex filters this");
 
+            $table->unique(['user_id','attribute_name']);
             $table->timestamps();
         });
 

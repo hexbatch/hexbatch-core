@@ -46,4 +46,26 @@ return [
     'attribute_ping_missing_data' => 'Cannot ping, check the ping type and data given for missing inputs',
     'attribute_cannot_be_used_at_parent' => 'This attribute :ref cannot be used as a parent, you do not have permissions',
     'attribute_schema_bounds_violation' => 'When making an attribute, each bounds type has to be in a certain key',
+    'attribute_schema_bad_regex' => 'When making an attribute, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
+    'attribute_schema_bad_json' => 'The json value is malformed. :issue',
+    'attribute_schema_json_no_primitive' => 'The json value cannot be a primitive',
+    'attribute_schema_improper_map_coordinate' => 'Map coodinates must have latitude and longitude properties and numbers in map ranges',
+    'attribute_schema_improper_shape_coordinate' => 'Shape coodinates must have properies of x,y,x',
+    'attribute_schema_bad_scalar_default' => 'When making an attribute, a scalar default must match the rules given in the default, and must be a scalar value',
+    'attribute_schema_unsupported_value' => 'The attribute value type :type is not supported to be cast to a resource',
+    'attribute_schema_wrong_value' => 'The attribute value type :type points to the wrong sort of resource :res',
+    'attribute_schema_pointers_string_only' => 'The attribute value type :type needs to be identified by a string (uuid or name)',
+    'attribute_schema_bad_meta' => 'Adding a meta requires a minimum of a type and value, language and mime is optional',
+    'attribute_schema_unsupported_meta_type' => 'Unsupported attribute meta type of :type',
+    'attribute_schema_empty_meta' => 'Meta needs a non empty value',
+    'attribute_schema_bad_mime_meta' => 'Meta mime needs a string or empty or missing',
+    'attribute_schema_bad_mime_language' => 'Meta language needs an iso language or empty or missing',
+    'attribute_schema_bad_mime_url' => 'Meta url needs to start with a http or https and have only question marks for punctuation, no spaces and be less than 100 chars',
+    'attribute_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
+
+    //element types
+    'element_type_not_found' => 'Element type not found using :ref',
+
+    //elements
+    'element_not_found' => 'Element not found using :ref',
 ];

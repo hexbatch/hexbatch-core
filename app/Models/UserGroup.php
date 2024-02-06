@@ -78,6 +78,10 @@ class UserGroup extends Model
         return $this->belongsTo('App\Models\User','user_id');
     }
 
+    public function getName() :string {
+        return $this->group_owner->username . '.'. $this->group_name;
+    }
+
     /**
      * Retrieve the model for a bound value.
      *

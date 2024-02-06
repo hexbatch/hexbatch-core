@@ -6,14 +6,18 @@ use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Http\Resources\UserGroupResource;
 use App\Models\Enums\AttributeUserGroupType;
 use App\Models\Enums\AttributeValueType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\ResourceNameReq;
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -44,7 +48,7 @@ use Illuminate\Validation\ValidationException;
  * @property int value_numeric_min
  * @property int value_numeric_max
  * @property string value_regex
- * @property string value_default
+ * @property ArrayObject value_default
  * @property string attribute_name
  * @property string created_at
  * @property string updated_at
@@ -62,7 +66,7 @@ use Illuminate\Validation\ValidationException;
  * @property LocationBound read_shape_bound
  * @property LocationBound write_shape_bound
  *
- * @property AttributeMetum[] attribute_meta_default
+ * @property AttributeValuePointer attribute_pointer
  * @property AttributeMetum[] attribute_meta_all
  * @property AttributeRule[] da_rules
  * @property AttributeUserGroup[] permission_groups
@@ -96,6 +100,7 @@ class Attribute extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'value_default' => AsArrayObject::class,
         'value_type' => AttributeValueType::class,
     ];
 
@@ -144,15 +149,17 @@ class Attribute extends Model
 
     }
 
+    public function attribute_pointer() : HasOne {
+        return $this->hasOne('App\Models\AttributeValuePointer','value_parent_attribute_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts");
+
+    }
+
     public function attribute_meta_all() : HasMany {
         return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id')
             ->orderBy('meta_type')
             ->orderBy('meta_iso_lang');
-    }
-    public function attribute_meta_default() : HasMany {
-        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id')
-            ->where('meta_iso_lang',AttributeMetum::ANY_LANGUAGE)
-            ->orderBy('meta_type');
     }
 
     public function da_rules() : HasMany {
@@ -163,8 +170,8 @@ class Attribute extends Model
 
     public function permission_groups() : HasMany {
         return $this->hasMany('App\Models\AttributeUserGroup','group_parent_attribute_id','id')
-            /** @uses AttributeUserGroup::group_parent() */
-            ->with('group_parent')
+            /** @uses AttributeUserGroup::target_user_group() */
+            ->with('target_user_group')
             ->orderBy('group_type')
             ->orderBy('created_at');
     }
@@ -231,6 +238,10 @@ class Attribute extends Model
         return null;
     }
 
+    public function getName() : string  {
+        return $this->attribute_owner->username . '.'. $this->attribute_name;
+    }
+
     public static function buildAttribute(
         ?int $id = null,?int $admin_user_id = null)
     : Builder
@@ -244,8 +255,8 @@ class Attribute extends Model
             /** @uses Attribute::read_map_bound(),Attribute::write_map_bound(),Attribute::read_shape_bound(),Attribute::write_shape_bound() */
             ->with('read_map_bound', 'write_map_bound', 'read_shape_bound', 'write_shape_bound')
 
-            /** @uses Attribute::attribute_meta_default(),Attribute::da_rules(),Attribute::permission_groups() */
-            ->with('attribute_meta_default', 'da_rules', 'permission_groups')
+            /** @uses Attribute::attribute_meta_all(),Attribute::da_rules(),Attribute::permission_groups(),Attribute::attribute_pointer() */
+            ->with('attribute_meta_all', 'da_rules', 'permission_groups','attribute_pointer')
        ;
 
         if ($id) {
@@ -344,6 +355,45 @@ class Attribute extends Model
             }
         }
         return $ret;
+
+    }
+
+    public function getPermissionGroupsForResource(bool $b_brief) {
+        $write = [];
+        $read = [];
+        $usage= [];
+        foreach ($this->permission_groups as $p) {
+            switch ($p->group_type) {
+                case AttributeUserGroupType::WRITE : {
+                    $write[] = $b_brief? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group);
+                    break;
+                }
+                case AttributeUserGroupType::READ : {
+                    $read[] = $b_brief? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group);
+                    break;
+                }
+                case AttributeUserGroupType::USAGE : {
+                    $usage[] = $b_brief? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group);
+                    break;
+                }
+                default: {
+                    continue 2;
+                }
+            }//end switch
+        }
+        $ret = [];
+        if (count($read)) {
+            $ret['read'] = $read;
+        }
+        if (count($write)) {
+            $ret['write'] = $write;
+        }
+        if (count($usage)) {
+            $ret['usage'] = $usage;
+        }
+
+        return $ret;
+
 
     }
 

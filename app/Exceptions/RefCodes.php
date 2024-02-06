@@ -38,6 +38,15 @@ class RefCodes {
     const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 5003;
     const ATTRIBUTE_SCHEMA_ISSUE = 5004;
 
+    //element types start at 6000
+
+    const ELEMENT_TYPE_NOT_FOUND = 6001;
+
+    //elements start at 7000
+
+    const ELEMENT_NOT_FOUND =  7001;
+
+
     const URLS = [
         self::BAD_LOGIN => '',
         self::USER_NOT_FOUND => '',
@@ -60,5 +69,7 @@ class RefCodes {
         self::ATTRIBUTE_PING_DATA_MISSING => '',
         self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
         self::ATTRIBUTE_SCHEMA_ISSUE => '',
+        self::ELEMENT_TYPE_NOT_FOUND => '',
+        self::ELEMENT_NOT_FOUND => '',
     ];
 }

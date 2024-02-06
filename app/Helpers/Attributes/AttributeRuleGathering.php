@@ -9,7 +9,6 @@ class AttributeRuleGathering
 {
 
 
-
     public function __construct(Request $request)
     {
         //todo implement

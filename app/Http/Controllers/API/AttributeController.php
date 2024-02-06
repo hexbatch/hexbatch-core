@@ -6,6 +6,10 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Attributes\AttributeBinaryOptions;
 use App\Helpers\Attributes\AttributeBounds;
+use App\Helpers\Attributes\AttributeMetaGathering;
+use App\Helpers\Attributes\AttributePermissionGathering;
+use App\Helpers\Attributes\AttributeRuleGathering;
+use App\Helpers\Attributes\AttributeValue;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
@@ -211,9 +215,10 @@ class AttributeController extends Controller
 
     /**
      * @throws ValidationException
+     * @throws \Exception
      */
     public function attribute_create(Request $request): JsonResponse {
-        //todo implement more
+
         /*
          * parent,user,name,retired,
          * bounds (all 6),
@@ -233,7 +238,15 @@ class AttributeController extends Controller
         (new AttributeBinaryOptions($request) )->assign($attribute);
         (new AttributeBounds($request) )->assign($attribute);
 
+
         $attribute->save();
+
+        (new AttributeValue(request:$request) )->assign($attribute);
+        $attribute->save(); //again
+
+        (new AttributeMetaGathering($request) )->assign($attribute);
+        (new AttributePermissionGathering($request) )->assign($attribute);
+        (new AttributeRuleGathering($request) )->assign($attribute);
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
