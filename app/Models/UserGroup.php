@@ -61,7 +61,7 @@ class UserGroup extends Model
 
     public function group_members() : HasMany {
         return $this->hasMany('App\Models\UserGroupMember')
-            /** @uses \App\Models\UserGroupMember::member_user() */
+            /** @uses UserGroupMember::member_user */
             ->with('member_user')
             ->orderBy('created_at');
     }
@@ -69,7 +69,7 @@ class UserGroup extends Model
     public function group_admins() : HasMany {
         return $this->hasMany('App\Models\UserGroupMember')
             ->where('is_admin',true)
-            /** @uses \App\Models\UserGroupMember::member_user() */
+            /** @uses UserGroupMember::member_user */
             ->with('member_user')
             ->orderBy('updated_at');
     }

@@ -208,4 +208,16 @@ class AttributeMetum extends Model
                 ->delete();
         }
     }
+
+    public function getMetaValue()
+    {
+        if (!empty($this->meta_value)) {
+            return $this->meta_value;
+        }
+        if (!empty($this->meta_json)) {
+            return $this->meta_json;
+        }
+
+        return null;
+    }
 }

@@ -7,10 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\TimeBound::time_spans()
+ * @method getName()
  */
 class LocationBoundResource extends JsonResource
 {
+    protected int $n_display_level = 1;
+    public function __construct($resource, int $n_display_level = 1) {
+        parent::__construct($resource);
+        $this->n_display_level = $n_display_level;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -18,20 +24,24 @@ class LocationBoundResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if ($this->n_display_level <=0) {
+            return [$this->getName()];
+        }
+
         $ret =  [
             'uuid' => $this->ref_uuid,
-            'name' => $this->bound_name,
+            'name' => $this->getName(),
             'geo_json' => json_decode($this->geom_as_geo_json),
             'location_type' => $this->location_type,
             'is_retired' => $this->is_retired,
             'created_at' => round($this->created_at_ts),
         ];
 
-        if ($request->query->getString('tz')) {
-            $ret['alt'] = [
-                'created_at' => Carbon::createFromTimestamp($this->created_at_ts,$request->query->getString('tz'))->toIso8601String(),
-            ];
+        if ($this->n_display_level > 1) {
+            $ret['geo_json'] = json_decode($this->geom_as_geo_json);
         }
+
+
         return $ret;
     }
 }

@@ -40,6 +40,7 @@ use Laravel\Sanctum\HasApiTokens;
  *
  * @property Element user_element
  * @property UserGroup user_group
+ * @property ElementType user_type
  *
  */
 class User extends Authenticatable
@@ -84,6 +85,10 @@ class User extends Authenticatable
 
     public function user_element() : BelongsTo {
         return $this->belongsTo('App\Models\Element','element_id');
+    }
+
+    public function user_type() : BelongsTo {
+        return $this->belongsTo('App\Models\ElementType','element_type_id');
     }
 
     public function user_group() : BelongsTo {
@@ -177,5 +182,9 @@ class User extends Authenticatable
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::USER_NOT_PRIV);
         }
+    }
+
+    public function getName() : string {
+        return $this->username;
     }
 }

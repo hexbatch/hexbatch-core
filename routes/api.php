@@ -6,8 +6,6 @@ use App\Http\Controllers\API\LocationBoundController;
 use App\Http\Controllers\API\TimeBoundController;
 use App\Http\Controllers\API\UserGroupController;
 use App\Http\Controllers\API\AttributeController;
-use App\Models\Enums\AttributePingType;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,9 +28,7 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('user')->group(function () {
-            Route::get('/me', function (Request $request) {
-                return $request->user();
-            });
+            Route::get('/me', [AuthenticationController::class, 'me']);
 
             Route::post('/logout', [AuthenticationController::class, 'logout'])->name('core.user.logout');
 

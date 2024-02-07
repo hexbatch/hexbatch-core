@@ -70,7 +70,7 @@ class AttributeRule extends Model
     public function rule_target() : BelongsTo {
         return $this->belongsTo('App\Models\Attribute','target_attribute_id');
     }
-
+    const DEFAULT_WEIGHT = 1;
 
     public bool $delete_mode = false;
 
@@ -82,29 +82,29 @@ class AttributeRule extends Model
         }
         $use_rule_hint = $rule_hint;
         if (is_array($rule_hint)) {
-            if (!array_key_exists('attribute',$rule_hint)) {
+            if (!array_key_exists('target',$rule_hint)) {
                 throw new HexbatchNotPossibleException(__("msg.attribute_schema_missing_rule_attribute"),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
             }
-            $use_rule_hint = $rule_hint['attribute'];
+            $use_rule_hint = $rule_hint['target'];
             if (array_key_exists('delete',$rule_hint) && Utilities::boolishToBool($rule_hint['delete'])) {
                 $ret->delete_mode = true;
             }
 
-            if (array_key_exists('rule_weight',$rule_hint) && !is_array($rule_hint['rule_weight'])) {
-                $ret->rule_weight = (int)$rule_hint['rule_weight'];
+            if (array_key_exists('weight',$rule_hint) && !is_array($rule_hint['weight'])) {
+                $ret->rule_weight = (int)$rule_hint['weight'];
             }
 
-            if (array_key_exists('rule_numeric_min',$rule_hint) && !is_array($rule_hint['rule_numeric_min'])) {
-                $ret->rule_numeric_min = (float)$rule_hint['rule_numeric_min'];
+            if (array_key_exists('min',$rule_hint) && !is_array($rule_hint['min'])) {
+                $ret->rule_numeric_min = (float)$rule_hint['min'];
             }
 
-            if (array_key_exists('rule_numeric_max',$rule_hint) && !is_array($rule_hint['rule_numeric_max'])) {
-                $ret->rule_numeric_max = (float)$rule_hint['rule_numeric_max'];
+            if (array_key_exists('max',$rule_hint) && !is_array($rule_hint['max'])) {
+                $ret->rule_numeric_max = (float)$rule_hint['max'];
             }
-            if (array_key_exists('rule_regex',$rule_hint) && !is_array($rule_hint['rule_regex'])) {
-                $rest_regex = $rule_hint['rule_regex'];
+            if (array_key_exists('regex',$rule_hint) && !is_array($rule_hint['regex'])) {
+                $rest_regex = $rule_hint['regex'];
                 $bare_regex = trim($rest_regex, '/');
                 $test_regex = "/$bare_regex/";
                 $issues = Utilities::regexHasErrors($test_regex);

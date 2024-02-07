@@ -13,9 +13,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @uses UserGroup::group_admins()
  * @method UserGroupMember[]|Collection group_members()
  * @method UserGroupMember[]|Collection group_admins()
+ * @method getName()
  */
 class UserGroupResource extends JsonResource
 {
+    protected int $n_display_level = 1;
+    public function __construct($resource, int $n_display_level = 1) {
+        parent::__construct($resource);
+        $this->n_display_level = $n_display_level;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -23,9 +30,13 @@ class UserGroupResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if ($this->n_display_level <=0) {
+            return [$this->getName()];
+        }
+
         return [
-            'group_name' => $this->group_name,
-            'owner' =>   new UserResource($this->group_owner),
+            'group_name' => $this->getName(),
+            'owner' =>   new UserResource($this->group_owner,$this->n_display_level - 1),
             'uuid' => $this->ref_uuid,
             'members_count' => $this->group_members()->count(),
             'admins_count' => $this->group_admins()->count(),

@@ -107,8 +107,8 @@ class AttributeValuePointer extends Model
         return null;
     }
 
-    public function getValueDisplayForResource(bool $b_brief) {
-        if ($b_brief) {
+    public function getValueDisplayForResource(int $n_display) {
+        if ($n_display <= 1) {
             if ($this->value_user()->first()) {return $this->value_user->username;}
             if ($this->value_group()->first()) {return $this->value_group->getName();}
             if ($this->value_attribute()->first()) {return $this->value_attribute->getName();}
@@ -117,13 +117,13 @@ class AttributeValuePointer extends Model
             if ($this->value_schedule()->first()) {return $this->value_schedule->getName();}
             if ($this->value_location()->first()) {return $this->value_location->getName();}
         } else {
-            if ($this->value_user()->first()) {return new UserResource($this->value_user);}
-            if ($this->value_group()->first()) {return new UserGroupResource($this->value_group);}
-            if ($this->value_attribute()->first()) {return new AttributeResource($this->value_attribute);}
-            if ($this->value_element()->first()) {return new ElementResource($this->value_element);}
-            if ($this->value_element_type()->first()) {return new ElementTypeResource($this->value_element_type);}
-            if ($this->value_schedule()->first()) {return new TimeBoundResource($this->value_schedule);}
-            if ($this->value_location()->first()) {return new LocationBoundResource($this->value_location);}
+            if ($this->value_user()->first()) {return new UserResource($this->value_user,$n_display - 1);}
+            if ($this->value_group()->first()) {return new UserGroupResource($this->value_group,$n_display - 1);}
+            if ($this->value_attribute()->first()) {return new AttributeResource($this->value_attribute,$n_display - 1);}
+            if ($this->value_element()->first()) {return new ElementResource($this->value_element,$n_display - 1);}
+            if ($this->value_element_type()->first()) {return new ElementTypeResource($this->value_element_type,$n_display - 1);}
+            if ($this->value_schedule()->first()) {return new TimeBoundResource($this->value_schedule,$n_display - 1);}
+            if ($this->value_location()->first()) {return new LocationBoundResource($this->value_location,$n_display - 1);}
         }
         return null;
     }

@@ -19,6 +19,9 @@ use Laravel\Sanctum\NewAccessToken;
 class AuthenticationController extends Controller
 {
 
+    public function me(Request $request) {
+        return response()->json(new UserResource($request->user()), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
     public function login(Request $request): JsonResponse
     {
         $request->validate([
@@ -65,7 +68,7 @@ class AuthenticationController extends Controller
         $user = (new CreateNewUser)->create($request->all());
         $user->initUser();
         $user->refresh();
-        return response()->json(new UserResource($user), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+        return response()->json(new UserResource($user,3), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
 

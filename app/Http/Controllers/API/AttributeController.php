@@ -44,8 +44,9 @@ class AttributeController extends Controller
     public function attribute_get(Attribute $attribute,?string $full = null) {
         $this->adminCheck($attribute);
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
-        $b_brief = !$full;
-        return response()->json(new AttributeResource($out,$b_brief), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        $n_level = (int)$full;
+        if ($n_level <= 0) { $n_level =1;}
+        return response()->json(new AttributeResource($out,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 

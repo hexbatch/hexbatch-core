@@ -50,7 +50,7 @@ class AttributeValue
 
         if ($value_block->has('value_type')) {
             $convert = AttributeValueType::tryFrom($value_block->get('value_type'));
-            $this->value_type = $convert ? $convert : AttributeValueType::STRING;
+            $this->value_type = $convert ?: AttributeValueType::STRING;
         }
 
         if (in_array($this->value_type, AttributeValueType::NUMERIC_TYPES)) {

@@ -6,7 +6,10 @@ use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Http\Resources\AttributeMetaResource;
+use App\Http\Resources\AttributeRuleResource;
 use App\Http\Resources\UserGroupResource;
+use App\Models\Enums\AttributeRuleType;
 use App\Models\Enums\AttributeUserGroupType;
 use App\Models\Enums\AttributeValueType;
 use App\Models\Traits\TResourceCommon;
@@ -360,22 +363,49 @@ class Attribute extends Model
 
     }
 
-    public function getPermissionGroupsForResource(bool $b_brief) {
+    public function getMeta(int $n_display) : array  {
+        $ret = [];
+
+        foreach ($this->attribute_meta_all as $meta) {
+            if ($n_display < 1) {
+                $ret[] = $meta->getName();
+            } else {
+                $ret[] = new AttributeMetaResource($meta,$n_display);
+            }
+        }
+
+        return $ret;
+    }
+    /**
+     * @param AttributeRuleType $rule_type
+     * @param int $n_display
+     * @return string[]|AttributeRuleResource[]
+     */
+    public function getRuleGroup(AttributeRuleType $rule_type,int $n_display) : array  {
+        $ret = [];
+        foreach ($this->da_rules as $some_rule) {
+            if ($some_rule->rule_type === $rule_type) {
+                $ret[] = $n_display < 1? $some_rule->rule_target->getName() : new AttributeRuleResource($some_rule,$n_display);
+            }
+        }
+        return $ret;
+    }
+    public function getPermissionGroupsForResource(int $n_display) {
         $write = [];
         $read = [];
         $usage= [];
         foreach ($this->permission_groups as $p) {
             switch ($p->group_type) {
                 case AttributeUserGroupType::WRITE : {
-                    $write[] = $b_brief? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group);
+                    $write[] = ($n_display <= 1)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,$n_display);
                     break;
                 }
                 case AttributeUserGroupType::READ : {
-                    $read[] = $b_brief? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group);
+                    $read[] = ($n_display <= 1)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,$n_display);
                     break;
                 }
                 case AttributeUserGroupType::USAGE : {
-                    $usage[] = $b_brief? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group);
+                    $usage[] = ($n_display <= 1)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,$n_display);
                     break;
                 }
                 default: {
