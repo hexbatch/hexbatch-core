@@ -35,7 +35,7 @@ class GeoJsonReq implements ValidationRule
             $this->geometry = GeoJson::jsonUnserialize($value);
         } catch (Throwable $t) {
             Log::warning("Cannot covert to geojson: ". $t->getMessage());
-            $fail("msg.location_bound_json_invalid_geo_json")->translate();
+            $fail("msg.location_bound_json_invalid_geo_json",)->translate(['msg'=>$t->getMessage()]);
             return;
         }
 

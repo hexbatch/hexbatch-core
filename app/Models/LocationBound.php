@@ -109,41 +109,49 @@ class LocationBound extends Model
         $geometry = GeoJson::jsonUnserialize($this->geo_json);
 
 
-
         $b_is_3d = null;
-        //check dimensions
-        foreach ($geometry->getCoordinates() as $coord_array) {
-            foreach ($coord_array as $coordinates) {
-                foreach ($coordinates as $coord) {
-                    if (count($coord) > 3 || count($coord) < 2) {
-                        throw new HexbatchNotPossibleException(__("msg.location_bound_json_invalid_geo_json"),
+
+        $countCoordinates = function ($coord) use(&$b_is_3d) {
+            if (count($coord) > 3 || count($coord) < 2) {
+                throw new HexbatchNotPossibleException(__("msg.location_bound_json_invalid_geo_json",['msg'=>__("msg.location_wrong_number_coordinates")]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::BOUND_TYPE_DEF);
+            }
+            if (count($coord) === 3) {
+                if ($b_is_3d === null) {
+                    $b_is_3d = true;
+                } else {
+                    if (!$b_is_3d) {
+                        throw new HexbatchNotPossibleException(__("msg.location_bounds_shape_is_3d"),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::BOUND_TYPE_DEF);
                     }
-                    if (count($coord) === 3) {
-                        if ($b_is_3d === null) {
-                            $b_is_3d = true;
-                        } else {
-                            if (!$b_is_3d) {
-                                throw new HexbatchNotPossibleException(__("msg.location_bounds_shape_is_3d"),
-                                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                    RefCodes::BOUND_TYPE_DEF);
-                            }
-                        }
+                }
 
-                    } else {
-                        if ($b_is_3d === null) {
-                            $b_is_3d = false;
-                        } else {
-                            if ($b_is_3d) {
-                                throw new HexbatchNotPossibleException(__("msg.location_bounds_map_is_2d"),
-                                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                    RefCodes::BOUND_TYPE_DEF);
-                            }
-                        }
-
+            } else {
+                if ($b_is_3d === null) {
+                    $b_is_3d = false;
+                } else {
+                    if ($b_is_3d) {
+                        throw new HexbatchNotPossibleException(__("msg.location_bounds_map_is_2d"),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::BOUND_TYPE_DEF);
                     }
+                }
 
+            }
+        };
+
+
+        //check dimensions
+        foreach ($geometry->getCoordinates() as $coord_array) {
+            foreach ($coord_array as $coordinates) {
+                if ($geometry->getType() === 'Polygon') {
+                    $countCoordinates($coordinates);
+                } else {
+                    foreach ($coordinates as $coord) {
+                        $countCoordinates($coord);
+                    }
                 }
             }
         }
@@ -175,7 +183,7 @@ class LocationBound extends Model
                              *
                              */
                             if ($long < -180 || $long > 180 || $lat > 89 || $lat < -89) {
-                                throw new HexbatchNotPossibleException(__("msg.location_bound_json_invalid_geo_json"),
+                                throw new HexbatchNotPossibleException(__("msg.location_bound_json_invalid_geo_json",['msg'=>__("msg.location_out_of_bounds")]),
                                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                                     RefCodes::BOUND_TYPE_DEF);
                             }

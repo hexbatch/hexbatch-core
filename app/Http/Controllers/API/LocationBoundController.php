@@ -37,7 +37,7 @@ class LocationBoundController extends Controller
     public function location_bound_get(LocationBound $bound) {
         $this->adminCheck($bound);
         $out = LocationBound::buildLocationBound(id: $bound->id)->first();
-        return response()->json(new LocationBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new LocationBoundResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     /**

@@ -35,7 +35,9 @@ return [
 
     //location bounds
     'location_bound_json_invalid' => 'Location bound was not given valid json',
-    'location_bound_json_invalid_geo_json' => 'Location bound was not given geo json',
+    'location_out_of_bounds' => 'Location out of bounds',
+    'location_wrong_number_coordinates' => 'Location needs two numbers in each point to make a map, and three to make a shape',
+    'location_bound_json_invalid_geo_json' => 'Location bound was not given geo json :msg',
     'location_bound_geo_json_not_polygon' => 'Location bound needs polygon or multipolygon geojson',
     'location_bounds_needs_minimum_info' => 'Location bound needs a name and a geo json',
     'location_bounds_only_pings_these' => 'Location bound can only ping with a polygon, a multipology or a point',
