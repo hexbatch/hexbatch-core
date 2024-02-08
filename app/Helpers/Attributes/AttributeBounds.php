@@ -21,6 +21,7 @@ class AttributeBounds
     public ?int $read_shape_location_bounds_id;
     public ?int $write_shape_location_bounds_id;
 
+    public bool $b_skip = false;
 
     public function __construct(Request $request)
     {
@@ -44,6 +45,11 @@ class AttributeBounds
             }
         }
         $all_bounds = $read_bounds->merge($write_bounds);
+
+        if (!$all_bounds->count()) {
+            $this->b_skip = true;
+            return;
+        }
 
         foreach ($all_bounds as $key => $val) {
             $found_object = null;
@@ -83,6 +89,13 @@ class AttributeBounds
             if (empty($found_object)) {
                 continue;
             }
+
+            if ($found_object->is_retired) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_schema_bounds_retired",['bound_name'=>$found_object->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            }
+
             $trans_key = match ($key) {
                 'read_time' => 'read_time_bounds_id',
                 'write_time' => 'write_time_bounds_id',
@@ -98,7 +111,10 @@ class AttributeBounds
     }
 
     public function assign(Attribute $attribute) {
+        if ($this->b_skip) {return;}
+
         foreach ($this as $key => $val) {
+            if ($key === 'b_skip') {continue;}
             $attribute->$key = $val;
         }
     }

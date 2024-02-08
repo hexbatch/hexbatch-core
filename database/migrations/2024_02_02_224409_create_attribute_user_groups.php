@@ -32,7 +32,7 @@ return new class extends Migration
             $table->foreignId('target_user_group_id')
                 ->nullable(false)
                 ->comment("The user group this is aboutr")
-                ->unique('udx_attribute_user_group_id')
+                ->index('idx_attribute_user_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();

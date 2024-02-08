@@ -17,11 +17,11 @@ class AttributeValue
 {
 
     public bool $is_nullable;
-    public AttributeValueType $value_type;
+    public ?AttributeValueType $value_type;
     public ?int $value_numeric_min;
     public ?int $value_numeric_max;
     public ?string $value_regex;
-    public ?string $value_default;
+    public ?array $value_default;
 
     public ?AttributeValuePointer $pointer;
 
@@ -43,28 +43,32 @@ class AttributeValue
         if ($request->request->has('value')) {
             $value_block = $request->collect('value');
         }
+        if (!$value_block->count()) {
+            $this->value_type = null;
+            return;
+        }
 
         if ($value_block->has('is_nullable')) {
             $this->is_nullable = Utilities::boolishToBool($value_block->get('is_nullable'));
         }
 
-        if ($value_block->has('value_type')) {
-            $convert = AttributeValueType::tryFrom($value_block->get('value_type'));
+        if ($value_block->has('type')) {
+            $convert = AttributeValueType::tryFrom($value_block->get('type'));
             $this->value_type = $convert ?: AttributeValueType::STRING;
         }
 
         if (in_array($this->value_type, AttributeValueType::NUMERIC_TYPES)) {
-            if ($value_block->has('value_numeric_min')) {
-                $this->value_numeric_min = (float)$value_block->get('value_numeric_min');
+            if ($value_block->has('min')) {
+                $this->value_numeric_min = (float)$value_block->get('min');
             }
-            if ($value_block->has('value_numeric_max')) {
-                $this->value_numeric_min = (float)$value_block->get('value_numeric_max');
+            if ($value_block->has('max')) {
+                $this->value_numeric_max = (float)$value_block->get('max');
             }
         }
 
         if (in_array($this->value_type, AttributeValueType::STRING_TYPES)) {
-            if ($value_block->has('value_regex')) {
-                $bare_regex = trim($value_block->get('value_regex'), '/');
+            if ($value_block->has('regex')) {
+                $bare_regex = trim($value_block->get('regex'), '/');
                 $test_regex = "/$bare_regex/";
                 $issues = Utilities::regexHasErrors($test_regex);
                 if ($issues) {
@@ -77,8 +81,8 @@ class AttributeValue
 
         }
 
-        if ($value_block->has('value_default')) {
-            $test_default = $value_block->get('value_default');
+        if ($value_block->has('default')) {
+            $test_default = $value_block->get('default');
 
             if (in_array($this->value_type, AttributeValueType::STRING_TYPES) || in_array($this->value_type, AttributeValueType::NUMERIC_TYPES)) {
                 if (is_array($test_default) || is_object($test_default)) {
@@ -91,7 +95,7 @@ class AttributeValue
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                 }
-                $this->value_default = $this->castScalarValue($test_default);
+                $this->value_default = ['value_default'=>$this->castScalarValue($test_default)];
             } elseif ($this->value_type === AttributeValueType::JSON) {
                 if (is_string($test_default)) {
                     $json_issue = Utilities::jsonHasErrors($test_default);
@@ -100,13 +104,9 @@ class AttributeValue
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }
-                    $maybe_object = json_decode($test_default, false);
-                    if (!is_object($maybe_object)) {
-                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_json_no_primitive"),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-                    }
-                    $this->value_default = $maybe_object;
+                    $this->value_default = json_decode($test_default, true);
+                } else {
+                    $this->value_default = $test_default;
                 }
             } elseif (in_array($this->value_type, AttributeValueType::COORDINATION_TYPES)) {
                 if (is_string($test_default)) {
@@ -116,23 +116,23 @@ class AttributeValue
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }
-                    $maybe_coordination = json_decode($test_default, false);
+                    $maybe_coordination = json_decode($test_default, true);
                     if (!is_object($maybe_coordination)) {
                         throw new HexbatchNotPossibleException(__("msg.attribute_schema_json_no_primitive"),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }
                 } else {
-                    $maybe_coordination = Utilities::convertToObject($test_default);
+                    $maybe_coordination = $test_default;
                 }
                 switch ($this->value_type) {
                     case AttributeValueType::COORDINATE_MAP:
                     {
                         if (
-                            !property_exists($maybe_coordination, 'latitude')
-                            || !property_exists($maybe_coordination, 'longitude')
-                            || ($maybe_coordination->longitude > 180 || $maybe_coordination->longitude < -180)
-                            || ($maybe_coordination->latitude > 90 || $maybe_coordination->latitude < -900)
+                            !array_key_exists('latitude',$maybe_coordination )
+                            || !array_key_exists('longitude',$maybe_coordination)
+                            || ($maybe_coordination['longitude'] > 180 || $maybe_coordination['longitude'] < -180)
+                            || ($maybe_coordination['latitude'] > 90 || $maybe_coordination['latitude'] < -900)
                         ) {
                             throw new HexbatchNotPossibleException(__("msg.attribute_schema_improper_map_coordinate"),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -144,9 +144,9 @@ class AttributeValue
                     case AttributeValueType::COORDINATE_SHAPE:
                     {
                         if (
-                            !property_exists($maybe_coordination, 'x')
-                            || !property_exists($maybe_coordination, 'y')
-                            || !property_exists($maybe_coordination, 'z')
+                            !array_key_exists('x',$maybe_coordination )
+                            || !array_key_exists('y',$maybe_coordination )
+                            || !array_key_exists('z',$maybe_coordination )
                         ) {
                             throw new HexbatchNotPossibleException(__("msg.attribute_schema_improper_shape_coordinate"),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -180,6 +180,9 @@ class AttributeValue
     }
 
     public function assign(Attribute $attribute) {
+        if (!$this->value_type) {
+            return;
+        }
         try {
             DB::beginTransaction();
             AttributeValuePointer::where('value_parent_attribute_id',$attribute->id)->delete();

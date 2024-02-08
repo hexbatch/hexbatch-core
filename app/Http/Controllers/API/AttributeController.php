@@ -24,6 +24,7 @@ use App\Models\User;
 use App\Models\UserGroup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 
@@ -46,7 +47,7 @@ class AttributeController extends Controller
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         $n_level = (int)$full;
         if ($n_level <= 0) { $n_level =1;}
-        return response()->json(new AttributeResource($out,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new AttributeResource($out,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 
@@ -180,7 +181,7 @@ class AttributeController extends Controller
         return response()->json(['attribute_id'=>$attribute->id,'results'=>$ret], $resp);
     }
 
-    public function attribute_list_manage(?User $user = null) {
+    public function attribute_list_managed(?User $user = null) {
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
         $out = Attribute::buildAttribute(admin_user_id: $user->id)->cursorPaginate();
@@ -192,7 +193,7 @@ class AttributeController extends Controller
         $attribute->checkIsInUse();
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         $attribute->delete();
-        return response()->json(new LocationBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 
@@ -206,22 +207,37 @@ class AttributeController extends Controller
     public function attribute_edit_patch(Attribute $attribute, Request $request) {
         $this->adminCheck($attribute);
 
+        try {
+            DB::beginTransaction();
+            // if this is in use then can only edit retired, meta
+            // otherwise can edit all but the ownership
+            if ($attribute->isInUse()) {
+                (new AttributeMetaGathering($request) )->assign($attribute);
+            } else {
+                $user = auth()->user();
+                $some_name = $request->request->getString('attribute_name');
 
-        // if this is in use then can only edit retired, meta
-        // otherwise can edit all but the ownership
-        if ($attribute->isInUse()) {
-            (new AttributeMetaGathering($request) )->assign($attribute);
-        } else {
-            $user = auth()->user();
-            $attribute->setName($request->request->getString('attribute_name'),$user);
-            $attribute->setParent($request->request->getString('parent_attribute'));
-            $this->updateAllAttribute($attribute,$request);
+                if ($some_name && $some_name !== $attribute->attribute_name) {
+                    $attribute->setName($request->request->getString('attribute_name'),$user);
+                }
+                $some_parent = $request->request->getString('parent_attribute');
+                if ($some_parent) {
+                    $attribute->setParent($some_parent);
+                }
+
+                $this->updateAllAttribute($attribute,$request);
+            }
+
+            if ($request->request->has('is_retired')) {
+                $attribute->is_retired = Utilities::boolishToBool($request->request->get('is_retired'));
+                $attribute->save();
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
 
-        if ($request->request->has('is_retired')) {
-            $attribute->is_retired = Utilities::boolishToBool($request->request->get('is_retired'));
-            $attribute->save();
-        }
 
 
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
@@ -251,24 +267,24 @@ class AttributeController extends Controller
      */
     public function attribute_create(Request $request): JsonResponse {
 
-        /*
-         * parent,user,name,retired,
-         * bounds (all 6),
-            requirements ( required_siblings,forbidden_siblings,allergies,affinities,set read,set write) is_read_policy_all is_write_policy_all
-            meta (any given)
-            permissions(usage,read,write)
-            value (all the fields)
-            options
-         */
-        $attribute = new Attribute();
-        $user = auth()->user();
-        $attribute->setName($request->request->getString('attribute_name'),$user);
-        $attribute->setParent($request->request->getString('parent_attribute'));
-        $attribute->user_id = $user->id;
-        $this->updateAllAttribute($attribute,$request);
 
+        try {
+            DB::beginTransaction();
+            // if this is in use then can only edit retired, meta
+            // otherwise can edit all but the ownership
+            $attribute = new Attribute();
+            $user = auth()->user();
+            $attribute->setName($request->request->getString('attribute_name'),$user);
+            $attribute->setParent($request->request->getString('parent_attribute'));
+            $attribute->user_id = $user->id;
+            $this->updateAllAttribute($attribute,$request);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
-        return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+        return response()->json(new AttributeResource($out,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 }

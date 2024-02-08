@@ -141,6 +141,6 @@ class UserGroupController extends Controller
     public function group_get(UserGroup $group) {
         $this->memberCheck($group,auth()->user());
         $ret = UserGroup::buildGroup(auth()?->user()->id)->first();
-        return response()->json(new UserGroupResource($ret), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new UserGroupResource($ret,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 }

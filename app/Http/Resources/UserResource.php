@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\Utilities;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,8 +13,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class UserResource extends JsonResource
 {
     protected int $n_display_level = 1;
-    public function __construct($resource, int $n_display_level = 1) {
+    public function __construct($resource, mixed $unused = null,int $n_display_level = 1) {
         parent::__construct($resource);
+        Utilities::ignoreVar($unused);
         $this->n_display_level = $n_display_level;
     }
 
@@ -30,9 +32,9 @@ class UserResource extends JsonResource
         return [
             'uuid' => $this->ref_uuid,
             'username' => $this->username,
-            'type' => new ElementTypeResource($this->user_element,$this->n_display_level - 1),
-            'element' => new ElementResource($this->user_element,$this->n_display_level - 1),
-            'group' => new UserGroupResource($this->user_element,$this->n_display_level - 1),
+            'type' => new ElementTypeResource($this->user_type,null,$this->n_display_level - 1),
+            'element' => new ElementResource($this->user_element,null,$this->n_display_level - 1),
+            'group' => new UserGroupResource($this->user_group,null,$this->n_display_level - 1),
             'created_at' => $this->created_at_ts
         ];
     }

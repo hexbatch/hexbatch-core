@@ -116,7 +116,16 @@ class AttributeRule extends Model
                 $ret->rule_regex = $test_regex;
             }
         }
-        $ret->target_attribute_id = (new Attribute())->resolveRouteBinding($use_rule_hint);
+        /**
+         * @var Attribute $found_attribute
+         */
+        $found_attribute = (new Attribute())->resolveRouteBinding($use_rule_hint);
+        if ($found_attribute->is_retired) {
+            throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_retired",['name'=>$found_attribute->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        }
+        $ret->target_attribute_id = $found_attribute->id;
         return $ret;
     }
 

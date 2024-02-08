@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TimeBoundCollection;
 use App\Http\Resources\TimeBoundResource;
@@ -35,7 +36,7 @@ class TimeBoundController extends Controller
     public function time_bound_get(TimeBound $bound) {
         $this->adminCheck($bound);
         $out = TimeBound::buildTimeBound(id: $bound->id)->first();
-        return response()->json(new TimeBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new TimeBoundResource($out,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function time_bound_ping(TimeBound $bound,string $time_to_ping ) {
@@ -73,7 +74,7 @@ class TimeBoundController extends Controller
     public function time_bound_edit(TimeBound $bound, Request $request) {
         $this->adminCheck($bound);
 
-        $is_retired = $request->request->getBoolean('is_retired');
+        $is_retired = Utilities::boolishToBool($request->request->get('is_retired'));
         $bound_name = $request->request->getString('bound_name');
         $start = $request->request->getString('bound_start');
         $stop = $request->request->getString('bound_stop');

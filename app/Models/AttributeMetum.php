@@ -56,7 +56,12 @@ class AttributeMetum extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-
+        'meta_parent_attribute_id',
+        'meta_type',
+        'meta_iso_lang',
+        'meta_mime_type',
+        'meta_json',
+        'meta_value'
     ];
 
     /**
@@ -90,7 +95,7 @@ class AttributeMetum extends Model
         return $this->meta_type->value . $lang;
     }
 
-    public static function createMetum(Collection $c,?Attribute $parent = null) : AttributeMetum {
+    public static function createMetum(Collection $c,?Attribute $parent = null,bool $b_admin = false) : AttributeMetum {
         /*
          * type,lang,mime,value (delete)
          */
@@ -100,11 +105,20 @@ class AttributeMetum extends Model
             $b_delete_mode = true;
         }
 
-        if (!$c->has('type') || !$c->has('value')) {
-            throw new HexbatchNotPossibleException(__("msg.attribute_schema_bad_meta"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        if ($b_delete_mode) {
+            if (!$c->has('type') ) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_schema_bad_meta"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            }
+        } else {
+            if (!$c->has('type') || !$c->has('value')) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_schema_bad_meta"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            }
         }
+
         $raw_type = $c->get('type');
         if (!is_string($raw_type)) {
             throw new HexbatchNotPossibleException(__("msg.attribute_schema_unsupported_meta_type",['type'=>$raw_type]),
@@ -119,8 +133,16 @@ class AttributeMetum extends Model
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
         }
 
+        if (empty($b_admin)) {
+            if (!in_array($maybe_type,AttributeMetum::PUBLIC_META)) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_schema_admin_meta_type",["type"=>$maybe_type->value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            }
+        }
+
         $maybe_value = $c->get('value');
-        if (empty($maybe_value)) {
+        if (!$b_delete_mode && empty($maybe_value)) {
             throw new HexbatchNotPossibleException(__("msg.attribute_schema_empty_meta"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
@@ -132,8 +154,8 @@ class AttributeMetum extends Model
         }
         $ret->meta_type = $maybe_type;
 
-        if ($c->has('lang')) {
-            $maybe_lang = $c->get('lang');
+        if ($c->has('language')) {
+            $maybe_lang = $c->get('language');
             if (!empty($maybe_lang)) {
                 if (!is_string($maybe_lang) || mb_strlen($maybe_lang) > 10) {
                     throw new HexbatchNotPossibleException(__("msg.attribute_schema_bad_mime_meta"),
@@ -161,13 +183,25 @@ class AttributeMetum extends Model
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }
                 }
-                $ret->meta_mime_type = (string)$c->has('mime');
+                $ret->meta_mime_type = (string)$raw_mime;
             }
             if ($ret->meta_mime_type && str_contains(strtolower($ret->meta_mime_type), 'json') && !in_array($ret->meta_type, static::STRING_VAL_ONLY)) {
                 //test to see if value is json
-                if (!Utilities::jsonHasErrors($maybe_value)) {
-                    $ret->meta_json = json_decode($maybe_value, true);
+
+                $ret->meta_mime_type = "application/json";
+                if (!is_array($maybe_value) && !is_object($maybe_value)) {
+                    $issues = Utilities::jsonHasErrors((string)$maybe_value);
+                    if (!$issues) {
+                        $ret->meta_json = json_decode($maybe_value, true);
+                    } else {
+                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_bad_mime_json",['msg'=>$issues]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
+                } else {
+                    $ret->meta_json = $maybe_value;
                 }
+
             }
             if (empty($ret->meta_json)) {
                 $ret->meta_value = $maybe_value;
@@ -202,7 +236,7 @@ class AttributeMetum extends Model
 
     public function deleteModeActivate() {
         if ($this->delete_mode) {
-            AttributeMetum::where('parent_attribute_id',$this->meta_parent_attribute_id)
+            AttributeMetum::where('meta_parent_attribute_id',$this->meta_parent_attribute_id)
                 ->where('meta_type',$this->meta_type->value)
                 ->where('meta_iso_lang',$this->meta_iso_lang)
                 ->delete();

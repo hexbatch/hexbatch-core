@@ -51,7 +51,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AttributeValuePointer extends Model
 {
 
-    protected $table = 'attribute_meta';
+    protected $table = 'attribute_value_pointers';
     public $timestamps = false;
 
     /**
@@ -117,13 +117,13 @@ class AttributeValuePointer extends Model
             if ($this->value_schedule()->first()) {return $this->value_schedule->getName();}
             if ($this->value_location()->first()) {return $this->value_location->getName();}
         } else {
-            if ($this->value_user()->first()) {return new UserResource($this->value_user,$n_display - 1);}
-            if ($this->value_group()->first()) {return new UserGroupResource($this->value_group,$n_display - 1);}
-            if ($this->value_attribute()->first()) {return new AttributeResource($this->value_attribute,$n_display - 1);}
-            if ($this->value_element()->first()) {return new ElementResource($this->value_element,$n_display - 1);}
-            if ($this->value_element_type()->first()) {return new ElementTypeResource($this->value_element_type,$n_display - 1);}
-            if ($this->value_schedule()->first()) {return new TimeBoundResource($this->value_schedule,$n_display - 1);}
-            if ($this->value_location()->first()) {return new LocationBoundResource($this->value_location,$n_display - 1);}
+            if ($this->value_user()->first()) {return new UserResource($this->value_user,null,$n_display - 1);}
+            if ($this->value_group()->first()) {return new UserGroupResource($this->value_group,null,$n_display - 1);}
+            if ($this->value_attribute()->first()) {return new AttributeResource($this->value_attribute,null,$n_display - 1);}
+            if ($this->value_element()->first()) {return new ElementResource($this->value_element,null,$n_display - 1);}
+            if ($this->value_element_type()->first()) {return new ElementTypeResource($this->value_element_type,null,$n_display - 1);}
+            if ($this->value_schedule()->first()) {return new TimeBoundResource($this->value_schedule,null,$n_display - 1);}
+            if ($this->value_location()->first()) {return new LocationBoundResource($this->value_location,null,$n_display - 1);}
         }
         return null;
     }
@@ -157,6 +157,11 @@ class AttributeValuePointer extends Model
                 case AttributeValueType::ATTRIBUTE : {
                     /** @var Attribute $found_object */
                     $found_object = (new Attribute())->resolveRouteBinding($maybe_value);
+                    if ($found_object->is_retired) {
+                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_default_retired",['name'=>$found_object->getName()]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
                     $ret->attribute_id = $found_object->id;
                     break;
                 }
@@ -169,18 +174,33 @@ class AttributeValuePointer extends Model
                 case AttributeValueType::ELEMENT_TYPE : {
                     /** @var ElementType $found_object */
                     $found_object = (new ElementType())->resolveRouteBinding($maybe_value);
+                    if ($found_object->is_retired) {
+                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_default_retired",['name'=>$found_object->getName()]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
                     $ret->element_type_id = $found_object->id;
                     break;
                 }
                 case AttributeValueType::SCHEDULE_BOUNDS : {
                     /** @var TimeBound $found_object */
                     $found_object = (new TimeBound())->resolveRouteBinding($maybe_value);
+                    if ($found_object->is_retired) {
+                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_default_retired",['name'=>$found_object->getName()]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
                     $ret->time_bound_id = $found_object->id;
                     break;
                 }
                 case AttributeValueType::SHAPE_BOUNDS : {
                     /** @var LocationBound $found_object */
                     $found_object = (new LocationBound())->resolveRouteBinding($maybe_value);
+                    if ($found_object->is_retired) {
+                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_default_retired",['name'=>$found_object->getName()]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
                     if ($found_object->location_type !== LocationType::SHAPE) {
                         throw new HexbatchNotPossibleException(__("msg.attribute_schema_wrong_value",['type'=>$hint->value,'res'=>$found_object->getName()]),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -193,8 +213,14 @@ class AttributeValuePointer extends Model
                 {
                     /** @var LocationBound $found_object */
                     $found_object = (new LocationBound())->resolveRouteBinding($maybe_value);
+
                     if ($found_object->location_type !== LocationType::MAP) {
                         throw new HexbatchNotPossibleException(__("msg.attribute_schema_wrong_value",['type'=>$hint->value,'res'=>$found_object->getName()]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
+                    if ($found_object->is_retired) {
+                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_default_retired",['name'=>$found_object->getName()]),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }

@@ -57,7 +57,7 @@ return new class extends Migration
             $table->string('meta_mime_type',255)->nullable()->default(null)
                 ->comment("some meta can be markdown or html or plain text");
 
-            $table->text('meta_value')->nullable(false)->comment("the value of the meta");
+            $table->text('meta_value')->nullable()->default(null)->comment("the value of the meta, unless jaon");
 
             $table->jsonb('meta_json')->nullable()->default(null)
                 ->comment('data stored with the meta value');

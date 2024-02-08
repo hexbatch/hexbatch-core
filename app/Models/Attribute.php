@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Resources\AttributeMetaResource;
@@ -16,6 +17,7 @@ use App\Models\Traits\TResourceCommon;
 use App\Rules\ResourceNameReq;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -181,11 +183,20 @@ class Attribute extends Model
             ->orderBy('created_at');
     }
 
+    public function checkIsInUse() : void {
+        if (!$this->isInUse()) {return;}
+        throw new HexbatchNotPossibleException(__("msg.attribute_in_use_cannot_change"),
+            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+            RefCodes::ATTRIBUTE_CANNOT_EDIT);
+    }
+
     public function isInUse() : bool {
         if (!$this->id) {return false;}
-        return Attribute::where('parent_attribute_id',$this->id)
-            ->exists()
-            ;
+        $b_exist =  Attribute::where('parent_attribute_id',$this->id)->exists();
+        if ($b_exist) {return true;}
+        $b_exist =  AttributeRule::where('target_attribute_id',$this->id)->exists();
+        if ($b_exist) {return true;}
+        return false;
         //todo also check for the element type
     }
 
@@ -299,7 +310,8 @@ class Attribute extends Model
                 function (JoinClause $join) use($admin_user_id) {
                     $join
                         ->on('user_group_members.user_group_id','=','user_groups.id')
-                        ->where('user_group_members.user_id',$admin_user_id);
+                        ->where('user_group_members.user_id',$admin_user_id)
+                        ->where('user_group_members.is_admin',true);
                 }
             );
         }
@@ -370,7 +382,7 @@ class Attribute extends Model
             if ($n_display < 1) {
                 $ret[] = $meta->getName();
             } else {
-                $ret[] = new AttributeMetaResource($meta,$n_display);
+                $ret[] = new AttributeMetaResource($meta,null,$n_display);
             }
         }
 
@@ -385,7 +397,7 @@ class Attribute extends Model
         $ret = [];
         foreach ($this->da_rules as $some_rule) {
             if ($some_rule->rule_type === $rule_type) {
-                $ret[] = $n_display < 1? $some_rule->rule_target->getName() : new AttributeRuleResource($some_rule,$n_display);
+                $ret[] = $n_display < 1? $some_rule->rule_target->getName() : new AttributeRuleResource($some_rule,null,$n_display);
             }
         }
         return $ret;
@@ -397,15 +409,15 @@ class Attribute extends Model
         foreach ($this->permission_groups as $p) {
             switch ($p->group_type) {
                 case AttributeUserGroupType::WRITE : {
-                    $write[] = ($n_display <= 1)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,$n_display);
+                    $write[] = ($n_display <= 0)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,null,$n_display);
                     break;
                 }
                 case AttributeUserGroupType::READ : {
-                    $read[] = ($n_display <= 1)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,$n_display);
+                    $read[] = ($n_display <= 0)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,null,$n_display);
                     break;
                 }
                 case AttributeUserGroupType::USAGE : {
-                    $usage[] = ($n_display <= 1)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,$n_display);
+                    $usage[] = ($n_display <= 0)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,null,$n_display);
                     break;
                 }
                 default: {
@@ -426,6 +438,16 @@ class Attribute extends Model
 
         return $ret;
 
+
+    }
+
+    public function getValue() {
+        if (in_array($this->value_type, AttributeValueType::STRING_TYPES) || in_array($this->value_type, AttributeValueType::NUMERIC_TYPES)) {
+            return $this->value_default['value_default']??null;
+        } elseif (in_array($this->value_type, AttributeValueType::POINTER_TYPES)) {
+            return $this->attribute_pointer->getValue();
+        }
+        return $this->value_default;
 
     }
 

@@ -20,7 +20,8 @@ class AuthenticationController extends Controller
 {
 
     public function me(Request $request) {
-        return response()->json(new UserResource($request->user()), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        $user = User::buildUser($request->user()->id)->first();
+        return response()->json(new UserResource($user,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
     public function login(Request $request): JsonResponse
     {
@@ -68,7 +69,7 @@ class AuthenticationController extends Controller
         $user = (new CreateNewUser)->create($request->all());
         $user->initUser();
         $user->refresh();
-        return response()->json(new UserResource($user,3), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+        return response()->json(new UserResource($user,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
 

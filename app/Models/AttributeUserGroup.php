@@ -9,6 +9,7 @@ use App\Models\Enums\AttributeUserGroupType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 
 /**
@@ -83,7 +84,16 @@ class AttributeUserGroup extends Model
                 $ret->delete_mode = true;
             }
         }
-        $ret->target_user_group_id = (new UserGroup())->resolveRouteBinding($use_group_hint);
+        /**
+         * @var UserGroup $user_group
+         */
+        $user_group = (new UserGroup())->resolveRouteBinding($use_group_hint);
+        if (!$user_group->isAdmin(Auth::id())) {
+            throw new HexbatchNotPossibleException(__("msg.attribute_schema_need_admin_permission_group",['group_name'=>$user_group->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        }
+        $ret->target_user_group_id = $user_group->id;
         return $ret;
     }
 

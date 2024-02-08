@@ -38,6 +38,8 @@ class RefCodes {
     const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 5003;
     const ATTRIBUTE_SCHEMA_ISSUE = 5004;
 
+    const ATTRIBUTE_CANNOT_EDIT = 5010;
+
     //element types start at 6000
 
     const ELEMENT_TYPE_NOT_FOUND = 6001;
@@ -71,5 +73,6 @@ class RefCodes {
         self::ATTRIBUTE_SCHEMA_ISSUE => '',
         self::ELEMENT_TYPE_NOT_FOUND => '',
         self::ELEMENT_NOT_FOUND => '',
+        self::ATTRIBUTE_CANNOT_EDIT => '',
     ];
 }

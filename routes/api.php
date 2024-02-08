@@ -81,11 +81,11 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('attribute')->group(function () {
             Route::post('/create', [AttributeController::class, 'attribute_create'])->name('core.attribute.create');
-            Route::patch('/edit', [AttributeController::class, 'attribute_edit_patch'])->name('core.attribute.edit');
+            Route::patch('/{attribute}/edit', [AttributeController::class, 'attribute_edit_patch'])->name('core.attribute.edit');
             Route::delete('/{attribute}/destroy', [AttributeController::class, 'attribute_delete'])->name('core.attribute.destroy');
             Route::get('/{attribute}/get/{levels?}', [AttributeController::class, 'attribute_get'])->name('core.attribute.get');
             Route::get('/{attribute}/ping/{attribute_ping_type}', [AttributeController::class, 'attribute_ping'])->name('core.attribute.ping');
-            Route::get('/list/manage', [AttributeController::class, 'attribute_list_manage'])->name('core.attribute.list.manage');
+            Route::get('/list/managed', [AttributeController::class, 'attribute_list_managed'])->name('core.attribute.list.managed');
         });
     }); //end auth protected
 

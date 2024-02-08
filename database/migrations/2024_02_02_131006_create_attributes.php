@@ -232,12 +232,12 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_attribute_value AS ENUM (
             'numeric' , 'numeric_integer','numeric_natural',
-            'string','string_json','string_markdown','string_html','string_xml','string_binary',
+            'string','json','string_markdown','string_html','string_xml','string_binary',
             'user','user_group','attribute','element','element_type',
             'script','remote','action','search',
             'schedule_bounds','map_bounds','shape_bounds',
             'view','mutual','container',
-            'coordinate_map','coordinate_cartesian'
+            'coordinate_map','coordinate_shape'
             );");
 
         DB::statement("ALTER TABLE attributes Add COLUMN value_type type_of_attribute_value NOT NULL default 'string';");

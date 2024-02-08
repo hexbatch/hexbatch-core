@@ -168,6 +168,28 @@ class User extends Authenticatable
         }
     }
 
+    public static function buildUser(
+        ?int $id = null )
+    : Builder
+    {
+
+        $build =  User::select('users.*')
+            ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts")
+
+            /** @uses User::user_element(),User::user_type(),User::user_group() */
+            ->with('user_element','user_type','user_group')
+
+
+        ;
+
+        if ($id) {
+            $build->where('users.id',$id);
+        }
+
+
+        return $build;
+    }
+
 
 
     public function checkAdminGroup(int $user_id) : void {

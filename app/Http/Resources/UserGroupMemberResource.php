@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\Utilities;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,8 +13,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class UserGroupMemberResource extends JsonResource
 {
     protected int $n_display_level = 1;
-    public function __construct($resource, int $n_display_level = 1) {
+    public function __construct($resource, mixed $unused = null,int $n_display_level = 1) {
         parent::__construct($resource);
+        Utilities::ignoreVar($unused);
         $this->n_display_level = $n_display_level;
     }
     /**
@@ -24,7 +26,7 @@ class UserGroupMemberResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-          'member' => $this->n_display_level <=1 ? $this->member_user->getName():new UserResource($this->member_user,$this->n_display_level),
+          'member' => $this->n_display_level <=1 ? $this->member_user->getName():new UserResource($this->member_user,null,$this->n_display_level),
           'is_admin' => $this->is_admin
         ];
     }

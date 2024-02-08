@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationBoundCollection;
 use App\Http\Resources\LocationBoundResource;
@@ -81,7 +82,7 @@ class LocationBoundController extends Controller
         $this->adminCheck($bound);
 
 
-        $is_retired = $request->request->getBoolean('is_retired');
+        $is_retired = Utilities::boolishToBool($request->request->get('is_retired'));
         $bound_name = $request->request->getString('bound_name');
         $geo_json = $request->request->getString('geo_json');
 

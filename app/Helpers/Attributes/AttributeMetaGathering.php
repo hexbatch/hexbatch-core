@@ -14,67 +14,57 @@ use Illuminate\Support\Facades\DB;
 class AttributeMetaGathering
 {
 
-    public ?AttributeMetum $description;
-    public ?AttributeMetum $name; //string val only
-    public ?AttributeMetum $standard_family; //string val only
-    public ?AttributeMetum $author;
-    public ?AttributeMetum $copywrite;
-    public ?AttributeMetum $url; //string val only
-    public ?AttributeMetum $rating; //string val only
-    public ?AttributeMetum $internal;
+    /**
+     * @var AttributeMetum[] $meta_mori
+     */
+    public array $meta_mori;
 
+    public bool $b_skip = false;
 
 
 
 
     public function __construct(Request $request, bool $b_admin = false)
     {
-        $this->description = null;
-        $this->name = null;
-        $this->author = null;
-        $this->url = null;
-        $this->internal = null;
-        $this->copywrite = null;
-        $this->rating = null;
-        $this->standard_family = null;
+        $this->meta_mori = [];
 
         $meta_block = new Collection();
         if ($request->request->has('meta')) {
             $meta_block = $request->collect('meta');
         }
 
-        foreach (AttributeMetum::PUBLIC_META as $public_meta_enum) {
-            $type_meta = $public_meta_enum->value;
-            if ($meta_block->has($type_meta)) {
-                $this->$type_meta = AttributeMetum::createMetum(new Collection($meta_block->get($type_meta,[])));
-            }
+        if (!$meta_block->count()) {
+            $this->b_skip = true;
+            return;
         }
 
-        if ($b_admin) {
-            foreach (AttributeMetum::ADMIN_META as $admin_meta_enum) {
-                $type_meta = $admin_meta_enum->value;
-                if ($meta_block->has($type_meta)) {
-                    $this->$type_meta = AttributeMetum::createMetum(new Collection($meta_block->get($type_meta,[])));
-                }
-            }
-        }
+        foreach ($meta_block as $some_meta) {
 
-        if ($meta_block->has('description')) {
-            $this->description = AttributeMetum::createMetum(new Collection($meta_block->get('description',[])));
+            $this->meta_mori[] = AttributeMetum::createMetum(new Collection($some_meta),null,$b_admin);
         }
 
     }
 
     public function assign(Attribute $attribute) {
+        if ($this->b_skip) {return;}
         try {
             DB::beginTransaction();
-            /** @var AttributeMetum $what */
-            foreach ($this as $what) {
+
+            foreach ($this->meta_mori as $what) {
                 if (!$what) {continue;}
                 $what->meta_parent_attribute_id = $attribute->id;
                 if ($what->delete_mode) {
                     $what->deleteModeActivate();
                 } else {
+                    //see if id already exists for unique
+                    $maybe = AttributeMetum::where('meta_parent_attribute_id',$what->meta_parent_attribute_id)
+                        ->where('meta_iso_lang',$what->meta_iso_lang)
+                        ->where('meta_type',$what->meta_type->value)
+                        ->first();
+                    if ($maybe) {
+                        $what->id = $maybe->id;
+                        $what->exists = true;
+                    }
                     $what->save();
                 }
             }

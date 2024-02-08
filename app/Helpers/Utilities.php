@@ -6,6 +6,10 @@ use ErrorException;
 use JsonException;
 
 class Utilities {
+    public static function ignoreVar(...$params) {
+
+    }
+
     public static function is_uuid(?string $guid) : bool{
         if (empty($guid)) {return false;}
         $test_this = str_replace('-','',$guid);
