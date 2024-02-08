@@ -33,7 +33,6 @@ class LocationBoundResource extends JsonResource
         $ret =  [
             'uuid' => $this->ref_uuid,
             'name' => $this->getName(),
-            'geo_json' => json_decode($this->geom_as_geo_json),
             'location_type' => $this->location_type,
             'is_retired' => $this->is_retired,
             'created_at' => round($this->created_at_ts),

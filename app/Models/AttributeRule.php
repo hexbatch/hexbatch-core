@@ -120,7 +120,7 @@ class AttributeRule extends Model
          * @var Attribute $found_attribute
          */
         $found_attribute = (new Attribute())->resolveRouteBinding($use_rule_hint);
-        if ($found_attribute->is_retired) {
+        if (!$ret->delete_mode && $found_attribute->is_retired) {
             throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_retired",['name'=>$found_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
@@ -133,6 +133,7 @@ class AttributeRule extends Model
         if ($this->delete_mode) {
             AttributeRule::where('rule_parent_attribute_id',$this->rule_parent_attribute_id)
                 ->where('target_attribute_id',$this->target_attribute_id)
+                ->where('rule_type',$this->rule_type->value)
                 ->delete();
         }
     }

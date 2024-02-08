@@ -101,6 +101,7 @@ class AttributeUserGroup extends Model
         if ($this->delete_mode) {
             AttributeUserGroup::where('group_parent_attribute_id',$this->group_parent_attribute_id)
                 ->where('target_user_group_id',$this->target_user_group_id)
+                ->where('group_type',$this->group_type->value)
                 ->delete();
         }
     }
