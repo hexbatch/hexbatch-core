@@ -26,3 +26,7 @@ https://dockerwebdev.com/tutorials/docker-php-development/
         'invoice_date' => DB::raw('DATE_SUB(`payout_date`, INTERVAL 3 DAY)')
         ])
         ;
+
+Script notes:
+
+https://hub.docker.com/_/node
