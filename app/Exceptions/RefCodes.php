@@ -32,6 +32,23 @@ class RefCodes {
     const BOUND_CANNOT_PING = 3007;
     const BOUND_TYPE_DEF = 3008;
 
+    // attributes start at 5000
+    const ATTRIBUTE_NOT_FOUND = 5001;
+    const ATTRIBUTE_PING_DATA_MISSING = 5002;
+    const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 5003;
+    const ATTRIBUTE_SCHEMA_ISSUE = 5004;
+
+    const ATTRIBUTE_CANNOT_EDIT = 5010;
+
+    //element types start at 6000
+
+    const ELEMENT_TYPE_NOT_FOUND = 6001;
+
+    //elements start at 7000
+
+    const ELEMENT_NOT_FOUND =  7001;
+
+
     const URLS = [
         self::BAD_LOGIN => '',
         self::USER_NOT_FOUND => '',
@@ -50,5 +67,12 @@ class RefCodes {
         self::BOUND_NEEDS_MIN_INFO => '',
         self::BOUND_CANNOT_PING => '',
         self::BOUND_TYPE_DEF => '',
+        self::ATTRIBUTE_NOT_FOUND => '',
+        self::ATTRIBUTE_PING_DATA_MISSING => '',
+        self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
+        self::ATTRIBUTE_SCHEMA_ISSUE => '',
+        self::ELEMENT_TYPE_NOT_FOUND => '',
+        self::ELEMENT_NOT_FOUND => '',
+        self::ATTRIBUTE_CANNOT_EDIT => '',
     ];
 }

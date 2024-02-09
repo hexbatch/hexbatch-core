@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\HasApiTokens;
 
 
@@ -39,6 +40,7 @@ use Laravel\Sanctum\HasApiTokens;
  *
  * @property Element user_element
  * @property UserGroup user_group
+ * @property ElementType user_type
  *
  */
 class User extends Authenticatable
@@ -83,6 +85,10 @@ class User extends Authenticatable
 
     public function user_element() : BelongsTo {
         return $this->belongsTo('App\Models\Element','element_id');
+    }
+
+    public function user_type() : BelongsTo {
+        return $this->belongsTo('App\Models\ElementType','element_type_id');
     }
 
     public function user_group() : BelongsTo {
@@ -147,6 +153,9 @@ class User extends Authenticatable
        return  $builder->first();
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function initUser() {
         if (!$this->user_group_id) {
             $group =  new UserGroup();
@@ -159,8 +168,34 @@ class User extends Authenticatable
         }
     }
 
+    public static function buildUser(
+        ?int $id = null )
+    : Builder
+    {
+
+        $build =  User::select('users.*')
+            ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts")
+
+            /** @uses User::user_element(),User::user_type(),User::user_group() */
+            ->with('user_element','user_type','user_group')
+
+
+        ;
+
+        if ($id) {
+            $build->where('users.id',$id);
+        }
+
+
+        return $build;
+    }
+
+
+
     public function checkAdminGroup(int $user_id) : void {
+        /** @noinspection PhpUnhandledExceptionInspection */
         $this->initUser();
+        /** @uses User::user_group() */
         $group = $this->user_group;
         if ($this->id === $user_id) {return;}
 
@@ -169,5 +204,9 @@ class User extends Authenticatable
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::USER_NOT_PRIV);
         }
+    }
+
+    public function getName() : string {
+        return $this->username;
     }
 }

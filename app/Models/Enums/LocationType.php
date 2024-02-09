@@ -1,6 +1,6 @@
 <?php
 namespace App\Models\Enums;
-enum LocationTypes : string {
+enum LocationType : string {
     case MAP = 'map';
     case SHAPE = 'shape';
 }

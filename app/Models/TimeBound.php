@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\RefCodes;
-use App\Models\Traits\TBoundsCommon;
+use App\Models\Traits\TResourceCommon;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Carbon\Exceptions\InvalidTimeZoneException;
@@ -43,7 +43,7 @@ use InvalidArgumentException;
  */
 class TimeBound extends Model
 {
-    use TBoundsCommon;
+    use TResourceCommon;
 
     protected $table = 'time_bounds';
     public $timestamps = false;
@@ -75,8 +75,16 @@ class TimeBound extends Model
             ->orderBy('span_start');
     }
 
+    public function getName() {
+        return $this->bound_owner->username . '.' .$this->bound_name;
+    }
+
     public function isInUse() : bool {
-        return false;
+        if (!$this->id) {return false;}
+        return Attribute::where('read_time_bounds_id',$this->id)
+            ->orWhere('write_time_bounds_id',$this->id)
+            ->exists()
+            ;
     }
 
     /**
@@ -255,6 +263,17 @@ class TimeBound extends Model
     public function redoTimeSpans() {
         TimeBoundSpan::where('time_bound_id',$this->id)->delete();
         $this->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);
+    }
+
+    public function ping(?string $time_to_ping = null) : ?int {
+        if ($time_to_ping) {
+            $ping_ts = Carbon::create($time_to_ping)->unix();
+        } else {
+            $ping_ts = Carbon::now()->unix();
+        }
+        $hit = TimeBoundSpan::where('time_bound_id',$this->id)->where('span_start','<=',$ping_ts)->where('span_stop','>=',$ping_ts)->first();
+        if ($hit) {return $ping_ts;}
+        return null;
     }
 
 

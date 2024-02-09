@@ -5,8 +5,7 @@ use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\LocationBoundController;
 use App\Http\Controllers\API\TimeBoundController;
 use App\Http\Controllers\API\UserGroupController;
-use App\Models\Enums\LocationTypes;
-use Illuminate\Http\Request;
+use App\Http\Controllers\API\AttributeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,9 +28,7 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('user')->group(function () {
-            Route::get('/me', function (Request $request) {
-                return $request->user();
-            });
+            Route::get('/me', [AuthenticationController::class, 'me']);
 
             Route::post('/logout', [AuthenticationController::class, 'logout'])->name('core.user.logout');
 
@@ -80,9 +77,18 @@ Route::prefix('v1')->group(function () {
                 Route::post('/create/{location_type}', [LocationBoundController::class, 'location_bound_create'])->name('core.bounds.location.create');
                 Route::get('/list/{user?}', [LocationBoundController::class, 'location_bound_list'])->name('core.bounds.location.list');
             });
-        });
-    });
+        }); //end bounds
 
-});
+        Route::prefix('attribute')->group(function () {
+            Route::post('/create', [AttributeController::class, 'attribute_create'])->name('core.attribute.create');
+            Route::patch('/{attribute}/edit', [AttributeController::class, 'attribute_edit_patch'])->name('core.attribute.edit');
+            Route::delete('/{attribute}/destroy', [AttributeController::class, 'attribute_delete'])->name('core.attribute.destroy');
+            Route::get('/{attribute}/get/{levels?}', [AttributeController::class, 'attribute_get'])->name('core.attribute.get');
+            Route::get('/{attribute}/ping/{attribute_ping_type}', [AttributeController::class, 'attribute_ping'])->name('core.attribute.ping');
+            Route::get('/list/managed', [AttributeController::class, 'attribute_list_managed'])->name('core.attribute.list.managed');
+        });
+    }); //end auth protected
+
+}); //end v1
 
 

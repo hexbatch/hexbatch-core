@@ -61,7 +61,7 @@ class UserGroup extends Model
 
     public function group_members() : HasMany {
         return $this->hasMany('App\Models\UserGroupMember')
-            /** @uses \App\Models\UserGroupMember::member_user() */
+            /** @uses UserGroupMember::member_user */
             ->with('member_user')
             ->orderBy('created_at');
     }
@@ -69,13 +69,17 @@ class UserGroup extends Model
     public function group_admins() : HasMany {
         return $this->hasMany('App\Models\UserGroupMember')
             ->where('is_admin',true)
-            /** @uses \App\Models\UserGroupMember::member_user() */
+            /** @uses UserGroupMember::member_user */
             ->with('member_user')
             ->orderBy('updated_at');
     }
 
     public function group_owner() : BelongsTo {
         return $this->belongsTo('App\Models\User','user_id');
+    }
+
+    public function getName() :string {
+        return $this->group_owner->username . '.'. $this->group_name;
     }
 
     /**
@@ -181,5 +185,12 @@ class UserGroup extends Model
         $member = $this->isMember($user_id);
         $member?->delete();
         return $member;
+    }
+
+    public function isInUse() : bool {
+        if (!$this->id) {return false;}
+        if( AttributeUserGroup::where('target_user_group_id',$this->id)->exists() ) {return true;}
+        if( User::where('user_group_id',$this->id)->exists() ) {return true;}
+        return false;
     }
 }

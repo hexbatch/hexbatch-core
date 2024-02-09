@@ -5,10 +5,11 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationBoundCollection;
 use App\Http\Resources\LocationBoundResource;
-use App\Models\Enums\LocationTypes;
+use App\Models\Enums\LocationType;
 use App\Models\LocationBound;
 
 use App\Models\User;
@@ -36,7 +37,7 @@ class LocationBoundController extends Controller
     public function location_bound_get(LocationBound $bound) {
         $this->adminCheck($bound);
         $out = LocationBound::buildLocationBound(id: $bound->id)->first();
-        return response()->json(new LocationBoundResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new LocationBoundResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     /**
@@ -48,22 +49,11 @@ class LocationBoundController extends Controller
     public function location_bound_ping(LocationBound $bound,string $location_json_to_ping ) {
 
         $this->adminCheck($bound);
-        Validator::make(['location'=>$location_json_to_ping], [
-            'location'=>['required',new GeoJsonReq],
-        ])->validate();
-        $location_geo = json_decode($location_json_to_ping);
-        $geometry = GeoJson::jsonUnserialize($location_geo);
-        if (!(get_class($geometry) === Polygon::class || get_class($geometry) === MultiPolygon::class || get_class($geometry) === Point::class) ) {
-            throw new HexbatchNotPossibleException(__("msg.location_bounds_only_pings_these"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::BOUND_CANNOT_PING);
-        }
+        $b_hit = $bound->ping($location_json_to_ping);
 
-
-        $where = "ST_Contains(geom,ST_AsText(ST_GeomFromGeoJSON('$location_json_to_ping')))";
-        $hit = LocationBound::buildLocationBound(id: $bound->id)->whereRaw($where)->first();
-        if ($hit) {
-            return response()->json(new LocationBoundResource($hit), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        if ($b_hit) {
+            $out = LocationBound::buildLocationBound(id: $bound->id)->first();
+            return response()->json(new LocationBoundResource($out,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
         return response()->json(['bound_id'=>$bound->id,'tested'=>$location_json_to_ping], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
     }
@@ -93,7 +83,7 @@ class LocationBoundController extends Controller
         $this->adminCheck($bound);
 
 
-        $is_retired = $request->request->getBoolean('is_retired');
+        $is_retired = Utilities::boolishToBool($request->request->get('is_retired'));
         $bound_name = $request->request->getString('bound_name');
         $geo_json = $request->request->getString('geo_json');
 
@@ -104,7 +94,7 @@ class LocationBoundController extends Controller
         $user = auth()->user();
 
         if ($bound_name) {
-            $bound->setBoundName($bound_name,$user);
+            $bound->setName($bound_name,$user);
         }
 
         if ($geo_json) {
@@ -123,7 +113,7 @@ class LocationBoundController extends Controller
      * @throws ValidationException
      * @throws \Exception
      */
-    public function location_bound_create(Request $request, LocationTypes $location_type): JsonResponse {
+    public function location_bound_create(Request $request, LocationType $location_type): JsonResponse {
 
         $bound_name = $request->request->getString('bound_name');
         $geo_json = $request->request->all('geo_json');
@@ -136,7 +126,7 @@ class LocationBoundController extends Controller
 
         $bound = new LocationBound();
         $user = auth()->user();
-        $bound->setBoundName($bound_name,$user);
+        $bound->setName($bound_name,$user);
 
         $bound->user_id = $user->id;
         $bound->setShape(json_encode($geo_json),$location_type);
