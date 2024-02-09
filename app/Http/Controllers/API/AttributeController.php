@@ -63,8 +63,8 @@ class AttributeController extends Controller
 
         $location_to_ping = $request->get('location_ping');
         $shape_to_ping = $request->get('shape_ping');
-        $time_string = $request->query->getString('time_string');
-        $user_lookup = $request->query->getString('user');
+        $time_string = $request->get('time_string');
+        $user_lookup = $request->get('user');
 
         $location_to_ping_json = '';
         if (!empty($location_to_ping)) {
@@ -148,7 +148,7 @@ class AttributeController extends Controller
                      RefCodes::ATTRIBUTE_PING_DATA_MISSING);
             }
             /**
-             * @var UserGroup $read_group
+             * @var AttributeUserGroup $read_group
              */
             $read_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
                 ->where('group_type',AttributeUserGroupType::READ->value)
@@ -156,7 +156,7 @@ class AttributeController extends Controller
                 ->with('target_user_group')
                 ->first();
             if($read_group) {
-                $ret['read_user'] = (bool)$read_group->isMember($check_user->id);
+                $ret['read_user'] = (bool)$read_group->target_user_group->isMember($check_user->id);
             }
         }
 
@@ -167,7 +167,7 @@ class AttributeController extends Controller
                     RefCodes::ATTRIBUTE_PING_DATA_MISSING);
             }
             /**
-             * @var UserGroup $write_group
+             * @var AttributeUserGroup $write_group
              */
             $write_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
                 ->where('group_type',AttributeUserGroupType::WRITE->value)
@@ -175,7 +175,26 @@ class AttributeController extends Controller
                 ->with('target_user_group')
                 ->first();
             if($write_group) {
-                $ret['write_user'] = (bool)$write_group->isMember($check_user->id);
+                $ret['write_user'] = (bool)$write_group->target_user_group->isMember($check_user->id);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_USER || $attribute_ping_type === AttributePingType::USAGE_USER) {
+            if (!$check_user) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            /**
+             * @var AttributeUserGroup $write_group
+             */
+            $write_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
+                ->where('group_type',AttributeUserGroupType::WRITE->value)
+                /** @uses AttributeUserGroup::target_user_group() */
+                ->with('target_user_group')
+                ->first();
+            if($write_group) {
+                $ret['usage_user'] = (bool)$write_group->target_user_group->isMember($check_user->id);
             }
         }
 

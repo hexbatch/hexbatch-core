@@ -52,7 +52,8 @@ class LocationBoundController extends Controller
         $b_hit = $bound->ping($location_json_to_ping);
 
         if ($b_hit) {
-            return response()->json(new LocationBoundResource($bound), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+            $out = LocationBound::buildLocationBound(id: $bound->id)->first();
+            return response()->json(new LocationBoundResource($out,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
         return response()->json(['bound_id'=>$bound->id,'tested'=>$location_json_to_ping], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND);
     }
