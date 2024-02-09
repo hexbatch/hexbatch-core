@@ -26,9 +26,26 @@ class Utilities {
         return true;
     }
 
-    public static function boolishToBool($val) {
+    public static function boolishToBool($val) : bool {
+        if (is_string($val)) {return false;}
         $boolval = ( is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val );
         return ( $boolval===null  ? false : $boolval );
+    }
+
+    public static function negativeBoolWords($val) : bool {
+        $val = mb_strtolower($val);
+        return match($val) {
+            'off', '0', 'no', 'false', '' =>true,
+            default => false
+        };
+    }
+
+    public static function positiveBoolWords($val) : bool {
+        $val = mb_strtolower($val);
+        return match($val) {
+            'yes', '1', 'on', 'true', '' =>true,
+            default => false
+        };
     }
 
     /**

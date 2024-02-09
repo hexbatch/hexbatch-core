@@ -4,6 +4,7 @@ namespace App\Helpers\Attributes;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\Enums\LocationType;
 use App\Models\LocationBound;
@@ -14,24 +15,14 @@ use Illuminate\Support\Collection;
 class AttributeBounds
 {
 
-    public ?int $read_time_bounds_id;
-    public ?int $write_time_bounds_id;
-    public ?int $read_map_location_bounds_id;
-    public ?int $write_map_location_bounds_id;
-    public ?int $read_shape_location_bounds_id;
-    public ?int $write_shape_location_bounds_id;
-
-    public bool $b_skip = false;
+    /**
+     * @var array<string,LocationBound|TimeBound> $da_bounds
+     */
+    public array $da_bounds = [];
 
     public function __construct(Request $request)
     {
 
-        $this->read_time_bounds_id = null;
-        $this->write_time_bounds_id = null;
-        $this->read_map_location_bounds_id = null;
-        $this->write_map_location_bounds_id = null;
-        $this->read_shape_location_bounds_id = null;
-        $this->write_shape_location_bounds_id = null;
 
         $read_bounds = new Collection();
         $write_bounds = new Collection();
@@ -46,55 +37,51 @@ class AttributeBounds
         }
         $all_bounds = $read_bounds->merge($write_bounds);
 
-        if (!$all_bounds->count()) {
-            $this->b_skip = true;
-            return;
-        }
 
         foreach ($all_bounds as $key => $val) {
             $found_object = null;
-            switch($key) {
-                case 'read_time':
-                case 'write_time':
-                {
-                    /** @var TimeBound $found_object */
-                    $found_object = (new TimeBound())->resolveRouteBinding($val);
-                    break;
-                }
-                case 'read_map':
-                case 'write_map':
-                {
-                    /** @var LocationBound $found_object */
-                    $found_object = (new LocationBound())->resolveRouteBinding($val);
-                    if ($found_object->location_type !== LocationType::MAP) {
-                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_bounds_violation"),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            if ($val && !Utilities::negativeBoolWords($val) ) {
+                switch ($key) {
+                    case 'read_time':
+                    case 'write_time':
+                    {
+                        /** @var TimeBound $found_object */
+                        $found_object = (new TimeBound())->resolveRouteBinding($val);
+                        break;
                     }
-                    break;
-                }
-                case 'read_shape':
-                case 'write_shape':
-                {
-                    /** @var LocationBound $found_object */
-                    $found_object = (new LocationBound())->resolveRouteBinding($val);
-                    if ($found_object->location_type !== LocationType::SHAPE) {
-                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_bounds_violation"),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    case 'read_map':
+                    case 'write_map':
+                    {
+                        /** @var LocationBound $found_object */
+                        $found_object = (new LocationBound())->resolveRouteBinding($val);
+                        if ($found_object->location_type !== LocationType::MAP) {
+                            throw new HexbatchNotPossibleException(__("msg.attribute_schema_bounds_violation"),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                        }
+                        break;
                     }
-                    break;
+                    case 'read_shape':
+                    case 'write_shape':
+                    {
+                        /** @var LocationBound $found_object */
+                        $found_object = (new LocationBound())->resolveRouteBinding($val);
+                        if ($found_object->location_type !== LocationType::SHAPE) {
+                            throw new HexbatchNotPossibleException(__("msg.attribute_schema_bounds_violation"),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                        }
+                        break;
+                    }
+                } //end switch
+                if (!$found_object) {continue;}
+                if ($found_object->is_retired) {
+                    throw new HexbatchNotPossibleException(__("msg.attribute_schema_bounds_retired",['bound_name'=>$found_object->getName()]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                 }
-            } //end switch
-            if (empty($found_object)) {
-                continue;
-            }
+            } //end some value set for this key
 
-            if ($found_object->is_retired) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_schema_bounds_retired",['bound_name'=>$found_object->getName()]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-            }
 
             $trans_key = match ($key) {
                 'read_time' => 'read_time_bounds_id',
@@ -105,16 +92,14 @@ class AttributeBounds
                 'write_shape' => 'write_shape_location_bounds_id',
 
             };
-            $this->$trans_key = $found_object->id;
+            $this->da_bounds[$trans_key] = $found_object?->id;
 
         }
     }
 
     public function assign(Attribute $attribute) {
-        if ($this->b_skip) {return;}
 
-        foreach ($this as $key => $val) {
-            if ($key === 'b_skip') {continue;}
+        foreach ($this->da_bounds as $key => $val) {
             $attribute->$key = $val;
         }
     }
