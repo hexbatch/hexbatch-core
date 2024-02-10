@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Models\Enums\RemoteMapType;
+use App\Models\Enums\RemoteInputMapType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,12 +13,12 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int remote_id
- * @property int map_attribute_id
- * @property RemoteMapType map_type
+
+ * @property RemoteInputMapType map_type
  * @property string remote_json_path
- * @property string remote_header_regex
- * @property string attribute_json_path
- * @property string key_path
+ * @property string remote_xpath
+ * @property string remote_regex
+ * @property string holder_json_path
  *
  *
  *
@@ -27,10 +27,10 @@ use Illuminate\Database\Eloquent\Model;
  *
  *
  */
-class RemoteMap extends Model
+class RemoteInputMap extends Model
 {
 
-    protected $table = 'remote_maps';
+    protected $table = 'remote_input_maps';
     public $timestamps = false;
 
     /**
@@ -54,7 +54,7 @@ class RemoteMap extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'map_type' => RemoteMapType::class
+        'map_type' => RemoteInputMapType::class
     ];
 
 

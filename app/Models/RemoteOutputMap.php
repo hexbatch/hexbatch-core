@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Models\Enums\RemoteSettingType;
+use App\Models\Enums\RemoteOutputMapType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int remote_id
  * @property boolean is_secret
- * @property RemoteSettingType pair_type
+ * @property RemoteOutputMapType output_map_type
  * @property string header_var_name
  * @property string header_var_value
  *
@@ -25,10 +25,10 @@ use Illuminate\Database\Eloquent\Model;
  *
  *
  */
-class RemoteSetting extends Model
+class RemoteOutputMap extends Model
 {
 
-    protected $table = 'remote_settings';
+    protected $table = 'remote_output_maps';
     public $timestamps = false;
 
     /**
@@ -52,7 +52,7 @@ class RemoteSetting extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'pair_type' => RemoteSettingType::class
+        'output_map_type' => RemoteOutputMapType::class
     ];
 
 

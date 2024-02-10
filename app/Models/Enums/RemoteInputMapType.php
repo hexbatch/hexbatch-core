@@ -1,10 +1,9 @@
 <?php
 namespace App\Models\Enums;
-enum RemoteSettingType : string {
+enum RemoteInputMapType : string {
 
     case NONE = 'none';
-    case BASIC_AUTH = 'basic_auth';
-    case BEARER_AUTH = 'bearer_auth';
     case DATA = 'data';
     case HEADER = 'header';
+    case RESPONSE_CODE = 'response_code';
 }
