@@ -16,9 +16,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string remote_call_ended
  * @property int http_response_code
  * @property ArrayObject input_headers
- * @property ArrayObject input_data
- * @property ArrayObject output_data
- * @property string output_data_text
+ * @property ArrayObject from_remote_processed_data
+ * @property ArrayObject to_remote_processed_data
+ * @property string from_remote_raw_text
  *
  *
  *
@@ -55,8 +55,8 @@ class RemoteLog extends Model
      */
     protected $casts = [
         'headers' => ArrayObject::class,
-        'input_data' => ArrayObject::class,
-        'output_data' => ArrayObject::class
+        'from_remote_processed_data' => ArrayObject::class,
+        'to_remote_processed_data' => ArrayObject::class
 
     ];
 

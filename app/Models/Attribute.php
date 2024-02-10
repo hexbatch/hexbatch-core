@@ -196,6 +196,9 @@ class Attribute extends Model
         if ($b_exist) {return true;}
         $b_exist =  AttributeRule::where('target_attribute_id',$this->id)->exists();
         if ($b_exist) {return true;}
+
+        $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
+        if ($b_exist) {return true;}
         return false;
         //todo also check for the element type
     }

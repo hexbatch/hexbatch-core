@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Schema;
         data:
             from_remote_map: array<rule to convert data from the server to value in (attr or action)>
             to_remote_map: array<rule to convert either pre-set value, or data in (attr or action) to some part of a data format to the server>
+            is_sending_context_to_remote: bool
         call_schedule:
             call_max_per_unit: x
             call_unit_in_seconds: x
@@ -140,6 +141,9 @@ return new class extends Migration
 
             $table->boolean('is_readable')->default(true)->nullable(false)
                 ->comment('if false then attached attribute not readable');
+
+            $table->boolean('is_sending_context_to_remote')->default(false)->nullable(false)
+                ->comment('if on, then the guids of the relavent attribute,action,element and type are sent to help keep state on the server side');
 
             $table->boolean('is_caching')->default(true)->nullable(false)
                 ->comment('if true then using caching');

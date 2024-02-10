@@ -37,9 +37,9 @@ return new class extends Migration
         Schema::table('remote_logs', function (Blueprint $table) {
             $table->integer('http_response_code')->nullable()->comment("the http status or console status");
             $table->jsonb('headers')->nullable()->comment("The headers going and coming to the remote (if that kind), no secret values here");
-            $table->jsonb('input_data')->nullable()->comment("The value of going in, if marked is_secret not put here");
-            $table->jsonb('output_data')->nullable()->comment("The value coming back, if its json");
-            $table->text('output_data_text')->nullable()->comment("The value coming back, if its not json (xml,html,primitive");
+            $table->jsonb('from_remote_processed_data')->nullable()->comment("The value of going in, if marked is_secret not put here");
+            $table->jsonb('to_remote_processed_data')->nullable()->comment("The value coming back, if its json");
+            $table->text('from_remote_raw_text')->nullable()->comment("The value coming back, if its not json (xml,html,primitive");
         });
     }
 

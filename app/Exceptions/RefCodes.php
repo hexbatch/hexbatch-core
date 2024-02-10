@@ -3,9 +3,11 @@
 namespace App\Exceptions;
 
 class RefCodes {
-    //users start at 1
+    //general stuff start at 1
 
     const VALIDATION = 1;
+
+
     //users start at 1000
     const BAD_LOGIN = 1000;
     const RESOURCE_NAME_UNIQUE_PER_USER = 1002;
@@ -32,21 +34,29 @@ class RefCodes {
     const BOUND_CANNOT_PING = 3007;
     const BOUND_TYPE_DEF = 3008;
 
-    // attributes start at 5000
-    const ATTRIBUTE_NOT_FOUND = 5001;
-    const ATTRIBUTE_PING_DATA_MISSING = 5002;
-    const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 5003;
-    const ATTRIBUTE_SCHEMA_ISSUE = 5004;
+    // attributes start at 4000
+    const ATTRIBUTE_NOT_FOUND = 4001;
+    const ATTRIBUTE_PING_DATA_MISSING = 4002;
+    const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 4003;
+    const ATTRIBUTE_SCHEMA_ISSUE = 4004;
 
-    const ATTRIBUTE_CANNOT_EDIT = 5010;
+    const ATTRIBUTE_CANNOT_EDIT = 4010;
 
-    //element types start at 6000
+    //remotes start at 5000
 
-    const ELEMENT_TYPE_NOT_FOUND = 6001;
+    const REMOTE_NOT_FOUND = 5001;
 
-    //elements start at 7000
+    //actions start at 6000
 
-    const ELEMENT_NOT_FOUND =  7001;
+    //element types start at 7000
+
+    const ELEMENT_TYPE_NOT_FOUND = 7001;
+
+    //elements start at 8000
+
+    const ELEMENT_NOT_FOUND =  8001;
+
+    //sets start at 9000
 
 
     const URLS = [
@@ -71,8 +81,10 @@ class RefCodes {
         self::ATTRIBUTE_PING_DATA_MISSING => '',
         self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
         self::ATTRIBUTE_SCHEMA_ISSUE => '',
+        self::ATTRIBUTE_CANNOT_EDIT => '',
+        self::REMOTE_NOT_FOUND => '',
         self::ELEMENT_TYPE_NOT_FOUND => '',
         self::ELEMENT_NOT_FOUND => '',
-        self::ATTRIBUTE_CANNOT_EDIT => '',
+
     ];
 }

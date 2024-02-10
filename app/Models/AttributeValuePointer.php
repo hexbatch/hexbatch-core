@@ -8,6 +8,7 @@ use App\Http\Resources\AttributeResource;
 use App\Http\Resources\ElementResource;
 use App\Http\Resources\ElementTypeResource;
 use App\Http\Resources\LocationBoundResource;
+use App\Http\Resources\RemoteResource;
 use App\Http\Resources\TimeBoundResource;
 use App\Http\Resources\UserGroupResource;
 use App\Http\Resources\UserResource;
@@ -31,6 +32,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int element_id
  * @property int time_bound_id
  * @property int location_bound_id
+ * @property int remote_id
+ *
+ *
  * @property string created_at
  * @property string updated_at
  *
@@ -45,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property ElementType value_element_type
  * @property TimeBound value_schedule
  * @property LocationBound value_location
+ * @property Remote value_remote
  *
  *
  */
@@ -95,6 +100,9 @@ class AttributeValuePointer extends Model
     public function value_location() : BelongsTo {
         return $this->belongsTo('App\Models\LocationBound','location_bound_id');
     }
+    public function value_remote() : BelongsTo {
+        return $this->belongsTo('App\Models\Remote','remote_id');
+    }
 
     public function getValue() {
         if ($this->value_user()->first()) {return $this->value_user;}
@@ -104,6 +112,7 @@ class AttributeValuePointer extends Model
         if ($this->value_element_type()->first()) {return $this->value_element_type;}
         if ($this->value_schedule()->first()) {return $this->value_schedule;}
         if ($this->value_location()->first()) {return $this->value_location;}
+        if ($this->value_remote()->first()) {return $this->value_remote;}
         return null;
     }
 
@@ -116,6 +125,7 @@ class AttributeValuePointer extends Model
             if ($this->value_element_type()->first()) {return $this->value_element_type->getName();}
             if ($this->value_schedule()->first()) {return $this->value_schedule->getName();}
             if ($this->value_location()->first()) {return $this->value_location->getName();}
+            if ($this->value_remote()->first()) {return $this->value_remote->getName();}
         } else {
             if ($this->value_user()->first()) {return new UserResource($this->value_user,null,$n_display - 1);}
             if ($this->value_group()->first()) {return new UserGroupResource($this->value_group,null,$n_display - 1);}
@@ -124,6 +134,7 @@ class AttributeValuePointer extends Model
             if ($this->value_element_type()->first()) {return new ElementTypeResource($this->value_element_type,null,$n_display - 1);}
             if ($this->value_schedule()->first()) {return new TimeBoundResource($this->value_schedule,null,$n_display - 1);}
             if ($this->value_location()->first()) {return new LocationBoundResource($this->value_location,null,$n_display - 1);}
+            if ($this->value_remote()->first()) {return new RemoteResource($this->value_remote,null,$n_display - 1);}
         }
         return null;
     }
@@ -163,6 +174,18 @@ class AttributeValuePointer extends Model
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }
                     $ret->attribute_id = $found_object->id;
+                    break;
+                }
+
+                case AttributeValueType::REMOTE : {
+                    /** @var Remote $found_object */
+                    $found_object = (new Remote())->resolveRouteBinding($maybe_value);
+                    if ($found_object->is_retired) {
+                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_default_retired",['name'=>$found_object->getName()]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
+                    $ret->remote_id = $found_object->id;
                     break;
                 }
                 case AttributeValueType::ELEMENT : {

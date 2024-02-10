@@ -15,7 +15,6 @@ enum AttributeValueType : string {
     case ATTRIBUTE = 'attribute';
     case ELEMENT = 'element';
     case ELEMENT_TYPE = 'element_type';
-    case SCRIPT = 'script';
     case REMOTE = 'remote';
     case ACTION = 'action';
 
@@ -39,7 +38,7 @@ enum AttributeValueType : string {
     ];
 
     const POINTER_TYPES = [
-      self::USER,self::USER_GROUP,self::ATTRIBUTE,self::ELEMENT,self::ELEMENT_TYPE,self::SCRIPT,self::REMOTE,self::ACTION,
+      self::USER,self::USER_GROUP,self::ATTRIBUTE,self::ELEMENT,self::ELEMENT_TYPE,self::REMOTE,self::ACTION,
       self::SCHEDULE_BOUNDS,self::MAP_BOUNDS,self::SHAPE_BOUNDS,self::SET,self::VIEW,self::MUTUAL,self::CONTAINER, self::SEARCH
     ];
 

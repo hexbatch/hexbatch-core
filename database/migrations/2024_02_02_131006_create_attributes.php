@@ -234,7 +234,7 @@ return new class extends Migration
             'numeric' , 'numeric_integer','numeric_natural',
             'string','json','string_markdown','string_html','string_xml','string_binary',
             'user','user_group','attribute','element','element_type',
-            'script','remote','action','search',
+            'remote','action','search',
             'schedule_bounds','map_bounds','shape_bounds',
             'view','mutual','container',
             'coordinate_map','coordinate_shape'

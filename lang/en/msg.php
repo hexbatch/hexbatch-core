@@ -75,6 +75,8 @@ return [
     'attribute_schema_rule_retired' => 'This attribute, ":name" has been retired and new rules using this cannot be added to an attribute',
     'attribute_in_use_cannot_change' => 'Attributes in use cannot edited or deleted. Remove dependencies and try again',
 
+    //remotes
+    'remote_not_found' => 'Remote not found using :ref',
 
     //element types
     'element_type_not_found' => 'Element type not found using :ref',
