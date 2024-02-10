@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Models\Enums\RemoteUriDataFormatType;
 use App\Models\Enums\RemoteUriMethod;
 use App\Models\Enums\RemoteUriType;
 use ArrayObject;
@@ -15,12 +16,16 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int user_id
+ * @property int usage_group_id
  * @property string ref_uuid
+ * @property string remote_name
  * @property boolean is_retired
  * @property boolean is_on
  * @property int timeout_seconds
  * @property RemoteUriType uri_type
  * @property RemoteUriMethod uri_method_type
+ * @property RemoteUriDataFormatType uri_data_input_format
+ * @property RemoteUriDataFormatType uri_data_output_format
  * @property string uri_string
  * @property int uri_port
  * @property bool is_readable
@@ -32,11 +37,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int rate_limit_unit_in_seconds
  * @property string rate_limit_starts_at
  * @property int rate_limit_count
- * @property ArrayObject local_state_init
- * @property ArrayObject element_state_init
- * @property ArrayObject type_state_init
- * @property ArrayObject global_state
- * @property ArrayObject global_cache
  *
  *
  *
@@ -74,13 +74,9 @@ class Remote extends Model
     protected $casts = [
         'uri_type' => RemoteUriType::class,
         'uri_method_type' => RemoteUriMethod::class,
-        'cache_keys' => AsArrayObject::class,
-        'local_state_init' => AsArrayObject::class,
-        'element_state_init' => AsArrayObject::class,
-        'type_state_init' => AsArrayObject::class,
-        'global_state' => AsArrayObject::class,
-        'global_cache' => AsArrayObject::class,
+        'uri_data_input_format' => RemoteUriDataFormatType::class,
+        'uri_data_output_format' => RemoteUriDataFormatType::class,
+        'cache_keys' => AsArrayObject::class
     ];
-
 
 }

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int remote_id
  * @property boolean is_secret
  * @property RemoteOutputMapType output_map_type
+ * @property string holder_json_path
  * @property string header_var_name
  * @property string header_var_value
  *
@@ -25,10 +26,10 @@ use Illuminate\Database\Eloquent\Model;
  *
  *
  */
-class RemoteOutputMap extends Model
+class RemoteToMap extends Model
 {
 
-    protected $table = 'remote_output_maps';
+    protected $table = 'remote_to_maps';
     public $timestamps = false;
 
     /**

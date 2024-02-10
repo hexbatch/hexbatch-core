@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5e18bdd3573c05af03d74e410fb476d8",
+    "content-hash": "69a058c0b06495eafada9cc103821dc1",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -239,6 +239,60 @@
                 "source": "https://github.com/dflydev/dflydev-dot-access-data/tree/v3.0.2"
             },
             "time": "2022-10-27T11:44:00+00:00"
+        },
+        {
+            "name": "digitickets/lalit",
+            "version": "3.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/digitickets/lalit.git",
+                "reference": "c42d6ba903ee78ea4210582fb8401aafa9858678"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/digitickets/lalit/zipball/c42d6ba903ee78ea4210582fb8401aafa9858678",
+                "reference": "c42d6ba903ee78ea4210582fb8401aafa9858678",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "php": ">=7"
+            },
+            "require-dev": {
+                "mockery/mockery": "^0",
+                "phpunit/phpunit": "^6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LaLit\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CC0-1.0"
+            ],
+            "authors": [
+                {
+                    "name": "Lalit Patel",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Richard Quadling",
+                    "role": "Developer"
+                }
+            ],
+            "description": "GitHub copy of LaLit's XML2Array and Array2XML",
+            "homepage": "http://www.lalit.org/lab",
+            "keywords": [
+                "array",
+                "xml"
+            ],
+            "support": {
+                "issues": "https://github.com/digitickets/lalit/issues",
+                "source": "https://github.com/digitickets/lalit/tree/3.3.0"
+            },
+            "time": "2022-03-10T17:19:42+00:00"
         },
         {
             "name": "doctrine/inflector",
@@ -606,6 +660,57 @@
                 }
             ],
             "time": "2023-10-12T05:21:21+00:00"
+        },
+        {
+            "name": "galbar/jsonpath",
+            "version": "3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Galbar/JsonPath-PHP.git",
+                "reference": "61bfdd51729ac95413aaf64112b93b6fb3dbd786"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Galbar/JsonPath-PHP/zipball/61bfdd51729ac95413aaf64112b93b6fb3dbd786",
+                "reference": "61bfdd51729ac95413aaf64112b93b6fb3dbd786",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0",
+                "sami/sami": ">=3.3.0",
+                "satooshi/php-coveralls": ">=1.0.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "JsonPath\\": "src/Galbar/JsonPath",
+                    "Utilities\\": "src/Galbar/Utilities"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Alessio Linares",
+                    "email": "alessio@alessio.cc"
+                }
+            ],
+            "description": "JSONPath implementation for querying and updating JSON objects",
+            "keywords": [
+                "json",
+                "jsonpath",
+                "path"
+            ],
+            "support": {
+                "issues": "https://github.com/Galbar/JsonPath-PHP/issues",
+                "source": "https://github.com/Galbar/JsonPath-PHP/tree/3.0"
+            },
+            "time": "2023-03-05T19:47:06+00:00"
         },
         {
             "name": "graham-campbell/result-type",

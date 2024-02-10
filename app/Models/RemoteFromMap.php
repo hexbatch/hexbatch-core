@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property RemoteInputMapType map_type
  * @property string remote_json_path
  * @property string remote_xpath
- * @property string remote_regex
+ * @property string remote_regex_split
+ * @property string remote_regex_match
  * @property string holder_json_path
  *
  *
@@ -27,10 +28,10 @@ use Illuminate\Database\Eloquent\Model;
  *
  *
  */
-class RemoteInputMap extends Model
+class RemoteFromMap extends Model
 {
 
-    protected $table = 'remote_input_maps';
+    protected $table = 'remote_from_maps';
     public $timestamps = false;
 
     /**

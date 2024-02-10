@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 /*
   user: required
         name : unique in urls
+        usage_group: (optional)
         is_retired: default false // if true then cannot be added to element types
         is_on : if off then all read and writes will fail and the remote not called
         timeout_seconds: if an attempt is made to sent to the remote, this is how many seconds until the read or write of the attribute ends in failure
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Schema;
             uri_method (post, get, patch.. etc)
             uri_port:
             uri_string
+            uri_data_input_format
+            uri_data_output_format
 
         read_policy:
             allow: bool
@@ -26,17 +29,11 @@ use Illuminate\Support\Facades\Schema;
         write_policy:
             allow: bool,
         data:
-            input_attribute_map: array<name of attribute, name of key this goes to server>
-            output_map: array<name of server output key or xml path, name of key output object will have>
-            remote_data : key value pairs with remote_data_type ('none','basic_auth','bearer_auth','data','header') and name, value and is_secret
+            from_remote_map: array<rule to convert data from the server to value in (attr or action)>
+            to_remote_map: array<rule to convert either pre-set value, or data in (attr or action) to some part of a data format to the server>
         call_schedule:
             call_max_per_unit: x
             call_unit_in_seconds: x
-        state
-            local_state_init: the initial state for per attribute or action
-            element_state_init: the initial shared state for any element that has this an attribute or action with this remote
-            type_state_init: the initial shared state for all elements of the same type that has this remote in an attribute or action
-            global_state: shared by all usages of this remote
 
 
 Remotes:
@@ -58,10 +55,6 @@ Remotes:
     * jsonb output_map
     call_max_per_unit
     call_unit_in_seconds
-    jsonb local_state_init
-    jsonb element_state_init
-    jsonb type_state_init
-    jsonb global_state
     remote_name
 
  */
@@ -84,6 +77,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('usage_group_id')
+                ->nullable()->default(null)
+                ->comment("Optional user group this is about")
+                ->index('idx_remotes_usage_group_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
@@ -100,18 +101,28 @@ return new class extends Migration
 
             $table->timestamps();
         });
-
+        #------------------------------
         DB::statement("CREATE TYPE type_remote_uri AS ENUM (
             'none','url','socket','console','manual'
             );");
 
         DB::statement("ALTER TABLE remotes Add COLUMN uri_type type_remote_uri  NOT NULL default 'none';");
+        #------------------------------
 
         DB::statement("CREATE TYPE type_remote_uri_method AS ENUM (
             'none','post','get','put','patch','delete'
             );");
 
         DB::statement("ALTER TABLE remotes Add COLUMN uri_method_type type_remote_uri_method  NOT NULL default 'none';");
+        #------------------------------
+
+        DB::statement("CREATE TYPE type_remote_data_format AS ENUM (
+            'none','plain_text','xml','json'
+            );");
+
+        DB::statement("ALTER TABLE remotes Add COLUMN uri_data_input_format type_remote_data_format  NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remotes Add COLUMN uri_data_output_format type_remote_data_format  NOT NULL default 'none';");
+        #------------------------------
 
         DB::statement('ALTER TABLE remotes ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
@@ -154,21 +165,9 @@ return new class extends Migration
             $table->integer('rate_limit_count')->default(null)->nullable()
                 ->comment('shared by all usages of this remote, has usage stats, rolls over per rate limit unit');
 
+            $table->string('remote_name',128)->nullable(false)->index()
+                ->comment("The unique name of the remote, using the naming rules");
 
-            $table->jsonb('local_state_init')->default(null)->nullable()
-                ->comment('the initial state for per attribute or action');
-
-            $table->jsonb('element_state_init')->default(null)->nullable()
-                ->comment('the initial shared state for any element that has this an attribute or action with this remote');
-
-            $table->jsonb('type_state_init')->default(null)->nullable()
-                ->comment('the initial shared state for all elements of the same type that has this remote in an attribute or action');
-
-            $table->jsonb('global_state')->default(null)->nullable()
-                ->comment('shared by all usages of this remote');
-
-            $table->jsonb('global_cache')->default(null)->nullable()
-                ->comment('shared by all usages of this remote, to store cache data');
 
 
         });
@@ -182,5 +181,6 @@ return new class extends Migration
         Schema::dropIfExists('remotes');
         DB::statement("DROP TYPE type_remote_uri;");
         DB::statement("DROP TYPE type_remote_uri_method;");
+        DB::statement("DROP TYPE type_remote_data_format;");
     }
 };

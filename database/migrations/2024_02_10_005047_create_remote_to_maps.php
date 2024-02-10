@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('remote_output_maps', function (Blueprint $table) {
+        Schema::create('remote_to_maps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('remote_id')
                 ->nullable(false)
@@ -29,21 +29,24 @@ return new class extends Migration
 
         });
 
-        DB::statement("CREATE TYPE type_of_remote_output AS ENUM (
+        DB::statement("CREATE TYPE type_of_remote_output_map AS ENUM (
             'none','basic_auth','bearer_auth','data','header'
             );");
 
-        DB::statement("ALTER TABLE remote_output_maps Add COLUMN output_map_type type_of_remote_output NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_to_maps Add COLUMN output_map_type type_of_remote_output_map NOT NULL default 'none';");
 
-        DB::statement("ALTER TABLE remote_output_maps ALTER COLUMN created_at SET DEFAULT NOW();");
+        DB::statement("ALTER TABLE remote_to_maps ALTER COLUMN created_at SET DEFAULT NOW();");
 
         DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON remote_output_maps FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+            CREATE TRIGGER update_modified_time BEFORE UPDATE ON remote_to_maps FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
 
-        Schema::table('remote_output_maps', function (Blueprint $table) {
+        Schema::table('remote_to_maps', function (Blueprint $table) {
+            $table->string('holder_json_path')->default(null)->nullable()
+                ->comment('how to get the data in the holder, if var value is null, then this will be used instead');
+
             $table->string('header_var_name')->nullable(false)->comment("The name of the header or setting");
-            $table->text('header_var_value')->nullable(false)->comment("The value of the header or setting");
+            $table->text('header_var_value')->nullable(true)->default(null)->comment("The value of the header or setting");
         });
     }
 
@@ -52,7 +55,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('remote_output_maps');
-        DB::statement("DROP TYPE type_of_remote_output;");
+        Schema::dropIfExists('remote_to_maps');
+        DB::statement("DROP TYPE type_of_remote_output_map;");
     }
 };
