@@ -8,6 +8,8 @@ return [
     |--------------------------------------------------------------------------
     |
     */
+    //general
+    'this_is_bad_json' => 'The json value is malformed. :issue',
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
@@ -51,7 +53,6 @@ return [
     'attribute_schema_bounds_violation' => 'When making an attribute, each bounds type has to be in a certain key',
     'attribute_schema_bounds_retired' => 'This bounds, ":bound_name" has been retired and cannot be added to the attribute',
     'attribute_schema_bad_regex' => 'When making an attribute, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
-    'attribute_schema_bad_json' => 'The json value is malformed. :issue',
     'attribute_schema_json_no_primitive' => 'The json value cannot be a primitive',
     'attribute_schema_improper_map_coordinate' => 'Map coodinates must have latitude and longitude properties and numbers in map ranges',
     'attribute_schema_improper_shape_coordinate' => 'Shape coodinates must have properies of x,y,x',
@@ -77,6 +78,8 @@ return [
 
     //remotes
     'remote_not_found' => 'Remote not found using :ref',
+    'remote_from_map_invalid_type' => 'Remote from mapping had an invalid type :ref',
+    'remote_to_map_invalid_type' => 'Remote to mapping had an invalid type :ref',
 
     //element types
     'element_type_not_found' => 'Element type not found using :ref',

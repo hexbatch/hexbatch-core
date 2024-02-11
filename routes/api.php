@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\LocationBoundController;
+use App\Http\Controllers\API\RemoteController;
 use App\Http\Controllers\API\TimeBoundController;
 use App\Http\Controllers\API\UserGroupController;
 use App\Http\Controllers\API\AttributeController;
@@ -86,6 +87,16 @@ Route::prefix('v1')->group(function () {
             Route::get('/{attribute}/get/{levels?}', [AttributeController::class, 'attribute_get'])->name('core.attribute.get');
             Route::get('/{attribute}/ping/{attribute_ping_type}', [AttributeController::class, 'attribute_ping'])->name('core.attribute.ping');
             Route::get('/list/managed', [AttributeController::class, 'attribute_list_managed'])->name('core.attribute.list.managed');
+            Route::get('/list/usage', [AttributeController::class, 'attribute_list_usage'])->name('core.attribute.list.usage');
+        });
+
+        Route::prefix('remote')->group(function () {
+            Route::post('/create', [RemoteController::class, 'remote_create'])->name('core.remote.create');
+            Route::patch('/{remote}/edit', [RemoteController::class, 'remote_edit_patch'])->name('core.remote.edit');
+            Route::delete('/{remote}/destroy', [RemoteController::class, 'remote_delete'])->name('core.remote.destroy');
+            Route::get('/{remote}/get/{levels?}', [RemoteController::class, 'remote_get'])->name('core.remote.get');
+            Route::get('/{remote}/test', [RemoteController::class, 'remote_test'])->name('core.remote.test');
+            Route::get('/list', [RemoteController::class, 'remote_list'])->name('core.remote.list');
         });
     }); //end auth protected
 

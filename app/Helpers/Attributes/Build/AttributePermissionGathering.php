@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers\Attributes;
+namespace App\Helpers\Attributes\Build;
 
 use App\Models\Attribute;
 use App\Models\AttributeUserGroup;

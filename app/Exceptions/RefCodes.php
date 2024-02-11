@@ -45,6 +45,7 @@ class RefCodes {
     //remotes start at 5000
 
     const REMOTE_NOT_FOUND = 5001;
+    const REMOTE_SCHEMA_ISSUE = 5010;
 
     //actions start at 6000
 
@@ -82,7 +83,10 @@ class RefCodes {
         self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
         self::ATTRIBUTE_SCHEMA_ISSUE => '',
         self::ATTRIBUTE_CANNOT_EDIT => '',
+
         self::REMOTE_NOT_FOUND => '',
+        self::REMOTE_SCHEMA_ISSUE => '',
+
         self::ELEMENT_TYPE_NOT_FOUND => '',
         self::ELEMENT_NOT_FOUND => '',
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers\Attributes;
+namespace App\Helpers\Attributes\Build;
 
 use App\Helpers\Utilities;
 use App\Models\Attribute;

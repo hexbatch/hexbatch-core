@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -46,7 +47,7 @@ use Illuminate\Validation\ValidationException;
  * @property bool is_writable
  * @property int rate_limit_max_per_unit
  * @property int rate_limit_unit_in_seconds
- * @property string rate_limit_starts_at
+ * @property ?string rate_limit_starts_at
  * @property int rate_limit_count
  *
  *
@@ -73,6 +74,8 @@ class Remote extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'rate_limit_starts_at',
+        'rate_limit_count'
     ];
 
     /**
@@ -150,7 +153,7 @@ class Remote extends Model
     }
 
     public static function buildRemote(
-        ?int $id = null,?int $admin_user_id = null)
+        ?int $id = null,?int $admin_user_id = null,?int $usage_user_id = null)
     : Builder
     {
 
@@ -188,15 +191,31 @@ class Remote extends Model
                 }
             );
 
-            $build->join('user_group_members',
+            $build->join('user_group_members admin_group_members',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join) use($admin_user_id) {
                     $join
-                        ->on('user_group_members.user_group_id','=','user_groups.id')
-                        ->where('user_group_members.user_id',$admin_user_id)
-                        ->where('user_group_members.is_admin',true);
+                        ->on('admin_group_members.user_group_id','=','user_groups.id')
+                        ->where('admin_group_members.user_id',$admin_user_id)
+                        ->where('admin_group_members.is_admin',true);
+                }
+            );
+        }
+
+
+        if ($usage_user_id) {
+
+            $build->join('user_group_members as usage_members',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($usage_user_id) {
+                    $join
+                        ->on('remotes.usage_group_id','=','usage_members.user_group_id')
+                        ->where('usage_members.user_id',$usage_user_id)
+                    ;
                 }
             );
         }
@@ -258,6 +277,31 @@ class Remote extends Model
         }
         return $ret;
 
+    }
+
+    public function powerRemote(bool $b_off = true) {
+        if ($this->is_on === $b_off) {return;}
+        $this->is_on = !$b_off;
+        $this->save();
+        if ($this->is_on) {
+            $this->resetRateLimit();
+        } else {
+            $this->emptyRateLimit();
+        }
+    }
+    public function resetRateLimit() :void {
+        $this->update(['rate_limit_starts_at' => DB::raw('NOW()'),'rate_limit_count'=>0]);
+    }
+    protected function emptyRateLimit() :void {
+        $this->update(['rate_limit_starts_at' => null,'rate_limit_count'=>null]);
+    }
+
+    public function testRemote(\Illuminate\Support\Collection $collection) {
+
+    }
+
+    public function clearCache() :void {
+        //todo clear the cache
     }
 
 }

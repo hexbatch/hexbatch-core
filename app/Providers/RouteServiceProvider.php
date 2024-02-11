@@ -6,6 +6,7 @@ use App\Models\Attribute;
 use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\LocationBound;
+use App\Models\Remote;
 use App\Models\TimeBound;
 use App\Models\User;
 use App\Models\UserGroup;
@@ -40,6 +41,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('time_bound', TimeBound::class);
         Route::model('location_bound', LocationBound::class);
         Route::model('attribute', Attribute::class);
+        Route::model('remote', Remote::class);
         Route::model('element', Element::class);
         Route::model('element_type', ElementType::class);
 

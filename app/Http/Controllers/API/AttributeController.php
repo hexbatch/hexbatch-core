@@ -4,12 +4,12 @@ namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Attributes\AttributeBinaryOptions;
-use App\Helpers\Attributes\AttributeBounds;
-use App\Helpers\Attributes\AttributeMetaGathering;
-use App\Helpers\Attributes\AttributePermissionGathering;
-use App\Helpers\Attributes\AttributeRuleGathering;
-use App\Helpers\Attributes\AttributeValue;
+use App\Helpers\Attributes\Build\AttributeBinaryOptions;
+use App\Helpers\Attributes\Build\AttributeBounds;
+use App\Helpers\Attributes\Build\AttributeMetaGathering;
+use App\Helpers\Attributes\Build\AttributePermissionGathering;
+use App\Helpers\Attributes\Build\AttributeRuleGathering;
+use App\Helpers\Attributes\Build\AttributeValue;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
@@ -18,10 +18,7 @@ use App\Models\Attribute;
 use App\Models\AttributeUserGroup;
 use App\Models\Enums\AttributePingType;
 use App\Models\Enums\AttributeUserGroupType;
-
-
 use App\Models\User;
-use App\Models\UserGroup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -214,6 +211,13 @@ class AttributeController extends Controller
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
         $out = Attribute::buildAttribute(admin_user_id: $user->id)->cursorPaginate();
+        return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function attribute_list_usage(?User $user = null) {
+        $logged_user = auth()->user();
+        if (!$user) {$user = $logged_user;}
+        $out = Attribute::buildAttribute(usage_user_id: $user->id)->cursorPaginate();
         return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 

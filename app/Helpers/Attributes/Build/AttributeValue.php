@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers\Attributes;
+namespace App\Helpers\Attributes\Build;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -100,7 +100,7 @@ class AttributeValue
                 if (is_string($test_default)) {
                     $json_issue = Utilities::jsonHasErrors($test_default);
                     if ($json_issue) {
-                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_bad_json", ['issue' => $json_issue]),
+                        throw new HexbatchNotPossibleException(__("msg.this_is_bad_json", ['issue' => $json_issue]),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }
@@ -112,7 +112,7 @@ class AttributeValue
                 if (is_string($test_default)) {
                     $json_issue = Utilities::jsonHasErrors($test_default);
                     if ($json_issue) {
-                        throw new HexbatchNotPossibleException(__("msg.attribute_schema_bad_json", ['issue' => $json_issue]),
+                        throw new HexbatchNotPossibleException(__("msg.this_is_bad_json", ['issue' => $json_issue]),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }

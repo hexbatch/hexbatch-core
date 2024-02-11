@@ -16,4 +16,4 @@ class TrimStrings extends Middleware
         'password',
         'password_confirmation',
     ];
-}
+}//todo need to sanitize strings in api that are not names, such as attribute meta

@@ -262,7 +262,7 @@ class Attribute extends Model
     }
 
     public static function buildAttribute(
-        ?int $id = null,?int $admin_user_id = null)
+        ?int $id = null,?int $admin_user_id = null,?int $usage_user_id = null)
     : Builder
     {
 
@@ -315,6 +315,33 @@ class Attribute extends Model
                         ->on('user_group_members.user_group_id','=','user_groups.id')
                         ->where('user_group_members.user_id',$admin_user_id)
                         ->where('user_group_members.is_admin',true);
+                }
+            );
+        }
+
+        if ($usage_user_id) {
+
+            $build->join('attribute_user_groups as a_groups',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('a_groups.group_parent_attribute_id','=','attributes.id')
+                        ->where('a_groups.group_type',AttributeUserGroupType::USAGE->value)
+                    ;
+                }
+            );
+
+            $build->join('user_group_members as usage_members',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($usage_user_id) {
+                    $join
+                        ->on('usage_members.id','=','a_groups.target_user_group_id')
+                        ->where('usage_members.user_id',$usage_user_id)
+                    ;
                 }
             );
         }

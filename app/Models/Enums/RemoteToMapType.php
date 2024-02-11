@@ -1,6 +1,6 @@
 <?php
 namespace App\Models\Enums;
-enum RemoteOutputMapType : string {
+enum RemoteToMapType : string {
 
     case NONE = 'none';
     case BASIC_AUTH = 'basic_auth';

@@ -21,11 +21,14 @@ use Illuminate\Support\Facades\Schema;
             uri_data_input_format
             uri_data_output_format
 
-        read_policy:
-            allow: bool
-            cache: bool, if true then each last call updates the cache, and if same cache param key values then cache is used
+        cache:
+            is_caching: bool, if true then each last call updates the cache, and if same cache param key values then cache is used
             cache_ttl_seconds: how old the cache is allowed to be
             cache_keys: array of string keys to use for the cache comparisons, empty means no comparison
+
+        read_policy:
+            allow: bool
+
         write_policy:
             allow: bool,
         data:

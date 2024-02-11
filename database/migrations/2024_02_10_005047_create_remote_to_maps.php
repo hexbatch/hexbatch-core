@@ -33,7 +33,7 @@ return new class extends Migration
             'none','basic_auth','bearer_auth','data','header'
             );");
 
-        DB::statement("ALTER TABLE remote_to_maps Add COLUMN output_map_type type_of_remote_output_map NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_to_maps Add COLUMN map_type type_of_remote_output_map NOT NULL default 'none';");
 
         DB::statement("ALTER TABLE remote_to_maps ALTER COLUMN created_at SET DEFAULT NOW();");
 
