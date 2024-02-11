@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Enums\RemoteStatusType;
 use ArrayObject;
@@ -23,7 +25,6 @@ use Illuminate\Support\Facades\Cache;
  * @property int caller_element_id
  * @property int caller_type_id
  * @property string ref_uuid
- * @property string remote_call_ended
  * @property RemoteStatusType status_type
  * @property int response_code
  * @property ArrayObject to_headers
@@ -35,9 +36,13 @@ use Illuminate\Support\Facades\Cache;
  *
  *
  *
- *
+ * @property string remote_call_ended_at
  * @property string created_at
  * @property string updated_at
+ *
+ * @property int remote_call_ended_at_ts
+ * @property int created_at_ts
+ * @property int updated_at_ts
  *
  * @property Remote remote_parent
  * @property Action caller_action
@@ -105,6 +110,78 @@ class RemoteActivity extends Model
 
     public function caller_type() : BelongsTo {
         return $this->belongsTo('App\Models\ElementType','caller_type_id');
+    }
+
+
+    public static function buildElement(
+        ?int $id = null)
+    : Builder
+    {
+
+
+        $build = Remote::select('remote_activities.*')
+            ->selectRaw(" extract(epoch from  remote_activities.created_at) as created_at_ts,  extract(epoch from  remote_activities.updated_at) as updated_at_ts".
+                ",  extract(epoch from  remote_activities.remote_call_ended) as remote_call_ended_at_ts")
+
+            /** @uses RemoteActivity::remote_parent(),Remote::rules_to_remote(),Remote::rules_from_remote(), */
+            ->with('remote_parent','remote_parent.rules_to_remote','remote_parent.rules_from_remote')
+
+            /**
+             * @uses RemoteActivity::caller_action(),RemoteActivity::caller_attribute(),RemoteActivity::caller_user()
+             * @uses RemoteActivity::caller_element(),RemoteActivity::caller_type(),
+             */
+            ->with('caller_action','caller_attribute','caller_user','caller_element','caller_type')
+        ;
+
+        if ($id) {
+            $build->where('remote_activities.id', $id);
+        }
+
+        return $build;
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $build = null;
+        $ret = null;
+        $first_id = null;
+        try {
+            if ($field) {
+                $build = $this->where($field, $value);
+            } else {
+                if (Utilities::is_uuid($value)) {
+                    //the ref
+                    $build = $this->where('ref_uuid', $value);
+                }
+            }
+            if ($build) {
+                $first_id = (int)$build->value('id');
+                if ($first_id) {
+                    $ret = RemoteActivity::buildElement(id:$first_id)->first();
+                }
+            }
+        } finally {
+            if (empty($ret) || empty($first_id) || empty($build)) {
+                throw new HexbatchNotFound(
+                    __('msg.remote_activity_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::REMOTE_ACTIVITY_NOT_FOUND
+                );
+            }
+        }
+        return $ret;
+
+    }
+
+    public function getName() :string {
+        return $this->ref_uuid;
     }
 
     public function addCache() : void {

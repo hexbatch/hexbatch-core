@@ -74,7 +74,7 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
             $table->timestamps();
-            $table->dateTime('remote_call_ended')->nullable()->default(null)->comment("filled in when remote completes");
+            $table->dateTime('remote_call_ended_at')->nullable()->default(null)->comment("filled in when remote completes");
 
         });
 

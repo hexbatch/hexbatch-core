@@ -40,15 +40,14 @@ use Illuminate\Validation\ValidationException;
  * @property RemoteUriDataFormatType uri_data_output_format
  * @property string uri_string
  * @property int uri_port
- * @property bool is_readable
  * @property bool is_sending_context_to_remote
  * @property bool is_caching
  * @property int cache_ttl_seconds
  * @property ArrayObject cache_keys
- * @property bool is_writable
  * @property int rate_limit_max_per_unit
  * @property int rate_limit_unit_in_seconds
  * @property ?string rate_limit_starts_at
+ * @property int total_calls_made
  * @property int rate_limit_count
  * @property int max_concurrent_calls
  *
@@ -58,7 +57,7 @@ use Illuminate\Validation\ValidationException;
  * @property string updated_at
  *
  * @property User remote_owner
- * @property RemoteActivity[] logs_of_remote
+ * @property RemoteActivity[] activity_of_remote
  * @property RemoteToMap[] rules_to_remote
  * @property RemoteFromMap[] rules_from_remote
  *
@@ -102,7 +101,7 @@ class Remote extends Model
 
     const REMOTES_CACHE_TAG = 'remotes';
 
-    public function logs_of_remote() : BelongsTo {
+    public function activity_of_remote() : BelongsTo {
         return $this->belongsTo('App\Models\RemoteActivity','remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
@@ -162,8 +161,8 @@ class Remote extends Model
 
         $build =  Remote::select('remotes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Remote::remote_owner(),Remote::logs_of_remote(),Remote::rules_to_remote(),Remote::rules_from_remote(), */
-            ->with('remote_owner','logs_of_remote','rules_to_remote','rules_from_remote')
+            /** @uses Remote::remote_owner(),Remote::activity_of_remote(),Remote::rules_to_remote(),Remote::rules_from_remote(), */
+            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
 
         ;
 
@@ -319,7 +318,7 @@ class Remote extends Model
     }
 
     public function getCache() : array {
-        $what = Cache::tags([ static::REMOTES_CACHE_TAG])->get($this->getCacheKey());;
+        $what = Cache::tags([ static::REMOTES_CACHE_TAG])->get($this->getCacheKey());
         return Utilities::maybeDecodeJson($what,true,[]);
     }
 

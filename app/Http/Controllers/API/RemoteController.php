@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Helpers\Remotes\Build\DataGathering;
-use App\Helpers\Remotes\Build\PermissionGathering;
 use App\Helpers\Remotes\Build\RemoteAlwaysCanSetOptions;
 use App\Helpers\Remotes\Build\RemoteUriGathering;
 use App\Http\Controllers\Controller;
@@ -122,7 +121,6 @@ class RemoteController extends Controller
     protected function updateAllRemote(Remote $remote, Request $request) {
 
         (new RemoteUriGathering($request) )->assign($remote);
-        (new PermissionGathering($request) )->assign($remote);
 
         $this->updateInUseRemote($remote,$request);
 

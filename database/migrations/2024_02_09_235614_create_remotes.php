@@ -50,11 +50,9 @@ Remotes:
     * enum uri_method
     * uri_string
     * uri_port
-    * is_readable
     * is_caching
     * cache_ttl_seconds
     * jsonb cache_keys
-    * is_writeable
     * jsonb input_attribute_map
     * jsonb output_map
     call_max_per_unit
@@ -142,8 +140,7 @@ return new class extends Migration
             $table->integer('uri_port')->default(null)->nullable()
                 ->comment('if set, this port for the socket or url');
 
-            $table->boolean('is_readable')->default(true)->nullable(false)
-                ->comment('if false then attached attribute not readable');
+
 
             $table->boolean('is_sending_context_to_remote')->default(false)->nullable(false)
                 ->comment('if on, then the guids of the relavent attribute,action,element and type are sent to help keep state on the server side');
@@ -157,8 +154,8 @@ return new class extends Migration
             $table->jsonb('cache_keys')->default(null)->nullable()
                 ->comment('array of string keys to use for the cache comparisons, empty means no comparison');
 
-            $table->boolean('is_writable')->default(true)->nullable(false)
-                ->comment('if false then attached attribute not writable');
+            $table->integer('total_calls_made')->default(0)->nullable(false)
+                ->comment('counts the total number of calls made in the remote lifetime');
 
             $table->integer('rate_limit_max_per_unit')->default(null)->nullable()
                 ->comment('if set, this is the rate limit this remote can be called in the time unit defined in the other column');

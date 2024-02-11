@@ -83,7 +83,7 @@ return [
     'remote_to_map_invalid_type' => 'Remote to mapping had an invalid type :ref',
     'remote_sensitive_type' => 'Remote method of :method can only be set with permission',
     'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
-
+    'remote_activity_not_found' => 'Remote activity not found using :ref',
     //actions
     'action_not_found' => 'Element not found using :ref',
 
