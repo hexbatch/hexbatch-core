@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int time_bound_id
  * @property int location_bound_id
  * @property int remote_id
+ * @property int action_id
  *
  *
  * @property string created_at

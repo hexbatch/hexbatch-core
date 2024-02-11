@@ -261,6 +261,10 @@ class Attribute extends Model
         return $this->attribute_owner->username . '.'. $this->attribute_name;
     }
 
+    public static function findAttribute(int $id) : ?Attribute {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return static::buildAttribute(id:$id)->first();
+    }
     public static function buildAttribute(
         ?int $id = null,?int $admin_user_id = null,?int $usage_user_id = null)
     : Builder

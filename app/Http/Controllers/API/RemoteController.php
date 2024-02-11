@@ -54,7 +54,7 @@ class RemoteController extends Controller
      */
     public function remote_test(Request $request, Remote $remote) {
 
-        $remote->testRemote($request->collect());
+        $remote->runRemote($request->collect());
         $out = Remote::buildRemote(id: $remote->id)->first();
         return response()->json(new RemoteResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }

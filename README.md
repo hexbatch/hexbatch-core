@@ -29,3 +29,5 @@ https://dockerwebdev.com/tutorials/docker-php-development/
 
 https://github.com/Galbar/JsonPath-PHP
 https://github.com/digitickets/lalit
+
+can clear out just part of the redis cache `php artisan cache:clear --tags=tests`

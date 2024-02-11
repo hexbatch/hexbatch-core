@@ -2,6 +2,9 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use ErrorException;
 use JsonException;
 
@@ -75,19 +78,37 @@ class Utilities {
         return null;
     }
 
-    public static function convertToObject(array|string|object $what) : null|object {
-        if (empty($what)) { return null;}
+
+    public static function wrapJsonEncode(array|object|null $what) : ? string {
+        try {
+            return json_encode($what, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new HexbatchCoreException(__('msg.cannot_convert_to_json',['issue'=>$e->getMessage()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::JSON_ISSUE);
+
+        }
+    }
+
+    public static function maybeDecodeJson(array|string|object|null $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array {
+        if (empty($what)) { return $null_default;}
+        if (is_array($what) && $b_associative) {
+            return $maybe_json;
+        }
+        if (is_object($what) && !$b_associative) {
+            return $maybe_json;
+        }
         if (is_array($what) || is_object($what)) {
             $json = json_encode($what);
         } else {
             if (static::jsonHasErrors($what)) {
-                return null;
+                return $null_default;
             }
             $json = $what;
         }
-        $converted =  json_decode($json,false);
-        if (! is_object($converted)) {
-            return null;
+        $converted =  json_decode($json,$b_associative);
+        if (! is_object($converted) || !is_array($converted)) {
+            return $null_default;
         }
         return $converted;
     }

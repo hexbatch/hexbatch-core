@@ -17,6 +17,7 @@ class RemoteAlwaysCanSetOptions
     public ?int $timeout_seconds = self::DEFAULT_UNUSED_NUMBER;
     public ?int $rate_limit_unit_in_seconds = self::DEFAULT_UNUSED_NUMBER;
     public ?int $rate_limit_max_per_unit = self::DEFAULT_UNUSED_NUMBER;
+    public int $max_concurrent_calls = self::DEFAULT_UNUSED_NUMBER;
 
 
     public ?bool $is_caching = null;
@@ -54,6 +55,11 @@ class RemoteAlwaysCanSetOptions
             if ($this->rate_limit_unit_in_seconds <= 0) {$this->rate_limit_unit_in_seconds = null;}
         }
 
+        if ($call_schedule_block->has('max_concurrent_calls')) {
+            $this->max_concurrent_calls = intval($call_schedule_block->get('max_concurrent_calls'));
+            if ($this->max_concurrent_calls <= 0) {$this->max_concurrent_calls = 1;}
+        }
+
         $cache_block = new Collection();
         if ($request->request->has('cache')) {
             $cache_block = $request->collect('cache');
@@ -77,12 +83,26 @@ class RemoteAlwaysCanSetOptions
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::REMOTE_SCHEMA_ISSUE);
                 }
-                $this->cache_keys = json_decode($test_cache_keys, true);
+                $found_keys = json_decode($test_cache_keys, true);
             } else {
-                $this->cache_keys = $test_cache_keys;
+                $found_keys = $test_cache_keys;
             }
             if (empty($this->cache_keys)) {
                 $this->cache_keys = null;
+            } else {
+                $ok_keys = [];
+                foreach ($found_keys as $a_key) {
+                    if (empty(trim($a_key))) {
+                        continue;
+                    }
+                    if (!in_array($a_key,Remote::ALL_SPECIAL_CACHE_KEY_NAMES)) {
+                        throw new HexbatchNotPossibleException(__("msg.remote_invalid_cache_keys", ['key' => $a_key]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::REMOTE_SCHEMA_ISSUE);
+                    }
+                    $ok_keys[] = $a_key;
+                }
+                $this->cache_keys = $ok_keys;
             }
         }
     }
@@ -112,11 +132,5 @@ class RemoteAlwaysCanSetOptions
             $remote->resetRateLimit();
         }
 
-        $older_cach_keys =  ($remote->getRawOriginal('cache_keys')??[]);
-        $newer_cache_keys = ($this->cache_keys??[]);
-        $diff_keys = array_diff($older_cach_keys, $newer_cache_keys);
-        if (count($diff_keys)) {
-            $remote->clearCache();
-        }
     }
 }

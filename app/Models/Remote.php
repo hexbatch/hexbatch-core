@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -49,6 +50,7 @@ use Illuminate\Validation\ValidationException;
  * @property int rate_limit_unit_in_seconds
  * @property ?string rate_limit_starts_at
  * @property int rate_limit_count
+ * @property int max_concurrent_calls
  *
  *
  *
@@ -56,7 +58,7 @@ use Illuminate\Validation\ValidationException;
  * @property string updated_at
  *
  * @property User remote_owner
- * @property RemoteLog[] logs_of_remote
+ * @property RemoteActivity[] logs_of_remote
  * @property RemoteToMap[] rules_to_remote
  * @property RemoteFromMap[] rules_from_remote
  *
@@ -98,9 +100,10 @@ class Remote extends Model
         'cache_keys' => AsArrayObject::class
     ];
 
+    const REMOTES_CACHE_TAG = 'remotes';
 
     public function logs_of_remote() : BelongsTo {
-        return $this->belongsTo('App\Models\RemoteLog','remote_id')
+        return $this->belongsTo('App\Models\RemoteActivity','remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
     }
@@ -296,12 +299,30 @@ class Remote extends Model
         $this->update(['rate_limit_starts_at' => null,'rate_limit_count'=>null]);
     }
 
-    public function testRemote(\Illuminate\Support\Collection $collection) {
-
+    public function runRemote(\Illuminate\Support\Collection $collection, bool $b_log = true, bool $b_rated = true) {
+        /*
+         * todo api calls to list manual calls and supply them with the result
+         * is the log the calling context also? if so it needs more fields
+         */
     }
 
-    public function clearCache() :void {
-        //todo clear the cache
+   const CACHE_KEY_DEFAULT = 'default';
+   const CACHE_KEY_NAME_ATTRIBUTE = 'attribute_ref';
+   const CACHE_KEY_NAME_ACTION = 'action_ref';
+   const CACHE_KEY_NAME_ELEMENT = 'element_ref';
+   const CACHE_KEY_NAME_TYPE = 'type_ref';
+   const CACHE_KEY_NAME_USER = 'user_ref';
+   const ALL_SPECIAL_CACHE_KEY_NAMES = [ self::CACHE_KEY_NAME_ELEMENT,self::CACHE_KEY_NAME_TYPE,self::CACHE_KEY_NAME_ATTRIBUTE,self::CACHE_KEY_NAME_ACTION,self::CACHE_KEY_NAME_USER];
+
+    public function getCacheKey() :string {
+        return 'r-'.$this->ref_uuid;
     }
+
+    public function getCache() : array {
+        $what = Cache::tags([ static::REMOTES_CACHE_TAG])->get($this->getCacheKey());;
+        return Utilities::maybeDecodeJson($what,true,[]);
+    }
+
+
 
 }

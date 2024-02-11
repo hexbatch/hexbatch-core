@@ -10,6 +10,7 @@ return [
     */
     //general
     'this_is_bad_json' => 'The json value is malformed. :issue',
+    'cannot_convert_to_json' => 'The the value cannot be converted to json :issue',
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
@@ -80,6 +81,11 @@ return [
     'remote_not_found' => 'Remote not found using :ref',
     'remote_from_map_invalid_type' => 'Remote from mapping had an invalid type :ref',
     'remote_to_map_invalid_type' => 'Remote to mapping had an invalid type :ref',
+    'remote_sensitive_type' => 'Remote method of :method can only be set with permission',
+    'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
+
+    //actions
+    'action_not_found' => 'Element not found using :ref',
 
     //element types
     'element_type_not_found' => 'Element type not found using :ref',

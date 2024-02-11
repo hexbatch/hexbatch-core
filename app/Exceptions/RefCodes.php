@@ -6,6 +6,7 @@ class RefCodes {
     //general stuff start at 1
 
     const VALIDATION = 1;
+    const JSON_ISSUE = 3;
 
 
     //users start at 1000
@@ -49,6 +50,8 @@ class RefCodes {
 
     //actions start at 6000
 
+    const ACTION_NOT_FOUND =  6001;
+
     //element types start at 7000
 
     const ELEMENT_TYPE_NOT_FOUND = 7001;
@@ -61,6 +64,7 @@ class RefCodes {
 
 
     const URLS = [
+        self::JSON_ISSUE => '',
         self::BAD_LOGIN => '',
         self::USER_NOT_FOUND => '',
         self::USER_NOT_PRIV => '',
@@ -86,6 +90,9 @@ class RefCodes {
 
         self::REMOTE_NOT_FOUND => '',
         self::REMOTE_SCHEMA_ISSUE => '',
+
+
+        self::ACTION_NOT_FOUND => '',
 
         self::ELEMENT_TYPE_NOT_FOUND => '',
         self::ELEMENT_NOT_FOUND => '',

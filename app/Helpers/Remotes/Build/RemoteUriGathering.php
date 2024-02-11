@@ -2,6 +2,8 @@
 
 namespace App\Helpers\Remotes\Build;
 
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Models\Enums\RemoteUriDataFormatType;
 use App\Models\Enums\RemoteUriMethod;
 use App\Models\Enums\RemoteUriType;
@@ -26,7 +28,7 @@ class RemoteUriGathering
 
 
 
-    public function __construct(Request $request)
+    public function __construct(Request $request, bool $b_admin = false)
     {
 
 
@@ -37,6 +39,11 @@ class RemoteUriGathering
 
         if ($uri_block->has('uri_type')) {
             $convert = RemoteUriType::tryFrom($uri_block->get('uri_type'));
+            if (!$b_admin && in_array($convert,RemoteUriType::SENSITIVE_TYPES) ) {
+                throw new HexbatchNotPossibleException(__("msg.remote_sensitive_type",['method'=>$convert->value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            }
             $this->uri_type = $convert ?: null;
         }
 

@@ -172,6 +172,9 @@ return new class extends Migration
             $table->integer('rate_limit_count')->default(null)->nullable()
                 ->comment('shared by all usages of this remote, has usage stats, rolls over per rate limit unit');
 
+            $table->integer('max_concurrent_calls')->default(1)->nullable(false)
+                ->comment('number of open calls to this remote at one time');
+
             $table->string('remote_name',128)->nullable(false)->index()
                 ->comment("The unique name of the remote, using the naming rules");
 

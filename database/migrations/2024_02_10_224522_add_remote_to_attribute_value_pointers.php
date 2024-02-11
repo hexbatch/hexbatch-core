@@ -21,12 +21,21 @@ return new class extends Migration
                 ->constrained('remotes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+
+            $table->foreignId('action_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The value points to an action")
+                ->index('idx_value_pointer_action_id')
+                ->constrained('actions')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
         });
 
         DB::statement("ALTER TABLE attribute_value_pointers DROP CONSTRAINT chk_only_one_is_not_null;");
 
         DB::statement("ALTER TABLE attribute_value_pointers ADD CONSTRAINT chk_only_one_is_not_null CHECK (
-            num_nonnulls(location_bound_id, time_bound_id, element_id,element_type_id,attribute_id,user_group_id,user_id,remote_id) = 1)
+            num_nonnulls(location_bound_id, time_bound_id, element_id,element_type_id,attribute_id,user_group_id,user_id,remote_id,action_id) = 1)
         ;");
     }
 
@@ -46,6 +55,7 @@ return new class extends Migration
 
             $table->dropForeign(['remote_id']);
             $table->dropColumn('remote_id');
+            $table->dropColumn('action_id');
 
         });
     }
