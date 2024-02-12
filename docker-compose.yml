@@ -7,10 +7,12 @@ volumes:
 
 networks:
   dev_hbc_network:
+      name: network_hbc
 
 services:
 
   webserver_hbc:
+    container_name: php_server_hbc
     build:
       context: ./docker/php
     ports:
@@ -49,7 +51,7 @@ services:
       - dev_hbc_network
 
   pgadmin_hbc:
-    container_name: pgadmin
+    container_name: pgadmin_hbc
     depends_on:
       - db_hbc
     image: dpage/pgadmin4:latest

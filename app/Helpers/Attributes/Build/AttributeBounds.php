@@ -6,7 +6,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
-use App\Models\Enums\LocationType;
+use App\Models\Enums\Bounds\LocationType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
 use Illuminate\Http\Request;

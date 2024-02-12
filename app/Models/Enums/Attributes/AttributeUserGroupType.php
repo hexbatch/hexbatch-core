@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Enums;
+namespace App\Models\Enums\Attributes;
 enum AttributeUserGroupType : string {
     case INACTIVE = 'inactive';
     case READ = 'read';

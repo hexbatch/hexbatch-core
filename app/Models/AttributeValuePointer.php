@@ -12,12 +12,11 @@ use App\Http\Resources\RemoteResource;
 use App\Http\Resources\TimeBoundResource;
 use App\Http\Resources\UserGroupResource;
 use App\Http\Resources\UserResource;
-use App\Models\Enums\AttributeValueType;
-use App\Models\Enums\LocationType;
+use App\Models\Enums\Attributes\AttributeValueType;
+use App\Models\Enums\Bounds\LocationType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
 
 
 /**

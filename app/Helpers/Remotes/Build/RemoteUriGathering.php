@@ -4,9 +4,9 @@ namespace App\Helpers\Remotes\Build;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\Enums\RemoteUriDataFormatType;
-use App\Models\Enums\RemoteUriMethod;
-use App\Models\Enums\RemoteUriType;
+use App\Models\Enums\Remotes\RemoteUriDataFormatType;
+use App\Models\Enums\Remotes\RemoteUriMethod;
+use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -22,8 +22,8 @@ class RemoteUriGathering
 
     public ?int $uri_port = self::DEFAULT_UNUSED_NUMBER;
     public ?string $uri_string = self::DEFAULT_UNUSED_STRING;
-    public ?RemoteUriDataFormatType $uri_data_input_format = null;
-    public ?RemoteUriDataFormatType $uri_data_output_format = null;
+    public ?RemoteUriDataFormatType $uri_from_remote_format = null;
+    public ?RemoteUriDataFormatType $uri_to_remote_format = null;
 
 
 
@@ -62,14 +62,14 @@ class RemoteUriGathering
             if (empty($this->uri_string)) {$this->uri_string = null;}
         }
 
-        if ($uri_block->has('uri_data_input_format')) {
-            $convert = RemoteUriDataFormatType::tryFrom($uri_block->get('uri_data_input_format'));
-            $this->uri_data_input_format = $convert ?: null;
+        if ($uri_block->has('uri_to_remote_format')) {
+            $convert = RemoteUriDataFormatType::tryFrom($uri_block->get('uri_to_remote_format'));
+            $this->uri_to_remote_format = $convert ?: null;
         }
 
-        if ($uri_block->has('uri_data_output_format')) {
-            $convert = RemoteUriDataFormatType::tryFrom($uri_block->get('uri_data_output_format'));
-            $this->uri_data_output_format = $convert ?: null;
+        if ($uri_block->has('uri_from_remote_format')) {
+            $convert = RemoteUriDataFormatType::tryFrom($uri_block->get('uri_from_remote_format'));
+            $this->uri_from_remote_format = $convert ?: null;
         }
 
     }

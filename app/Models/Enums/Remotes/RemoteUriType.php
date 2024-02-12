@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Enums;
+namespace App\Models\Enums\Remotes;
 enum RemoteUriType : string {
 
     case NONE = 'none';
@@ -9,6 +9,12 @@ enum RemoteUriType : string {
     case MANUAL = 'manual';
 
     const SENSITIVE_TYPES = [
+        self::SOCKET,
+        self::CONSOLE
+    ];
+
+    const DISPATCHABLE_TYPES = [
+        self::URL,
         self::SOCKET,
         self::CONSOLE
     ];

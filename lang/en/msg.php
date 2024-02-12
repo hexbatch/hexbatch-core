@@ -84,6 +84,10 @@ return [
     'remote_sensitive_type' => 'Remote method of :method can only be set with permission',
     'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
     'remote_activity_not_found' => 'Remote activity not found using :ref',
+    'remote_map_invalid_json_path' => 'The json path is not valid :ref',
+    'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
+
+
     //actions
     'action_not_found' => 'Element not found using :ref',
 

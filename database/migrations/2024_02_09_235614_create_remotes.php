@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Schema;
             uri_method (post, get, patch.. etc)
             uri_port:
             uri_string
-            uri_data_input_format
-            uri_data_output_format
+            uri_to_remote_format
+            uri_from_remote_format
 
         cache:
             is_caching: bool, if true then each last call updates the cache, and if same cache param key values then cache is used
@@ -122,8 +122,8 @@ return new class extends Migration
             'none','plain_text','xml','json'
             );");
 
-        DB::statement("ALTER TABLE remotes Add COLUMN uri_data_input_format type_remote_data_format  NOT NULL default 'none';");
-        DB::statement("ALTER TABLE remotes Add COLUMN uri_data_output_format type_remote_data_format  NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remotes Add COLUMN uri_to_remote_format type_remote_data_format  NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remotes Add COLUMN uri_from_remote_format type_remote_data_format  NOT NULL default 'none';");
         #------------------------------
 
         DB::statement('ALTER TABLE remotes ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

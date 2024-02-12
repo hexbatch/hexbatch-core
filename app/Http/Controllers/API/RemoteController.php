@@ -6,9 +6,14 @@ use App\Helpers\Remotes\Build\DataGathering;
 use App\Helpers\Remotes\Build\RemoteAlwaysCanSetOptions;
 use App\Helpers\Remotes\Build\RemoteUriGathering;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RemoteActivityCollection;
+use App\Http\Resources\RemoteActivityResource;
 use App\Http\Resources\RemoteCollection;
 use App\Http\Resources\RemoteResource;
+use App\Models\Enums\Remotes\RemoteStatusType;
+use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
+use App\Models\RemoteActivity;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,16 +21,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 
-/*
-| Method | Path                | Route Name | Operation                                    | Args                                            |
-|--------|---------------------|------------|----------------------------------------------|-------------------------------------------------|
-| Post   | remote              |            | Makes a new remote                           | Required name: optional states, required remote |
-| Patch  | remote/:id/edit/    |            | Edit part of value, if possible, sparse      | Any detail , sparse update                      |
-| Get    | remote/:id          |            | returns full remote info                     | can pass in optional type and element           |
-| Get    | remotes/list        |            | searches for remotes                         | iterator,can pass in filtering info             |
-| Get    | remote/:id/test     |            | Sends to the Remote, returns value or issues | add json body for the values it draws on        |
-| Delete | remote/:id          |            | Delete Remote, if the user can               |                                                 |                                               |
- */
 
 class RemoteController extends Controller
 {
@@ -46,16 +41,28 @@ class RemoteController extends Controller
     }
 
 
-    /**
-     * @param Request $request
-     * @param Remote $remote
-     * @return JsonResponse
-     */
-    public function remote_test(Request $request, Remote $remote) {
 
-        $remote->runRemote($request->collect());
-        $out = Remote::buildRemote(id: $remote->id)->first();
-        return response()->json(new RemoteResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    public function remote_test(Request $request, Remote $remote) {
+        $activity = $remote->createActivity($request->collect());
+        return response()->json(new RemoteActivityResource($activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function update_activity(Request $request, RemoteActivity $remote_activity) {
+        //see if valid activity
+        /** @var RemoteActivity $checked_activity */
+        $checked_activity = RemoteActivity::buildActivity(id:$remote_activity->id,status_type: RemoteStatusType::PENDING,uri_type: RemoteUriType::MANUAL)->first();
+        $data = $request->collect();
+        $checked_activity->processManualPending($data);
+        $out = RemoteActivity::buildActivity(id:$checked_activity->id)->first();
+        return response()->json(new RemoteActivityResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+    public function list_activities(RemoteStatusType $remote_status_type) {
+        $activities = RemoteActivity::buildActivity(status_type: $remote_status_type)->cursorPaginate();
+        return response()->json(new RemoteActivityCollection($activities), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+    public function get_activity(RemoteActivity $remote_activity) {
+        $activity = RemoteActivity::buildActivity(id: $remote_activity->id)->first();
+        return response()->json(new RemoteActivityResource($activity), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function remote_list(?User $user = null) {

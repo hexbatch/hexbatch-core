@@ -5,7 +5,7 @@ namespace App\Helpers\Attributes\Build;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\AttributeRule;
-use App\Models\Enums\AttributeRuleType;
+use App\Models\Enums\Attributes\AttributeRuleType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Enums;
+namespace App\Models\Enums\Remotes;
 enum RemoteUriMethod : string {
 
     case NONE = 'none';

@@ -5,10 +5,11 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\Enums\RemoteFromMapType;
+use App\Models\Enums\Remotes\RemoteFromMapType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use JsonPath\JsonObject;
 
 
 /**
@@ -101,6 +102,10 @@ class RemoteFromMap extends Model
         return $ret;
     }
 
-
+    public function applyRuleToGiven(array $my_data) : array {
+        $ret = [];
+        //todo add in this code
+        return $ret;
+    }
 
 }

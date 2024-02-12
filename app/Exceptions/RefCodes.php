@@ -48,6 +48,7 @@ class RefCodes {
     const REMOTE_NOT_FOUND = 5001;
     const REMOTE_SCHEMA_ISSUE = 5010;
     const REMOTE_ACTIVITY_NOT_FOUND =  5015;
+    const REMOTE_UNCALLABLE =  5050;
 
     //actions start at 6000
 

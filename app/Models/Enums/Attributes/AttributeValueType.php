@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Enums;
+namespace App\Models\Enums\Attributes;
 enum AttributeValueType : string {
     case NUMERIC = 'numeric';
     case NUMERIC_INTEGER = 'numeric_integer';

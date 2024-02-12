@@ -79,7 +79,7 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_of_remote_status AS ENUM (
-            'none','pending','started','success','failed'
+            'none','pending','started','success','failed','cached'
             );");
 
         DB::statement("ALTER TABLE remote_activities Add COLUMN status_type type_of_remote_status NOT NULL default 'none';");

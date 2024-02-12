@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Enums;
+namespace App\Models\Enums\Attributes;
 enum AttributeRuleType : string {
 
     case INACTIVE = 'inactive';

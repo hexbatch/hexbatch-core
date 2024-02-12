@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Attribute;
 use App\Models\AttributeMetum;
+use App\Models\RemoteActivity;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,10 +20,9 @@ class RunRemote implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(
+        public RemoteActivity $activity,
+    ) {}
 
     /**
      * Execute the job.
@@ -30,6 +30,6 @@ class RunRemote implements ShouldQueue
     public function handle(): void
     {
         Log::debug("calling..");
-
+        $this->activity->doCallRemote();
     }
 }

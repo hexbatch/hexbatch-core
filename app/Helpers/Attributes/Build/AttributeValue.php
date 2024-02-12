@@ -7,7 +7,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\AttributeValuePointer;
-use App\Models\Enums\AttributeValueType;
+use App\Models\Enums\Attributes\AttributeValueType;
 use ErrorException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;

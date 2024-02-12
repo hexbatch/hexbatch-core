@@ -4,7 +4,7 @@ namespace App\Helpers\Attributes\Build;
 
 use App\Models\Attribute;
 use App\Models\AttributeUserGroup;
-use App\Models\Enums\AttributeUserGroupType;
+use App\Models\Enums\Attributes\AttributeUserGroupType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

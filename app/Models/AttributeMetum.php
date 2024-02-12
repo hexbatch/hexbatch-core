@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\AttributeMetaType;
+use App\Models\Enums\Attributes\AttributeMetaType;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;

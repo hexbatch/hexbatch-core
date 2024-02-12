@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Enums;
+namespace App\Models\Enums\Attributes;
 enum AttributeMetaType : string {
     case NONE = 'none';
     case DESCRIPTION = 'description';

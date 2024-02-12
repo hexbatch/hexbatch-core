@@ -1,5 +1,5 @@
 <?php
-namespace App\Models\Enums;
+namespace App\Models\Enums\Attributes;
 enum AttributePingType : string {
     case READ = 'read_all';
     case WRITE = 'write_all';

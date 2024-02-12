@@ -3,24 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchCoreException;
-use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationBoundCollection;
 use App\Http\Resources\LocationBoundResource;
-use App\Models\Enums\LocationType;
+use App\Models\Enums\Bounds\LocationType;
 use App\Models\LocationBound;
-
 use App\Models\User;
-use App\Rules\GeoJsonReq;
-use GeoJson\GeoJson;
-use GeoJson\Geometry\MultiPolygon;
-use GeoJson\Geometry\Point;
-use GeoJson\Geometry\Polygon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 

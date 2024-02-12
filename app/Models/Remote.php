@@ -5,11 +5,15 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchRemoteException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\RemoteUriDataFormatType;
-use App\Models\Enums\RemoteUriMethod;
-use App\Models\Enums\RemoteUriType;
+use App\Jobs\RunRemote;
+use App\Models\Enums\Remotes\RemoteStatusType;
+use App\Models\Enums\Remotes\RemoteToMapType;
+use App\Models\Enums\Remotes\RemoteUriDataFormatType;
+use App\Models\Enums\Remotes\RemoteUriMethod;
+use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\ResourceNameReq;
 use ArrayObject;
@@ -18,6 +22,7 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -36,8 +41,8 @@ use Illuminate\Validation\ValidationException;
  * @property int timeout_seconds
  * @property RemoteUriType uri_type
  * @property RemoteUriMethod uri_method_type
- * @property RemoteUriDataFormatType uri_data_input_format
- * @property RemoteUriDataFormatType uri_data_output_format
+ * @property RemoteUriDataFormatType uri_to_remote_format
+ * @property RemoteUriDataFormatType uri_from_remote_format
  * @property string uri_string
  * @property int uri_port
  * @property bool is_sending_context_to_remote
@@ -76,7 +81,10 @@ class Remote extends Model
      */
     protected $fillable = [
         'rate_limit_starts_at',
-        'rate_limit_count'
+        'rate_limit_count',
+        'remote_call_ended_at' ,
+        'status_type',
+        'from_remote_processed_data'
     ];
 
     /**
@@ -94,8 +102,8 @@ class Remote extends Model
     protected $casts = [
         'uri_type' => RemoteUriType::class,
         'uri_method_type' => RemoteUriMethod::class,
-        'uri_data_input_format' => RemoteUriDataFormatType::class,
-        'uri_data_output_format' => RemoteUriDataFormatType::class,
+        'uri_to_remote_format' => RemoteUriDataFormatType::class,
+        'uri_from_remote_format' => RemoteUriDataFormatType::class,
         'cache_keys' => AsArrayObject::class
     ];
 
@@ -298,12 +306,18 @@ class Remote extends Model
         $this->update(['rate_limit_starts_at' => null,'rate_limit_count'=>null]);
     }
 
-    public function runRemote(\Illuminate\Support\Collection $collection, bool $b_log = true, bool $b_rated = true) {
-        /*
-         * todo api calls to list manual calls and supply them with the result
-         * is the log the calling context also? if so it needs more fields
-         */
+    protected function addOneToRateLimit() : bool
+    {
+        if (time() > $this->rate_limit_starts_at + $this->rate_limit_unit_in_seconds) {
+            $this->emptyRateLimit();
+        }
+        //see if can add one in the limits, if so do that, otherwise return false
+        if ($this->rate_limit_count >= $this->rate_limit_max_per_unit) { return false;} //already at the max
+
+        $this->increment('rate_limit_count');
+        return true;
     }
+
 
    const CACHE_KEY_DEFAULT = 'default';
    const CACHE_KEY_NAME_ATTRIBUTE = 'attribute_ref';
@@ -313,15 +327,98 @@ class Remote extends Model
    const CACHE_KEY_NAME_USER = 'user_ref';
    const ALL_SPECIAL_CACHE_KEY_NAMES = [ self::CACHE_KEY_NAME_ELEMENT,self::CACHE_KEY_NAME_TYPE,self::CACHE_KEY_NAME_ATTRIBUTE,self::CACHE_KEY_NAME_ACTION,self::CACHE_KEY_NAME_USER];
 
-    public function getCacheKey() :string {
+    public function getRemoteCacheKey() :string {
         return 'r-'.$this->ref_uuid;
     }
 
-    public function getCache() : array {
-        $what = Cache::tags([ static::REMOTES_CACHE_TAG])->get($this->getCacheKey());
+    public function getRemoteCache() : array {
+        $what = Cache::tags([ static::REMOTES_CACHE_TAG])->get($this->getRemoteCacheKey());
         return Utilities::maybeDecodeJson($what,true,[]);
     }
 
+
+
+    protected function processToSend(Collection $collection,RemoteToMapType $filter) : array {
+        $ret = [];
+        $my_data = $collection->toArray();
+        foreach ($this->rules_to_remote as $rule) {
+            if ($rule->map_type !== $filter) { continue; }
+            $pair = $rule->applyRuleToGiven($my_data);
+            if (!empty($pair)) {
+                $ret = array_merge($ret,$pair);
+            }
+        }
+        return $ret;
+    }
+
+    public function processFromSend(Collection|array $what) : array {
+        $ret = [];
+        if (is_object($what) ){
+            $my_data = $what->toArray();
+        } else {
+            $my_data = $what;
+        }
+
+        foreach ($this->rules_from_remote as $rule) {
+            $pair = $rule->applyRuleToGiven($my_data);
+            if (!empty($pair)) {
+                $ret = array_merge($ret,$pair);
+            }
+        }
+        return $ret;
+    }
+
+
+
+    public function createActivity(Collection $collection,
+                                   ?User $user = null,?ElementType $type = null,?Element $element = null,
+                                   ?Attribute $attribute = null,?Action $action = null
+    ) :RemoteActivity {
+
+        $ret = new RemoteActivity();
+        $ret->remote_id = $this->id;
+        $ret->caller_user_id = $user?->id;
+        $ret->caller_type_id = $type?->id;
+        $ret->caller_element_id = $element?->id;
+        $ret->caller_attribute_id = $attribute?->id;
+        $ret->caller_action_id = $action?->id;
+        $ret->to_remote_processed_data = $this->processToSend($collection,RemoteToMapType::DATA);
+        $ret->to_headers = $this->processToSend($collection,RemoteToMapType::HEADER);
+        $ret->save();
+        if ($this->addOneToRateLimit()) {
+            $ret->status_type = RemoteStatusType::PENDING;
+            $ret->save();
+            /** @var RemoteActivity $activity_to_process */
+            $activity_to_process = RemoteActivity::buildActivity(id:$ret->id)->first();
+            if (in_array($this->uri_type,RemoteUriType::DISPATCHABLE_TYPES)) {
+                RunRemote::dispatch($activity_to_process);
+            }
+
+        } else {
+            //try to use cache or just say cannot do this
+            $maybe_cache = $ret->getCache();
+            if (empty($maybe_cache)) {
+                $ret->status_type = RemoteStatusType::FAILED;
+                $ret->save();
+                throw new HexbatchRemoteException(__("msg.remote_uncallable",['name'=>$this->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::REMOTE_UNCALLABLE);
+            }
+            $ret->update(['remote_call_ended_at' => DB::raw('NOW()'),'status_type'=>RemoteStatusType::CACHED,'from_remote_processed_data'=>$maybe_cache]);
+        }
+
+        return $ret;
+
+    }
+
+    public function removeSecretsFromArray(ArrayObject|array $my_data) : ?array {
+        if (empty($my_data)) { return null;}
+        foreach ($this->rules_to_remote as $rule) {
+            if (!$rule->is_secret) { continue; }
+            unset($my_data[$rule->remote_data_name]);
+        }
+        return $my_data;
+    }
 
 
 }

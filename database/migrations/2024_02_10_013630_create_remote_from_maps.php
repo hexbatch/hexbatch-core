@@ -31,11 +31,11 @@ return new class extends Migration
 
         });
 
-        DB::statement("CREATE TYPE type_of_header_input_map AS ENUM (
+        DB::statement("CREATE TYPE type_from_remote_map AS ENUM (
             'none','data','header','response_code'
             );");
 
-        DB::statement("ALTER TABLE remote_from_maps Add COLUMN map_type type_of_header_input_map NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_from_maps Add COLUMN map_type type_from_remote_map NOT NULL default 'none';");
 
         DB::statement("ALTER TABLE remote_from_maps ALTER COLUMN created_at SET DEFAULT NOW();");
 
@@ -69,6 +69,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('remote_from_maps');
-        DB::statement("DROP TYPE type_of_header_input_map");
+        DB::statement("DROP TYPE type_from_remote_map");
     }
 };

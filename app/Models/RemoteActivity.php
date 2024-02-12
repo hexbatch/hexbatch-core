@@ -5,13 +5,16 @@ namespace App\Models;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\RemoteStatusType;
+use App\Models\Enums\Remotes\RemoteStatusType;
+use App\Models\Enums\Remotes\RemoteUriType;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -113,8 +116,8 @@ class RemoteActivity extends Model
     }
 
 
-    public static function buildElement(
-        ?int $id = null)
+    public static function buildActivity(
+        ?int $id = null, ?RemoteStatusType $status_type = null, ?RemoteUriType $uri_type = null)
     : Builder
     {
 
@@ -135,6 +138,24 @@ class RemoteActivity extends Model
 
         if ($id) {
             $build->where('remote_activities.id', $id);
+        }
+
+        if ($status_type) {
+            $build->where('status_type.id', $status_type->value);
+        }
+
+        if ($uri_type) {
+            $build->join('remotes as par_remote',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($uri_type) {
+                    $join
+                        ->on('par_remote.id','=','remote_activities.remote_id')
+                        ->where('par_remote.uri_type',$uri_type->value)
+                    ;
+                }
+            );
         }
 
         return $build;
@@ -164,7 +185,7 @@ class RemoteActivity extends Model
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = RemoteActivity::buildElement(id:$first_id)->first();
+                    $ret = RemoteActivity::buildActivity(id:$first_id)->first();
                 }
             }
         } finally {
@@ -184,18 +205,16 @@ class RemoteActivity extends Model
         return $this->ref_uuid;
     }
 
-    public function addCache() : void {
-        $older_cache = $this->remote_parent->getCache();
-
+    public function getCacheSubKey() : string {
         $subkeys = [];
         foreach ($this->remote_parent->cache_keys as $some_key) {
             if (in_array($some_key,Remote::ALL_SPECIAL_CACHE_KEY_NAMES)) {
                 $maybe = match($some_key) {
-                  Remote::CACHE_KEY_NAME_ACTION => $this->caller_action?->ref_uuid,
-                  Remote::CACHE_KEY_NAME_ATTRIBUTE => $this->caller_attribute?->ref_uuid,
-                  Remote::CACHE_KEY_NAME_ELEMENT => $this->caller_element?->ref_uuid,
-                  Remote::CACHE_KEY_NAME_TYPE => $this->caller_type?->ref_uuid,
-                  Remote::CACHE_KEY_NAME_USER => $this->caller_user?->ref_uuid,
+                    Remote::CACHE_KEY_NAME_ACTION => $this->caller_action?->ref_uuid,
+                    Remote::CACHE_KEY_NAME_ATTRIBUTE => $this->caller_attribute?->ref_uuid,
+                    Remote::CACHE_KEY_NAME_ELEMENT => $this->caller_element?->ref_uuid,
+                    Remote::CACHE_KEY_NAME_TYPE => $this->caller_type?->ref_uuid,
+                    Remote::CACHE_KEY_NAME_USER => $this->caller_user?->ref_uuid,
                 };
                 if ($maybe) {$subkeys[] = $maybe;}
             } else {
@@ -207,11 +226,73 @@ class RemoteActivity extends Model
         } else {
             $subkey = implode('_',$subkeys);
         }
+        return $subkey;
+    }
+
+    public function getCache() : array {
+        $cache = $this->remote_parent->getRemoteCache();
+        $subkey = $this->getCacheSubKey();
+        return $cache[$subkey]??[] ;
+    }
+    public function addCache() : void {
+        if (!$this->remote_parent->is_caching) {return;}
+        $older_cache = $this->remote_parent->getRemoteCache();
+        $subkey = $this->getCacheSubKey();
         $older_cache[$subkey] = $this->from_remote_processed_data??[];
 
         $final = Utilities::wrapJsonEncode($older_cache);
         Cache::tags([ Remote::REMOTES_CACHE_TAG])
-            ->put($this->remote_parent->getCacheKey(), $final,$this->cache_ttl_seconds);
+            ->put($this->remote_parent->getRemoteCacheKey(), $final,$this->cache_ttl_seconds);
+    }
+
+
+    protected function addError(\Exception $e) {
+        $node = ['message'=>$e,'class'=>get_class($e)];
+        if (is_array($this->errors) && count($this->errors)) {
+            $this->errors[] = $node;
+        } else {
+            $this->errors = $node;
+        }
+    }
+
+    public function doCallRemote() {
+        $this->status_type = RemoteStatusType::STARTED;
+        $this->save();
+        try {
+            $from_data = [];
+            try {
+                //todo call the different types of remote, and change the raw data to processed
+                /*
+                 * use uri_to_remote_format to cast data.
+                 Data can be string, so need to check that not json, and uri_from_remote_format
+                 */
+                $this->from_remote_processed_data = $this->remote_parent->processFromSend($from_data);
+                $this->status_type = RemoteStatusType::SUCCESS;
+            } catch (\Exception $e) {
+                $this->addError($e);
+                $this->status_type = RemoteStatusType::FAILED;
+            }
+
+            try {
+                $this->addCache();
+            } catch (\Exception $e) {
+                $this->addError($e);
+            }
+        } finally {
+            $this->to_remote_processed_data = $this->remote_parent->removeSecretsFromArray($this->to_remote_processed_data);
+            $this->save();
+        }
+    }
+
+    public function processManualPending(Collection|ArrayObject|array $my_data)   {
+        if (!($this->remote_parent->uri_type === RemoteUriType::MANUAL && $this->status_type === RemoteStatusType::PENDING) ) {
+            return;
+        }
+        $this->update([
+            'remote_call_ended_at' => DB::raw('NOW()'),
+            'status_type'=>RemoteStatusType::SUCCESS,
+            'from_remote_processed_data'=>$this->remote_parent->processFromSend($my_data)]);
+        $this->addCache();
     }
 
 }

@@ -97,6 +97,11 @@ Route::prefix('v1')->group(function () {
             Route::get('/{remote}/get/{levels?}', [RemoteController::class, 'remote_get'])->name('core.remote.get');
             Route::get('/{remote}/test', [RemoteController::class, 'remote_test'])->name('core.remote.test');
             Route::get('/list', [RemoteController::class, 'remote_list'])->name('core.remote.list');
+            Route::prefix('activity')->group(function () {
+                Route::post('/{remote_activity}/update', [RemoteController::class, 'update_activity'])->name('core.remote.activity.update');
+                Route::get('/list/{?remote_status_type}', [RemoteController::class, 'list_activities'])->name('core.remote.activity.list');
+                Route::get('/{remote_activity}/update', [RemoteController::class, 'get_activity'])->name('core.remote.activity.get');
+            });
         });
     }); //end auth protected
 
