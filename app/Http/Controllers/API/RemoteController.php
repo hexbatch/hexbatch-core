@@ -55,16 +55,16 @@ class RemoteController extends Controller
                 $user = AttributeValuePointer::getModelFromHint($callers->get('user'),AttributeValueType::USER);
             }
             if ($callers->has('type')) {
-                $type = AttributeValuePointer::getModelFromHint($callers->get('type'),AttributeValueType::USER);
+                $type = AttributeValuePointer::getModelFromHint($callers->get('type'),AttributeValueType::ELEMENT_TYPE);
             }
             if ($callers->has('action')) {
-                $action = AttributeValuePointer::getModelFromHint($callers->get('action'),AttributeValueType::USER);
+                $action = AttributeValuePointer::getModelFromHint($callers->get('action'),AttributeValueType::ACTION);
             }
             if ($callers->has('element')) {
-                $element = AttributeValuePointer::getModelFromHint($callers->get('element'),AttributeValueType::USER);
+                $element = AttributeValuePointer::getModelFromHint($callers->get('element'),AttributeValueType::ELEMENT);
             }
             if ($callers->has('attribute')) {
-                $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::USER);
+                $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::ATTRIBUTE);
             }
         }
         $activity = $remote->createActivity(collection: $inputs, user: $user?->id,
