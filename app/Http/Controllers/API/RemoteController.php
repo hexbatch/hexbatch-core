@@ -10,6 +10,8 @@ use App\Http\Resources\RemoteActivityCollection;
 use App\Http\Resources\RemoteActivityResource;
 use App\Http\Resources\RemoteCollection;
 use App\Http\Resources\RemoteResource;
+use App\Models\AttributeValuePointer;
+use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Enums\Remotes\RemoteStatusType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
@@ -17,6 +19,7 @@ use App\Models\RemoteActivity;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -43,7 +46,29 @@ class RemoteController extends Controller
 
 
     public function remote_test(Request $request, Remote $remote) {
-        $activity = $remote->createActivity($request->collect());
+        $inputs = $request->collect();
+        $user = null;$type = null;$action = null;$element = null; $attribute = null;
+        if ($inputs->has('callers')) {
+            $callers = new Collection($inputs->get('callers'));
+            $inputs->forget('callers');
+            if ($callers->has('user')) {
+                $user = AttributeValuePointer::getModelFromHint($callers->get('user'),AttributeValueType::USER);
+            }
+            if ($callers->has('type')) {
+                $type = AttributeValuePointer::getModelFromHint($callers->get('type'),AttributeValueType::USER);
+            }
+            if ($callers->has('action')) {
+                $action = AttributeValuePointer::getModelFromHint($callers->get('action'),AttributeValueType::USER);
+            }
+            if ($callers->has('element')) {
+                $element = AttributeValuePointer::getModelFromHint($callers->get('element'),AttributeValueType::USER);
+            }
+            if ($callers->has('attribute')) {
+                $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::USER);
+            }
+        }
+        $activity = $remote->createActivity(collection: $inputs, user: $user?->id,
+            type: $type?->id, element: $element->id, attribute: $attribute?->id, action: $action?->id);
         return response()->json(new RemoteActivityResource($activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
