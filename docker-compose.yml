@@ -12,7 +12,7 @@ networks:
 services:
 
   webserver_hbc:
-    container_name: php_server_hbc
+    container_name: webserver_hbc
     build:
       context: ./docker/php
     ports:

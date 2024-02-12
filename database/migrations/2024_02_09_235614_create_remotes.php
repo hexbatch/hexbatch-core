@@ -87,6 +87,22 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
+            $table->foreignId('action_event_id')
+                ->nullable()->default(null)
+                ->comment("When the remote type is action_event")
+                ->index('idx_remotes_action_event_id')
+                ->constrained('action_events')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+            $table->foreignId('search_path_id')
+                ->nullable()->default(null)
+                ->comment("When the remote type is action_event")
+                ->index('idx_remotes_search_path_id')
+                ->constrained('search_paths')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
@@ -105,7 +121,7 @@ return new class extends Migration
         });
         #------------------------------
         DB::statement("CREATE TYPE type_remote_uri AS ENUM (
-            'none','url','socket','console','manual'
+            'none','url','socket','console','manual','action_event'
             );");
 
         DB::statement("ALTER TABLE remotes Add COLUMN uri_type type_remote_uri  NOT NULL default 'none';");
