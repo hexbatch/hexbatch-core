@@ -14,7 +14,6 @@ class RemoteAlwaysCanSetOptions
     const DEFAULT_UNUSED_NUMBER = -1;
     public ?bool $is_retired = null;
     public ?bool $is_on = null;
-    public ?int $timeout_seconds = self::DEFAULT_UNUSED_NUMBER;
     public ?int $rate_limit_unit_in_seconds = self::DEFAULT_UNUSED_NUMBER;
     public ?int $rate_limit_max_per_unit = self::DEFAULT_UNUSED_NUMBER;
     public int $max_concurrent_calls = self::DEFAULT_UNUSED_NUMBER;
@@ -36,9 +35,6 @@ class RemoteAlwaysCanSetOptions
             $this->is_retired = Utilities::boolishToBool($top_block->get('is_retired'));
         }
 
-        if ($top_block->has('timeout_seconds')) {
-            $this->timeout_seconds = intval($top_block->get('timeout_seconds'));
-        }
 
         $call_schedule_block = new Collection();
         if ($request->request->has('call_schedule')) {

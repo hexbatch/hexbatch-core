@@ -82,7 +82,15 @@ return new class extends Migration
             'none','pending','started','success','failed','cached'
             );");
 
-        DB::statement("ALTER TABLE remote_activities Add COLUMN status_type type_of_remote_status NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_activities Add COLUMN remote_status_type type_of_remote_status NOT NULL default 'none';");
+        #--------------------------------------
+
+        DB::statement("CREATE TYPE type_of_cache_status AS ENUM (
+            'none','created','not_made','error'
+            );");
+
+        DB::statement("ALTER TABLE remote_activities Add COLUMN cache_status_type type_of_cache_status NOT NULL default 'none';");
+        #--------------------------------------
 
         DB::statement('ALTER TABLE remote_activities ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
         DB::statement("ALTER TABLE remote_activities ALTER COLUMN created_at SET DEFAULT NOW();");
@@ -92,13 +100,16 @@ return new class extends Migration
         ");
 
         Schema::table('remote_activities', function (Blueprint $table) {
-            $table->index(['remote_id','status_type'],'idx_remotes_status');
+            $table->index(['cache_status_type'],'idx_cache_status');
+            $table->index(['remote_status_type'],'idx_remote_status');
+            $table->index(['remote_id','remote_status_type'],'idx_status_of_remote');
             $table->integer('response_code')->nullable()->comment("the http status or console status");
             $table->jsonb('to_headers')->nullable()->comment("The headers to the remote (if that kind), no secret values here");
             $table->jsonb('from_headers')->nullable()->comment("The headers from the remote answering (if that kind), no secret values here");
             $table->jsonb('from_remote_processed_data')->nullable()->comment("The value of going in, if marked is_secret not put here");
             $table->jsonb('to_remote_processed_data')->nullable()->comment("The value coming back, if its json");
             $table->jsonb('errors')->nullable()->comment("Any errors from or to");
+            $table->jsonb('consumer_passthrough_data')->nullable()->comment("This is used by any consumer who is listening to the completion event. Passthrough data");
             $table->text('from_remote_raw_text')->nullable()->comment("The value coming back, if its not json (xml,html,primitive");
         });
     }
@@ -110,5 +121,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('remote_activities');
         DB::statement("DROP TYPE type_of_remote_status");
+        DB::statement("DROP TYPE type_of_cache_status");
     }
 };

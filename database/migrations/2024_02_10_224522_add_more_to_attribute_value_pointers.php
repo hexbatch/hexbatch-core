@@ -75,6 +75,8 @@ return new class extends Migration
             $table->dropForeign(['remote_id']);
             $table->dropColumn('remote_id');
             $table->dropColumn('action_id');
+            $table->dropColumn('action_event_id');
+            $table->dropColumn('search_path_id');
 
         });
     }

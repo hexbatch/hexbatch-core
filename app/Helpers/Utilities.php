@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
+use App\Models\User;
 use ErrorException;
 use JsonException;
 
@@ -110,6 +111,14 @@ class Utilities {
             return $null_default;
         }
         return $converted;
+    }
+
+    public static function getTypeCastedAuthUser() : ?User {
+        /**
+         * @type User $user
+         */
+        $user = auth()->user();
+        return $user;
     }
 
 }

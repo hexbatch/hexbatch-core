@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
+use App\Helpers\Remotes\Activity\TestingActivityEventConsumer;
 use App\Helpers\Remotes\Build\DataGathering;
 use App\Helpers\Remotes\Build\RemoteAlwaysCanSetOptions;
 use App\Helpers\Remotes\Build\RemoteUriGathering;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RemoteActivityCollection;
 use App\Http\Resources\RemoteActivityResource;
@@ -67,22 +71,37 @@ class RemoteController extends Controller
                 $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::ATTRIBUTE);
             }
         }
+        $debugging = null;
+        if ($inputs->has('debugging')) {
+            $debugging = new Collection($inputs->get('debugging'));
+            if (!is_array($debugging)) {
+                $debugging = [$debugging];
+            }
+        }
+        $test_sink = new TestingActivityEventConsumer();
+        $test_sink->setPassthrough($debugging);
         $activity = $remote->createActivity(collection: $inputs, user: $user?->id,
-            type: $type?->id, element: $element->id, attribute: $attribute?->id, action: $action?->id);
+            type: $type?->id, element: $element->id, attribute: $attribute?->id, action: $action?->id,consumer: $test_sink);
+
         return response()->json(new RemoteActivityResource($activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function update_activity(Request $request, RemoteActivity $remote_activity) {
         //see if valid activity
         /** @var RemoteActivity $checked_activity */
-        $checked_activity = RemoteActivity::buildActivity(id:$remote_activity->id,status_type: RemoteStatusType::PENDING,uri_type: RemoteUriType::MANUAL)->first();
+        $checked_activity = RemoteActivity::buildActivity(id:$remote_activity->id,remote_status_type: RemoteStatusType::PENDING,uri_type: RemoteUriType::MANUAL)->first();
+        if ($checked_activity) {
+            throw new HexbatchNotPossibleException(__("msg.remote_activity_not_found"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::REMOTE_NOT_FOUND);
+        }
         $data = $request->collect();
         $checked_activity->processManualPending($data);
         $out = RemoteActivity::buildActivity(id:$checked_activity->id)->first();
         return response()->json(new RemoteActivityResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
     public function list_activities(RemoteStatusType $remote_status_type) {
-        $activities = RemoteActivity::buildActivity(status_type: $remote_status_type)->cursorPaginate();
+        $activities = RemoteActivity::buildActivity(remote_status_type: $remote_status_type)->cursorPaginate();
         return response()->json(new RemoteActivityCollection($activities), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
     public function get_activity(RemoteActivity $remote_activity) {
@@ -124,11 +143,10 @@ class RemoteController extends Controller
             if ($remote->isInUse()) {
                 $this->updateInUseRemote($remote,$request);
             } else {
-                $user = auth()->user();
                 $some_name = $request->request->getString('remote_name');
 
                 if ($some_name && $some_name !== $remote->remote_name) {
-                    $remote->setName($request->request->getString('remote_name'),$user);
+                    $remote->setName($request->request->getString('remote_name'),Utilities::getTypeCastedAuthUser());
                 }
 
                 $this->updateAllRemote($remote,$request);
@@ -178,7 +196,7 @@ class RemoteController extends Controller
             // if this is in use then can only edit retired, meta
             // otherwise can edit all but the ownership
             $remote = new Remote();
-            $user = auth()->user();
+            $user = Utilities::getTypeCastedAuthUser();
             $remote->setName($request->request->getString('remote_name'),$user);
             $remote->user_id = $user->id;
             $this->updateAllRemote($remote,$request);

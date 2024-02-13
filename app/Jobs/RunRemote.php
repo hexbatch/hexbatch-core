@@ -27,6 +27,7 @@ class RunRemote implements ShouldQueue
     public function handle(): void
     {
         Log::debug("calling..");
-        $this->activity->doCallRemote();
+        $this->activity->doCallRemote(); //this is blocking
+        $this->activity->announceDaFinishing();
     }
 }

@@ -7,6 +7,7 @@ use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchRemoteException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Remotes\Activity\ActivityEventConsumer;
 use App\Helpers\Utilities;
 use App\Jobs\RunRemote;
 use App\Models\Enums\Remotes\RemoteStatusType;
@@ -40,7 +41,6 @@ use Illuminate\Validation\ValidationException;
  * @property string remote_name
  * @property boolean is_retired
  * @property boolean is_on
- * @property int timeout_seconds
  * @property RemoteUriType uri_type
  * @property RemoteUriMethod uri_method_type
  * @property RemoteUriDataFormatType uri_to_remote_format
@@ -54,10 +54,10 @@ use Illuminate\Validation\ValidationException;
  * @property int rate_limit_max_per_unit
  * @property int rate_limit_unit_in_seconds
  * @property ?string rate_limit_starts_at
- * @property int total_calls_made
  * @property int rate_limit_count
  * @property int max_concurrent_calls
- *
+ * @property int total_calls_made
+ * @property int total_errors
  *
  *
  * @property string created_at
@@ -85,8 +85,10 @@ class Remote extends Model
         'rate_limit_starts_at',
         'rate_limit_count',
         'remote_call_ended_at' ,
-        'status_type',
-        'from_remote_processed_data'
+        'remote_status_type',
+        'from_remote_processed_data',
+        'total_errors',
+        'total_calls_made'
     ];
 
     /**
@@ -320,6 +322,16 @@ class Remote extends Model
         return true;
     }
 
+    public function updateGlobalStats(bool $b_error) :void {
+        if ($b_error) {
+            $this->update(['total_errors' => $this->total_errors + 1,'total_calls_made' => $this->total_calls_made + 1]);
+        } else {
+            $this->increment('total_calls_made');
+        }
+
+
+    }
+
 
    const CACHE_KEY_DEFAULT = 'default';
    const CACHE_KEY_NAME_ATTRIBUTE = 'attribute_ref';
@@ -374,7 +386,8 @@ class Remote extends Model
 
     public function createActivity(Collection $collection,
                                    ?User $user = null,?ElementType $type = null,?Element $element = null,
-                                   ?Attribute $attribute = null,?Action $action = null
+                                   ?Attribute $attribute = null,?Action $action = null,
+                                   ?ActivityEventConsumer $consumer = null
     ) :RemoteActivity {
 
         $ret = new RemoteActivity();
@@ -386,12 +399,17 @@ class Remote extends Model
         $ret->caller_action_id = $action?->id;
         $ret->to_remote_processed_data = $this->processToSend($collection,RemoteToMapType::DATA);
         $ret->to_headers = $this->processToSend($collection,RemoteToMapType::HEADER);
+        if ($consumer) {
+            $ret->consumer_passthrough_data = $consumer->getPassthrough();
+        }
         $ret->save();
+        $consumer?->setActivity($ret);
         if ($this->addOneToRateLimit()) {
-            $ret->status_type = RemoteStatusType::PENDING;
+            $ret->remote_status_type = RemoteStatusType::PENDING;
             $ret->save();
             /** @var RemoteActivity $activity_to_process */
             $activity_to_process = RemoteActivity::buildActivity(id:$ret->id)->first();
+
             if (in_array($this->uri_type,RemoteUriType::DISPATCHABLE_TYPES)) {
                 RunRemote::dispatch($activity_to_process);
             }
@@ -400,13 +418,14 @@ class Remote extends Model
             //try to use cache or just say cannot do this
             $maybe_cache = $ret->getCache();
             if (empty($maybe_cache)) {
-                $ret->status_type = RemoteStatusType::FAILED;
+                $ret->remote_status_type = RemoteStatusType::FAILED;
                 $ret->save();
                 throw new HexbatchRemoteException(__("msg.remote_uncallable",['name'=>$this->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                     RefCodes::REMOTE_UNCALLABLE);
             }
-            $ret->update(['remote_call_ended_at' => DB::raw('NOW()'),'status_type'=>RemoteStatusType::CACHED,'from_remote_processed_data'=>$maybe_cache]);
+            $ret->update(['remote_call_ended_at' => DB::raw('NOW()'),'remote_status_type'=>RemoteStatusType::CACHED,'from_remote_processed_data'=>$maybe_cache]);
+            $consumer?->markThisDone();
         }
 
         return $ret;

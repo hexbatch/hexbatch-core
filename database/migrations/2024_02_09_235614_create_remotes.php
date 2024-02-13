@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Schema;
         usage_group: (optional)
         is_retired: default false // if true then cannot be added to element types
         is_on : if off then all read and writes will fail and the remote not called
-        timeout_seconds: if an attempt is made to sent to the remote, this is how many seconds until the read or write of the attribute ends in failure
 
         uri:
             uri_type: (none,url,port,console,manual)
@@ -45,7 +44,6 @@ Remotes:
     * remote_user_id
     * is_retired
     * is_on
-    * timeout_seconds
     * enum uri_type
     * enum uri_method
     * uri_string
@@ -114,9 +112,6 @@ return new class extends Migration
             $table->boolean('is_on')->default(true)->nullable(false)
                 ->comment('if false then cannot call remote');
 
-            $table->integer('timeout_seconds')->default(null)->nullable()
-                ->comment('if set, this is the total time a remote can take before the read or write on the attribute fails');
-
             $table->timestamps();
         });
         #------------------------------
@@ -171,6 +166,9 @@ return new class extends Migration
                 ->comment('array of string keys to use for the cache comparisons, empty means no comparison');
 
             $table->integer('total_calls_made')->default(0)->nullable(false)
+                ->comment('counts the total number of calls made in the remote lifetime');
+
+            $table->integer('total_errors')->default(0)->nullable(false)
                 ->comment('counts the total number of calls made in the remote lifetime');
 
             $table->integer('rate_limit_max_per_unit')->default(null)->nullable()
