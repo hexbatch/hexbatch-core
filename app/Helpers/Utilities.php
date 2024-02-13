@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use App\Exceptions\HexbatchCoreException;
-use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use ErrorException;
 use JsonException;

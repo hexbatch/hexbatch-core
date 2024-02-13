@@ -25,7 +25,14 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
-        "ext-redis": "*"
+        "ext-bcmath": "*",
+        "ext-fileinfo": "*",
+        "ext-pcre": "*",
+        "ext-pdo": "*",
+        "ext-pdo_pgsql": "*",
+        "ext-pgsql": "*",
+        "ext-redis": "*",
+        "ext-rdkafka": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

@@ -4,9 +4,6 @@ namespace App\Rules;
 
 use Closure;
 use GeoJson\GeoJson;
-use GeoJson\Geometry\Geometry;
-use GeoJson\Geometry\MultiPolygon;
-use GeoJson\Geometry\Polygon;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -35,7 +32,7 @@ class GeoJsonReq implements ValidationRule
             $this->geometry = GeoJson::jsonUnserialize($value);
         } catch (Throwable $t) {
             Log::warning("Cannot covert to geojson: ". $t->getMessage());
-            $fail("msg.location_bound_json_invalid_geo_json",)->translate(['msg'=>$t->getMessage()]);
+            $fail("msg.location_bound_json_invalid_geo_json")->translate(['msg'=>$t->getMessage()]);
             return;
         }
 
