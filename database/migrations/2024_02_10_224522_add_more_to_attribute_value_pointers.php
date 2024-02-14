@@ -31,21 +31,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('action_event_id')
-                ->nullable()->default(null)
-                ->comment("When the remote type is action_event")
-                ->index('idx_value_action_event_id')
-                ->constrained('action_events')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
 
-            $table->foreignId('search_path_id')
-                ->nullable()->default(null)
-                ->comment("When the remote type is action_event")
-                ->index('idx_value_search_path_id')
-                ->constrained('search_paths')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
         });
 
         DB::statement("ALTER TABLE attribute_value_pointers DROP CONSTRAINT chk_only_one_is_not_null;");
@@ -53,7 +39,7 @@ return new class extends Migration
         DB::statement("ALTER TABLE attribute_value_pointers ADD CONSTRAINT chk_only_one_is_not_null CHECK (
             num_nonnulls(
                             location_bound_id, time_bound_id, element_id,element_type_id,attribute_id,
-                            user_group_id,user_id,remote_id,action_id,action_event_id,search_path_id
+                            user_group_id,user_id,remote_id,action_id
             ) = 1)
         ;");
     }
@@ -75,8 +61,6 @@ return new class extends Migration
             $table->dropForeign(['remote_id']);
             $table->dropColumn('remote_id');
             $table->dropColumn('action_id');
-            $table->dropColumn('action_event_id');
-            $table->dropColumn('search_path_id');
 
         });
     }

@@ -76,6 +76,16 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
+
+            $table->foreignId('remote_element_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The remote element from the type")
+                ->unique('udx_remote_element_id')
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)

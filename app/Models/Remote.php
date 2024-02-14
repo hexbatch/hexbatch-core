@@ -36,6 +36,7 @@ use Illuminate\Validation\ValidationException;
  * @property int user_id
  * @property int usage_group_id
  * @property int remote_element_type_id
+ * @property int remote_element_id
  * @property string ref_uuid
  * @property string remote_name
  * @property boolean is_retired

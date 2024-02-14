@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ae7d2f9e19ea5dfe7a0a220e8a56677e",
+    "content-hash": "aad31199f2cf847afd42d2bd89bb9899",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4012,6 +4012,57 @@
                 }
             ],
             "time": "2023-11-08T05:53:05+00:00"
+        },
+        {
+            "name": "relisten/forceutf8",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/RelistenNL/forceutf8.git",
+                "reference": "9910e47e9c2a21cc79df0d27e03d560e4113a33e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/RelistenNL/forceutf8/zipball/9910e47e9c2a21cc79df0d27e03d560e4113a33e",
+                "reference": "9910e47e9c2a21cc79df0d27e03d560e4113a33e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0 || ^8.0"
+            },
+            "suggest": {
+                "ext-iconv": "To convert non-UTF-8 strings to UTF-8",
+                "ext-intl": "To convert non-UTF-8 strings to UTF-8",
+                "ext-mbstring": "To convert non-UTF-8 strings to UTF-8"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "name": "neitanod/forceutf8",
+                    "url": "https://github.com/neitanod/forceutf8"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ForceUTF8\\": "src/ForceUTF8/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sjoerd Wenker",
+                    "email": "sjoerd@relisten.nl"
+                }
+            ],
+            "description": "PHP Class Encoding featuring popular Encoding::toUTF8() function --formerly known as forceUTF8()-- that fixes mixed encoded strings.",
+            "homepage": "https://github.com/RelistenNL/forceutf8",
+            "support": {
+                "source": "https://github.com/RelistenNL/forceutf8/tree/1.1.0"
+            },
+            "time": "2023-12-08T16:34:53+00:00"
         },
         {
             "name": "symfony/console",
