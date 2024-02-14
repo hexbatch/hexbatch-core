@@ -99,7 +99,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/list', [RemoteController::class, 'remote_list'])->name('core.remote.list');
             Route::prefix('activity')->group(function () {
                 Route::post('/{remote_activity}/update', [RemoteController::class, 'update_activity'])->name('core.remote.activity.update');
-                Route::get('/list/{?remote_status_type}', [RemoteController::class, 'list_activities'])->name('core.remote.activity.list');
+                Route::get('/list/{?remote_activity_status_type}', [RemoteController::class, 'list_activities'])->name('core.remote.activity.list');
                 Route::get('/{remote_activity}/update', [RemoteController::class, 'get_activity'])->name('core.remote.activity.get');
             });
         });

@@ -28,7 +28,7 @@ class RemoteActivityResource extends JsonResource
         $ret =  [
             'remote' => $this->remote_parent->getName(),
             'uuid'          => $this->ref_uuid,
-            'status'        => $this->remote_status_type->value,
+            'status'        => $this->remote_activity_status_type->value,
             'started_at_ts' => $this->created_at_ts
         ];
 

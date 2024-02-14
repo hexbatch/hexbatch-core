@@ -72,7 +72,7 @@ trait TResourceCommon
                         $parts = explode('.', $value);
                         if (count($parts) === 1) {
                             //must be owned by the user
-                            $user = auth()->user();
+                            $user = Utilities::getTypeCastedAuthUser();
                             $ret = $this->where('user_id', $user?->id)->where('bound_name', $value)->first();
                         } else {
                             $owner = $parts[0];

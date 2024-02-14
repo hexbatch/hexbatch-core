@@ -10,7 +10,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Remotes\Activity\ActivityEventConsumer;
 use App\Helpers\Utilities;
 use App\Jobs\RunRemote;
-use App\Models\Enums\Remotes\RemoteStatusType;
+use App\Models\Enums\Remotes\RemoteActivityStatusType;
 use App\Models\Enums\Remotes\RemoteToMapType;
 use App\Models\Enums\Remotes\RemoteUriDataFormatType;
 use App\Models\Enums\Remotes\RemoteUriMethod;
@@ -49,6 +49,7 @@ use Illuminate\Validation\ValidationException;
  * @property int uri_port
  * @property bool is_sending_context_to_remote
  * @property bool is_caching
+ * @property bool is_using_cache_on_failure
  * @property int cache_ttl_seconds
  * @property ArrayObject cache_keys
  * @property int rate_limit_max_per_unit
@@ -85,7 +86,7 @@ class Remote extends Model
         'rate_limit_starts_at',
         'rate_limit_count',
         'remote_call_ended_at' ,
-        'remote_status_type',
+        'remote_activity_status_type',
         'from_remote_processed_data',
         'total_errors',
         'total_calls_made'
@@ -263,7 +264,7 @@ class Remote extends Model
                         $parts = explode('.', $value);
                         if (count($parts) === 1) {
                             //must be owned by the user
-                            $user = auth()->user();
+                            $user = Utilities::getTypeCastedAuthUser();
                             $build = $this->where('user_id', $user?->id)->where('remote_name', $value);
                         } else {
                             $owner = $parts[0];
@@ -405,7 +406,7 @@ class Remote extends Model
         $ret->save();
         $consumer?->setActivity($ret);
         if ($this->addOneToRateLimit()) {
-            $ret->remote_status_type = RemoteStatusType::PENDING;
+            $ret->remote_activity_status_type = RemoteActivityStatusType::PENDING;
             $ret->save();
             /** @var RemoteActivity $activity_to_process */
             $activity_to_process = RemoteActivity::buildActivity(id:$ret->id)->first();
@@ -418,13 +419,13 @@ class Remote extends Model
             //try to use cache or just say cannot do this
             $maybe_cache = $ret->getCache();
             if (empty($maybe_cache)) {
-                $ret->remote_status_type = RemoteStatusType::FAILED;
+                $ret->remote_activity_status_type = RemoteActivityStatusType::FAILED;
                 $ret->save();
                 throw new HexbatchRemoteException(__("msg.remote_uncallable",['name'=>$this->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                     RefCodes::REMOTE_UNCALLABLE);
             }
-            $ret->update(['remote_call_ended_at' => DB::raw('NOW()'),'remote_status_type'=>RemoteStatusType::CACHED,'from_remote_processed_data'=>$maybe_cache]);
+            $ret->update(['remote_call_ended_at' => DB::raw('NOW()'),'remote_activity_status_type'=>RemoteActivityStatusType::CACHED,'from_remote_processed_data'=>$maybe_cache]);
             $consumer?->markThisDone();
         }
 

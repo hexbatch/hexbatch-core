@@ -233,7 +233,7 @@ class Attribute extends Model
          * @var Attribute $parent
          */
         $parent = (new Attribute())->resolveRouteBinding($parent_hint);
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         //check if this user can use the parent attribute
         $maybe_group = $this->getPermissionGroup(AttributeUserGroupType::USAGE);
         if ($maybe_group) {
@@ -378,7 +378,7 @@ class Attribute extends Model
                         $parts = explode('.', $value);
                         if (count($parts) === 1) {
                             //must be owned by the user
-                            $user = auth()->user();
+                            $user = Utilities::getTypeCastedAuthUser();
                             $build = $this->where('user_id', $user?->id)->where('attribute_name', $value);
                         } else {
                             $owner = $parts[0];

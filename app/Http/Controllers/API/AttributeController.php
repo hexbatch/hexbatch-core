@@ -35,8 +35,7 @@ class AttributeController extends Controller
      * @uses Attribute::attribute_owner()
      */
     protected function adminCheck(Attribute $att) {
-        $user = auth()->user();
-        $att->attribute_owner->checkAdminGroup($user->id);
+        $att->attribute_owner->checkAdminGroup(Utilities::getTypeCastedAuthUser()?->id);
     }
 
     public function attribute_get(Attribute $attribute,?string $full = null) {
@@ -247,7 +246,7 @@ class AttributeController extends Controller
             if ($attribute->isInUse()) {
                 (new AttributeMetaGathering($request) )->assign($attribute);
             } else {
-                $user = auth()->user();
+                $user = Utilities::getTypeCastedAuthUser();
                 $some_name = $request->request->getString('attribute_name');
 
                 if ($some_name && $some_name !== $attribute->attribute_name) {
@@ -306,7 +305,7 @@ class AttributeController extends Controller
             // if this is in use then can only edit retired, meta
             // otherwise can edit all but the ownership
             $attribute = new Attribute();
-            $user = auth()->user();
+            $user = Utilities::getTypeCastedAuthUser();
             $attribute->setName($request->request->getString('attribute_name'),$user);
             $attribute->setParent($request->request->getString('parent_attribute'));
             $attribute->user_id = $user->id;

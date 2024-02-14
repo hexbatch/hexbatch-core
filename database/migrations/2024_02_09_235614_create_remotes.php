@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Schema;
 
         uri:
             uri_type: (none,url,port,console,manual)
-            uri_method (post, get, patch.. etc)
-            uri_port:
+            uri_method (post, get, patch )
+            uri_port
             uri_string
             uri_to_remote_format
             uri_from_remote_format
@@ -158,6 +158,9 @@ return new class extends Migration
 
             $table->boolean('is_caching')->default(true)->nullable(false)
                 ->comment('if true then using caching');
+
+            $table->boolean('is_using_cache_on_failure')->default(false)->nullable(false)
+                ->comment('if true then if remote fails, and has cache, use cache and it does not fail');
 
             $table->integer('cache_ttl_seconds')->default(null)->nullable()
                 ->comment('if set, this is the max time before continuing with attibute read or write');

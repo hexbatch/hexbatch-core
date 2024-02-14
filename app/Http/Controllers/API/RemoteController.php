@@ -16,7 +16,7 @@ use App\Http\Resources\RemoteCollection;
 use App\Http\Resources\RemoteResource;
 use App\Models\AttributeValuePointer;
 use App\Models\Enums\Attributes\AttributeValueType;
-use App\Models\Enums\Remotes\RemoteStatusType;
+use App\Models\Enums\Remotes\RemoteActivityStatusType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
 use App\Models\RemoteActivity;
@@ -35,7 +35,7 @@ class RemoteController extends Controller
      * @uses Remote::remote_owner()
      */
     protected function adminCheck(Remote $att) {
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         $att->remote_owner->checkAdminGroup($user->id);
     }
 
@@ -89,7 +89,7 @@ class RemoteController extends Controller
     public function update_activity(Request $request, RemoteActivity $remote_activity) {
         //see if valid activity
         /** @var RemoteActivity $checked_activity */
-        $checked_activity = RemoteActivity::buildActivity(id:$remote_activity->id,remote_status_type: RemoteStatusType::PENDING,uri_type: RemoteUriType::MANUAL)->first();
+        $checked_activity = RemoteActivity::buildActivity(id:$remote_activity->id,remote_activity_status_type: RemoteActivityStatusType::PENDING,uri_type: RemoteUriType::MANUAL)->first();
         if ($checked_activity) {
             throw new HexbatchNotPossibleException(__("msg.remote_activity_not_found"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -100,8 +100,8 @@ class RemoteController extends Controller
         $out = RemoteActivity::buildActivity(id:$checked_activity->id)->first();
         return response()->json(new RemoteActivityResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
-    public function list_activities(RemoteStatusType $remote_status_type) {
-        $activities = RemoteActivity::buildActivity(remote_status_type: $remote_status_type)->cursorPaginate();
+    public function list_activities(RemoteActivityStatusType $remote_activity_status_type) {
+        $activities = RemoteActivity::buildActivity(remote_activity_status_type: $remote_activity_status_type)->cursorPaginate();
         return response()->json(new RemoteActivityCollection($activities), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
     public function get_activity(RemoteActivity $remote_activity) {

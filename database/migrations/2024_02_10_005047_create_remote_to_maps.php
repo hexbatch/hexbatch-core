@@ -47,7 +47,7 @@ return new class extends Migration
                 ->comment('how to get the data in the holder, if remote_data_constant value is null, then this will be used instead');
 
             $table->string('remote_data_name')->nullable(false)->comment("The name of the header, setting, json key or xml tag");
-            $table->jsonb('remote_data_constant')->nullable(true)->default(null)->comment("The value of the header or setting");
+            $table->jsonb('remote_data_constant')->nullable()->default(null)->comment("The value of the header or setting");
 
         });
     }

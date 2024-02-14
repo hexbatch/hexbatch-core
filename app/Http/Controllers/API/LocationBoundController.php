@@ -22,8 +22,7 @@ class LocationBoundController extends Controller
      * @uses LocationBound::bound_owner()
      */
     protected function adminCheck(LocationBound $bound) {
-        $user = auth()->user();
-        $bound->bound_owner->checkAdminGroup($user->id);
+        $bound->bound_owner->checkAdminGroup(Utilities::getTypeCastedAuthUser()?->id);
     }
 
     public function location_bound_get(LocationBound $bound) {
@@ -51,7 +50,7 @@ class LocationBoundController extends Controller
     }
 
     public function location_bound_list(?User $user = null) {
-        $logged_user = auth()->user();
+        $logged_user = Utilities::getTypeCastedAuthUser();
         if (!$user) {$user = $logged_user;}
         $user->checkAdminGroup($logged_user->id);
         /** @var LocationBound $out */
@@ -83,7 +82,7 @@ class LocationBoundController extends Controller
             $bound->checkIsInUse();
         }
 
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
 
         if ($bound_name) {
             $bound->setName($bound_name,$user);
@@ -117,7 +116,7 @@ class LocationBoundController extends Controller
         }
 
         $bound = new LocationBound();
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         $bound->setName($bound_name,$user);
 
         $bound->user_id = $user->id;

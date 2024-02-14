@@ -104,7 +104,7 @@ class ElementType extends Model
                         $parts = explode('.', $value);
                         if (count($parts) === 1) {
                             //must be owned by the user
-                            $user = auth()->user();
+                            $user = Utilities::getTypeCastedAuthUser();
                             $build = $this->where('user_id', $user?->id)->where('type_name', $value);
                         } else {
                             $owner = $parts[0];

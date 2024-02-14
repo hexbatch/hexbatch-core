@@ -43,7 +43,7 @@ class UserGroupResource extends JsonResource
             'members_count' => $this->group_members()->count(),
             'admins_count' => $this->group_admins()->count(),
             'is_admin' => $this->whenNotNull($this->is_admin),
-            'is_owner' => auth()->user()->id === $this->user_id,
+            'is_owner' => Utilities::getTypeCastedAuthUser()?->id === $this->user_id,
         ];
     }
 }

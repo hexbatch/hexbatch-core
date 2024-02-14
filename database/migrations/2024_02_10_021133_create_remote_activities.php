@@ -17,17 +17,25 @@ return new class extends Migration
             $table->foreignId('remote_id')
                 ->nullable(false)
                 ->comment("The remote this header/key is for")
-                ->index('idx_header_log_has_remote_id')
+                ->index('idx_activity_has_remote_id')
                 ->constrained('remotes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('remote_stack_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The stack this remote activity belongs to")
+                ->index('idx_activity_has_remote_stack_id')
+                ->constrained('remote_stacks')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
             $table->foreignId('caller_action_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The action that called this remote")
-                ->index('idx_remote_activities_action_id')
+                ->index('idx_activity_has_action_id')
                 ->constrained('actions')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
@@ -78,11 +86,11 @@ return new class extends Migration
 
         });
 
-        DB::statement("CREATE TYPE type_of_remote_status AS ENUM (
+        DB::statement("CREATE TYPE type_of_remote_activity_status AS ENUM (
             'none','pending','started','success','failed','cached'
             );");
 
-        DB::statement("ALTER TABLE remote_activities Add COLUMN remote_status_type type_of_remote_status NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_activities Add COLUMN remote_activity_status_type type_of_remote_activity_status NOT NULL default 'none';");
         #--------------------------------------
 
         DB::statement("CREATE TYPE type_of_cache_status AS ENUM (
@@ -101,8 +109,12 @@ return new class extends Migration
 
         Schema::table('remote_activities', function (Blueprint $table) {
             $table->index(['cache_status_type'],'idx_cache_status');
-            $table->index(['remote_status_type'],'idx_remote_status');
-            $table->index(['remote_id','remote_status_type'],'idx_status_of_remote');
+            $table->index(['remote_activity_status_type'],'idx_remote_status');
+            $table->index(['remote_id','remote_activity_status_type'],'idx_status_of_remote');
+
+            $table->integer('data_priority_level_in_stack')->nullable(false)->default(0)
+                ->comment("when multiple activities are run, and their data is merged, this helps in the merge strategy");
+
             $table->integer('response_code')->nullable()->comment("the http status or console status");
             $table->jsonb('to_headers')->nullable()->comment("The headers to the remote (if that kind), no secret values here");
             $table->jsonb('from_headers')->nullable()->comment("The headers from the remote answering (if that kind), no secret values here");
@@ -120,7 +132,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('remote_activities');
-        DB::statement("DROP TYPE type_of_remote_status");
+        DB::statement("DROP TYPE type_of_remote_activity_status");
         DB::statement("DROP TYPE type_of_cache_status");
     }
 };
