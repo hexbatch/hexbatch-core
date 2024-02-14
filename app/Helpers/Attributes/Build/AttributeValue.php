@@ -131,6 +131,7 @@ class AttributeValue
                         if (
                             !array_key_exists('latitude',$maybe_coordination )
                             || !array_key_exists('longitude',$maybe_coordination)
+                            || !is_numeric($maybe_coordination['longitude'] )|| !is_numeric($maybe_coordination['latitude'] )
                             || ($maybe_coordination['longitude'] > 180 || $maybe_coordination['longitude'] < -180)
                             || ($maybe_coordination['latitude'] > 90 || $maybe_coordination['latitude'] < -900)
                         ) {
@@ -147,6 +148,7 @@ class AttributeValue
                             !array_key_exists('x',$maybe_coordination )
                             || !array_key_exists('y',$maybe_coordination )
                             || !array_key_exists('z',$maybe_coordination )
+                            || !is_numeric($maybe_coordination['x'] )|| !is_numeric($maybe_coordination['y'] ) || !is_numeric($maybe_coordination['z'] )
                         ) {
                             throw new HexbatchNotPossibleException(__("msg.attribute_schema_improper_shape_coordinate"),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

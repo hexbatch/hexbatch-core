@@ -15,7 +15,10 @@ return new class extends Migration
         Schema::create('user_group_members', function (Blueprint $table) {
 
             $table->id();
-
+            //todo add membership type (working and defined), there is now the defined for this group, and the working group based on the parent
+            //todo add parent group (optional)
+            //todo add parent_combine_strategy_type (membership_union,membership_intersect)
+            //todo add trigger to change the working membership anytime the parent or this changes the defined membership
 
             $table->foreignId('user_group_id')
                 ->nullable(false)

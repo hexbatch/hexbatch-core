@@ -16,6 +16,8 @@ class RefCodes {
     const OPACITY_ISSUE = 10;
     const COLOR_ISSUE = 11;
 
+    const SHAPE_COORDINATE_ISSUE = 12;
+
 
     //users start at 1000
     const BAD_LOGIN = 1000;

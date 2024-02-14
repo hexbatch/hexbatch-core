@@ -78,6 +78,14 @@ class StandardAttributes
             'value_type' => AttributeValueType::MAP_BOUNDS,
             'validator' => [StandardAttributes::class, 'validateMapLocation']
         ],
+        User::SYSTEM_NAME . '.info.shape_location' => [
+            'name' => User::SYSTEM_NAME . '.info.shape_location',
+            'uuid' => 'de7c7ae8-1d8a-4c4a-a0ec-ba80ca21c980',
+            'internal_description' => '2d map location',
+            'parent_uuid' => '016b2926-ab06-44af-b1c5-81520b39975b',
+            'value_type' => AttributeValueType::SHAPE_BOUNDS,
+            'validator' => [StandardAttributes::class, 'validateShapeLocation']
+        ],
         User::SYSTEM_NAME . '.info.timezone' => [
             'name' => User::SYSTEM_NAME . '.info.timezone',
             'uuid' => '5a188757-81a7-4dc5-87de-a08341a12c91',
@@ -310,6 +318,7 @@ class StandardAttributes
             if (
                 !array_key_exists('latitude', $maybe_coordination)
                 || !array_key_exists('longitude', $maybe_coordination)
+                || !is_numeric($maybe_coordination['longitude'] )|| !is_numeric($maybe_coordination['latitude'] )
                 || ($maybe_coordination['longitude'] > 180 || $maybe_coordination['longitude'] < -180)
                 || ($maybe_coordination['latitude'] > 90 || $maybe_coordination['latitude'] < -900)
             ) {
@@ -321,6 +330,31 @@ class StandardAttributes
             throw new HexbatchInvalidException(__("msg.not_map_coordinate"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::MAP_COORDINATE_ISSUE);
+        }
+    }
+
+    public static function validateShapeLocation($what): void
+    {
+        $b_ok = true;
+        $maybe_coordination = Utilities::toArrayOrNull($what);
+        if (!$maybe_coordination) {
+            $b_ok = false;
+        }
+        if ($b_ok) {
+            if (
+                !array_key_exists('x',$maybe_coordination )
+                || !array_key_exists('y',$maybe_coordination )
+                || !array_key_exists('z',$maybe_coordination )
+                || !is_numeric($maybe_coordination['x'] )|| !is_numeric($maybe_coordination['y'] ) || !is_numeric($maybe_coordination['z'] )
+            ) {
+                $b_ok = false;
+            }
+        }
+
+        if (!$b_ok) {
+            throw new HexbatchInvalidException(__("msg.not_shape_coordinate"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::SHAPE_COORDINATE_ISSUE);
         }
     }
 

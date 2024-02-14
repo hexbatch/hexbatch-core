@@ -12,6 +12,7 @@ return [
     'this_is_bad_json' => 'The json value is malformed. :issue',
     'cannot_convert_to_json' => 'The value cannot be converted to json :issue',
     'not_map_coordinate' => 'The value is not a map coordinate',
+    'not_shape_coordinate' => 'The value is not a shape coordinate',
     'not_url_or_ip' => 'The value is not a url or ip',
     'not_timezone' => 'The value is not a timezone',
     'not_e164_phone' => 'The value is not a e164 phone number',

@@ -68,6 +68,7 @@ class UserGroupController extends Controller
         $group->save();
         $group->addMember($user->id,true);
         $group->refresh();
+        //todo allow to define new fields for parent (make sure owns parent when this happens), and combine strategy
         return response()->json(new UserGroupResource($group), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
@@ -94,6 +95,7 @@ class UserGroupController extends Controller
             return response()->json(new UserGroupMemberResource($existing_member), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
         }
         $new_member = $group->addMember($some_user->id);
+        //todo need to update any derived attribute user groups
         return response()->json(new UserGroupMemberResource($new_member), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
@@ -101,7 +103,7 @@ class UserGroupController extends Controller
         $this->adminCheck($group);
         $this->memberCheck($group,$some_user);
         $old_member = $group->removeMember($some_user->id);
-
+        //todo need to update any derived attribute user groups
         return response()->json(new UserGroupMemberResource($old_member), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
