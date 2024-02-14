@@ -15,10 +15,6 @@ return new class extends Migration
         Schema::create('user_group_members', function (Blueprint $table) {
 
             $table->id();
-            //todo add membership type (working and defined), there is now the defined for this group, and the working group based on the parent
-            //todo add parent group (optional)
-            //todo add parent_combine_strategy_type (membership_union,membership_intersect)
-            //todo add trigger to change the working membership anytime the parent or this changes the defined membership
 
             $table->foreignId('user_group_id')
                 ->nullable(false)
@@ -44,13 +40,18 @@ return new class extends Migration
 
             $table->unique(['user_group_id','user_id']);
         });
+        DB::statement("CREATE TYPE type_user_group_membership AS ENUM (
+            'working','defined'
+            );");
 
+        DB::statement("ALTER TABLE user_group_members Add COLUMN type_membership type_user_group_membership NOT NULL default 'working';");
 
         DB::statement("ALTER TABLE user_group_members ALTER COLUMN created_at SET DEFAULT NOW();");
 
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON user_group_members FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+
     }
 
     /**
@@ -59,5 +60,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('user_group_members');
+        DB::statement("DROP TYPE type_user_group_membership");
     }
 };

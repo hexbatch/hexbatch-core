@@ -16,10 +16,7 @@ return new class extends Migration
 
             $table->id();
 
-            $table->uuid('ref_uuid')
-                ->unique()
-                ->nullable(false)
-                ->comment("used for display and id outside the code");
+
 
 
 
@@ -31,16 +28,33 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->string('group_name',128)
-                ->nullable(false)
-                ->comment("The unique name of the group, using the naming rules");
+            $table->foreignId('parent_user_group_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Optional parent group")
+                ->unique('udx_user_group_has_parent_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
+            $table->uuid('ref_uuid')
+                ->unique()
+                ->nullable(false)
+                ->comment("used for display and id outside the code");
 
 
             $table->timestamps();
 
-            $table->unique(['user_id','group_name']);
         });
+
+        #--------------------------------------
+        DB::statement("CREATE TYPE type_user_group_parent_combination AS ENUM (
+            'none','parent_union','parent_intersection'
+            );");
+
+        DB::statement("ALTER TABLE user_groups Add COLUMN parent_combine_strategy type_user_group_parent_combination NOT NULL default 'none';");
+        #--------------------------------------
+
 
         DB::statement('ALTER TABLE user_groups ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
@@ -50,6 +64,32 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON user_groups FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+
+        Schema::table('user_groups', function (Blueprint $table) {
+
+            $table->string('group_name',128)
+                ->nullable(false)
+                ->comment("The unique name of the group, using the naming rules");
+
+
+            $table->unique(['user_id','group_name']);
+        });
+
+
+        //add user group to users
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('user_group_id')
+                ->after('element_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The dedicated group for this user")
+                ->unique('udx_user_dedicated_group_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+        });
+
+
     }
 
     /**
@@ -57,6 +97,13 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['user_group_id']);
+        });
+
+
         Schema::dropIfExists('user_groups');
+
+        DB::statement("DROP TYPE type_user_group_parent_combination");
     }
 };

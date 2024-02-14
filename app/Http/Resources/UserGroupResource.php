@@ -32,6 +32,8 @@ class UserGroupResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if (!$this->id) {return [];}
+
         if ($this->n_display_level <=0) {
             return ['group_name' => [$this->getName()] ];
         }

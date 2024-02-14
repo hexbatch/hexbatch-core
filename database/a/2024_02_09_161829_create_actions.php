@@ -12,14 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        //just a stub
         Schema::create('actions', function (Blueprint $table) {
             $table->id();
-
-            $table->uuid('ref_uuid')
-                ->unique()
-                ->nullable(false)
-                ->comment("used for display and id outside the code");
-
 
             $table->foreignId('user_id')
                 ->nullable()
@@ -34,14 +29,6 @@ return new class extends Migration
 
         });
 
-        DB::statement('ALTER TABLE actions ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
-
-
-        DB::statement("ALTER TABLE actions ALTER COLUMN created_at SET DEFAULT NOW();");
-
-        DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON actions FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
-        ");
     }
 
     /**

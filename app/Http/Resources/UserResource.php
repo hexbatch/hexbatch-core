@@ -32,8 +32,6 @@ class UserResource extends JsonResource
         return [
             'uuid' => $this->ref_uuid,
             'username' => $this->username,
-            'type' => new ElementTypeResource($this->user_type,null,$this->n_display_level - 1),
-            'element' => new ElementResource($this->user_element,null,$this->n_display_level - 1),
             'group' => new UserGroupResource($this->user_group,null,$this->n_display_level - 1),
             'created_at' => $this->created_at_ts
         ];

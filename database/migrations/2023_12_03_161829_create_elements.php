@@ -7,18 +7,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
+        //just make a stub
         Schema::create('elements', function (Blueprint $table) {
             $table->id();
-
-            $table->uuid('ref_uuid')
-                ->unique()
-                ->nullable(false)
-                ->comment("used for display and id outside the code");
 
 
 
@@ -40,18 +34,9 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->timestamps();
 
         });
 
-        DB::statement('ALTER TABLE elements ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
-
-
-        DB::statement("ALTER TABLE elements ALTER COLUMN created_at SET DEFAULT NOW();");
-
-        DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON elements FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
-        ");
     }
 
     /**
