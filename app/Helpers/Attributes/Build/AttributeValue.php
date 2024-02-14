@@ -253,6 +253,18 @@ class AttributeValue
         }
 
         if (in_array($this->value_type,AttributeValueType::NUMERIC_TYPES )) {
+            if ($this->value_type === AttributeValueType::NUMERIC_NATURAL) {
+                $what = (int)$what;
+                if ($what < 0) {
+                    throw new HexbatchNotPossibleException(__("msg.attribute_schema_improper_natural_number"),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                }
+                return $what;
+            }
+            if ($this->value_type === AttributeValueType::NUMERIC_INTEGER) {
+                return intval($what);
+            }
             return (float)$what;
         }
         throw new \LogicException("cannot cast the scaler value because the type is not scaler");

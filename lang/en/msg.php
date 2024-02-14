@@ -10,7 +10,15 @@ return [
     */
     //general
     'this_is_bad_json' => 'The json value is malformed. :issue',
-    'cannot_convert_to_json' => 'The the value cannot be converted to json :issue',
+    'cannot_convert_to_json' => 'The value cannot be converted to json :issue',
+    'not_map_coordinate' => 'The value is not a map coordinate',
+    'not_url_or_ip' => 'The value is not a url or ip',
+    'not_timezone' => 'The value is not a timezone',
+    'not_e164_phone' => 'The value is not a e164 phone number',
+    'not_email' => 'The value is not an email',
+    'not_svg' => 'The value is not a svg',
+    'not_opacity' => 'The value is not a visual opacity integer from 0..100 ',
+    'not_color' => 'The value is not a color ',
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
@@ -55,6 +63,7 @@ return [
     'attribute_schema_bounds_retired' => 'This bounds, ":bound_name" has been retired and cannot be added to the attribute',
     'attribute_schema_bad_regex' => 'When making an attribute, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
     'attribute_schema_json_no_primitive' => 'The json value cannot be a primitive',
+    'attribute_schema_improper_natural_number' => 'Natural numbers are integers that are >=0',
     'attribute_schema_improper_map_coordinate' => 'Map coodinates must have latitude and longitude properties and numbers in map ranges',
     'attribute_schema_improper_shape_coordinate' => 'Shape coodinates must have properies of x,y,x',
     'attribute_schema_bad_scalar_default' => 'When making an attribute, a scalar default must match the rules given in the default, and must be a scalar value',

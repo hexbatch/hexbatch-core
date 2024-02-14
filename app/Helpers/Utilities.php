@@ -89,7 +89,7 @@ class Utilities {
         }
     }
 
-    public static function maybeDecodeJson(array|string|object|null $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array {
+    public static function maybeDecodeJson(mixed $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array {
         if (empty($what)) { return $null_default;}
         if (is_array($what) && $b_associative) {
             return $maybe_json;
@@ -110,6 +110,16 @@ class Utilities {
             return $null_default;
         }
         return $converted;
+    }
+
+    public static function toArrayOrNull(mixed $what) : ?array {
+        $maybe = static::maybeDecodeJson($what);
+        if (!empty($maybe)) {
+            if (is_array($maybe)) {return $maybe;}
+            $json = static::wrapJsonEncode($maybe);
+            return static::maybeDecodeJson($json,true);
+        }
+        return null;
     }
 
     public static function getTypeCastedAuthUser() : ?User {
