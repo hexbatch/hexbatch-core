@@ -41,11 +41,9 @@ return new class extends Migration
             $table->integer('level_from_top')->default(0)->nullable(false)
                 ->comment('how many levels down are we?');
 
-            $table->jsonb('starting_data')->default(null)->nullable()
-                ->comment('data sent to the remotes');
 
             $table->jsonb('ending_data')->default(null)->nullable()
-                ->comment('final data after processing');
+                ->comment('final data after processing, starting data is defined at each activity linked to this');
 
             $table->timestamps();
             $table->dateTime('stack_ended_at')->nullable()->default(null)->comment("filled in when this stack completes");
