@@ -204,6 +204,10 @@ return new class extends Migration
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
 
+            $table->boolean('is_standard')->default(false)->nullable(false)
+                ->index('idx_is_standard')
+                ->comment('if true then this attribute is a standard attribute or derived from one');
+
 
             $table->boolean('is_human')->default(false)->nullable(false)
                 ->comment('if true then shows up in a human friendly filter');
@@ -216,6 +220,8 @@ return new class extends Migration
 
             $table->boolean('is_nullable')->default(true)->nullable(false)
                 ->comment('if true then value is nullable');
+
+
 
 
         });
