@@ -39,24 +39,6 @@ use Illuminate\Support\Facades\Schema;
             call_unit_in_seconds: x
 
 
-Remotes:
-    * id
-    * remote_user_id
-    * is_retired
-    * is_on
-    * enum uri_type
-    * enum uri_method
-    * uri_string
-    * uri_port
-    * is_caching
-    * cache_ttl_seconds
-    * jsonb cache_keys
-    * jsonb input_attribute_map
-    * jsonb output_map
-    call_max_per_unit
-    call_unit_in_seconds
-    remote_name
-
  */
 return new class extends Migration
 {
@@ -85,19 +67,12 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
-            $table->foreignId('action_event_id')
-                ->nullable()->default(null)
-                ->comment("When the remote type is action_event")
-                ->index('idx_remotes_action_event_id')
-                ->constrained('action_events')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreignId('search_path_id')
-                ->nullable()->default(null)
-                ->comment("When the remote type is action_event")
-                ->index('idx_remotes_search_path_id')
-                ->constrained('search_paths')
+            $table->foreignId('remote_element_type_id')
+                ->nullable()
+                ->default(null)
+                ->comment("This remote type inherits from the standard remote type and the user type of the creator")
+                ->unique('udx_remote_element_type_id')
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
@@ -116,7 +91,7 @@ return new class extends Migration
         });
         #------------------------------
         DB::statement("CREATE TYPE type_remote_uri AS ENUM (
-            'none','url','socket','console','manual','action_event'
+            'none','url','socket','console','manual'
             );");
 
         DB::statement("ALTER TABLE remotes Add COLUMN uri_type type_remote_uri  NOT NULL default 'none';");

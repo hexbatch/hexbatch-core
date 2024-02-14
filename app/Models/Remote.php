@@ -35,8 +35,7 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property int user_id
  * @property int usage_group_id
- * @property int action_event_id
- * @property int search_path_id
+ * @property int remote_element_type_id
  * @property string ref_uuid
  * @property string remote_name
  * @property boolean is_retired
@@ -143,7 +142,7 @@ class Remote extends Model
         $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
         if ($b_exist) {return true;}
         return false;
-        //todo also check for the  action
+        //todo also check for the action
     }
 
     /**

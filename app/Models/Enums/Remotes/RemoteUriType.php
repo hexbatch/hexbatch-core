@@ -7,7 +7,6 @@ enum RemoteUriType : string {
     case SOCKET = 'socket';
     case CONSOLE = 'console';
     case MANUAL = 'manual';
-    case ACTION_EVENT = 'action_event';
 
     const SENSITIVE_TYPES = [
         self::SOCKET,
@@ -18,6 +17,5 @@ enum RemoteUriType : string {
         self::URL,
         self::SOCKET,
         self::CONSOLE,
-        self::ACTION_EVENT
     ];
 }

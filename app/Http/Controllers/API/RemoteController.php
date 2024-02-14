@@ -6,6 +6,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Remotes\Activity\TestingActivityEventConsumer;
 use App\Helpers\Remotes\Build\DataGathering;
+use App\Helpers\Remotes\Build\GroupTypeGathering;
 use App\Helpers\Remotes\Build\RemoteAlwaysCanSetOptions;
 use App\Helpers\Remotes\Build\RemoteUriGathering;
 use App\Helpers\Utilities;
@@ -175,6 +176,7 @@ class RemoteController extends Controller
         $this->updateInUseRemote($remote,$request);
 
         (new DataGathering($request) )->assign($remote);
+        (new GroupTypeGathering($request) )->assign($remote);
 
     }
 
