@@ -44,8 +44,7 @@ class Utilities {
     }
 
     public static function positiveBoolWords($val) : bool {
-        $val = mb_strtolower($val);
-        return match($val) {
+        return match(mb_strtolower($val)) {
             'yes', '1', 'on', 'true', '' =>true,
             default => false
         };

@@ -83,6 +83,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    const SYSTEM_NAME = 'system';
+
     public function user_element() : BelongsTo {
         return $this->belongsTo('App\Models\Element','element_id');
     }
