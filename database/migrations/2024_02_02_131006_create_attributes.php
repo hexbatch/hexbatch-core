@@ -208,10 +208,6 @@ return new class extends Migration
                 ->index('idx_is_standard')
                 ->comment('if true then this attribute is a standard attribute');
 
-            $table->boolean('is_system_private')->default(false)->nullable(false)
-                ->index('idx_is_standard')
-                ->comment('If true, then this is always readable by the type owner group members');
-
 
             $table->boolean('is_human')->default(false)->nullable(false)
                 ->comment('if true then shows up in a human friendly filter');
