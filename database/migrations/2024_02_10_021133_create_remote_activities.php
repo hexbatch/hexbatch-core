@@ -99,6 +99,12 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE remote_activities Add COLUMN cache_status_type type_of_cache_status NOT NULL default 'none';");
         #--------------------------------------
+         DB::statement("CREATE TYPE type_of_cache_policy AS ENUM (
+            'normal','not_use_cache','use_cache_or_fail'
+            );");
+
+        DB::statement("ALTER TABLE remote_activities Add COLUMN cache_policy_type type_of_cache_policy NOT NULL default 'normal';");
+        #--------------------------------------
 
         DB::statement('ALTER TABLE remote_activities ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
         DB::statement("ALTER TABLE remote_activities ALTER COLUMN created_at SET DEFAULT NOW();");
@@ -134,5 +140,6 @@ return new class extends Migration
         Schema::dropIfExists('remote_activities');
         DB::statement("DROP TYPE type_of_remote_activity_status");
         DB::statement("DROP TYPE type_of_cache_status");
+        DB::statement("DROP TYPE type_of_cache_policy");
     }
 };

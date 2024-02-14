@@ -1,6 +1,6 @@
 <?php
 namespace App\Models\Enums\Remotes;
-enum CacheStatusType : string {
+enum RemoteCacheStatusType : string {
 
     case NONE = 'none';
     case CREATED = 'created';

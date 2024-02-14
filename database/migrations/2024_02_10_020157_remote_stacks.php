@@ -33,6 +33,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('shortcut_stack_id')
+                ->nullable()
+                ->default(null)
+                ->comment("if there is another stack that runs earlier and does the same thing, put it here, and we use that ending_data to avoid recursion but allow nested usages")
+                ->index('idx_shortcut_remote_stack_id')
+                ->constrained('remote_stacks')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
@@ -76,6 +85,8 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON remote_stacks FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+        //todo add trigger in other file, and use it here, to detect any possible repeats of the same remote, with same cache callers, and set the later's activity cache_policy_type to cache or cache_or_fail policy
+        //todo add trigger to see if any repeat usage of the same action, in the same element, and if so, set shortcut_stack_id here
     }
 
     /**

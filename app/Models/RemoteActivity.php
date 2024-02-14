@@ -5,7 +5,8 @@ namespace App\Models;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\Remotes\CacheStatusType;
+use App\Models\Enums\Remotes\RemoteCachePolicyType;
+use App\Models\Enums\Remotes\RemoteCacheStatusType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use ArrayObject;
@@ -31,7 +32,8 @@ use Illuminate\Support\Facades\DB;
  * @property int caller_type_id
  * @property string ref_uuid
  * @property RemoteActivityStatusType remote_activity_status_type
- * @property CacheStatusType cache_status_type
+ * @property RemoteCacheStatusType cache_status_type
+ * @property RemoteCachePolicyType cache_policy_type
  * @property int data_priority_level_in_stack
  * @property int response_code
  * @property ArrayObject to_headers
@@ -94,7 +96,8 @@ class RemoteActivity extends Model
         'errors' => ArrayObject::class,
         'consumer_passthrough_data' => ArrayObject::class,
         'remote_activity_status_type' => RemoteActivityStatusType::class,
-        'cache_status_type' => CacheStatusType::class
+        'cache_status_type' => RemoteCacheStatusType::class,
+        'cache_policy_type' => RemoteCachePolicyType::class
 
     ];
 
@@ -124,7 +127,7 @@ class RemoteActivity extends Model
 
 
     public static function buildActivity(
-        ?int $id = null, ?RemoteActivityStatusType $remote_activity_status_type = null, ?CacheStatusType $cache_status_type = null, ?RemoteUriType $uri_type = null)
+        ?int $id = null, ?RemoteActivityStatusType $remote_activity_status_type = null, ?RemoteCacheStatusType $cache_status_type = null, ?RemoteUriType $uri_type = null)
     : Builder
     {
 
@@ -251,7 +254,7 @@ class RemoteActivity extends Model
     public function addCache() : void {
         try {
             if (!$this->remote_parent->is_caching) {
-                $this->cache_status_type = CacheStatusType::NOT_MADE;
+                $this->cache_status_type = RemoteCacheStatusType::NOT_MADE;
                 return;
             }
             $older_cache = $this->remote_parent->getRemoteCache();
@@ -261,9 +264,9 @@ class RemoteActivity extends Model
             $final = Utilities::wrapJsonEncode($older_cache);
             Cache::tags([Remote::REMOTES_CACHE_TAG])
                 ->put($this->remote_parent->getRemoteCacheKey(), $final, $this->cache_ttl_seconds);
-            $this->cache_status_type = CacheStatusType::CREATED;
+            $this->cache_status_type = RemoteCacheStatusType::CREATED;
         } catch (\Exception $e) {
-            $this->cache_status_type = CacheStatusType::ERROR;
+            $this->cache_status_type = RemoteCacheStatusType::ERROR;
             throw $e;
         }
     }
