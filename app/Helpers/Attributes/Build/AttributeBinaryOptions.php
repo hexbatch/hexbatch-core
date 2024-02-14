@@ -30,8 +30,6 @@ class AttributeBinaryOptions
         }
 
 
-        $this->is_constant = false;
-        $this->is_static = false;
         $this->is_human = false;
         $this->is_final = false;
 

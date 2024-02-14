@@ -41,8 +41,6 @@ use Illuminate\Validation\ValidationException;
  * @property int read_shape_location_bounds_id
  * @property int write_shape_location_bounds_id
  * @property boolean is_retired
- * @property boolean is_constant
- * @property boolean is_static
  * @property boolean is_final
  * @property boolean is_human
  * @property boolean is_read_policy_all

@@ -77,8 +77,6 @@ class AttributeResource extends JsonResource
                 ],
             ],
             'options'=> [
-                'is_constant' => $this->is_constant,
-                'is_static' => $this->is_static,
                 'is_final' => $this->is_final,
                 'is_human' => $this->is_human,
             ],

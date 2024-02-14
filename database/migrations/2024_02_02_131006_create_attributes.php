@@ -67,8 +67,6 @@ attributes:
     write_bounds_shape : fk nullable
 
     is_retired: bool default false
-    is_constant: bool default false
-    is_static: bool default false
     is_final: bool default false
     is_human: bool default false
 
@@ -202,13 +200,6 @@ return new class extends Migration
             $table->boolean('is_retired')->default(false)->nullable(false)
                 ->comment('if true then cannot be added to types or new live-attribute on elements');
 
-            $table->boolean('is_constant')->default(false)->nullable(false)
-                ->comment('if true then this attribute value cannot be changed after set to the element');
-
-
-
-            $table->boolean('is_static')->default(false)->nullable(false)
-                ->comment('if true then this value is shared in the type');
 
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
