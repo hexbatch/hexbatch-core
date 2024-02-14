@@ -16,16 +16,6 @@ return new class extends Migration
         Schema::create('actions', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The owner")
-                ->index('idx_action_user_id')
-                ->constrained('users')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->timestamps();
 
         });
 

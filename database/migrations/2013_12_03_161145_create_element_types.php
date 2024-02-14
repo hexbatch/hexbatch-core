@@ -17,15 +17,6 @@ return new class extends Migration
             $table->id();
 
 
-            $table->foreignId('user_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The owner")
-                ->index('idx_element_type_user_id')
-                ->constrained('users')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
 
         });
 

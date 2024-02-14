@@ -12,12 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_groups', function (Blueprint $table) {
-
-            $table->id();
-
-
-
+        Schema::table('user_groups', function (Blueprint $table) {
 
 
             $table->foreignId('user_id')
@@ -76,19 +71,6 @@ return new class extends Migration
         });
 
 
-        //add user group to users
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('user_group_id')
-                ->after('element_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The dedicated group for this user")
-                ->unique('udx_user_dedicated_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-        });
-
 
     }
 
@@ -97,10 +79,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['user_group_id']);
-            $table->dropColumn('user_group_id');
-        });
 
 
         Schema::dropIfExists('user_groups');
