@@ -226,7 +226,8 @@ return new class extends Migration
 
         });
 
-
+        //todo no 'numeric_integer','numeric_natural', 'string_markdown','string_html','string_xml','string_binary',
+        //todo add the iso_lang ?
         DB::statement("CREATE TYPE type_of_attribute_value AS ENUM (
             'numeric' , 'numeric_integer','numeric_natural',
             'string','json','string_markdown','string_html','string_xml','string_binary',
@@ -248,7 +249,7 @@ return new class extends Migration
             $table->float('value_numeric_max')->nullable()->default(null)
                 ->comment("if set and this value type is number, then this is the max allowed for the value");
 
-
+            //todo three columns , text, json and int for the three formats of values
             $table->jsonb('value_default')->nullable()->default(null)
                 ->comment("if set this is default, cast to the type, when attribute is applied to type or live");
 

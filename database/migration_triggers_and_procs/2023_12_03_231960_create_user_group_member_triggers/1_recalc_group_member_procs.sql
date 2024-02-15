@@ -15,6 +15,9 @@ BEGIN
 
     -- else if neither parent or child put this in working mode
     -- todo fill in proc and test
+    -- todo perhaps this instead fills a new table for working users in the groups, and no status of working for defined
+    --  so id group_id, user_id and this gives a nice table for getting perms for stuff
+    -- then the the groups
     RETURN NEW;
 END;
 $$ language 'plpgsql';

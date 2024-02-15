@@ -6,6 +6,7 @@ BEGIN
     -- this will start the membership checks
 
     -- todo fill in proc and test
+
     RETURN NEW;
 END;
 $$ language 'plpgsql';
