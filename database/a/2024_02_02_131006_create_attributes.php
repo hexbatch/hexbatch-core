@@ -226,11 +226,8 @@ return new class extends Migration
 
         });
 
-        //todo no 'numeric_integer','numeric_natural', 'string_markdown','string_html','string_xml','string_binary',
-        //todo add the iso_lang ?
         DB::statement("CREATE TYPE type_of_attribute_value AS ENUM (
-            'numeric' , 'numeric_integer','numeric_natural',
-            'string','json','string_markdown','string_html','string_xml','string_binary',
+            'numeric','string','json',
             'user','user_group','attribute','element','element_type',
             'remote','action','search',
             'schedule_bounds','map_bounds','shape_bounds',
@@ -250,8 +247,8 @@ return new class extends Migration
                 ->comment("if set and this value type is number, then this is the max allowed for the value");
 
             //todo three columns , text, json and int for the three formats of values
-            $table->jsonb('value_default')->nullable()->default(null)
-                ->comment("if set this is default, cast to the type, when attribute is applied to type or live");
+            $table->jsonb('json_value_default')->nullable()->default(null)->comment("set if json");
+            $table->text('text_value_default')->nullable()->default(null)->comment("set if string");
 
             $table->string('attribute_name',128)->nullable(false)->index()
                 ->comment("The unique name of the attribute, using the naming rules");

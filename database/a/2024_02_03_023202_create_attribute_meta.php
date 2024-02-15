@@ -28,12 +28,9 @@ return new class extends Migration
 
             $table->timestamps();
         });
-//todo meta should only be a text column , attr id, and a type,
-// no stardard_family, no description, no name
+
         DB::statement("CREATE TYPE type_of_attribute_metum AS ENUM (
-            'none',
-            'description','name','standard_family',
-            'author','copywrite','url','rating','internal'
+            'none','author','copywrite','url','rating','lang'
             );");
 
         DB::statement("ALTER TABLE attribute_meta Add COLUMN meta_type type_of_attribute_metum NOT NULL default 'none';");
@@ -45,23 +42,8 @@ return new class extends Migration
         ");
 
         Schema::table('attribute_meta', function (Blueprint $table) {
-
-            $table->string('meta_iso_lang',10)->nullable(false)->index()
-                ->comment("The iso language code")->default(AttributeMetum::ANY_LANGUAGE);
-
-
-            $table->index(['meta_type'],'idx_meta_type');
-            $table->index(['meta_type','meta_iso_lang'],'idx_meta_type_with_lang');
-            $table->index(['meta_parent_attribute_id','meta_type'],'idx_meta_type_of_attribute');
-            $table->unique(['meta_parent_attribute_id','meta_iso_lang','meta_type'],'udx_one_meta_type_per_lang_per_attribute');
-//todo remove meta_json
-            $table->string('meta_mime_type',255)->nullable()->default(null)
-                ->comment("some meta can be markdown or html or plain text");
-//todo remove meta_json
-            $table->text('meta_value')->nullable()->default(null)->comment("the value of the meta, unless jaon");
-
-            $table->jsonb('meta_json')->nullable()->default(null)
-                ->comment('data stored with the meta value');
+            $table->index(['meta_parent_attribute_id','meta_type'],'idx_attr_meta_type');
+            $table->string('meta_value')->nullable()->default(null)->comment("the value of the meta");
         });
     }
 

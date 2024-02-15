@@ -12,14 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_group_members', function (Blueprint $table) {
+        Schema::create('user_group_active_members', function (Blueprint $table) {
 
             $table->id();
 
             $table->foreignId('user_group_id')
                 ->nullable(false)
                 ->comment("The group this entry is for")
-                ->index('idx_user_group_id')
+                ->index('idx_active_member_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -28,25 +28,26 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->nullable(false)
                 ->comment("The group member/maybe admin too")
-                ->index('idx_group_member_user_id')
+                ->index('idx_active_member_user_id')
                 ->constrained('users')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->boolean('is_admin')->default(false)->nullable(false)
-                ->comment('if true then member is admin');
-
-            $table->timestamps();
+            $table->foreignId('parent_user_group_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The user was supplied by this group")
+                ->index('idx_active_member_parent_group_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->unique(['user_group_id','user_id']);
+
         });
-
-
-        DB::statement("ALTER TABLE user_group_members ALTER COLUMN created_at SET DEFAULT NOW();");
-
-        DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON user_group_members FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
-        ");
+        DB::statement("ALTER TABLE user_group_active_members ADD CONSTRAINT chk_not_same_groups CHECK (
+                parent_user_group_id is null OR  (parent_user_group_id <> user_group_id)
+            );");
 
     }
 
@@ -55,6 +56,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_group_members');
+        Schema::dropIfExists('user_group_active_members');
     }
 };
