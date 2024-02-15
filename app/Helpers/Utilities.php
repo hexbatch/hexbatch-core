@@ -6,7 +6,9 @@ use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
 use ErrorException;
+use Illuminate\Support\Facades\DB;
 use JsonException;
+use LogicException;
 
 class Utilities {
     public static function ignoreVar(...$params) {
@@ -128,6 +130,18 @@ class Utilities {
          */
         $user = auth()->user();
         return $user;
+    }
+
+    public static function runDbFile(?string $start_path) :bool {
+        $path = realpath($start_path);
+        if (!$path) {
+            throw new LogicException("could not find file in migration: $start_path");
+        }
+        $proc = file_get_contents($path);
+        if (!$proc) {
+            throw new LogicException("could not read file in migration: $path");
+        }
+        return DB::statement($proc);
     }
 
 }
