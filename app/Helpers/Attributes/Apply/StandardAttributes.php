@@ -19,12 +19,23 @@ use enshrined\svgSanitize\Sanitizer;
  */
 class StandardAttributes
 {
+    const BASE_ATTRIBUTE_NAME = 'base';
+
     const DEF = [
+
+        self::BASE_ATTRIBUTE_NAME => [
+            'name' => 'base',
+            'uuid' => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
+            'internal_description' => 'Base attribute for all attributes on all servers. This allows any attribute to be targeted in rules and searches',
+            'parent_uuid' => null,
+            'value_type' => AttributeValueType::STRING,
+            'validator' => null
+        ],
         User::SYSTEM_NAME => [
             'name' => User::SYSTEM_NAME,
             'uuid' => null, //generated at seed time
             'internal_description' => 'Base attribute for all attributes made on the server',
-            'parent_uuid' => null,
+            'parent_uuid' => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
             'value_type' => AttributeValueType::STRING,
             'validator' => null
         ],
