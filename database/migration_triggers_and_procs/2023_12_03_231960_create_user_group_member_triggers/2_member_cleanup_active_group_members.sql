@@ -9,6 +9,11 @@ BEGIN
         -- if union, see if child does has this user in their list, if so then set user_group_active_members.parent_user_group_id to null
         -- if intersection then if this user is also in the child list, add this to the user_group_active_members with parent there set to null
 
+    -- if owner is a child , then there can be one or many parent groups. Get the owner's parent's parent combine strategy
+        -- for each child group
+        -- if union, see if parent does has this user in their list, if so then set user_group_active_members.parent_user_group_id to that parent
+        -- if intersection then do nothing because row will have dropped automatically there
+
     -- todo fill in proc and test
     RETURN NEW;
 END;

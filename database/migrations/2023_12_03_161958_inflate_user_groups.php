@@ -23,6 +23,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo will need one parent to multiple children, or multiple children to one parent. Add a child link, and constraint that only one can be set
             $table->foreignId('parent_user_group_id')
                 ->nullable()
                 ->default(null)

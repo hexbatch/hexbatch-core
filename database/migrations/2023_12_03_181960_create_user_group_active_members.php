@@ -12,6 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        //todo admin flag
         Schema::create('user_group_active_members', function (Blueprint $table) {
 
             $table->id();
@@ -33,6 +34,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo add child user group link too
             $table->foreignId('parent_user_group_id')
                 ->nullable()
                 ->default(null)
