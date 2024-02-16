@@ -24,7 +24,7 @@ class AttributeMetaGathering
 
 
 
-    public function __construct(Request $request, bool $b_admin = false)
+    public function __construct(Request $request)
     {
         $this->meta_mori = [];
 
@@ -40,7 +40,7 @@ class AttributeMetaGathering
 
         foreach ($meta_block as $some_meta) {
 
-            $this->meta_mori[] = AttributeMetum::createMetum(new Collection($some_meta),null,$b_admin);
+            $this->meta_mori[] = AttributeMetum::createMetum(new Collection($some_meta));
         }
 
     }
@@ -58,7 +58,6 @@ class AttributeMetaGathering
                 } else {
                     //see if id already exists for unique
                     $maybe = AttributeMetum::where('meta_parent_attribute_id',$what->meta_parent_attribute_id)
-                        ->where('meta_iso_lang',$what->meta_iso_lang)
                         ->where('meta_type',$what->meta_type->value)
                         ->first();
                     if ($maybe) {

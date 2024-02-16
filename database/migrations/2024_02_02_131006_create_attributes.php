@@ -223,42 +223,14 @@ return new class extends Migration
 
 
 
-
-        });
-
-        DB::statement("CREATE TYPE type_of_attribute_value AS ENUM (
-            'numeric','string','json',
-            'user','user_group','attribute','element','element_type',
-            'remote','action','search',
-            'schedule_bounds','map_bounds','shape_bounds',
-            'view','mutual','container',
-            'coordinate_map','coordinate_shape'
-            );");
-
-        DB::statement("ALTER TABLE attributes Add COLUMN value_type type_of_attribute_value NOT NULL default 'string';");
-
-        Schema::table('attributes', function (Blueprint $table) {
-
-
-            $table->float('value_numeric_min')->nullable()->default(null)
-                ->comment("if set and this value type is number, then this is the min allowed for the value");
-
-            $table->float('value_numeric_max')->nullable()->default(null)
-                ->comment("if set and this value type is number, then this is the max allowed for the value");
-
-            //todo three columns , text, json and int for the three formats of values
-            $table->jsonb('json_value_default')->nullable()->default(null)->comment("set if json");
-            $table->text('text_value_default')->nullable()->default(null)->comment("set if string");
-
+            $table->unique(['user_id','attribute_name']);
+            $table->timestamps();
             $table->string('attribute_name',128)->nullable(false)->index()
                 ->comment("The unique name of the attribute, using the naming rules");
 
-            $table->string('value_regex')->nullable()->default(null)
-                ->comment("if set and this is plain string, then regex filters this");
 
-            $table->unique(['user_id','attribute_name']);
-            $table->timestamps();
         });
+
 
 
 
@@ -278,6 +250,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('attributes');
-        DB::statement("DROP TYPE type_of_attribute_value;");
     }
 };

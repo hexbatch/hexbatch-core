@@ -9,7 +9,7 @@ use App\Helpers\Attributes\Build\AttributeBounds;
 use App\Helpers\Attributes\Build\AttributeMetaGathering;
 use App\Helpers\Attributes\Build\AttributePermissionGathering;
 use App\Helpers\Attributes\Build\AttributeRuleGathering;
-use App\Helpers\Attributes\Build\AttributeValue;
+use App\Helpers\Attributes\Build\AttributeDefaultGathering;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
@@ -287,7 +287,7 @@ class AttributeController extends Controller
 
         $attribute->save();
 
-        (new AttributeValue(request:$request,attribute: $attribute) )->assign($attribute);
+        (new AttributeDefaultGathering(request:$request,attribute: $attribute) )->assign($attribute);
         (new AttributeMetaGathering($request) )->assign($attribute);
         (new AttributePermissionGathering($request) )->assign($attribute);
         (new AttributeRuleGathering($request) )->assign($attribute);

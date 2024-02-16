@@ -3,7 +3,6 @@
 namespace App\Helpers\Attributes\Apply;
 
 use App\Exceptions\HexbatchInvalidException;
-use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Enums\Attributes\AttributeValueType;
@@ -162,7 +161,7 @@ class StandardAttributes
             'uuid' => '8a569174-35a8-4af9-8531-1b07c135c63c',
             'internal_description' => 'Opacity',
             'parent_uuid' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
-            'value_type' => AttributeValueType::NUMERIC_NATURAL,
+            'value_type' => AttributeValueType::NUMERIC,
             'validator' => [StandardAttributes::class, 'validateOpacity']
         ],
         User::SYSTEM_NAME . '.display.svg' => [
@@ -170,7 +169,7 @@ class StandardAttributes
             'uuid' => 'f5baab77-66bb-4ccc-917f-6f36afc70051',
             'internal_description' => 'svg',
             'parent_uuid' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
-            'value_type' => AttributeValueType::STRING_XML,
+            'value_type' => AttributeValueType::STRING,
             'validator' => [StandardAttributes::class, 'validateSvg']
         ],
         User::SYSTEM_NAME . '.display.image' => [
@@ -238,7 +237,7 @@ class StandardAttributes
             'uuid' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
             'internal_description' => 'Base for all standard admin roles',
             'parent_uuid' => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
-            'value_type' => AttributeValueType::NUMERIC_NATURAL,
+            'value_type' => AttributeValueType::NUMERIC,
             'validator' => null
         ],
         User::SYSTEM_NAME . '.admin_role.view_private_user_info' => [
@@ -246,7 +245,7 @@ class StandardAttributes
             'uuid' => 'be806efe-fffb-4a39-a9ad-6b1b705c2fb1',
             'internal_description' => 'Users with this attribute can view all other user info',
             'parent_uuid' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
-            'value_type' => AttributeValueType::NUMERIC_NATURAL,
+            'value_type' => AttributeValueType::NUMERIC,
             'validator' => null
         ],
         User::SYSTEM_NAME . '.admin_role.set_sensitive_remote_types' => [
@@ -254,7 +253,7 @@ class StandardAttributes
             'uuid' => 'a202179c-a8af-4f38-a612-7ddb719d4012',
             'internal_description' => 'Users with this attribute can set all the remote types',
             'parent_uuid' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
-            'value_type' => AttributeValueType::NUMERIC_NATURAL,
+            'value_type' => AttributeValueType::NUMERIC,
             'validator' => null
         ],
         User::SYSTEM_NAME . '.admin_role.view_all_remote_activity' => [
@@ -262,7 +261,7 @@ class StandardAttributes
             'uuid' => '63b649da-2a3f-4940-8f78-ad8ac3109443',
             'internal_description' => 'Users with this attribute can see all remote activity by all users',
             'parent_uuid' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
-            'value_type' => AttributeValueType::NUMERIC_NATURAL,
+            'value_type' => AttributeValueType::NUMERIC,
             'validator' => null
         ],
 
@@ -326,7 +325,7 @@ class StandardAttributes
         }
     }
 
-    public static function validateMapLocation($what): void
+    public static function validateMapLocation($what, bool $b_throw_exception = true): bool
     {
         $b_ok = true;
         $maybe_coordination = Utilities::toArrayOrNull($what);
@@ -339,20 +338,24 @@ class StandardAttributes
                 || !array_key_exists('longitude', $maybe_coordination)
                 || !is_numeric($maybe_coordination['longitude'] )|| !is_numeric($maybe_coordination['latitude'] )
                 || ($maybe_coordination['longitude'] > 180 || $maybe_coordination['longitude'] < -180)
-                || ($maybe_coordination['latitude'] > 90 || $maybe_coordination['latitude'] < -900)
+                || ($maybe_coordination['latitude'] > 90 || $maybe_coordination['latitude'] < -90)
             ) {
                 $b_ok = false;
             }
         }
 
         if (!$b_ok) {
-            throw new HexbatchInvalidException(__("msg.not_map_coordinate"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::MAP_COORDINATE_ISSUE);
+            if ($b_throw_exception) {
+                throw new HexbatchInvalidException(__("msg.not_map_coordinate"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::MAP_COORDINATE_ISSUE);
+            }
+            return false;
         }
+        return true;
     }
 
-    public static function validateShapeLocation($what): void
+    public static function validateShapeLocation($what, bool $b_throw_exception = true): bool
     {
         $b_ok = true;
         $maybe_coordination = Utilities::toArrayOrNull($what);
@@ -371,10 +374,14 @@ class StandardAttributes
         }
 
         if (!$b_ok) {
-            throw new HexbatchInvalidException(__("msg.not_shape_coordinate"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::SHAPE_COORDINATE_ISSUE);
+            if ($b_throw_exception) {
+                throw new HexbatchInvalidException(__("msg.not_shape_coordinate"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::SHAPE_COORDINATE_ISSUE);
+            }
+            return false;
         }
+        return true;
     }
 
     public static function validateTimezone($what): void
@@ -441,7 +448,7 @@ class StandardAttributes
                 if (!$cleanSVG) {
                     $b_ok = false;
                 }
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 $b_ok = false;
             }
         }

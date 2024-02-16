@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\AttributeValuePointer::getValueDisplayForResource()
  * @uses \App\Models\Attribute::getPermissionGroupsForResource()
  * @uses \App\Models\Attribute::getRuleGroup()
  * @uses \App\Models\Attribute::getMeta()
@@ -80,28 +79,12 @@ class AttributeResource extends JsonResource
                 'is_final' => $this->is_final,
                 'is_human' => $this->is_human,
             ],
-            'value'=> [
+            'value'=> new AttributeValueResource($this->attribute_value),
 
-                'type' => $this->value_type->value,
-                'min' => $this->value_numeric_min,
-                'max' => $this->value_numeric_max,
-                'regex' => $this->value_regex,
-                'default' => empty($this->attribute_pointer)? $this->getValue() : $this->attribute_pointer->getValueDisplayForResource($this->n_display_level-1),
-                'is_nullable' => $this->is_nullable,
-            ],
             'meta' => $this->getMeta($this->n_display_level - 1)
 
         ];
 
-        if (is_null($this->value_numeric_min)) {
-            unset($ret['value']['min']);
-        }
-        if (is_null($this->value_numeric_max)) {
-            unset($ret['value']['max']);
-        }
-        if (empty($this->value_regex)) {
-            unset($ret['value']['regex']);
-        }
 
         return $ret;
     }

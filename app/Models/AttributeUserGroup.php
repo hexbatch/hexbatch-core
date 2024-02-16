@@ -29,8 +29,6 @@ use Illuminate\Support\Facades\Auth;
  */
 class AttributeUserGroup extends Model
 {
-    //todo when an attribute is inherited it combines this group with the same group type of the parent, to create a new user group
-    // anytime this intersected user group has either parent change it will update the membership
     protected $table = 'attribute_user_groups';
     public $timestamps = false;
 

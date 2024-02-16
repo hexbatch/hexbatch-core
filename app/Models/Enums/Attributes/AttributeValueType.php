@@ -2,14 +2,10 @@
 namespace App\Models\Enums\Attributes;
 enum AttributeValueType : string {
     case NUMERIC = 'numeric';
-    case NUMERIC_INTEGER = 'numeric_integer';
-    case NUMERIC_NATURAL = 'numeric_natural';
+
     case STRING = 'string';
     case JSON = 'json';
-    case STRING_MARKDOWN = 'string_markdown';
-    case STRING_HTML = 'string_html';
-    case STRING_XML = 'string_xml';
-    case STRING_BINARY = 'string_binary';
+
     case USER = 'user';
     case USER_GROUP = 'user_group';
     case ATTRIBUTE = 'attribute';
@@ -29,12 +25,8 @@ enum AttributeValueType : string {
     case CONTAINER = 'container';
     case COORDINATE_MAP = 'coordinate_map';
     case COORDINATE_SHAPE = 'coordinate_shape';
-    const NUMERIC_TYPES = [
-        self::NUMERIC,self::NUMERIC_INTEGER,self::NUMERIC_NATURAL
-    ];
-
-    const STRING_TYPES = [
-        self::STRING,self::STRING_MARKDOWN,self::STRING_HTML,self::STRING_XML,self::STRING_BINARY
+    const SCALER_TYPES = [
+        self::NUMERIC,self::STRING
     ];
 
     const POINTER_TYPES = [

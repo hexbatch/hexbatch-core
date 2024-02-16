@@ -15,9 +15,7 @@ use App\Models\Enums\Attributes\AttributeUserGroupType;
 use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\ResourceNameReq;
-use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -46,12 +44,7 @@ use Illuminate\Validation\ValidationException;
  * @property boolean is_human
  * @property boolean is_read_policy_all
  * @property boolean is_write_policy_all
- * @property boolean is_nullable
- * @property AttributeValueType value_type
- * @property int value_numeric_min
- * @property int value_numeric_max
- * @property string value_regex
- * @property ArrayObject value_default
+
  * @property string attribute_name
  * @property string created_at
  * @property string updated_at
@@ -70,7 +63,8 @@ use Illuminate\Validation\ValidationException;
  * @property LocationBound write_shape_bound
  *
  * @property AttributeValuePointer attribute_pointer
- * @property AttributeMetum[] attribute_meta_all
+ * @property AttributeValue attribute_value
+ * @property AttributeMetum[] meta_of_attribute
  * @property AttributeRule[] da_rules
  * @property AttributeUserGroup[] permission_groups
  */
@@ -103,7 +97,7 @@ class Attribute extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'value_default' => AsArrayObject::class,
+
         'value_type' => AttributeValueType::class,
     ];
 
@@ -159,10 +153,15 @@ class Attribute extends Model
 
     }
 
-    public function attribute_meta_all() : HasMany {
-        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id')
-            ->orderBy('meta_type')
-            ->orderBy('meta_iso_lang');
+    public function attribute_value() : HasOne {
+        return $this->hasOne('App\Models\AttributeValue','parent_attribute_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts");
+
+    }
+
+    public function meta_of_attribute() : HasMany {
+        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id');
     }
 
     public function da_rules() : HasMany {
@@ -259,6 +258,7 @@ class Attribute extends Model
         return $this->attribute_owner->username . '.'. $this->attribute_name;
     }
 
+    /** @noinspection PhpUnused */
     public static function findAttribute(int $id) : ?Attribute {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return static::buildAttribute(id:$id)->first();
@@ -276,8 +276,11 @@ class Attribute extends Model
             /** @uses Attribute::read_map_bound(),Attribute::write_map_bound(),Attribute::read_shape_bound(),Attribute::write_shape_bound() */
             ->with('read_map_bound', 'write_map_bound', 'read_shape_bound', 'write_shape_bound')
 
-            /** @uses Attribute::attribute_meta_all(),Attribute::da_rules(),Attribute::permission_groups(),Attribute::attribute_pointer() */
-            ->with('attribute_meta_all', 'da_rules', 'permission_groups','attribute_pointer')
+            /** @uses Attribute::meta_of_attribute(),Attribute::da_rules(),Attribute::permission_groups(),Attribute::attribute_pointer() */
+            ->with('meta_of_attribute', 'da_rules', 'permission_groups','attribute_pointer')
+
+            /** @uses Attribute::attribute_value(),AttributeValue::value_parent()  */
+            ->with('attribute_value','attribute_value.value_parent')
        ;
 
         if ($id) {
@@ -410,9 +413,9 @@ class Attribute extends Model
     public function getMeta(int $n_display) : array  {
         $ret = [];
 
-        foreach ($this->attribute_meta_all as $meta) {
+        foreach ($this->meta_of_attribute as $meta) {
             if ($n_display < 1) {
-                $ret[] = $meta->getName();
+                $ret[] = $meta->meta_type->value;
             } else {
                 $ret[] = new AttributeMetaResource($meta,null,$n_display);
             }
@@ -474,12 +477,10 @@ class Attribute extends Model
     }
 
     public function getValue() {
-        if (in_array($this->value_type, AttributeValueType::STRING_TYPES) || in_array($this->value_type, AttributeValueType::NUMERIC_TYPES)) {
-            return $this->value_default['value_default']??null;
-        } elseif (in_array($this->value_type, AttributeValueType::POINTER_TYPES)) {
+        if ($this->attribute_pointer) {
             return $this->attribute_pointer->getValue();
         }
-        return $this->value_default;
+        return $this->attribute_value?->getValue();
 
     }
 
