@@ -19,19 +19,26 @@ enum AttributeValueType : string {
     case SHAPE_BOUNDS = 'shape_bounds';
 
     case SET = 'set ';
-    case SEARCH = 'search';
+    case PATH = 'path';
+
+    case COORDINATE_MAP = 'coordinate_map';
+    case COORDINATE_SHAPE = 'coordinate_shape';
+
     case VIEW = 'view';
     case MUTUAL = 'mutual';
     case CONTAINER = 'container';
-    case COORDINATE_MAP = 'coordinate_map';
-    case COORDINATE_SHAPE = 'coordinate_shape';
+    case INTERFACE = 'interface';
+    case PIPELINE = 'pipeline';
+    case PIPELINE_JOINT = 'pipeline_joint';
+
     const SCALER_TYPES = [
         self::NUMERIC,self::STRING
     ];
 
     const POINTER_TYPES = [
       self::USER,self::USER_GROUP,self::ATTRIBUTE,self::ELEMENT,self::ELEMENT_TYPE,self::REMOTE,self::ACTION,
-      self::SCHEDULE_BOUNDS,self::MAP_BOUNDS,self::SHAPE_BOUNDS,self::SET,self::VIEW,self::MUTUAL,self::CONTAINER, self::SEARCH
+      self::SCHEDULE_BOUNDS,self::MAP_BOUNDS,self::SHAPE_BOUNDS,self::SET,self::VIEW,self::MUTUAL,self::CONTAINER, self::PATH,
+      self::INTERFACE,self::PIPELINE,self::PIPELINE_JOINT
     ];
 
     const COORDINATION_TYPES = [

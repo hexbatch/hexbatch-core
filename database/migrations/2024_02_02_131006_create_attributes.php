@@ -192,6 +192,25 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+
+            $table->foreignId('read_path_bounds_id')
+                ->nullable()
+                ->default(null)
+                ->comment("reading this depends on where the attribute is")
+                ->index('idx_attribute_read_paths_id')
+                ->constrained('paths')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('write_path_bounds_id')
+                ->nullable()
+                ->default(null)
+                ->comment("writing this depends where the attribute is")
+                ->index('idx_attribute_write_paths_id')
+                ->constrained('paths')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)

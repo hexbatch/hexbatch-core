@@ -69,7 +69,6 @@ return new class extends Migration
 
             DB::statement("DROP TRIGGER update_modified_time ON user_groups");
 
-            $table->dropForeign(['parent_user_group_id']);
             $table->dropForeign(['user_id']);
             $table->dropColumn('group_name');
             $table->dropColumn('ref_uuid');

@@ -42,8 +42,8 @@ return new class extends Migration
             'user','user_group','attribute','element','element_type',
             'remote','action','search',
             'schedule_bounds','map_bounds','shape_bounds',
-            'view','mutual','container',
-            'coordinate_map','coordinate_shape'
+            'coordinate_map','coordinate_shape',
+            'mutual','view','container','interface','pipeline','pipeline_joint'
             );");
 
         DB::statement("ALTER TABLE attribute_values Add COLUMN value_type type_of_attribute_value NOT NULL default 'string';");

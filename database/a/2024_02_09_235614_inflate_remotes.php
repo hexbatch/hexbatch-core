@@ -47,8 +47,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('remotes', function (Blueprint $table) {
-            $table->id();
+        Schema::table('remotes', function (Blueprint $table) {
+
 
             $table->foreignId('user_id')
                 ->nullable()
