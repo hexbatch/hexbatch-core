@@ -8,13 +8,7 @@ class RefCodes {
     const VALIDATION = 1;
     const JSON_ISSUE = 3;
     const MAP_COORDINATE_ISSUE = 4;
-    const PHONE_NUMBER_ISSUE = 5;
-    const EMAIL_ISSUE = 6;
     const TIMEZONE_ISSUE = 7;
-    const URL_ISSUE = 8;
-    const SVG_ISSUE = 9;
-    const OPACITY_ISSUE = 10;
-    const COLOR_ISSUE = 11;
 
     const SHAPE_COORDINATE_ISSUE = 12;
 
@@ -78,13 +72,7 @@ class RefCodes {
     const URLS = [
         self::JSON_ISSUE => '',
         self::MAP_COORDINATE_ISSUE => '',
-        self::PHONE_NUMBER_ISSUE => '',
-        self::EMAIL_ISSUE => '',
         self::TIMEZONE_ISSUE => '',
-        self::URL_ISSUE => '',
-        self::SVG_ISSUE => '',
-        self::OPACITY_ISSUE => '',
-        self::COLOR_ISSUE => '',
 
         self::BAD_LOGIN => '',
         self::USER_NOT_FOUND => '',

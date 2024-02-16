@@ -26,8 +26,6 @@
         "ext-rdkafka": "*",
         "ext-redis": "*",
         "digitickets/lalit": "^3.3",
-        "egulias/email-validator": "^4.0",
-        "enshrined/svg-sanitize": "^0.17.0",
         "galbar/jsonpath": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
         "jmikola/geojson": "^1.1",
@@ -36,7 +34,6 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "mateusjunges/laravel-kafka": "^1.13",
-        "ozdemirburak/iris": "^3.1",
         "relisten/forceutf8": "^1.1"
     },
     "require-dev": {

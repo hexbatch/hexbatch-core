@@ -241,6 +241,12 @@ class Attribute extends Model
                     RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
             }
         }
+        //check if retired
+        if ($parent->is_retired) {
+            throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_retired",['name'=>$parent->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        }
         $this->parent_attribute_id = $parent->id;
 
     }

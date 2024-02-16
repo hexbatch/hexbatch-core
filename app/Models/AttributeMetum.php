@@ -64,7 +64,7 @@ class AttributeMetum extends Model
         'meta_type' => AttributeMetaType::class,
     ];
 
-
+    const META_VALUE_MAX_LENGTH = 255;
 
 
     public static function createMetum(Collection $c,?Attribute $parent = null) : AttributeMetum {
@@ -108,6 +108,12 @@ class AttributeMetum extends Model
 
         $maybe_value = $c->get('value');
         if (!$b_delete_mode && empty($maybe_value)) {
+            throw new HexbatchNotPossibleException(__("msg.attribute_schema_empty_meta"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        }
+
+        if (!is_string($maybe_value) || (mb_strlen($maybe_value) >= static::META_VALUE_MAX_LENGTH )) {
             throw new HexbatchNotPossibleException(__("msg.attribute_schema_empty_meta"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
