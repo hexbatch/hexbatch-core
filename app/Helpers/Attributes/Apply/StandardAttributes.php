@@ -22,9 +22,17 @@ class StandardAttributes
     const DEF = [
         User::SYSTEM_NAME => [
             'name' => User::SYSTEM_NAME,
+            'uuid' => null, //generated at seed time
+            'internal_description' => 'Base attribute for all attributes made on the server',
+            'parent_uuid' => null,
+            'value_type' => AttributeValueType::STRING,
+            'validator' => null
+        ],
+        User::SYSTEM_NAME . '.standard_root' => [
+            'name' => User::SYSTEM_NAME,
             'uuid' => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
             'internal_description' => 'Base attribute for all standard attributes',
-            'parent_uuid' => null,
+            'parent_uuid' => null, //the parent is added here at seed time
             'value_type' => AttributeValueType::STRING,
             'validator' => null
         ],

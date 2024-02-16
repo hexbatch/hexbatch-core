@@ -23,15 +23,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo will need one parent to multiple children, or multiple children to one parent. Add a child link, and constraint that only one can be set
-            $table->foreignId('parent_user_group_id')
-                ->nullable()
-                ->default(null)
-                ->comment("Optional parent group")
-                ->unique('udx_user_group_has_parent_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -43,13 +34,6 @@ return new class extends Migration
 
         });
 
-        #--------------------------------------
-        DB::statement("CREATE TYPE type_user_group_parent_combination AS ENUM (
-            'none','parent_union','parent_intersection'
-            );");
-
-        DB::statement("ALTER TABLE user_groups Add COLUMN parent_combine_strategy type_user_group_parent_combination NOT NULL default 'none';");
-        #--------------------------------------
 
 
         DB::statement('ALTER TABLE user_groups ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -81,9 +65,19 @@ return new class extends Migration
     public function down(): void
     {
 
+        Schema::table('user_groups', function (Blueprint $table) {
 
-        Schema::dropIfExists('user_groups');
+            DB::statement("DROP TRIGGER update_modified_time ON user_groups");
 
-        DB::statement("DROP TYPE type_user_group_parent_combination");
+            $table->dropForeign(['parent_user_group_id']);
+            $table->dropForeign(['user_id']);
+            $table->dropColumn('group_name');
+            $table->dropColumn('ref_uuid');
+            $table->dropColumn('user_id');
+            $table->dropColumn('created_at');
+            $table->dropColumn('updated_at');
+        });
+
+
     }
 };

@@ -21,7 +21,6 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property string ref_uuid
  * @property int user_id
- * //todo user groups have parents, and the membership can be union or intersection, each time the parent is updated, then this group must be updated too, and done via trigger
  * @property string group_name
  * @property string created_at
  * @property string updated_at
