@@ -187,7 +187,21 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('remotes');
+        Schema::table('remotes', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropForeign(['usage_group_id']);
+            $table->dropForeign(['remote_element_type_id']);
+            $table->dropForeign(['remote_element_id']);
+
+            $table->dropColumn(['ref_uuid','is_retired','is_on','created_at','updated_at']);
+            $table->dropColumn(['uri_type','uri_method_type','uri_to_remote_format','uri_from_remote_format']);
+            $table->dropColumn(['uri_string','uri_port','is_sending_context_to_remote']);
+            $table->dropColumn(['is_caching','is_using_cache_on_failure','cache_ttl_seconds']);
+            $table->dropColumn(['cache_keys','total_calls_made,total_errors','rate_limit_max_per_unit']);
+            $table->dropColumn(['rate_limit_unit_in_seconds','rate_limit_starts_at']);
+            $table->dropColumn(['rate_limit_count','max_concurrent_calls','remote_name']);
+        });
+
         DB::statement("DROP TYPE type_remote_uri;");
         DB::statement("DROP TYPE type_remote_uri_method;");
         DB::statement("DROP TYPE type_remote_data_format;");
