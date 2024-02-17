@@ -6,6 +6,7 @@ use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Attributes\Apply\StandardAttributes;
 use App\Helpers\Utilities;
 use App\Http\Resources\AttributeMetaResource;
 use App\Http\Resources\AttributeRuleResource;
@@ -260,8 +261,28 @@ class Attribute extends Model
         return null;
     }
 
-    public function getName() : string  {
-        return $this->attribute_owner->username . '.'. $this->attribute_name;
+    public ?string $fully_qualified_name = null;
+    public function getName(bool $b_redo = false,bool $b_strip_system_prefix = true) : string  {
+        //get ancestor chain
+       if (!$b_redo && $this->fully_qualified_name) {return $this->fully_qualified_name;}
+        $ancestors = [];
+        $names = [];
+        $parent = $this->attribute_parent;
+        while ($parent) {
+            $ancestors[] = $parent;
+            if ($b_strip_system_prefix) {
+                if ($parent->attribute_name === StandardAttributes::SYSTEM_NAME) { break; }
+            }
+            $names[] = $parent->attribute_name;
+            $parent = $parent->attribute_parent;
+
+        }
+        if (empty($ancestors)) {
+            return $this->attribute_owner->username . '.'. $this->attribute_name;
+        }
+        $oldest_first = array_reverse($names);
+        $root = implode('.',$oldest_first);
+        return $root . '.'. $this->attribute_name;
     }
 
     /** @noinspection PhpUnused */
@@ -384,15 +405,31 @@ class Attribute extends Model
                         //the name, but scope to the user id of the owner
                         //if this user is not the owner, then the group owner id can be scoped
                         $parts = explode('.', $value);
+                        $owner = null;
                         if (count($parts) === 1) {
                             //must be owned by the user
-                            $user = Utilities::getTypeCastedAuthUser();
-                            $build = $this->where('user_id', $user?->id)->where('attribute_name', $value);
-                        } else {
-                            $owner = $parts[0];
+                            $owner = Utilities::getTypeCastedAuthUser();
+                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_id')->where('attribute_name', $value);
+                        } else if (count($parts) > 1) {
+                            $owner_string = $parts[0];
                             $maybe_name = $parts[1];
-                            $owner = (new User)->resolveRouteBinding($owner);
-                            $build = $this->where('user_id', $owner?->id)->where('attribute_name', $maybe_name);
+                            $owner = (new User)->resolveRouteBinding($owner_string);
+                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_id')->where('attribute_name', $maybe_name);
+                        }
+
+                        if ($build && $owner) {
+                            if (count($parts) > 2) {
+                                //loop through and get the rest of the chain
+                                $attr = $build->first();
+                                for ($i = 2; !empty($attr) && $i < count($parts); $i++) {
+                                    $sub_name = $parts[$i];
+                                    $build = $this->where('user_id', $owner->id)->where('parent_id',$attr->id)->where('attribute_name', $sub_name);
+                                    $attr = $build->first();
+                                }
+                                if (empty($attr)) {
+                                    $build = null;
+                                }
+                            }
                         }
                     }
                 }

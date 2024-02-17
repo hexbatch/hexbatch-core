@@ -88,6 +88,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/{attribute}/ping/{attribute_ping_type}', [AttributeController::class, 'attribute_ping'])->name('core.attribute.ping');
             Route::get('/list/managed', [AttributeController::class, 'attribute_list_managed'])->name('core.attribute.list.managed');
             Route::get('/list/usage', [AttributeController::class, 'attribute_list_usage'])->name('core.attribute.list.usage');
+            Route::get('/standard/list', [AttributeController::class, 'attribute_list_standard'])->name('core.attribute.standard.list');
         });
 
         Route::prefix('remote')->group(function () {

@@ -16,4 +16,5 @@ return [
     */
 
     'base_attribute_uuid' => env('HBC_SERVER_ATTRIBUTE_UUID', StandardAttributes::getUuid(StandardAttributes::DEFAULT_SERVER_ATTRIBUTE_BASE_UUID)),
+    'system_user_pw' => env('HBC_SYSTEM_USER_PW', null),
 ];

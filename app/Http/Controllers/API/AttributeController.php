@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Attributes\Apply\StandardAttributes;
 use App\Helpers\Attributes\Build\AttributeBinaryOptions;
 use App\Helpers\Attributes\Build\AttributeBounds;
 use App\Helpers\Attributes\Build\AttributeMetaGathering;
@@ -14,6 +15,7 @@ use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
+use App\Http\Resources\StandardAttributeCollection;
 use App\Models\Attribute;
 use App\Models\AttributeUserGroup;
 use App\Models\Enums\Attributes\AttributePingType;
@@ -318,5 +320,10 @@ class AttributeController extends Controller
 
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         return response()->json(new AttributeResource($out,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+    }
+
+    public function attribute_list_standard() {
+        $standard = StandardAttributes::getAttributeCache();
+        return response()->json(new StandardAttributeCollection($standard), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 }

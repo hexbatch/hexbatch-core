@@ -5,6 +5,7 @@ namespace App\Helpers\Attributes\Apply;
 use App\Exceptions\HexbatchInvalidException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Models\Attribute;
 use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\User;
 
@@ -20,22 +21,37 @@ class StandardAttributes
     const DEFAULT_SERVER_ATTRIBUTE_BASE_UUID = 'default-server-uuid';
     const BASE_ATTRIBUTE_NAME = 'base';
     const SYSTEM_NAME = User::SYSTEM_NAME;
-    const BASE_STANDARD_ATTRIBUTE = User::SYSTEM_NAME . '.standard_root';
-    const STANDARD_ATTRIBUTE_INFO = User::SYSTEM_NAME . '.info';
-    const STANDARD_ATTRIBUTE_NAME = self::STANDARD_ATTRIBUTE_INFO . '_name';
-    const STANDARD_ATTRIBUTE_DESCRIPTION = self::STANDARD_ATTRIBUTE_INFO . '_description';
-    const STANDARD_ATTRIBUTE_EMAIL = self::STANDARD_ATTRIBUTE_INFO . '_email';
-    const STANDARD_ATTRIBUTE_PHONE = self::STANDARD_ATTRIBUTE_INFO . '_phone';
-    const STANDARD_ATTRIBUTE_ADDRESS = self::STANDARD_ATTRIBUTE_INFO . '_address';
-    const STANDARD_ATTRIBUTE_MAP_LOCATION = self::STANDARD_ATTRIBUTE_INFO . '_map_location';
-    const STANDARD_ATTRIBUTE_SHAPE_LOCATION = self::STANDARD_ATTRIBUTE_INFO . '_shape_location';
-    const STANDARD_ATTRIBUTE_TIMEZONE = self::STANDARD_ATTRIBUTE_INFO . '_timezone';
+    const STANDARD_ATTRIBUTE =  'standard_attribute';
+    const STANDARD_ATTRIBUTE_INFO =  'info';
+
+    const STANDARD_ATTRIBUTE_NAME =  'name';
+    const STANDARD_ATTRIBUTE_DESCRIPTION =  'description';
+    const STANDARD_ATTRIBUTE_EMAIL =  'email';
+    const STANDARD_ATTRIBUTE_PHONE =  'phone';
+    const STANDARD_ATTRIBUTE_ADDRESS =  'address';
+    const STANDARD_ATTRIBUTE_MAP_LOCATION =  'map_location';
+    const STANDARD_ATTRIBUTE_SHAPE_LOCATION =  'shape_location';
+    const STANDARD_ATTRIBUTE_TIMEZONE =  'timezone';
+
+    const STANDARD_ATTRIBUTE_DISPLAY =  'display';
+    const STANDARD_ATTRIBUTE_PRIMARY_COLOR =  'primary_color';
+    const STANDARD_ATTRIBUTE_SECONDARY_COLOR =  'secondary_color';
+    const STANDARD_ATTRIBUTE_BG_COLOR =  'bg_color';
+    const STANDARD_ATTRIBUTE_OPACITY =  'opacity';
+    const STANDARD_ATTRIBUTE_IMAGE =  'image';
+    const STANDARD_ATTRIBUTE_SMALL_THUMB =  'small_thumbnail';
+    const STANDARD_ATTRIBUTE_MEDIUM_THUMB =  'medium_thumbnail';
+
+    const STANDARD_ATTRIBUTE_ADMIN_ROLE = 'admin_role';
+    const STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO = 'view_private_info';
+    const STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES =  'set_remote_types';
+    const STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY = 'view_all_remote_activity';
 
     const UUIDS = [
         self::SYSTEM_NAME => null, //generated at seed time, found in db later
-        self::BASE_ATTRIBUTE_NAME => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
         self::DEFAULT_SERVER_ATTRIBUTE_BASE_UUID => '1fed5be4-c705-4c40-81bc-8c89c6a634ec',
-        self::BASE_STANDARD_ATTRIBUTE => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
+        self::BASE_ATTRIBUTE_NAME => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
+        self::STANDARD_ATTRIBUTE => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
         self::STANDARD_ATTRIBUTE_INFO => '016b2926-ab06-44af-b1c5-81520b39975b',
         self::STANDARD_ATTRIBUTE_NAME => '4a9bda81-980c-4f20-9135-e0d2bd4b905f',
         self::STANDARD_ATTRIBUTE_DESCRIPTION => '152c4fd4-d721-45c2-a75b-96d69992ef89',
@@ -45,6 +61,21 @@ class StandardAttributes
         self::STANDARD_ATTRIBUTE_MAP_LOCATION => 'de7c7ae8-1d8a-4c4a-a0ec-ba80ca21c980',
         self::STANDARD_ATTRIBUTE_SHAPE_LOCATION => 'a1bf270e-a08b-48e3-86ac-29b79ad0ce2b',
         self::STANDARD_ATTRIBUTE_TIMEZONE => '5a188757-81a7-4dc5-87de-a08341a12c91',
+
+        self::STANDARD_ATTRIBUTE_DISPLAY => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+        self::STANDARD_ATTRIBUTE_PRIMARY_COLOR => 'c84278fc-a1be-4dc7-b47b-a24bab2464db',
+        self::STANDARD_ATTRIBUTE_SECONDARY_COLOR => 'cfc6feb5-d92b-4db0-8146-058aee99a654',
+        self::STANDARD_ATTRIBUTE_BG_COLOR => '3b39ce42-a37f-45ef-9972-21b0592e0f87',
+        self::STANDARD_ATTRIBUTE_OPACITY => '8a569174-35a8-4af9-8531-1b07c135c63c',
+        self::STANDARD_ATTRIBUTE_IMAGE => '2fa8ff2b-1735-4497-b7e0-83645e42240f',
+        self::STANDARD_ATTRIBUTE_SMALL_THUMB => '43e9362d-2bf1-409e-9b87-cc29bf95560c',
+        self::STANDARD_ATTRIBUTE_MEDIUM_THUMB => 'fbfff4ce-410f-42a0-9e99-87963b131446',
+
+
+        self::STANDARD_ATTRIBUTE_ADMIN_ROLE => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
+        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO => 'be806efe-fffb-4a39-a9ad-6b1b705c2fb1',
+        self::STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES => 'a202179c-a8af-4f38-a612-7ddb719d4012',
+        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY => '63b649da-2a3f-4940-8f78-ad8ac3109443',
     ];
 
     const INFO_ATTRIBUTE_NAMES = [
@@ -58,33 +89,100 @@ class StandardAttributes
         self::STANDARD_ATTRIBUTE_TIMEZONE ,
     ];
 
+    const DISPLAY_ATTRIBUTE_NAMES = [
+        self::STANDARD_ATTRIBUTE_PRIMARY_COLOR ,
+        self::STANDARD_ATTRIBUTE_SECONDARY_COLOR ,
+        self::STANDARD_ATTRIBUTE_BG_COLOR ,
+        self::STANDARD_ATTRIBUTE_OPACITY ,
+        self::STANDARD_ATTRIBUTE_IMAGE ,
+        self::STANDARD_ATTRIBUTE_SMALL_THUMB ,
+        self::STANDARD_ATTRIBUTE_MEDIUM_THUMB ,
+    ];
+
+    const ADMIN_ATTRIBUTE_NAMES = [
+        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO ,
+        self::STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES ,
+        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY
+    ];
+
     public static function getStandardAttributeInfo(string $what) : array  {
         $start = self::DEF[$what]??null;
         if (!$start) {
             throw new \LogicException("No SA matches $what");
         }
         $start['name'] = $what;
-        $start['uuid'] = self::UUIDS[$what]??null;
+        $start['uuid'] = self::UUIDS[$what]??config('hbc.base_attribute_uuid');
         $start['parent_uuid'] = $start['parent']? self::UUIDS[$start['parent']] : null ;
         return $start;
     }
 
+
+    /**
+     * @return Attribute[]
+     */
+    public static function generateMissingAttributes() : array  {
+        $news = [];
+        foreach (static::DEF as $key => $da) {
+            $b_new = false;
+            $what = static::getOrCreateStandardAttribute($key,$b_new);
+            if ($b_new) {$news[] = $what; }
+        }
+        return $news;
+    }
+
+    /**
+     * @var Attribute[] $attribute_cache
+     */
+    protected static array $attribute_cache = [];
+
+    public static function getAttributeCache() : array {
+        $whats = Attribute::where('is_system',true)->orderBy('id')->get();
+        foreach ($whats as $woo) {
+            static::$attribute_cache[$woo->ref_uuid] = $woo;
+        }
+        return static::$attribute_cache;
+    }
+
+    public static function getOrCreateStandardAttribute(string $what,bool &$is_new = false) : Attribute {
+        $info = static::getStandardAttributeInfo($what);
+        $cached = static::getAttributeCache()[$info['uuid']]??null;
+        if ($cached) {return $cached;}
+
+        $att = Attribute::where('ref_uuid',$info['uuid'])->first();
+        if ($att) {return $att;}
+        $is_new = true;
+        $att = new Attribute();
+        $att->user_id = ($what === static::BASE_ATTRIBUTE_NAME? null: User::getOrCreateSystemUser()->id);
+        if ($info['parent']) {
+            $att->parent_attribute_id = static::getOrCreateStandardAttribute($info['parent'])->id;
+        }
+        $att->is_system = true;
+        $att->attribute_name = $info['name'];
+        $att->save();
+        $att->ref_uuid = $info['uuid'];
+        $att->save();
+        print "made ".$att->attribute_name."\n";
+        return $att;
+
+    }
+
     const DEF = [
 
-        self::BASE_ATTRIBUTE_NAME => [
-            'internal_description' => 'Base attribute for all attributes on all servers. This allows any attribute to be targeted in rules and searches',
+
+        self::BASE_ATTRIBUTE_NAME  => [
+            'internal_description' => 'Well know base attribute same on all servers',
             'parent' => null,
             'value_type' => AttributeValueType::STRING,
-
         ],
 
         self::SYSTEM_NAME => [
-            'internal_description' => 'Base attribute for all attributes made on the server',
+            'internal_description' => 'Attributes from this server have this as the root ancestor',
             'parent' => self::BASE_ATTRIBUTE_NAME,
             'value_type' => AttributeValueType::STRING,
+
         ],
 
-        self::BASE_STANDARD_ATTRIBUTE => [
+        self::STANDARD_ATTRIBUTE => [
             'internal_description' => 'Base attribute for all standard attributes',
             'parent' => self::SYSTEM_NAME,
             'value_type' => AttributeValueType::STRING,
@@ -93,7 +191,7 @@ class StandardAttributes
         //standard info
         self::STANDARD_ATTRIBUTE_INFO => [
             'internal_description' => 'Attributes having to do with describing',
-            'parent' => self::BASE_STANDARD_ATTRIBUTE,
+            'parent' => self::STANDARD_ATTRIBUTE,
             'value_type' => AttributeValueType::STRING,
         ],
 
@@ -149,151 +247,81 @@ class StandardAttributes
 
 
         //standard display
-        User::SYSTEM_NAME . '.display' => [
-            'name' => User::SYSTEM_NAME . '.display',
-            'uuid' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+        self::STANDARD_ATTRIBUTE_DISPLAY => [
             'internal_description' => 'Attributes having to do with display',
-            'parent' => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
+            'parent' => self::STANDARD_ATTRIBUTE,
             'value_type' => AttributeValueType::STRING,
+        ],
 
-        ],
-        User::SYSTEM_NAME . '.display.primary_color' => [
-            'name' => User::SYSTEM_NAME . '.display.primary_color',
-            'uuid' => 'c84278fc-a1be-4dc7-b47b-a24bab2464db',
+        self::STANDARD_ATTRIBUTE_PRIMARY_COLOR => [
             'internal_description' => 'Primary color',
-            'parent' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+            'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::STRING,
         ],
-        User::SYSTEM_NAME . '.display.secondary_color' => [
-            'name' => User::SYSTEM_NAME . '.display.secondary_color',
-            'uuid' => 'cfc6feb5-d92b-4db0-8146-058aee99a654',
+
+        self::STANDARD_ATTRIBUTE_SECONDARY_COLOR => [
             'internal_description' => 'Secondary color',
-            'parent' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+            'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::STRING,
         ],
-        User::SYSTEM_NAME . '.display.bg_color' => [
-            'name' => User::SYSTEM_NAME . '.display.bg_color',
-            'uuid' => '3b39ce42-a37f-45ef-9972-21b0592e0f87',
+
+        self::STANDARD_ATTRIBUTE_BG_COLOR => [
             'internal_description' => 'Background color',
-            'parent' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+            'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::STRING,
         ],
-        User::SYSTEM_NAME . '.display.opacity' => [
-            'name' => User::SYSTEM_NAME . '.display.opacity',
-            'uuid' => '8a569174-35a8-4af9-8531-1b07c135c63c',
+
+        self::STANDARD_ATTRIBUTE_OPACITY => [
             'internal_description' => 'Opacity',
-            'parent' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+            'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::NUMERIC,
         ],
 
-        User::SYSTEM_NAME . '.display.image' => [
-            'name' => User::SYSTEM_NAME . '.display.image',
-            'uuid' => '2fa8ff2b-1735-4497-b7e0-83645e42240f',
+        self::STANDARD_ATTRIBUTE_IMAGE => [
             'internal_description' => 'url to image',
-            'parent' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+            'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::STRING,
         ],
-        User::SYSTEM_NAME . '.display.small_thumbnail' => [
-            'name' => User::SYSTEM_NAME . '.display.small_thumbnail',
-            'uuid' => '43e9362d-2bf1-409e-9b87-cc29bf95560c',
+
+        self::STANDARD_ATTRIBUTE_SMALL_THUMB => [
             'internal_description' => 'url to image',
-            'parent' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+            'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::STRING,
         ],
-        User::SYSTEM_NAME . '.display.medium_thumbnail' => [
-            'name' => User::SYSTEM_NAME . '.display.medium_thumbnail',
-            'uuid' => 'fbfff4ce-410f-42a0-9e99-87963b131446',
+
+        self::STANDARD_ATTRIBUTE_MEDIUM_THUMB => [
             'internal_description' => 'url to image',
-            'parent' => 'd17ae25b-cc99-4ac2-a773-b51eddb95dc1',
+            'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::STRING,
         ],
-        //category
-        User::SYSTEM_NAME . '.category' => [
-            'name' => User::SYSTEM_NAME . '.category',
-            'uuid' => '09dc6180-f48a-4acb-9668-67e08a6d5ea3',
-            'internal_description' => 'Base for all standard categories',
-            'parent' => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
-            'value_type' => AttributeValueType::STRING,
 
-        ],
-        User::SYSTEM_NAME . '.category.remote' => [
-            'name' => User::SYSTEM_NAME . '.category.remote',
-            'uuid' => '618689d9-6dd2-40dc-a288-443d050c71bb',
-            'internal_description' => 'Remote Category',
-            'parent' => '09dc6180-f48a-4acb-9668-67e08a6d5ea3',
-            'value_type' => AttributeValueType::STRING,
 
-        ],
-        User::SYSTEM_NAME . '.category.group' => [
-            'name' => User::SYSTEM_NAME . '.category.group',
-            'uuid' => 'f83aa255-862a-413f-8d9c-083d21c9d983',
-            'internal_description' => 'User Group Category',
-            'parent' => '09dc6180-f48a-4acb-9668-67e08a6d5ea3',
-            'value_type' => AttributeValueType::STRING,
-
-        ],
-        User::SYSTEM_NAME . '.category.user' => [
-            'name' => User::SYSTEM_NAME . '.category.user',
-            'uuid' => '048a58ef-374c-4369-bc9a-fd04210d66a4',
-            'internal_description' => 'User category',
-            'parent' => '09dc6180-f48a-4acb-9668-67e08a6d5ea3',
-            'value_type' => AttributeValueType::STRING,
-
-        ],
 
 
         //admin roles
-        User::SYSTEM_NAME . '.admin_role' => [
-            'name' => User::SYSTEM_NAME . '.admin_role',
-            'uuid' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
+        self::STANDARD_ATTRIBUTE_ADMIN_ROLE => [
             'internal_description' => 'Base for all standard admin roles',
-            'parent' => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
+            'parent' => self::STANDARD_ATTRIBUTE,
             'value_type' => AttributeValueType::NUMERIC,
-
         ],
-        User::SYSTEM_NAME . '.admin_role.view_private_user_info' => [
-            'name' => User::SYSTEM_NAME . '.admin_role.view_private_user_info',
-            'uuid' => 'be806efe-fffb-4a39-a9ad-6b1b705c2fb1',
+
+        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO => [
             'internal_description' => 'Users with this attribute can view all other user info',
-            'parent' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
+            'parent' => self::STANDARD_ATTRIBUTE_ADMIN_ROLE,
             'value_type' => AttributeValueType::NUMERIC,
-
         ],
-        User::SYSTEM_NAME . '.admin_role.set_sensitive_remote_types' => [
-            'name' => User::SYSTEM_NAME . '.admin_role.set_sensitive_remote_types',
-            'uuid' => 'a202179c-a8af-4f38-a612-7ddb719d4012',
+
+        self::STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES  => [
             'internal_description' => 'Users with this attribute can set all the remote types',
-            'parent' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
+            'parent' => self::STANDARD_ATTRIBUTE_ADMIN_ROLE,
             'value_type' => AttributeValueType::NUMERIC,
 
         ],
-        User::SYSTEM_NAME . '.admin_role.view_all_remote_activity' => [
-            'name' => User::SYSTEM_NAME . '.admin_role.view_all_remote_activity',
-            'uuid' => '63b649da-2a3f-4940-8f78-ad8ac3109443',
+
+        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY => [
             'internal_description' => 'Users with this attribute can see all remote activity by all users',
-            'parent' => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
+            'parent' => self::STANDARD_ATTRIBUTE_ADMIN_ROLE,
             'value_type' => AttributeValueType::NUMERIC,
-
-        ],
-
-        //set relationships
-        User::SYSTEM_NAME . '.set_relation' => [
-            'name' => User::SYSTEM_NAME . '.set_relation',
-            'uuid' => '25197025-96e4-46dc-8b41-433a6336dc9d',
-            'internal_description' => 'Base for all standard set relationships',
-            'parent' => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
-            'value_type' => AttributeValueType::SET,
-
-        ],
-
-        //set types
-        User::SYSTEM_NAME . '.set_type' => [
-            'name' => User::SYSTEM_NAME . '.set_type',
-            'uuid' => '1ea12c69-6fed-4fa7-a816-73326a222b82',
-            'internal_description' => 'Base for all standard set types',
-            'parent' => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
-            'value_type' => AttributeValueType::STRING,
-
         ],
 
 
@@ -380,6 +408,7 @@ class StandardAttributes
         return true;
     }
 
+    /** @noinspection PhpUnused */
     public static function validateTimezone($what): void
     {
 

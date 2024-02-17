@@ -17,9 +17,13 @@ class UserNameReq implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
 
-        if (mb_strtolower($value) === mb_strtolower(User::SYSTEM_NAME) )  {
-            $fail('auth.not_reserved_word')->translate();
+        if (in_array(mb_strtolower($value),static::RESERVED_NAMES) )  {
+            $fail('auth.not_reserved_word',['word'=>$value])->translate();
         }
     }
+
+    const RESERVED_NAMES = [
+
+    ];
 
 }

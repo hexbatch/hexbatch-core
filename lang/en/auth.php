@@ -22,6 +22,6 @@ return [
     'invalid_name' => 'name should have only letters and numbers and underscrores and not start with a number ',
     'not_uuid_name' => 'name cannot be a uuid or similar to a uuid',
     'not_upper_case_name' => 'name cannot have upper case characters',
-    'not_reserved_word' => 'name is a reserved word'
+    'not_reserved_word' => ':word is a reserved word'
 
 ];

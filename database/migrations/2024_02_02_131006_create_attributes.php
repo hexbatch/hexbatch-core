@@ -242,7 +242,6 @@ return new class extends Migration
 
 
 
-            $table->unique(['user_id','attribute_name']);
             $table->timestamps();
             $table->string('attribute_name',128)->nullable(false)->index()
                 ->comment("The unique name of the attribute, using the naming rules");
@@ -250,6 +249,8 @@ return new class extends Migration
 
         });
 
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_user_parent_name ON attributes (user_id,parent_attribute_id,attribute_name) NULLS NOT DISTINCT;");
 
 
 
