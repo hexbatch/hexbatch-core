@@ -14,11 +14,11 @@ return new class extends Migration
     {
         Schema::create('remote_to_maps', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('remote_id')
+            $table->foreignId('remote_uri_id')
                 ->nullable(false)
-                ->comment("The remote this header/key is for")
-                ->index('idx_header_setting_has_remote_id')
-                ->constrained('remotes')
+                ->comment("The remote uri this header/key is for")
+                ->index('idx_remote_to_maps_has_remote_uri_id')
+                ->constrained('remote_uris')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -30,7 +30,7 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_to_remote_map AS ENUM (
-            'none','basic_auth','bearer_auth','data','header'
+            'none','basic_auth','bearer_auth','data','header','file'
             );");
 
         DB::statement("ALTER TABLE remote_to_maps Add COLUMN map_type type_to_remote_map NOT NULL default 'none';");

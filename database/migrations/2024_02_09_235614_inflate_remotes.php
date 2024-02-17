@@ -99,28 +99,10 @@ return new class extends Migration
 
             $table->timestamps();
         });
-        #------------------------------
-        DB::statement("CREATE TYPE type_remote_uri AS ENUM (
-            'none','url','socket','console','manual'
-            );");
 
-        DB::statement("ALTER TABLE remotes Add COLUMN uri_type type_remote_uri  NOT NULL default 'none';");
         #------------------------------
 
-        DB::statement("CREATE TYPE type_remote_uri_method AS ENUM (
-            'none','post','get','put','patch','delete'
-            );");
 
-        DB::statement("ALTER TABLE remotes Add COLUMN uri_method_type type_remote_uri_method  NOT NULL default 'none';");
-        #------------------------------
-
-        DB::statement("CREATE TYPE type_remote_data_format AS ENUM (
-            'none','plain_text','xml','json'
-            );");
-
-        DB::statement("ALTER TABLE remotes Add COLUMN uri_to_remote_format type_remote_data_format  NOT NULL default 'none';");
-        DB::statement("ALTER TABLE remotes Add COLUMN uri_from_remote_format type_remote_data_format  NOT NULL default 'none';");
-        #------------------------------
 
         DB::statement('ALTER TABLE remotes ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
@@ -131,15 +113,8 @@ return new class extends Migration
         ");
 
         Schema::table('remotes', function (Blueprint $table) {
-            $table->string('uri_string')->nullable(false)->comment("The url, socket command, console command or hint of the manual call");
-
-            $table->integer('uri_port')->default(null)->nullable()
-                ->comment('if set, this port for the socket or url');
 
 
-
-            $table->boolean('is_sending_context_to_remote')->default(false)->nullable(false)
-                ->comment('if on, then the guids of the relavent attribute,action,element and type are sent to help keep state on the server side');
 
             $table->boolean('is_caching')->default(true)->nullable(false)
                 ->comment('if true then using caching');
@@ -153,11 +128,7 @@ return new class extends Migration
             $table->jsonb('cache_keys')->default(null)->nullable()
                 ->comment('array of string keys to use for the cache comparisons, empty means no comparison');
 
-            $table->integer('total_calls_made')->default(0)->nullable(false)
-                ->comment('counts the total number of calls made in the remote lifetime');
 
-            $table->integer('total_errors')->default(0)->nullable(false)
-                ->comment('counts the total number of calls made in the remote lifetime');
 
             $table->integer('rate_limit_max_per_unit')->default(null)->nullable()
                 ->comment('if set, this is the rate limit this remote can be called in the time unit defined in the other column');
@@ -193,17 +164,17 @@ return new class extends Migration
             $table->dropForeign(['remote_element_type_id']);
             $table->dropForeign(['remote_element_id']);
 
+            DB::statement("DROP TRIGGER update_modified_time ON remotes");
+
+            $table->dropColumn(['user_id','usage_group_id','remote_element_type_id','remote_element_id']);
             $table->dropColumn(['ref_uuid','is_retired','is_on','created_at','updated_at']);
-            $table->dropColumn(['uri_type','uri_method_type','uri_to_remote_format','uri_from_remote_format']);
-            $table->dropColumn(['uri_string','uri_port','is_sending_context_to_remote']);
             $table->dropColumn(['is_caching','is_using_cache_on_failure','cache_ttl_seconds']);
-            $table->dropColumn(['cache_keys','total_calls_made,total_errors','rate_limit_max_per_unit']);
+            $table->dropColumn(['cache_keys','rate_limit_max_per_unit']);
             $table->dropColumn(['rate_limit_unit_in_seconds','rate_limit_starts_at']);
             $table->dropColumn(['rate_limit_count','max_concurrent_calls','remote_name']);
         });
 
-        DB::statement("DROP TYPE type_remote_uri;");
-        DB::statement("DROP TYPE type_remote_uri_method;");
-        DB::statement("DROP TYPE type_remote_data_format;");
+
+
     }
 };

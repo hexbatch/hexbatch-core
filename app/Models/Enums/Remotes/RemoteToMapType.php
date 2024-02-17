@@ -7,4 +7,5 @@ enum RemoteToMapType : string {
     case BEARER_AUTH = 'bearer_auth';
     case DATA = 'data';
     case HEADER = 'header';
+    case FILE = 'file';
 }

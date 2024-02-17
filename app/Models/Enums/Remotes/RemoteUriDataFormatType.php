@@ -6,5 +6,6 @@ enum RemoteUriDataFormatType : string {
     case PLAIN_TEXT = 'plain_text';
     case XML = 'xml';
     case JSON = 'json';
+    case YAML = 'yaml';
 
 }

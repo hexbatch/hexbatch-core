@@ -300,7 +300,7 @@ class RemoteActivity extends Model
 
                  if failure can maybe still get cache
                  */
-                $this->from_remote_processed_data = $this->remote_parent->processFromSend($from_data);
+                $this->from_remote_processed_data = $this->remote_parent->default_uri->processFromSend($from_data);
                 $this->remote_activity_status_type = RemoteActivityStatusType::SUCCESS;
             } catch (\Exception $e) {
                 $b_error = true;
@@ -316,7 +316,7 @@ class RemoteActivity extends Model
         } finally {
             $this->to_remote_processed_data = $this->remote_parent->removeSecretsFromArray($this->to_remote_processed_data);
             $this->save();
-            $this->remote_parent->updateGlobalStats($b_error);
+            $this->remote_parent->default_uri->updateGlobalStats($b_error);
         }
     }
 
@@ -327,7 +327,7 @@ class RemoteActivity extends Model
         $this->update([
             'remote_call_ended_at' => DB::raw('NOW()'),
             'remote_activity_status_type'=>RemoteActivityStatusType::SUCCESS,
-            'from_remote_processed_data'=>$this->remote_parent->processFromSend($my_data)
+            'from_remote_processed_data'=>$this->remote_parent->default_uri->processFromSend($my_data)
         ]);
         try {
             $this->addCache();
