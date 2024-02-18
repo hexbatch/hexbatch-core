@@ -17,7 +17,7 @@ use Illuminate\Support\Collection;
  * @property int meta_parent_attribute_id
  * @property AttributeMetaType meta_type
 
- * @property string meta_value
+ * @property string meta_value //todo strip tags here and convert major entities
  * @property string created_at
  * @property string updated_at
  *

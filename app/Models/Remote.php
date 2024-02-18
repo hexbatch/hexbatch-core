@@ -54,7 +54,10 @@ use Illuminate\Validation\ValidationException;
  * @property int rate_limit_count
  * @property int max_concurrent_calls
 
- *
+ * todo add to migration and here new remote meta table:
+ * todo in new remote_metas: description (any length text, strip html), terms of use link, privacy link, about url, accepted languages (json) (none for all or z/a),location map bounds for area of service
+ * todo meta is not checked at this time for anything, just for reference. strip tags and do entities for description
+ * todo time bounds for when available, if time bounds set, and not available, do not call, so put the time bounds on the remote table itself
  *
  * @property string created_at
  * @property string updated_at

@@ -48,9 +48,9 @@ class StandardAttributes
     const STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY = 'view_all_remote_activity';
 
     const UUIDS = [
+        self::BASE_ATTRIBUTE_NAME => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
         self::SYSTEM_NAME => null, //generated at seed time, found in db later
         self::DEFAULT_SERVER_ATTRIBUTE_BASE_UUID => '1fed5be4-c705-4c40-81bc-8c89c6a634ec',
-        self::BASE_ATTRIBUTE_NAME => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
         self::STANDARD_ATTRIBUTE => '6ac886fb-d52f-46fa-b5db-a3d0a91e0b85',
         self::STANDARD_ATTRIBUTE_INFO => '016b2926-ab06-44af-b1c5-81520b39975b',
         self::STANDARD_ATTRIBUTE_NAME => '4a9bda81-980c-4f20-9135-e0d2bd4b905f',
@@ -77,7 +77,7 @@ class StandardAttributes
         self::STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES => 'a202179c-a8af-4f38-a612-7ddb719d4012',
         self::STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY => '63b649da-2a3f-4940-8f78-ad8ac3109443',
     ];
-
+    //todo add meta section for standard attributes for more meta: 'author','copywrite','url','rating','lang' (lang value numberic for weight) -- also mime type, keywords
     const INFO_ATTRIBUTE_NAMES = [
         self::STANDARD_ATTRIBUTE_NAME ,
         self::STANDARD_ATTRIBUTE_DESCRIPTION ,

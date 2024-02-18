@@ -32,6 +32,7 @@ return new class extends Migration
         DB::statement("CREATE TYPE type_of_attribute_metum AS ENUM (
             'none','author','copywrite','url','rating','lang'
             );");
+        //todo add mime_type
 
         DB::statement("ALTER TABLE attribute_meta Add COLUMN meta_type type_of_attribute_metum NOT NULL default 'none';");
 
