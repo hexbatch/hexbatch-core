@@ -41,7 +41,7 @@ class RemoteController extends Controller
     }
 
     public function remote_get(Remote $remote,?string $full = null) {
-        $this->adminCheck($remote);
+        $this->adminCheck($remote);//todo also check usage group
         $out = Remote::buildRemote(id: $remote->id)->first();
         $n_level = (int)$full;
         if ($n_level <= 0) { $n_level =1;}
@@ -51,6 +51,7 @@ class RemoteController extends Controller
 
 
     public function remote_test(Request $request, Remote $remote) {
+        //todo check admin and usage group
         $inputs = $request->collect();
         $user = null;$type = null;$action = null;$element = null; $attribute = null;
         if ($inputs->has('callers')) {
@@ -96,22 +97,25 @@ class RemoteController extends Controller
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::REMOTE_NOT_FOUND);
         }
+        //todo check if owns element that made this call, or remote admin group, and see if element owner can set
         $data = $request->collect();
         $checked_activity->processManualPending($data);
         $out = RemoteActivity::buildActivity(id:$checked_activity->id)->first();
         return response()->json(new RemoteActivityResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
     public function list_activities(RemoteActivityStatusType $remote_activity_status_type) {
+        //todo check admin and usage group, or if element owner (always can)
         $activities = RemoteActivity::buildActivity(remote_activity_status_type: $remote_activity_status_type)->cursorPaginate();
         return response()->json(new RemoteActivityCollection($activities), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
     public function get_activity(RemoteActivity $remote_activity) {
+        //todo check admin and usage group, or if element owner (always can)
         $activity = RemoteActivity::buildActivity(id: $remote_activity->id)->first();
         return response()->json(new RemoteActivityResource($activity), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function remote_list(?User $user = null) {
-
+        //todo allow admin and usage group
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
         $out = Remote::buildRemote(usage_user_id: $user->id)->cursorPaginate();

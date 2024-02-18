@@ -32,7 +32,8 @@ use Illuminate\Support\Collection;
  * @property RemoteUriRoleType uri_role
  * @property string uri_string
  * @property bool is_sending_context_to_remote
- *
+ * //todo add in bool for can element owner set manual remote answer
+ * //todo add db level check that manual cannot be used on anything but default role because do not monitor response from others
  *
  * @property string created_at
  * @property string updated_at
