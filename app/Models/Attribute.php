@@ -45,12 +45,11 @@ use Illuminate\Validation\ValidationException;
  * @property boolean is_human
  * @property boolean is_read_policy_all
  * @property boolean is_write_policy_all
-
  * @property string attribute_name
  * @property string created_at
  * @property string updated_at
  *
- *
+ * todo add server levels read_server_level: write_server_level
  * @property int created_at_ts
  * @property int updated_at_ts
  *
