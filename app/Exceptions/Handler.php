@@ -39,15 +39,15 @@ class Handler extends ExceptionHandler
                     $status = 400;
                 }
                 $response = [
+                    'type' => $e->getRefCodeUrl(),
+                    'title' => $e->getMessage(),
+                    'instance' => $e->getRefCode(),
                     'status' => $status,
-                    'message' => $e->getMessage(),
-                    'code' => $e->getRefCode(),
-                    'more_info' => $e->getRefCodeUrl(),
                     'errors' => [],
                 ];
                 $other = $e->getPrevious();
                 while ($other) {
-                    $response['errors'][] = $other->getMessage();
+                    $response['errors'][get_class($other)] = $other->getMessage();
                     $other = $other->getPrevious();
                 }
                 if (empty($response['errors'])) {
@@ -64,10 +64,9 @@ class Handler extends ExceptionHandler
             $status = $e->status;
 
             $response = [
+                'title' => $e->getMessage(),
+                'instance' => RefCodes::VALIDATION,
                 'status' => $status,
-                'message' => $e->getMessage(),
-                'code' => RefCodes::VALIDATION,
-                'more_info' => '',
                 'errors' => $e->errors(),
             ];
             $other = $e->getPrevious();

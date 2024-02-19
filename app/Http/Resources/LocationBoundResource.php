@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -34,7 +35,7 @@ class LocationBoundResource extends JsonResource
             'name' => $this->getName(),
             'location_type' => $this->location_type,
             'is_retired' => $this->is_retired,
-            'created_at' => round($this->created_at_ts),
+            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
         ];
 
         if ($this->n_display_level > 1) {

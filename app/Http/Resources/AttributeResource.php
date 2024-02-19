@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
 use App\Models\Enums\Attributes\AttributeRuleType;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -43,7 +44,7 @@ class AttributeResource extends JsonResource
             'uuid' => $this->ref_uuid,
             'name' => $this->getName(),
             'is_retired' => $this->is_retired,
-            'created_at' => round($this->created_at_ts),
+            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
             'bounds'=> [
                 "read_bounds"=> [
                     "read_time" => $this->n_display_level <=1? ($this->read_time_bound?->getName() ) : ($this->read_time_bound ? new TimeBoundResource($this->read_time_bound,null,$this->n_display_level -1) : null),

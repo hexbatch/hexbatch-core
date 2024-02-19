@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -33,7 +34,7 @@ class UserResource extends JsonResource
             'uuid' => $this->ref_uuid,
             'username' => $this->username,
             'group' => new UserGroupResource($this->user_group,null,$this->n_display_level - 1),
-            'created_at' => $this->created_at_ts
+            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String()
         ];
     }
 }
