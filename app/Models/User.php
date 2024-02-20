@@ -201,7 +201,7 @@ class User extends Authenticatable
         $user = User::where('ref_uuid',User::SYSTEM_UUID)->first();
         if ($user) {
             try {
-                $user->initUser();
+                $user->initUser(); //todo the system user type inherits from the user.server token type
                 $user->refresh();
                 return static::$system_user = $user;
             } catch (ValidationException $e) {

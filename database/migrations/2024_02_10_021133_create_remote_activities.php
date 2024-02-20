@@ -58,6 +58,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
+            //todo add a server_id here for when this is called for servers api
+
             $table->foreignId('caller_element_id')
                 ->nullable()
                 ->default(null)
