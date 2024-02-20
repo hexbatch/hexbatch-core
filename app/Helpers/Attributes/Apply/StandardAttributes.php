@@ -42,10 +42,6 @@ class StandardAttributes
     const STANDARD_ATTRIBUTE_SMALL_THUMB =  'small_thumbnail';
     const STANDARD_ATTRIBUTE_MEDIUM_THUMB =  'medium_thumbnail';
 
-    const STANDARD_ATTRIBUTE_ADMIN_ROLE = 'admin_role';
-    const STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO = 'view_private_info';
-    const STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES =  'set_remote_types';
-    const STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY = 'view_all_remote_activity';
 
     const UUIDS = [
         self::BASE_ATTRIBUTE_NAME => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
@@ -69,13 +65,7 @@ class StandardAttributes
         self::STANDARD_ATTRIBUTE_OPACITY => '8a569174-35a8-4af9-8531-1b07c135c63c',
         self::STANDARD_ATTRIBUTE_IMAGE => '2fa8ff2b-1735-4497-b7e0-83645e42240f',
         self::STANDARD_ATTRIBUTE_SMALL_THUMB => '43e9362d-2bf1-409e-9b87-cc29bf95560c',
-        self::STANDARD_ATTRIBUTE_MEDIUM_THUMB => 'fbfff4ce-410f-42a0-9e99-87963b131446',
-
-
-        self::STANDARD_ATTRIBUTE_ADMIN_ROLE => '61370c98-57c5-4b2d-a64e-6d9fa336191b',
-        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO => 'be806efe-fffb-4a39-a9ad-6b1b705c2fb1',
-        self::STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES => 'a202179c-a8af-4f38-a612-7ddb719d4012',
-        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY => '63b649da-2a3f-4940-8f78-ad8ac3109443',
+        self::STANDARD_ATTRIBUTE_MEDIUM_THUMB => 'fbfff4ce-410f-42a0-9e99-87963b131446'
     ];
     //todo add meta section for standard attributes for more meta: 'author','copywrite','url','rating','lang' (lang value numberic for weight) -- also mime type, keywords
     const INFO_ATTRIBUTE_NAMES = [
@@ -99,11 +89,6 @@ class StandardAttributes
         self::STANDARD_ATTRIBUTE_MEDIUM_THUMB ,
     ];
 
-    const ADMIN_ATTRIBUTE_NAMES = [
-        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO ,
-        self::STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES ,
-        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY
-    ];
 
     public static function getStandardAttributeInfo(string $what) : array  {
         $start = self::DEF[$what]??null;
@@ -294,36 +279,6 @@ class StandardAttributes
             'parent' => self::STANDARD_ATTRIBUTE_DISPLAY,
             'value_type' => AttributeValueType::STRING,
         ],
-
-
-
-
-        //admin roles
-        self::STANDARD_ATTRIBUTE_ADMIN_ROLE => [
-            'internal_description' => 'Base for all standard admin roles',
-            'parent' => self::STANDARD_ATTRIBUTE,
-            'value_type' => AttributeValueType::NUMERIC,
-        ],
-
-        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_PRIVATE_INFO => [
-            'internal_description' => 'Users with this attribute can view all other user info',
-            'parent' => self::STANDARD_ATTRIBUTE_ADMIN_ROLE,
-            'value_type' => AttributeValueType::NUMERIC,
-        ],
-
-        self::STANDARD_ATTRIBUTE_ADMIN_SET_REMOTE_TYPES  => [
-            'internal_description' => 'Users with this attribute can set all the remote types',
-            'parent' => self::STANDARD_ATTRIBUTE_ADMIN_ROLE,
-            'value_type' => AttributeValueType::NUMERIC,
-
-        ],
-
-        self::STANDARD_ATTRIBUTE_ADMIN_VIEW_ALL_REMOTE_ACTIVITY => [
-            'internal_description' => 'Users with this attribute can see all remote activity by all users',
-            'parent' => self::STANDARD_ATTRIBUTE_ADMIN_ROLE,
-            'value_type' => AttributeValueType::NUMERIC,
-        ],
-
 
     ];
 
