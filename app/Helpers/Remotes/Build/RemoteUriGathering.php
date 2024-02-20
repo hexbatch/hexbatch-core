@@ -44,9 +44,18 @@ class RemoteUriGathering
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::REMOTE_SCHEMA_ISSUE);
             }
+            if (in_array($convert,RemoteUriType::FORBIDDEN_TYPES) ) {
+                throw new HexbatchNotPossibleException(__("msg.remote_sensitive_type",['method'=>$convert->value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            }
             $this->uri_type = $convert ?: null;
+        } else {
+            throw new HexbatchNotPossibleException(__("msg.remote_need_uri_type"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::REMOTE_SCHEMA_ISSUE);
         }
-
+        //todo update this with new columns and do better type checking and setting of defaults
         if ($uri_block->has('uri_method')) {
             $convert = RemoteUriMethod::tryFrom($uri_block->get('uri_method'));
             $this->uri_method = $convert ?: null;

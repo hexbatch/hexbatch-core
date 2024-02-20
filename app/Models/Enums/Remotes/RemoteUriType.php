@@ -8,9 +8,15 @@ enum RemoteUriType : string {
     case CONSOLE = 'console';
     case MANUAL = 'manual';
 
+    case CODE = 'code';
+
     const SENSITIVE_TYPES = [
         self::SOCKET,
         self::CONSOLE
+    ];
+
+    const FORBIDDEN_TYPES = [
+        self::CODE,
     ];
 
     const DISPATCHABLE_TYPES = [

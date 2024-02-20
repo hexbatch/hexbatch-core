@@ -228,6 +228,7 @@ class RemoteActivity extends Model
                     Remote::CACHE_KEY_NAME_ELEMENT => $this->caller_element?->ref_uuid,
                     Remote::CACHE_KEY_NAME_TYPE => $this->caller_type?->ref_uuid,
                     Remote::CACHE_KEY_NAME_USER => $this->caller_user?->ref_uuid,
+                    //todo add server_id to allowed cache keys
                 };
                 if ($maybe) {$subkeys[] = $maybe;}
             } else {
