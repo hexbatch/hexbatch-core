@@ -58,7 +58,7 @@ return new class extends Migration
         #------------------------------
         DB::statement("CREATE TYPE type_remote_uri AS ENUM (
             'none','url','socket','console','manual'
-            );");
+            );"); //todo add code
 
         DB::statement("ALTER TABLE remote_uris Add COLUMN uri_type type_remote_uri  NOT NULL default 'none';");
         #------------------------------
@@ -83,8 +83,8 @@ return new class extends Migration
             //todo remote_uri_name (to id this to humans no checking and can be anything)
             //todo remote_uri_description (text anything no checking and can be anything)
             //todo remote_uri_protocol (enum with supported, right now 'none','http','https') only urls fill this out
-            //todo remote_uri_main (for url this is the subdomain(s) and domain no path, or ip) , for commands and sockets this is the first part before any whitespace. Manual leaves this blank
-            //todo remote_uri_path (for url this is the path, for command and port this is what is left over from the field above) query strings in url are put in the maps as constants. Manual leaves this blank
+            //todo remote_uri_main (for url this is the subdomain(s) and domain no path, or ip) , for commands and sockets this is the first part before any whitespace. Manual leaves this blank. Code has the class with namespace
+            //todo remote_uri_path (for url this is the path, for command and port this is what is left over from the field above) query strings in url are put in the maps as constants. Manual leaves this blank. Code has the method name
             $table->string('uri_string')->nullable(false) //todo remove this column
                 ->comment("The url, socket command, console command or hint of the manual call");
 
