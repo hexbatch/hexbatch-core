@@ -85,6 +85,7 @@ return [
     'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
     'remote_activity_not_found' => 'Remote activity not found using :ref',
     'remote_map_invalid_json_path' => 'The json path is not valid :ref',
+    'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
 
 

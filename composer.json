@@ -19,6 +19,7 @@
         "php": "^8.1",
         "ext-bcmath": "*",
         "ext-fileinfo": "*",
+        "ext-openssl": "*",
         "ext-pcre": "*",
         "ext-pdo": "*",
         "ext-pdo_pgsql": "*",

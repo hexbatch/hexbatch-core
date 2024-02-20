@@ -27,7 +27,7 @@ class AuthenticationController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'username'=>['required','string','max:30'],
+            'username'=>['required','string','max:61'],
             'password'=>['required','string','min:8']
         ]);
 

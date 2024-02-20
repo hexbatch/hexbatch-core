@@ -225,6 +225,7 @@ class User extends Authenticatable
         } catch (ValidationException $e) {
             throw new \LogicException("Cannot create system user because ".$e->getMessage());
         }
+        //todo make sure the user here is on the servers table
     }
 
     public static function buildUser(

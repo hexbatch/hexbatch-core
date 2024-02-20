@@ -45,6 +45,7 @@ return new class extends Migration
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
+            //todo add server_id here for users who are not from here
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -52,7 +53,7 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
             $table->string('name')->nullable();
-            $table->string('username',30)->unique();
+            $table->string('username',61)->unique();//username is only 30, but visiting users have their server name appended todo redo this migration
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

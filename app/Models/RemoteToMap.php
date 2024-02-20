@@ -82,6 +82,9 @@ class RemoteToMap extends Model
             }
             $ret->map_type = $convert;
         }
+        if ($c->has('is_secret')) {
+            $ret->is_secret = Utilities::boolishToBool($c->get('is_secret'));
+        }
 
         if ($c->has('holder_json_path')) {
             $maybe_json_path = $c->get('holder_json_path');
@@ -89,7 +92,7 @@ class RemoteToMap extends Model
                 $ret->holder_json_path = null;
             } else {
                 try {
-                    $ret = [1,2,3,"apples"=>"two"];
+                    $ret = [1,2,3,"apples"=>"two"];//this is just to test, and is ok to keep, this can be any array
                     JsonPath::get($ret,$maybe_json_path);
                 } /** @noinspection PhpRedundantCatchClauseInspection */
                 catch (InvalidJsonPathException) {
@@ -109,16 +112,22 @@ class RemoteToMap extends Model
             $da_data = $c->get('remote_data_value');
             if (!empty($da_data)) {
                 if (!is_array($da_data) && !is_object($da_data)) {
-                    $ret->remote_data_value = [static::UNJSON_KEY => $da_data];
+                    if ($ret->is_secret) {
+                        $da_data = Utilities::str_encrypt_aes_256_gcm(plaintext: $da_data,password: config('hbc.system_secrets_pw'));
+                    }
+                    $ret->remote_data_constant = [static::UNJSON_KEY => $da_data];
                 } else {
-                    $ret->remote_data_value = $da_data;
+                    if ($ret->is_secret) {
+                        throw new HexbatchNotPossibleException(__("msg.remote_map_invalid_secret"),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::REMOTE_SCHEMA_ISSUE);
+                    }
+                    $ret->remote_data_constant = $da_data;
                 }
             }
         }
 
-        if ($c->has('is_secret')) {
-            $ret->is_secret = Utilities::boolishToBool($c->get('is_secret'));
-        }
+
 
         return $ret;
     }
@@ -126,7 +135,11 @@ class RemoteToMap extends Model
     public function getConstantData() : mixed {
         if (empty($this->remote_data_constant)) {return null;}
         if (isset($this->remote_data_constant[static::UNJSON_KEY]) && !empty($this->remote_data_constant[static::UNJSON_KEY])) {
-            return $this->remote_data_constant[static::UNJSON_KEY];
+            $val =  $this->remote_data_constant[static::UNJSON_KEY];
+            if($this->is_secret) {
+                return Utilities::str_decrypt_aes_256_gcm(encrypted_string: $val,password: config('hbc.system_secrets_pw'));
+            }
+            return $val;
         }
         return $this->remote_data_constant;
     }

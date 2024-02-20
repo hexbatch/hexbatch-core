@@ -144,4 +144,49 @@ class Utilities {
         return DB::statement($proc);
     }
 
+    const BASE_64_OPTION = 'base64';
+    /**
+     * return a base64 encrypted string, you can also choose hex or null as encoding.
+     * @source https://stackoverflow.com/a/62175263/2420206
+     * @example $enc = str_encrypt_aes_256_gcm("my-secretText", "myPassword", "base64");
+     */
+    function str_encrypt_aes_256_gcm(string $plaintext, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string {
+        if (empty($plaintext) || empty($password)) {
+            throw new LogicException("str_encrypt_aes_256_gcm needs args to not be empty");
+        }
+        $keysalt = openssl_random_pseudo_bytes(16);
+        $key = hash_pbkdf2("sha512", $password, $keysalt, 20000, 32, true);
+        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length("aes-256-gcm"));
+        $tag = "";
+        $encryptedstring = openssl_encrypt($plaintext, "aes-256-gcm", $key, OPENSSL_RAW_DATA, $iv, $tag);
+        if ($encryptedstring === false) {
+            throw new \RuntimeException("Cannot str_encrypt_aes_256_gcm ");
+        }
+        return $encoding === "hex" ? bin2hex($keysalt.$iv.$encryptedstring.$tag) :
+                                    ($encoding === self::BASE_64_OPTION ? base64_encode($keysalt.$iv.$encryptedstring.$tag) : $keysalt.$iv.$encryptedstring.$tag);
+    }
+
+    /**
+     * decrypt something made in str_encrypt_aes_256_gcm
+     * @source https://stackoverflow.com/a/62175263/2420206
+     * @example $dec = str_decrypt_aes_256_gcm($enc, "myPassword", "base64");
+     */
+    function str_decrypt_aes_256_gcm(string $encrypted_string, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string  {
+        if (empty($encrypted_string) || empty($password)) {
+            throw new LogicException("str_decrypt_aes_256_gcm needs args to not be empty");
+        }
+
+        $encrypted_string = $encoding === "hex" ? hex2bin($encrypted_string) : ($encoding === self::BASE_64_OPTION ? base64_decode($encrypted_string) : $encrypted_string);
+        $keysalt = substr($encrypted_string, 0, 16);
+        $key = hash_pbkdf2("sha512", $password, $keysalt, 20000, 32, true);
+        $ivlength = openssl_cipher_iv_length("aes-256-gcm");
+        $iv = substr($encrypted_string, 16, $ivlength);
+        $tag = substr($encrypted_string, -16);
+        $work_or_false_on_fail =  openssl_decrypt(substr($encrypted_string, 16 + $ivlength, -16), "aes-256-gcm", $key, OPENSSL_RAW_DATA, $iv, $tag);
+        if ($work_or_false_on_fail === false) {
+            throw new \RuntimeException("Cannot str_decrypt_aes_256_gcm ");
+        }
+        return $work_or_false_on_fail;
+    }
+
 }

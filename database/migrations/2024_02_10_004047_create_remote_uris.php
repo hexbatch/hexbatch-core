@@ -72,15 +72,20 @@ return new class extends Migration
         //#-------------------------------------
         DB::statement("CREATE TYPE type_role_uri AS ENUM (
             'default','api_success','api_fail'
-            );");
+            );"); //todo add read and write, keep default but make constraint in here that the same remote cannot have default and (read and/or write) set together
+                   //todo in same way, put in api_default so one callback for all can be declared, do not allow api_default to be set if either api_success and api_fail are set
 
         DB::statement("ALTER TABLE remote_uris Add COLUMN uri_role type_role_uri  NOT NULL default 'default';");
 
 
         Schema::table('remote_uris', function (Blueprint $table) {
             $table->unique(['remote_id','uri_role']);
-
-            $table->string('uri_string')->nullable(false)
+            //todo remote_uri_name (to id this to humans no checking and can be anything)
+            //todo remote_uri_description (text anything no checking and can be anything)
+            //todo remote_uri_protocol (enum with supported, right now 'none','http','https') only urls fill this out
+            //todo remote_uri_main (for url this is the subdomain(s) and domain no path, or ip) , for commands and sockets this is the first part before any whitespace. Manual leaves this blank
+            //todo remote_uri_path (for url this is the path, for command and port this is what is left over from the field above) query strings in url are put in the maps as constants. Manual leaves this blank
+            $table->string('uri_string')->nullable(false) //todo remove this column
                 ->comment("The url, socket command, console command or hint of the manual call");
 
 

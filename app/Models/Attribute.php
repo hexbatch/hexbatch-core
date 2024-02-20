@@ -50,7 +50,7 @@ use Illuminate\Validation\ValidationException;
  * @property string updated_at
  *
  * todo add server levels read_server_level: write_server_level, ttl_server_read
- * todo add in is_constant which is different from not being writable via user permissions
+ * todo add in enum constant_policy: not_constant,always_constant,constant_after_write ,  which is different from not being writable via user permissions
  * @property int created_at_ts
  * @property int updated_at_ts
  *

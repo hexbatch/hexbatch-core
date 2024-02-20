@@ -42,6 +42,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo add optional server_id
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
