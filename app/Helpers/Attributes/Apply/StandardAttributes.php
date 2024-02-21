@@ -67,8 +67,7 @@ class StandardAttributes
         self::STANDARD_ATTRIBUTE_SMALL_THUMB => '43e9362d-2bf1-409e-9b87-cc29bf95560c',
         self::STANDARD_ATTRIBUTE_MEDIUM_THUMB => 'fbfff4ce-410f-42a0-9e99-87963b131446'
     ];
-    //todo add meta section for standard attributes for more meta: 'author','copywrite','url','rating', mime type, keywords or tags (json array)
-    //todo add standard attributes for * preferred languages and weights,iso region or locality
+    //todo add meta sections for data and content from spec
     const INFO_ATTRIBUTE_NAMES = [
         self::STANDARD_ATTRIBUTE_NAME ,
         self::STANDARD_ATTRIBUTE_DESCRIPTION ,
