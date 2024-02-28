@@ -79,12 +79,14 @@ return [
 
     //remotes
     'remote_not_found' => 'Remote not found using :ref',
+    'remote_not_in_usage_group' => 'You are not allowed to use this remote :ref',
     'remote_from_map_invalid_type' => 'Remote from mapping had an invalid type :ref',
     'remote_to_map_invalid_type' => 'Remote to mapping had an invalid type :ref',
     'remote_sensitive_type' => 'Remote method of :method can only be set with permission',
     'remote_need_uri_type' => 'Remote uri needs to be given a type',
     'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
     'remote_activity_not_found' => 'Remote activity not found using :ref',
+    'remote_activity_only_manual_updated' => 'Can only update manual types of remotes, but not :ref',
     'remote_map_invalid_json_path' => 'The json path is not valid :ref',
     'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',

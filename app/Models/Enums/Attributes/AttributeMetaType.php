@@ -7,5 +7,6 @@ enum AttributeMetaType : string {
     case COPYWRITE = 'copywrite';
     case URL = 'url';
     case RATING = 'rating';
+    case MIME_TYPE = 'mime_type';
 }
 

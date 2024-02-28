@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
@@ -43,7 +44,6 @@ use Illuminate\Validation\ValidationException;
  * @property string remote_name
  * @property boolean is_retired
  * @property boolean is_on
-
  * @property bool is_caching
  * @property bool is_using_cache_on_failure
  * @property int cache_ttl_seconds
@@ -53,19 +53,17 @@ use Illuminate\Validation\ValidationException;
  * @property ?string rate_limit_starts_at
  * @property int rate_limit_count
  * @property int max_concurrent_calls
-
- * todo add to migration and here new remote meta table:
- * todo in new remote_metas: description (any length text, strip html), terms of use link, privacy link, about url, accepted languages (json) (none for all or z/a),location map bounds for area of service
- * todo meta is not checked at this time for anything, just for reference. strip tags and do entities for description
- * todo time bounds for when available, if time bounds set, and not available, do not call, so put the time bounds on the remote table itself
  *
  * @property string created_at
  * @property string updated_at
  *
  * @property User remote_owner
+ * @property UserGroup usage_group
  * @property RemoteUri event_uri
- * @property RemoteUri default_uri
+ * @property RemoteUri read_uri
+ * @property RemoteUri write_uri
  * @property RemoteActivity[] activity_of_remote
+ * @property RemoteMetum[] meta_of_remote
  * @property RemoteUri[] uris
  *
  *
@@ -118,22 +116,42 @@ class Remote extends Model
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
     }
 
-    public function default_uri() : HasOne {
+    public function meta_of_remote() : HasMany {
+        return $this->hasMany('App\Models\RemoteMetum','remote_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
+            ;
+    }
+
+    public function usage_group() : HasOne {
+        return $this->hasOne('App\Models\UserGroup','usage_group_id');
+    }
+
+    public function read_uri() : HasOne {
         return $this->hasOne('App\Models\RemoteUri','remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::DEFAULT)
+            ->where('uri_role',RemoteUriRoleType::READ_AND_WRITE)->orWhere('uri_role',RemoteUriRoleType::READ)
             /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
             ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
             ;
+    }
 
+    public function write_uri() : HasOne {
+        return $this->hasOne('App\Models\RemoteUri','remote_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
+            ->where('uri_role',RemoteUriRoleType::READ_AND_WRITE)->orWhere('uri_role',RemoteUriRoleType::WRITE)
+            /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
+            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
+            ;
     }
 
     public function event_success_uri() : HasOne {
         return $this->hasOne('App\Models\RemoteUri','remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::API_SUCCESS)
+            ->where('uri_role',RemoteUriRoleType::EVENT_SUCCESS)
             /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
             ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
             ;
@@ -144,7 +162,18 @@ class Remote extends Model
         return $this->hasOne('App\Models\RemoteUri','remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::API_FAIL)
+            ->where('uri_role',RemoteUriRoleType::EVENT_FAIL)
+            /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
+            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
+            ;
+
+    }
+
+    public function event_always_uri() : HasOne {
+        return $this->hasOne('App\Models\RemoteUri','remote_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
+            ->where('uri_role',RemoteUriRoleType::EVENT_ALWAYS)
             /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
             ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
             ;
@@ -153,6 +182,34 @@ class Remote extends Model
 
     public function remote_owner() : BelongsTo {
         return $this->belongsTo('App\Models\User','user_id');
+    }
+
+    public function getUri(RemoteUriRoleType $role) : ?RemoteUri {
+        switch ($role) {
+            case RemoteUriRoleType::EVENT_FAIL: {
+                /** @var RemoteUri */
+                return $this->event_fail_uri()->first();
+            }
+            case RemoteUriRoleType::EVENT_SUCCESS: {
+                /** @var RemoteUri */
+                return $this->event_success_uri()->first();
+            }
+            case RemoteUriRoleType::EVENT_ALWAYS: {
+                /** @var RemoteUri */
+                return $this->event_always_uri()->first();
+            }
+            case RemoteUriRoleType::READ: {
+                /** @var RemoteUri */
+                return $this->read_uri()->first();
+            }
+            case RemoteUriRoleType::WRITE: {
+                /** @var RemoteUri */
+                return $this->write_uri()->first();
+            }
+            default: {
+                return null;
+            }
+        }
     }
 
     public function getName() : string  {
@@ -164,7 +221,7 @@ class Remote extends Model
         $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
         if ($b_exist) {return true;}
         return false;
-        //todo also check for the action
+        //todo also check for the actions and any activities that are still pending
     }
 
     /**
@@ -195,8 +252,10 @@ class Remote extends Model
 
         $build =  Remote::select('remotes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Remote::default_uri(),Remote::event_uri(),Remote::activity_of_remote() */
-            ->with('default_uri','event_uri','activity_of_remote')
+            /** @uses Remote::read_uri(),Remote::write_uri(),Remote::event_always_uri(),Remote::event_success_uri(),Remote::event_fail_uri(),
+             * @uses Remote::activity_of_remote(),Remote::usage_group(),Remote::meta_of_remote()
+             */
+            ->with('read_uri','write_uri','event_always_uri','event_success_uri','event_fail_uri','activity_of_remote','usage_group','meta_of_remote')
 
         ;
 
@@ -207,25 +266,16 @@ class Remote extends Model
 
         if ($admin_user_id) {
 
-            $build->join('users',
+            $build->join('users owner_user_for_admin_check',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('users.id','=','remotes.user_id');
+                        ->on('owner_user_for_admin_check.id','=','remotes.user_id');
                 }
             );
 
-            $build->join('user_groups',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('user_groups.id','=','users.user_group_id');
-                }
-            );
 
             $build->join('user_group_members admin_group_members',
                 /**
@@ -233,7 +283,7 @@ class Remote extends Model
                  */
                 function (JoinClause $join) use($admin_user_id) {
                     $join
-                        ->on('admin_group_members.user_group_id','=','user_groups.id')
+                        ->on('admin_group_members.user_group_id','=','owner_user_for_admin_check.user_group_id')
                         ->where('admin_group_members.user_id',$admin_user_id)
                         ->where('admin_group_members.is_admin',true);
                 }
@@ -243,17 +293,46 @@ class Remote extends Model
 
         if ($usage_user_id) {
 
-            $build->join('user_group_members as usage_members',
+            $build->join('users owner_user_for_usage_check',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join->on('owner_user_for_usage_check.id','=','remotes.user_id');
+                }
+            );
+
+
+            $build->leftJoin('user_group_members admin_group_members',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join) use($usage_user_id) {
                     $join
-                        ->on('remotes.usage_group_id','=','usage_members.user_group_id')
-                        ->where('usage_members.user_id',$usage_user_id)
-                    ;
+                        ->on('admin_group_members.user_group_id','=','owner_user_for_usage_check.user_group_id')
+                        ->where('admin_group_members.user_id',$usage_user_id);
                 }
             );
+
+            //remote user group, may not exist
+
+            $build->leftJoin('user_group_members remote_group_members',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($usage_user_id) {
+                    $join
+                        ->on('remote_group_members.user_group_id','=','remotes.usage_group_id')
+                        ->where('remote_group_members.user_id',$usage_user_id);
+                }
+            );
+
+            $build->where(function ($q)  {
+                $q->whereNotNull('remote_group_members.id')
+                    ->orWhereNotNull('admin_group_members.id');
+            });
+
+
         }
 
         return $build;
@@ -353,7 +432,11 @@ class Remote extends Model
    const CACHE_KEY_NAME_ELEMENT = 'element_ref';
    const CACHE_KEY_NAME_TYPE = 'type_ref';
    const CACHE_KEY_NAME_USER = 'user_ref';
-   const ALL_SPECIAL_CACHE_KEY_NAMES = [ self::CACHE_KEY_NAME_ELEMENT,self::CACHE_KEY_NAME_TYPE,self::CACHE_KEY_NAME_ATTRIBUTE,self::CACHE_KEY_NAME_ACTION,self::CACHE_KEY_NAME_USER];
+   const CACHE_KEY_NAME_SERVER = 'server_ref';
+   const ALL_SPECIAL_CACHE_KEY_NAMES = [
+       self::CACHE_KEY_NAME_ELEMENT,self::CACHE_KEY_NAME_TYPE,self::CACHE_KEY_NAME_ATTRIBUTE,
+       self::CACHE_KEY_NAME_ACTION,self::CACHE_KEY_NAME_USER,self::CACHE_KEY_NAME_SERVER
+   ];
 
     public function getRemoteCacheKey() :string {
         return 'r-'.$this->ref_uuid;
@@ -370,21 +453,25 @@ class Remote extends Model
 
 
 
-    public function createActivity(Collection $collection,
+    public function createActivity(Collection $collection, RemoteUriRoleType $role,
                                    ?User $user = null,?ElementType $type = null,?Element $element = null,
                                    ?Attribute $attribute = null,?Action $action = null,
                                    ?ActivityEventConsumer $consumer = null
     ) :RemoteActivity {
-
+        $remote_uri = $this->getUri($role);
+        if (!$remote_uri) {
+            throw new \LogicException("The remote does not have a uri of type ". $role->value);
+        }
         $ret = new RemoteActivity();
-        $ret->remote_id = $this->id;
+        $ret->remote_uri_id = $remote_uri;
         $ret->caller_user_id = $user?->id;
         $ret->caller_type_id = $type?->id;
         $ret->caller_element_id = $element?->id;
         $ret->caller_attribute_id = $attribute?->id;
         $ret->caller_action_id = $action?->id;
-        $ret->to_remote_processed_data = $this->default_uri->processToSend($collection,RemoteToMapType::DATA);
-        $ret->to_headers = $this->default_uri->processToSend($collection,RemoteToMapType::HEADER);
+        //todo add stack, and think about how the mapping goes to different uri (read and write) and how that is enforced
+        $ret->to_remote_processed_data = $remote_uri->processToSend($collection,RemoteToMapType::DATA);
+        $ret->to_headers = $remote_uri->processToSend($collection,RemoteToMapType::HEADER);
         if ($consumer) {
             $ret->consumer_passthrough_data = $consumer->getPassthrough();
         }

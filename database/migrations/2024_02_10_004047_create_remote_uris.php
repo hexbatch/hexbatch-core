@@ -57,8 +57,8 @@ return new class extends Migration
 
         #------------------------------
         DB::statement("CREATE TYPE type_remote_uri AS ENUM (
-            'none','url','socket','console','manual'
-            );"); //todo add code
+            'none','url','socket','console','manual_owner','manual_element','code'
+            );");
 
         DB::statement("ALTER TABLE remote_uris Add COLUMN uri_type type_remote_uri  NOT NULL default 'none';");
         #------------------------------
@@ -70,24 +70,40 @@ return new class extends Migration
         DB::statement("ALTER TABLE remote_uris Add COLUMN uri_method_type type_remote_uri_method  NOT NULL default 'none';");
 
         //#-------------------------------------
-        DB::statement("CREATE TYPE type_role_uri AS ENUM (
-            'default','api_success','api_fail'
-            );"); //todo add read and write, keep default but make constraint in here that the same remote cannot have default and (read and/or write) set together
-                   //todo in same way, put in api_default so one callback for all can be declared, do not allow api_default to be set if either api_success and api_fail are set
+        DB::statement("CREATE TYPE type_remote_uri_role AS ENUM (
+            'read_and_write','read','write','event_success','event_fail','event_always'
+            );"); //todo constraint in here that the same remote cannot have read_and_write and (read and/or write) set together
 
-        DB::statement("ALTER TABLE remote_uris Add COLUMN uri_role type_role_uri  NOT NULL default 'default';");
+        DB::statement("ALTER TABLE remote_uris Add COLUMN uri_role type_remote_uri_role  NOT NULL default 'read_and_write';");
 
+        //#-------------------------------------
+        DB::statement("CREATE TYPE type_remote_uri_protocol AS ENUM (
+            'none','http','https'
+            );");
+
+        DB::statement("ALTER TABLE remote_uris Add COLUMN uri_protocol type_remote_uri_protocol  NOT NULL default 'none';");
+
+
+        DB::statement("ALTER TABLE attribute_value_pointers ADD CONSTRAINT chk_only_one_is_not_null CHECK (
+            uri_type not in ('manual_owner','manual_element') OR uri_role in ('read_and_write','read','write'))
+        ;");
 
         Schema::table('remote_uris', function (Blueprint $table) {
             $table->unique(['remote_id','uri_role']);
-            //todo remote_uri_name (to id this to humans no checking and can be anything)
-            //todo remote_uri_description (text anything no checking and can be anything)
-            //todo remote_uri_protocol (enum with supported, right now 'none','http','https') only urls fill this out
-            //todo remote_uri_main (for url this is the subdomain(s) and domain no path, or ip) , for commands and sockets this is the first part before any whitespace. Manual leaves this blank. Code has the class with namespace
-            //todo remote_uri_path (for url this is the path, for command and port this is what is left over from the field above) query strings in url are put in the maps as constants. Manual leaves this blank. Code has the method name
-            $table->string('uri_string')->nullable(false) //todo remove this column
-                ->comment("The url, socket command, console command or hint of the manual call");
+            $table->string('uri_name')->nullable(false)
+                ->comment("to id this to humans no checking and can be anything");
 
+            $table->unique(['remote_id','uri_name']);
+
+
+            $table->string('remote_uri_main')->nullable(false)
+                ->comment("for url this is domain and subdomain, or ip, for commands and sockets this is the first part before any whitespace. Manual leaves this blank. Code has the class with namespace");
+
+            $table->string('remote_uri_path')->nullable()->default(null)
+                ->comment("for url this is the path, for command and port this is what is left over from the field above, this can have placeholders");
+
+            $table->text('uri_description')->nullable()->default(null)
+                ->comment("can be anything, notes for the users of this remote");
 
         });
     }
@@ -99,9 +115,10 @@ return new class extends Migration
     {
         Schema::dropIfExists('remote_uris');
 
-        DB::statement("DROP TYPE type_role_uri;");
+        DB::statement("DROP TYPE type_remote_uri_role;");
         DB::statement("DROP TYPE type_remote_uri;");
         DB::statement("DROP TYPE type_remote_uri_method;");
         DB::statement("DROP TYPE type_remote_data_format;");
+        DB::statement("DROP TYPE type_remote_uri_protocol;");
     }
 };

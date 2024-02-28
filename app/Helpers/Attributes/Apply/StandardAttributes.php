@@ -76,7 +76,7 @@ class StandardAttributes
         self::STANDARD_ATTRIBUTE_ADDRESS ,
         self::STANDARD_ATTRIBUTE_MAP_LOCATION ,
         self::STANDARD_ATTRIBUTE_SHAPE_LOCATION ,
-        self::STANDARD_ATTRIBUTE_TIMEZONE ,
+        self::STANDARD_ATTRIBUTE_TIMEZONE
     ];
 
 

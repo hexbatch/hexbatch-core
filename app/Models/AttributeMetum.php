@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Models\Enums\Attributes\AttributeMetaType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,7 @@ use Illuminate\Support\Collection;
  * @property int meta_parent_attribute_id
  * @property AttributeMetaType meta_type
 
- * @property string meta_value //todo strip tags here and convert major entities
+ * @property string meta_value
  * @property string created_at
  * @property string updated_at
  *
@@ -124,7 +125,7 @@ class AttributeMetum extends Model
             $ret->meta_parent_attribute_id = $parent->id;
         }
         $ret->meta_type = $maybe_type;
-        $ret->meta_value = $maybe_value;
+        $ret->meta_value = Utilities::strip_tags_convert_entities($maybe_value);
 
         if ($b_delete_mode) {
             $ret->delete_mode = true;

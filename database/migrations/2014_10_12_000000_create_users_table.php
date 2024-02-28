@@ -15,7 +15,6 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('element_type_id')
-                ->after('id')
                 ->nullable()
                 ->default(null)
                 ->comment("The user type")
@@ -26,7 +25,6 @@ return new class extends Migration
 
 
             $table->foreignId('element_id')
-                ->after('element_type_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The user element that stores the user data")
@@ -37,7 +35,6 @@ return new class extends Migration
 
 
             $table->foreignId('user_group_id')
-                ->after('element_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The dedicated group for this user")
@@ -45,7 +42,15 @@ return new class extends Migration
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
-            //todo add server_id here for users who are not from here
+
+            $table->foreignId('server_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The server this user belongs to, null means this one")
+                ->index('idx_user_has_server_id')
+                ->constrained('servers')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -53,7 +58,7 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
             $table->string('name')->nullable();
-            $table->string('username',61)->unique();//username is only 30, but visiting users have their server name appended todo redo this migration
+            $table->string('username',61)->unique();//username is only 30, but visiting users have their server name appended
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

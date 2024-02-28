@@ -11,9 +11,7 @@ use JsonException;
 use LogicException;
 
 class Utilities {
-    public static function ignoreVar(...$params) {
-
-    }
+    public static function ignoreVar(...$params) {}
 
     public static function is_uuid(?string $guid) : bool{
         if (empty($guid)) {return false;}
@@ -150,7 +148,7 @@ class Utilities {
      * @source https://stackoverflow.com/a/62175263/2420206
      * @example $enc = str_encrypt_aes_256_gcm("my-secretText", "myPassword", "base64");
      */
-    function str_encrypt_aes_256_gcm(string $plaintext, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string {
+    public static function str_encrypt_aes_256_gcm(string $plaintext, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string {
         if (empty($plaintext) || empty($password)) {
             throw new LogicException("str_encrypt_aes_256_gcm needs args to not be empty");
         }
@@ -171,7 +169,7 @@ class Utilities {
      * @source https://stackoverflow.com/a/62175263/2420206
      * @example $dec = str_decrypt_aes_256_gcm($enc, "myPassword", "base64");
      */
-    function str_decrypt_aes_256_gcm(string $encrypted_string, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string  {
+    public static function str_decrypt_aes_256_gcm(string $encrypted_string, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string  {
         if (empty($encrypted_string) || empty($password)) {
             throw new LogicException("str_decrypt_aes_256_gcm needs args to not be empty");
         }
@@ -187,6 +185,11 @@ class Utilities {
             throw new \RuntimeException("Cannot str_decrypt_aes_256_gcm ");
         }
         return $work_or_false_on_fail;
+    }
+
+    public static function strip_tags_convert_entities(?string $what) : ?string  {
+        if (empty($what)) {return $what; }
+        return strip_tags(htmlspecialchars($what,ENT_QUOTES| ENT_HTML401,'UTF-8',false));
     }
 
 }

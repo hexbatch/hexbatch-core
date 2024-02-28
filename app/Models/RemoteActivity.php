@@ -23,13 +23,14 @@ use Illuminate\Support\Facades\DB;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int remote_id
+ * @property int remote_uri_id
  * @property int remote_stack_id
  * @property int caller_action_id
  * @property int caller_attribute_id
  * @property int caller_user_id
  * @property int caller_element_id
  * @property int caller_type_id
+ * @property int caller_server_id
  * @property string ref_uuid
  * @property RemoteActivityStatusType remote_activity_status_type
  * @property RemoteCacheStatusType cache_status_type
@@ -41,6 +42,7 @@ use Illuminate\Support\Facades\DB;
  * @property ArrayObject from_remote_processed_data
  * @property ArrayObject to_remote_processed_data
  * @property ArrayObject errors
+ * @property ArrayObject location_geo_json
  * @property ArrayObject consumer_passthrough_data
  * @property string from_remote_raw_text
  *
@@ -54,7 +56,7 @@ use Illuminate\Support\Facades\DB;
  * @property int created_at_ts
  * @property int updated_at_ts
  *
- * @property Remote remote_parent
+ * @property RemoteUri remote_uri_parent
  * @property Action caller_action
  * @property Attribute caller_attribute
  * @property User caller_user
@@ -95,14 +97,17 @@ class RemoteActivity extends Model
         'to_remote_processed_data' => ArrayObject::class,
         'errors' => ArrayObject::class,
         'consumer_passthrough_data' => ArrayObject::class,
+        'location_geo_json' => ArrayObject::class,
         'remote_activity_status_type' => RemoteActivityStatusType::class,
         'cache_status_type' => RemoteCacheStatusType::class,
         'cache_policy_type' => RemoteCachePolicyType::class
 
     ];
 
-    public function remote_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Remote','remote_id');
+    public function remote_uri_parent() : BelongsTo {
+        return $this->belongsTo('App\Models\RemoteUri','remote_uri_id')
+            /** @uses RemoteUri::parent_remote() */
+            ->with('parent_remote');
     }
 
     public function caller_action() : BelongsTo {
@@ -127,7 +132,10 @@ class RemoteActivity extends Model
 
 
     public static function buildActivity(
-        ?int $id = null, ?RemoteActivityStatusType $remote_activity_status_type = null, ?RemoteCacheStatusType $cache_status_type = null, ?RemoteUriType $uri_type = null)
+        ?int $id = null, ?RemoteActivityStatusType $remote_activity_status_type = null,
+        ?RemoteCacheStatusType $cache_status_type = null, ?RemoteUriType $uri_type = null,
+        array $remote_id_array = []
+    )
     : Builder
     {
 
@@ -136,7 +144,7 @@ class RemoteActivity extends Model
             ->selectRaw(" extract(epoch from  remote_activities.created_at) as created_at_ts,  extract(epoch from  remote_activities.updated_at) as updated_at_ts".
                 ",  extract(epoch from  remote_activities.remote_call_ended) as remote_call_ended_at_ts")
 
-            /** @uses RemoteActivity::remote_parent(),Remote::rules_to_remote(),Remote::rules_from_remote(), */
+            /** @uses RemoteActivity::remote_uri_parent(),Remote::rules_to_remote(),Remote::rules_from_remote(), */
             ->with('remote_parent','remote_parent.rules_to_remote','remote_parent.rules_from_remote')
 
             /**
@@ -149,6 +157,34 @@ class RemoteActivity extends Model
         if ($id) {
             $build->where('remote_activities.id', $id);
         }
+        //do join to parent for common causes
+        if (count($remote_id_array) || $uri_type) {
+
+            $build->join('remote_uris as par_remote_uri',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join->on('par_remote_uri.id','=','remote_activities.remote_uri_id');
+                }
+            );
+        }
+
+        //get remote for common
+        if (count($remote_id_array) ) {
+            $build->join('remotes as par_remote',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($uri_type) {
+                    $join->on('par_remote.id','=','remote_uris.remote_id');
+                }
+            );
+        }
+
+        if (count($remote_id_array) ) {
+            $build->whereIn('par_remote.id',$remote_id_array);
+        }
 
         if ($remote_activity_status_type) {
             $build->where('remote_activity_status_type.remote_activity_status_type', $remote_activity_status_type->value);
@@ -158,17 +194,7 @@ class RemoteActivity extends Model
         }
 
         if ($uri_type) {
-            $build->join('remotes as par_remote',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($uri_type) {
-                    $join
-                        ->on('par_remote.id','=','remote_activities.remote_id')
-                        ->where('par_remote.uri_type',$uri_type->value)
-                    ;
-                }
-            );
+            $build->where('par_remote_uri.uri_type',$uri_type->value);
         }
 
         return $build;
@@ -220,7 +246,7 @@ class RemoteActivity extends Model
 
     public function getCacheSubKey() : string {
         $subkeys = [];
-        foreach ($this->remote_parent->cache_keys as $some_key) {
+        foreach ($this->remote_uri_parent->parent_remote->cache_keys as $some_key) {
             if (in_array($some_key,Remote::ALL_SPECIAL_CACHE_KEY_NAMES)) {
                 $maybe = match($some_key) {
                     Remote::CACHE_KEY_NAME_ACTION => $this->caller_action?->ref_uuid,
@@ -244,7 +270,7 @@ class RemoteActivity extends Model
     }
 
     public function getCache() : array {
-        $cache = $this->remote_parent->getRemoteCache();
+        $cache = $this->remote_uri_parent->parent_remote->getRemoteCache();
         $subkey = $this->getCacheSubKey();
         return $cache[$subkey]??[] ;
     }
@@ -254,17 +280,17 @@ class RemoteActivity extends Model
      */
     public function addCache() : void {
         try {
-            if (!$this->remote_parent->is_caching) {
+            if (!$this->remote_uri_parent->parent_remote->is_caching) {
                 $this->cache_status_type = RemoteCacheStatusType::NOT_MADE;
                 return;
             }
-            $older_cache = $this->remote_parent->getRemoteCache();
+            $older_cache = $this->remote_uri_parent->parent_remote->getRemoteCache();
             $subkey = $this->getCacheSubKey();
             $older_cache[$subkey] = $this->from_remote_processed_data ?? [];
 
             $final = Utilities::wrapJsonEncode($older_cache);
             Cache::tags([Remote::REMOTES_CACHE_TAG])
-                ->put($this->remote_parent->getRemoteCacheKey(), $final, $this->cache_ttl_seconds);
+                ->put($this->remote_uri_parent->parent_remote->getRemoteCacheKey(), $final, $this->cache_ttl_seconds);
             $this->cache_status_type = RemoteCacheStatusType::CREATED;
         } catch (\Exception $e) {
             $this->cache_status_type = RemoteCacheStatusType::ERROR;
@@ -301,7 +327,7 @@ class RemoteActivity extends Model
 
                  if failure can maybe still get cache
                  */
-                $this->from_remote_processed_data = $this->remote_parent->default_uri->processFromSend($from_data);
+                $this->from_remote_processed_data = $this->remote_uri_parent->parent_remote->read_uri->processFromSend($from_data);
                 $this->remote_activity_status_type = RemoteActivityStatusType::SUCCESS;
             } catch (\Exception $e) {
                 $b_error = true;
@@ -315,20 +341,23 @@ class RemoteActivity extends Model
                 $this->addError($e);
             }
         } finally {
-            $this->to_remote_processed_data = $this->remote_parent->removeSecretsFromArray($this->to_remote_processed_data);
+            $this->to_remote_processed_data = $this->remote_uri_parent->parent_remote->removeSecretsFromArray($this->to_remote_processed_data);
             $this->save();
-            $this->remote_parent->default_uri->updateGlobalStats($b_error);
+            $this->remote_uri_parent->updateGlobalStats($b_error);
         }
     }
 
     public function processManualPending(Collection|ArrayObject|array $my_data)   {
-        if (!($this->remote_parent->uri_type === RemoteUriType::MANUAL && $this->remote_activity_status_type === RemoteActivityStatusType::PENDING) ) {
+        if (!in_array($this->remote_uri_parent->uri_type, RemoteUriType::MANUAL_TYPES)  ) {
+            return;
+        }
+        if (!(in_array($this->remote_uri_parent->uri_type, RemoteUriType::MANUAL_TYPES) && $this->remote_activity_status_type === RemoteActivityStatusType::PENDING) ) {
             return;
         }
         $this->update([
             'remote_call_ended_at' => DB::raw('NOW()'),
             'remote_activity_status_type'=>RemoteActivityStatusType::SUCCESS,
-            'from_remote_processed_data'=>$this->remote_parent->default_uri->processFromSend($my_data)
+            'from_remote_processed_data'=>$this->remote_uri_parent->parent_remote->read_uri->processFromSend($my_data)
         ]);
         try {
             $this->addCache();

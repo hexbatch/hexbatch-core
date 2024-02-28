@@ -6,9 +6,15 @@ enum RemoteUriType : string {
     case URL = 'url';
     case SOCKET = 'socket';
     case CONSOLE = 'console';
-    case MANUAL = 'manual';
+    case MANUAL_OWNER = 'manual_owner';
+    case MANUAL_ELEMENT = 'manual_element';
 
     case CODE = 'code';
+
+    const MANUAL_TYPES = [
+      self::MANUAL_ELEMENT,
+      self::MANUAL_OWNER,
+    ];
 
     const SENSITIVE_TYPES = [
         self::SOCKET,

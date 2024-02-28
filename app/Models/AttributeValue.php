@@ -6,6 +6,8 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Attributes\Apply\StandardAttributes;
 use App\Helpers\Utilities;
+use App\Models\Enums\Attributes\AttributeConstantPolicy;
+use App\Models\Enums\Attributes\AttributeRemoteUsePolicy;
 use App\Models\Enums\Attributes\AttributeValueType;
 use ArrayObject;
 use ErrorException;
@@ -23,6 +25,8 @@ use Illuminate\Support\Collection;
  * @property int parent_attribute_id
  * @property boolean is_nullable
  * @property AttributeValueType value_type
+ * @property AttributeRemoteUsePolicy remote_use_policy
+ * @property AttributeConstantPolicy constant_policy
  * @property int value_numeric_min
  * @property int value_numeric_max
  * @property string value_regex
@@ -65,6 +69,7 @@ class AttributeValue extends Model
     protected $casts = [
         'json_value_default' => AsArrayObject::class,
         'value_type' => AttributeValueType::class,
+        'remote_use_policy' => AttributeRemoteUsePolicy::class,
     ];
 
     public function value_parent() : BelongsTo {

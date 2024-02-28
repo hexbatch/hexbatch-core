@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Models\Enums\Remotes\RemoteToMapType;
 use App\Models\Enums\Remotes\RemoteUriDataFormatType;
 use App\Models\Enums\Remotes\RemoteUriMethod;
+use App\Models\Enums\Remotes\RemoteUriProtocolType;
 use App\Models\Enums\Remotes\RemoteUriRoleType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Traits\TResourceCommon;
@@ -30,10 +31,13 @@ use Illuminate\Support\Collection;
  * @property RemoteUriDataFormatType uri_to_remote_format
  * @property RemoteUriDataFormatType uri_from_remote_format
  * @property RemoteUriRoleType uri_role
- * @property string uri_string
+ * @property RemoteUriProtocolType uri_protocol
+ * @property string uri_name
+ * @property string remote_uri_main
+ * @property string remote_uri_path
+ * @property string uri_description
  * @property bool is_sending_context_to_remote
- * //todo add in bool for can element owner set manual remote answer
- * //todo add db level check that manual cannot be used on anything but default role because do not monitor response from others
+
  *
  * @property string created_at
  * @property string updated_at
@@ -93,7 +97,7 @@ class RemoteUri extends Model
     }
 
     public function parent_remote() : BelongsTo {
-        return $this->belongsTo('App\Models\Remote','user_id');
+        return $this->belongsTo('App\Models\Remote','remote_id');
     }
 
     public function updateGlobalStats(bool $b_error) :void {

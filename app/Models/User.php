@@ -38,6 +38,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int element_type_id
  * @property int element_id
  * @property int user_group_id
+ * @property int server_id
  * @property string ref_uuid
  *
  * @property Element user_element
@@ -225,7 +226,7 @@ class User extends Authenticatable
         } catch (ValidationException $e) {
             throw new \LogicException("Cannot create system user because ".$e->getMessage());
         }
-        //todo make sure the user here is on the servers table
+        //todo the user here inherits from the server type, but local server types are null
     }
 
     public static function buildUser(

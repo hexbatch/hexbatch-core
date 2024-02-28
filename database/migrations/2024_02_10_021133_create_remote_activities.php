@@ -14,11 +14,11 @@ return new class extends Migration
     {
         Schema::create('remote_activities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('remote_id')
+            $table->foreignId('remote_uri_id')
                 ->nullable(false)
                 ->comment("The remote this header/key is for")
-                ->index('idx_activity_has_remote_id')
-                ->constrained('remotes')
+                ->index('idx_activity_has_remote_uri_id')
+                ->constrained('remote_uris')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -58,7 +58,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
-            //todo add a server_id here for when this is called for servers api
+            $table->foreignId('caller_server_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The server this remote was called from")
+                ->index('idx_remote_activities_server_id')
+                ->constrained('servers')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
             $table->foreignId('caller_element_id')
                 ->nullable()
@@ -130,6 +137,7 @@ return new class extends Migration
             $table->jsonb('to_remote_processed_data')->nullable()->comment("The value coming back, if its json");
             $table->jsonb('errors')->nullable()->comment("Any errors from or to");
             $table->jsonb('consumer_passthrough_data')->nullable()->comment("This is used by any consumer who is listening to the completion event. Passthrough data");
+            $table->jsonb('location_geo_json')->nullable()->comment("This is union of the set location bounds");
             $table->text('from_remote_raw_text')->nullable()->comment("The value coming back, if its not json (xml,html,primitive");
         });
     }

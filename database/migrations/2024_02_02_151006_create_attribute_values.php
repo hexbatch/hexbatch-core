@@ -37,6 +37,23 @@ return new class extends Migration
 
         });
 
+
+        #------------------------------------------------------------
+        DB::statement("CREATE TYPE type_remote_access_policy AS ENUM (
+            'read_and_write_local','read_only_remote_write_local','write_only_remote_read_local','read_and_write_remote'
+            );");
+
+        DB::statement("ALTER TABLE attribute_values Add COLUMN remote_use_policy type_remote_access_policy NOT NULL default 'read_and_write_local';");
+
+        #------------------------------------------------------------
+        //enum constant_policy: ,,
+        DB::statement("CREATE TYPE type_attribute_constant_policy AS ENUM (
+            'not_constant','always_constant','constant_after_write'
+            );");
+
+        DB::statement("ALTER TABLE attribute_values Add COLUMN constant_policy type_attribute_constant_policy NOT NULL default 'not_constant';");
+
+        #------------------------------------------------------------
         DB::statement("CREATE TYPE type_of_attribute_value AS ENUM (
             'numeric','string','json',
             'user','user_group','attribute','element','element_type',
@@ -87,5 +104,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('attribute_values');
         DB::statement("DROP TYPE type_of_attribute_value;");
+        DB::statement("DROP TYPE type_remote_access_policy;");
+        DB::statement("DROP TYPE type_attribute_constant_policy;");
     }
 };
