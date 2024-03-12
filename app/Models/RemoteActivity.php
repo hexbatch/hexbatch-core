@@ -8,22 +8,25 @@ use App\Helpers\Utilities;
 use App\Models\Enums\Remotes\RemoteCachePolicyType;
 use App\Models\Enums\Remotes\RemoteCacheStatusType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
+use App\Models\Enums\Remotes\RemoteToMapType;
+use App\Models\Enums\Remotes\RemoteUriProtocolType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use ArrayObject;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int remote_uri_id
+ * @property int parent_remote_id
  * @property int remote_stack_id
  * @property int caller_action_id
  * @property int caller_attribute_id
@@ -41,6 +44,7 @@ use Illuminate\Support\Facades\DB;
  * @property ArrayObject from_headers
  * @property ArrayObject from_remote_processed_data
  * @property ArrayObject to_remote_processed_data
+ * @property ArrayObject to_remote_files
  * @property ArrayObject errors
  * @property ArrayObject location_geo_json
  * @property ArrayObject consumer_passthrough_data
@@ -56,10 +60,11 @@ use Illuminate\Support\Facades\DB;
  * @property int created_at_ts
  * @property int updated_at_ts
  *
- * @property RemoteUri remote_uri_parent
+ * @property Remote remote_parent
  * @property Action caller_action
  * @property Attribute caller_attribute
  * @property User caller_user
+ * @property Server caller_server
  * @property Element caller_element
  * @property ElementType caller_type
  *
@@ -95,6 +100,7 @@ class RemoteActivity extends Model
         'from_headers' => ArrayObject::class,
         'from_remote_processed_data' => ArrayObject::class,
         'to_remote_processed_data' => ArrayObject::class,
+        'to_remote_files' => ArrayObject::class,
         'errors' => ArrayObject::class,
         'consumer_passthrough_data' => ArrayObject::class,
         'location_geo_json' => ArrayObject::class,
@@ -104,10 +110,8 @@ class RemoteActivity extends Model
 
     ];
 
-    public function remote_uri_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\RemoteUri','remote_uri_id')
-            /** @uses RemoteUri::parent_remote() */
-            ->with('parent_remote');
+    public function remote_parent() : BelongsTo {
+        return $this->belongsTo('App\Models\Remote','parent_remote_id');
     }
 
     public function caller_action() : BelongsTo {
@@ -122,8 +126,14 @@ class RemoteActivity extends Model
         return $this->belongsTo('App\Models\User','caller_user_id');
     }
 
+    public function caller_server() : BelongsTo {
+        return $this->belongsTo('App\Models\Server','caller_server_id');
+    }
+
     public function caller_element() : BelongsTo {
-        return $this->belongsTo('App\Models\Element','caller_element_id');
+        return $this->belongsTo('App\Models\Element','caller_element_id')
+            /** @uses Element::element_owner() */
+            ->with('element_owner');
     }
 
     public function caller_type() : BelongsTo {
@@ -140,18 +150,18 @@ class RemoteActivity extends Model
     {
 
 
-        $build = Remote::select('remote_activities.*')
+        $build = RemoteActivity::select('remote_activities.*')
             ->selectRaw(" extract(epoch from  remote_activities.created_at) as created_at_ts,  extract(epoch from  remote_activities.updated_at) as updated_at_ts".
                 ",  extract(epoch from  remote_activities.remote_call_ended) as remote_call_ended_at_ts")
 
-            /** @uses RemoteActivity::remote_uri_parent(),Remote::rules_to_remote(),Remote::rules_from_remote(), */
+            /** @uses RemoteActivity::remote_parent(), */
             ->with('remote_parent','remote_parent.rules_to_remote','remote_parent.rules_from_remote')
 
             /**
-             * @uses RemoteActivity::caller_action(),RemoteActivity::caller_attribute(),RemoteActivity::caller_user()
+             * @uses RemoteActivity::caller_action(),RemoteActivity::caller_attribute(),RemoteActivity::caller_user(),RemoteActivity::caller_server()
              * @uses RemoteActivity::caller_element(),RemoteActivity::caller_type(),
              */
-            ->with('caller_action','caller_attribute','caller_user','caller_element','caller_type')
+            ->with('caller_action','caller_attribute','caller_user','caller_element','caller_type','caller_server')
         ;
 
         if ($id) {
@@ -246,7 +256,7 @@ class RemoteActivity extends Model
 
     public function getCacheSubKey() : string {
         $subkeys = [];
-        foreach ($this->remote_uri_parent->parent_remote->cache_keys as $some_key) {
+        foreach ($this->remote_parent->cache_keys as $some_key) {
             if (in_array($some_key,Remote::ALL_SPECIAL_CACHE_KEY_NAMES)) {
                 $maybe = match($some_key) {
                     Remote::CACHE_KEY_NAME_ACTION => $this->caller_action?->ref_uuid,
@@ -254,7 +264,7 @@ class RemoteActivity extends Model
                     Remote::CACHE_KEY_NAME_ELEMENT => $this->caller_element?->ref_uuid,
                     Remote::CACHE_KEY_NAME_TYPE => $this->caller_type?->ref_uuid,
                     Remote::CACHE_KEY_NAME_USER => $this->caller_user?->ref_uuid,
-                    //todo add server_id to allowed cache keys
+                    Remote::CACHE_KEY_NAME_SERVER => $this->caller_server?->ref_uuid,
                 };
                 if ($maybe) {$subkeys[] = $maybe;}
             } else {
@@ -270,7 +280,7 @@ class RemoteActivity extends Model
     }
 
     public function getCache() : array {
-        $cache = $this->remote_uri_parent->parent_remote->getRemoteCache();
+        $cache = $this->remote_parent->getRemoteCache();
         $subkey = $this->getCacheSubKey();
         return $cache[$subkey]??[] ;
     }
@@ -280,17 +290,17 @@ class RemoteActivity extends Model
      */
     public function addCache() : void {
         try {
-            if (!$this->remote_uri_parent->parent_remote->is_caching) {
+            if (!$this->remote_parent->is_caching) {
                 $this->cache_status_type = RemoteCacheStatusType::NOT_MADE;
                 return;
             }
-            $older_cache = $this->remote_uri_parent->parent_remote->getRemoteCache();
+            $older_cache = $this->remote_parent->getRemoteCache();
             $subkey = $this->getCacheSubKey();
             $older_cache[$subkey] = $this->from_remote_processed_data ?? [];
 
             $final = Utilities::wrapJsonEncode($older_cache);
             Cache::tags([Remote::REMOTES_CACHE_TAG])
-                ->put($this->remote_uri_parent->parent_remote->getRemoteCacheKey(), $final, $this->cache_ttl_seconds);
+                ->put($this->remote_parent->getRemoteCacheKey(), $final, $this->remote_parent->cache_ttl_seconds);
             $this->cache_status_type = RemoteCacheStatusType::CREATED;
         } catch (\Exception $e) {
             $this->cache_status_type = RemoteCacheStatusType::ERROR;
@@ -312,24 +322,95 @@ class RemoteActivity extends Model
         //todo check if completed or error and send event that this is done
     }
 
-    public function doCallRemote() {
+    public function doCallRemote(mixed $manual_data = null) {
         $this->remote_activity_status_type = RemoteActivityStatusType::STARTED;
         $this->save();
         $b_error = false;
         try {
             $from_data = [];
+            $code = 0;
+            $headers = [];
+            $temp_files = [];
             try {
-                //todo call the different types of remote, and change the raw data to processed
-                /*
-                 * use uri_to_remote_format to cast data.
-                 Data can be string, so need to check that not json, and uri_from_remote_format
-                 when done update either the total_calls_made or total_errors
 
-                 if failure can maybe still get cache
-                 */
-                $this->from_remote_processed_data = $this->remote_uri_parent->parent_remote->read_uri->processFromSend($from_data);
+                switch ($this->remote_parent->uri_type) {
+                    case RemoteUriType::NONE: {
+                        throw new \LogicException("Cannot process uri type of none");
+                    }
+                    case RemoteUriType::URL: {
+                        if ($this->remote_parent->uri_protocol === RemoteUriProtocolType::NONE) {
+                            throw new \LogicException("cannot have a protocol of none");
+                        }
+                        $protocal = $this->remote_parent->uri_protocol->value;
+                        $url_base = $protocal. '://'.$this->remote_parent->remote_uri_main;
+                        if ($this->remote_parent->uri_port) {
+                            $url_base .= ":".$this->remote_parent->uri_port;
+                        }
+                        if ($this->remote_parent->remote_uri_path) {
+                            $url = $url_base . '/'.$this->remote_parent->remote_uri_path;
+                        } else {
+                            $url = $url_base;
+                        }
+
+                        $data = $this->to_remote_processed_data;
+
+                        foreach ($this->to_remote_files as $k => $file_contents) {
+                            $tmpfname = tempnam(sys_get_temp_dir(),'remote-'.$this->remote_parent.'-'.$k .'-');
+                            $temp_files[] = $tmpfname;
+                            $handle = fopen($tmpfname, "w");
+                            fwrite($handle, $file_contents);
+                            fclose($handle);
+                            $data[$k] = \GuzzleHttp\Psr7\Utils::tryFopen($tmpfname, 'r');
+                        }
+                        $client = new Client();
+                        $request = new Request($this->remote_parent->uri_method_type->value,$url,$this->to_headers->getArrayCopy(),$data);
+                        $response = $client->send($request);
+                        $code= $response->getStatusCode();
+                        $from_data = $response->getBody();
+                        $headers = $response->getHeaders();
+                        break;
+                    }
+                    case RemoteUriType::CONSOLE: {
+
+
+                        $command_args_array = [];
+                        foreach ($this->to_remote_processed_data as $k => $v) {
+                            $command_args_array[] = "$k$v";
+                        }
+
+                        foreach ($this->to_remote_files as $k => $file_contents) {
+                            $tmpfname = tempnam(sys_get_temp_dir(),'remote-'.$this->remote_parent.'-'.$k .'-');
+                            $temp_files[] = $tmpfname;
+                            $handle = fopen($tmpfname, "w");
+                            fwrite($handle, $file_contents);
+                            fclose($handle);
+                            $command_args_array[$k] = $tmpfname;
+                        }
+                        $command_args = $this->remote_parent->remote_uri_path . implode(' ',$command_args_array);
+                        exec($this->remote_parent->remote_uri_main . ' '. $command_args, $from_data, $code);
+                        break;
+                    }
+                    case RemoteUriType::CODE: {
+                        $class = $this->remote_parent->remote_uri_main;
+                        $method = $this->remote_parent->remote_uri_path;
+                        if (empty($this->to_remote_processed_data)) {
+                            $from_data = $class::$method();
+                        } else {
+                            $from_data = $class::$method(...$this->to_remote_processed_data);
+                        }
+
+                        break;
+                    }
+
+                    case RemoteUriType::MANUAL_OWNER:
+                    case RemoteUriType::MANUAL_ELEMENT: {
+                        $from_data = $manual_data;
+                        break;
+                    }
+                }
+                $this->from_remote_processed_data = $this->remote_parent->processDataFromSend($from_data,$code,$headers);
                 $this->remote_activity_status_type = RemoteActivityStatusType::SUCCESS;
-            } catch (\Exception $e) {
+            } catch (GuzzleException|\Exception $e) {
                 $b_error = true;
                 $this->addError($e);
                 $this->remote_activity_status_type = RemoteActivityStatusType::FAILED;
@@ -341,32 +422,16 @@ class RemoteActivity extends Model
                 $this->addError($e);
             }
         } finally {
-            $this->to_remote_processed_data = $this->remote_uri_parent->parent_remote->removeSecretsFromArray($this->to_remote_processed_data);
+            $this->to_remote_processed_data = $this->remote_parent->removeSecretsFromArray($this->to_remote_processed_data,RemoteToMapType::DATA);
+            $this->to_remote_files = $this->remote_parent->removeSecretsFromArray($this->to_remote_processed_data,RemoteToMapType::FILE);
+            $this->to_headers = $this->remote_parent->removeSecretsFromArray($this->to_remote_processed_data,RemoteToMapType::HEADER);
             $this->save();
-            $this->remote_uri_parent->updateGlobalStats($b_error);
+            $this->remote_parent->updateGlobalStats($b_error);
+            foreach ($temp_files as $da_file) {
+                unlink($da_file);
+            }
         }
-    }
-
-    public function processManualPending(Collection|ArrayObject|array $my_data)   {
-        if (!in_array($this->remote_uri_parent->uri_type, RemoteUriType::MANUAL_TYPES)  ) {
-            return;
-        }
-        if (!(in_array($this->remote_uri_parent->uri_type, RemoteUriType::MANUAL_TYPES) && $this->remote_activity_status_type === RemoteActivityStatusType::PENDING) ) {
-            return;
-        }
-        $this->update([
-            'remote_call_ended_at' => DB::raw('NOW()'),
-            'remote_activity_status_type'=>RemoteActivityStatusType::SUCCESS,
-            'from_remote_processed_data'=>$this->remote_uri_parent->parent_remote->read_uri->processFromSend($my_data)
-        ]);
-        try {
-            $this->addCache();
-        } catch (\Exception $e) {
-            $this->addError($e);
-        }
-        $this->save();
         $this->announceDaFinishing();
-
     }
 
 }

@@ -196,7 +196,7 @@ class Attribute extends Model
         $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
         if ($b_exist) {return true;}
         return false;
-        //todo also check for the element type
+        //!later also check for attributes used in types
     }
 
     /**

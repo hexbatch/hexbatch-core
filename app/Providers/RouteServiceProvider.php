@@ -9,6 +9,7 @@ use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\Remote;
 use App\Models\RemoteActivity;
+use App\Models\Server;
 use App\Models\TimeBound;
 use App\Models\User;
 use App\Models\UserGroup;
@@ -48,6 +49,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('action', Action::class);
         Route::model('element', Element::class);
         Route::model('element_type', ElementType::class);
+        Route::model('server', Server::class);
 
         $this->routes(function () {
             Route::middleware('api')

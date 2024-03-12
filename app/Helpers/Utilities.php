@@ -89,6 +89,14 @@ class Utilities {
         }
     }
 
+    public static function maybeEncodeJson(mixed $what) : ?string  {
+        if (empty($what)) {return $what;}
+        if (is_array($what) || is_object($what)) {
+            return static::wrapJsonEncode($what);
+        }
+        return strval($what);
+    }
+
     public static function maybeDecodeJson(mixed $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array {
         if (empty($what)) { return $null_default;}
         if (is_array($what) && $b_associative) {
@@ -148,9 +156,12 @@ class Utilities {
      * @source https://stackoverflow.com/a/62175263/2420206
      * @example $enc = str_encrypt_aes_256_gcm("my-secretText", "myPassword", "base64");
      */
-    public static function str_encrypt_aes_256_gcm(string $plaintext, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string {
-        if (empty($plaintext) || empty($password)) {
-            throw new LogicException("str_encrypt_aes_256_gcm needs args to not be empty");
+    public static function str_encrypt_aes_256_gcm(?string $plaintext, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string {
+        if (empty($plaintext) ) {
+            return null;
+        }
+        if (empty($password)) {
+            throw new LogicException("str_encrypt_aes_256_gcm needs password to not be empty");
         }
         $keysalt = openssl_random_pseudo_bytes(16);
         $key = hash_pbkdf2("sha512", $password, $keysalt, 20000, 32, true);
@@ -161,7 +172,7 @@ class Utilities {
             throw new \RuntimeException("Cannot str_encrypt_aes_256_gcm ");
         }
         return $encoding === "hex" ? bin2hex($keysalt.$iv.$encryptedstring.$tag) :
-                                    ($encoding === self::BASE_64_OPTION ? base64_encode($keysalt.$iv.$encryptedstring.$tag) : $keysalt.$iv.$encryptedstring.$tag);
+            ($encoding === self::BASE_64_OPTION ? base64_encode($keysalt.$iv.$encryptedstring.$tag) : $keysalt.$iv.$encryptedstring.$tag);
     }
 
     /**
@@ -169,8 +180,13 @@ class Utilities {
      * @source https://stackoverflow.com/a/62175263/2420206
      * @example $dec = str_decrypt_aes_256_gcm($enc, "myPassword", "base64");
      */
-    public static function str_decrypt_aes_256_gcm(string $encrypted_string, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string  {
-        if (empty($encrypted_string) || empty($password)) {
+    public static function str_decrypt_aes_256_gcm(?string $encrypted_string, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string  {
+
+        if (empty($encrypted_string) ) {
+            return null;
+        }
+
+        if (empty($password)) {
             throw new LogicException("str_decrypt_aes_256_gcm needs args to not be empty");
         }
 

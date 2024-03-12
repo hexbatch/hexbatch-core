@@ -12,9 +12,9 @@ use App\Helpers\Utilities;
 use App\Jobs\RunRemote;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
 use App\Models\Enums\Remotes\RemoteToMapType;
-use App\Models\Enums\Remotes\RemoteUriDataFormatType;
+use App\Models\Enums\Remotes\RemoteDataFormatType;
 use App\Models\Enums\Remotes\RemoteUriMethod;
-use App\Models\Enums\Remotes\RemoteUriRoleType;
+use App\Models\Enums\Remotes\RemoteUriProtocolType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\ResourceNameReq;
@@ -31,6 +31,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use LaLit\XML2Array;
+use Symfony\Component\Yaml\Yaml;
+
 
 /**
  * @mixin Builder
@@ -44,6 +47,22 @@ use Illuminate\Validation\ValidationException;
  * @property string remote_name
  * @property boolean is_retired
  * @property boolean is_on
+ *
+ * @property string created_at
+ * @property string updated_at
+ *
+
+ *
+ * @property int uri_port
+ * @property int total_calls_made
+ * @property int total_errors
+ * @property RemoteUriType uri_type
+ * @property RemoteUriMethod uri_method_type
+ * @property RemoteDataFormatType to_remote_format
+ * @property RemoteDataFormatType from_remote_format
+ * @property RemoteUriProtocolType uri_protocol
+ * @property string remote_uri_main
+ * @property string remote_uri_path
  * @property bool is_caching
  * @property bool is_using_cache_on_failure
  * @property int cache_ttl_seconds
@@ -54,17 +73,14 @@ use Illuminate\Validation\ValidationException;
  * @property int rate_limit_count
  * @property int max_concurrent_calls
  *
- * @property string created_at
- * @property string updated_at
- *
+
  * @property User remote_owner
  * @property UserGroup usage_group
- * @property RemoteUri event_uri
- * @property RemoteUri read_uri
- * @property RemoteUri write_uri
  * @property RemoteActivity[] activity_of_remote
- * @property RemoteMetum[] meta_of_remote
- * @property RemoteUri[] uris
+ * @property RemoteMetum meta_of_remote
+ * @property Remote parent_remote
+ * @property RemoteToMap[] rules_to_remote
+ * @property RemoteFromMap[] rules_from_remote
  *
  *
  */
@@ -103,23 +119,24 @@ class Remote extends Model
     protected $casts = [
         'uri_type' => RemoteUriType::class,
         'uri_method_type' => RemoteUriMethod::class,
-        'uri_to_remote_format' => RemoteUriDataFormatType::class,
-        'uri_from_remote_format' => RemoteUriDataFormatType::class,
+        'to_remote_format' => RemoteDataFormatType::class,
+        'from_remote_format' => RemoteDataFormatType::class,
         'cache_keys' => AsArrayObject::class
     ];
 
-    const REMOTES_CACHE_TAG = 'remotes';
 
-    public function activity_of_remote() : BelongsTo {
-        return $this->belongsTo('App\Models\RemoteActivity','remote_id')
+    public function activity_of_remote() : HasMany {
+        return $this->hasMany('App\Models\RemoteActivity','remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
     }
 
-    public function meta_of_remote() : HasMany {
-        return $this->hasMany('App\Models\RemoteMetum','remote_id')
+    public function meta_of_remote() : HasOne {
+        return $this->hasOne('App\Models\RemoteMetum','remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
+            /** @uses RemoteMetum::remote_meta_map_bound(),RemoteMetum::remote_meta_time_bound() */
+            ->with('remote_meta_time_bound','remote_meta_map_bound')
             ;
     }
 
@@ -127,90 +144,13 @@ class Remote extends Model
         return $this->hasOne('App\Models\UserGroup','usage_group_id');
     }
 
-    public function read_uri() : HasOne {
-        return $this->hasOne('App\Models\RemoteUri','remote_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::READ_AND_WRITE)->orWhere('uri_role',RemoteUriRoleType::READ)
-            /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
-            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
-            ;
-    }
 
-    public function write_uri() : HasOne {
-        return $this->hasOne('App\Models\RemoteUri','remote_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::READ_AND_WRITE)->orWhere('uri_role',RemoteUriRoleType::WRITE)
-            /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
-            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
-            ;
-    }
-
-    public function event_success_uri() : HasOne {
-        return $this->hasOne('App\Models\RemoteUri','remote_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::EVENT_SUCCESS)
-            /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
-            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
-            ;
-
-    }
-
-    public function event_fail_uri() : HasOne {
-        return $this->hasOne('App\Models\RemoteUri','remote_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::EVENT_FAIL)
-            /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
-            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
-            ;
-
-    }
-
-    public function event_always_uri() : HasOne {
-        return $this->hasOne('App\Models\RemoteUri','remote_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
-            ->where('uri_role',RemoteUriRoleType::EVENT_ALWAYS)
-            /** @uses RemoteUri::parent_remote(),RemoteUri::rules_to_remote(),RemoteUri::rules_from_remote(), */
-            ->with('remote_owner','activity_of_remote','rules_to_remote','rules_from_remote')
-            ;
-
-    }
 
     public function remote_owner() : BelongsTo {
         return $this->belongsTo('App\Models\User','user_id');
     }
 
-    public function getUri(RemoteUriRoleType $role) : ?RemoteUri {
-        switch ($role) {
-            case RemoteUriRoleType::EVENT_FAIL: {
-                /** @var RemoteUri */
-                return $this->event_fail_uri()->first();
-            }
-            case RemoteUriRoleType::EVENT_SUCCESS: {
-                /** @var RemoteUri */
-                return $this->event_success_uri()->first();
-            }
-            case RemoteUriRoleType::EVENT_ALWAYS: {
-                /** @var RemoteUri */
-                return $this->event_always_uri()->first();
-            }
-            case RemoteUriRoleType::READ: {
-                /** @var RemoteUri */
-                return $this->read_uri()->first();
-            }
-            case RemoteUriRoleType::WRITE: {
-                /** @var RemoteUri */
-                return $this->write_uri()->first();
-            }
-            default: {
-                return null;
-            }
-        }
-    }
+
 
     public function getName() : string  {
         return $this->remote_owner->username . '.'. $this->attribute_name;
@@ -221,7 +161,7 @@ class Remote extends Model
         $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
         if ($b_exist) {return true;}
         return false;
-        //todo also check for the actions and any activities that are still pending
+        //todo also check any activities that are still pending
     }
 
     /**
@@ -252,10 +192,10 @@ class Remote extends Model
 
         $build =  Remote::select('remotes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Remote::read_uri(),Remote::write_uri(),Remote::event_always_uri(),Remote::event_success_uri(),Remote::event_fail_uri(),
-             * @uses Remote::activity_of_remote(),Remote::usage_group(),Remote::meta_of_remote()
+            /**
+             * @uses Remote::usage_group(),Remote::meta_of_remote(),Remote::rules_to_remote(),Remote::rules_from_remote()
              */
-            ->with('read_uri','write_uri','event_always_uri','event_success_uri','event_fail_uri','activity_of_remote','usage_group','meta_of_remote')
+            ->with('usage_group','meta_of_remote','rules_to_remote','rules_from_remote')
 
         ;
 
@@ -426,52 +366,25 @@ class Remote extends Model
 
 
 
-   const CACHE_KEY_DEFAULT = 'default';
-   const CACHE_KEY_NAME_ATTRIBUTE = 'attribute_ref';
-   const CACHE_KEY_NAME_ACTION = 'action_ref';
-   const CACHE_KEY_NAME_ELEMENT = 'element_ref';
-   const CACHE_KEY_NAME_TYPE = 'type_ref';
-   const CACHE_KEY_NAME_USER = 'user_ref';
-   const CACHE_KEY_NAME_SERVER = 'server_ref';
-   const ALL_SPECIAL_CACHE_KEY_NAMES = [
-       self::CACHE_KEY_NAME_ELEMENT,self::CACHE_KEY_NAME_TYPE,self::CACHE_KEY_NAME_ATTRIBUTE,
-       self::CACHE_KEY_NAME_ACTION,self::CACHE_KEY_NAME_USER,self::CACHE_KEY_NAME_SERVER
-   ];
-
-    public function getRemoteCacheKey() :string {
-        return 'r-'.$this->ref_uuid;
-    }
-
-    public function getRemoteCache() : array {
-        $what = Cache::tags([ static::REMOTES_CACHE_TAG])->get($this->getRemoteCacheKey());
-        return Utilities::maybeDecodeJson($what,true,[]);
-    }
-
-
-
-
-
-
-
-    public function createActivity(Collection $collection, RemoteUriRoleType $role,
+    public function createActivity(Collection $collection,
                                    ?User $user = null,?ElementType $type = null,?Element $element = null,
                                    ?Attribute $attribute = null,?Action $action = null,
                                    ?ActivityEventConsumer $consumer = null
     ) :RemoteActivity {
-        $remote_uri = $this->getUri($role);
-        if (!$remote_uri) {
-            throw new \LogicException("The remote does not have a uri of type ". $role->value);
+        if ($this->uri_type === RemoteUriType::NONE) {
+            throw new \LogicException("Cannot create activity for uri type of none");
         }
         $ret = new RemoteActivity();
-        $ret->remote_uri_id = $remote_uri;
+        $ret->parent_remote_id = $this->id;
         $ret->caller_user_id = $user?->id;
         $ret->caller_type_id = $type?->id;
         $ret->caller_element_id = $element?->id;
         $ret->caller_attribute_id = $attribute?->id;
         $ret->caller_action_id = $action?->id;
         //todo add stack, and think about how the mapping goes to different uri (read and write) and how that is enforced
-        $ret->to_remote_processed_data = $remote_uri->processToSend($collection,RemoteToMapType::DATA);
-        $ret->to_headers = $remote_uri->processToSend($collection,RemoteToMapType::HEADER);
+        $ret->to_remote_processed_data = $this->processToSend($collection,RemoteToMapType::DATA);
+        $ret->to_headers = $this->processToSend($collection,RemoteToMapType::HEADER);
+        $ret->to_remote_files = $this->processToSend($collection,RemoteToMapType::FILE);
         if ($consumer) {
             $ret->consumer_passthrough_data = $consumer->getPassthrough();
         }
@@ -505,13 +418,163 @@ class Remote extends Model
 
     }
 
-    public function removeSecretsFromArray(ArrayObject|array $my_data) : ?array {
+    const REMOTES_CACHE_TAG = 'remotes';
+
+    const CACHE_KEY_DEFAULT = 'default';
+    const CACHE_KEY_NAME_ATTRIBUTE = 'attribute_ref';
+    const CACHE_KEY_NAME_ACTION = 'action_ref';
+    const CACHE_KEY_NAME_ELEMENT = 'element_ref';
+    const CACHE_KEY_NAME_TYPE = 'type_ref';
+    const CACHE_KEY_NAME_USER = 'user_ref';
+    const CACHE_KEY_NAME_SERVER = 'server_ref';
+    const ALL_SPECIAL_CACHE_KEY_NAMES = [
+        self::CACHE_KEY_NAME_ELEMENT,self::CACHE_KEY_NAME_TYPE,self::CACHE_KEY_NAME_ATTRIBUTE,
+        self::CACHE_KEY_NAME_ACTION,self::CACHE_KEY_NAME_USER,self::CACHE_KEY_NAME_SERVER
+    ];
+
+    public function getRemoteCacheKey() :string {
+        return 'r-'.$this->ref_uuid;
+    }
+
+    public function getRemoteCache() : array {
+        $what = Cache::tags([ static::REMOTES_CACHE_TAG])->get($this->getRemoteCacheKey());
+        return Utilities::maybeDecodeJson($what,true,[]);
+    }
+
+    public function rules_to_remote() : BelongsTo {
+        return $this->belongsTo('App\Models\RemoteToMap','remote_uri_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
+    }
+    public function rules_from_remote() : BelongsTo {
+        return $this->belongsTo('App\Models\RemoteFromMap','remote_uri_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
+    }
+
+
+    public function updateGlobalStats(bool $b_error) :void {
+        if ($b_error) {
+            $this->update(['total_errors' => $this->total_errors + 1,'total_calls_made' => $this->total_calls_made + 1]);
+        } else {
+            $this->increment('total_calls_made');
+        }
+    }
+
+
+
+    public function removeSecretsFromArray(ArrayObject|array $my_data,RemoteToMapType $filter) : ?array {
         if (empty($my_data)) { return null;}
         foreach ($this->rules_to_remote as $rule) {
+            if ($rule->map_type !== $filter) { continue; }
             if (!$rule->is_secret) { continue; }
             unset($my_data[$rule->remote_data_name]);
         }
         return $my_data;
+    }
+
+
+    public function processToSend(Collection $collection,RemoteToMapType $filter) : array {
+        $ret = [];
+        $my_data = $collection->toArray();
+        foreach ($this->rules_to_remote as $rule) {
+            if ($rule->map_type !== $filter) { continue; }
+            $pair = $rule->applyRuleToGiven($my_data);
+            if (!empty($pair)) {
+                $ret = array_merge($ret,$pair);
+            }
+        }
+        return $ret;
+    }
+
+
+
+    protected function castResponseToExpected(mixed $what) : string|array|null {
+        if (empty($what)) {return null;}
+
+        switch ($this->from_remote_format) {
+            case RemoteDataFormatType::TEXT :
+            {
+                if (is_object($what) || is_array($what)) {
+                    return Utilities::wrapJsonEncode($what);
+                }
+                return (string)$what;
+            }
+            case RemoteDataFormatType::XML : {
+                if (!is_string($what) ) {
+                    throw new \LogicException("xml response is not a string");
+                }
+                try {
+                    return XML2Array::createArray($what);
+                } catch (\Exception $e) {
+                    throw new \RuntimeException("Cannot process xml string: ".$e->getMessage());
+                }
+
+            }
+            case RemoteDataFormatType::JSON : {
+                return Utilities::maybeDecodeJson($what,true);
+            }
+
+            case RemoteDataFormatType::YAML :
+            {
+                if (!is_string($what) ) {
+                    throw new \LogicException("yaml response is not a string");
+                }
+               try {
+                   $value = Yaml::parse($what);
+                   if (!is_array($value)) {
+                       return [$value];
+                   }
+                   return $value;
+               } catch (\Exception $e) {
+                   throw new \RuntimeException("Cannot process yaml string: ".$e->getMessage());
+               }
+            }
+        }
+        throw new \LogicException("Format type mismatch in the code: ". $this->from_remote_format->value);
+    }
+
+    public function processDataFromSend(mixed $data,int $code = 0,array $headers = []) : array {
+        $ret = [];
+        $casted_data = $this->castResponseToExpected($data);
+        switch ($this->from_remote_format) {
+            case RemoteDataFormatType::TEXT :
+            {
+                foreach ($this->rules_from_remote as $rule) {
+                    $pair = $rule->applyRuleToString($casted_data);
+                    if (!empty($pair)) {
+                        $ret = array_merge($ret, $pair);
+                    }
+                }
+            }
+            case RemoteDataFormatType::XML :
+            case RemoteDataFormatType::JSON :
+            case RemoteDataFormatType::YAML :
+            {
+                foreach ($this->rules_from_remote as $rule) {
+                    $pair = $rule->applyRuleToJson($casted_data);
+                    if (!empty($pair)) {
+                        $ret = array_merge($ret, $pair);
+                    }
+                }
+            }
+        }
+
+        foreach ($this->rules_from_remote as $rule) {
+            $pair = $rule->applyRuleToJson($headers);
+            if (!empty($pair)) {
+                $ret = array_merge($ret, $pair);
+            }
+        }
+
+        foreach ($this->rules_from_remote as $rule) {
+            $pair = $rule->applyRuleToString(strval($code));
+            if (!empty($pair)) {
+                $ret = array_merge($ret, $pair);
+            }
+        }
+
+        return $ret;
     }
 
 

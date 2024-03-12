@@ -19,6 +19,7 @@
         "php": "^8.1",
         "ext-bcmath": "*",
         "ext-fileinfo": "*",
+        "ext-intl": "*",
         "ext-openssl": "*",
         "ext-pcre": "*",
         "ext-pdo": "*",
@@ -35,7 +36,8 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "mateusjunges/laravel-kafka": "^1.13",
-        "relisten/forceutf8": "^1.1"
+        "relisten/forceutf8": "^1.1",
+        "ext-dom": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

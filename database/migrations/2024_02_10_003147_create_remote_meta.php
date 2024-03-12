@@ -11,10 +11,10 @@ return new class extends Migration
     {
         Schema::create('remote_meta', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('remote_id')
+            $table->foreignId('parent_remote_id')
                 ->nullable(false)
                 ->comment("The remote this header/key is for")
-                ->index('idx_uri_has_remote_id')
+                ->index('idx_meta_has_remote_id')
                 ->constrained('remotes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -28,7 +28,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('remote_location_bounds_id')
+            $table->foreignId('remote_map_bounds_id')
                 ->nullable()
                 ->default(null)
                 ->comment("Shows where this service is available in time, also mark downtimes here")
@@ -37,11 +37,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->json('remote_accepted_language_iso_codes')->default(null)->nullable()
-                ->comment('an optional array of iso languages this server accepts');
-
-            $table->json('remote_accepted_region_iso_codes')->default(null)->nullable()
-                ->comment('an optional array of iso regions/countires/sub-admin regions this server works with');
+            $table->json('remote_icu_locale_codes')->default(null)->nullable()
+                ->comment('an optional array of language /region locales this remote accepts');
 
             $table->timestamps();
 

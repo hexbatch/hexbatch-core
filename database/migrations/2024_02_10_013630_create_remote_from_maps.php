@@ -7,24 +7,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * remote_json_path remote_xpath attribute_json_path attribute_id action_id
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('remote_from_maps', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('remote_uri_id')
+            $table->foreignId('parent_remote_id')
                 ->nullable(false)
                 ->comment("The remote uri this map is for")
                 ->index('idx_remote_from_map_has_remote_uri_id')
-                ->constrained('remote_uris')
+                ->constrained('remotes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-
-
-
 
 
             $table->timestamps();
@@ -32,7 +26,7 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_from_remote_map AS ENUM (
-            'none','data','header','response_code','file'
+            'none','data','header','response_code'
             );");
 
         DB::statement("ALTER TABLE remote_from_maps Add COLUMN map_type type_from_remote_map NOT NULL default 'none';");
@@ -48,18 +42,13 @@ return new class extends Migration
             $table->string('remote_json_path')->default(null)->nullable()
                 ->comment('If the data in the remote is json (post or json). This is how we get and set that');
 
-            $table->string('remote_xpath')->default(null)->nullable()
-                ->comment('If the data in the remote is xml. This is how we get that');
-
-            $table->string('remote_regex_split')->default(null)->nullable()
-                ->comment('if the data in the remote is string, this is how we break apart what we find in the match, empty for no splitting');
 
             $table->string('remote_regex_match')->default(null)->nullable()
-                ->comment('if the data in the remote is string, this is how we find that');
+                ->comment('if the data in the remote is string, this is how we find that, multiple matches makes an array of strings');
 
 
-            $table->string('holder_json_path')->default(null)->nullable()
-                ->comment('how to put the data in the holder');
+            $table->string('remote_data_name')->default(null)->nullable()
+                ->comment('the name of the data extracted');
         });
     }
 

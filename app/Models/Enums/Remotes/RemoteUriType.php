@@ -4,7 +4,6 @@ enum RemoteUriType : string {
 
     case NONE = 'none';
     case URL = 'url';
-    case SOCKET = 'socket';
     case CONSOLE = 'console';
     case MANUAL_OWNER = 'manual_owner';
     case MANUAL_ELEMENT = 'manual_element';
@@ -17,7 +16,6 @@ enum RemoteUriType : string {
     ];
 
     const SENSITIVE_TYPES = [
-        self::SOCKET,
         self::CONSOLE
     ];
 
@@ -27,7 +25,6 @@ enum RemoteUriType : string {
 
     const DISPATCHABLE_TYPES = [
         self::URL,
-        self::SOCKET,
         self::CONSOLE,
     ];
 }

@@ -14,11 +14,11 @@ return new class extends Migration
     {
         Schema::create('remote_activities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('remote_uri_id')
+            $table->foreignId('parent_remote_id')
                 ->nullable(false)
                 ->comment("The remote this header/key is for")
                 ->index('idx_activity_has_remote_uri_id')
-                ->constrained('remote_uris')
+                ->constrained('remotes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -125,7 +125,6 @@ return new class extends Migration
         Schema::table('remote_activities', function (Blueprint $table) {
             $table->index(['cache_status_type'],'idx_cache_status');
             $table->index(['remote_activity_status_type'],'idx_remote_status');
-            $table->index(['remote_id','remote_activity_status_type'],'idx_status_of_remote');
 
             $table->integer('data_priority_level_in_stack')->nullable(false)->default(0)
                 ->comment("when multiple activities are run, and their data is merged, this helps in the merge strategy");
@@ -135,6 +134,7 @@ return new class extends Migration
             $table->jsonb('from_headers')->nullable()->comment("The headers from the remote answering (if that kind), no secret values here");
             $table->jsonb('from_remote_processed_data')->nullable()->comment("The value of going in, if marked is_secret not put here");
             $table->jsonb('to_remote_processed_data')->nullable()->comment("The value coming back, if its json");
+            $table->jsonb('to_remote_files')->nullable()->comment("The files being sent to the remote");
             $table->jsonb('errors')->nullable()->comment("Any errors from or to");
             $table->jsonb('consumer_passthrough_data')->nullable()->comment("This is used by any consumer who is listening to the completion event. Passthrough data");
             $table->jsonb('location_geo_json')->nullable()->comment("This is union of the set location bounds");

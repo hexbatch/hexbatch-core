@@ -7,5 +7,4 @@ enum RemoteFromMapType : string {
     case HEADER = 'header';
     case RESPONSE_CODE = 'response_code';
 
-    case FILE = 'file';
 }

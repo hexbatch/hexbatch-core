@@ -80,14 +80,24 @@ return [
     //remotes
     'remote_not_found' => 'Remote not found using :ref',
     'remote_not_in_usage_group' => 'You are not allowed to use this remote :ref',
+    'remote_schema_meta_bounds_admin_group' => 'When adding meta time bounds or location as object, need to be in the admin group of the bounds :ref',
+    'remote_schema_meta_map_wrong_type' => 'When adding meta map bounds, this has to be a map type :ref',
+    'remote_schema_meta_empty_meta' => 'Meta needs a non empty string value when set: :ref',
+    'remote_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
+    'remote_schema_need_admin_permission_group' => 'Only group admins can add that group to be a remote usage group :group_name',
+    'remote_activity_not_owned_by_your_element' => 'You cannot use this activity because you are not an admin for the element :ref',
     'remote_from_map_invalid_type' => 'Remote from mapping had an invalid type :ref',
     'remote_to_map_invalid_type' => 'Remote to mapping had an invalid type :ref',
     'remote_sensitive_type' => 'Remote method of :method can only be set with permission',
     'remote_need_uri_type' => 'Remote uri needs to be given a type',
+    'remote_mapped_data_type_wrong' => 'The mapped data casting type is wrong :what ',
+    'remote_uri_needs_method' => 'Remote uri needs to be given a method',
+    'remote_uri_needs_protocol' => 'Remote uri needs to be given a protocol',
     'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
     'remote_activity_not_found' => 'Remote activity not found using :ref',
     'remote_activity_only_manual_updated' => 'Can only update manual types of remotes, but not :ref',
     'remote_map_invalid_json_path' => 'The json path is not valid :ref',
+    'remote_map_invalid_regex' => 'The regex is not valid :ref',
     'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
 
@@ -100,6 +110,9 @@ return [
 
     //elements
     'element_not_found' => 'Element not found using :ref',
+
+    //servers
+    'server_not_found' => "Server not found using :ref"
 
 
 

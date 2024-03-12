@@ -12,6 +12,9 @@ class RefCodes {
 
     const SHAPE_COORDINATE_ISSUE = 12;
 
+    //servers start at 500
+    const SERVER_NOT_FOUND = 500;
+
 
     //users start at 1000
     const BAD_LOGIN = 1000;
@@ -73,6 +76,8 @@ class RefCodes {
         self::JSON_ISSUE => '',
         self::MAP_COORDINATE_ISSUE => '',
         self::TIMEZONE_ISSUE => '',
+
+        self::SERVER_NOT_FOUND => '',
 
         self::BAD_LOGIN => '',
         self::USER_NOT_FOUND => '',

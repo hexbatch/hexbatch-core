@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Attributes\Apply\StandardAttributes;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -163,12 +161,7 @@ class User extends Authenticatable
      * @throws ValidationException
      */
     public function initUser() {
-        $attr_uuid = null;
-        if ($this->username === User::SYSTEM_NAME) {
-            $attr_uuid = config('hbc.base_attribute_uuid');
-            $this->ref_uuid =  User::SYSTEM_UUID;
-            $this->save();
-        }
+
 
         if (!$this->user_group_id) {
             $group =  new UserGroup();
@@ -179,21 +172,7 @@ class User extends Authenticatable
             $this->user_group_id = $group->id;
             $this->save();
         }
-        $b_att = Attribute::where('user_id',$this->id)->where('attribute_name',$this->username)->exists();
-        if (!$b_att) {
-            $base = StandardAttributes::getOrCreateStandardAttribute(StandardAttributes::BASE_ATTRIBUTE_NAME);
-            $base->user_id = $this->id;
-            $base->save();
-            $att = new Attribute();
-            $att->user_id = $this->id;
-            $att->parent_attribute_id = $base->id;
-            $att->attribute_name = $this->username;
-            $att->save();
-            if ($attr_uuid) {
-                $att->ref_uuid = $attr_uuid;
-                $att->save();
-            }
-        }
+
     }
 
     protected static ?User $system_user = null;
@@ -201,13 +180,7 @@ class User extends Authenticatable
         if (static::$system_user) {return static::$system_user;}
         $user = User::where('ref_uuid',User::SYSTEM_UUID)->first();
         if ($user) {
-            try {
-                $user->initUser(); //todo the system user type inherits from the user.server token type
-                $user->refresh();
-                return static::$system_user = $user;
-            } catch (ValidationException $e) {
-                throw new \LogicException("Cannot update system user because ".$e->getMessage());
-            }
+            return static::$system_user = $user;
         }
         $b_new = true;
         $pw = config('hbc.system_user_pw');
@@ -215,18 +188,19 @@ class User extends Authenticatable
             throw new \LogicException("System user pw is not set in .evn");
         }
         try {
+
             $user = (new CreateNewUser)->create([
                 "username" => User::SYSTEM_NAME,
                 "password" => $pw,
                 "password_confirmation" => $pw
             ]);
-            $user->initUser();
+            $user->ref_uuid =  User::SYSTEM_UUID;
+            $user->save();
             $user->refresh();
             return static::$system_user = $user;
         } catch (ValidationException $e) {
             throw new \LogicException("Cannot create system user because ".$e->getMessage());
         }
-        //todo the user here inherits from the server type, but local server types are null
     }
 
     public static function buildUser(

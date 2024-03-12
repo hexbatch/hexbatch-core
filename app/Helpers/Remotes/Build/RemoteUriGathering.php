@@ -4,12 +4,14 @@ namespace App\Helpers\Remotes\Build;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\Enums\Remotes\RemoteUriDataFormatType;
+use App\Models\Enums\Remotes\RemoteDataFormatType;
 use App\Models\Enums\Remotes\RemoteUriMethod;
+use App\Models\Enums\Remotes\RemoteUriProtocolType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+
 
 class RemoteUriGathering
 {
@@ -18,12 +20,14 @@ class RemoteUriGathering
 
 
     public ?RemoteUriType $uri_type = null;
-    public ?RemoteUriMethod $uri_method = null;
+    public ?RemoteUriMethod $uri_method_type = null;
+    public ?RemoteUriProtocolType $uri_protocol = null;
 
     public ?int $uri_port = self::DEFAULT_UNUSED_NUMBER;
-    public ?string $uri_string = self::DEFAULT_UNUSED_STRING;
-    public ?RemoteUriDataFormatType $uri_from_remote_format = null;
-    public ?RemoteUriDataFormatType $uri_to_remote_format = null;
+    public ?string $remote_uri_main = self::DEFAULT_UNUSED_STRING;
+    public ?string $remote_uri_path = self::DEFAULT_UNUSED_STRING;
+    public ?RemoteDataFormatType $uri_from_remote_format = null;
+    public ?RemoteDataFormatType $uri_to_remote_format = null;
 
 
 
@@ -55,10 +59,29 @@ class RemoteUriGathering
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::REMOTE_SCHEMA_ISSUE);
         }
-        //todo update this with new columns and do better type checking and setting of defaults
-        if ($uri_block->has('uri_method')) {
-            $convert = RemoteUriMethod::tryFrom($uri_block->get('uri_method'));
-            $this->uri_method = $convert ?: null;
+
+        if ($this->uri_type === RemoteUriType::URL) {
+
+            if ($uri_block->has('uri_method_type')) {
+                $convert = RemoteUriMethod::tryFrom($uri_block->get('uri_method_type'));
+                $this->uri_method_type = $convert ?: null;
+            }
+            if (!$this->uri_method_type || $this->uri_method_type === RemoteUriMethod::NONE) {
+                throw new HexbatchNotPossibleException(__("msg.remote_uri_needs_method"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            }
+
+            if ($uri_block->has('uri_protocol')) {
+                $convert = RemoteUriProtocolType::tryFrom($uri_block->get('uri_protocol'));
+                $this->uri_protocol = $convert ?: null;
+            }
+            if (!$this->uri_protocol || $this->uri_protocol === RemoteUriProtocolType::NONE) {
+                throw new HexbatchNotPossibleException(__("msg.remote_uri_needs_protocol"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            }
+
         }
 
         if ($uri_block->has('uri_port')) {
@@ -66,18 +89,22 @@ class RemoteUriGathering
             if ($this->uri_port <= 0) {$this->uri_port = null;}
         }
 
-        if ($uri_block->has('uri_string')) {
-            $this->uri_string = trim(($uri_block->get('uri_string')));
-            if (empty($this->uri_string)) {$this->uri_string = null;}
+        if ($uri_block->has('remote_uri_main')) {
+            $this->remote_uri_main = trim(($uri_block->get('remote_uri_main')));
+            if (empty($this->remote_uri_main)) {$this->remote_uri_main = null;}
+        }
+        if ($uri_block->has('remote_uri_path')) {
+            $this->remote_uri_path = trim(($uri_block->get('remote_uri_path')));
+            if (empty($this->remote_uri_path)) {$this->remote_uri_path = null;}
         }
 
         if ($uri_block->has('uri_to_remote_format')) {
-            $convert = RemoteUriDataFormatType::tryFrom($uri_block->get('uri_to_remote_format'));
+            $convert = RemoteDataFormatType::tryFrom($uri_block->get('uri_to_remote_format'));
             $this->uri_to_remote_format = $convert ?: null;
         }
 
         if ($uri_block->has('uri_from_remote_format')) {
-            $convert = RemoteUriDataFormatType::tryFrom($uri_block->get('uri_from_remote_format'));
+            $convert = RemoteDataFormatType::tryFrom($uri_block->get('uri_from_remote_format'));
             $this->uri_from_remote_format = $convert ?: null;
         }
 

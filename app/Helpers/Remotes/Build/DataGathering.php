@@ -2,7 +2,6 @@
 
 namespace App\Helpers\Remotes\Build;
 
-use App\Helpers\Utilities;
 use App\Models\Remote;
 use App\Models\RemoteFromMap;
 use App\Models\RemoteToMap;
@@ -22,7 +21,6 @@ class DataGathering
      */
     public array $from_map = [];
 
-    public ?bool $is_sending_context_to_remote = null;
 
 
     public function __construct(Request $request)
@@ -53,9 +51,7 @@ class DataGathering
             $this->to_map[] = RemoteToMap::createMap(new Collection($some_to));
         }
 
-        if ($data_block->has('is_sending_context_to_remote')) {
-            $this->is_sending_context_to_remote = Utilities::boolishToBool($data_block->get('is_sending_context_to_remote'));
-        }
+
 
     }
 
@@ -79,13 +75,13 @@ class DataGathering
             }
             /** @var RemoteFromMap $what */
             foreach ($this->from_map as $what) {
-                $what->remote_id = $remote->id;
+                $what->parent_remote_id = $remote->id;
                 $what->save();
             }
 
             /** @var RemoteToMap $what */
             foreach ($this->to_map as $what) {
-                $what->remote_id = $remote->id;
+                $what->parent_remote_id = $remote->id;
                 $what->save();
             }
 

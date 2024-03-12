@@ -6,9 +6,24 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Remote;
+use App\Models\RemoteMetum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
+
+
+/*
+* always set
+    is_retired
+    is_on
+    is_caching
+    is_using_cache_on_failure
+    cache_ttl_seconds
+    rate_limit_max_per_unit
+    rate_limit_unit_in_seconds
+    max_concurrent_calls
+    cache_keys
+*/
 class RemoteAlwaysCanSetOptions
 {
     const DEFAULT_UNUSED_NUMBER = -1;
@@ -20,8 +35,13 @@ class RemoteAlwaysCanSetOptions
 
 
     public ?bool $is_caching = null;
+    public ?bool $is_using_cache_on_failure = null;
     public ?int $cache_ttl_seconds = self::DEFAULT_UNUSED_NUMBER;
     public ?array $cache_keys = null;
+
+
+
+    public ?RemoteMetum $metum = null;
 
 
     public function __construct(Request $request)
@@ -64,6 +84,9 @@ class RemoteAlwaysCanSetOptions
         if ($cache_block->has('is_caching')) {
             $this->is_caching = Utilities::boolishToBool($cache_block->get('is_caching'));
         }
+        if ($cache_block->has('is_using_cache_on_failure')) {
+            $this->is_using_cache_on_failure = Utilities::boolishToBool($cache_block->get('is_using_cache_on_failure'));
+        }
 
         if ($cache_block->has('cache_ttl_seconds')) {
             $this->cache_ttl_seconds = intval($cache_block->get('cache_ttl_seconds'));
@@ -101,6 +124,11 @@ class RemoteAlwaysCanSetOptions
                 $this->cache_keys = $ok_keys;
             }
         }
+
+        if ($request->request->has('meta')) {
+            $meta_block = $request->collect('meta');
+            $this->metum = RemoteMetum::createMetum($meta_block);
+        }
     }
 
     public function assign(Remote $remote) {
@@ -126,6 +154,17 @@ class RemoteAlwaysCanSetOptions
 
         ) {
             $remote->resetRateLimit();
+        }
+
+        if ($this->metum) {
+            $this->metum->parent_remote_id = $remote->id;
+            //see if new or need to update
+            $maybe = RemoteMetum::where('parent_remote_id',$remote->id)->first();
+            if ($maybe) {
+                $this->metum->id = $maybe->id;
+            }
+
+            $this->metum->save();
         }
 
     }

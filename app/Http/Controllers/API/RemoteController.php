@@ -19,7 +19,6 @@ use App\Http\Resources\RemoteResource;
 use App\Models\AttributeValuePointer;
 use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
-use App\Models\Enums\Remotes\RemoteUriRoleType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
 use App\Models\RemoteActivity;
@@ -51,7 +50,20 @@ class RemoteController extends Controller
         throw new HexbatchPermissionException(__("msg.remote_not_in_usage_group",['ref'=>$remote->getName()]),
             \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
             RefCodes::USER_NOT_PRIV);
+    }
 
+    protected function elementCheck(RemoteActivity $activity) {
+
+        if ($activity->caller_element_id) {
+            $user = Utilities::getTypeCastedAuthUser();
+            if ($activity->caller_element->element_owner->user_group->isAdmin($user->id) ) {
+                return;
+            }
+        }
+
+        throw new HexbatchPermissionException(__("msg.remote_activity_not_owned_by_your_element",['ref'=>$activity->caller_element->getName()]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+            RefCodes::USER_NOT_PRIV);
     }
 
     public function remote_get(Remote $remote,?string $full = null) {
@@ -64,7 +76,7 @@ class RemoteController extends Controller
 
 
 
-    public function remote_test(Request $request, Remote $remote,RemoteUriRoleType $remote_uri_role_type = null) {
+    public function remote_test(Request $request, Remote $remote) {
         $this->usageCheck($remote);
         $inputs = $request->collect();
         $user = null;$type = null;$action = null;$element = null; $attribute = null;
@@ -96,7 +108,7 @@ class RemoteController extends Controller
         }
         $test_sink = new TestingActivityEventConsumer();
         $test_sink->setPassthrough($debugging);
-        $activity = $remote->createActivity(collection: $inputs,role: $remote_uri_role_type, user: $user?->id,
+        $activity = $remote->createActivity(collection: $inputs, user: $user?->id,
             type: $type?->id, element: $element->id, attribute: $attribute?->id, action: $action?->id,consumer: $test_sink);
 
         return response()->json(new RemoteActivityResource($activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
@@ -111,23 +123,22 @@ class RemoteController extends Controller
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::REMOTE_NOT_FOUND);
         }
-        if (!in_array($checked_activity->remote_uri_parent->uri_type,RemoteUriType::MANUAL_TYPES)) {
+        if (!in_array($checked_activity->remote_parent->uri_type,RemoteUriType::MANUAL_TYPES)) {
             throw new HexbatchNotPossibleException(__("msg.remote_activity_only_manual_updated",['ref'=>$checked_activity->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::REMOTE_NOT_FOUND);
         }
 
-        if ($checked_activity->remote_uri_parent->uri_type === RemoteUriType::MANUAL_ELEMENT) {
-            Utilities::ignoreVar("here is placehodler");
-            //todo check if owns element that made this call
-        } elseif ($checked_activity->remote_uri_parent->uri_type === RemoteUriType::MANUAL_OWNER) {
-            $this->adminCheck($checked_activity->remote_uri_parent->parent_remote);
+        if ($checked_activity->remote_parent->uri_type === RemoteUriType::MANUAL_ELEMENT) {
+            $this->elementCheck($checked_activity);
+        } elseif ($checked_activity->remote_parent->uri_type === RemoteUriType::MANUAL_OWNER) {
+            $this->adminCheck($checked_activity->remote_parent);
         } else {
             throw new \LogicException("Other manual types not implemented yet");
         }
 
         $data = $request->collect();
-        $checked_activity->processManualPending($data);
+        $checked_activity->doCallRemote($data);
         $out = RemoteActivity::buildActivity(id:$checked_activity->id)->first();
         return response()->json(new RemoteActivityResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
@@ -139,7 +150,7 @@ class RemoteController extends Controller
         return response()->json(new RemoteActivityCollection($activities), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
     public function get_activity(RemoteActivity $remote_activity) {
-        $this->usageCheck($remote_activity->remote_uri_parent->parent_remote);
+        $this->usageCheck($remote_activity->remote_parent);
         $activity = RemoteActivity::buildActivity(id: $remote_activity->id)->first();
         return response()->json(new RemoteActivityResource($activity), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
@@ -206,7 +217,7 @@ class RemoteController extends Controller
 
         (new RemoteUriGathering($request) )->assign($remote);
 
-        $this->updateInUseRemote($remote,$request);
+        $this->updateInUseRemote($remote,$request); //saved at this point
 
         (new DataGathering($request) )->assign($remote);
         (new GroupTypeGathering($request) )->assign($remote);
@@ -215,7 +226,7 @@ class RemoteController extends Controller
 
     protected function updateInUseRemote(Remote $remote, Request $request) {
         (new RemoteAlwaysCanSetOptions($request) )->assign($remote);
-        //saved at this point
+
 
     }
 

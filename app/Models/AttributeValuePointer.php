@@ -69,6 +69,7 @@ class AttributeValuePointer extends Model
     ];
 
 
+    /** @noinspection PhpUnused */
     public function value_parent() : BelongsTo {
         return $this->belongsTo('App\Models\Attribute','value_parent_attribute_id');
     }
