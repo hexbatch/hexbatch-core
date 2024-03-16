@@ -52,11 +52,17 @@ return new class extends Migration
                 ->comment('how many levels down are we?');
 
 
+            $table->jsonb('children_data')->default(null)->nullable()
+                ->comment('final data of any children after all is done');
+
             $table->jsonb('ending_data')->default(null)->nullable()
                 ->comment('final data after processing, starting data is defined at each activity linked to this');
 
             $table->timestamps();
             $table->dateTime('stack_ended_at')->nullable()->default(null)->comment("filled in when this stack completes");
+
+            $table->integer('child_priority_level')->nullable(false)->default(0)
+                ->comment("when multiple children stacks, this determines the order of combining");
         });
         DB::statement("CREATE TYPE type_of_remote_stack_status AS ENUM (
             'none','pending','started','success','failed'
@@ -64,12 +70,6 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE remote_stacks Add COLUMN remote_stack_status_type type_of_remote_stack_status NOT NULL default 'none';");
 
-        #--------------------------------------------
-        DB::statement("CREATE TYPE type_of_remote_stack_data_merge AS ENUM (
-            'union_or','union_and','union_xor','union_or_replace','union_and_replace'
-            );");
-
-        DB::statement("ALTER TABLE remote_stacks Add COLUMN remote_stack_data_merge_type type_of_remote_stack_data_merge NOT NULL default 'union_or_replace';");
 
         #--------------------------------------------
         DB::statement("CREATE TYPE type_of_remote_stack_call_merge AS ENUM (
@@ -97,7 +97,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('remote_stacks');
         DB::statement("DROP TYPE type_of_remote_stack_status");
-        DB::statement("DROP TYPE type_of_remote_stack_data_merge");
         DB::statement("DROP TYPE type_of_remote_stack_call_merge");
     }
 };

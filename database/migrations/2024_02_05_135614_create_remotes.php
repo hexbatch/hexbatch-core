@@ -151,6 +151,12 @@ return new class extends Migration
             $table->jsonb('cache_keys')->default(null)->nullable()
                 ->comment('array of string keys to use for the cache comparisons, empty means no comparison');
 
+            $table->jsonb('xml_doc_type')->default(null)->nullable()
+                ->comment('information for building doc type for xml going out');
+
+            $table->string('xml_root_name')->nullable()->default(null)
+                ->comment("root dom element name for the xml gooing ouit");
+
             $table->string('remote_name')->nullable(false)
                 ->comment("to id this to humans no checking and can be anything");
 

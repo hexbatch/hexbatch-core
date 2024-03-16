@@ -30,10 +30,17 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_to_remote_map AS ENUM (
-            'none','data','header','file'
+            'data','header','file'
             );");
 
-        DB::statement("ALTER TABLE remote_to_maps Add COLUMN map_type type_to_remote_map NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_to_maps Add COLUMN map_type type_to_remote_map NOT NULL default 'data';");
+
+        # -------------------------------
+         DB::statement("CREATE TYPE type_to_remote_source AS ENUM (
+            'from_data','from_stack'
+            );"); # from_stack is the children_data in the stack, if any run
+
+        DB::statement("ALTER TABLE remote_to_maps Add COLUMN source_type type_to_remote_source NOT NULL default 'from_data';");
 
         # -------------------------------
 
@@ -65,6 +72,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('remote_to_maps');
+        Schema::dropIfExists('type_to_remote_source');
         DB::statement("DROP TYPE type_to_remote_map;");
     }
 };

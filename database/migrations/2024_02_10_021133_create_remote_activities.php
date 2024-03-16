@@ -96,10 +96,10 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_of_remote_activity_status AS ENUM (
-            'none','pending','started','success','failed','cached'
+            'pending','started','success','failed','cached'
             );");
 
-        DB::statement("ALTER TABLE remote_activities Add COLUMN remote_activity_status_type type_of_remote_activity_status NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_activities Add COLUMN remote_activity_status_type type_of_remote_activity_status NOT NULL default 'pending';");
         #--------------------------------------
 
         DB::statement("CREATE TYPE type_of_cache_status AS ENUM (
@@ -129,16 +129,21 @@ return new class extends Migration
             $table->integer('data_priority_level_in_stack')->nullable(false)->default(0)
                 ->comment("when multiple activities are run, and their data is merged, this helps in the merge strategy");
 
-            $table->integer('response_code')->nullable()->comment("the http status or console status");
-            $table->jsonb('to_headers')->nullable()->comment("The headers to the remote (if that kind), no secret values here");
-            $table->jsonb('from_headers')->nullable()->comment("The headers from the remote answering (if that kind), no secret values here");
-            $table->jsonb('from_remote_processed_data')->nullable()->comment("The value of going in, if marked is_secret not put here");
-            $table->jsonb('to_remote_processed_data')->nullable()->comment("The value coming back, if its json");
-            $table->jsonb('to_remote_files')->nullable()->comment("The files being sent to the remote");
-            $table->jsonb('errors')->nullable()->comment("Any errors from or to");
-            $table->jsonb('consumer_passthrough_data')->nullable()->comment("This is used by any consumer who is listening to the completion event. Passthrough data");
-            $table->jsonb('location_geo_json')->nullable()->comment("This is union of the set location bounds");
-            $table->text('from_remote_raw_text')->nullable()->comment("The value coming back, if its not json (xml,html,primitive");
+            $table->integer('response_code')->nullable()->default(null)->comment("the http status or console status");
+            $table->jsonb('to_headers')->nullable()->default(null)->comment("The headers to the remote (if that kind), no secret values here");
+            $table->jsonb('from_headers')->nullable()->default(null)->comment("The headers from the remote answering (if that kind), no secret values here");
+            $table->jsonb('from_remote_processed_data')->nullable()->default(null)->comment("The value of going in, if marked is_secret not put here");
+            $table->jsonb('to_remote_processed_data')->nullable()->default(null)->comment("The value coming back, if its json");
+            $table->jsonb('to_remote_files')->nullable()->default(null)->comment("The files being sent to the remote");
+            $table->jsonb('errors')->nullable()->default(null)->comment("Any errors from or to");
+
+            $table->jsonb('consumer_passthrough_data')->nullable()->default(null)
+                ->comment("This is used by any consumer who is listening to the completion event. Passthrough data");
+
+            $table->jsonb('location_geo_json')->nullable()->default(null)
+                ->comment("This is the set location bounds the call comes from, its passed to the call");
+
+            $table->text('from_remote_raw_text')->nullable()->default(null)->comment("The value coming back, in string form");
         });
     }
 

@@ -14,6 +14,7 @@ use App\Models\Enums\Remotes\RemoteActivityStatusType;
 use App\Models\Enums\Remotes\RemoteFromMapType;
 use App\Models\Enums\Remotes\RemoteToMapType;
 use App\Models\Enums\Remotes\RemoteDataFormatType;
+use App\Models\Enums\Remotes\RemoteToSourceType;
 use App\Models\Enums\Remotes\RemoteUriMethod;
 use App\Models\Enums\Remotes\RemoteUriProtocolType;
 use App\Models\Enums\Remotes\RemoteUriType;
@@ -69,6 +70,8 @@ use Symfony\Component\Yaml\Yaml;
  * @property bool is_using_cache_on_failure
  * @property int cache_ttl_seconds
  * @property ArrayObject cache_keys
+ * @property ArrayObject xml_doc_type
+ * @property string xml_root_name
  * @property int rate_limit_max_per_unit
  * @property int rate_limit_unit_in_seconds
  * @property ?string rate_limit_starts_at
@@ -125,7 +128,8 @@ class Remote extends Model
         'to_remote_format' => RemoteDataFormatType::class,
         'from_remote_format' => RemoteDataFormatType::class,
         'uri_protocol' => RemoteUriProtocolType::class,
-        'cache_keys' => AsArrayObject::class
+        'cache_keys' => AsArrayObject::class,
+        'xml_doc_type' => AsArrayObject::class
     ];
 
 
@@ -378,6 +382,7 @@ class Remote extends Model
     public function createActivity(Collection $collection,
                                    ?User $user = null,?ElementType $type = null,?Element $element = null,
                                    ?Attribute $attribute = null,?Action $action = null,
+                                   ?array $geo_json = null,
                                    ?ActivityEventConsumer $consumer = null
     ) :RemoteActivity {
         if ($this->uri_type === RemoteUriType::NONE) {
@@ -390,10 +395,11 @@ class Remote extends Model
         $ret->caller_element_id = $element?->id;
         $ret->caller_attribute_id = $attribute?->id;
         $ret->caller_action_id = $action?->id;
-        //todo add stack, and think about how the mapping goes to different uri (read and write) and how that is enforced
-        $ret->to_remote_processed_data = $this->processToSend($collection,RemoteToMapType::DATA);
-        $ret->to_headers = $this->processToSend($collection,RemoteToMapType::HEADER);
-        $ret->to_remote_files = $this->processToSend($collection,RemoteToMapType::FILE);
+        $ret->location_geo_json = $geo_json;
+        //todo add stack
+        $ret->to_remote_processed_data = $this->processToSend($collection,RemoteToMapType::DATA,RemoteToSourceType::FROM_DATA);
+        $ret->to_headers = $this->processToSend($collection,RemoteToMapType::HEADER,RemoteToSourceType::FROM_DATA);
+        $ret->to_remote_files = $this->processToSend($collection,RemoteToMapType::FILE,RemoteToSourceType::FROM_DATA);
         if ($consumer) {
             $ret->consumer_passthrough_data = $consumer->getPassthrough();
         }
@@ -436,6 +442,7 @@ class Remote extends Model
     const CACHE_KEY_NAME_TYPE = 'type_ref';
     const CACHE_KEY_NAME_USER = 'user_ref';
     const CACHE_KEY_NAME_SERVER = 'server_ref';
+    const GEO_JSON_DATA_KEY = 'location_geo_json';
     const ALL_SPECIAL_CACHE_KEY_NAMES = [
         self::CACHE_KEY_NAME_ELEMENT,self::CACHE_KEY_NAME_TYPE,self::CACHE_KEY_NAME_ATTRIBUTE,
         self::CACHE_KEY_NAME_ACTION,self::CACHE_KEY_NAME_USER,self::CACHE_KEY_NAME_SERVER
@@ -481,11 +488,12 @@ class Remote extends Model
     }
 
 
-    public function processToSend(Collection $collection,RemoteToMapType $filter) : array {
+    public function processToSend(Collection $collection,RemoteToMapType $filter,RemoteToSourceType $source) : array {
         $ret = [];
         $my_data = $collection->toArray();
         foreach ($this->rules_to_remote as $rule) {
             if ($rule->map_type !== $filter) { continue; }
+            if ($rule->source_type !== $source) { continue; }
             $pair = $rule->applyRuleToGiven($my_data);
             if (!empty($pair)) {
                 $ret = array_merge($ret,$pair);
@@ -606,7 +614,17 @@ class Remote extends Model
             }
             case RemoteDataFormatType::XML: {
                 /** @noinspection PhpUnhandledExceptionInspection */
-                return Array2XML::createXML('',$data)->saveXML(); //todo add root element name and doc type to db?
+                return Array2XML::createXML($this->xml_root_name??'root',$data,$this->xml_doc_type->getArrayCopy())->saveXML();
+                /*
+                 '@docType' => [
+                            'name' => 'root',
+                            'entities' => null,
+                            'notations' => null,
+                            'publicId' => '-//W3C//DTD XHTML 1.0 Transitional//EN',
+                            'systemId' => 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd',
+                            'internalSubset' => null,
+                        ],
+                 */
             }
         }
         throw new \LogicException("Format type mismatch in the code: ". $this->from_remote_format->value);

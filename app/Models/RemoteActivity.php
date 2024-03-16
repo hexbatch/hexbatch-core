@@ -363,6 +363,7 @@ class RemoteActivity extends Model
                         $options = [];
                         if (count($this->to_remote_files)) {
                             $multi = [];
+                            $data[static::IDENTIFYING_DATA_KEY] = $this->getIdentifyingData();
                             foreach ($data as $data_key => $data_val) {
                                 $multi[] = [
                                     'name'     => $data_key,
@@ -391,8 +392,10 @@ class RemoteActivity extends Model
                                 case RemoteUriMethod::PATCH:
                                 case RemoteUriMethod::POST:
                                 case RemoteUriMethod::PUT: {
+                                    $data[static::IDENTIFYING_DATA_KEY] = $this->getIdentifyingData();
                                     $options['body'] = $this->remote_parent->convertToRemoteStringFormat($data->getArrayCopy());
-                                }break;
+                                    break;
+                                }
                                 case RemoteUriMethod::NONE:
                                     throw new \LogicException("Uri method is set to none");
                             }
@@ -435,7 +438,10 @@ class RemoteActivity extends Model
                         if (empty($this->to_remote_processed_data)) {
                             $from_data = $class::$method();
                         } else {
-                            $from_data = $class::$method(...$this->to_remote_processed_data);
+                            $data = $this->to_remote_processed_data;
+                            $data[static::IDENTIFYING_DATA_KEY] = $this->getIdentifyingData();
+                            $data_array = $data->getArrayCopy();
+                            $from_data = $class::$method(...$data_array);
                         }
 
                         break;
@@ -449,6 +455,7 @@ class RemoteActivity extends Model
                 }
 
                 $this->from_headers = $headers;
+                $this->from_remote_raw_text = $from_data;
                 $this->from_remote_processed_data = $this->remote_parent->processDataFromSend($from_data,$code,$headers);
                 $this->response_code = $code;
                 $this->remote_activity_status_type = RemoteActivityStatusType::SUCCESS;
@@ -483,6 +490,20 @@ class RemoteActivity extends Model
             }
         }
         $this->announceDaFinishing();
+    }
+
+    const IDENTIFYING_DATA_KEY = 'call_identity';
+    public function getIdentifyingData() : array {
+        $ret = [];
+        if ($this->caller_user) { $ret[Remote::CACHE_KEY_NAME_USER] = $this->caller_user->ref_uuid;}
+        if ($this->caller_element) { $ret[Remote::CACHE_KEY_NAME_ELEMENT] = $this->caller_element->ref_uuid;}
+        if ($this->caller_action) { $ret[Remote::CACHE_KEY_NAME_ACTION] = $this->caller_action->ref_uuid;}
+        if ($this->caller_type) { $ret[Remote::CACHE_KEY_NAME_TYPE] = $this->caller_type->ref_uuid;}
+        if ($this->caller_attribute) { $ret[Remote::CACHE_KEY_NAME_ATTRIBUTE] = $this->caller_attribute->ref_uuid;}
+        if ($this->caller_server) { $ret[Remote::CACHE_KEY_NAME_SERVER] = $this->caller_server->ref_uuid;}
+        if (!empty($this->location_geo_json )) { $ret[Remote::GEO_JSON_DATA_KEY] = $this->location_geo_json;}
+
+        return $ret;
     }
 
 }

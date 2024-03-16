@@ -26,10 +26,10 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_from_remote_map AS ENUM (
-            'none','data','header','response_code'
+            'data','header','response_code'
             );");
 
-        DB::statement("ALTER TABLE remote_from_maps Add COLUMN map_type type_from_remote_map NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_from_maps Add COLUMN map_type type_from_remote_map NOT NULL default 'data';");
 
         DB::statement("ALTER TABLE remote_from_maps ALTER COLUMN created_at SET DEFAULT NOW();");
 

@@ -29,7 +29,8 @@ class RemoteUriGathering
     public ?RemoteDataFormatType $from_remote_format = null;
     public ?RemoteDataFormatType $to_remote_format = null;
 
-
+    public ?string $xml_root_name = self::DEFAULT_UNUSED_STRING;
+    public ?array $xml_doc_type = null;
 
 
     public function __construct(Request $request, bool $b_admin = false)
@@ -107,6 +108,19 @@ class RemoteUriGathering
         if ($uri_block->has('uri_from_remote_format')) {
             $convert = RemoteDataFormatType::tryFrom($uri_block->get('uri_from_remote_format'));
             $this->from_remote_format = $convert ?: null;
+        }
+
+        if ($uri_block->has('xml_root_name')) {
+            $this->xml_root_name = $uri_block->get('xml_root_name');
+        }
+
+        if ($uri_block->has('xml_doc_type')) {
+            $this->xml_doc_type = $uri_block->get('xml_doc_type');
+            if (!is_array($this->xml_doc_type)) {
+                throw new HexbatchNotPossibleException(__("msg.remote_uri_invalid_xml_doc"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            }
         }
 
     }

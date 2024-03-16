@@ -8,6 +8,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Enums\Remotes\RemoteToMapType;
 use App\Models\Enums\Remotes\RemoteDataFormatType;
+use App\Models\Enums\Remotes\RemoteToSourceType;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -27,6 +28,7 @@ use Symfony\Component\Yaml\Yaml;
  * @property int parent_remote_id
  * @property boolean is_secret
  * @property RemoteToMapType map_type
+ * @property RemoteToSourceType source_type
  * @property RemoteDataFormatType cast_data_to_format
  * @property string holder_json_path
  * @property string remote_data_name
@@ -69,6 +71,7 @@ class RemoteToMap extends Model
      */
     protected $casts = [
         'map_type' => RemoteToMapType::class,
+        'source_type' => RemoteToSourceType::class,
         'cast_data_to_format' => RemoteDataFormatType::class,
         'remote_data_constant' => AsArrayObject::class,
     ];
@@ -80,12 +83,22 @@ class RemoteToMap extends Model
         }
         if ($c->has('map_type')) {
             $convert = RemoteToMapType::tryFrom($c->get('map_type'));
-            if (!$convert || $convert === RemoteToMapType::NONE) {
-                throw new HexbatchNotPossibleException(__("msg.remote_from_map_invalid_type",['ref'=>$c->get('map_type')]),
+            if (!$convert ) {
+                throw new HexbatchNotPossibleException(__("msg.remote_to_map_invalid_type",['ref'=>$c->get('map_type')]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::REMOTE_SCHEMA_ISSUE);
             }
             $ret->map_type = $convert;
+        }
+
+        if ($c->has('source_type')) {
+            $convert = RemoteToSourceType::tryFrom($c->get('source_type'));
+            if (!$convert ) {
+                throw new HexbatchNotPossibleException(__("msg.remote_to_source_invalid_type",['ref'=>$c->get('source_type')]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            }
+            $ret->source_type = $convert;
         }
 
 
