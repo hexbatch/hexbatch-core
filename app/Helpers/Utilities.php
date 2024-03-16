@@ -98,23 +98,23 @@ class Utilities {
     }
 
     public static function maybeDecodeJson(mixed $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array {
-        if (empty($what)) { return $null_default;}
-        if (is_array($what) && $b_associative) {
+        if (empty($maybe_json)) { return $null_default;}
+        if (is_array($maybe_json) && $b_associative) {
             return $maybe_json;
         }
-        if (is_object($what) && !$b_associative) {
+        if (is_object($maybe_json) && !$b_associative) {
             return $maybe_json;
         }
-        if (is_array($what) || is_object($what)) {
-            $json = json_encode($what);
+        if (is_array($maybe_json) || is_object($maybe_json)) {
+            $json = json_encode($maybe_json);
         } else {
-            if (static::jsonHasErrors($what)) {
+            if (static::jsonHasErrors($maybe_json)) {
                 return $null_default;
             }
-            $json = $what;
+            $json = $maybe_json;
         }
         $converted =  json_decode($json,$b_associative);
-        if (! is_object($converted) || !is_array($converted)) {
+        if (! (is_object($converted) || is_array($converted) )) {
             return $null_default;
         }
         return $converted;

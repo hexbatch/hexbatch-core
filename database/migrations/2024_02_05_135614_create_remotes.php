@@ -61,7 +61,7 @@ return new class extends Migration
             $table->boolean('is_retired')->default(false)->nullable(false)
                 ->comment('if true then cannot be added to attributes or actions');
 
-            $table->boolean('is_on')->default(true)->nullable(false)
+            $table->boolean('is_on')->default(false)->nullable(false)
                 ->comment('if false then cannot call remote');
 
             $table->integer('uri_port')->default(null)->nullable()

@@ -91,7 +91,7 @@ class AttributeValue extends Model
 
     }
 
-    public function createValue(Collection $value_block,?Attribute $parent = null) : AttributeValue {
+    public static function createValue(Collection $value_block,?Attribute $parent = null) : AttributeValue {
 
         $ret = new AttributeValue();
         if ($parent) {

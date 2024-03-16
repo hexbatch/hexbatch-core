@@ -26,8 +26,8 @@ class RemoteUriGathering
     public ?int $uri_port = self::DEFAULT_UNUSED_NUMBER;
     public ?string $remote_uri_main = self::DEFAULT_UNUSED_STRING;
     public ?string $remote_uri_path = self::DEFAULT_UNUSED_STRING;
-    public ?RemoteDataFormatType $uri_from_remote_format = null;
-    public ?RemoteDataFormatType $uri_to_remote_format = null;
+    public ?RemoteDataFormatType $from_remote_format = null;
+    public ?RemoteDataFormatType $to_remote_format = null;
 
 
 
@@ -40,6 +40,7 @@ class RemoteUriGathering
         if ($request->request->has('uri')) {
             $uri_block = $request->collect('uri');
         }
+        if ($uri_block->isEmpty()) {return;}
 
         if ($uri_block->has('uri_type')) {
             $convert = RemoteUriType::tryFrom($uri_block->get('uri_type'));
@@ -62,8 +63,8 @@ class RemoteUriGathering
 
         if ($this->uri_type === RemoteUriType::URL) {
 
-            if ($uri_block->has('uri_method_type')) {
-                $convert = RemoteUriMethod::tryFrom($uri_block->get('uri_method_type'));
+            if ($uri_block->has('uri_method')) {
+                $convert = RemoteUriMethod::tryFrom($uri_block->get('uri_method'));
                 $this->uri_method_type = $convert ?: null;
             }
             if (!$this->uri_method_type || $this->uri_method_type === RemoteUriMethod::NONE) {
@@ -100,12 +101,12 @@ class RemoteUriGathering
 
         if ($uri_block->has('uri_to_remote_format')) {
             $convert = RemoteDataFormatType::tryFrom($uri_block->get('uri_to_remote_format'));
-            $this->uri_to_remote_format = $convert ?: null;
+            $this->to_remote_format = $convert ?: null;
         }
 
         if ($uri_block->has('uri_from_remote_format')) {
             $convert = RemoteDataFormatType::tryFrom($uri_block->get('uri_from_remote_format'));
-            $this->uri_from_remote_format = $convert ?: null;
+            $this->from_remote_format = $convert ?: null;
         }
 
     }

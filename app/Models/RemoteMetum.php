@@ -148,12 +148,14 @@ class RemoteMetum extends Model
             if (!is_array($codes_raw)) {
                 $codes_raw = [$codes_raw];
             }
+            $codes = [];
             foreach ($codes_raw as $maybe_lang_code) {
                 if (empty($maybe_lang_code)) {continue;}
                 if (in_array($maybe_lang_code,$locale_codes)) {
-                    $ret->remote_icu_locale_codes[] = $maybe_lang_code;
+                    $codes[] = $maybe_lang_code;
                 }
             }
+            $ret->remote_icu_locale_codes = $codes;
         }
 
         return $ret;

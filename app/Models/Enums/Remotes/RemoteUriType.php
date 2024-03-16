@@ -16,7 +16,7 @@ enum RemoteUriType : string {
     ];
 
     const SENSITIVE_TYPES = [
-        self::CONSOLE
+        //none at present but keep as placeholder
     ];
 
     const FORBIDDEN_TYPES = [
@@ -26,5 +26,6 @@ enum RemoteUriType : string {
     const DISPATCHABLE_TYPES = [
         self::URL,
         self::CONSOLE,
+        self::CODE
     ];
 }

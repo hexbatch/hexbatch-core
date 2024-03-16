@@ -72,7 +72,7 @@ class RemoteFromMap extends Model
 
         if ($c->has('map_type')) {
             $convert = RemoteFromMapType::tryFrom($c->get('map_type'));
-            if ($convert) {
+            if (!$convert || $convert === RemoteFromMapType::NONE) {
                 throw new HexbatchNotPossibleException(__("msg.remote_from_map_invalid_type",['ref'=>$c->get('map_type')]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::REMOTE_SCHEMA_ISSUE);

@@ -407,12 +407,12 @@ class Attribute extends Model
                         if (count($parts) === 1) {
                             //must be owned by the user
                             $owner = Utilities::getTypeCastedAuthUser();
-                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_id')->where('attribute_name', $value);
+                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_attribute_id')->where('attribute_name', $value);
                         } else if (count($parts) > 1) {
                             $owner_string = $parts[0];
                             $maybe_name = $parts[1];
                             $owner = (new User)->resolveRouteBinding($owner_string);
-                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_id')->where('attribute_name', $maybe_name);
+                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_attribute_id')->where('attribute_name', $maybe_name);
                         }
 
                         if ($build && $owner) {
@@ -421,7 +421,7 @@ class Attribute extends Model
                                 $attr = $build->first();
                                 for ($i = 2; !empty($attr) && $i < count($parts); $i++) {
                                     $sub_name = $parts[$i];
-                                    $build = $this->where('user_id', $owner->id)->where('parent_id',$attr->id)->where('attribute_name', $sub_name);
+                                    $build = $this->where('user_id', $owner->id)->where('parent_attribute_id',$attr->id)->where('attribute_name', $sub_name);
                                     $attr = $build->first();
                                 }
                                 if (empty($attr)) {

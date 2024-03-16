@@ -96,7 +96,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('/{remote}/edit', [RemoteController::class, 'remote_edit_patch'])->name('core.remotes.edit');
             Route::delete('/{remote}/destroy', [RemoteController::class, 'remote_delete'])->name('core.remotes.destroy');
             Route::get('/{remote}/get/{levels?}', [RemoteController::class, 'remote_get'])->name('core.remotes.get');
-            Route::get('/{remote}/test', [RemoteController::class, 'remote_test'])->name('core.remotes.test');
+            Route::post('/{remote}/test', [RemoteController::class, 'remote_test'])->name('core.remotes.test');
             Route::get('/list', [RemoteController::class, 'remote_list'])->name('core.remotes.list');
             Route::prefix('activities')->group(function () {
                 Route::post('/{remote_activity}/update', [RemoteController::class, 'update_activity'])->name('core.remotes.activity.update');

@@ -11,6 +11,7 @@ use App\Helpers\Remotes\Activity\ActivityEventConsumer;
 use App\Helpers\Utilities;
 use App\Jobs\RunRemote;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
+use App\Models\Enums\Remotes\RemoteFromMapType;
 use App\Models\Enums\Remotes\RemoteToMapType;
 use App\Models\Enums\Remotes\RemoteDataFormatType;
 use App\Models\Enums\Remotes\RemoteUriMethod;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use LaLit\Array2XML;
 use LaLit\XML2Array;
 use Symfony\Component\Yaml\Yaml;
 
@@ -46,7 +48,7 @@ use Symfony\Component\Yaml\Yaml;
  * @property string ref_uuid
  * @property string remote_name
  * @property boolean is_retired
- * @property boolean is_on
+ * @property boolean|null is_on
  *
  * @property string created_at
  * @property string updated_at
@@ -82,7 +84,10 @@ use Symfony\Component\Yaml\Yaml;
  * @property RemoteToMap[] rules_to_remote
  * @property RemoteFromMap[] rules_from_remote
  *
- *
+ * //in select
+ * @property int rate_limit_starts_at_ts
+ * @property int created_at_ts
+ * @property int updated_at_ts
  */
 class Remote extends Model
 {
@@ -91,7 +96,6 @@ class Remote extends Model
     public $timestamps = false;
 
     /**
-     * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
@@ -101,18 +105,17 @@ class Remote extends Model
         'remote_call_ended_at' ,
         'remote_activity_status_type',
         'from_remote_processed_data',
-
+        'total_errors',
+        'total_calls_made'
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
     protected $hidden = [];
 
     /**
-     * The attributes that should be cast.
      *
      * @var array<string, string>
      */
@@ -121,6 +124,7 @@ class Remote extends Model
         'uri_method_type' => RemoteUriMethod::class,
         'to_remote_format' => RemoteDataFormatType::class,
         'from_remote_format' => RemoteDataFormatType::class,
+        'uri_protocol' => RemoteUriProtocolType::class,
         'cache_keys' => AsArrayObject::class
     ];
 
@@ -132,7 +136,7 @@ class Remote extends Model
     }
 
     public function meta_of_remote() : HasOne {
-        return $this->hasOne('App\Models\RemoteMetum','remote_id')
+        return $this->hasOne('App\Models\RemoteMetum','parent_remote_id')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts")
             /** @uses RemoteMetum::remote_meta_map_bound(),RemoteMetum::remote_meta_time_bound() */
@@ -141,7 +145,7 @@ class Remote extends Model
     }
 
     public function usage_group() : HasOne {
-        return $this->hasOne('App\Models\UserGroup','usage_group_id');
+        return $this->hasOne('App\Models\UserGroup','id','usage_group_id');
     }
 
 
@@ -150,7 +154,16 @@ class Remote extends Model
         return $this->belongsTo('App\Models\User','user_id');
     }
 
-
+    public function rules_to_remote() : hasMany {
+        return $this->hasMany('App\Models\RemoteToMap','parent_remote_id','id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
+    }
+    public function rules_from_remote() : hasMany {
+        return $this->hasMany('App\Models\RemoteFromMap','parent_remote_id','id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
+    }
 
     public function getName() : string  {
         return $this->remote_owner->username . '.'. $this->attribute_name;
@@ -191,7 +204,8 @@ class Remote extends Model
     {
 
         $build =  Remote::select('remotes.*')
-            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  remotes.created_at) as created_at_ts,  extract(epoch from  remotes.updated_at) as updated_at_ts,".
+                "  extract(epoch from  remotes.rate_limit_starts_at) as rate_limit_starts_at_ts")
             /**
              * @uses Remote::usage_group(),Remote::meta_of_remote(),Remote::rules_to_remote(),Remote::rules_from_remote()
              */
@@ -233,7 +247,7 @@ class Remote extends Model
 
         if ($usage_user_id) {
 
-            $build->join('users owner_user_for_usage_check',
+            $build->join('users as owner_user_for_usage_check',
                 /**
                  * @param JoinClause $join
                  */
@@ -243,7 +257,7 @@ class Remote extends Model
             );
 
 
-            $build->leftJoin('user_group_members admin_group_members',
+            $build->leftJoin('user_group_members as admin_group_members',
                 /**
                  * @param JoinClause $join
                  */
@@ -256,7 +270,7 @@ class Remote extends Model
 
             //remote user group, may not exist
 
-            $build->leftJoin('user_group_members remote_group_members',
+            $build->leftJoin('user_group_members as remote_group_members',
                 /**
                  * @param JoinClause $join
                  */
@@ -334,27 +348,22 @@ class Remote extends Model
 
     }
 
-    public function powerRemote(bool $b_off = true) {
-        if ($this->is_on === $b_off) {return;}
-        $this->is_on = !$b_off;
-        $this->save();
+    public function powerAdjustRates() {
+
         if ($this->is_on) {
             $this->resetRateLimit();
         } else {
-            $this->emptyRateLimit();
+            $this->update(['rate_limit_starts_at' => null,'rate_limit_count'=>null]);
         }
     }
     public function resetRateLimit() :void {
         $this->update(['rate_limit_starts_at' => DB::raw('NOW()'),'rate_limit_count'=>0]);
     }
-    protected function emptyRateLimit() :void {
-        $this->update(['rate_limit_starts_at' => null,'rate_limit_count'=>null]);
-    }
 
     protected function addOneToRateLimit() : bool
     {
-        if (time() > $this->rate_limit_starts_at + $this->rate_limit_unit_in_seconds) {
-            $this->emptyRateLimit();
+        if (time() < $this->rate_limit_starts_at_ts + $this->rate_limit_unit_in_seconds) {
+            $this->resetRateLimit();
         }
         //see if can add one in the limits, if so do that, otherwise return false
         if ($this->rate_limit_count >= $this->rate_limit_max_per_unit) { return false;} //already at the max
@@ -441,16 +450,7 @@ class Remote extends Model
         return Utilities::maybeDecodeJson($what,true,[]);
     }
 
-    public function rules_to_remote() : BelongsTo {
-        return $this->belongsTo('App\Models\RemoteToMap','remote_uri_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
-    }
-    public function rules_from_remote() : BelongsTo {
-        return $this->belongsTo('App\Models\RemoteFromMap','remote_uri_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
-    }
+
 
 
     public function updateGlobalStats(bool $b_error) :void {
@@ -465,12 +465,19 @@ class Remote extends Model
 
     public function removeSecretsFromArray(ArrayObject|array $my_data,RemoteToMapType $filter) : ?array {
         if (empty($my_data)) { return null;}
+        $changes = 0;
         foreach ($this->rules_to_remote as $rule) {
             if ($rule->map_type !== $filter) { continue; }
             if (!$rule->is_secret) { continue; }
             unset($my_data[$rule->remote_data_name]);
+            $changes++;
         }
-        return $my_data;
+        if (!$changes) {return null;}
+
+        if (is_array($my_data)) {
+            return $my_data;
+        }
+        return $my_data->getArrayCopy();
     }
 
 
@@ -489,7 +496,7 @@ class Remote extends Model
 
 
 
-    protected function castResponseToExpected(mixed $what) : string|array|null {
+    protected function castResponseToExpected(mixed $what) : array|string|null {
         if (empty($what)) {return null;}
 
         switch ($this->from_remote_format) {
@@ -512,7 +519,11 @@ class Remote extends Model
 
             }
             case RemoteDataFormatType::JSON : {
-                return Utilities::maybeDecodeJson($what,true);
+                $maybe_array =  Utilities::maybeDecodeJson($what,true);
+                if (!is_array($maybe_array)) {
+                    return [$maybe_array];
+                }
+                return $maybe_array;
             }
 
             case RemoteDataFormatType::YAML :
@@ -541,6 +552,7 @@ class Remote extends Model
             case RemoteDataFormatType::TEXT :
             {
                 foreach ($this->rules_from_remote as $rule) {
+                    if ($rule->map_type !== RemoteFromMapType::DATA) {continue;}
                     $pair = $rule->applyRuleToString($casted_data);
                     if (!empty($pair)) {
                         $ret = array_merge($ret, $pair);
@@ -552,6 +564,7 @@ class Remote extends Model
             case RemoteDataFormatType::YAML :
             {
                 foreach ($this->rules_from_remote as $rule) {
+                    if ($rule->map_type !== RemoteFromMapType::DATA) {continue;}
                     $pair = $rule->applyRuleToJson($casted_data);
                     if (!empty($pair)) {
                         $ret = array_merge($ret, $pair);
@@ -559,8 +572,8 @@ class Remote extends Model
                 }
             }
         }
-
         foreach ($this->rules_from_remote as $rule) {
+            if ($rule->map_type !== RemoteFromMapType::HEADER) {continue;}
             $pair = $rule->applyRuleToJson($headers);
             if (!empty($pair)) {
                 $ret = array_merge($ret, $pair);
@@ -568,6 +581,7 @@ class Remote extends Model
         }
 
         foreach ($this->rules_from_remote as $rule) {
+            if ($rule->map_type !== RemoteFromMapType::RESPONSE_CODE) {continue;}
             $pair = $rule->applyRuleToString(strval($code));
             if (!empty($pair)) {
                 $ret = array_merge($ret, $pair);
@@ -575,6 +589,27 @@ class Remote extends Model
         }
 
         return $ret;
+    }
+
+    public function convertToRemoteStringFormat(array $data) : ?string {
+        if (empty($data)) {return null;}
+
+        switch ($this->to_remote_format) {
+            case RemoteDataFormatType::TEXT:
+            case RemoteDataFormatType::JSON:
+            {
+                return Utilities::maybeEncodeJson($data);
+            }
+
+            case RemoteDataFormatType::YAML: {
+                return Yaml::dump($data);
+            }
+            case RemoteDataFormatType::XML: {
+                /** @noinspection PhpUnhandledExceptionInspection */
+                return Array2XML::createXML('',$data)->saveXML(); //todo add root element name and doc type to db?
+            }
+        }
+        throw new \LogicException("Format type mismatch in the code: ". $this->from_remote_format->value);
     }
 
 

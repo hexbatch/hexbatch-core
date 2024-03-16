@@ -17,7 +17,6 @@ use JsonPath\InvalidJsonPathException;
 use JsonPath\JsonObject;
 use JsonPath\JsonPath;
 use LaLit\Array2XML;
-use LaLit\XML2Array;
 use Symfony\Component\Yaml\Yaml;
 
 
@@ -81,7 +80,7 @@ class RemoteToMap extends Model
         }
         if ($c->has('map_type')) {
             $convert = RemoteToMapType::tryFrom($c->get('map_type'));
-            if (!$convert) {
+            if (!$convert || $convert === RemoteToMapType::NONE) {
                 throw new HexbatchNotPossibleException(__("msg.remote_from_map_invalid_type",['ref'=>$c->get('map_type')]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::REMOTE_SCHEMA_ISSUE);
@@ -91,13 +90,16 @@ class RemoteToMap extends Model
 
 
         if ($c->has('cast_data_to_format')) {
-            $convert = RemoteDataFormatType::tryFrom($c->get('cast_data_to_format'));
-            if (!$convert) {
-                throw new HexbatchNotPossibleException(__("msg.remote_mapped_data_type_wrong",['what'=>$c->get('cast_data_to_format')]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            $raw_convert = $c->get('cast_data_to_format');
+            if ($raw_convert) {
+                $convert = RemoteDataFormatType::tryFrom($raw_convert);
+                if (!$convert) {
+                    throw new HexbatchNotPossibleException(__("msg.remote_mapped_data_type_wrong",['what'=>$c->get('cast_data_to_format')]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::REMOTE_SCHEMA_ISSUE);
+                }
+                $ret->cast_data_to_format = $convert ;
             }
-            $ret->cast_data_to_format = $convert ;
         }
 
         //'' => RemoteDataFormatType::class,
@@ -128,7 +130,7 @@ class RemoteToMap extends Model
             $ret->remote_data_name = $c->get('remote_data_name') ? $c->get('remote_data_name'): null;
         }
 
-        if ($c->has('remote_data_value')) {
+        if (empty($ret->holder_json_path) && $c->has('remote_data_value')) {
             $da_data = $c->get('remote_data_value');
             if (!empty($da_data)) {
                 if (!is_array($da_data) && !is_object($da_data)) {
@@ -180,9 +182,12 @@ class RemoteToMap extends Model
         if ($this->cast_data_to_format) {
             switch ($this->cast_data_to_format) {
                 case RemoteDataFormatType::TEXT:
+                {
+                    $data = Utilities::maybeDecodeJson($data);
+                    break;
+                }
                 case RemoteDataFormatType::JSON:
                 {
-                    $data = Utilities::maybeEncodeJson($data);
                     break;
                 }
 

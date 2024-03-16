@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::prefix('test')->group(function () {
+    Route::get('/echo', [\App\Http\Controllers\TestingController::class, 'echoResponse'])->name('test.echo_response');
+});

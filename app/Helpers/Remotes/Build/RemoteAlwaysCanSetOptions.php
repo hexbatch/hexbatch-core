@@ -12,18 +12,7 @@ use Illuminate\Support\Collection;
 
 
 
-/*
-* always set
-    is_retired
-    is_on
-    is_caching
-    is_using_cache_on_failure
-    cache_ttl_seconds
-    rate_limit_max_per_unit
-    rate_limit_unit_in_seconds
-    max_concurrent_calls
-    cache_keys
-*/
+
 class RemoteAlwaysCanSetOptions
 {
     const DEFAULT_UNUSED_NUMBER = -1;
@@ -106,7 +95,7 @@ class RemoteAlwaysCanSetOptions
             } else {
                 $found_keys = $test_cache_keys;
             }
-            if (empty($this->cache_keys)) {
+            if (empty($found_keys)) {
                 $this->cache_keys = null;
             } else {
                 $ok_keys = [];
@@ -133,24 +122,26 @@ class RemoteAlwaysCanSetOptions
 
     public function assign(Remote $remote) {
 
-        if ($this->is_on !== null) {
-            $remote->powerRemote($this->is_on);
-        }
-        if ($this->is_on !== null) {
-            $remote->powerRemote($this->is_on);
-        }
+
+        $old_on = boolval($remote->is_on);
         $counter = 0;
         foreach ($this as $key => $val) {
-            if (is_null($val) || $val === static::DEFAULT_UNUSED_NUMBER) { continue;}
+            if (is_null($val) || $val === static::DEFAULT_UNUSED_NUMBER || $key === 'metum') { continue;}
             $remote->$key = $val;
             $counter++;
         }
 
         if ($counter) {$remote->save();}
 
+        if ($old_on !== $remote->is_on) {
+            $remote->powerAdjustRates();
+        }
+
+
         if (
-            intval($remote->getRawOriginal('rate_limit_max_per_unit')) !== $this->rate_limit_max_per_unit
-            || intval($remote->getRawOriginal('rate_limit_unit_in_seconds')) !== $this->rate_limit_unit_in_seconds
+            self::DEFAULT_UNUSED_NUMBER !== $this->rate_limit_max_per_unit && intval($remote->getRawOriginal('rate_limit_max_per_unit')) !== $this->rate_limit_max_per_unit
+            ||
+            self::DEFAULT_UNUSED_NUMBER !== $this->rate_limit_unit_in_seconds && intval($remote->getRawOriginal('rate_limit_unit_in_seconds')) !== $this->rate_limit_unit_in_seconds
 
         ) {
             $remote->resetRateLimit();

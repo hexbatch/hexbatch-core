@@ -56,22 +56,17 @@ class DataGathering
     }
 
     public function assign(Remote $remote) {
-        foreach ($this as $key => $val) {
-            if (is_null($val)  ) { continue;}
-            $remote->$key = $val;
-        }
 
-        $remote->save();
 
         try {
             DB::beginTransaction();
 
             if (count($this->from_map)) {
-                RemoteFromMap::where('remote_id',$remote->id)->delete();
+                RemoteFromMap::where('parent_remote_id',$remote->id)->delete();
             }
 
             if (count($this->to_map)) {
-                RemoteToMap::where('remote_id',$remote->id)->delete();
+                RemoteToMap::where('parent_remote_id',$remote->id)->delete();
             }
             /** @var RemoteFromMap $what */
             foreach ($this->from_map as $what) {

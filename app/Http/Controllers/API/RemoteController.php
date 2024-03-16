@@ -68,10 +68,9 @@ class RemoteController extends Controller
 
     public function remote_get(Remote $remote,?string $full = null) {
         $this->usageCheck($remote);
-        $out = Remote::buildRemote(id: $remote->id)->first();
         $n_level = (int)$full;
-        if ($n_level <= 0) { $n_level =1;}
-        return response()->json(new RemoteResource($out,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        if ($n_level <= 0) { $n_level =0;}
+        return response()->json(new RemoteResource($remote,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 
@@ -82,7 +81,6 @@ class RemoteController extends Controller
         $user = null;$type = null;$action = null;$element = null; $attribute = null;
         if ($inputs->has('callers')) {
             $callers = new Collection($inputs->get('callers'));
-            $inputs->forget('callers');
             if ($callers->has('user')) {
                 $user = AttributeValuePointer::getModelFromHint($callers->get('user'),AttributeValueType::USER);
             }
@@ -98,20 +96,20 @@ class RemoteController extends Controller
             if ($callers->has('attribute')) {
                 $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::ATTRIBUTE);
             }
+            $inputs->forget('callers');
         }
         $debugging = null;
         if ($inputs->has('debugging')) {
-            $debugging = new Collection($inputs->get('debugging'));
-            if (!is_array($debugging)) {
-                $debugging = [$debugging];
-            }
+            $debugging = (new Collection($inputs->get('debugging')) )->toArray();
+            $inputs->forget('debugging');
         }
+
         $test_sink = new TestingActivityEventConsumer();
         $test_sink->setPassthrough($debugging);
-        $activity = $remote->createActivity(collection: $inputs, user: $user?->id,
-            type: $type?->id, element: $element->id, attribute: $attribute?->id, action: $action?->id,consumer: $test_sink);
-
-        return response()->json(new RemoteActivityResource($activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        $activity = $remote->createActivity(collection: $inputs, user: $user,
+            type: $type, element: $element, attribute: $attribute, action: $action,consumer: $test_sink);
+        $display_activity = RemoteActivity::buildActivity(id:$activity->id)->first();
+        return response()->json(new RemoteActivityResource($display_activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function update_activity(Request $request, RemoteActivity $remote_activity) {
@@ -158,7 +156,8 @@ class RemoteController extends Controller
     public function remote_list(?User $user = null) {
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
-        $out = Remote::buildRemote(usage_user_id: $user->id)->cursorPaginate();
+        $out_laravel = Remote::buildRemote(usage_user_id: $user->id);
+        $out = $out_laravel->cursorPaginate();
         return response()->json(new RemoteCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -216,7 +215,7 @@ class RemoteController extends Controller
     protected function updateAllRemote(Remote $remote, Request $request) {
 
         (new RemoteUriGathering($request) )->assign($remote);
-
+        $remote->save();
         $this->updateInUseRemote($remote,$request); //saved at this point
 
         (new DataGathering($request) )->assign($remote);

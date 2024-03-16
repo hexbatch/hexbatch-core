@@ -57,6 +57,7 @@ class GroupTypeGathering
             } else {
                 $remote->usage_group_id = $this->usage_group->id;
             }
+            $remote->save();
         }
 
     }
