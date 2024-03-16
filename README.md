@@ -31,6 +31,10 @@ https://github.com/mateusjunges/laravel-kafka
 
 can clear out just part of the redis cache `php artisan cache:clear --tags=tests`
 
+# Now working on the remote stacks
+
+Not listed in the specs because it is an implementation to enable the rest of the spec
+
 ## Kafka stuff
 
 https://hub.docker.com/r/bitnami/kafka
