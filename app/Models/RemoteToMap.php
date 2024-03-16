@@ -9,11 +9,13 @@ use App\Helpers\Utilities;
 use App\Models\Enums\Remotes\RemoteToMapType;
 use App\Models\Enums\Remotes\RemoteDataFormatType;
 use App\Models\Enums\Remotes\RemoteToSourceType;
+use App\Rules\ResourceNameReq;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 use JsonPath\InvalidJsonPathException;
 use JsonPath\JsonObject;
 use JsonPath\JsonPath;
@@ -140,7 +142,19 @@ class RemoteToMap extends Model
         }
 
         if ($c->has('remote_data_name')) {
-            $ret->remote_data_name = $c->get('remote_data_name') ? $c->get('remote_data_name'): null;
+            $name = $c->get('remote_data_name') ? $c->get('remote_data_name'): null;
+            if ($name) {
+                try {
+                    Validator::make(['remote_data_name' => $name], [
+                        'remote_data_name' => ['required',  'max:128','string', new ResourceNameReq],
+                    ])->validate();
+                } catch (\Illuminate\Validation\ValidationException $v) {
+                    throw new HexbatchNotPossibleException(__("msg.remote_map_invalid_name",['ref'=>$name,'error'=>$v->getMessage()]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::REMOTE_SCHEMA_ISSUE);
+                }
+                $ret->remote_data_name = $name;
+            }
         }
 
         if (empty($ret->holder_json_path) && $c->has('remote_data_value')) {
@@ -191,14 +205,49 @@ class RemoteToMap extends Model
             $data = $jo->get($this->holder_json_path);
         }
         if (is_null($data) || $data === false ) {return [];}
-        //maybe cast this data
         if ($this->cast_data_to_format) {
+        //maybe cast this data, but  different if this is a file
+        if ($this->map_type ===RemoteToMapType::FILE ) {
+            //always return a string here
+            switch ($this->cast_data_to_format) {
+                case RemoteDataFormatType::TEXT:
+                case RemoteDataFormatType::FORM_URLENCODED:
+                case RemoteDataFormatType::MULTIPART_FORM_DATA:
+                case RemoteDataFormatType::QUERY:
+                case RemoteDataFormatType::JSON:
+                {
+                    $data = Utilities::maybeEncodeJson($data);
+                    break;
+                }
+
+                case RemoteDataFormatType::YAML: {
+                    $data = Yaml::dump($data);
+                    break;
+                }
+                case RemoteDataFormatType::XML: {
+
+                    try {
+                        $data = Array2XML::createXML($data)->saveXML();
+                    } catch (\Exception $e) {
+                        throw new \RuntimeException("Cannot convert to xml text ". $e->getMessage(),$e->getCode(),$e);
+                    }
+                    if ($data === false) {
+                        throw new \RuntimeException("Cannot convert to xml text");
+                    }
+                    break;
+                }
+
+            }
+        } else {
             switch ($this->cast_data_to_format) {
                 case RemoteDataFormatType::TEXT:
                 {
                     $data = Utilities::maybeDecodeJson($data);
                     break;
                 }
+                case RemoteDataFormatType::FORM_URLENCODED:
+                case RemoteDataFormatType::MULTIPART_FORM_DATA:
+                case RemoteDataFormatType::QUERY:
                 case RemoteDataFormatType::JSON:
                 {
                     break;
@@ -213,7 +262,11 @@ class RemoteToMap extends Model
                     $data = Array2XML::createXML($data);
                     break;
                 }
+
             }
+        }
+
+
         }
         if($this->remote_data_name) {
             $ret[$this->remote_data_name] = $data;

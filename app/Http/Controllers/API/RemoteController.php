@@ -140,17 +140,19 @@ class RemoteController extends Controller
         $out = RemoteActivity::buildActivity(id:$checked_activity->id)->first();
         return response()->json(new RemoteActivityResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
-    public function list_activities(RemoteActivityStatusType $remote_activity_status_type) {
+    public function list_activities(?RemoteActivityStatusType $remote_activity_status_type = null) {
         //either this is an admin or this is a user getting the usage things
         //just do usage now
         $remotes = Remote::buildRemote(usage_user_id: Utilities::getTypeCastedAuthUser()->id)->pluck('id')->toArray();
         $activities = RemoteActivity::buildActivity(remote_activity_status_type: $remote_activity_status_type,remote_id_array: $remotes)->cursorPaginate();
         return response()->json(new RemoteActivityCollection($activities), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
-    public function get_activity(RemoteActivity $remote_activity) {
+    public function get_activity(RemoteActivity $remote_activity,?string $full = null) {
+        $n_level = (int)$full;
+        if ($n_level <= 0) { $n_level =0;}
         $this->usageCheck($remote_activity->remote_parent);
         $activity = RemoteActivity::buildActivity(id: $remote_activity->id)->first();
-        return response()->json(new RemoteActivityResource($activity), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new RemoteActivityResource($activity,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function remote_list(?User $user = null) {

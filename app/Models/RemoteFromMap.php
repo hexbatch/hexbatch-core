@@ -7,9 +7,11 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Enums\Remotes\RemoteFromMapType;
+use App\Rules\ResourceNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 use JsonPath\InvalidJsonPathException;
 use JsonPath\JsonObject;
 use JsonPath\JsonPath;
@@ -119,7 +121,19 @@ class RemoteFromMap extends Model
         }
 
         if ($c->has('remote_data_name')) {
-            $ret->remote_data_name = $c->get('remote_data_name') ? $c->get('remote_data_name'): null;
+            $name = $c->get('remote_data_name') ? $c->get('remote_data_name'): null;
+            if ($name) {
+                try {
+                    Validator::make(['remote_data_name' => $name], [
+                        'remote_data_name' => ['required', 'string', 'max:128', new ResourceNameReq],
+                    ])->validate();
+                } catch (\Illuminate\Validation\ValidationException $v) {
+                    throw new HexbatchNotPossibleException(__("msg.remote_map_invalid_name",['ref'=>$name,'error'=>$v->getMessage()]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::REMOTE_SCHEMA_ISSUE);
+                }
+                $ret->remote_data_name = $name;
+            }
         }
 
         return $ret;
@@ -147,44 +161,20 @@ class RemoteFromMap extends Model
         if (empty($this->remote_regex_match) ) return [];
         $ret = [];
         $matches = [];
-        $preg_ret = preg_match_all($this->remote_regex_match,$my_data,$matches,PREG_SET_ORDER);
+        $preg_ret = preg_match_all($this->remote_regex_match,$my_data,$matches);
         if (empty($preg_ret)) {return [];}
         if (empty($matches)) {return [];}
-        //look at matches, if any element has a two-dimensional array greater than 1, then we return all the non-zero index
-        //else we return the concatenated 0 index
-
-        $vals = [];
-        //first pass look at return size
-        $b_submatches = false;
-        foreach ($matches as $m) {
-            if (count($m) > 1) {$b_submatches = true; break;}
-        }
-
-        if ($b_submatches) {
-            foreach ($matches as $m) {
-                if (!is_array($m)) {continue;}
-
-                for($i = 1; $i < count($m); $i++) {
-                    if (!isset($m[$i])) { break;}
-                    $vals[] = $m[$i];
-                }
-            }
-        } else {
-            foreach ($matches as $m) {
-                if (is_array($m)) {
-                    $vals[] = $m[0];
-                } else {
-                    $vals[] = $m;
-                }
-
+        foreach ($matches as $m_key => $m_val) {
+            if (is_int($m_key)) {continue;}
+            if($this->remote_data_name) {
+                $ret[$this->remote_data_name] = $m_val;
+            } else {
+                $ret[] = $m_val;
             }
         }
 
-        if($this->remote_data_name) {
-            $ret[$this->remote_data_name] = $vals;
-        } else {
-            $ret[] = $vals;
-        }
+
+
 
 
         return $ret;

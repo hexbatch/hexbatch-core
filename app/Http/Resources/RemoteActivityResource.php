@@ -39,8 +39,48 @@ class RemoteActivityResource extends JsonResource
         if ($this->n_display_level === 1) {
             return $ret;
         }
+        $ret =  [
+            'uuid'      => $this->ref_uuid,
+            'status'    => $this->remote_activity_status_type->value,
+            'started_at'=> Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
+            'ended_at'  => $this->remote_call_ended_at_ts? Carbon::createFromTimestamp($this->remote_call_ended_at_ts)->toIso8601String(): null ,
 
-        $ret['remote'] = new RemoteResource($this->remote_parent,null,$this->n_display_level - 1);
+            'callers' => [
+                'stack' => $this->caller_action ? new UserGroupResource($this->caller_action,null,$this->n_display_level - 1) : null,
+                'attribute' => $this->caller_attribute ? new AttributeResource($this->caller_attribute,null,$this->n_display_level - 1) : null,
+                'user' => $this->caller_user ? new UserResource($this->caller_user,null,$this->n_display_level - 1) : null,
+                'server' => $this->caller_server ? new ServerResource($this->caller_server,null,$this->n_display_level - 1) : null,
+                'element' => $this->caller_element ? new ElementResource($this->caller_element,null,$this->n_display_level - 1) : null,
+                'type' => $this->caller_type ? new ElementTypeResource($this->caller_type,null,$this->n_display_level - 1) : null,
+            ],
+            'cache' => [
+              'status' => $this->cache_status_type->value  ,
+              'policy' => $this->cache_policy_type->value
+            ],
+
+            'input_data' => [
+                'to_remote_processed_data'=> $this->to_remote_processed_data,
+                'to_remote_files'=> $this->to_remote_files,
+                'to_headers'=> $this->to_headers,
+            ],
+
+            'output_data' => [
+                'response_code'=> $this->response_code,
+                'from_remote_processed_data'=> $this->from_remote_processed_data,
+                'from_remote_raw_text'=> $this->from_remote_raw_text,
+                'from_headers'=> $this->from_headers,
+            ],
+
+            'errors' => $this->errors,
+
+            'consumer_passthrough_data' => $this->consumer_passthrough_data,
+
+            'remote' => new RemoteResource($this->remote_parent,null,$this->n_display_level - 1)
+        ];
+
+        if ($this->n_display_level > 2) {
+            $ret['callers']['location_geo_json'] = !empty($this->location_geo_json) ? $this->location_geo_json : null;
+        }
 
         return $ret;
     }

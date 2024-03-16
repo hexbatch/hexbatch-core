@@ -115,7 +115,7 @@ class AttributeMetum extends Model
         }
 
         if (!is_string($maybe_value) || (mb_strlen($maybe_value) >= static::META_VALUE_MAX_LENGTH )) {
-            throw new HexbatchNotPossibleException(__("msg.attribute_schema_empty_meta"),
+            throw new HexbatchNotPossibleException(__("msg.attribute_schema_too_long_meta"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
         }

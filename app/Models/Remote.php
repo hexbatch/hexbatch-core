@@ -133,12 +133,6 @@ class Remote extends Model
     ];
 
 
-    public function activity_of_remote() : HasMany {
-        return $this->hasMany('App\Models\RemoteActivity','remote_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts");
-    }
-
     public function meta_of_remote() : HasOne {
         return $this->hasOne('App\Models\RemoteMetum','parent_remote_id')
             ->select('*')
@@ -177,8 +171,9 @@ class Remote extends Model
         if (!$this->id) {return false;}
         $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
         if ($b_exist) {return true;}
+        $b_exist =  RemoteActivity::where('parent_remote_id',$this->id)->where('remote_activity_status_type',RemoteActivityStatusType::PENDING)->exists();
+        if ($b_exist) {return true;}
         return false;
-        //todo also check any activities that are still pending
     }
 
     /**
@@ -496,7 +491,7 @@ class Remote extends Model
             if ($rule->source_type !== $source) { continue; }
             $pair = $rule->applyRuleToGiven($my_data);
             if (!empty($pair)) {
-                $ret = array_merge($ret,$pair);
+                $ret = array_merge_recursive($ret,$pair);
             }
         }
         return $ret;
@@ -510,8 +505,8 @@ class Remote extends Model
         switch ($this->from_remote_format) {
             case RemoteDataFormatType::TEXT :
             {
-                if (is_object($what) || is_array($what)) {
-                    return Utilities::wrapJsonEncode($what);
+                if (is_array($what)) {
+                    return implode("\n",$what);
                 }
                 return (string)$what;
             }
@@ -549,6 +544,10 @@ class Remote extends Model
                    throw new \RuntimeException("Cannot process yaml string: ".$e->getMessage());
                }
             }
+            case RemoteDataFormatType::FORM_URLENCODED:
+            case RemoteDataFormatType::MULTIPART_FORM_DATA:
+            case RemoteDataFormatType::QUERY:
+                throw new \LogicException('From cannot have this value: '. $this->from_remote_format->value);
         }
         throw new \LogicException("Format type mismatch in the code: ". $this->from_remote_format->value);
     }
@@ -563,9 +562,10 @@ class Remote extends Model
                     if ($rule->map_type !== RemoteFromMapType::DATA) {continue;}
                     $pair = $rule->applyRuleToString($casted_data);
                     if (!empty($pair)) {
-                        $ret = array_merge($ret, $pair);
+                        $ret = array_merge_recursive($ret, $pair);
                     }
                 }
+                break;
             }
             case RemoteDataFormatType::XML :
             case RemoteDataFormatType::JSON :
@@ -575,16 +575,21 @@ class Remote extends Model
                     if ($rule->map_type !== RemoteFromMapType::DATA) {continue;}
                     $pair = $rule->applyRuleToJson($casted_data);
                     if (!empty($pair)) {
-                        $ret = array_merge($ret, $pair);
+                        $ret = array_merge_recursive($ret, $pair);
                     }
                 }
+                break;
             }
+            case RemoteDataFormatType::FORM_URLENCODED:
+            case RemoteDataFormatType::MULTIPART_FORM_DATA:
+            case RemoteDataFormatType::QUERY:
+                throw new \LogicException('From cannot have this value: '. $this->from_remote_format->value);
         }
         foreach ($this->rules_from_remote as $rule) {
             if ($rule->map_type !== RemoteFromMapType::HEADER) {continue;}
             $pair = $rule->applyRuleToJson($headers);
             if (!empty($pair)) {
-                $ret = array_merge($ret, $pair);
+                $ret = array_merge_recursive($ret, $pair);
             }
         }
 
@@ -592,29 +597,35 @@ class Remote extends Model
             if ($rule->map_type !== RemoteFromMapType::RESPONSE_CODE) {continue;}
             $pair = $rule->applyRuleToString(strval($code));
             if (!empty($pair)) {
-                $ret = array_merge($ret, $pair);
+                $ret = array_merge_recursive($ret, $pair);
             }
         }
 
         return $ret;
     }
 
-    public function convertToRemoteStringFormat(array $data) : ?string {
+    public function convertToRemoteFormat(array $data) : null|string|array {
         if (empty($data)) {return null;}
 
         switch ($this->to_remote_format) {
-            case RemoteDataFormatType::TEXT:
-            case RemoteDataFormatType::JSON:
-            {
+            case RemoteDataFormatType::TEXT: {
                 return Utilities::maybeEncodeJson($data);
             }
+
+            case RemoteDataFormatType::JSON:
+            case RemoteDataFormatType::QUERY:
+            case RemoteDataFormatType::FORM_URLENCODED:
+            case RemoteDataFormatType::MULTIPART_FORM_DATA: {
+                return $data;
+        }
+
 
             case RemoteDataFormatType::YAML: {
                 return Yaml::dump($data);
             }
             case RemoteDataFormatType::XML: {
                 /** @noinspection PhpUnhandledExceptionInspection */
-                return Array2XML::createXML($this->xml_root_name??'root',$data,$this->xml_doc_type->getArrayCopy())->saveXML();
+                return Array2XML::createXML($this->xml_root_name??'root',$data,$this->xml_doc_type?->getArrayCopy()??[])->saveXML();
                 /*
                  '@docType' => [
                             'name' => 'root',

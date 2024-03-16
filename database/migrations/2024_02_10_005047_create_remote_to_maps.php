@@ -72,7 +72,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('remote_to_maps');
-        Schema::dropIfExists('type_to_remote_source');
+        DB::statement("DROP TYPE type_to_remote_source;");
         DB::statement("DROP TYPE type_to_remote_map;");
     }
 };

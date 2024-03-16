@@ -39,6 +39,12 @@ class AttributeResource extends JsonResource
             return [$this->getName()];
         }
 
+        if ($this->n_display_level === 1) {
+            return [
+                'uuid' => $this->ref_uuid,
+                'name' => $this->getName()
+                ];
+        }
 
         $ret =  [
             'uuid' => $this->ref_uuid,

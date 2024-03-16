@@ -107,6 +107,12 @@ class RemoteUriGathering
 
         if ($uri_block->has('uri_from_remote_format')) {
             $convert = RemoteDataFormatType::tryFrom($uri_block->get('uri_from_remote_format'));
+            if ($convert && !in_array($convert,RemoteDataFormatType::ALLOWED_FROM_REMOTE) ) {
+                throw new HexbatchNotPossibleException(__("msg.remote_uri_invalid_from_type",
+                    ['allowed'=> implode(',',RemoteDataFormatType::ALLOWED_FROM_REMOTE)]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::REMOTE_SCHEMA_ISSUE);
+            }
             $this->from_remote_format = $convert ?: null;
         }
 

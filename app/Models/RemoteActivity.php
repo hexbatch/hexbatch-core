@@ -8,6 +8,7 @@ use App\Helpers\Utilities;
 use App\Models\Enums\Remotes\RemoteCachePolicyType;
 use App\Models\Enums\Remotes\RemoteCacheStatusType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
+use App\Models\Enums\Remotes\RemoteDataFormatType;
 use App\Models\Enums\Remotes\RemoteToMapType;
 use App\Models\Enums\Remotes\RemoteUriMethod;
 use App\Models\Enums\Remotes\RemoteUriProtocolType;
@@ -171,43 +172,33 @@ class RemoteActivity extends Model
             $build->where('remote_activities.id', $id);
         }
         //do join to parent for common causes
-        if (count($remote_id_array) || $uri_type) {
+        if ($uri_type) {
 
-            $build->join('remote_uris as par_remote_uri',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join->on('par_remote_uri.id','=','remote_activities.remote_uri_id');
-                }
-            );
-        }
-
-        //get remote for common
-        if (count($remote_id_array) ) {
             $build->join('remotes as par_remote',
                 /**
                  * @param JoinClause $join
                  */
-                function (JoinClause $join) use($uri_type) {
-                    $join->on('par_remote.id','=','remote_uris.remote_id');
+                function (JoinClause $join)  {
+                    $join->on('par_remote.id','=','remote_activities.parent_remote_id');
                 }
             );
         }
 
+
+
         if (count($remote_id_array) ) {
-            $build->whereIn('par_remote.id',$remote_id_array);
+            $build->whereIn('remote_activities.parent_remote_id',$remote_id_array);
         }
 
         if ($remote_activity_status_type) {
-            $build->where('remote_activity_status_type.remote_activity_status_type', $remote_activity_status_type->value);
+            $build->where('remote_activities.remote_activity_status_type', $remote_activity_status_type->value);
         }
         if ($cache_status_type) {
-            $build->where('remote_activity_status_type.cache_status_type', $cache_status_type->value);
+            $build->where('remote_activities.cache_status_type', $cache_status_type->value);
         }
 
         if ($uri_type) {
-            $build->where('par_remote_uri.uri_type',$uri_type->value);
+            $build->where('par_remote.uri_type',$uri_type->value);
         }
 
         return $build;
@@ -325,9 +316,19 @@ class RemoteActivity extends Model
         //todo check if completed or error and send event that this is done
     }
 
-    /**
-     * @throws GuzzleException
-     */
+    protected function getGuzzleToFormat() :string  {
+        switch ($this->remote_parent->to_remote_format) {
+            case RemoteDataFormatType::XML:
+            case RemoteDataFormatType::TEXT:
+            case RemoteDataFormatType::YAML: return 'body';
+            case RemoteDataFormatType::JSON: return 'json';
+            case RemoteDataFormatType::QUERY: return 'query';
+            case RemoteDataFormatType::MULTIPART_FORM_DATA: return 'multipart';
+            case RemoteDataFormatType::FORM_URLENCODED: return 'form_params';
+        }
+        throw new \LogicException("Missing cases");
+    }
+
     public function doCallRemote(mixed $manual_data = null) {
         $this->remote_activity_status_type = RemoteActivityStatusType::STARTED;
         $this->save();
@@ -361,45 +362,49 @@ class RemoteActivity extends Model
                         $data = $this->to_remote_processed_data;
 
                         $options = [];
-                        if (count($this->to_remote_files)) {
-                            $multi = [];
-                            $data[static::IDENTIFYING_DATA_KEY] = $this->getIdentifyingData();
-                            foreach ($data as $data_key => $data_val) {
-                                $multi[] = [
-                                    'name'     => $data_key,
-                                    'contents' => $data_val,
-                                ];
-                            }
-                            foreach ($this->to_remote_files as $k => $file_contents) {
-                                $tmpfname = tempnam(sys_get_temp_dir(), 'remote-' . $this->remote_parent . '-' . $k . '-');
-                                $temp_files[] = $tmpfname;
-                                $handle = fopen($tmpfname, "w");
-                                fwrite($handle, $file_contents);
-                                fclose($handle);
-                                $multi[] = [
-                                    'name'     => $k,
-                                    'contents' => \GuzzleHttp\Psr7\Utils::tryFopen($tmpfname, 'r'),
-                                ];
-                            }
-                            $options['multipart'] = $multi;
-                        } else {
-                            switch ($this->remote_parent->uri_method_type) {
-                                case RemoteUriMethod::GET: {
-                                    $options['query'] = $data->getArrayCopy();
-                                    break;
-                                }
-                                case RemoteUriMethod::DELETE:
-                                case RemoteUriMethod::PATCH:
-                                case RemoteUriMethod::POST:
-                                case RemoteUriMethod::PUT: {
+                        $guzzle_to_format = $this->getGuzzleToFormat();
+
+                        switch ($this->remote_parent->uri_method_type) {
+
+                            case RemoteUriMethod::GET:
+                            case RemoteUriMethod::DELETE:
+                            case RemoteUriMethod::PATCH:
+                            case RemoteUriMethod::POST:
+                            case RemoteUriMethod::PUT: {
+                                $data_out = [];
+                                if ($this->remote_parent->to_remote_format !== RemoteDataFormatType::QUERY) {
                                     $data[static::IDENTIFYING_DATA_KEY] = $this->getIdentifyingData();
-                                    $options['body'] = $this->remote_parent->convertToRemoteStringFormat($data->getArrayCopy());
-                                    break;
                                 }
-                                case RemoteUriMethod::NONE:
-                                    throw new \LogicException("Uri method is set to none");
+                                if ($this->remote_parent->to_remote_format === RemoteDataFormatType::MULTIPART_FORM_DATA) {
+                                    foreach ($data as $data_key => $data_val) {
+                                        $data_out[] = [
+                                            'name'     => $data_key,
+                                            'contents' => (is_array($data_val)? Utilities::maybeEncodeJson($data_val):$data_val),
+                                        ];
+                                    }
+                                    foreach (($this->to_remote_files??[]) as $k => $file_contents) {
+                                        $tmpfname = tempnam(sys_get_temp_dir(), 'remote-' . $this->remote_parent . '-' . $k . '-');
+                                        $temp_files[] = $tmpfname;
+                                        $handle = fopen($tmpfname, "w");
+                                        fwrite($handle, $file_contents);
+                                        fclose($handle);
+                                        $data_out[] = [
+                                            'name'     => $k,
+                                            'contents' => \GuzzleHttp\Psr7\Utils::tryFopen($tmpfname, 'r'),
+                                            'filename' => $k
+                                        ];
+                                    }
+                                } else {
+                                    $data_out = $this->remote_parent->convertToRemoteFormat($data->getArrayCopy());
+                                }
+
+                                $options[$guzzle_to_format] = $data_out;
+                                break;
                             }
+                            case RemoteUriMethod::NONE:
+                                throw new \LogicException("Uri method is set to none");
                         }
+
 
                         $options['headers'] = $this->to_headers->getArrayCopy();
 
@@ -417,8 +422,28 @@ class RemoteActivity extends Model
 
                         $command_args_array = [];
                         foreach ($this->to_remote_processed_data as $k => $v) {
-                            $command_args_array[] = "$k$v";
-                        }
+                            if (!is_array($v)) {
+                                $args = [$v];
+                            } else {
+                                $args = $v;
+                            }
+                            if (is_int($k)) {
+                                foreach ($args as $what_arg) {
+                                    $command_args_array[] = $what_arg;
+                                }
+
+                            } else {
+                                foreach ($args as $what_key => $what_arg) {
+                                    if (is_int($what_key)) {
+                                        $command_args_array[] = $what_arg;
+                                    } else {
+                                        $command_args_array[] = "$what_key$what_arg";
+                                    }
+
+                                }
+
+                            }
+                        } //end foreach args
 
                         foreach ($this->to_remote_files as $k => $file_contents) {
                             $tmpfname = tempnam(sys_get_temp_dir(),'remote-'.$this->remote_parent.'-'.$k .'-');
@@ -435,13 +460,18 @@ class RemoteActivity extends Model
                     case RemoteUriType::CODE: {
                         $class = $this->remote_parent->remote_uri_main;
                         $method = $this->remote_parent->remote_uri_path;
-                        if (empty($this->to_remote_processed_data)) {
-                            $from_data = $class::$method();
-                        } else {
-                            $data = $this->to_remote_processed_data;
-                            $data[static::IDENTIFYING_DATA_KEY] = $this->getIdentifyingData();
-                            $data_array = $data->getArrayCopy();
-                            $from_data = $class::$method(...$data_array);
+
+                        try {
+                            if (empty($this->to_remote_processed_data)) {
+                                $from_data = $class::$method();
+                            } else {
+                                $data = $this->to_remote_processed_data;
+                                $data[static::IDENTIFYING_DATA_KEY] = $this->getIdentifyingData();
+                                $data_array = $data->getArrayCopy();
+                                $from_data = $class::$method(...$data_array);
+                            }
+                        } catch (\Error|\Exception $e) {
+                            throw new \RuntimeException("Could not execute code for remote: ". $e->getMessage(),$e->getCode(),$e);
                         }
 
                         break;
@@ -455,7 +485,7 @@ class RemoteActivity extends Model
                 }
 
                 $this->from_headers = $headers;
-                $this->from_remote_raw_text = $from_data;
+                $this->from_remote_raw_text = Utilities::maybeEncodeJson($from_data);
                 $this->from_remote_processed_data = $this->remote_parent->processDataFromSend($from_data,$code,$headers);
                 $this->response_code = $code;
                 $this->remote_activity_status_type = RemoteActivityStatusType::SUCCESS;

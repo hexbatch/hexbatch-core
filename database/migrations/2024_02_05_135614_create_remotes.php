@@ -78,7 +78,7 @@ return new class extends Migration
 
         #------------------------------
         DB::statement("CREATE TYPE type_remote_data_format AS ENUM (
-            'text','xml','json','yaml'
+            'text','xml','json','yaml','form-urlencoded','multipart-form-data','query'
             );");
 
         DB::statement("ALTER TABLE remotes Add COLUMN to_remote_format type_remote_data_format  NOT NULL default 'text';");
@@ -123,7 +123,7 @@ return new class extends Migration
 
 
 
-            $table->boolean('is_caching')->default(true)->nullable(false)
+            $table->boolean('is_caching')->default(false)->nullable(false)
                 ->comment('if true then using caching');
 
             $table->boolean('is_using_cache_on_failure')->default(false)->nullable(false)
@@ -155,7 +155,7 @@ return new class extends Migration
                 ->comment('information for building doc type for xml going out');
 
             $table->string('xml_root_name')->nullable()->default(null)
-                ->comment("root dom element name for the xml gooing ouit");
+                ->comment("root dom element name for the xml gooing out");
 
             $table->string('remote_name')->nullable(false)
                 ->comment("to id this to humans no checking and can be anything");

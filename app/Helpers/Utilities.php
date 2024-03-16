@@ -97,7 +97,7 @@ class Utilities {
         return strval($what);
     }
 
-    public static function maybeDecodeJson(mixed $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array {
+    public static function maybeDecodeJson(mixed $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array|string {
         if (empty($maybe_json)) { return $null_default;}
         if (is_array($maybe_json) && $b_associative) {
             return $maybe_json;
@@ -109,7 +109,7 @@ class Utilities {
             $json = json_encode($maybe_json);
         } else {
             if (static::jsonHasErrors($maybe_json)) {
-                return $null_default;
+                return $maybe_json;
             }
             $json = $maybe_json;
         }
