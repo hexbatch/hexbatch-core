@@ -16,7 +16,6 @@ return new class extends Migration
 
             $table->id();
 
-
             $table->foreignId('user_group_id')
                 ->nullable(false)
                 ->comment("The group this entry is for")
@@ -48,6 +47,7 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON user_group_members FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+
     }
 
     /**

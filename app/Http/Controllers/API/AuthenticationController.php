@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchAuthException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\User;
@@ -26,7 +27,7 @@ class AuthenticationController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'username'=>['required','string','max:30'],
+            'username'=>['required','string','max:61'],
             'password'=>['required','string','min:8']
         ]);
 
@@ -52,7 +53,7 @@ class AuthenticationController extends Controller
     public function logout(): JsonResponse
     {
         // Get the authenticated user
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         // revoke the users token
         $user->tokens()->delete();
 

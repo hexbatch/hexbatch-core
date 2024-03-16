@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserGroupCollection;
 use App\Http\Resources\UserGroupMemberCollection;
@@ -22,7 +23,7 @@ class UserGroupController extends Controller
 
     protected function adminCheck(UserGroup $group) {
 
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         if (!$group->isAdmin($user?->id)) {
             throw new HexbatchPermissionException(__("msg.group_only_admin_changes_membership"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
@@ -56,7 +57,7 @@ class UserGroupController extends Controller
     public function group_create(?string $group_name): JsonResponse {
         $group = new UserGroup();
         $group->setGroupName($group_name);
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         $conflict =  UserGroup::where('user_id', $user?->id)->where('group_name',$group->group_name)->first();
         if ($conflict) {
             throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$group->group_name]),
@@ -72,7 +73,7 @@ class UserGroupController extends Controller
 
     public function group_destroy(UserGroup $group): JsonResponse {
 
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         if ($group->user_id !== $user->id) {
             throw new HexbatchPermissionException(__("msg.group_only_owner_can_delete"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
@@ -100,7 +101,6 @@ class UserGroupController extends Controller
         $this->adminCheck($group);
         $this->memberCheck($group,$some_user);
         $old_member = $group->removeMember($some_user->id);
-
         return response()->json(new UserGroupMemberResource($old_member), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -133,14 +133,15 @@ class UserGroupController extends Controller
     }
 
     public function list_my_groups(): JsonResponse {
-        $ret = UserGroup::buildGroup(auth()?->user()->id)->cursorPaginate();
+        $ret = UserGroup::buildGroup(Utilities::getTypeCastedAuthUser()?->id)->cursorPaginate();
         return (new UserGroupCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function group_get(UserGroup $group) {
-        $this->memberCheck($group,auth()->user());
-        $ret = UserGroup::buildGroup(auth()?->user()->id)->first();
+        $user = Utilities::getTypeCastedAuthUser();
+        $this->memberCheck($group,$user);
+        $ret = UserGroup::buildGroup($user->id)->first();
         return response()->json(new UserGroupResource($ret,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 }

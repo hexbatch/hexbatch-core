@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
@@ -36,6 +36,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int element_type_id
  * @property int element_id
  * @property int user_group_id
+ * @property int server_id
  * @property string ref_uuid
  *
  * @property Element user_element
@@ -82,6 +83,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    const SYSTEM_NAME = 'system';
+    const SYSTEM_UUID = '2e3bfcdc-ac5b-4229-8919-b5a9a67f7701';
 
     public function user_element() : BelongsTo {
         return $this->belongsTo('App\Models\Element','element_id');
@@ -157,6 +161,8 @@ class User extends Authenticatable
      * @throws ValidationException
      */
     public function initUser() {
+
+
         if (!$this->user_group_id) {
             $group =  new UserGroup();
             $group->setGroupName($this->username);
@@ -165,6 +171,35 @@ class User extends Authenticatable
             $group->addMember($this->id,true);
             $this->user_group_id = $group->id;
             $this->save();
+        }
+
+    }
+
+    protected static ?User $system_user = null;
+    public static function getOrCreateSystemUser(bool &$b_new = false) : User {
+        if (static::$system_user) {return static::$system_user;}
+        $user = User::where('ref_uuid',User::SYSTEM_UUID)->first();
+        if ($user) {
+            return static::$system_user = $user;
+        }
+        $b_new = true;
+        $pw = config('hbc.system_user_pw');
+        if (!$pw) {
+            throw new \LogicException("System user pw is not set in .evn");
+        }
+        try {
+
+            $user = (new CreateNewUser)->create([
+                "username" => User::SYSTEM_NAME,
+                "password" => $pw,
+                "password_confirmation" => $pw
+            ]);
+            $user->ref_uuid =  User::SYSTEM_UUID;
+            $user->save();
+            $user->refresh();
+            return static::$system_user = $user;
+        } catch (ValidationException $e) {
+            throw new \LogicException("Cannot create system user because ".$e->getMessage());
         }
     }
 

@@ -8,6 +8,12 @@ return [
     |--------------------------------------------------------------------------
     |
     */
+    //general
+    'this_is_bad_json' => 'The json value is malformed. :issue',
+    'cannot_convert_to_json' => 'The value cannot be converted to json :issue',
+    'not_map_coordinate' => 'The value is not a map coordinate',
+    'not_shape_coordinate' => 'The value is not a shape coordinate',
+    'not_timezone' => 'The value is not a timezone',
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
@@ -51,7 +57,6 @@ return [
     'attribute_schema_bounds_violation' => 'When making an attribute, each bounds type has to be in a certain key',
     'attribute_schema_bounds_retired' => 'This bounds, ":bound_name" has been retired and cannot be added to the attribute',
     'attribute_schema_bad_regex' => 'When making an attribute, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
-    'attribute_schema_bad_json' => 'The json value is malformed. :issue',
     'attribute_schema_json_no_primitive' => 'The json value cannot be a primitive',
     'attribute_schema_improper_map_coordinate' => 'Map coodinates must have latitude and longitude properties and numbers in map ranges',
     'attribute_schema_improper_shape_coordinate' => 'Shape coodinates must have properies of x,y,x',
@@ -62,12 +67,8 @@ return [
     'attribute_schema_default_retired' => 'The resource :name is retired and cannot be added as a default value',
     'attribute_schema_bad_meta' => 'Adding a meta requires a minimum of a type and value, language and mime is optional',
     'attribute_schema_unsupported_meta_type' => 'Unsupported attribute meta type of :type',
-    'attribute_schema_admin_meta_type' => 'The attribute meta ":type" is protected',
     'attribute_schema_empty_meta' => 'Meta needs a non empty value',
-    'attribute_schema_bad_mime_meta' => 'Meta mime needs a string or empty or missing',
-    'attribute_schema_bad_mime_language' => 'Meta language needs an iso language or empty or missing',
-    'attribute_schema_bad_mime_url' => 'Meta url needs to start with a http or https and have only question marks for punctuation, no spaces and be less than 100 chars',
-    'attribute_schema_bad_mime_json' => 'Meta json value has issue: :msg',
+    'attribute_schema_too_long_meta' => 'Meta needs to be a string and less than 255 characters',
     'attribute_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
     'attribute_schema_need_admin_permission_group' => 'When adding user permission groups, the person needs to be an admin for the group :group_name',
     'attribute_schema_missing_rule_attribute' => 'When adding rules as object, need the attribute key to hold the name or id',
@@ -75,10 +76,47 @@ return [
     'attribute_schema_rule_retired' => 'This attribute, ":name" has been retired and new rules using this cannot be added to an attribute',
     'attribute_in_use_cannot_change' => 'Attributes in use cannot edited or deleted. Remove dependencies and try again',
 
+    //remotes
+    'remote_not_found' => 'Remote not found using :ref',
+    'remote_not_in_usage_group' => 'You are not allowed to use this remote :ref',
+    'remote_schema_meta_bounds_admin_group' => 'When adding meta time bounds or location as object, need to be in the admin group of the bounds :ref',
+    'remote_schema_meta_map_wrong_type' => 'When adding meta map bounds, this has to be a map type :ref',
+    'remote_schema_meta_empty_meta' => 'Meta needs a non empty string value when set: :ref',
+    'remote_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
+    'remote_schema_need_admin_permission_group' => 'Only group admins can add that group to be a remote usage group :group_name',
+    'remote_activity_not_owned_by_your_element' => 'You cannot use this activity because you are not an admin for the element :ref',
+    'remote_from_map_invalid_type' => 'Remote from mapping had an invalid type :ref',
+    'remote_to_source_invalid_type' => 'Remote to source had an invalid type :ref',
+    'remote_to_map_invalid_type' => 'Remote to mapping had an invalid type :ref',
+    'remote_sensitive_type' => 'Remote method of :method can only be set with permission',
+    'remote_need_uri_type' => 'Remote uri needs to be given a type',
+    'remote_mapped_data_type_wrong' => 'The mapped data casting type is wrong :what ',
+    'remote_uri_needs_method' => 'Remote uri needs to be given a method',
+    'remote_uri_needs_protocol' => 'Remote uri needs to be given a protocol',
+    'remote_uri_invalid_from_type' => 'Remote uri only expects the following in the from data type :allowed',
+    'remote_uri_invalid_xml_doc' => 'Remote uri needs the xml doc to be a json object',
+    'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
+    'remote_activity_not_found' => 'Remote activity not found using :ref',
+    'remote_activity_only_manual_updated' => 'Can only update manual types of remotes, but not :ref',
+    'remote_map_invalid_json_path' => 'The json path is not valid :ref',
+    'remote_map_invalid_regex' => 'The regex is not valid :ref',
+    'remote_map_invalid_name' => 'The name of the map entry should follow the same rules as the other names :ref : :error',
+    'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',
+    'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
+
+
+    //actions
+    'action_not_found' => 'Element not found using :ref',
 
     //element types
     'element_type_not_found' => 'Element type not found using :ref',
 
     //elements
     'element_not_found' => 'Element not found using :ref',
+
+    //servers
+    'server_not_found' => "Server not found using :ref"
+
+
+
 ];

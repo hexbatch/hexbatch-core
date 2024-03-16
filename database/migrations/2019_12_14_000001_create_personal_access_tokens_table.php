@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
             $table->jsonb('passthrough')->nullable()->default(null)
                 ->comment('data stored with the token when its created, not meant to be changed');
+            $table->timestamps();
         });
     }
 

@@ -3,24 +3,16 @@
 namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchCoreException;
-use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationBoundCollection;
 use App\Http\Resources\LocationBoundResource;
-use App\Models\Enums\LocationType;
+use App\Models\Enums\Bounds\LocationType;
 use App\Models\LocationBound;
-
 use App\Models\User;
-use App\Rules\GeoJsonReq;
-use GeoJson\GeoJson;
-use GeoJson\Geometry\MultiPolygon;
-use GeoJson\Geometry\Point;
-use GeoJson\Geometry\Polygon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 
@@ -30,8 +22,7 @@ class LocationBoundController extends Controller
      * @uses LocationBound::bound_owner()
      */
     protected function adminCheck(LocationBound $bound) {
-        $user = auth()->user();
-        $bound->bound_owner->checkAdminGroup($user->id);
+        $bound->bound_owner->checkAdminGroup(Utilities::getTypeCastedAuthUser()?->id);
     }
 
     public function location_bound_get(LocationBound $bound) {
@@ -59,7 +50,7 @@ class LocationBoundController extends Controller
     }
 
     public function location_bound_list(?User $user = null) {
-        $logged_user = auth()->user();
+        $logged_user = Utilities::getTypeCastedAuthUser();
         if (!$user) {$user = $logged_user;}
         $user->checkAdminGroup($logged_user->id);
         /** @var LocationBound $out */
@@ -91,7 +82,7 @@ class LocationBoundController extends Controller
             $bound->checkIsInUse();
         }
 
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
 
         if ($bound_name) {
             $bound->setName($bound_name,$user);
@@ -125,7 +116,7 @@ class LocationBoundController extends Controller
         }
 
         $bound = new LocationBound();
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         $bound->setName($bound_name,$user);
 
         $bound->user_id = $user->id;

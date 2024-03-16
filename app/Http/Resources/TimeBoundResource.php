@@ -34,8 +34,8 @@ class TimeBoundResource extends JsonResource
         $ret =  [
             'uuid' => $this->ref_uuid,
             'name' => $this->getName(),
-            'start' => (float)$this->bound_start_ts,
-            'stop' => (float)$this->bound_stop_ts,
+            'start' => Carbon::createFromTimestamp($this->bound_start_ts)->toIso8601String(),
+            'stop' => Carbon::createFromTimestamp($this->bound_stop_ts)->toIso8601String(),
             'is_retired' => $this->is_retired,
             'period_length' => $this->bound_period_length,
             'cron' => $this->bound_cron,
@@ -46,12 +46,6 @@ class TimeBoundResource extends JsonResource
             $ret['spans'] = new TimeBoundSpanCollection($this->time_spans);
         }
 
-        if ($request->query->getString('tz')) {
-            $ret['alt'] = [
-                'start' => Carbon::createFromTimestamp($this->bound_start_ts,$request->query->getString('tz'))->toIso8601String(),
-                'stop' => Carbon::createFromTimestamp($this->bound_stop_ts,$request->query->getString('tz'))->toIso8601String(),
-            ];
-        }
         return $ret;
     }
 }

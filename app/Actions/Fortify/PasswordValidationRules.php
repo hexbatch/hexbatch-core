@@ -2,7 +2,7 @@
 
 namespace App\Actions\Fortify;
 
-use Laravel\Fortify\Rules\Password;
+use Illuminate\Validation\Rules\Password;
 
 trait PasswordValidationRules
 {
@@ -16,10 +16,11 @@ trait PasswordValidationRules
         return [
             'required',
             'string',
-            (new Password)
-            ->requireNumeric()
-            ->requireSpecialCharacter()
-            ->length(10)
+            (new Password(10))
+            ->max(20)
+            ->letters()
+            ->numbers()
+            ->symbols()
             ,
             'confirmed'
         ];

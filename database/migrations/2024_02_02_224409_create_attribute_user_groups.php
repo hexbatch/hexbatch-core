@@ -31,7 +31,7 @@ return new class extends Migration
 
             $table->foreignId('target_user_group_id')
                 ->nullable(false)
-                ->comment("The user group this is aboutr")
+                ->comment("The user group this is about")
                 ->index('idx_attribute_user_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()

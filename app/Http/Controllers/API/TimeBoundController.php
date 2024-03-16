@@ -10,9 +10,7 @@ use App\Http\Resources\TimeBoundCollection;
 use App\Http\Resources\TimeBoundResource;
 use App\Http\Resources\TimeBoundSpanResource;
 use App\Models\TimeBound;
-use App\Models\TimeBoundSpan;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -29,7 +27,7 @@ class TimeBoundController extends Controller
      * @uses TimeBound::bound_owner()
      */
     protected function adminCheck(TimeBound $bound) {
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         $bound->bound_owner->checkAdminGroup($user->id);
     }
 
@@ -50,7 +48,7 @@ class TimeBoundController extends Controller
     }
 
     public function time_bound_list(Request $request,?User $user = null) {
-        $logged_user = auth()->user();
+        $logged_user = Utilities::getTypeCastedAuthUser();
         if (!$user) {$user = $logged_user;}
         $user->checkAdminGroup($logged_user->id);
         /** @var TimeBound $out */
@@ -124,7 +122,7 @@ class TimeBoundController extends Controller
 
 
         $bound = new TimeBound();
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         $bound->setName($bound_name,$user);
 
         $bound->user_id = $user->id;

@@ -68,7 +68,7 @@ class ElementType extends Model
          * @var Builder $build
          */
         $build = ElementType::select('element_types.*')
-            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
             ;
 
         if ($id) {
@@ -104,7 +104,7 @@ class ElementType extends Model
                         $parts = explode('.', $value);
                         if (count($parts) === 1) {
                             //must be owned by the user
-                            $user = auth()->user();
+                            $user = Utilities::getTypeCastedAuthUser();
                             $build = $this->where('user_id', $user?->id)->where('type_name', $value);
                         } else {
                             $owner = $parts[0];

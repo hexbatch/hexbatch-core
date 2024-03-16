@@ -6,19 +6,17 @@ use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Attributes\Apply\StandardAttributes;
 use App\Helpers\Utilities;
 use App\Http\Resources\AttributeMetaResource;
 use App\Http\Resources\AttributeRuleResource;
 use App\Http\Resources\UserGroupResource;
-use App\Models\Enums\AttributeRuleType;
-use App\Models\Enums\AttributeUserGroupType;
-use App\Models\Enums\AttributeValueType;
+use App\Models\Enums\Attributes\AttributeRuleType;
+use App\Models\Enums\Attributes\AttributeUserGroupType;
+use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\ResourceNameReq;
-use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
-
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -42,22 +40,14 @@ use Illuminate\Validation\ValidationException;
  * @property int read_shape_location_bounds_id
  * @property int write_shape_location_bounds_id
  * @property boolean is_retired
- * @property boolean is_constant
- * @property boolean is_static
+ * @property boolean is_system
  * @property boolean is_final
  * @property boolean is_human
  * @property boolean is_read_policy_all
  * @property boolean is_write_policy_all
- * @property boolean is_nullable
- * @property AttributeValueType value_type
- * @property int value_numeric_min
- * @property int value_numeric_max
- * @property string value_regex
- * @property ArrayObject value_default
  * @property string attribute_name
  * @property string created_at
  * @property string updated_at
- *
  *
  * @property int created_at_ts
  * @property int updated_at_ts
@@ -72,7 +62,8 @@ use Illuminate\Validation\ValidationException;
  * @property LocationBound write_shape_bound
  *
  * @property AttributeValuePointer attribute_pointer
- * @property AttributeMetum[] attribute_meta_all
+ * @property AttributeValue attribute_value
+ * @property AttributeMetum[] meta_of_attribute
  * @property AttributeRule[] da_rules
  * @property AttributeUserGroup[] permission_groups
  */
@@ -105,7 +96,7 @@ class Attribute extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'value_default' => AsArrayObject::class,
+
         'value_type' => AttributeValueType::class,
     ];
 
@@ -161,10 +152,15 @@ class Attribute extends Model
 
     }
 
-    public function attribute_meta_all() : HasMany {
-        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id')
-            ->orderBy('meta_type')
-            ->orderBy('meta_iso_lang');
+    public function attribute_value() : HasOne {
+        return $this->hasOne('App\Models\AttributeValue','parent_attribute_id')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts");
+
+    }
+
+    public function meta_of_attribute() : HasMany {
+        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id');
     }
 
     public function da_rules() : HasMany {
@@ -196,8 +192,11 @@ class Attribute extends Model
         if ($b_exist) {return true;}
         $b_exist =  AttributeRule::where('target_attribute_id',$this->id)->exists();
         if ($b_exist) {return true;}
+
+        $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
+        if ($b_exist) {return true;}
         return false;
-        //todo also check for the element type
+        //!later also check for attributes used in types
     }
 
     /**
@@ -231,7 +230,7 @@ class Attribute extends Model
          * @var Attribute $parent
          */
         $parent = (new Attribute())->resolveRouteBinding($parent_hint);
-        $user = auth()->user();
+        $user = Utilities::getTypeCastedAuthUser();
         //check if this user can use the parent attribute
         $maybe_group = $this->getPermissionGroup(AttributeUserGroupType::USAGE);
         if ($maybe_group) {
@@ -240,6 +239,12 @@ class Attribute extends Model
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
             }
+        }
+        //check if retired
+        if ($parent->is_retired) {
+            throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_retired",['name'=>$parent->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
         }
         $this->parent_attribute_id = $parent->id;
 
@@ -254,12 +259,37 @@ class Attribute extends Model
         return null;
     }
 
-    public function getName() : string  {
-        return $this->attribute_owner->username . '.'. $this->attribute_name;
+    public ?string $fully_qualified_name = null;
+    public function getName(bool $b_redo = false,bool $b_strip_system_prefix = true) : string  {
+        //get ancestor chain
+       if (!$b_redo && $this->fully_qualified_name) {return $this->fully_qualified_name;}
+        $ancestors = [];
+        $names = [];
+        $parent = $this->attribute_parent;
+        while ($parent) {
+            $ancestors[] = $parent;
+            if ($b_strip_system_prefix) {
+                if ($parent->attribute_name === StandardAttributes::SYSTEM_NAME) { break; }
+            }
+            $names[] = $parent->attribute_name;
+            $parent = $parent->attribute_parent;
+
+        }
+        if (empty($ancestors)) {
+            return $this->attribute_owner->username . '.'. $this->attribute_name;
+        }
+        $oldest_first = array_reverse($names);
+        $root = implode('.',$oldest_first);
+        return $root . '.'. $this->attribute_name;
     }
 
+    /** @noinspection PhpUnused */
+    public static function findAttribute(int $id) : ?Attribute {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
+        return static::buildAttribute(id:$id)->first();
+    }
     public static function buildAttribute(
-        ?int $id = null,?int $admin_user_id = null)
+        ?int $id = null,?int $admin_user_id = null,?int $usage_user_id = null)
     : Builder
     {
 
@@ -271,8 +301,11 @@ class Attribute extends Model
             /** @uses Attribute::read_map_bound(),Attribute::write_map_bound(),Attribute::read_shape_bound(),Attribute::write_shape_bound() */
             ->with('read_map_bound', 'write_map_bound', 'read_shape_bound', 'write_shape_bound')
 
-            /** @uses Attribute::attribute_meta_all(),Attribute::da_rules(),Attribute::permission_groups(),Attribute::attribute_pointer() */
-            ->with('attribute_meta_all', 'da_rules', 'permission_groups','attribute_pointer')
+            /** @uses Attribute::meta_of_attribute(),Attribute::da_rules(),Attribute::permission_groups(),Attribute::attribute_pointer() */
+            ->with('meta_of_attribute', 'da_rules', 'permission_groups','attribute_pointer')
+
+            /** @uses Attribute::attribute_value(),AttributeValue::value_parent()  */
+            ->with('attribute_value','attribute_value.value_parent')
        ;
 
         if ($id) {
@@ -316,6 +349,33 @@ class Attribute extends Model
             );
         }
 
+        if ($usage_user_id) {
+
+            $build->join('attribute_user_groups as a_groups',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('a_groups.group_parent_attribute_id','=','attributes.id')
+                        ->where('a_groups.group_type',AttributeUserGroupType::USAGE->value)
+                    ;
+                }
+            );
+
+            $build->join('user_group_members as usage_members',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($usage_user_id) {
+                    $join
+                        ->on('usage_members.id','=','a_groups.target_user_group_id')
+                        ->where('usage_members.user_id',$usage_user_id)
+                    ;
+                }
+            );
+        }
+
         return $build;
     }
 
@@ -343,15 +403,31 @@ class Attribute extends Model
                         //the name, but scope to the user id of the owner
                         //if this user is not the owner, then the group owner id can be scoped
                         $parts = explode('.', $value);
+                        $owner = null;
                         if (count($parts) === 1) {
                             //must be owned by the user
-                            $user = auth()->user();
-                            $build = $this->where('user_id', $user?->id)->where('attribute_name', $value);
-                        } else {
-                            $owner = $parts[0];
+                            $owner = Utilities::getTypeCastedAuthUser();
+                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_attribute_id')->where('attribute_name', $value);
+                        } else if (count($parts) > 1) {
+                            $owner_string = $parts[0];
                             $maybe_name = $parts[1];
-                            $owner = (new User)->resolveRouteBinding($owner);
-                            $build = $this->where('user_id', $owner?->id)->where('attribute_name', $maybe_name);
+                            $owner = (new User)->resolveRouteBinding($owner_string);
+                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_attribute_id')->where('attribute_name', $maybe_name);
+                        }
+
+                        if ($build && $owner) {
+                            if (count($parts) > 2) {
+                                //loop through and get the rest of the chain
+                                $attr = $build->first();
+                                for ($i = 2; !empty($attr) && $i < count($parts); $i++) {
+                                    $sub_name = $parts[$i];
+                                    $build = $this->where('user_id', $owner->id)->where('parent_attribute_id',$attr->id)->where('attribute_name', $sub_name);
+                                    $attr = $build->first();
+                                }
+                                if (empty($attr)) {
+                                    $build = null;
+                                }
+                            }
                         }
                     }
                 }
@@ -378,9 +454,9 @@ class Attribute extends Model
     public function getMeta(int $n_display) : array  {
         $ret = [];
 
-        foreach ($this->attribute_meta_all as $meta) {
+        foreach ($this->meta_of_attribute as $meta) {
             if ($n_display < 1) {
-                $ret[] = $meta->getName();
+                $ret[] = $meta->meta_type->value;
             } else {
                 $ret[] = new AttributeMetaResource($meta,null,$n_display);
             }
@@ -442,12 +518,10 @@ class Attribute extends Model
     }
 
     public function getValue() {
-        if (in_array($this->value_type, AttributeValueType::STRING_TYPES) || in_array($this->value_type, AttributeValueType::NUMERIC_TYPES)) {
-            return $this->value_default['value_default']??null;
-        } elseif (in_array($this->value_type, AttributeValueType::POINTER_TYPES)) {
+        if ($this->attribute_pointer) {
             return $this->attribute_pointer->getValue();
         }
-        return $this->value_default;
+        return $this->attribute_value?->getValue();
 
     }
 

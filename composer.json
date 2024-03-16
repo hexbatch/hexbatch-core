@@ -17,12 +17,27 @@
     "license": "Apache-2.0",
     "require": {
         "php": "^8.1",
+        "ext-bcmath": "*",
+        "ext-fileinfo": "*",
+        "ext-intl": "*",
+        "ext-openssl": "*",
+        "ext-pcre": "*",
+        "ext-pdo": "*",
+        "ext-pdo_pgsql": "*",
+        "ext-pgsql": "*",
+        "ext-rdkafka": "*",
+        "ext-redis": "*",
+        "digitickets/lalit": "^3.3",
+        "galbar/jsonpath": "^3.0",
         "guzzlehttp/guzzle": "^7.2",
         "jmikola/geojson": "^1.1",
         "laravel/fortify": "^1.19",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "mateusjunges/laravel-kafka": "^1.13",
+        "relisten/forceutf8": "^1.1",
+        "ext-dom": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

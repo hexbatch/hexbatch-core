@@ -3,12 +3,12 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
-use App\Models\Enums\AttributeRuleType;
+use App\Models\Enums\Attributes\AttributeRuleType;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\AttributeValuePointer::getValueDisplayForResource()
  * @uses \App\Models\Attribute::getPermissionGroupsForResource()
  * @uses \App\Models\Attribute::getRuleGroup()
  * @uses \App\Models\Attribute::getMeta()
@@ -39,12 +39,18 @@ class AttributeResource extends JsonResource
             return [$this->getName()];
         }
 
+        if ($this->n_display_level === 1) {
+            return [
+                'uuid' => $this->ref_uuid,
+                'name' => $this->getName()
+                ];
+        }
 
         $ret =  [
             'uuid' => $this->ref_uuid,
             'name' => $this->getName(),
             'is_retired' => $this->is_retired,
-            'created_at' => round($this->created_at_ts),
+            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
             'bounds'=> [
                 "read_bounds"=> [
                     "read_time" => $this->n_display_level <=1? ($this->read_time_bound?->getName() ) : ($this->read_time_bound ? new TimeBoundResource($this->read_time_bound,null,$this->n_display_level -1) : null),
@@ -77,33 +83,15 @@ class AttributeResource extends JsonResource
                 ],
             ],
             'options'=> [
-                'is_constant' => $this->is_constant,
-                'is_static' => $this->is_static,
                 'is_final' => $this->is_final,
                 'is_human' => $this->is_human,
             ],
-            'value'=> [
+            'value'=> new AttributeValueResource($this->attribute_value),
 
-                'type' => $this->value_type->value,
-                'min' => $this->value_numeric_min,
-                'max' => $this->value_numeric_max,
-                'regex' => $this->value_regex,
-                'default' => empty($this->attribute_pointer)? $this->getValue() : $this->attribute_pointer->getValueDisplayForResource($this->n_display_level-1),
-                'is_nullable' => $this->is_nullable,
-            ],
             'meta' => $this->getMeta($this->n_display_level - 1)
 
         ];
 
-        if (is_null($this->value_numeric_min)) {
-            unset($ret['value']['min']);
-        }
-        if (is_null($this->value_numeric_max)) {
-            unset($ret['value']['max']);
-        }
-        if (empty($this->value_regex)) {
-            unset($ret['value']['regex']);
-        }
 
         return $ret;
     }

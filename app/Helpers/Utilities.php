@@ -2,13 +2,16 @@
 
 namespace App\Helpers;
 
+use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\RefCodes;
+use App\Models\User;
 use ErrorException;
+use Illuminate\Support\Facades\DB;
 use JsonException;
+use LogicException;
 
 class Utilities {
-    public static function ignoreVar(...$params) {
-
-    }
+    public static function ignoreVar(...$params) {}
 
     public static function is_uuid(?string $guid) : bool{
         if (empty($guid)) {return false;}
@@ -41,8 +44,7 @@ class Utilities {
     }
 
     public static function positiveBoolWords($val) : bool {
-        $val = mb_strtolower($val);
-        return match($val) {
+        return match(mb_strtolower($val)) {
             'yes', '1', 'on', 'true', '' =>true,
             default => false
         };
@@ -75,21 +77,135 @@ class Utilities {
         return null;
     }
 
-    public static function convertToObject(array|string|object $what) : null|object {
-        if (empty($what)) { return null;}
-        if (is_array($what) || is_object($what)) {
-            $json = json_encode($what);
-        } else {
-            if (static::jsonHasErrors($what)) {
-                return null;
-            }
-            $json = $what;
+
+    public static function wrapJsonEncode(array|object|null $what) : ? string {
+        try {
+            return json_encode($what, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new HexbatchCoreException(__('msg.cannot_convert_to_json',['issue'=>$e->getMessage()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::JSON_ISSUE);
+
         }
-        $converted =  json_decode($json,false);
-        if (! is_object($converted)) {
-            return null;
+    }
+
+    public static function maybeEncodeJson(mixed $what) : ?string  {
+        if (empty($what)) {return $what;}
+        if (is_array($what) || is_object($what)) {
+            return static::wrapJsonEncode($what);
+        }
+        return strval($what);
+    }
+
+    public static function maybeDecodeJson(mixed $maybe_json,?bool $b_associative = false,mixed $null_default = null) : null|object|array|string {
+        if (empty($maybe_json)) { return $null_default;}
+        if (is_array($maybe_json) && $b_associative) {
+            return $maybe_json;
+        }
+        if (is_object($maybe_json) && !$b_associative) {
+            return $maybe_json;
+        }
+        if (is_array($maybe_json) || is_object($maybe_json)) {
+            $json = json_encode($maybe_json);
+        } else {
+            if (static::jsonHasErrors($maybe_json)) {
+                return $maybe_json;
+            }
+            $json = $maybe_json;
+        }
+        $converted =  json_decode($json,$b_associative);
+        if (! (is_object($converted) || is_array($converted) )) {
+            return $null_default;
         }
         return $converted;
+    }
+
+    public static function toArrayOrNull(mixed $what) : ?array {
+        $maybe = static::maybeDecodeJson($what);
+        if (!empty($maybe)) {
+            if (is_array($maybe)) {return $maybe;}
+            $json = static::wrapJsonEncode($maybe);
+            return static::maybeDecodeJson($json,true);
+        }
+        return null;
+    }
+
+    public static function getTypeCastedAuthUser() : ?User {
+        /**
+         * @type User $user
+         */
+        $user = auth()->user();
+        return $user;
+    }
+
+    public static function runDbFile(?string $start_path) :bool {
+        $path = realpath($start_path);
+        if (!$path) {
+            throw new LogicException("could not find file in migration: $start_path");
+        }
+        $proc = file_get_contents($path);
+        if (!$proc) {
+            throw new LogicException("could not read file in migration: $path");
+        }
+        return DB::statement($proc);
+    }
+
+    const BASE_64_OPTION = 'base64';
+    /**
+     * return a base64 encrypted string, you can also choose hex or null as encoding.
+     * @source https://stackoverflow.com/a/62175263/2420206
+     * @example $enc = str_encrypt_aes_256_gcm("my-secretText", "myPassword", "base64");
+     */
+    public static function str_encrypt_aes_256_gcm(?string $plaintext, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string {
+        if (empty($plaintext) ) {
+            return null;
+        }
+        if (empty($password)) {
+            throw new LogicException("str_encrypt_aes_256_gcm needs password to not be empty");
+        }
+        $keysalt = openssl_random_pseudo_bytes(16);
+        $key = hash_pbkdf2("sha512", $password, $keysalt, 20000, 32, true);
+        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length("aes-256-gcm"));
+        $tag = "";
+        $encryptedstring = openssl_encrypt($plaintext, "aes-256-gcm", $key, OPENSSL_RAW_DATA, $iv, $tag);
+        if ($encryptedstring === false) {
+            throw new \RuntimeException("Cannot str_encrypt_aes_256_gcm ");
+        }
+        return $encoding === "hex" ? bin2hex($keysalt.$iv.$encryptedstring.$tag) :
+            ($encoding === self::BASE_64_OPTION ? base64_encode($keysalt.$iv.$encryptedstring.$tag) : $keysalt.$iv.$encryptedstring.$tag);
+    }
+
+    /**
+     * decrypt something made in str_encrypt_aes_256_gcm
+     * @source https://stackoverflow.com/a/62175263/2420206
+     * @example $dec = str_decrypt_aes_256_gcm($enc, "myPassword", "base64");
+     */
+    public static function str_decrypt_aes_256_gcm(?string $encrypted_string, string $password, ?string $encoding = self::BASE_64_OPTION) : ?string  {
+
+        if (empty($encrypted_string) ) {
+            return null;
+        }
+
+        if (empty($password)) {
+            throw new LogicException("str_decrypt_aes_256_gcm needs args to not be empty");
+        }
+
+        $encrypted_string = $encoding === "hex" ? hex2bin($encrypted_string) : ($encoding === self::BASE_64_OPTION ? base64_decode($encrypted_string) : $encrypted_string);
+        $keysalt = substr($encrypted_string, 0, 16);
+        $key = hash_pbkdf2("sha512", $password, $keysalt, 20000, 32, true);
+        $ivlength = openssl_cipher_iv_length("aes-256-gcm");
+        $iv = substr($encrypted_string, 16, $ivlength);
+        $tag = substr($encrypted_string, -16);
+        $work_or_false_on_fail =  openssl_decrypt(substr($encrypted_string, 16 + $ivlength, -16), "aes-256-gcm", $key, OPENSSL_RAW_DATA, $iv, $tag);
+        if ($work_or_false_on_fail === false) {
+            throw new \RuntimeException("Cannot str_decrypt_aes_256_gcm ");
+        }
+        return $work_or_false_on_fail;
+    }
+
+    public static function strip_tags_convert_entities(?string $what) : ?string  {
+        if (empty($what)) {return $what; }
+        return strip_tags(htmlspecialchars($what,ENT_QUOTES| ENT_HTML401,'UTF-8',false));
     }
 
 }

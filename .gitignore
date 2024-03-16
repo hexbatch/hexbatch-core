@@ -28,7 +28,7 @@ php.ini
 error_log
 composer.phar
 .ftpquota
-.user.ini
+.users.ini
 .htaccess
 
 /api/

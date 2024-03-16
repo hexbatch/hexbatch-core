@@ -4,24 +4,23 @@ namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Attributes\AttributeBinaryOptions;
-use App\Helpers\Attributes\AttributeBounds;
-use App\Helpers\Attributes\AttributeMetaGathering;
-use App\Helpers\Attributes\AttributePermissionGathering;
-use App\Helpers\Attributes\AttributeRuleGathering;
-use App\Helpers\Attributes\AttributeValue;
+use App\Helpers\Attributes\Apply\StandardAttributes;
+use App\Helpers\Attributes\Build\AttributeBinaryOptions;
+use App\Helpers\Attributes\Build\AttributeBounds;
+use App\Helpers\Attributes\Build\AttributeMetaGathering;
+use App\Helpers\Attributes\Build\AttributePermissionGathering;
+use App\Helpers\Attributes\Build\AttributeRuleGathering;
+use App\Helpers\Attributes\Build\AttributeDefaultGathering;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
+use App\Http\Resources\StandardAttributeCollection;
 use App\Models\Attribute;
 use App\Models\AttributeUserGroup;
-use App\Models\Enums\AttributePingType;
-use App\Models\Enums\AttributeUserGroupType;
-
-
+use App\Models\Enums\Attributes\AttributePingType;
+use App\Models\Enums\Attributes\AttributeUserGroupType;
 use App\Models\User;
-use App\Models\UserGroup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,8 +37,7 @@ class AttributeController extends Controller
      * @uses Attribute::attribute_owner()
      */
     protected function adminCheck(Attribute $att) {
-        $user = auth()->user();
-        $att->attribute_owner->checkAdminGroup($user->id);
+        $att->attribute_owner->checkAdminGroup(Utilities::getTypeCastedAuthUser()?->id);
     }
 
     public function attribute_get(Attribute $attribute,?string $full = null) {
@@ -217,6 +215,13 @@ class AttributeController extends Controller
         return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    public function attribute_list_usage(?User $user = null) {
+        $logged_user = auth()->user();
+        if (!$user) {$user = $logged_user;}
+        $out = Attribute::buildAttribute(usage_user_id: $user->id)->cursorPaginate();
+        return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
     public function attribute_delete(Attribute $attribute) {
         $this->adminCheck($attribute);
         $attribute->checkIsInUse();
@@ -243,7 +248,7 @@ class AttributeController extends Controller
             if ($attribute->isInUse()) {
                 (new AttributeMetaGathering($request) )->assign($attribute);
             } else {
-                $user = auth()->user();
+                $user = Utilities::getTypeCastedAuthUser();
                 $some_name = $request->request->getString('attribute_name');
 
                 if ($some_name && $some_name !== $attribute->attribute_name) {
@@ -284,7 +289,7 @@ class AttributeController extends Controller
 
         $attribute->save();
 
-        (new AttributeValue(request:$request,attribute: $attribute) )->assign($attribute);
+        (new AttributeDefaultGathering(request:$request,attribute: $attribute) )->assign($attribute);
         (new AttributeMetaGathering($request) )->assign($attribute);
         (new AttributePermissionGathering($request) )->assign($attribute);
         (new AttributeRuleGathering($request) )->assign($attribute);
@@ -302,7 +307,7 @@ class AttributeController extends Controller
             // if this is in use then can only edit retired, meta
             // otherwise can edit all but the ownership
             $attribute = new Attribute();
-            $user = auth()->user();
+            $user = Utilities::getTypeCastedAuthUser();
             $attribute->setName($request->request->getString('attribute_name'),$user);
             $attribute->setParent($request->request->getString('parent_attribute'));
             $attribute->user_id = $user->id;
@@ -315,5 +320,10 @@ class AttributeController extends Controller
 
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         return response()->json(new AttributeResource($out,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+    }
+
+    public function attribute_list_standard() {
+        $standard = StandardAttributes::getAttributeCache();
+        return response()->json(new StandardAttributeCollection($standard), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 }

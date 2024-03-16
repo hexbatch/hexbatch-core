@@ -7,6 +7,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int user_id
  * @property string created_at
  * @property string updated_at
+ *
+ * @property User element_owner
  *
  */
 class Element extends Model
@@ -49,7 +52,10 @@ class Element extends Model
      * @var array<string, string>
      */
     protected $casts = [];
-
+    public function element_owner(): BelongsTo
+    {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
 
     public static function buildElement(
         ?int $id = null)
@@ -60,7 +66,7 @@ class Element extends Model
          * @var Builder $build
          */
         $build = Element::select('elements.*')
-            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
         ;
 
         if ($id) {

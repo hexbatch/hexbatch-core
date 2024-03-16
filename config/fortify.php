@@ -38,7 +38,7 @@ return [
     |
     | This value defines which model attribute should be considered as your
     | application's "username" field. Typically, this might be the email
-    | address of the users but you are free to change this value here.
+    | address of the users, but you are free to change this value here.
     |
     | Out of the box, Fortify expects forgot password and reset password
     | requests to have a field named 'email'. If the application uses
@@ -83,7 +83,7 @@ return [
     |
     | Here you may specify which prefix Fortify will assign to all the routes
     | that it registers with the application. If necessary, you may change
-    | subdomain under which all of the Fortify routes will be available.
+    | subdomain under which all the Fortify routes will be available.
     |
     */
 
@@ -140,7 +140,7 @@ return [
     |
     | Some of the Fortify features are optional. You may disable the features
     | by removing them from this array. You're free to only remove some of
-    | these features or you can even remove all of these if you need to.
+    | these features, or you can even remove all of these if you need to.
     |
     */
 

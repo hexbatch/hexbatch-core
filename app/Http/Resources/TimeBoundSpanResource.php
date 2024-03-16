@@ -18,16 +18,10 @@ class TimeBoundSpanResource extends JsonResource
     public function toArray(Request $request): array
     {
         $ret =  [
-            'start' => $this->span_start,
-            'stop' => $this->span_stop,
+            'start' => Carbon::createFromTimestamp($this->span_start)->toIso8601String(),
+            'stop' => Carbon::createFromTimestamp($this->span_stop)->toIso8601String(),
         ];
 
-        if ($request->query->getString('tz')) {
-            $ret['alt'] = [
-                'start' => Carbon::createFromTimestamp($this->span_start,$request->query->getString('tz'))->toIso8601String(),
-                'stop' => Carbon::createFromTimestamp($this->span_stop,$request->query->getString('tz'))->toIso8601String(),
-            ];
-        }
         return $ret;
     }
 }
