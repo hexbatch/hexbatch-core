@@ -1,4 +1,4 @@
-FROM phpstorm/php-apache:8.1-xdebug3.1 as my_php_base_8_1_xdebug_3_1
+FROM phpstorm/php-apache:8.2-xdebug3.2 as my_php_base_8_2_xdebug_3_2
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
@@ -12,7 +12,7 @@ RUN  apt-get -y update \
      unzip nano vim iputils-ping
 
 
-FROM my_php_base_8_1_xdebug_3_1 as my_sms_php_apache
+FROM my_php_base_8_2_xdebug_3_2 as my_gk_php_apache
 
 RUN a2enmod rewrite
 RUN a2enmod headers
