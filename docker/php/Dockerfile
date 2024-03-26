@@ -3,7 +3,7 @@ FROM phpstorm/php-apache:8.2-xdebug3.2 as my_php_base_8_2_xdebug_3_2
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions gd mysqli pgsql zip intl bcmath pdo_mysql pdo_pgsql bz2 gettext gmp exif redis rdkafka soap sockets tidy ioncube_loader
+    install-php-extensions bcmath bz2 gd gettext exif gmp intl ioncube_loader mysqli pcntl pdo_mysql pdo_pgsql pgsql redis soap sockets tidy zip
 
 RUN  apt-get -y update \
      && apt-get -y autoremove \

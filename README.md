@@ -35,12 +35,3 @@ can clear out just part of the redis cache `php artisan cache:clear --tags=tests
 
 Not listed in the specs because it is an implementation to enable the rest of the spec
 
-## Kafka stuff
-
-https://hub.docker.com/r/bitnami/kafka
-https://kafka.apache.org/intro
-https://laravel-news.com/laravel-kafka-package
-https://github.com/mateusjunges/laravel-kafka
-https://junges.dev/documentation/laravel-kafka/v1.13/1-introduction
-https://medium.com/simform-engineering/integrating-apache-kafka-in-laravel-real-time-database-synchronization-with-debezium-connector-2506bc8f37a7
-https://www.golinuxcloud.com/laravel-kafka-tutorial/ //ads
