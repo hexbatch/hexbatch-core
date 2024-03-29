@@ -17,7 +17,7 @@ class RunRemoteStack implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public RemoteStack $stack,
+        public int $stack_id,
     ) {}
 
     /**
@@ -25,6 +25,10 @@ class RunRemoteStack implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->stack->run_stack();
+        /**
+         * @var RemoteStack $stack
+         */
+        $stack = RemoteStack::buildRemoteStack(id:$this->stack_id)->first();
+        $stack->run_stack();
     }
 }

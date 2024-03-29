@@ -352,7 +352,7 @@ class RemoteActivity extends Model
             $activity_to_process = RemoteActivity::buildActivity(id:$this->id)->first();
 
             if (in_array($this->remote_parent->uri_type,RemoteUriType::DISPATCHABLE_TYPES)) {
-                RunRemote::dispatch($activity_to_process);
+                RunRemote::dispatch($activity_to_process->id);
             }
 
         } else {

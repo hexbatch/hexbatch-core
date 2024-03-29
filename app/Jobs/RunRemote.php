@@ -17,7 +17,7 @@ class RunRemote implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public RemoteActivity $activity,
+        public int $activity_id,
     ) {}
 
     /**
@@ -25,6 +25,10 @@ class RunRemote implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->activity->doCallRemote(); //this is blocking
+        /**
+         * @var RemoteActivity $activity
+         */
+        $activity = RemoteActivity::buildActivity(id:$this->activity_id)->first();
+        $activity->doCallRemote(); //this is blocking
     }
 }

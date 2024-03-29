@@ -277,7 +277,7 @@ class RemoteStack extends Model
 
                 $this->remote_stack_status = RemoteStackStatusType::PENDING;
                 $this->save();
-                RunRemoteStack::dispatch($this);
+                RunRemoteStack::dispatch($this->id);
                 return;
             }
 
@@ -290,7 +290,7 @@ class RemoteStack extends Model
             foreach ($children as $child) {
                 $child->remote_stack_status = RemoteStackStatusType::PENDING;
                 $child->save();
-                RunRemoteStack::dispatch($child);
+                RunRemoteStack::dispatch($child->id);
             }
         } catch (\Exception $e) {
             $this->addError($e);
