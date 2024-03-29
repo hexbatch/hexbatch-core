@@ -7,6 +7,7 @@ enum RemoteStackStatusType : string {
     case STARTED = 'started';
     case SUCCESS = 'success';
     case FAILED = 'failed';
+    case ERROR = 'error';
 
 
 }

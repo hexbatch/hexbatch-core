@@ -5,11 +5,8 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
-use App\Exceptions\HexbatchRemoteException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Remotes\Activity\ActivityEventConsumer;
 use App\Helpers\Utilities;
-use App\Jobs\RunRemote;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
 use App\Models\Enums\Remotes\RemoteFromMapType;
 use App\Models\Enums\Remotes\RemoteToMapType;
@@ -359,7 +356,7 @@ class Remote extends Model
         $this->update(['rate_limit_starts_at' => DB::raw('NOW()'),'rate_limit_count'=>0]);
     }
 
-    protected function addOneToRateLimit() : bool
+    public function addOneToRateLimit() : bool
     {
         if (time() < $this->rate_limit_starts_at_ts + $this->rate_limit_unit_in_seconds) {
             $this->resetRateLimit();
@@ -373,12 +370,11 @@ class Remote extends Model
 
 
 
-
     public function createActivity(Collection $collection,
                                    ?User $user = null,?ElementType $type = null,?Element $element = null,
                                    ?Attribute $attribute = null,?Action $action = null,
                                    ?array $geo_json = null,
-                                   ?ActivityEventConsumer $consumer = null
+                                   ?array $pass_through = null
     ) :RemoteActivity {
         if ($this->uri_type === RemoteUriType::NONE) {
             throw new \LogicException("Cannot create activity for uri type of none");
@@ -391,38 +387,13 @@ class Remote extends Model
         $ret->caller_attribute_id = $attribute?->id;
         $ret->caller_action_id = $action?->id;
         $ret->location_geo_json = $geo_json;
-        //todo add stack
         $ret->to_remote_processed_data = $this->processToSend($collection,RemoteToMapType::DATA,RemoteToSourceType::FROM_DATA);
         $ret->to_headers = $this->processToSend($collection,RemoteToMapType::HEADER,RemoteToSourceType::FROM_DATA);
         $ret->to_remote_files = $this->processToSend($collection,RemoteToMapType::FILE,RemoteToSourceType::FROM_DATA);
-        if ($consumer) {
-            $ret->consumer_passthrough_data = $consumer->getPassthrough();
-        }
+        $ret->consumer_passthrough_data = $pass_through;
         $ret->save();
-        $consumer?->setActivity($ret);
-        if ($this->addOneToRateLimit()) {
-            $ret->remote_activity_status_type = RemoteActivityStatusType::PENDING;
-            $ret->save();
-            /** @var RemoteActivity $activity_to_process */
-            $activity_to_process = RemoteActivity::buildActivity(id:$ret->id)->first();
 
-            if (in_array($this->uri_type,RemoteUriType::DISPATCHABLE_TYPES)) {
-                RunRemote::dispatch($activity_to_process);
-            }
 
-        } else {
-            //try to use cache or just say cannot do this
-            $maybe_cache = $ret->getCache();
-            if (empty($maybe_cache)) {
-                $ret->remote_activity_status_type = RemoteActivityStatusType::FAILED;
-                $ret->save();
-                throw new HexbatchRemoteException(__("msg.remote_uncallable",['name'=>$this->getName()]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::REMOTE_UNCALLABLE);
-            }
-            $ret->update(['remote_call_ended_at' => DB::raw('NOW()'),'remote_activity_status_type'=>RemoteActivityStatusType::CACHED,'from_remote_processed_data'=>$maybe_cache]);
-            $consumer?->markThisDone();
-        }
 
         return $ret;
 

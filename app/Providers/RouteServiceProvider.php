@@ -9,6 +9,7 @@ use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\Remote;
 use App\Models\RemoteActivity;
+use App\Models\RemoteStack;
 use App\Models\Server;
 use App\Models\TimeBound;
 use App\Models\User;
@@ -46,6 +47,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('attribute', Attribute::class);
         Route::model('remote', Remote::class);
         Route::model('remote_activity', RemoteActivity::class);
+        Route::model('remote_stack', RemoteStack::class);
         Route::model('action', Action::class);
         Route::model('element', Element::class);
         Route::model('element_type', ElementType::class);

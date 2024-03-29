@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchRemoteException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Jobs\RunRemote;
 use App\Models\Enums\Remotes\RemoteCachePolicyType;
 use App\Models\Enums\Remotes\RemoteCacheStatusType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
@@ -23,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 /**
@@ -64,6 +67,8 @@ use Illuminate\Support\Facades\DB;
  * @property int updated_at_ts
  *
  * @property Remote remote_parent
+ * @property RemoteStack home_stack
+
  * @property Action caller_action
  * @property Attribute caller_attribute
  * @property User caller_user
@@ -118,6 +123,12 @@ class RemoteActivity extends Model
         return $this->belongsTo('App\Models\Remote','parent_remote_id');
     }
 
+    public function home_stack() : BelongsTo {
+        $what =  $this->belongsTo('App\Models\RemoteStack','remote_stack_id');
+        RemoteStack::decorateBuilder($what);
+        return $what;
+    }
+
     public function caller_action() : BelongsTo {
         return $this->belongsTo('App\Models\Action','caller_action_id');
     }
@@ -158,8 +169,8 @@ class RemoteActivity extends Model
             ->selectRaw(" extract(epoch from  remote_activities.created_at) as created_at_ts,  extract(epoch from  remote_activities.updated_at) as updated_at_ts".
                 ",  extract(epoch from  remote_activities.remote_call_ended_at) as remote_call_ended_at_ts")
 
-            /** @uses RemoteActivity::remote_parent(), */
-            ->with('remote_parent','remote_parent.rules_to_remote','remote_parent.rules_from_remote')
+            /** @uses RemoteActivity::remote_parent(),RemoteActivity::home_stack(),Remote::rules_to_remote(),Remote::rules_from_remote() */
+            ->with('remote_parent','remote_parent.rules_to_remote','remote_parent.rules_from_remote','home_stack')
 
             /**
              * @uses RemoteActivity::caller_action(),RemoteActivity::caller_attribute(),RemoteActivity::caller_user(),RemoteActivity::caller_server()
@@ -305,6 +316,7 @@ class RemoteActivity extends Model
 
     protected function addError(\Exception $e) {
         $node = ['message'=>$e->getMessage(),'class'=>get_class($e)];
+        Log::error("Remote activity error",$node);
         if (is_array($this->errors) && count($this->errors)) {
             $this->errors[] = $node;
         } else {
@@ -313,7 +325,7 @@ class RemoteActivity extends Model
     }
 
     public function announceDaFinishing() :void  {
-        //todo check if completed or error and send event that this is done
+        $this->home_stack?->stack_finalization();
     }
 
     protected function getGuzzleToFormat() :string  {
@@ -327,6 +339,34 @@ class RemoteActivity extends Model
             case RemoteDataFormatType::FORM_URLENCODED: return 'form_params';
         }
         throw new \LogicException("Missing cases");
+    }
+
+    public function runActivity() {
+        if ($this->remote_activity_status_type !== RemoteActivityStatusType::PENDING) {
+            throw new \RuntimeException("Activity #$this->id is not pending its ". $this->remote_activity_status_type->value);
+        }
+        if ($this->remote_parent->addOneToRateLimit()) {
+            $this->remote_activity_status_type = RemoteActivityStatusType::PENDING;
+            $this->save();
+            /** @var RemoteActivity $activity_to_process */
+            $activity_to_process = RemoteActivity::buildActivity(id:$this->id)->first();
+
+            if (in_array($this->remote_parent->uri_type,RemoteUriType::DISPATCHABLE_TYPES)) {
+                RunRemote::dispatch($activity_to_process);
+            }
+
+        } else {
+            //try to use cache or just say cannot do this
+            $maybe_cache = $this->getCache();
+            if (empty($maybe_cache)) {
+                $this->remote_activity_status_type = RemoteActivityStatusType::FAILED;
+                $this->save();
+                throw new HexbatchRemoteException(__("msg.remote_uncallable",['name'=>$this->remote_parent->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::REMOTE_UNCALLABLE);
+            }
+            $this->update(['remote_call_ended_at' => DB::raw('NOW()'),'remote_activity_status_type'=>RemoteActivityStatusType::CACHED,'from_remote_processed_data'=>$maybe_cache]);
+        }
     }
 
     public function doCallRemote(mixed $manual_data = null) {

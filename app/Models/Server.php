@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
-use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 

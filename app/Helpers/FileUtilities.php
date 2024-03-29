@@ -49,6 +49,7 @@ class FileUtilities
                     else unlink   ($dir."/".$object);
                 }
             }
+            /** @noinspection PhpArrayIndexResetIsUnnecessaryInspection */
             reset($objects);
             rmdir($dir);
         }

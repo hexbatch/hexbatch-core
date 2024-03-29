@@ -3,11 +3,14 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
+use App\Models\RemoteActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-
+/**
+ * @mixin RemoteActivity
+ */
 class RemoteActivityResource extends JsonResource
 {
     protected int $n_display_level = 1;
@@ -80,6 +83,10 @@ class RemoteActivityResource extends JsonResource
 
         if ($this->n_display_level > 2) {
             $ret['callers']['location_geo_json'] = !empty($this->location_geo_json) ? $this->location_geo_json : null;
+        }
+
+        if ($this->n_display_level > 2) {
+            $ret['stack'] = !empty($this->remote_stack_id) ? new RemoteStackResource($this->home_stack,$this->n_display_level - 1) : null;
         }
 
         return $ret;

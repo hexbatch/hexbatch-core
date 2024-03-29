@@ -103,6 +103,7 @@ return [
     'remote_map_invalid_name' => 'The name of the map entry should follow the same rules as the other names :ref : :error',
     'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
+    'stack_not_found' => 'Remote stack not found using :ref',
 
 
     //actions

@@ -2,8 +2,6 @@
 
 namespace App\Rules;
 
-use App\Helpers\Utilities;
-use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 

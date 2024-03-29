@@ -33,14 +33,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('shortcut_stack_id')
-                ->nullable()
-                ->default(null)
-                ->comment("if there is another stack that runs earlier and does the same thing, put it here, and we use that ending_data to avoid recursion but allow nested usages")
-                ->index('idx_shortcut_remote_stack_id')
-                ->constrained('remote_stacks')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
 
             $table->uuid('ref_uuid')
@@ -55,29 +47,55 @@ return new class extends Migration
             $table->jsonb('children_data')->default(null)->nullable()
                 ->comment('final data of any children after all is done');
 
+            $table->jsonb('ending_activity_data')->default(null)->nullable()
+                ->comment('merged data of any activities after they are all completed');
+
+            $table->jsonb('starting_activity_data')->default(null)->nullable()
+                ->comment('any starting activity data that all activities directly attached to this get');
+
             $table->jsonb('ending_data')->default(null)->nullable()
-                ->comment('final data after processing, starting data is defined at each activity linked to this');
+                ->comment('final data after processing, this includes from main children and activities');
+
+            $table->jsonb('error_data')->default(null)->nullable()
+                ->comment('if exception thrown in the stack logic, it is here');
 
             $table->timestamps();
             $table->dateTime('stack_ended_at')->nullable()->default(null)->comment("filled in when this stack completes");
 
             $table->integer('child_priority_level')->nullable(false)->default(0)
-                ->comment("when multiple children stacks, this determines the order of combining");
+                ->comment("when multiple children stacks, this determines the order of combining, but not running");
         });
-        DB::statement("CREATE TYPE type_of_remote_stack_status AS ENUM (
-            'none','pending','started','success','failed'
+
+        # ----------------------------
+
+        # non-main stuff get passed in the merged main return data that ran (including fails),  and only runs after main, which depends on the main logic
+        DB::statement("CREATE TYPE type_of_remote_stack_category AS ENUM (
+            'main','on_success','on_failure','on_always'
             );");
 
-        DB::statement("ALTER TABLE remote_stacks Add COLUMN remote_stack_status_type type_of_remote_stack_status NOT NULL default 'none';");
+        DB::statement("ALTER TABLE remote_stacks Add COLUMN remote_stack_category type_of_remote_stack_category NOT NULL default 'main';");
+
+
+        # ----------------------------
+
+        DB::statement("CREATE TYPE type_of_remote_stack_status AS ENUM (
+            'none','pending','started','success','failed','error'
+            );");
+
+        DB::statement("ALTER TABLE remote_stacks Add COLUMN remote_stack_status type_of_remote_stack_status NOT NULL default 'none';");
 
 
         #--------------------------------------------
-        DB::statement("CREATE TYPE type_of_remote_stack_call_merge AS ENUM (
+
+        DB::statement("CREATE TYPE type_of_remote_stack_logic AS ENUM (
             'all_must_succeed','some_failing_ok'
             );");
 
-        DB::statement("ALTER TABLE remote_stacks Add COLUMN remote_stack_call_type type_of_remote_stack_call_merge NOT NULL default 'all_must_succeed';");
+        DB::statement("ALTER TABLE remote_stacks Add COLUMN remote_stack_logic_type type_of_remote_stack_logic NOT NULL default 'all_must_succeed';");
 
+
+
+        #--------------------------------------------
 
         DB::statement('ALTER TABLE remote_stacks ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
@@ -86,17 +104,17 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON remote_stacks FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
-        //todo add trigger in other file, and use it here, to detect any possible repeats of the same remote, with same cache callers, and set the later's activity cache_policy_type to cache or cache_or_fail policy
-        //todo add trigger to see if any repeat usage of the same action, in the same element, and if so, set shortcut_stack_id here
+
     }
 
     /**
-     * Reverse the migrations.
+     * Reverse the migrations
      */
     public function down(): void
     {
         Schema::dropIfExists('remote_stacks');
         DB::statement("DROP TYPE type_of_remote_stack_status");
-        DB::statement("DROP TYPE type_of_remote_stack_call_merge");
+        DB::statement("DROP TYPE type_of_remote_stack_logic");
+        DB::statement("DROP TYPE type_of_remote_stack_category");
     }
 };

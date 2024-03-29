@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Remotes\Activity\TestingActivityEventConsumer;
 use App\Helpers\Remotes\Build\DataGathering;
 use App\Helpers\Remotes\Build\GroupTypeGathering;
 use App\Helpers\Remotes\Build\RemoteAlwaysCanSetOptions;
@@ -16,16 +15,20 @@ use App\Http\Resources\RemoteActivityCollection;
 use App\Http\Resources\RemoteActivityResource;
 use App\Http\Resources\RemoteCollection;
 use App\Http\Resources\RemoteResource;
+use App\Http\Resources\RemoteStackResource;
 use App\Models\AttributeValuePointer;
 use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
+use App\Models\Enums\Remotes\RemoteStackCategoryType;
 use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
 use App\Models\RemoteActivity;
+use App\Models\RemoteStack;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -73,9 +76,47 @@ class RemoteController extends Controller
         return response()->json(new RemoteResource($remote,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    public function show_stack(RemoteStack $remote_stack) {
+        return response()->json(new RemoteStackResource($remote_stack,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
 
+    /**
+     * @throws \Exception
+     */
+    public function execute_stack(RemoteStack $remote_stack) {
+        $remote_stack->execute_stack(RemoteStackCategoryType::MAIN);
+        $refresh = RemoteStack::buildRemoteStack(id:$remote_stack->id)->first();
+        return response()->json(new RemoteStackResource($refresh,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
 
-    public function remote_test(Request $request, Remote $remote) {
+    public function create_test_stack(Request $request,?RemoteStack $remote_stack = null) {
+        $test_stack = new RemoteStack();
+        $test_stack->user_id = Auth::id();
+        if($remote_stack) {
+            $test_stack->parent_remote_stack_id = $remote_stack->id;
+        }
+
+        if ($request->request->has('category')) {
+            $test_stack->remote_stack_category = RemoteStackCategoryType::tryFrom($request->request->get('category'));
+            if (empty($test_stack->remote_stack_category)) {
+                $test_stack->remote_stack_category = RemoteStackCategoryType::MAIN;
+            }
+        } else {
+            $test_stack->remote_stack_category = RemoteStackCategoryType::MAIN;
+        }
+
+        if ($request->has('starting_activity_data')) {
+            $test_stack->starting_activity_data = $request->get('starting_activity_data');
+        }
+
+        $test_stack->save();
+        return response()->json(new RemoteStackResource($test_stack,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function remote_test(Request $request, Remote $remote,?RemoteStack $remote_stack = null) {
         $this->usageCheck($remote);
         $inputs = $request->collect();
         $user = null;$type = null;$action = null;$element = null; $attribute = null;
@@ -104,10 +145,24 @@ class RemoteController extends Controller
             $inputs->forget('debugging');
         }
 
-        $test_sink = new TestingActivityEventConsumer();
-        $test_sink->setPassthrough($debugging);
+
         $activity = $remote->createActivity(collection: $inputs, user: $user,
-            type: $type, element: $element, attribute: $attribute, action: $action,consumer: $test_sink);
+            type: $type, element: $element, attribute: $attribute, action: $action,pass_through: $debugging);
+
+        if ($remote_stack) {
+            $activity->remote_stack_id = $remote_stack->id;
+            $activity->save();
+        }
+        else
+        {
+            $remote_stack = new RemoteStack();
+            $remote_stack->remote_stack_category = RemoteStackCategoryType::MAIN;
+            $remote_stack->user_id = Auth::id();
+            $remote_stack->save();
+            $remote_stack->execute_stack(RemoteStackCategoryType::MAIN);
+        }
+
+
         $display_activity = RemoteActivity::buildActivity(id:$activity->id)->first();
         return response()->json(new RemoteActivityResource($display_activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }

@@ -2,14 +2,14 @@
 
 namespace App\Jobs;
 
-use App\Models\RemoteActivity;
+use App\Models\RemoteStack;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class RunRemote implements ShouldQueue
+class RunRemoteStack implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -17,7 +17,7 @@ class RunRemote implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public RemoteActivity $activity,
+        public RemoteStack $stack,
     ) {}
 
     /**
@@ -25,6 +25,6 @@ class RunRemote implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->activity->doCallRemote(); //this is blocking
+        $this->stack->run_stack();
     }
 }
