@@ -15,7 +15,6 @@ use App\Http\Resources\RemoteActivityCollection;
 use App\Http\Resources\RemoteActivityResource;
 use App\Http\Resources\RemoteCollection;
 use App\Http\Resources\RemoteResource;
-use App\Http\Resources\RemoteStackResource;
 use App\Models\AttributeValuePointer;
 use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
@@ -76,80 +75,75 @@ class RemoteController extends Controller
         return response()->json(new RemoteResource($remote,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function show_stack(RemoteStack $remote_stack) {
-        return response()->json(new RemoteStackResource($remote_stack,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+
+
+   protected function createActivityInternal(Request $request, Remote $remote) :RemoteActivity  {
+       $inputs = $request->collect();
+       $user = null;$type = null;$action = null;$element = null; $attribute = null;
+       if ($inputs->has('callers')) {
+           $callers = new Collection($inputs->get('callers'));
+           if ($callers->has('user')) {
+               $user = AttributeValuePointer::getModelFromHint($callers->get('user'),AttributeValueType::USER);
+           }
+           if ($callers->has('type')) {
+               $type = AttributeValuePointer::getModelFromHint($callers->get('type'),AttributeValueType::ELEMENT_TYPE);
+           }
+           if ($callers->has('action')) {
+               $action = AttributeValuePointer::getModelFromHint($callers->get('action'),AttributeValueType::ACTION);
+           }
+           if ($callers->has('element')) {
+               $element = AttributeValuePointer::getModelFromHint($callers->get('element'),AttributeValueType::ELEMENT);
+           }
+           if ($callers->has('attribute')) {
+               $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::ATTRIBUTE);
+           }
+           $inputs->forget('callers');
+       }
+
+       $debugging = null;
+       if ($inputs->has('debugging')) {
+           $debugging = (new Collection($inputs->get('debugging')) )->toArray();
+           $inputs->forget('debugging');
+       }
+
+       return  $remote->createActivity(collection: $inputs, user: $user,
+           type: $type, element: $element, attribute: $attribute, action: $action,pass_through: $debugging);
+   }
+
+    public function restack_activity(RemoteActivity $activity,?RemoteStack $stack = null)
+    {
+        StackController::stackUsageCheck($stack);
+        $this->usageCheck($activity->remote_parent);
+        $activity->remote_stack_id = $stack?->id;
+        $activity->save();
+        $activity->refresh();
+        return response()->json(new RemoteActivityResource($activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function execute_stack(RemoteStack $remote_stack) {
-        $remote_stack->execute_stack(RemoteStackCategoryType::MAIN);
-        $refresh = RemoteStack::buildRemoteStack(id:$remote_stack->id)->first();
-        return response()->json(new RemoteStackResource($refresh,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    public function create_activity(Request $request, Remote $remote) {
+        $this->usageCheck($remote);
+        $activity = $this->createActivityInternal($request,$remote);
+        $stack_id = $request->request->getInt('stack_id');
+
+        if ($stack_id) {
+            $stack = RemoteStack::findOrFail($stack_id);
+            StackController::stackUsageCheck($stack);
+            $activity->remote_stack_id = $stack_id;
+            $activity->save();
+        }
+        $display_activity = RemoteActivity::buildActivity(id:$activity->id)->first();
+        return response()->json(new RemoteActivityResource($display_activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function create_test_stack(Request $request,?RemoteStack $remote_stack = null) {
-        $test_stack = new RemoteStack();
-        $test_stack->user_id = Auth::id();
-        if($remote_stack) {
-            $test_stack->parent_remote_stack_id = $remote_stack->id;
-        }
-
-        if ($request->request->has('category')) {
-            $test_stack->remote_stack_category = RemoteStackCategoryType::tryFrom($request->request->get('category'));
-            if (empty($test_stack->remote_stack_category)) {
-                $test_stack->remote_stack_category = RemoteStackCategoryType::MAIN;
-            }
-        } else {
-            $test_stack->remote_stack_category = RemoteStackCategoryType::MAIN;
-        }
-
-        if ($request->has('starting_activity_data')) {
-            $test_stack->starting_activity_data = $request->get('starting_activity_data');
-        }
-
-        $test_stack->save();
-        return response()->json(new RemoteStackResource($test_stack,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
-    }
 
     /**
      * @throws \Exception
      */
     public function remote_test(Request $request, Remote $remote,?RemoteStack $remote_stack = null) {
         $this->usageCheck($remote);
-        $inputs = $request->collect();
-        $user = null;$type = null;$action = null;$element = null; $attribute = null;
-        if ($inputs->has('callers')) {
-            $callers = new Collection($inputs->get('callers'));
-            if ($callers->has('user')) {
-                $user = AttributeValuePointer::getModelFromHint($callers->get('user'),AttributeValueType::USER);
-            }
-            if ($callers->has('type')) {
-                $type = AttributeValuePointer::getModelFromHint($callers->get('type'),AttributeValueType::ELEMENT_TYPE);
-            }
-            if ($callers->has('action')) {
-                $action = AttributeValuePointer::getModelFromHint($callers->get('action'),AttributeValueType::ACTION);
-            }
-            if ($callers->has('element')) {
-                $element = AttributeValuePointer::getModelFromHint($callers->get('element'),AttributeValueType::ELEMENT);
-            }
-            if ($callers->has('attribute')) {
-                $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::ATTRIBUTE);
-            }
-            $inputs->forget('callers');
-        }
-        $debugging = null;
-        if ($inputs->has('debugging')) {
-            $debugging = (new Collection($inputs->get('debugging')) )->toArray();
-            $inputs->forget('debugging');
-        }
-
-
-        $activity = $remote->createActivity(collection: $inputs, user: $user,
-            type: $type, element: $element, attribute: $attribute, action: $action,pass_through: $debugging);
-
+        $activity = $this->createActivityInternal($request,$remote);
         if ($remote_stack) {
+            StackController::stackUsageCheck($remote_stack);
             $activity->remote_stack_id = $remote_stack->id;
             $activity->save();
         }

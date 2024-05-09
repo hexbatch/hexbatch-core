@@ -45,16 +45,16 @@ return new class extends Migration
 
 
             $table->jsonb('children_data')->default(null)->nullable()
-                ->comment('final data of any children after all is done');
+                ->comment('final merged data of any children stacks after they are all run');
 
             $table->jsonb('ending_activity_data')->default(null)->nullable()
-                ->comment('merged data of any activities after they are all completed');
+                ->comment('merged data of any activities of this stack after they are all completed ');
 
             $table->jsonb('starting_activity_data')->default(null)->nullable()
-                ->comment('any starting activity data that all activities directly attached to this get');
+                ->comment('any starting activity data that all activities directly attached to this get. If not main type, this is merged with the parent completed data');
 
             $table->jsonb('ending_data')->default(null)->nullable()
-                ->comment('final data after processing, this includes from main children and activities');
+                ->comment('final merged data from main activites and children stacks. This is what is given to the success, or parent, if any. This is null on error');
 
             $table->jsonb('error_data')->default(null)->nullable()
                 ->comment('if exception thrown in the stack logic, it is here');

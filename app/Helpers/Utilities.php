@@ -208,4 +208,13 @@ class Utilities {
         return strip_tags(htmlspecialchars($what,ENT_QUOTES| ENT_HTML401,'UTF-8',false));
     }
 
+    public  static function cleanAnsiFromString(string $what) : string {
+        $step_a = preg_replace(/** @lang text */ '#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $what);
+        $step_b = preg_replace('#\\.[.]+#','-->',$step_a,1);
+        $step_c = preg_replace('#\\.[.]+#','',$step_b);
+        $step_d = htmlspecialchars_decode($step_c);
+        $step_e = str_replace('&gt;','>',$step_d);
+        return $step_e;
+    }
+
 }

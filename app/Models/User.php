@@ -132,9 +132,11 @@ class User extends Authenticatable
                     \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                     RefCodes::USER_NOT_FOUND
                 );
+            } else {
+                $out = User::buildUser($ret->id)->first();
             }
         }
-        return $ret;
+        return $out;
 
     }
 

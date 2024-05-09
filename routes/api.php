@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\LocationBoundController;
 use App\Http\Controllers\API\RemoteController;
+use App\Http\Controllers\API\StackController;
 use App\Http\Controllers\API\TimeBoundController;
 use App\Http\Controllers\API\UserGroupController;
 use App\Http\Controllers\API\AttributeController;
@@ -99,16 +100,21 @@ Route::prefix('v1')->group(function () {
             Route::post('/{remote}/test/{remote_stack?}', [RemoteController::class, 'remote_test'])->name('core.remotes.test');
             Route::get('/list', [RemoteController::class, 'remote_list'])->name('core.remotes.list');
             Route::prefix('activities')->group(function () {
+                Route::post('/{remote}/create', [RemoteController::class, 'create_activity'])->name('core.remotes.activity.create');
+                Route::post('/{remote_activity}/restack/{remote_stack?}', [RemoteController::class, 'restack_activity'])->name('core.remotes.activity.restack');
                 Route::post('/{remote_activity}/update', [RemoteController::class, 'update_activity'])->name('core.remotes.activity.update');
                 Route::get('/list/{remote_activity_status_type?}', [RemoteController::class, 'list_activities'])->name('core.remotes.activity.list');
                 Route::get('/{remote_activity}/get/{levels?}', [RemoteController::class, 'get_activity'])->name('core.remotes.activity.get');
             });
+        });
 
-            Route::prefix('stacks')->group(function () {
-                Route::post('/create/{remote_stack?}', [RemoteController::class, 'create_test_stack'])->name('core.remotes.stacks.create');
-                Route::get('/{remote_stack}/show', [RemoteController::class, 'show_stack'])->name('core.remotes.stacks.show');
-                Route::get('/{remote_stack}/execute', [RemoteController::class, 'execute_stack'])->name('core.remotes.stacks.execute');
-            });
+        Route::prefix('stacks')->group(function () {
+            Route::post('/create/{remote_stack?}', [StackController::class, 'create_stack'])->name('core.stacks.create');
+            Route::patch('/append/{remote_stack}/{remote_stack?}', [StackController::class, 'append_stack'])->name('core.stacks.append');
+            Route::get('/{remote_stack}/show', [StackController::class, 'show_stack'])->name('core.stacks.show');
+            Route::get('/{remote_stack}/execute', [StackController::class, 'execute_stack'])->name('core.stacks.execute');
+            Route::get('/list', [StackController::class, 'stack_list'])->name('core.stacks.list');
+            Route::delete('/{remote_stack}/delete', [StackController::class, 'stack_delete'])->name('core.stacks.delete');
         });
     }); //end auth protected
 

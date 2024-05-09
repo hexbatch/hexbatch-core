@@ -33,8 +33,8 @@ class UserResource extends JsonResource
         $ret =  [
             'uuid' => $this->ref_uuid,
             'username' => $this->username,
-            'group' => new UserGroupResource($this->user_group,null,$this->n_display_level - 1),
-            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String()
+            'group' => $this->user_group? new UserGroupResource($this->user_group,null,$this->n_display_level - 1) : null,
+            'created_at' => $this->created_at_ts? Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String() : null,
         ];
 
         if ($this->n_display_level === 1) {

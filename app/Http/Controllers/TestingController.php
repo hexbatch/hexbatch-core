@@ -9,7 +9,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class TestingController extends Controller {
 
     public function echoResponse(Request $request)  {
-        return response()->json(['status'=>true,'message'=>'ok','data'=>$request->all()]);
+        $code = $request->query->getInt('return_code',200);
+        return response()->json(['status'=>true,'message'=>'ok','data'=>$request->all()],$code);
     }
 
     public function echoPost(Request $request)  {

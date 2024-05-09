@@ -314,8 +314,8 @@ class RemoteActivity extends Model
     }
 
 
-    protected function addError(\Exception $e) {
-        $node = ['message'=>$e->getMessage(),'class'=>get_class($e)];
+    protected function addError(\Exception $e,mixed $data = []) {
+        $node = ['message'=>$e->getMessage(),'class'=>get_class($e),'data'=>$data];
         Log::error("Remote activity error",$node);
         if (is_array($this->errors) && count($this->errors)) {
             $this->errors[] = $node;
@@ -494,7 +494,8 @@ class RemoteActivity extends Model
                             $command_args_array[$k] = $tmpfname;
                         }
                         $command_args = $this->remote_parent->remote_uri_path . implode(' ',$command_args_array);
-                        exec($this->remote_parent->remote_uri_main . ' '. $command_args, $from_data, $code);
+                        $command = $this->remote_parent->remote_uri_main . ' '. $command_args . " 2>&1" ;
+                        $this->runCommand($command,$from_data);
                         break;
                     }
                     case RemoteUriType::CODE: {
@@ -531,7 +532,7 @@ class RemoteActivity extends Model
                 $this->remote_activity_status_type = RemoteActivityStatusType::SUCCESS;
             } catch (GuzzleException|\Exception $e) {
                 $b_error = true;
-                $this->addError($e);
+                $this->addError($e,$from_data);
                 $this->remote_activity_status_type = RemoteActivityStatusType::FAILED;
             }
 
@@ -560,6 +561,28 @@ class RemoteActivity extends Model
             }
         }
         $this->announceDaFinishing();
+    }
+
+    public function runCommand($command,array &$output) : void  {
+
+        $raw_output = [];
+        $b_exec_ok = exec($command,$raw_output,$result_code);
+        if ($b_exec_ok === false ) { throw new \RuntimeException("[runCommand] Could not run: $command ");}
+
+        $output = [];
+        if (!empty($raw_output)) {
+            foreach ($raw_output as $out) {
+                //it is in ansi color and formatting, impossible to read as text until those are removed first
+                $poc_line = trim(Utilities::cleanAnsiFromString($out));
+                if ($poc_line) {
+                    $output[] = $poc_line;
+                }
+            }
+        }
+
+        if ($result_code) {
+            throw new \RuntimeException("$command has error code $result_code: ",$result_code);
+        }
     }
 
     const IDENTIFYING_DATA_KEY = 'call_identity';

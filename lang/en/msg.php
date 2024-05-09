@@ -105,6 +105,8 @@ return [
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
     'stack_not_found' => 'Remote stack not found using :ref',
 
+    //stack
+    'stack_not_in_usage_group' => 'You are not allowed to use this stack :ref',
 
     //actions
     'action_not_found' => 'Element not found using :ref',

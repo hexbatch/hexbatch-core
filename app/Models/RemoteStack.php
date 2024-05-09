@@ -220,8 +220,13 @@ class RemoteStack extends Model
         $this->remote_stack_status = RemoteStackStatusType::STARTED;
         $this->save();
         foreach ($this->children_activities as $child) {
+            if ($this->remote_stack_category !== RemoteStackCategoryType::MAIN) {
+               $starting_data = array_merge(($this->parent_stack?->ending_data->getArrayCopy())??[],($this->starting_activity_data?->getArrayCopy())??[]);
+            } else {
+                $starting_data = ($this->starting_activity_data?->getArrayCopy())??[];
+            }
             if (!empty($this->starting_activity_data)) {
-                $child->to_remote_processed_data = array_merge($this->starting_activity_data->getArrayCopy(),$child->to_remote_processed_data->getArrayCopy());
+                $child->to_remote_processed_data = array_merge($starting_data,($child->to_remote_processed_data?->getArrayCopy())??[]);
                 $child->save();
             }
             $child->runActivity();
