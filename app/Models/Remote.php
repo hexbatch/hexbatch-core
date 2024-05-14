@@ -161,7 +161,7 @@ class Remote extends Model
     }
 
     public function getName() : string  {
-        return $this->remote_owner->username . '.'. $this->attribute_name;
+        return $this->remote_owner->username . '.'. $this->remote_name;
     }
 
     public function isInUse() : bool {

@@ -120,7 +120,8 @@ class RemoteActivity extends Model
     ];
 
     public function remote_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Remote','parent_remote_id');
+        return $this->belongsTo('App\Models\Remote','parent_remote_id')->select('remotes.*')
+            ->selectRaw(" extract(epoch from  remotes.created_at) as created_at_ts,  extract(epoch from  remotes.updated_at) as updated_at_ts");
     }
 
     public function home_stack() : BelongsTo {
@@ -134,11 +135,15 @@ class RemoteActivity extends Model
     }
 
     public function caller_attribute() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','caller_attribute_id');
+        return $this->belongsTo('App\Models\Attribute','caller_attribute_id')
+            ->select('attributes.*')
+            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts");
     }
 
     public function caller_user() : BelongsTo {
-        return $this->belongsTo('App\Models\User','caller_user_id');
+        return $this->belongsTo('App\Models\User','caller_user_id')
+            ->select('users.*')
+            ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts");
     }
 
     public function caller_server() : BelongsTo {

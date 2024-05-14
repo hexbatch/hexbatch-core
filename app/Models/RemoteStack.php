@@ -116,10 +116,10 @@ class RemoteStack extends Model
 
     public static function decorateBuilder(Builder|Relation $build) :void {
         $build->select('remote_stacks.*')
-            ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,".
-                "  extract(epoch from  elements.updated_at) as updated_at_ts,  extract(epoch from  elements.ending_data) as ending_data")
-            /** @uses RemoteStack::parent_stack(),RemoteStack::shortcut_stack(),RemoteStack::stack_owner(),RemoteStack::children_activities() */
-            ->with('parent_stack','shortcut_stack','stack_owner','children_activities')
+            ->selectRaw(" extract(epoch from  remote_stacks.created_at) as created_at_ts,".
+                "  extract(epoch from  remote_stacks.updated_at) as updated_at_ts")
+            /** @uses RemoteStack::parent_stack(),RemoteStack::stack_owner(),RemoteStack::children_activities() */
+            ->with('parent_stack','stack_owner','children_activities')
         ;
     }
 
@@ -128,7 +128,8 @@ class RemoteStack extends Model
      * @param RemoteStackCategoryType[] $category_types
      */
     public static function buildRemoteStack(
-        ?int $id = null,?int $parent_id = null,array $category_types = [],array $status_types = []
+        ?int $id = null,false|int|null $parent_id = false,array $category_types = [],array $status_types = [],
+        ?User $owner = null
     )
     : Builder
     {
@@ -144,8 +145,17 @@ class RemoteStack extends Model
             $build->where('remote_stacks.id', $id);
         }
 
-        if ($parent_id) {
-            $build->where('remote_stacks.parent_remote_stack_id', $parent_id);
+        if ($parent_id !== false) {
+            if ($parent_id) {
+                $build->where('remote_stacks.parent_remote_stack_id', $parent_id);
+            } else {
+                $build->whereNull('remote_stacks.parent_remote_stack_id');
+            }
+
+        }
+
+        if ($owner) {
+            $build->where('remote_stacks.user_id', $owner->id);
         }
 
 

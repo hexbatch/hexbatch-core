@@ -29,13 +29,14 @@ class RemoteStackResource extends JsonResource
         $init_ret = [
             'uuid' => $this->ref_uuid,
             'owner' => $this->stack_owner->getName(),
-            "category"=>$this->remote_stack_category->value,
-            "status"=>$this->remote_stack_status->value,
+            'parent' => $this->parent_stack?->getName(),
+            "category"=>$this->remote_stack_category?->value,
+            "status"=>$this->remote_stack_status?->value,
             "number_activities" => count($this->children_activities??[]),
             "number_children" => count($this->children_stacks),
         ];
 
-        if ($this->n_display_level <=0) {
+        if ($this->n_display_level <=1) {
             return $init_ret;
         }
 

@@ -59,7 +59,18 @@ class StackController extends Controller
         return response()->json(new RemoteStackResource($refresh,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function append_stack(RemoteStack $child_stack,?RemoteStack $parent_stack) {
+    public function append_stack(RemoteStack $child_stack,?string $parent_stack_ref) {
+        /**
+         * @var RemoteStack|null $parent_stack
+         */
+        $parent_stack = null;
+        if ($parent_stack_ref) {
+            $parent_field = null;
+            if (ctype_digit($parent_stack_ref)) {
+                $parent_field = 'id';
+            }
+            $parent_stack = (new RemoteStack())->resolveRouteBinding($parent_stack_ref,$parent_field);
+        }
         static::stackUsageCheck($parent_stack);
         static::stackUsageCheck($child_stack);
         $child_stack->parent_remote_stack_id = $parent_stack?->id;
@@ -90,6 +101,7 @@ class StackController extends Controller
         }
 
         $test_stack->save();
+        $test_stack->refresh();
         return response()->json(new RemoteStackResource($test_stack,null,30), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -98,7 +110,7 @@ class StackController extends Controller
     public function stack_list(?User $user = null) {
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
-        $out_laravel = Remote::buildRemote(usage_user_id: $user->id);
+        $out_laravel = RemoteStack::buildRemoteStack(parent_id:null,owner: $user);
         $out = $out_laravel->cursorPaginate();
         return response()->json(new RemoteStackCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }

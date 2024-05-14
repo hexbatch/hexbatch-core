@@ -39,7 +39,7 @@ class RemoteActivityResource extends JsonResource
         if ($this->remote_call_ended_at_ts) {
             $ret['ended_at'] = Carbon::createFromTimestamp($this->remote_call_ended_at_ts)->toIso8601String();
         }
-        if ($this->n_display_level === 1) {
+        if ($this->n_display_level <= 1) {
             return $ret;
         }
         $ret =  [
