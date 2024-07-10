@@ -24,7 +24,20 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+//todo attributes can have ancestors, which will provide missing  data in the definition if that attribute is missing it
+// each meta, rule, group, and the lookup are inherited unless the attribute defines its own section for those
+// the section can add or remove rules, meta, group without changing the rest of the inherited, or can simply replace, or make empty
 
+/*
+ * todo When an attribute is live on an element or used in an event, then its parent is the attribute type
+ * todo make a new table for live attributes that has the attribute, and its json value (put pointer value in there or other primitive if not json type)
+ *  only one live attribute is used for each element or event, unique possession
+ *
+ * todo a fired event is a live attribute whose json values is fed into one or more stacks (defined by the action handlers)
+ *  an event can only be fired if there is an action for it
+ *  remove events table, and make waiting_actions table which has the attribute created for the event
+ *
+ */
 
 /**
  * @mixin Builder
@@ -65,7 +78,7 @@ use Illuminate\Validation\ValidationException;
  * @property AttributeValue attribute_value
  * @property AttributeMetum[] meta_of_attribute
  * @property AttributeRule[] da_rules
- * @property AttributeUserGroup[] permission_groups
+ * @property AttributeUserGroupLookup[] permission_groups
  */
 class Attribute extends Model
 {
@@ -172,8 +185,8 @@ class Attribute extends Model
     }
 
     public function permission_groups() : HasMany {
-        return $this->hasMany('App\Models\AttributeUserGroup','group_parent_attribute_id','id')
-            /** @uses AttributeUserGroup::target_user_group() */
+        return $this->hasMany('App\Models\AttributeUserGroupLookup','group_lookup_attribute_id','id')
+            /** @uses AttributeUserGroupLookup::target_user_group() */
             ->with('target_user_group')
             ->orderBy('group_type')
             ->orderBy('created_at');
@@ -250,7 +263,7 @@ class Attribute extends Model
 
     }
 
-    public function getPermissionGroup(AttributeUserGroupType $type_group) : ?AttributeUserGroup{
+    public function getPermissionGroup(AttributeUserGroupType $type_group) : ?AttributeUserGroupLookup{
         foreach ($this->permission_groups as $perm_group) {
             if ($perm_group->group_type === $type_group) {
                 return $perm_group;
@@ -304,8 +317,8 @@ class Attribute extends Model
             /** @uses Attribute::meta_of_attribute(),Attribute::da_rules(),Attribute::permission_groups(),Attribute::attribute_pointer() */
             ->with('meta_of_attribute', 'da_rules', 'permission_groups','attribute_pointer')
 
-            /** @uses Attribute::attribute_value(),AttributeValue::value_parent()  */
-            ->with('attribute_value','attribute_value.value_parent')
+            /** @uses Attribute::attribute_value()  */
+            ->with('attribute_value',)
        ;
 
         if ($id) {
@@ -357,7 +370,7 @@ class Attribute extends Model
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('a_groups.group_parent_attribute_id','=','attributes.id')
+                        ->on('a_groups.group_lookup_attribute_id','=','attributes.id')
                         ->where('a_groups.group_type',AttributeUserGroupType::USAGE->value)
                     ;
                 }
@@ -411,6 +424,7 @@ class Attribute extends Model
                         } else if (count($parts) > 1) {
                             $owner_string = $parts[0];
                             $maybe_name = $parts[1];
+                            /** @var User $owner */
                             $owner = (new User)->resolveRouteBinding($owner_string);
                             $build = $this->where('user_id', $owner?->id)->whereNull('parent_attribute_id')->where('attribute_name', $maybe_name);
                         }

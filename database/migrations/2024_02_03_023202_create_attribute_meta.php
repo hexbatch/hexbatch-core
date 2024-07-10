@@ -15,16 +15,6 @@ return new class extends Migration
         Schema::create('attribute_meta', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('meta_parent_attribute_id')
-                ->nullable(false)
-                ->comment("The attribute this rule is for")
-                ->index('idx_meta_attribute_parent_id')
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-
-
             $table->timestamps();
         });
 
@@ -41,7 +31,6 @@ return new class extends Migration
         ");
 
         Schema::table('attribute_meta', function (Blueprint $table) {
-            $table->index(['meta_parent_attribute_id','meta_type'],'idx_attr_meta_type');
             $table->string('meta_value')->nullable()->default(null)->comment("the value of the meta");
         });
     }

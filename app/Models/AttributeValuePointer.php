@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int value_parent_attribute_id
+ * @property int parent_attribute_value_id
  * @property int user_id
  * @property int user_group_id
  * @property int attribute_id
@@ -41,7 +41,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int created_at_ts
  * @property int updated_at_ts
  *
- * @property Attribute value_parent
  * @property User value_user
  * @property UserGroup value_group
  * @property Attribute value_attribute
@@ -69,10 +68,6 @@ class AttributeValuePointer extends Model
     ];
 
 
-    /** @noinspection PhpUnused */
-    public function value_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','value_parent_attribute_id');
-    }
 
     public function value_user() : BelongsTo {
         return $this->belongsTo('App\Models\User','user_id');
@@ -242,7 +237,7 @@ class AttributeValuePointer extends Model
     public static function createAttributeValue(Attribute $attribute,$maybe_value,?AttributeValueType $hint = null ) : AttributeValuePointer {
 
         $ret = new AttributeValuePointer();
-        $ret->value_parent_attribute_id = $attribute->id;
+        $ret->parent_attribute_value_id = null; //todo change to point to the owning attribute value
         if (!$hint) { $hint = $attribute->value_type;}
         if (is_string($maybe_value)) {
             switch ($hint) {

@@ -17,7 +17,7 @@ use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
 use App\Http\Resources\StandardAttributeCollection;
 use App\Models\Attribute;
-use App\Models\AttributeUserGroup;
+use App\Models\AttributeUserGroupLookup;
 use App\Models\Enums\Attributes\AttributePingType;
 use App\Models\Enums\Attributes\AttributeUserGroupType;
 use App\Models\User;
@@ -146,11 +146,11 @@ class AttributeController extends Controller
                      RefCodes::ATTRIBUTE_PING_DATA_MISSING);
             }
             /**
-             * @var AttributeUserGroup $read_group
+             * @var AttributeUserGroupLookup $read_group
              */
-            $read_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
+            $read_group = AttributeUserGroupLookup::where('group_lookup_attribute_id',$attribute->id)
                 ->where('group_type',AttributeUserGroupType::READ->value)
-                /** @uses AttributeUserGroup::target_user_group() */
+                /** @uses AttributeUserGroupLookup::target_user_group() */
                 ->with('target_user_group')
                 ->first();
             if($read_group) {
@@ -165,11 +165,11 @@ class AttributeController extends Controller
                     RefCodes::ATTRIBUTE_PING_DATA_MISSING);
             }
             /**
-             * @var AttributeUserGroup $write_group
+             * @var AttributeUserGroupLookup $write_group
              */
-            $write_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
+            $write_group = AttributeUserGroupLookup::where('group_lookup_attribute_id',$attribute->id)
                 ->where('group_type',AttributeUserGroupType::WRITE->value)
-                /** @uses AttributeUserGroup::target_user_group() */
+                /** @uses AttributeUserGroupLookup::target_user_group() */
                 ->with('target_user_group')
                 ->first();
             if($write_group) {
@@ -184,11 +184,11 @@ class AttributeController extends Controller
                     RefCodes::ATTRIBUTE_PING_DATA_MISSING);
             }
             /**
-             * @var AttributeUserGroup $write_group
+             * @var AttributeUserGroupLookup $write_group
              */
-            $write_group = AttributeUserGroup::where('group_parent_attribute_id',$attribute->id)
+            $write_group = AttributeUserGroupLookup::where('group_lookup_attribute_id',$attribute->id)
                 ->where('group_type',AttributeUserGroupType::WRITE->value)
-                /** @uses AttributeUserGroup::target_user_group() */
+                /** @uses AttributeUserGroupLookup::target_user_group() */
                 ->with('target_user_group')
                 ->first();
             if($write_group) {

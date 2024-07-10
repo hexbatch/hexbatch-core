@@ -1,4 +1,3 @@
-version: '3.8'
 
 volumes:
   hbc_pgadmin_data:

@@ -22,7 +22,6 @@ use Illuminate\Support\Collection;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_attribute_id
  * @property boolean is_nullable
  * @property AttributeValueType value_type
  * @property AttributeRemoteUsePolicy remote_use_policy
@@ -72,8 +71,9 @@ class AttributeValue extends Model
         'remote_use_policy' => AttributeRemoteUsePolicy::class,
     ];
 
-    public function value_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','parent_attribute_id');
+
+    public function da_pointer() : BelongsTo {
+        return $this->belongsTo('App\Models\AttributeValuePointer','parent_attribute_value_id');
     }
 
 
@@ -94,9 +94,7 @@ class AttributeValue extends Model
     public static function createValue(Collection $value_block,?Attribute $parent = null) : AttributeValue {
 
         $ret = new AttributeValue();
-        if ($parent) {
-            $ret->parent_attribute_id = $parent->id;
-        }
+
         if ($value_block->has('is_nullable')) {
             $ret->is_nullable = Utilities::boolishToBool($value_block->get('is_nullable'));
         }

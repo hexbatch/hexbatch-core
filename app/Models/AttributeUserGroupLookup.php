@@ -11,12 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
-
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int group_parent_attribute_id
+ * @property int group_lookup_attribute_id
+ * @property int group_managed_by_attribute_id
  * @property int target_user_group_id
  * @property AttributeUserGroupType group_type
  * @property string created_at
@@ -27,9 +27,9 @@ use Illuminate\Support\Facades\Auth;
  * @property UserGroup target_user_group
  * @property Attribute group_parent
  */
-class AttributeUserGroup extends Model
+class AttributeUserGroupLookup extends Model
 {
-    protected $table = 'attribute_user_groups';
+    protected $table = 'attribute_user_group_lookups';
     public $timestamps = false;
 
     /**
@@ -55,9 +55,7 @@ class AttributeUserGroup extends Model
         'group_type' => AttributeUserGroupType::class,
     ];
 
-    public function group_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','group_parent_attribute_id');
-    }
+
 
     public function target_user_group() : BelongsTo {
         return $this->belongsTo('App\Models\UserGroup','target_user_group_id');
@@ -65,11 +63,11 @@ class AttributeUserGroup extends Model
 
     public bool $delete_mode = false;
 
-    public static function createUserGroup(string|array $group_hint,AttributeUserGroupType $group_type,?Attribute $parent = null) : AttributeUserGroup {
-        $ret = new AttributeUserGroup();
+    public static function createUserGroup(string|array $group_hint,AttributeUserGroupType $group_type,?Attribute $parent = null) : AttributeUserGroupLookup {
+        $ret = new AttributeUserGroupLookup();
         $ret->group_type = $group_type;
         if ($parent) {
-            $ret->group_parent_attribute_id = $parent->id;
+            $ret->group_lookup_attribute_id = $parent->id;
         }
         $use_group_hint = $group_hint;
         if (is_array($group_hint)) {
@@ -98,7 +96,7 @@ class AttributeUserGroup extends Model
 
     public function deleteModeActivate() {
         if ($this->delete_mode) {
-            AttributeUserGroup::where('group_parent_attribute_id',$this->group_parent_attribute_id)
+            AttributeUserGroupLookup::where('group_lookup_attribute_id',$this->group_lookup_attribute_id)
                 ->where('target_user_group_id',$this->target_user_group_id)
                 ->where('group_type',$this->group_type->value)
                 ->delete();

@@ -3,7 +3,7 @@
 namespace App\Helpers\Attributes\Build;
 
 use App\Models\Attribute;
-use App\Models\AttributeUserGroup;
+use App\Models\AttributeUserGroupLookup;
 use App\Models\Enums\Attributes\AttributeUserGroupType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -13,7 +13,7 @@ class AttributePermissionGathering
 {
 
     /**
-     * @var AttributeUserGroup[] $permission_groups
+     * @var AttributeUserGroupLookup[] $permission_groups
      */
     public array $permission_groups = [];
 
@@ -40,13 +40,13 @@ class AttributePermissionGathering
         }
 
         foreach ($write_block as $what) {
-            $this->permission_groups[] = AttributeUserGroup::createUserGroup($what,AttributeUserGroupType::WRITE);
+            $this->permission_groups[] = AttributeUserGroupLookup::createUserGroup($what,AttributeUserGroupType::WRITE);
         }
         foreach ($read_block as $what) {
-            $this->permission_groups[] = AttributeUserGroup::createUserGroup($what,AttributeUserGroupType::READ);
+            $this->permission_groups[] = AttributeUserGroupLookup::createUserGroup($what,AttributeUserGroupType::READ);
         }
         foreach ($usage_block as $what) {
-            $this->permission_groups[] = AttributeUserGroup::createUserGroup($what,AttributeUserGroupType::USAGE);
+            $this->permission_groups[] = AttributeUserGroupLookup::createUserGroup($what,AttributeUserGroupType::USAGE);
         }
 
 
@@ -55,9 +55,9 @@ class AttributePermissionGathering
     public function assign(Attribute $attribute) {
         try {
             DB::beginTransaction();
-            /** @var AttributeUserGroup $what */
+            /** @var AttributeUserGroupLookup $what */
             foreach ($this->permission_groups as $what) {
-                $what->group_parent_attribute_id = $attribute->id;
+                $what->group_lookup_attribute_id = $attribute->id;
                 if ($what->delete_mode) {
                     $what->deleteModeActivate();
                 } else {

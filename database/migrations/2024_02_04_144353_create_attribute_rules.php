@@ -24,14 +24,6 @@ return new class extends Migration
         Schema::create('attribute_rules', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('rule_parent_attribute_id')
-                ->nullable(false)
-                ->comment("The attribute this rule is for")
-                ->index('idx_rule_attribute_parent_id')
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
             $table->foreignId('target_attribute_id')
                 ->nullable(false)
                 ->comment("The attribute this rule is about")

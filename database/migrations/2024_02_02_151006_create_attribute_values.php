@@ -18,17 +18,6 @@ return new class extends Migration
             $table->id();
 
 
-            $table->foreignId('parent_attribute_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The optional parent of the attribute")
-                ->index('idx_attribute_value_parent_id')
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-
-
             $table->boolean('is_nullable')->default(true)->nullable(false)
                 ->comment('if true then value is nullable');
 

@@ -319,6 +319,7 @@ class Remote extends Model
                         } else {
                             $owner = $parts[0];
                             $maybe_name = $parts[1];
+                            /** @var User $owner */
                             $owner = (new User)->resolveRouteBinding($owner);
                             $build = $this->where('user_id', $owner?->id)->where('remote_name', $maybe_name);
                         }

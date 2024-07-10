@@ -16,11 +16,11 @@ return new class extends Migration
         Schema::create('attribute_value_pointers', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('value_parent_attribute_id')
+            $table->foreignId('value_lookup_attribute_id')
                 ->nullable(false)
                 ->comment("The attribute this value is for")
-                ->unique('udx_value_attribute_parent_id')
-                ->constrained('attributes')
+                ->unique('udx_parent_attribute_value_id')
+                ->constrained('attribute_values')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

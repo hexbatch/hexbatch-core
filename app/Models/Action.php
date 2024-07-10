@@ -8,7 +8,9 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-
+/*
+ * todo fill in actions enough , with that new table for events in progress used by actions when they are toggled by the event, to test custom event firing
+ */
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
