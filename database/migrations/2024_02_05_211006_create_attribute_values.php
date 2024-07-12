@@ -17,6 +17,13 @@ return new class extends Migration
         Schema::create('attribute_values', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('value_pointer_id')
+                ->nullable()
+                ->default(null)
+                ->comment("If the value points to some db object. Ignored if value type not using this  ")
+                ->constrained('attribute_value_pointers')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->boolean('is_nullable')->default(true)->nullable(false)
                 ->comment('if true then value is nullable');
@@ -74,7 +81,6 @@ return new class extends Migration
 
             $table->timestamps();
         });
-
 
 
 

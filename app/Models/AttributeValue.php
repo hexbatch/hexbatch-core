@@ -22,6 +22,7 @@ use Illuminate\Support\Collection;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int value_pointer_id
  * @property boolean is_nullable
  * @property AttributeValueType value_type
  * @property AttributeRemoteUsePolicy remote_use_policy
@@ -35,7 +36,7 @@ use Illuminate\Support\Collection;
  *
  * @property int created_at_ts
  * @property int updated_at_ts
- * @property Attribute value_parent
+ * @property AttributeValuePointer da_pointer
  *
  */
 class AttributeValue extends Model
@@ -73,7 +74,7 @@ class AttributeValue extends Model
 
 
     public function da_pointer() : BelongsTo {
-        return $this->belongsTo('App\Models\AttributeValuePointer','parent_attribute_value_id');
+        return $this->belongsTo('App\Models\AttributeValuePointer','value_pointer_id');
     }
 
 
@@ -86,7 +87,7 @@ class AttributeValue extends Model
             return $this->json_value_default;
         } else {
             /** @uses AttributeValue::value_parent() */
-            return $this->value_parent?->attribute_pointer?->getValue();
+            return $this->da_pointer?->getValue();
         }
 
     }

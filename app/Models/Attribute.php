@@ -78,7 +78,7 @@ use Illuminate\Validation\ValidationException;
  * @property AttributeValue attribute_value
  * @property AttributeMetum[] meta_of_attribute
  * @property AttributeRule[] da_rules
- * @property AttributeUserGroupLookup[] permission_groups
+ * @property AttributeLookupUserGroup[] permission_groups
  */
 class Attribute extends Model
 {
@@ -185,8 +185,8 @@ class Attribute extends Model
     }
 
     public function permission_groups() : HasMany {
-        return $this->hasMany('App\Models\AttributeUserGroupLookup','group_lookup_attribute_id','id')
-            /** @uses AttributeUserGroupLookup::target_user_group() */
+        return $this->hasMany('App\Models\AttributeLookupUserGroup','group_lookup_attribute_id','id')
+            /** @uses AttributeLookupUserGroup::target_user_group() */
             ->with('target_user_group')
             ->orderBy('group_type')
             ->orderBy('created_at');
@@ -263,7 +263,7 @@ class Attribute extends Model
 
     }
 
-    public function getPermissionGroup(AttributeUserGroupType $type_group) : ?AttributeUserGroupLookup{
+    public function getPermissionGroup(AttributeUserGroupType $type_group) : ?AttributeLookupUserGroup{
         foreach ($this->permission_groups as $perm_group) {
             if ($perm_group->group_type === $type_group) {
                 return $perm_group;

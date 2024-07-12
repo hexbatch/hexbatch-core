@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Auth;
  * @property UserGroup target_user_group
  * @property Attribute group_parent
  */
-class AttributeUserGroupLookup extends Model
+class AttributeLookupUserGroup extends Model
 {
     protected $table = 'attribute_user_group_lookups';
     public $timestamps = false;
@@ -63,8 +63,8 @@ class AttributeUserGroupLookup extends Model
 
     public bool $delete_mode = false;
 
-    public static function createUserGroup(string|array $group_hint,AttributeUserGroupType $group_type,?Attribute $parent = null) : AttributeUserGroupLookup {
-        $ret = new AttributeUserGroupLookup();
+    public static function createUserGroup(string|array $group_hint,AttributeUserGroupType $group_type,?Attribute $parent = null) : AttributeLookupUserGroup {
+        $ret = new AttributeLookupUserGroup();
         $ret->group_type = $group_type;
         if ($parent) {
             $ret->group_lookup_attribute_id = $parent->id;
@@ -96,7 +96,7 @@ class AttributeUserGroupLookup extends Model
 
     public function deleteModeActivate() {
         if ($this->delete_mode) {
-            AttributeUserGroupLookup::where('group_lookup_attribute_id',$this->group_lookup_attribute_id)
+            AttributeLookupUserGroup::where('group_lookup_attribute_id',$this->group_lookup_attribute_id)
                 ->where('target_user_group_id',$this->target_user_group_id)
                 ->where('group_type',$this->group_type->value)
                 ->delete();
