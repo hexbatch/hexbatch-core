@@ -19,7 +19,7 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_of_attribute_metum AS ENUM (
-            'none','author','copywrite','url','rating','lang','mime_type'
+            'none','author','copywrite','url','rating','lang','mime_type','icu_locale','icu_location'
             );");
 
         DB::statement("ALTER TABLE attribute_meta Add COLUMN meta_type type_of_attribute_metum NOT NULL default 'none';");

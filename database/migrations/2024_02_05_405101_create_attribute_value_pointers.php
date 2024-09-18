@@ -13,16 +13,17 @@ return new class extends Migration
     public function up(): void
     {
 
-        Schema::create('attribute_value_pointers', function (Blueprint $table) {
+        Schema::create('attribute_pointers', function (Blueprint $table) {
             $table->id();
 
 
-            $table->foreignId('user_id')
+
+            $table->foreignId('attribute_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The value points to a user")
-                ->index('idx_value_pointer_user_id')
-                ->constrained('users')
+                ->comment("The value points to an attribute")
+                ->index('idx_value_pointer_attribute_id')
+                ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -32,15 +33,6 @@ return new class extends Migration
                 ->comment("The value points to a user group")
                 ->index('idx_value_pointer_group_id')
                 ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreignId('attribute_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The value points to an attribute")
-                ->index('idx_value_pointer_attribute_id')
-                ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -82,14 +74,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('action_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The value points to an action")
-                ->index('idx_value_pointer_action_id')
-                ->constrained('actions')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('set_id')
                 ->nullable()
@@ -97,6 +81,15 @@ return new class extends Migration
                 ->comment("The value points to set ")
                 ->index('idx_value_pointer_set_id')
                 ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('attribute_rule_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The value is a rule")
+                ->index('idx_attribute_rule_id')
+                ->constrained('attribute_rules')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -109,28 +102,19 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('remote_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The value points to a remote")
-                ->index('idx_value_pointer_remote_id')
-                ->constrained('remotes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
             $table->timestamps();
         });
 
 
 
-        DB::statement("ALTER TABLE attribute_value_pointers ALTER COLUMN created_at SET DEFAULT NOW();");
-        DB::statement("ALTER TABLE attribute_value_pointers ADD CONSTRAINT chk_only_one_is_not_null CHECK (
+        DB::statement("ALTER TABLE attribute_pointers ALTER COLUMN created_at SET DEFAULT NOW();");
+        DB::statement("ALTER TABLE attribute_pointers ADD CONSTRAINT chk_only_one_is_not_null CHECK (
             num_nonnulls(location_bound_id, time_bound_id, element_id,element_type_id,
-                            attribute_id,user_group_id,user_id,action_id,set_id,path_id,remote_id) = 1)
+                            attribute_id,user_group_id,set_id,path_id) = 1)
         ;");
 
         DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON attribute_value_pointers FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+            CREATE TRIGGER update_modified_time BEFORE UPDATE ON attribute_pointers FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
 
     }
@@ -140,6 +124,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attribute_value_pointers');
+        Schema::dropIfExists('attribute_pointers');
     }
 };

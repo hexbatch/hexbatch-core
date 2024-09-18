@@ -26,23 +26,20 @@ return new class extends Migration
 
             $table->foreignId('target_attribute_id')
                 ->nullable(false)
-                ->comment("The attribute this rule is about")
+                ->comment("The attribute this rule is about. This can be a parent or ancestor, affecting all decendants")
                 ->index('idx_target_attribute_id')
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->integer('rule_weight')->nullable(false)->default(1)
-                ->comment("how important is this rule?");
+                ->comment("when combined with others of its type, how important is this?");
 
-            $table->float('rule_numeric_min')->nullable()->default(null)
-                ->comment("if set and target type is number, then this is the min allowed for the value");
+            $table->integer('rule_value')->nullable(false)->default(1)
+                ->comment("summed with others of its type, if total <= 0 rule is not applied");
 
-            $table->float('rule_numeric_max')->nullable()->default(null)
-                ->comment("if set and target type is number, then this is the max allowed for the value");
-
-            $table->string('rule_regex')->nullable()->default(null)
-                ->comment("if set and target value type is plain string, then regex filters this");
+            $table->text('rule_json_path')->nullable()->default(null)
+                ->comment("if set matches path to the the target json value");
 
 
             $table->timestamps();
