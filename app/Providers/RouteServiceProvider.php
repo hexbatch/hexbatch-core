@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Action;
 use App\Models\Attribute;
 use App\Models\Element;
 use App\Models\ElementType;
@@ -48,7 +47,6 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('remote', Remote::class);
         Route::model('remote_activity', RemoteActivity::class);
         Route::model('remote_stack', RemoteStack::class);
-        Route::model('action', Action::class);
         Route::model('element', Element::class);
         Route::model('element_type', ElementType::class);
         Route::model('server', Server::class);

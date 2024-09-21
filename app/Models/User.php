@@ -228,15 +228,16 @@ class User extends Authenticatable
     }
 
 
-
-    public function checkAdminGroup(int $user_id) : void {
+    public function inAdminGroup(int $user_id) : bool {
         /** @noinspection PhpUnhandledExceptionInspection */
         $this->initUser();
-        /** @uses User::user_group() */
-        $group = $this->user_group;
-        if ($this->id === $user_id) {return;}
+        if ($this->id === $user_id) {return true;}
+        return !!$this->user_group->isAdmin($user_id);
+    }
 
-        if (!$group->isAdmin($user_id)) {
+    public function checkAdminGroup(int $user_id) : void {
+
+        if (!$this->inAdminGroup($user_id)) {
             throw new HexbatchPermissionException(__("msg.user_not_priv"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::USER_NOT_PRIV);

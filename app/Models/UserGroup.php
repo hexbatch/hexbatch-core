@@ -111,6 +111,7 @@ class UserGroup extends Model
                         } else {
                             $owner = $parts[0];
                             $maybe_name = $parts[1];
+                            /** @var User $owner */
                             $owner = (new User)->resolveRouteBinding($owner);
                             $ret = $this->where('user_id', $owner?->id)->where('group_name', $maybe_name)->first();
                         }
@@ -151,12 +152,14 @@ class UserGroup extends Model
 
     /**
      * @param string|null $group_name
+     * @param string|null $attribute_name
      * @return void
      * @throws ValidationException
      */
-    public function setGroupName(?string $group_name) {
-        Validator::make(['group_name'=>$group_name], [
-            'group_name'=>['required','string','max:128',new ResourceNameReq],
+    public function setGroupName(?string $group_name,?string $attribute_name = null) {
+        if (empty($attribute_name)) { $attribute_name = 'group_name';}
+        Validator::make([$attribute_name=>$group_name], [
+            $attribute_name=>['required','string','max:128',new ResourceNameReq],
         ])->validate();
         $this->group_name = $group_name;
     }
@@ -189,7 +192,7 @@ class UserGroup extends Model
 
     public function isInUse() : bool {
         if (!$this->id) {return false;}
-        if( AttributeLookupUserGroup::where('target_user_group_id',$this->id)->exists() ) {return true;}
+
         if( User::where('user_group_id',$this->id)->exists() ) {return true;}
         return false;
     }

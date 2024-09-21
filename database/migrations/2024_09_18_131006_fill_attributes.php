@@ -16,13 +16,15 @@ return new class extends Migration
 
         Schema::table('attributes', function (Blueprint $table) {
 
-            $table->foreignId('user_id')
-                ->nullable(false)
-                ->comment("The owner of the attribute")
-                ->index('idx_attribute_owner_user_id')
-                ->constrained('users')
+            $table->foreignId('owner_element_type_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The type that owns this attribute")
+                ->index('idx_attribute_owner_element_type_id')
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+
 
             $table->foreignId('parent_attribute_id')
                 ->nullable()
@@ -52,6 +54,7 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
             $table->boolean('is_retired')->default(false)->nullable(false)
+                ->index('idx_is_retired')
                 ->comment('if true then cannot be added as parent or added to anything');
 
 
@@ -59,7 +62,7 @@ return new class extends Migration
                 ->comment('if true then cannot be used as a parent');
 
             $table->boolean('is_system')->default(false)->nullable(false)
-                ->index('idx_is_standard')
+                ->index('idx_attr_is_system')
                 ->comment('if true then this attribute is a standard attribute');
 
             $table->boolean('is_nullable')->default(true)->nullable(false)
@@ -82,7 +85,7 @@ return new class extends Migration
         });
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_user_parent_name ON attributes (user_id,parent_attribute_id,attribute_name) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_type_parent_name ON attributes (owner_element_type_id,attribute_name) NULLS NOT DISTINCT;");
 
 
 
@@ -100,7 +103,7 @@ return new class extends Migration
             'value',
              'rule',
             'meta_author','meta_copywrite','meta_url','meta_rating','meta_icu_language',
-            'meta_mime_type','meta_icu_locale','metaicu_location',
+            'meta_mime_type','meta_icu_locale','meta_icu_location',
             'read_time_bounds','write_time_bounds',
             'read_map_location_bounds','write_map_location_bounds',
             'read_shape_location_bounds','write_shape_location_bounds'
@@ -118,13 +121,11 @@ return new class extends Migration
         DB::statement("DROP TRIGGER update_modified_time ON attributes");
 
         Schema::table('attributes', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
             $table->dropForeign(['parent_attribute_id']);
             $table->dropForeign(['pointer_id']);
 
             $table->dropColumn('parent_attribute_id');
             $table->dropColumn('pointer_id');
-            $table->dropColumn('user_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_retired');
             $table->dropColumn('is_final');

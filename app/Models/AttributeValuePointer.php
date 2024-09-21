@@ -8,10 +8,10 @@ use App\Http\Resources\AttributeResource;
 use App\Http\Resources\ElementResource;
 use App\Http\Resources\ElementTypeResource;
 use App\Http\Resources\LocationBoundResource;
-use App\Http\Resources\RemoteResource;
+
 use App\Http\Resources\TimeBoundResource;
 use App\Http\Resources\UserGroupResource;
-use App\Http\Resources\UserResource;
+
 use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Enums\Bounds\LocationType;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,16 +23,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_attribute_value_id
- * @property int user_id
+ * @property int pointer_owner_id
+
  * @property int user_group_id
  * @property int attribute_id
  * @property int element_type_id
  * @property int element_id
  * @property int time_bound_id
  * @property int location_bound_id
- * @property int remote_id
- * @property int action_id
  *
  *
  * @property string created_at
@@ -41,14 +39,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int created_at_ts
  * @property int updated_at_ts
  *
- * @property User value_user
+
  * @property UserGroup value_group
  * @property Attribute value_attribute
  * @property Element value_element
  * @property ElementType value_element_type
  * @property TimeBound value_schedule
  * @property LocationBound value_location
- * @property Remote value_remote
  *
  *
  */
@@ -69,9 +66,7 @@ class AttributeValuePointer extends Model
 
 
 
-    public function value_user() : BelongsTo {
-        return $this->belongsTo('App\Models\User','user_id');
-    }
+
 
     public function value_group() : BelongsTo {
         return $this->belongsTo('App\Models\UserGroup','user_group_id');
@@ -96,41 +91,33 @@ class AttributeValuePointer extends Model
     public function value_location() : BelongsTo {
         return $this->belongsTo('App\Models\LocationBound','location_bound_id');
     }
-    public function value_remote() : BelongsTo {
-        return $this->belongsTo('App\Models\Remote','remote_id');
-    }
+
 
     public function getValue() {
-        if ($this->value_user()->first()) {return $this->value_user;}
         if ($this->value_group()->first()) {return $this->value_group;}
         if ($this->value_attribute()->first()) {return $this->value_attribute;}
         if ($this->value_element()->first()) {return $this->value_element;}
         if ($this->value_element_type()->first()) {return $this->value_element_type;}
         if ($this->value_schedule()->first()) {return $this->value_schedule;}
         if ($this->value_location()->first()) {return $this->value_location;}
-        if ($this->value_remote()->first()) {return $this->value_remote;}
         return null;
     }
 
     public function getValueDisplayForResource(int $n_display) {
         if ($n_display <= 1) {
-            if ($this->value_user()->first()) {return $this->value_user->username;}
             if ($this->value_group()->first()) {return $this->value_group->getName();}
             if ($this->value_attribute()->first()) {return $this->value_attribute->getName();}
             if ($this->value_element()->first()) {return $this->value_element->getName();}
             if ($this->value_element_type()->first()) {return $this->value_element_type->getName();}
             if ($this->value_schedule()->first()) {return $this->value_schedule->getName();}
             if ($this->value_location()->first()) {return $this->value_location->getName();}
-            if ($this->value_remote()->first()) {return $this->value_remote->getName();}
         } else {
-            if ($this->value_user()->first()) {return new UserResource($this->value_user,null,$n_display - 1);}
             if ($this->value_group()->first()) {return new UserGroupResource($this->value_group,null,$n_display - 1);}
             if ($this->value_attribute()->first()) {return new AttributeResource($this->value_attribute,null,$n_display - 1);}
             if ($this->value_element()->first()) {return new ElementResource($this->value_element,null,$n_display - 1);}
             if ($this->value_element_type()->first()) {return new ElementTypeResource($this->value_element_type,null,$n_display - 1);}
             if ($this->value_schedule()->first()) {return new TimeBoundResource($this->value_schedule,null,$n_display - 1);}
             if ($this->value_location()->first()) {return new LocationBoundResource($this->value_location,null,$n_display - 1);}
-            if ($this->value_remote()->first()) {return new RemoteResource($this->value_remote,null,$n_display - 1);}
         }
         return null;
     }
@@ -237,7 +224,7 @@ class AttributeValuePointer extends Model
     public static function createAttributeValue(Attribute $attribute,$maybe_value,?AttributeValueType $hint = null ) : AttributeValuePointer {
 
         $ret = new AttributeValuePointer();
-        $ret->parent_attribute_value_id = null; //todo change to point to the owning attribute value
+        $ret->pointer_owner_id = null; //todo change to point to the owning attribute value
         if (!$hint) { $hint = $attribute->value_type;}
         if (is_string($maybe_value)) {
             switch ($hint) {

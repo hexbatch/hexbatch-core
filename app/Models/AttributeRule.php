@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int rule_parent_attribute_id
+ * @property int rule_owner_id
  * @property int target_attribute_id
  * @property int rule_weight
  * @property int rule_numeric_min
@@ -64,7 +64,7 @@ class AttributeRule extends Model
     ];
 
     public function rule_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','rule_parent_attribute_id');
+        return $this->belongsTo('App\Models\Attribute','rule_owner_id');
     }
 
     public function rule_target() : BelongsTo {
@@ -78,7 +78,7 @@ class AttributeRule extends Model
         $ret = new AttributeRule();
         $ret->rule_type = $rule_type;
         if ($parent) {
-            $ret->rule_parent_attribute_id = $parent->id;
+            $ret->rule_owner_id = $parent->id;
         }
         $use_rule_hint = $rule_hint;
         if (is_array($rule_hint)) {
@@ -131,7 +131,7 @@ class AttributeRule extends Model
 
     public function deleteModeActivate() {
         if ($this->delete_mode) {
-            AttributeRule::where('rule_parent_attribute_id',$this->rule_parent_attribute_id)
+            AttributeRule::where('rule_owner_id',$this->rule_owner_id)
                 ->where('target_attribute_id',$this->target_attribute_id)
                 ->where('rule_type',$this->rule_type->value)
                 ->delete();

@@ -128,7 +128,7 @@ class RemoteFromMap extends Model
                         'remote_data_name' => ['required', 'string', 'max:128', new ResourceNameReq],
                     ])->validate();
                 } catch (\Illuminate\Validation\ValidationException $v) {
-                    throw new HexbatchNotPossibleException(__("msg.remote_map_invalid_name",['ref'=>$name,'error'=>$v->getMessage()]),
+                    throw new HexbatchNotPossibleException(__("msg.remote_map_invalid_name",['ref'=>$name,'error'=>$v->getMessage(),'limit'=>128]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::REMOTE_SCHEMA_ISSUE);
                 }

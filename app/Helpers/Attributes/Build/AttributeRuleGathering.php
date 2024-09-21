@@ -122,7 +122,7 @@ class AttributeRuleGathering
             DB::beginTransaction();
             /** @var AttributeRule $what */
             foreach ($this->rules as $what) {
-                $what->rule_parent_attribute_id = $attribute->id;
+                $what->rule_owner_id = $attribute->id;
                 if ($what->delete_mode) {
                     $what->deleteModeActivate();
                 } else {

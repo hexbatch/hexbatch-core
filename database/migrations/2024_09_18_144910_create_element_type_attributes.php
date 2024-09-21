@@ -40,7 +40,7 @@ return new class extends Migration
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then child types do not inherit this attribute');
 
-            $table->boolean('is_private')->default(false)->nullable(false)
+            $table->boolean('is_element_private')->default(false)->nullable(false)
                 ->comment('if true then only on read and written to by element owner, token owner if different cannot read/write');
 
         });
@@ -60,6 +60,14 @@ return new class extends Migration
             );");
 
         DB::statement("ALTER TABLE element_type_attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'private_to_home_server';");
+
+        DB::statement("CREATE TYPE type_of_attribute_access AS ENUM (
+            'normal',
+            'element_private',
+            'type_private'
+            );");
+
+        DB::statement("ALTER TABLE element_type_attributes Add COLUMN attribute_access_type type_of_attribute_access NOT NULL default 'normal';");
     }
 
     /**
@@ -69,5 +77,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('element_type_attributes');
         DB::statement("DROP TYPE type_of_server_access;");
+        DB::statement("DROP TYPE type_of_attribute_access;");
     }
 };

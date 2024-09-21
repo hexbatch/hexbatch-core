@@ -69,7 +69,6 @@ use Illuminate\Support\Facades\Log;
  * @property Remote remote_parent
  * @property RemoteStack home_stack
 
- * @property Action caller_action
  * @property Attribute caller_attribute
  * @property User caller_user
  * @property Server caller_server
@@ -130,9 +129,6 @@ class RemoteActivity extends Model
         return $what;
     }
 
-    public function caller_action() : BelongsTo {
-        return $this->belongsTo('App\Models\Action','caller_action_id');
-    }
 
     public function caller_attribute() : BelongsTo {
         return $this->belongsTo('App\Models\Attribute','caller_attribute_id')
@@ -178,10 +174,10 @@ class RemoteActivity extends Model
             ->with('remote_parent','remote_parent.rules_to_remote','remote_parent.rules_from_remote','home_stack')
 
             /**
-             * @uses RemoteActivity::caller_action(),RemoteActivity::caller_attribute(),RemoteActivity::caller_user(),RemoteActivity::caller_server()
+             * @uses RemoteActivity::caller_attribute(),RemoteActivity::caller_user(),RemoteActivity::caller_server()
              * @uses RemoteActivity::caller_element(),RemoteActivity::caller_type(),
              */
-            ->with('caller_action','caller_attribute','caller_user','caller_element','caller_type','caller_server')
+            ->with('caller_attribute','caller_user','caller_element','caller_type','caller_server')
         ;
 
         if ($id) {
@@ -269,7 +265,6 @@ class RemoteActivity extends Model
         foreach ($this->remote_parent->cache_keys as $some_key) {
             if (in_array($some_key,Remote::ALL_SPECIAL_CACHE_KEY_NAMES)) {
                 $maybe = match($some_key) {
-                    Remote::CACHE_KEY_NAME_ACTION => $this->caller_action?->ref_uuid,
                     Remote::CACHE_KEY_NAME_ATTRIBUTE => $this->caller_attribute?->ref_uuid,
                     Remote::CACHE_KEY_NAME_ELEMENT => $this->caller_element?->ref_uuid,
                     Remote::CACHE_KEY_NAME_TYPE => $this->caller_type?->ref_uuid,
@@ -595,7 +590,7 @@ class RemoteActivity extends Model
         $ret = [];
         if ($this->caller_user) { $ret[Remote::CACHE_KEY_NAME_USER] = $this->caller_user->ref_uuid;}
         if ($this->caller_element) { $ret[Remote::CACHE_KEY_NAME_ELEMENT] = $this->caller_element->ref_uuid;}
-        if ($this->caller_action) { $ret[Remote::CACHE_KEY_NAME_ACTION] = $this->caller_action->ref_uuid;}
+
         if ($this->caller_type) { $ret[Remote::CACHE_KEY_NAME_TYPE] = $this->caller_type->ref_uuid;}
         if ($this->caller_attribute) { $ret[Remote::CACHE_KEY_NAME_ATTRIBUTE] = $this->caller_attribute->ref_uuid;}
         if ($this->caller_server) { $ret[Remote::CACHE_KEY_NAME_SERVER] = $this->caller_server->ref_uuid;}

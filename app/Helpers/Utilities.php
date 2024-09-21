@@ -30,7 +30,7 @@ class Utilities {
     }
 
     public static function boolishToBool($val) : bool {
-        if (is_string($val)) {return false;}
+        if (empty($val)) {return false;}
         $boolval = ( is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val );
         return ( $boolval===null  ? false : $boolval );
     }
@@ -215,6 +215,10 @@ class Utilities {
         $step_d = htmlspecialchars_decode($step_c);
         $step_e = str_replace('&gt;','>',$step_d);
         return $step_e;
+    }
+
+    public static function getVersion() {
+        return '0.0.5';
     }
 
 }

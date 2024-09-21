@@ -373,7 +373,7 @@ class Remote extends Model
 
     public function createActivity(Collection $collection,
                                    ?User $user = null,?ElementType $type = null,?Element $element = null,
-                                   ?Attribute $attribute = null,?Action $action = null,
+                                   ?Attribute $attribute = null,
                                    ?array $geo_json = null,
                                    ?array $pass_through = null
     ) :RemoteActivity {
@@ -386,7 +386,6 @@ class Remote extends Model
         $ret->caller_type_id = $type?->id;
         $ret->caller_element_id = $element?->id;
         $ret->caller_attribute_id = $attribute?->id;
-        $ret->caller_action_id = $action?->id;
         $ret->location_geo_json = $geo_json;
         $ret->to_remote_processed_data = $this->processToSend($collection,RemoteToMapType::DATA,RemoteToSourceType::FROM_DATA);
         $ret->to_headers = $this->processToSend($collection,RemoteToMapType::HEADER,RemoteToSourceType::FROM_DATA);

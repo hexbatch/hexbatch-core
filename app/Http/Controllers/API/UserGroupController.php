@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\UserGroups\GroupGathering;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserGroupCollection;
@@ -55,19 +56,8 @@ class UserGroupController extends Controller
      * @throws ValidationException
      */
     public function group_create(?string $group_name): JsonResponse {
-        $group = new UserGroup();
-        $group->setGroupName($group_name);
-        $user = Utilities::getTypeCastedAuthUser();
-        $conflict =  UserGroup::where('user_id', $user?->id)->where('group_name',$group->group_name)->first();
-        if ($conflict) {
-            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$group->group_name]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::RESOURCE_NAME_UNIQUE_PER_USER);
-        }
-        $group->user_id = $user->id;
-        $group->save();
-        $group->addMember($user->id,true);
-        $group->refresh();
+
+        $group = GroupGathering::SetupNewGroup($group_name);
         return response()->json(new UserGroupResource($group), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 

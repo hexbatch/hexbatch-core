@@ -16,6 +16,13 @@ return new class extends Migration
         Schema::create('attribute_pointers', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('pointer_owner_id')
+                ->nullable(false)
+                ->comment("The attribute that owns this pointer")
+                ->unique()
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
 
             $table->foreignId('attribute_id')

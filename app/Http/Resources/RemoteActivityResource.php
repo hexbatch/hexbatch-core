@@ -49,7 +49,6 @@ class RemoteActivityResource extends JsonResource
             'ended_at'  => $this->remote_call_ended_at_ts? Carbon::createFromTimestamp($this->remote_call_ended_at_ts)->toIso8601String(): null ,
 
             'callers' => [
-                'stack' => $this->caller_action ? new UserGroupResource($this->caller_action,null,$this->n_display_level - 1) : null,
                 'attribute' => $this->caller_attribute ? new AttributeResource($this->caller_attribute,null,$this->n_display_level - 1) : null,
                 'user' => $this->caller_user ? new UserResource($this->caller_user,null,$this->n_display_level - 1) : null,
                 'server' => $this->caller_server ? new ServerResource($this->caller_server,null,$this->n_display_level - 1) : null,

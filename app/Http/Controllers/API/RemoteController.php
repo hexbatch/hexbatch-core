@@ -107,7 +107,7 @@ class RemoteController extends Controller
        }
 
        return  $remote->createActivity(collection: $inputs, user: $user,
-           type: $type, element: $element, attribute: $attribute, action: $action,pass_through: $debugging);
+           type: $type, element: $element, attribute: $attribute, pass_through: $debugging);
    }
 
     public function restack_activity(RemoteActivity $activity,?RemoteStack $stack = null)

@@ -6,6 +6,7 @@ use App\Http\Controllers\API\LocationBoundController;
 use App\Http\Controllers\API\RemoteController;
 use App\Http\Controllers\API\StackController;
 use App\Http\Controllers\API\TimeBoundController;
+use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\API\UserGroupController;
 use App\Http\Controllers\API\AttributeController;
 use Illuminate\Support\Facades\Route;
@@ -90,6 +91,15 @@ Route::prefix('v1')->group(function () {
             Route::get('/list/managed', [AttributeController::class, 'attribute_list_managed'])->name('core.attributes.list.managed');
             Route::get('/list/usage', [AttributeController::class, 'attribute_list_usage'])->name('core.attributes.list.usage');
             Route::get('/standard/list', [AttributeController::class, 'attribute_list_standard'])->name('core.attributes.standard.list');
+        });
+
+        Route::prefix('types')->group(function () {
+            Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
+            Route::patch('/{element_type}/edit', [TypeController::class, 'edit_type'])->name('core.remtypesotes.edit');
+            Route::delete('/{element_type}/destroy', [TypeController::class, 'destroy_type'])->name('core.types.destroy');
+            Route::get('/{element_type}/get/{levels?}', [TypeController::class, 'get_type'])->name('core.types.get');
+            Route::get('/list', [TypeController::class, 'list_types'])->name('core.types.list');
+
         });
 
         Route::prefix('remotes')->group(function () {

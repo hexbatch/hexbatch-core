@@ -15,12 +15,12 @@ return new class extends Migration
         Schema::create('location_bounds', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
+            $table->foreignId('owner_attribute_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The owner of the bound")
-                ->index('idx_location_bound_user_id')
-                ->constrained('users')
+                ->index('idx_location_bound_owner_attribute_id')
+                ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

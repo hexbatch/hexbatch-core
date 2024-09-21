@@ -27,6 +27,7 @@ return [
     'group_only_owner_can_change_admins' => 'Only the group owner can add or remove admins',
     'group_only_admin_changes_membership' => 'Only an admin of the group can change its membership',
     'group_this_member_does_not_exist' => 'This user :username is not a member in the group',
+    'group_not_admin' => 'This user :username is not an admin in the group :group',
 
     //bounds
     'bound_not_found' => 'Bound not found using :ref',
@@ -100,7 +101,7 @@ return [
     'remote_activity_only_manual_updated' => 'Can only update manual types of remotes, but not :ref',
     'remote_map_invalid_json_path' => 'The json path is not valid :ref',
     'remote_map_invalid_regex' => 'The regex is not valid :ref',
-    'remote_map_invalid_name' => 'The name of the map entry should follow the same rules as the other names :ref : :error',
+    'remote_map_invalid_name' => 'The name of the map entry should follow the same rules as the other names and be less than :limit characters :ref : :error',
     'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
     'stack_not_found' => 'Remote stack not found using :ref',
@@ -113,6 +114,9 @@ return [
 
     //element types
     'element_type_not_found' => 'Element type not found using :ref',
+    'element_type_not_admin' => 'You are not in the owner admin group or a member in the editing group for the type :ref',
+    'element_type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
+    'element_type_only_delete_if_unused' => 'Can only delete :ref when it has no elements',
 
     //elements
     'element_not_found' => 'Element not found using :ref',

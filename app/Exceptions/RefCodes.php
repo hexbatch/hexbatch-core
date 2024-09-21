@@ -65,6 +65,10 @@ class RefCodes {
     //element types start at 7000
 
     const ELEMENT_TYPE_NOT_FOUND = 7001;
+    const ELEMENT_TYPE_NOT_AUTHORIZED = 7002;
+    const ELEMENT_TYPE_INVALID_GROUP = 7003;
+    const ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE = 7004;
+    const ELEMENT_TYPE_CANNOT_DELETE = 7005;
 
     //elements start at 8000
 
@@ -112,6 +116,11 @@ class RefCodes {
         self::ACTION_NOT_FOUND => '',
 
         self::ELEMENT_TYPE_NOT_FOUND => '',
+        self::ELEMENT_TYPE_NOT_AUTHORIZED => '',
+        self::ELEMENT_TYPE_INVALID_GROUP => '',
+        self::ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE => '',
+        self::ELEMENT_TYPE_CANNOT_DELETE => '',
+
         self::ELEMENT_NOT_FOUND => '',
 
     ];

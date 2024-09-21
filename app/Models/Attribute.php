@@ -24,41 +24,30 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-//todo attributes can have ancestors, which will provide missing  data in the definition if that attribute is missing it
-// each meta, rule, group, and the lookup are inherited unless the attribute defines its own section for those
-// the section can add or remove rules, meta, group without changing the rest of the inherited, or can simply replace, or make empty
 
 /*
- * todo When an attribute is live on an element or used in an event, then its parent is the attribute type
- * todo make a new table for live attributes that has the attribute, and its json value (put pointer value in there or other primitive if not json type)
- *  only one live attribute is used for each element or event, unique possession
- *
- * todo a fired event is a live attribute whose json values is fed into one or more stacks (defined by the action handlers)
- *  an event can only be fired if there is an action for it
- *  remove events table, and make waiting_actions table which has the attribute created for the event
- *
- */
 
+value_json_path
+attribute_value
+
+attribute_type
+
+ */
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property string ref_uuid
- * @property int user_id
  * @property int parent_attribute_id
- * @property int read_time_bounds_id
- * @property int write_time_bounds_id
- * @property int read_map_location_bounds_id
- * @property int write_map_location_bounds_id
- * @property int read_shape_location_bounds_id
- * @property int write_shape_location_bounds_id
+ * @property int pointer_id
+ * @property int owner_element_type_id
  * @property boolean is_retired
  * @property boolean is_system
  * @property boolean is_final
- * @property boolean is_human
- * @property boolean is_read_policy_all
- * @property boolean is_write_policy_all
+
  * @property string attribute_name
+ * @property string value_json_path
+ * @property string attribute_value
  * @property string created_at
  * @property string updated_at
  *
@@ -67,18 +56,9 @@ use Illuminate\Validation\ValidationException;
  *
  * @property Attribute attribute_parent
  * @property User attribute_owner
- * @property TimeBound read_time_bound
- * @property TimeBound write_time_bound
- * @property LocationBound read_map_bound
- * @property LocationBound write_map_bound
- * @property LocationBound read_shape_bound
- * @property LocationBound write_shape_bound
  *
  * @property AttributeValuePointer attribute_pointer
- * @property AttributeValue attribute_value
- * @property AttributeMetum[] meta_of_attribute
  * @property AttributeRule[] da_rules
- * @property AttributeLookupUserGroup[] permission_groups
  */
 class Attribute extends Model
 {
@@ -177,7 +157,7 @@ class Attribute extends Model
     }
 
     public function da_rules() : HasMany {
-        return $this->hasMany('App\Models\AttributeRule','rule_parent_attribute_id','id')
+        return $this->hasMany('App\Models\AttributeRule','rule_owner_id','id')
             /** @uses AttributeRule::rule_target() */
             ->with('rule_target')
             ->orderBy('rule_type')
@@ -298,7 +278,6 @@ class Attribute extends Model
 
     /** @noinspection PhpUnused */
     public static function findAttribute(int $id) : ?Attribute {
-        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return static::buildAttribute(id:$id)->first();
     }
     public static function buildAttribute(
