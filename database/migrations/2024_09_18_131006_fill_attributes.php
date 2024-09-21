@@ -36,18 +36,6 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-
-            $table->foreignId('pointer_id')
-                ->nullable()
-                ->default(null)
-                ->comment("if the value points to something")
-                ->index('idx_attribute_pointer_id')
-                ->constrained('attribute_pointers')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-
-
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
@@ -58,7 +46,7 @@ return new class extends Migration
                 ->comment('if true then cannot be added as parent or added to anything');
 
 
-            $table->boolean('is_final')->default(false)->nullable(false)
+            $table->boolean('is_final_parent')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
 
             $table->boolean('is_system')->default(false)->nullable(false)
@@ -67,6 +55,15 @@ return new class extends Migration
 
             $table->boolean('is_nullable')->default(true)->nullable(false)
                 ->comment('if true then value is nullable');
+
+            $table->boolean('is_static')->default(false)->nullable(false)
+                ->comment('if true then all elements share this static value. This is per server');
+
+            $table->boolean('is_final')->default(false)->nullable(false)
+                ->comment('if true then child types do not inherit this attribute');
+
+            $table->boolean('is_lazy')->default(false)->nullable(false)
+                ->comment('if true then elements from this type only create this attribute when written. Until then they return null');
 
 
             $table->timestamps();
@@ -111,6 +108,24 @@ return new class extends Migration
             );");
 
         DB::statement("ALTER TABLE attributes Add COLUMN attribute_type type_of_attribute_rule NOT NULL default 'inactive';");
+
+        DB::statement("CREATE TYPE type_of_server_access AS ENUM (
+            'public',
+            'private_to_home_server',
+            'whitelisted_servers',
+            'whitelisted_servers_read_only',
+            'other_servers_read_only'
+            );");
+
+        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'private_to_home_server';");
+
+        DB::statement("CREATE TYPE type_of_attribute_access AS ENUM (
+            'normal',
+            'element_private',
+            'type_private'
+            );");
+
+        DB::statement("ALTER TABLE attributes Add COLUMN attribute_access_type type_of_attribute_access NOT NULL default 'normal';");
     } //up
 
     /**
@@ -122,25 +137,31 @@ return new class extends Migration
 
         Schema::table('attributes', function (Blueprint $table) {
             $table->dropForeign(['parent_attribute_id']);
-            $table->dropForeign(['pointer_id']);
+            $table->dropForeign(['owner_element_type_id']);
 
             $table->dropColumn('parent_attribute_id');
-            $table->dropColumn('pointer_id');
+            $table->dropColumn('owner_element_type_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_retired');
             $table->dropColumn('is_final');
             $table->dropColumn('is_system');
             $table->dropColumn('is_nullable');
+            $table->dropColumn('is_final_parent');
+            $table->dropColumn('is_static');
+            $table->dropColumn('is_lazy');
             $table->dropColumn('value_json_path');
             $table->dropColumn('attribute_value');
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
             $table->dropColumn('attribute_type');
+            $table->dropColumn('server_access_type');
+            $table->dropColumn('attribute_access_type');
         });
 
         DB::statement("DROP TYPE type_of_attribute;");
-
+        DB::statement("DROP TYPE type_of_server_access;");
+        DB::statement("DROP TYPE type_of_attribute_access;");
 
     }
 };

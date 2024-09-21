@@ -9,10 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\Attribute::getPermissionGroupsForResource()
+
  * @uses \App\Models\Attribute::getRuleGroup()
- * @uses \App\Models\Attribute::getMeta()
- * @method getPermissionGroupsForResource(int $n_display)
+
  * @method getRuleGroup(AttributeRuleType $rule_type,int $n_display)
  * @method getMeta(int $n_display)
  * @method getName()
@@ -74,7 +73,7 @@ class AttributeResource extends JsonResource
                 ]
             ],
             'permissions' => [
-                'user_groups' => $this->getPermissionGroupsForResource($this->n_display_level -1),
+
                 'set_requirements' => [
                     'is_read_policy_all'=> $this->is_read_policy_all,
                     'is_write_policy_all'=> $this->is_write_policy_all,

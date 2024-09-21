@@ -8,7 +8,7 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
 /**
@@ -80,6 +80,10 @@ class ElementType extends Model
         return $this->belongsTo('App\Models\UserGroup','new_elements_user_group_id');
     }
 
+    public function type_attributes() : HasMany {
+        return $this->hasMany('App\Models\Attribute','owner_element_type_id','id');
+    }
+
     public static function buildElementType(
         ?int $id = null,
         ?int $user_id = null
@@ -90,8 +94,8 @@ class ElementType extends Model
         $build = ElementType::select('element_types.*')
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
-            /** @uses ElementType::type_owner(),ElementType::editing_group(),ElementType::inheriting_group(),ElementType::new_elements_group() */
-            ->with('type_owner', 'editing_group', 'inheriting_group', 'new_elements_group')
+            /** @uses ElementType::type_owner(),ElementType::editing_group(),ElementType::inheriting_group(),ElementType::new_elements_group(),ElementType::type_attributes() */
+            ->with('type_owner', 'editing_group', 'inheriting_group', 'new_elements_group','type_attributes')
             ;
 
         if ($id) {

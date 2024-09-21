@@ -40,6 +40,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('rule_user_group_id')
+                ->nullable()->default(null)
+                ->comment("Optional user group that when members matches, makes this rule work")
+                ->index('idx_element_type_rule_group_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+
             $table->integer('rule_weight')->nullable(false)->default(1)
                 ->comment("when combined with others of its type, how important is this?");
 

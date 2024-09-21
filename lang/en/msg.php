@@ -77,6 +77,7 @@ return [
     'attribute_schema_rule_bad_regex' => 'When making an attribute rule, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
     'attribute_schema_rule_retired' => 'This attribute, ":name" has been retired and new rules using this cannot be added to an attribute',
     'attribute_in_use_cannot_change' => 'Attributes in use cannot edited or deleted. Remove dependencies and try again',
+    'attribute_unique_name_per_type' => 'Attributes in each type must have unique names',
 
     //remotes
     'remote_not_found' => 'Remote not found using :ref',

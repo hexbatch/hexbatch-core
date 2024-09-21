@@ -36,7 +36,7 @@ enum AttributeValueType : string {
     ];
 
     const POINTER_TYPES = [
-      self::USER,self::USER_GROUP,self::ATTRIBUTE,self::ELEMENT,self::ELEMENT_TYPE,self::REMOTE,self::ACTION,
+      self::USER,self::USER_GROUP,self::ATTRIBUTE,self::ELEMENT,self::ELEMENT_TYPE,
       self::SCHEDULE_BOUNDS,self::MAP_BOUNDS,self::SHAPE_BOUNDS,self::SET,self::VIEW,self::MUTUAL,self::CONTAINER, self::PATH,
       self::INTERFACE,self::PIPELINE,self::PIPELINE_JOINT
     ];

@@ -10,14 +10,14 @@ use App\Helpers\Attributes\Build\AttributeBounds;
 use App\Helpers\Attributes\Build\AttributeMetaGathering;
 use App\Helpers\Attributes\Build\AttributePermissionGathering;
 use App\Helpers\Attributes\Build\AttributeRuleGathering;
-use App\Helpers\Attributes\Build\AttributeDefaultGathering;
+
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
 use App\Http\Resources\StandardAttributeCollection;
 use App\Models\Attribute;
-use App\Models\AttributeLookupUserGroup;
+
 use App\Models\Enums\Attributes\AttributePingType;
 use App\Models\Enums\Attributes\AttributeUserGroupType;
 use App\Models\User;
@@ -211,20 +211,24 @@ class AttributeController extends Controller
     public function attribute_list_managed(?User $user = null) {
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
-        $out = Attribute::buildAttribute(admin_user_id: $user->id)->cursorPaginate();
+        $out = Attribute::buildAttribute(user_id: $user->id)->cursorPaginate();
         return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attribute_list_usage(?User $user = null) {
         $logged_user = auth()->user();
         if (!$user) {$user = $logged_user;}
-        $out = Attribute::buildAttribute(usage_user_id: $user->id)->cursorPaginate();
+        $out = Attribute::buildAttribute(user_id: $user->id)->cursorPaginate();
         return response()->json(new AttributeCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attribute_delete(Attribute $attribute) {
         $this->adminCheck($attribute);
-        $attribute->checkIsInUse();
+        if ($attribute->isInUse()) {
+            throw new HexbatchNotPossibleException(__("msg.attribute_in_use_cannot_change"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_CANNOT_EDIT);
+        }
         $out = Attribute::buildAttribute(id: $attribute->id)->first();
         $attribute->delete();
         return response()->json(new AttributeResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
@@ -256,7 +260,7 @@ class AttributeController extends Controller
                 }
                 $some_parent = $request->request->getString('parent_attribute');
                 if ($some_parent) {
-                    $attribute->setParent($some_parent);
+
                 }
 
                 $this->updateAllAttribute($attribute,$request);
@@ -289,7 +293,7 @@ class AttributeController extends Controller
 
         $attribute->save();
 
-        (new AttributeDefaultGathering(request:$request,attribute: $attribute) )->assign($attribute);
+
         (new AttributeMetaGathering($request) )->assign($attribute);
         (new AttributePermissionGathering($request) )->assign($attribute);
         (new AttributeRuleGathering($request) )->assign($attribute);
@@ -309,7 +313,7 @@ class AttributeController extends Controller
             $attribute = new Attribute();
             $user = Utilities::getTypeCastedAuthUser();
             $attribute->setName($request->request->getString('attribute_name'),$user);
-            $attribute->setParent($request->request->getString('parent_attribute'));
+
             $attribute->user_id = $user->id;
             $this->updateAllAttribute($attribute,$request);
             DB::commit();

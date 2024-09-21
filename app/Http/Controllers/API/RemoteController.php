@@ -15,8 +15,6 @@ use App\Http\Resources\RemoteActivityCollection;
 use App\Http\Resources\RemoteActivityResource;
 use App\Http\Resources\RemoteCollection;
 use App\Http\Resources\RemoteResource;
-use App\Models\AttributeValuePointer;
-use App\Models\Enums\Attributes\AttributeValueType;
 use App\Models\Enums\Remotes\RemoteActivityStatusType;
 use App\Models\Enums\Remotes\RemoteStackCategoryType;
 use App\Models\Enums\Remotes\RemoteUriType;
@@ -79,24 +77,9 @@ class RemoteController extends Controller
 
    protected function createActivityInternal(Request $request, Remote $remote) :RemoteActivity  {
        $inputs = $request->collect();
-       $user = null;$type = null;$action = null;$element = null; $attribute = null;
+       $user = null;$type = null;$element = null; $attribute = null;
        if ($inputs->has('callers')) {
-           $callers = new Collection($inputs->get('callers'));
-           if ($callers->has('user')) {
-               $user = AttributeValuePointer::getModelFromHint($callers->get('user'),AttributeValueType::USER);
-           }
-           if ($callers->has('type')) {
-               $type = AttributeValuePointer::getModelFromHint($callers->get('type'),AttributeValueType::ELEMENT_TYPE);
-           }
-           if ($callers->has('action')) {
-               $action = AttributeValuePointer::getModelFromHint($callers->get('action'),AttributeValueType::ACTION);
-           }
-           if ($callers->has('element')) {
-               $element = AttributeValuePointer::getModelFromHint($callers->get('element'),AttributeValueType::ELEMENT);
-           }
-           if ($callers->has('attribute')) {
-               $attribute = AttributeValuePointer::getModelFromHint($callers->get('attribute'),AttributeValueType::ATTRIBUTE);
-           }
+
            $inputs->forget('callers');
        }
 

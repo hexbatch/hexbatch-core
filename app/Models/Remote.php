@@ -166,8 +166,7 @@ class Remote extends Model
 
     public function isInUse() : bool {
         if (!$this->id) {return false;}
-        $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
-        if ($b_exist) {return true;}
+
         $b_exist =  RemoteActivity::where('parent_remote_id',$this->id)->where('remote_activity_status_type',RemoteActivityStatusType::PENDING)->exists();
         if ($b_exist) {return true;}
         return false;

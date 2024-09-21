@@ -48,6 +48,7 @@ class RefCodes {
     const ATTRIBUTE_PING_DATA_MISSING = 4002;
     const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 4003;
     const ATTRIBUTE_SCHEMA_ISSUE = 4004;
+    const ATTRIBUTE_BAD_NAME = 4005;
 
     const ATTRIBUTE_CANNOT_EDIT = 4010;
 
@@ -110,6 +111,7 @@ class RefCodes {
         self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
         self::ATTRIBUTE_SCHEMA_ISSUE => '',
         self::ATTRIBUTE_CANNOT_EDIT => '',
+        self::ATTRIBUTE_BAD_NAME => '',
 
         self::REMOTE_NOT_FOUND => '',
         self::REMOTE_SCHEMA_ISSUE => '',

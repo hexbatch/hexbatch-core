@@ -1,12 +1,12 @@
 
 todo :
- add code for making empty types
+
 
  redo the code for the simplified attributes, adding them to the types
 
  add code to list and edit types (includes the meta)
 
- make code to change ownership of types at different levels (change user for the attributes and bounds or copy them over)
+ 
 
 # Simplication 3
 elements, sets now are developed before remotes or actions
@@ -15,6 +15,8 @@ just the basic set and elements until later
 
 # Simplication 4
  remotes and stacks are now sets, the different remote setup is done by attributes
+
+
 
 
 

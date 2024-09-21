@@ -28,8 +28,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int created_at_ts
  * @property int updated_at_ts
- * @property Attribute rule_parent
  * @property Attribute rule_target
+ * @property UserGroup rule_group
  *
  */
 class AttributeRule extends Model
@@ -63,13 +63,16 @@ class AttributeRule extends Model
         'rule_type' => AttributeRuleType::class,
     ];
 
-    public function rule_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','rule_owner_id');
-    }
 
     public function rule_target() : BelongsTo {
         return $this->belongsTo('App\Models\Attribute','target_attribute_id');
     }
+
+    public function rule_group() : BelongsTo {
+        return $this->belongsTo('App\Models\UserGroup','rule_user_group_id');
+    }
+
+
     const DEFAULT_WEIGHT = 1;
 
     public bool $delete_mode = false;

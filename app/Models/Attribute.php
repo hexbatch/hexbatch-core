@@ -2,37 +2,28 @@
 
 namespace App\Models;
 
-use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Attributes\Apply\StandardAttributes;
 use App\Helpers\Utilities;
-use App\Http\Resources\AttributeMetaResource;
 use App\Http\Resources\AttributeRuleResource;
-use App\Http\Resources\UserGroupResource;
 use App\Models\Enums\Attributes\AttributeRuleType;
-use App\Models\Enums\Attributes\AttributeUserGroupType;
-use App\Models\Enums\Attributes\AttributeValueType;
+use App\Models\Enums\Attributes\AttributeType;
 use App\Models\Traits\TResourceCommon;
-use App\Rules\ResourceNameReq;
+use App\Rules\AttributeNameReq;
+
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-/*
 
-value_json_path
-attribute_value
-
-attribute_type
-
- */
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
@@ -44,10 +35,15 @@ attribute_type
  * @property boolean is_retired
  * @property boolean is_system
  * @property boolean is_final
+ * @property boolean is_final_parent
+ * @property boolean is_static
+ * @property boolean is_lazy
 
+ * @property AttributeType  attribute_type
  * @property string attribute_name
  * @property string value_json_path
- * @property string attribute_value
+ * @property ArrayObject attribute_value
+
  * @property string created_at
  * @property string updated_at
  *
@@ -55,9 +51,8 @@ attribute_type
  * @property int updated_at_ts
  *
  * @property Attribute attribute_parent
- * @property User attribute_owner
+ * @property ElementType type_owner
  *
- * @property AttributeValuePointer attribute_pointer
  * @property AttributeRule[] da_rules
  */
 class Attribute extends Model
@@ -72,9 +67,7 @@ class Attribute extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -89,168 +82,58 @@ class Attribute extends Model
      * @var array<string, string>
      */
     protected $casts = [
-
-        'value_type' => AttributeValueType::class,
+        'attribute_value' => AsArrayObject::class,
+        'attribute_type' => AttributeType::class,
     ];
 
     public function attribute_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','parent_attribute_id');
+        return $this->belongsTo('App\Models\Attribute','parent_attribute_id')
+            ->with('attribute_parent');
     }
 
-    public function attribute_owner() : BelongsTo {
-        return $this->belongsTo('App\Models\User','user_id');
-    }
 
-    public function read_time_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\TimeBound','read_time_bounds_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts");
-    }
-
-    public function write_time_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\TimeBound','write_time_bounds_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts");
-    }
-
-    public function read_map_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','read_map_location_bounds_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
-    }
-
-    public function write_map_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','write_map_location_bounds_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
-    }
-
-    public function read_shape_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','read_shape_location_bounds_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
-    }
-
-    public function write_shape_bound() : BelongsTo {
-        return $this->belongsTo('App\Models\LocationBound','write_shape_location_bounds_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
+    public function type_owner() : BelongsTo {
+        return $this->belongsTo('App\Models\ElementType','owner_element_type_id');
 
     }
 
-    public function attribute_pointer() : HasOne {
-        return $this->hasOne('App\Models\AttributeValuePointer','value_parent_attribute_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts");
-
-    }
-
-    public function attribute_value() : HasOne {
-        return $this->hasOne('App\Models\AttributeValue','parent_attribute_id')
-            ->select('*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts");
-
-    }
-
-    public function meta_of_attribute() : HasMany {
-        return $this->hasMany('App\Models\AttributeMetum','meta_parent_attribute_id','id');
-    }
 
     public function da_rules() : HasMany {
         return $this->hasMany('App\Models\AttributeRule','rule_owner_id','id')
-            /** @uses AttributeRule::rule_target() */
-            ->with('rule_target')
+            /** @uses AttributeRule::rule_target(),AttributeRule::rule_group(), */
+            ->with('rule_target','rule_group')
             ->orderBy('rule_type')
             ->orderBy('target_attribute_id');
     }
 
-    public function permission_groups() : HasMany {
-        return $this->hasMany('App\Models\AttributeLookupUserGroup','group_lookup_attribute_id','id')
-            /** @uses AttributeLookupUserGroup::target_user_group() */
-            ->with('target_user_group')
-            ->orderBy('group_type')
-            ->orderBy('created_at');
-    }
 
-    public function checkIsInUse() : void {
-        if (!$this->isInUse()) {return;}
-        throw new HexbatchNotPossibleException(__("msg.attribute_in_use_cannot_change"),
-            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-            RefCodes::ATTRIBUTE_CANNOT_EDIT);
-    }
 
     public function isInUse() : bool {
-        if (!$this->id) {return false;}
-        $b_exist =  Attribute::where('parent_attribute_id',$this->id)->exists();
-        if ($b_exist) {return true;}
-        $b_exist =  AttributeRule::where('target_attribute_id',$this->id)->exists();
-        if ($b_exist) {return true;}
-
-        $b_exist =  AttributeValuePointer::where('attribute_id',$this->id)->exists();
-        if ($b_exist) {return true;}
         return false;
         //!later also check for attributes used in types
     }
 
     /**
      * @param string $name
-     * @param User $owner
+     * @param ElementType $owner
      * @return void
-     * @throws ValidationException
-     */
-    public function setName(string $name, User $owner) {
-        Validator::make(['attribute_name'=>$name], [
-            'attribute_name'=>['required','string','max:128',new ResourceNameReq],
-        ])->validate();
 
-        $conflict =  static::where('user_id', $owner->id)->where('attribute_name',$name)->first();
-        if ($conflict) {
-            throw new HexbatchNameConflictException(__("msg.unique_resource_name_per_user",['resource_name'=>$name]),
+     */
+    public function setName(string $name, ElementType $owner) {
+        try {
+            Validator::make(['attribute_name' => $name], [
+                'attribute_name' => ['required', 'string', new AttributeNameReq($owner,$this)],
+            ])->validate();
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::RESOURCE_NAME_UNIQUE_PER_USER);
+                RefCodes::ATTRIBUTE_BAD_NAME);
         }
 
         $this->attribute_name = $name;
     }
 
-    public function setParent(?string $parent_hint) {
 
-        if (empty($parent_hint) ) {
-            $this->parent_attribute_id = null;
-            return;
-        }
-        /**
-         * @var Attribute $parent
-         */
-        $parent = (new Attribute())->resolveRouteBinding($parent_hint);
-        $user = Utilities::getTypeCastedAuthUser();
-        //check if this user can use the parent attribute
-        $maybe_group = $this->getPermissionGroup(AttributeUserGroupType::USAGE);
-        if ($maybe_group) {
-            if (!$maybe_group->target_user_group->isMember($user->id)) {
-                throw new HexbatchNameConflictException(__("msg.attribute_cannot_be_used_at_parent",['ref'=>$parent->attribute_name]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
-            }
-        }
-        //check if retired
-        if ($parent->is_retired) {
-            throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_retired",['name'=>$parent->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-        }
-        $this->parent_attribute_id = $parent->id;
-
-    }
-
-    public function getPermissionGroup(AttributeUserGroupType $type_group) : ?AttributeLookupUserGroup{
-        foreach ($this->permission_groups as $perm_group) {
-            if ($perm_group->group_type === $type_group) {
-                return $perm_group;
-            }
-        }
-        return null;
-    }
 
     public ?string $fully_qualified_name = null;
     public function getName(bool $b_redo = false,bool $b_strip_system_prefix = true) : string  {
@@ -269,11 +152,11 @@ class Attribute extends Model
 
         }
         if (empty($ancestors)) {
-            return $this->attribute_owner->username . '.'. $this->attribute_name;
+            return $this->type_owner->getName() . '.'. $this->attribute_name;
         }
         $oldest_first = array_reverse($names);
         $root = implode('.',$oldest_first);
-        return $root . '.'. $this->attribute_name;
+        return $this->type_owner->getName() . '.'.$root . '.'. $this->attribute_name;
     }
 
     /** @noinspection PhpUnused */
@@ -281,92 +164,102 @@ class Attribute extends Model
         return static::buildAttribute(id:$id)->first();
     }
     public static function buildAttribute(
-        ?int $id = null,?int $admin_user_id = null,?int $usage_user_id = null)
+        ?int $id = null,
+        ?int $user_id = null,
+        ?int $element_type_id = null
+    )
     : Builder
     {
 
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Attribute::attribute_parent(),Attribute::attribute_owner(),Attribute::read_time_bound(),Attribute::write_time_bound() */
-            ->with('attribute_parent', 'attribute_owner', 'read_time_bound', 'write_time_bound')
+            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::da_rules() */
+            ->with('attribute_parent', 'type_owner','da_rules')
 
-            /** @uses Attribute::read_map_bound(),Attribute::write_map_bound(),Attribute::read_shape_bound(),Attribute::write_shape_bound() */
-            ->with('read_map_bound', 'write_map_bound', 'read_shape_bound', 'write_shape_bound')
 
-            /** @uses Attribute::meta_of_attribute(),Attribute::da_rules(),Attribute::permission_groups(),Attribute::attribute_pointer() */
-            ->with('meta_of_attribute', 'da_rules', 'permission_groups','attribute_pointer')
-
-            /** @uses Attribute::attribute_value()  */
-            ->with('attribute_value',)
        ;
 
         if ($id) {
             $build->where('attributes.id',$id);
         }
 
-
-        if ($admin_user_id) {
-
-            $build->join('users',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('users.id','=','attributes.user_id')
-                        ->whereNotNull('attributes.user_id');
-                }
-            );
-
-            $build->join('user_groups',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('user_groups.id','=','users.user_group_id');
-                }
-            );
-
-            $build->join('user_group_members',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($admin_user_id) {
-                    $join
-                        ->on('user_group_members.user_group_id','=','user_groups.id')
-                        ->where('user_group_members.user_id',$admin_user_id)
-                        ->where('user_group_members.is_admin',true);
-                }
-            );
+        if ($element_type_id) {
+            $build->where('attributes.owner_element_type_id',$element_type_id);
         }
 
-        if ($usage_user_id) {
+        if ($user_id) {
 
-            $build->join('attribute_user_groups as a_groups',
+
+            $build->join('element_types',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('a_groups.group_lookup_attribute_id','=','attributes.id')
-                        ->where('a_groups.group_type',AttributeUserGroupType::USAGE->value)
-                    ;
+                        ->on('element_types.id','=','attributes.owner_element_type_id');
                 }
             );
 
-            $build->join('user_group_members as usage_members',
+            $build->join('users as user_owner',
                 /**
                  * @param JoinClause $join
                  */
-                function (JoinClause $join) use($usage_user_id) {
+                function (JoinClause $join)  {
                     $join
-                        ->on('usage_members.id','=','a_groups.target_user_group_id')
-                        ->where('usage_members.user_id',$usage_user_id)
-                    ;
+                        ->on('user.id','=','element_types.user_id');
                 }
             );
+
+            $build->join('user_groups as user_admin_group',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('user_groups.id','=','user_owner.user_group_id');
+                }
+            );
+
+            $build->join('user_groups as editing_admin_group',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('user_groups.id','=','element_types.editing_user_group_id');
+                }
+            );
+
+            $build->leftJoin('user_group_members as editing_admin_group_admins',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($user_id) {
+                    $join
+                        ->on('editing_admin_group_admins.user_group_id','=','editing_admin_group.id')
+                        ->where('editing_admin_group_admins.user_id',$user_id);
+                }
+            );
+
+            $build->leftJoin('user_group_members as user_admin_group_members',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($user_id) {
+                    $join
+                        ->on('user_admin_group_members.user_group_id','=','user_admin_group.id')
+                        ->where('user_admin_group_members.user_id',$user_id)
+                        ->where('user_admin_group_members.is_admin',true);
+                }
+            );
+
+            $build->where(function ($q)  {
+                $q->whereNotNull('user_group_members.id')
+                    ->orWhereNotNull('editing_admin_group_admins.id');
+            });
         }
+
+
 
         return $build;
     }
@@ -396,16 +289,12 @@ class Attribute extends Model
                         //if this user is not the owner, then the group owner id can be scoped
                         $parts = explode('.', $value);
                         $owner = null;
-                        if (count($parts) === 1) {
-                            //must be owned by the user
-                            $owner = Utilities::getTypeCastedAuthUser();
-                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_attribute_id')->where('attribute_name', $value);
-                        } else if (count($parts) > 1) {
+                         if (count($parts) > 1) {
                             $owner_string = $parts[0];
                             $maybe_name = $parts[1];
                             /** @var User $owner */
-                            $owner = (new User)->resolveRouteBinding($owner_string);
-                            $build = $this->where('user_id', $owner?->id)->whereNull('parent_attribute_id')->where('attribute_name', $maybe_name);
+                            $owner = (new ElementType)->resolveRouteBinding($owner_string);
+                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $maybe_name);
                         }
 
                         if ($build && $owner) {
@@ -444,19 +333,6 @@ class Attribute extends Model
 
     }
 
-    public function getMeta(int $n_display) : array  {
-        $ret = [];
-
-        foreach ($this->meta_of_attribute as $meta) {
-            if ($n_display < 1) {
-                $ret[] = $meta->meta_type->value;
-            } else {
-                $ret[] = new AttributeMetaResource($meta,null,$n_display);
-            }
-        }
-
-        return $ret;
-    }
     /**
      * @param AttributeRuleType $rule_type
      * @param int $n_display
@@ -471,51 +347,9 @@ class Attribute extends Model
         }
         return $ret;
     }
-    public function getPermissionGroupsForResource(int $n_display) {
-        $write = [];
-        $read = [];
-        $usage= [];
-        foreach ($this->permission_groups as $p) {
-            switch ($p->group_type) {
-                case AttributeUserGroupType::WRITE : {
-                    $write[] = ($n_display <= 0)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,null,$n_display);
-                    break;
-                }
-                case AttributeUserGroupType::READ : {
-                    $read[] = ($n_display <= 0)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,null,$n_display);
-                    break;
-                }
-                case AttributeUserGroupType::USAGE : {
-                    $usage[] = ($n_display <= 0)? $p->target_user_group->getName() : new UserGroupResource($p->target_user_group,null,$n_display);
-                    break;
-                }
-                default: {
-                    continue 2;
-                }
-            }//end switch
-        }
-        $ret = [];
-        if (count($read)) {
-            $ret['read'] = $read;
-        }
-        if (count($write)) {
-            $ret['write'] = $write;
-        }
-        if (count($usage)) {
-            $ret['usage'] = $usage;
-        }
-
-        return $ret;
-
-
-    }
 
     public function getValue() {
-        if ($this->attribute_pointer) {
-            return $this->attribute_pointer->getValue();
-        }
-        return $this->attribute_value?->getValue();
-
+        return $this->attribute_value;
     }
 
 }
