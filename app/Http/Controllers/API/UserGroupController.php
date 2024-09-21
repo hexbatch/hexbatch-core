@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exceptions\HexbatchNameConflictException;
+
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+
 use App\Helpers\UserGroups\GroupGathering;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
@@ -12,11 +13,13 @@ use App\Http\Resources\UserGroupCollection;
 use App\Http\Resources\UserGroupMemberCollection;
 use App\Http\Resources\UserGroupMemberResource;
 use App\Http\Resources\UserGroupResource;
+
 use App\Models\User;
 use App\Models\UserGroup;
 use App\Models\UserGroupMember;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 
 class UserGroupController extends Controller
@@ -53,11 +56,18 @@ class UserGroupController extends Controller
     }
 
     /**
-     * @throws ValidationException
+     * @throws \Exception
      */
-    public function group_create(?string $group_name): JsonResponse {
+    public function group_create(Request $request ): JsonResponse {
+        try {
+            DB::beginTransaction();
+            $group = GroupGathering::adminCheckOrMakeGroupWithUserAdmin($request->request->all());
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
-        $group = GroupGathering::SetupNewGroup($group_name);
         return response()->json(new UserGroupResource($group), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 

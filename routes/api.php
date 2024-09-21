@@ -52,7 +52,7 @@ Route::prefix('v1')->group(function () {
 
 
         Route::prefix('groups')->group(function () {
-            Route::post('/create/{group_name}', [UserGroupController::class, 'group_create'])->name('core.groups.create');
+            Route::post('/create', [UserGroupController::class, 'group_create'])->name('core.groups.create');
             Route::delete('/{user_group}/destroy', [UserGroupController::class, 'group_destroy'])->name('core.groups.destroy');
             Route::get('/{user_group}/list', [UserGroupController::class, 'group_list_members'])->name('core.groups.list');
             Route::get('/{user_group}/get', [UserGroupController::class, 'group_get'])->name('core.groups.get');
@@ -95,7 +95,7 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('types')->group(function () {
             Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
-            Route::patch('/{element_type}/edit', [TypeController::class, 'edit_type'])->name('core.remtypesotes.edit');
+            Route::patch('/{element_type}/edit', [TypeController::class, 'edit_type'])->name('core.types.edit');
             Route::delete('/{element_type}/destroy', [TypeController::class, 'destroy_type'])->name('core.types.destroy');
             Route::get('/{element_type}/get/{levels?}', [TypeController::class, 'get_type'])->name('core.types.get');
             Route::get('/list', [TypeController::class, 'list_types'])->name('core.types.list');

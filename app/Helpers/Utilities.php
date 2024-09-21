@@ -43,6 +43,22 @@ class Utilities {
         };
     }
 
+    public static function cleanMaybeIntArrayToUniqueAndSorted(array $vals) : array {
+        $ret = [];
+        foreach ($vals as $val) {
+            if (is_array($val) || is_object($val)) {
+                throw new LogicException("This is not the int you were looking for");
+            }
+            $ret[] = intval($val);
+
+        }
+        $ret = array_unique($ret,SORT_NUMERIC);
+        usort($ret,function(int $a,int $b) {
+            return $a <=> $b;
+        });
+        return $ret;
+    }
+
     public static function positiveBoolWords($val) : bool {
         return match(mb_strtolower($val)) {
             'yes', '1', 'on', 'true', '' =>true,

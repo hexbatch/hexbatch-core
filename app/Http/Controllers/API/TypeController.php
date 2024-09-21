@@ -15,7 +15,7 @@ use App\Http\Resources\ElementTypeResource;
 use App\Models\ElementType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 
 class TypeController extends Controller
@@ -23,12 +23,19 @@ class TypeController extends Controller
 
 
     /**
-     * @throws ValidationException
+     * @throws \Exception
      */
     public function create_type(Request $request): JsonResponse {
-        $gathering = new TypeGathering($request);
-        $element_type = $gathering->assign();
-        $refreshed = ElementType::buildElementType(id:$element_type->id)?->first();
+        try {
+            DB::beginTransaction();
+            $gathering = new TypeGathering($request);
+            $element_type = $gathering->assign();
+            $refreshed = ElementType::buildElementType(id: $element_type->id)?->first();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
         return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -36,12 +43,11 @@ class TypeController extends Controller
      * @param ElementType $element_type
      * @param Request $request
      * @return JsonResponse
-     * @throws ValidationException
      */
     public function edit_type(ElementType $element_type,Request $request): JsonResponse {
         $gathering = new TypeGathering($request,$element_type);
         $element_type = $gathering->assign();
-        $refreshed = ElementType::buildElementType(id:$element_type->id);
+        $refreshed = ElementType::buildElementType(id:$element_type->id)->first();
         return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -53,7 +59,7 @@ class TypeController extends Controller
                 RefCodes::ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE);
         }
 
-        if (!$element_type->isUnused()) {
+        if ($element_type->isInUse()) {
             throw new HexbatchPermissionException(__("msg.element_type_only_delete_if_unused",['ref'=>$element_type->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ELEMENT_TYPE_CANNOT_DELETE);

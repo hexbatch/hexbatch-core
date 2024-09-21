@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class ElementTypeNameReq extends ResourceNameReq
 {
-
+    const MAX_NAME_LENGTH = 60;
 
     public function __construct(protected ?ElementType $element_type){}
 
@@ -31,7 +31,7 @@ class ElementTypeNameReq extends ResourceNameReq
         }
         $here = $laravel->first();
         if ($here) {
-            $fail('msg.unique_resource_name_per_user',['resource_name'=>$value])->translate();
+            $fail('msg.unique_resource_name_per_user')->translate(['resource_name'=>$value]);
         }
 
 

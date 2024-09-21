@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ResourceNameReq;
@@ -133,20 +134,31 @@ class UserGroup extends Model
 
     }
 
-    public static function buildGroup(int $user_id) : Builder {
-        return UserGroup::select('user_groups.*','user_group_members.is_admin')
+    public static function buildGroup(int $user_id = null,int $group_id = null) : Builder {
+
+        $laravel =  UserGroup::select('user_groups.*')
+            ->selectRaw(" extract(epoch from  user_groups.created_at) as created_at_ts,  extract(epoch from  user_groups.updated_at) as updated_at_ts")
             /** @uses UserGroup::group_owner() */
-            ->with('group_owner')
-            ->join('user_group_members',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($user_id) {
-                    $join
-                        ->on('user_groups.id','=','user_group_members.user_group_id')
-                        ->where('user_group_members.user_id',$user_id);
-                }
-            );
+            ->with('group_owner');
+
+            if ($user_id) {
+                $laravel->
+                join('user_group_members',
+                    /**
+                     * @param JoinClause $join
+                     */
+                    function (JoinClause $join) use ($user_id) {
+                        $join
+                            ->on('user_groups.id', '=', 'user_group_members.user_group_id')
+                            ->where('user_group_members.user_id', $user_id);
+                    }
+                );
+            }
+
+            if ($group_id) {
+                $laravel->where('user_groups.id',$group_id);
+            }
+            return $laravel;
     }
 
 
@@ -154,13 +166,20 @@ class UserGroup extends Model
      * @param string|null $group_name
      * @param string|null $attribute_name
      * @return void
-     * @throws ValidationException
+
      */
     public function setGroupName(?string $group_name,?string $attribute_name = null) {
         if (empty($attribute_name)) { $attribute_name = 'group_name';}
-        Validator::make([$attribute_name=>$group_name], [
-            $attribute_name=>['required','string','max:128',new ResourceNameReq],
-        ])->validate();
+
+        try {
+            Validator::make([$attribute_name => $group_name], [
+                $attribute_name => ['required', 'string', 'max:128', new ResourceNameReq],
+            ])->validate();
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ELEMENT_TYPE_INVALID_NAME);
+        }
         $this->group_name = $group_name;
     }
 

@@ -88,7 +88,7 @@ class ElementType extends Model
     {
 
         $build = ElementType::select('element_types.*')
-            ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
             /** @uses ElementType::type_owner(),ElementType::editing_group(),ElementType::inheriting_group(),ElementType::new_elements_group() */
             ->with('type_owner', 'editing_group', 'inheriting_group', 'new_elements_group')
@@ -167,7 +167,7 @@ class ElementType extends Model
         return $this->type_owner->username.'.'.$this->type_name;
     }
 
-    public function isUnused() : bool {
-        return true;
+    public function isInUse() : bool {
+        return false;
     }
 }

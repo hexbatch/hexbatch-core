@@ -18,11 +18,11 @@ class ResourceNameReq implements ValidationRule
     {
 
         if (!preg_match('/^\p{L}[\p{L}0-9_]{2,}$/', $value) ) {
-            $fail('auth.invalid_name',['limit'=>static::MAX_NAME_LENGTH])->translate();
+            $fail('auth.invalid_name')->translate(['limit'=>static::MAX_NAME_LENGTH]);
         }
 
         if(mb_strlen($value) > static::MAX_NAME_LENGTH) {
-            $fail('auth.invalid_name',['limit'=>static::MAX_NAME_LENGTH])->translate();
+            $fail('auth.invalid_name')->translate(['limit'=>static::MAX_NAME_LENGTH]);
         }
 
         if (Utilities::is_uuid_similar($value) ) {

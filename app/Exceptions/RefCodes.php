@@ -27,8 +27,9 @@ class RefCodes {
     const ONLY_ADMINS_CAN_CHANGE_MEMBERSHIP = 2002;
     const ONLY_OWNERS_CAN_CHANGE_ADMINS = 2003;
     const GROUP_OPERATION_MISSING_MEMBER = 2004;
+    const GROUP_INVALID_NAME = 2005;
 
-    const GROUP_NOT_FOUND = 2005;
+    const GROUP_NOT_FOUND = 2006;
 
     // bounds start at 3000
 
@@ -69,6 +70,7 @@ class RefCodes {
     const ELEMENT_TYPE_INVALID_GROUP = 7003;
     const ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE = 7004;
     const ELEMENT_TYPE_CANNOT_DELETE = 7005;
+    const ELEMENT_TYPE_INVALID_NAME = 7006;
 
     //elements start at 8000
 
@@ -93,6 +95,8 @@ class RefCodes {
         self::ONLY_OWNERS_CAN_CHANGE_ADMINS => '',
         self::GROUP_OPERATION_MISSING_MEMBER => '',
         self::GROUP_NOT_FOUND => '',
+        self::GROUP_INVALID_NAME => '',
+
         self::BOUND_NOT_FOUND => '',
         self::BOUND_INVALID_CRON => '',
         self::BOUND_INVALID_PERIOD => '',
@@ -120,6 +124,7 @@ class RefCodes {
         self::ELEMENT_TYPE_INVALID_GROUP => '',
         self::ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE => '',
         self::ELEMENT_TYPE_CANNOT_DELETE => '',
+        self::ELEMENT_TYPE_INVALID_NAME => '',
 
         self::ELEMENT_NOT_FOUND => '',
 

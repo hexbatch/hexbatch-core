@@ -28,6 +28,7 @@ return [
     'group_only_admin_changes_membership' => 'Only an admin of the group can change its membership',
     'group_this_member_does_not_exist' => 'This user :username is not a member in the group',
     'group_not_admin' => 'This user :username is not an admin in the group :group',
+    'group_new_has_no_name' => 'Cannot make a new group without a name',
 
     //bounds
     'bound_not_found' => 'Bound not found using :ref',
@@ -114,6 +115,7 @@ return [
 
     //element types
     'element_type_not_found' => 'Element type not found using :ref',
+    'element_type_must_have_name' => 'Element types need a name',
     'element_type_not_admin' => 'You are not in the owner admin group or a member in the editing group for the type :ref',
     'element_type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
     'element_type_only_delete_if_unused' => 'Can only delete :ref when it has no elements',

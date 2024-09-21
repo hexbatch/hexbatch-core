@@ -6,6 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\UserGroups\GroupGathering;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -159,18 +160,12 @@ class User extends Authenticatable
        return  $builder->first();
     }
 
-    /**
-     * @throws ValidationException
-     */
+
     public function initUser() {
 
 
         if (!$this->user_group_id) {
-            $group =  new UserGroup();
-            $group->setGroupName($this->username);
-            $group->user_id = $this->id;
-            $group->save();
-            $group->addMember($this->id,true);
+            $group =  GroupGathering::SetupNewGroup($this->username);
             $this->user_group_id = $group->id;
             $this->save();
         }
@@ -229,7 +224,6 @@ class User extends Authenticatable
 
 
     public function inAdminGroup(int $user_id) : bool {
-        /** @noinspection PhpUnhandledExceptionInspection */
         $this->initUser();
         if ($this->id === $user_id) {return true;}
         return !!$this->user_group->isAdmin($user_id);
