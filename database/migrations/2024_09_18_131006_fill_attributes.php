@@ -35,6 +35,16 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('applied_rule_bundle_id')
+                ->nullable()->default(null)
+                ->comment("The bundle that is used, attributes do not need rules, or can inherit from parent")
+                ->index('idx_applied_rule_bundle_id')
+                ->constrained('attribute_rule_bundles')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+
+
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -48,6 +58,9 @@ return new class extends Migration
 
             $table->boolean('is_final_parent')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
+
+            $table->boolean('is_using_ancestor_bundle')->default(false)->nullable(false)
+                ->comment('if false then if this has parent, not using its rules');
 
             $table->boolean('is_system')->default(false)->nullable(false)
                 ->index('idx_attr_is_system')
@@ -95,19 +108,8 @@ return new class extends Migration
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON attributes FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
 
-        //for rule look at rule linked in pointer, bounds itself stored in pointer
-        DB::statement("CREATE TYPE type_of_attribute AS ENUM (
-            'value',
-             'rule',
-            'meta_author','meta_copywrite','meta_url','meta_rating','meta_icu_language',
-            'meta_mime_type','meta_icu_locale','meta_icu_location',
-            'read_time_bounds','write_time_bounds',
-            'read_map_location_bounds','write_map_location_bounds',
-            'read_shape_location_bounds','write_shape_location_bounds'
 
-            );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN attribute_type type_of_attribute_rule NOT NULL default 'inactive';");
 
         DB::statement("CREATE TYPE type_of_server_access AS ENUM (
             'public',
@@ -138,15 +140,18 @@ return new class extends Migration
         Schema::table('attributes', function (Blueprint $table) {
             $table->dropForeign(['parent_attribute_id']);
             $table->dropForeign(['owner_element_type_id']);
+            $table->dropForeign(['applied_rule_bundle_id']);
 
             $table->dropColumn('parent_attribute_id');
             $table->dropColumn('owner_element_type_id');
+            $table->dropColumn('applied_rule_bundle_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_retired');
             $table->dropColumn('is_final');
             $table->dropColumn('is_system');
             $table->dropColumn('is_nullable');
             $table->dropColumn('is_final_parent');
+            $table->dropColumn('is_using_ancestor_bundle');
             $table->dropColumn('is_static');
             $table->dropColumn('is_lazy');
             $table->dropColumn('value_json_path');
@@ -154,12 +159,10 @@ return new class extends Migration
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
-            $table->dropColumn('attribute_type');
             $table->dropColumn('server_access_type');
             $table->dropColumn('attribute_access_type');
         });
 
-        DB::statement("DROP TYPE type_of_attribute;");
         DB::statement("DROP TYPE type_of_server_access;");
         DB::statement("DROP TYPE type_of_attribute_access;");
 

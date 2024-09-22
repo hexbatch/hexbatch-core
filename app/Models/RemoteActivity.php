@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
+use App\Enums\Remotes\RemoteActivityStatusType;
+use App\Enums\Remotes\RemoteCachePolicyType;
+use App\Enums\Remotes\RemoteCacheStatusType;
+use App\Enums\Remotes\RemoteDataFormatType;
+use App\Enums\Remotes\RemoteToMapType;
+use App\Enums\Remotes\RemoteUriMethod;
+use App\Enums\Remotes\RemoteUriProtocolType;
+use App\Enums\Remotes\RemoteUriType;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchRemoteException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Jobs\RunRemote;
-use App\Models\Enums\Remotes\RemoteCachePolicyType;
-use App\Models\Enums\Remotes\RemoteCacheStatusType;
-use App\Models\Enums\Remotes\RemoteActivityStatusType;
-use App\Models\Enums\Remotes\RemoteDataFormatType;
-use App\Models\Enums\Remotes\RemoteToMapType;
-use App\Models\Enums\Remotes\RemoteUriMethod;
-use App\Models\Enums\Remotes\RemoteUriProtocolType;
-use App\Models\Enums\Remotes\RemoteUriType;
 use ArrayObject;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;

@@ -3,12 +3,12 @@
 namespace App\Models;
 
 
+use App\Enums\Remotes\RemoteDataFormatType;
+use App\Enums\Remotes\RemoteToMapType;
+use App\Enums\Remotes\RemoteToSourceType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\Remotes\RemoteToMapType;
-use App\Models\Enums\Remotes\RemoteDataFormatType;
-use App\Models\Enums\Remotes\RemoteToSourceType;
 use App\Rules\ResourceNameReq;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;

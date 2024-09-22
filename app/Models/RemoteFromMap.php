@@ -3,10 +3,10 @@
 namespace App\Models;
 
 
+use App\Enums\Remotes\RemoteFromMapType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\Remotes\RemoteFromMapType;
 use App\Rules\ResourceNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

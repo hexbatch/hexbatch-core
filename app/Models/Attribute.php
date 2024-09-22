@@ -2,23 +2,21 @@
 
 namespace App\Models;
 
+use App\Enums\Attributes\AttributeAccessType;
+use App\Enums\Attributes\AttributeServerAccessType;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Attributes\Apply\StandardAttributes;
+use App\Helpers\Standard\StandardAttributes;
 use App\Helpers\Utilities;
-use App\Http\Resources\AttributeRuleResource;
-use App\Models\Enums\Attributes\AttributeRuleType;
-use App\Models\Enums\Attributes\AttributeType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\AttributeNameReq;
-
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -36,16 +34,16 @@ use Illuminate\Validation\ValidationException;
  * @property boolean is_system
  * @property boolean is_final
  * @property boolean is_final_parent
+ * @property boolean is_using_ancestor_bundle
  * @property boolean is_static
  * @property boolean is_lazy
-
- * @property AttributeType  attribute_type
  * @property string attribute_name
  * @property string value_json_path
  * @property ArrayObject attribute_value
-
  * @property string created_at
  * @property string updated_at
+ * @property AttributeServerAccessType server_access_type
+ * @property AttributeAccessType attribute_access_type
  *
  * @property int created_at_ts
  * @property int updated_at_ts
@@ -83,12 +81,14 @@ class Attribute extends Model
      */
     protected $casts = [
         'attribute_value' => AsArrayObject::class,
-        'attribute_type' => AttributeType::class,
+        'server_access_type' => AttributeServerAccessType::class,
+        'attribute_access_type' => AttributeAccessType::class,
     ];
 
     public function attribute_parent() : BelongsTo {
         return $this->belongsTo('App\Models\Attribute','parent_attribute_id')
             ->with('attribute_parent');
+
     }
 
 
@@ -98,10 +98,22 @@ class Attribute extends Model
     }
 
 
-    public function da_rules() : HasMany {
-        return $this->hasMany('App\Models\AttributeRule','rule_owner_id','id')
-            /** @uses AttributeRule::rule_target(),AttributeRule::rule_group(), */
-            ->with('rule_target','rule_group')
+    public function da_rules() : HasManyThrough {
+        /*
+return $this->hasManyThrough(
+            Deployment::class,
+            Environment::class,
+            'project_id', // Foreign key on the environments table...
+            'environment_id', // Foreign key on the deployments table...
+            'id', // Local key on the projects table...
+            'id' // Local key on the environments table...
+        );
+
+         */
+        return $this->hasManyThrough(AttributeRule::class,AttributeRuleBundle::class,'rule_bundle_owner_id','applied_rule_bundle_id')
+            /** @uses AttributeRule::rule_target(),AttributeRule::rule_group(),AttributeRule::rule_owner(),AttributeRuleBundle::creator_attribute() */
+            /** @uses AttributeRule::rule_location_bounds(),AttributeRule::rule_time_bounds() */
+            ->with('rule_target','rule_group','rule_location_bounds','rule_time_bounds','rule_owner','rule_owner.creator_attribute')
             ->orderBy('rule_type')
             ->orderBy('target_attribute_id');
     }
@@ -159,10 +171,7 @@ class Attribute extends Model
         return $this->type_owner->getName() . '.'.$root . '.'. $this->attribute_name;
     }
 
-    /** @noinspection PhpUnused */
-    public static function findAttribute(int $id) : ?Attribute {
-        return static::buildAttribute(id:$id)->first();
-    }
+
     public static function buildAttribute(
         ?int $id = null,
         ?int $user_id = null,
@@ -333,20 +342,6 @@ class Attribute extends Model
 
     }
 
-    /**
-     * @param AttributeRuleType $rule_type
-     * @param int $n_display
-     * @return string[]|AttributeRuleResource[]
-     */
-    public function getRuleGroup(AttributeRuleType $rule_type,int $n_display) : array  {
-        $ret = [];
-        foreach ($this->da_rules as $some_rule) {
-            if ($some_rule->rule_type === $rule_type) {
-                $ret[] = $n_display < 1? $some_rule->rule_target->getName() : new AttributeRuleResource($some_rule,null,$n_display);
-            }
-        }
-        return $ret;
-    }
 
     public function getValue() {
         return $this->attribute_value;

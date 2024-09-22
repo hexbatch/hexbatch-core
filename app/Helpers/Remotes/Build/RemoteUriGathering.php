@@ -2,12 +2,12 @@
 
 namespace App\Helpers\Remotes\Build;
 
+use App\Enums\Remotes\RemoteDataFormatType;
+use App\Enums\Remotes\RemoteUriMethod;
+use App\Enums\Remotes\RemoteUriProtocolType;
+use App\Enums\Remotes\RemoteUriType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\Enums\Remotes\RemoteDataFormatType;
-use App\Models\Enums\Remotes\RemoteUriMethod;
-use App\Models\Enums\Remotes\RemoteUriProtocolType;
-use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;

@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\Remotes\RemoteActivityStatusType;
+use App\Enums\Remotes\RemoteStackCategoryType;
+use App\Enums\Remotes\RemoteStackLogicType;
+use App\Enums\Remotes\RemoteStackStatusType;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Jobs\RunRemoteStack;
-use App\Models\Enums\Remotes\RemoteActivityStatusType;
-use App\Models\Enums\Remotes\RemoteStackCategoryType;
-use App\Models\Enums\Remotes\RemoteStackLogicType;
-use App\Models\Enums\Remotes\RemoteStackStatusType;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;

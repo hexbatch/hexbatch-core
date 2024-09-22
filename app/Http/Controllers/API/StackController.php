@@ -3,20 +3,18 @@
 namespace App\Http\Controllers\API;
 
 
+use App\Enums\Remotes\RemoteStackCategoryType;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RemoteStackCollection;
 use App\Http\Resources\RemoteStackResource;
-use App\Models\Enums\Remotes\RemoteStackCategoryType;
 use App\Models\Remote;
 use App\Models\RemoteStack;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-
 
 
 class StackController extends Controller

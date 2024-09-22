@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Attribute;
+use App\Models\AttributeRule;
 use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\LocationBound;
@@ -44,6 +45,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('time_bound', TimeBound::class);
         Route::model('location_bound', LocationBound::class);
         Route::model('attribute', Attribute::class);
+        Route::model('attribute_rule', AttributeRule::class);
         Route::model('remote', Remote::class);
         Route::model('remote_activity', RemoteActivity::class);
         Route::model('remote_stack', RemoteStack::class);

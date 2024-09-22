@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Attributes\AttributeGathering;
 use App\Helpers\ElementTypes\TypeGathering;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
@@ -12,6 +13,8 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Resources\ElementTypeCollection;
 use App\Http\Resources\ElementTypeResource;
+use App\Models\Attribute;
+use App\Models\AttributeRule;
 use App\Models\ElementType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -79,6 +82,64 @@ class TypeController extends Controller
         $ret = $list->cursorPaginate();
         return (new ElementTypeCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function type_ping(): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_ping(): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function new_attribute(Request $request,ElementType $element_type, ?Attribute $parent_attribute=null): JsonResponse {
+        //$attribute = (new AttributeGathering($request,$parent_attribute,$element_type) )->assign();
+        //todo create attributes here first
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function edit_attribute(ElementType $element_type, Attribute $attribute): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function copy_attribute(ElementType $element_type, Attribute $source_attribute): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function delete_attribute(ElementType $element_type, Attribute $doomed_attribute): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_get(ElementType $element_type, Attribute $attribute): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attributes_list(ElementType $element_type,?string $filter = null): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_list_rules(ElementType $element_type,?string $filter = null): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_new_rule(ElementType $element_type,Attribute $attribute): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_clear_rules(ElementType $element_type,Attribute $attribute): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_edit_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_delete_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    }
+
+    public function attribute_get_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
+        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
     }
 
 }

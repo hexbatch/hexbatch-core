@@ -1,0 +1,171 @@
+<?php
+
+namespace App\Http\Controllers\API;
+
+use App\Enums\Attributes\AttributePingType;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
+use App\Helpers\Attributes\AttributeGathering;
+use App\Helpers\Standard\StandardAttributes;
+use App\Helpers\Utilities;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\AttributeCollection;
+use App\Http\Resources\AttributeResource;
+use App\Http\Resources\StandardAttributeCollection;
+use App\Models\Attribute;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+
+/*
+| Get    | attribute/:id/bounds/ping   |            | Determines if the attribute is in bounds              | Location, Time and Set                                                |
+ */
+
+class StandardController extends Controller
+{
+
+    /**
+     * @param Request $request
+     * @param Attribute $attribute
+     * @param AttributePingType $attribute_ping_type
+     * @return JsonResponse
+     * @throws ValidationException
+     */
+    public function attribute_ping(Request $request, Attribute $attribute, AttributePingType $attribute_ping_type) {
+
+        $location_to_ping = $request->get('location_ping');
+        $shape_to_ping = $request->get('shape_ping');
+        $time_string = $request->get('time_string');
+        $user_lookup = $request->get('user');
+
+        $location_to_ping_json = '';
+        if (!empty($location_to_ping)) {
+            $location_to_ping_json = json_encode($location_to_ping);
+        }
+
+        $shape_to_ping_json = '';
+        if (!empty($shape_to_ping)) {
+            $shape_to_ping_json = json_encode($shape_to_ping);
+        }
+
+        $check_user = null;
+        if ($user_lookup) {
+            $check_user = (new User)->resolveRouteBinding($user_lookup);
+        }
+
+
+        $this->adminCheck($attribute);
+
+        $ret = [];
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_TIME || $attribute_ping_type === AttributePingType::READ_TIME) {
+            if ($attribute->read_time_bound) {
+                $ret['read_time'] = $attribute->read_time_bound?->ping($time_string);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_TIME || $attribute_ping_type === AttributePingType::WRITE_TIME) {
+            if($attribute->write_time_bound) {
+                $ret['write_time'] = $attribute->write_time_bound?->ping($time_string);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_MAP || $attribute_ping_type === AttributePingType::READ_MAP) {
+            if (empty($location_to_ping )) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->read_map_bound) {
+                $ret['read_map'] = $attribute->read_map_bound?->ping($location_to_ping_json);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_MAP || $attribute_ping_type === AttributePingType::WRITE_MAP) {
+            if (!$location_to_ping) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->write_map_bound) {
+                $ret['write_map'] = $attribute->write_map_bound?->ping($location_to_ping_json);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_SHAPE || $attribute_ping_type === AttributePingType::READ_SHAPE) {
+            if (!$shape_to_ping) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->read_shape_bound) {
+                $ret['read_shape'] = $attribute->read_shape_bound?->ping($shape_to_ping_json);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_SHAPE || $attribute_ping_type === AttributePingType::WRITE_SHAPE) {
+            if (!$shape_to_ping) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->write_shape_bound) {
+                $ret['write_shape'] = $attribute->write_shape_bound?->ping($shape_to_ping_json);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_USER || $attribute_ping_type === AttributePingType::READ_USER) {
+            if (!$check_user) {
+                 throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                     RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            //todo fix this up
+            if(isset($read_group)) {
+                $ret['read_user'] = (bool)$read_group->target_user_group->isMember($check_user->id);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_USER || $attribute_ping_type === AttributePingType::WRITE_USER) {
+            if (!$check_user) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+
+            if(isset($write_group)) {
+                $ret['write_user'] = (bool)$write_group->target_user_group->isMember($check_user->id);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_USER || $attribute_ping_type === AttributePingType::USAGE_USER) {
+            if (!$check_user) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+
+            if(isset($write_group )) {
+                $ret['usage_user'] = (bool)$write_group->target_user_group->isMember($check_user->id);
+            }
+        }
+
+        $resp = \Symfony\Component\HttpFoundation\Response::HTTP_OK;
+        foreach ($ret as $part) {
+            if (!$part) {
+                $resp = \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND;
+                break;
+            }
+        }
+
+
+        return response()->json(['attribute_id'=>$attribute->id,'results'=>$ret], $resp);
+    }
+
+    public function attribute_list_standard() {
+        $standard = StandardAttributes::getAttributeCache();
+        return response()->json(new StandardAttributeCollection($standard), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+}

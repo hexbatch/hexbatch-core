@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
-use App\Models\AttributeRule;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -27,37 +26,48 @@ class AttributeRuleResource extends JsonResource
     public function toArray(Request $request): array
     {
         if ($this->n_display_level <= 0) {
-            return [$this->rule_target->getName()];
+            return [$this->rule_name];
         }
         else if ($this->n_display_level === 1) {
             $arr =  [
-                'target' => $this->rule_target->getName()
+                'name' => $this->rule_name,
+                'uuid' => $this->ref_uuid,
+                'target' => $this->rule_target?->getName(),
+                'rule_group' => $this->rule_group?->getName(),
+                'rule_time_bounds' => $this->rule_time_bounds?->getName(),
+                'rule_location_bounds' => $this->rule_location_bounds?->getName(),
+
             ];
         }
         else {
-            $arr =  [
-                'target' =>  new AttributeResource($this->rule_target,null,$this->n_display_level - 1 ),
-            ];
+           $arr = [
+               'name' => $this->rule_name,
+               'uuid' => $this->ref_uuid
+           ];
+
+            if($this->target) {
+                $arr['target'] = new AttributeResource($this->rule_target,null,$this->n_display_level - 1 );
+            }
+
+            if($this->rule_group) {
+                $arr['rule_group'] = new UserGroupResource($this->rule_group,null,$this->n_display_level - 1);
+            }
+
+            if($this->rule_time_bounds) {
+                $arr['rule_time_bounds'] = new TimeBoundResource($this->rule_time_bounds,null,$this->n_display_level - 1);
+            }
+
+            if($this->rule_location_bounds) {
+                $arr['rule_location_bounds'] = new LocationBoundResource($this->rule_location_bounds,null,$this->n_display_level - 1);
+            }
         }
 
-        if (!$this->b_brief) {
-            $arr['type'] = $this->rule_type->value;
-        }
-        if ($this->rule_weight !== AttributeRule::DEFAULT_WEIGHT) {
-            $arr['weight'] = $this->rule_weight;
-        }
+        $arr['type'] = $this->rule_type->value;
+        $arr['rule_value'] = $this->rule_value;
+        $arr['weight'] = $this->rule_weight;
+        $arr['rule_json_path'] = $this->rule_json_path;
 
-        if (!is_null($this->rule_numeric_min) ) {
-            $arr['min'] = $this->rule_numeric_min;
-        }
 
-        if (! is_null($this->rule_numeric_max) ) {
-            $arr['max'] = $this->rule_numeric_max;
-        }
-
-        if ($this->rule_regex) {
-            $arr['regex'] = $this->rule_regex;
-        }
         return $arr;
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Models;
+use App\Enums\Bounds\LocationType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\Bounds\LocationType;
 use App\Models\Traits\TResourceCommon;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;

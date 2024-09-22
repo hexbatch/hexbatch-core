@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Enums\Bounds\LocationType;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LocationBoundCollection;
 use App\Http\Resources\LocationBoundResource;
-use App\Models\Enums\Bounds\LocationType;
 use App\Models\LocationBound;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;

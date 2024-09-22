@@ -8,7 +8,6 @@ use App\Http\Controllers\API\StackController;
 use App\Http\Controllers\API\TimeBoundController;
 use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\API\UserGroupController;
-use App\Http\Controllers\API\AttributeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -82,16 +81,7 @@ Route::prefix('v1')->group(function () {
             });
         }); //end bounds
 
-        Route::prefix('attributes')->group(function () {
-            Route::post('/create', [AttributeController::class, 'attribute_create'])->name('core.attributes.create');
-            Route::patch('/{attribute}/edit', [AttributeController::class, 'attribute_edit_patch'])->name('core.attributes.edit');
-            Route::delete('/{attribute}/destroy', [AttributeController::class, 'attribute_delete'])->name('core.attributes.destroy');
-            Route::get('/{attribute}/get/{levels?}', [AttributeController::class, 'attribute_get'])->name('core.attributes.get');
-            Route::get('/{attribute}/ping/{attribute_ping_type}', [AttributeController::class, 'attribute_ping'])->name('core.attributes.ping');
-            Route::get('/list/managed', [AttributeController::class, 'attribute_list_managed'])->name('core.attributes.list.managed');
-            Route::get('/list/usage', [AttributeController::class, 'attribute_list_usage'])->name('core.attributes.list.usage');
-            Route::get('/standard/list', [AttributeController::class, 'attribute_list_standard'])->name('core.attributes.standard.list');
-        });
+
 
         Route::prefix('types')->group(function () {
             Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
@@ -99,7 +89,35 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{element_type}/destroy', [TypeController::class, 'destroy_type'])->name('core.types.destroy');
             Route::get('/{element_type}/get/{levels?}', [TypeController::class, 'get_type'])->name('core.types.get');
             Route::get('/list', [TypeController::class, 'list_types'])->name('core.types.list');
+            Route::get('/ping/{attribute_ping_type}', [TypeController::class, 'type_ping'])->name('core.types.list');
 
+            Route::group(['prefix' => '{element_type}/attributes'], function () {
+                Route::post('/create', [TypeController::class, 'new_attribute'])->name('core.types.attributes.create');
+                Route::patch('/{attribute}/edit', [TypeController::class, 'edit_attribute'])->name('coretypes..attributes.edit');
+                Route::post('/{attribute}/copy', [TypeController::class, 'copy_attribute'])->name('core.types.attributes.copy');
+                Route::delete('/{attribute}/destroy', [TypeController::class, 'delete_attribute'])->name('core.types.attributes.destroy');
+
+                Route::get('/{attribute}/get/{levels?}', [TypeController::class, 'attribute_get'])->name('core.types.attributes.get');
+                Route::get('/{attribute}/ping/{attribute_ping_type}', [TypeController::class, 'attribute_ping'])->name('core.types.attributes.ping');
+                Route::get('/list/{filter?}', [TypeController::class, 'attributes_list'])->name('core.types.attributes.list');
+
+                Route::prefix('{attribute}/rules')->group(function () {
+                    Route::get('/list/{filter?}', [TypeController::class, 'attribute_list_rules'])->name('core.types.attributes.rules.list');
+                    Route::get('/clear', [TypeController::class, 'attribute_clear_rules'])->name('core.types.attributes.rules.clear');
+                    Route::post('/new', [TypeController::class, 'attribute_new_rule'])->name('core.types.attributes.rules.create');
+                    Route::patch('/{attribute_rule}/edit', [TypeController::class, 'attribute_edit_rule'])->name('core.types.attributes.rules.edit');
+                    Route::delete('/{attribute_rule}/destroy', [TypeController::class, 'attribute_delete_rule'])->name('core.types.attributes.rules.destroy');
+                    Route::get('/{attribute_rule}/get/{levels?}', [TypeController::class, 'attribute_get_rule'])->name('core.types.attributes.rules.get');
+                    Route::get('/{attribute}/ping/{attribute_ping_type}', [TypeController::class, 'attribute_ping'])->name('core.types.attributes.rules.ping');
+                });
+            });
+
+
+
+        });
+
+        Route::prefix('standard')->group(function () {
+            Route::get('/list/{filter}', [\App\Http\Controllers\API\StandardController::class, 'attribute_list_standard'])->name('core.standard.list');
         });
 
         Route::prefix('remotes')->group(function () {

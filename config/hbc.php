@@ -1,7 +1,7 @@
 <?php
 
 
-use App\Helpers\Attributes\Apply\StandardAttributes;
+use App\Helpers\Standard\StandardAttributes;
 
 return [
     /*

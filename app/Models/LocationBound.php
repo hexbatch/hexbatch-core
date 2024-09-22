@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\Bounds\LocationType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\Enums\Bounds\LocationType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\GeoJsonPolyReq;
 use App\Rules\GeoJsonReq;

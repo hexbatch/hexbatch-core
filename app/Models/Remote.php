@@ -3,18 +3,18 @@
 namespace App\Models;
 
 
+use App\Enums\Remotes\RemoteActivityStatusType;
+use App\Enums\Remotes\RemoteDataFormatType;
+use App\Enums\Remotes\RemoteFromMapType;
+use App\Enums\Remotes\RemoteToMapType;
+use App\Enums\Remotes\RemoteToSourceType;
+use App\Enums\Remotes\RemoteUriMethod;
+use App\Enums\Remotes\RemoteUriProtocolType;
+use App\Enums\Remotes\RemoteUriType;
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\Remotes\RemoteActivityStatusType;
-use App\Models\Enums\Remotes\RemoteFromMapType;
-use App\Models\Enums\Remotes\RemoteToMapType;
-use App\Models\Enums\Remotes\RemoteDataFormatType;
-use App\Models\Enums\Remotes\RemoteToSourceType;
-use App\Models\Enums\Remotes\RemoteUriMethod;
-use App\Models\Enums\Remotes\RemoteUriProtocolType;
-use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Traits\TResourceCommon;
 use App\Rules\ResourceNameReq;
 use ArrayObject;

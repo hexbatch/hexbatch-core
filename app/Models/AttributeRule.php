@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\Attributes\AttributeRuleType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\Attributes\AttributeRuleType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,19 +15,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int rule_owner_id
+ * @property int rule_bundle_owner_id
  * @property int target_attribute_id
+ * @property int rule_user_group_id
+ * @property int rule_time_bound_id
+ * @property int rule_location_bound_id
+ * @property string ref_uuid
+ * @property string rule_name
  * @property int rule_weight
- * @property int rule_numeric_min
- * @property int rule_numeric_max
- * @property string rule_regex
  * @property AttributeRuleType rule_type
+ * @property int  rule_value
+ * @property string rule_json_path
+ *
  * @property string created_at
  * @property string updated_at
  *
  *
  * @property int created_at_ts
  * @property int updated_at_ts
+ * @property AttributeRuleBundle rule_owner
  * @property Attribute rule_target
  * @property UserGroup rule_group
  *
@@ -64,12 +70,24 @@ class AttributeRule extends Model
     ];
 
 
+    public function rule_owner() : BelongsTo {
+        return $this->belongsTo('App\Models\AttributeRuleBundle','rule_bundle_owner_id');
+    }
+
     public function rule_target() : BelongsTo {
         return $this->belongsTo('App\Models\Attribute','target_attribute_id');
     }
 
     public function rule_group() : BelongsTo {
         return $this->belongsTo('App\Models\UserGroup','rule_user_group_id');
+    }
+
+    public function rule_time_bounds() : BelongsTo {
+        return $this->belongsTo(TimeBound::class,'rule_time_bound_id');
+    }
+
+    public function rule_location_bounds() : BelongsTo {
+        return $this->belongsTo(LocationBound::class,'rule_location_bound_id');
     }
 
 
@@ -81,7 +99,7 @@ class AttributeRule extends Model
         $ret = new AttributeRule();
         $ret->rule_type = $rule_type;
         if ($parent) {
-            $ret->rule_owner_id = $parent->id;
+            $ret->rule_bundle_owner_id = $parent->id;
         }
         $use_rule_hint = $rule_hint;
         if (is_array($rule_hint)) {
@@ -99,13 +117,7 @@ class AttributeRule extends Model
                 $ret->rule_weight = (int)$rule_hint['weight'];
             }
 
-            if (array_key_exists('min',$rule_hint) && !is_array($rule_hint['min'])) {
-                $ret->rule_numeric_min = (float)$rule_hint['min'];
-            }
 
-            if (array_key_exists('max',$rule_hint) && !is_array($rule_hint['max'])) {
-                $ret->rule_numeric_max = (float)$rule_hint['max'];
-            }
             if (array_key_exists('regex',$rule_hint) && !is_array($rule_hint['regex'])) {
                 $rest_regex = $rule_hint['regex'];
                 $bare_regex = trim($rest_regex, '/');
@@ -116,7 +128,6 @@ class AttributeRule extends Model
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                 }
-                $ret->rule_regex = $test_regex;
             }
         }
         /**
@@ -134,7 +145,7 @@ class AttributeRule extends Model
 
     public function deleteModeActivate() {
         if ($this->delete_mode) {
-            AttributeRule::where('rule_owner_id',$this->rule_owner_id)
+            AttributeRule::where('rule_bundle_owner_id',$this->rule_bundle_owner_id)
                 ->where('target_attribute_id',$this->target_attribute_id)
                 ->where('rule_type',$this->rule_type->value)
                 ->delete();

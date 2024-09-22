@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Enums\Remotes\RemoteActivityStatusType;
+use App\Enums\Remotes\RemoteStackCategoryType;
+use App\Enums\Remotes\RemoteUriType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
@@ -15,9 +18,6 @@ use App\Http\Resources\RemoteActivityCollection;
 use App\Http\Resources\RemoteActivityResource;
 use App\Http\Resources\RemoteCollection;
 use App\Http\Resources\RemoteResource;
-use App\Models\Enums\Remotes\RemoteActivityStatusType;
-use App\Models\Enums\Remotes\RemoteStackCategoryType;
-use App\Models\Enums\Remotes\RemoteUriType;
 use App\Models\Remote;
 use App\Models\RemoteActivity;
 use App\Models\RemoteStack;
@@ -28,7 +28,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-
 
 
 class RemoteController extends Controller

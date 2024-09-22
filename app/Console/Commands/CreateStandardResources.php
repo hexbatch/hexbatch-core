@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Helpers\Attributes\Apply\StandardAttributes;
+use App\Helpers\Standard\StandardAttributes;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
