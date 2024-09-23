@@ -68,17 +68,26 @@ class AttributeGathering
         }
 
         if ($this->parent_attribute) {
-            if ($current_attribute && $current_attribute->isInUse()) {
-                throw new HexbatchPermissionException(__("msg.attribute_parent_cannnot_change_while_in_use",['ref'=>$this->parent_attribute->getName()]),
+            if ($current_attribute ) {
+                throw new HexbatchPermissionException(__("msg.attribute_parent_cannnot_change",['ref'=>$this->parent_attribute->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                     RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
             }
             if( !$this->parent_attribute->type_owner->canUserEdit($user)) {
-                throw new HexbatchPermissionException(__("msg.attribute_cannot_be_used_at_parent",['ref'=>$this->parent_attribute->getName()]),
+                throw new HexbatchPermissionException(__("msg.attribute_cannot_be_used_at_parent_permissions",['ref'=>$this->parent_attribute->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                     RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
             }
         }
+
+        //given a parent, see if its retired or is_final_parent
+        if ($this->parent_attribute->is_retired || $this->parent_attribute->is_final_parent) {
+            throw new HexbatchPermissionException(__("msg.attribute_cannot_be_used_at_parent_final",['ref'=>$this->parent_attribute->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+                RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
+        }
+
+
         //fill in the local values
         if ( $request->request->has('is_using_ancestor_bundle')) {
             $this->is_using_ancestor_bundle = $request->request->getBoolean('is_using_ancestor_bundle');

@@ -55,8 +55,9 @@ return [
     //attributes
     'attribute_not_found' => 'Attribute not found using :ref',
     'attribute_ping_missing_data' => 'Cannot ping, check the ping type and data given for missing inputs',
-    'attribute_cannot_be_used_at_parent' => 'This attribute :ref cannot be used as a parent, you do not have permissions',
-    'attribute_parent_cannnot_change_while_in_use' => 'This attribute :ref cannot change its parent while it is being used',
+    'attribute_cannot_be_used_at_parent_permissions' => 'This attribute :ref cannot be used as a parent, you do not have permissions',
+    'attribute_cannot_be_used_at_parent_final' => 'This attribute :ref cannot be used as a parent, it is either retired or marked to not be used for parenting',
+    'attribute_parent_cannnot_change' => 'This attribute :ref cannot change its parent after creation',
     'attribute_cannot_be_edited_due_to_pivs' => 'This attribute :ref cannot be edited by you because you are neither the owner, in the owner admin group, or in the edit admin group',
     'attribute_cannot_be_cloned_due_to_pivs' => 'This attribute :ref cannot be cloned by you because of permissions on the source or target. You have to be able to edit both types',
     'attribute_cannot_be_cloned_into_its_type' => 'This attribute :ref cannot be cloned into the same type',
