@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\Validator;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property string ref_uuid
- * @property int user_id
  * @property boolean is_retired
  * @property string bound_name
  * @property LocationType location_type
@@ -58,22 +57,22 @@ class LocationBound extends Model
     ];
 
 
-    public function bound_owner(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\User', 'user_id');
-    }
 
     public function getName() {
         return $this->bound_owner->username . '.' .$this->bound_name;
     }
 
-     public static function buildLocationBound(?int $user_id = null,?int $id = null) : Builder {
+     public static function buildLocationBound(?int $user_id = null,?int $id = null,?int $type_id = null) : Builder {
         /** @var Builder $build */
         $build =  LocationBound::select('location_bounds.*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
 
         if ($user_id) {
-            $build->where('user_id',$user_id);
+            //todo bound joins here
+        }
+
+        if ($type_id) {
+            //todo bound joins here
         }
 
         if ($id) {

@@ -22,7 +22,7 @@ use InvalidArgumentException;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property string ref_uuid
- * @property int user_id
+
  * @property boolean is_retired
  * @property string bound_name
  * @property string bound_start
@@ -55,7 +55,6 @@ class TimeBound extends Model
     protected $fillable = [
         'is_retired',
         'bound_name',
-        'user_id',
         'bound_start',
         'bound_stop',
         'bound_period_length',
@@ -66,9 +65,7 @@ class TimeBound extends Model
     const MAKE_REPEAT_SECONDS = 60*30;
 
 
-    public function bound_owner() : BelongsTo {
-        return $this->belongsTo('App\Models\User','user_id');
-    }
+
 
     public function time_spans() : HasMany {
         return $this->hasMany('App\Models\TimeBoundSpan')
@@ -166,14 +163,18 @@ class TimeBound extends Model
     }
 
 
-    public static function buildTimeBound(?int $user_id = null,?int $id = null) : Builder {
+    public static function buildTimeBound(?int $user_id = null,?int $id = null,?int $type_id = null) : Builder {
         $build =  TimeBound::select('time_bounds.*')
             ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts")
             /** @uses TimeBound::time_spans() */
             ->with('time_spans');
 
        if ($user_id) {
-           $build->where('user_id',$user_id);
+           //todo do the joins to figure this out
+       }
+
+       if ($type_id) {
+           //todo do the joins to figure this out
        }
 
        if ($id) {

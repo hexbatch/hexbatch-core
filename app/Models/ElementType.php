@@ -174,4 +174,17 @@ class ElementType extends Model
     public function isInUse() : bool {
         return false;
     }
+
+    public function canUserEdit(User $user) : bool {
+        if ($this->type_owner?->inAdminGroup($user->id) ) { return true; }
+        if ($this->editing_group?->isMember($user->id) ) { return true; }
+        return false;
+    }
+
+    public function canUserViewDetails(User $user) : bool {
+        if ($this->type_owner?->inAdminGroup($user->id) ) { return true; }
+        if ($this->editing_group?->isMember($user->id) ) { return true; }
+        if ($this->inheriting_group?->isMember($user->id) ) { return true; }
+        return false;
+    }
 }

@@ -66,6 +66,7 @@ class AttributeRuleResource extends JsonResource
         $arr['rule_value'] = $this->rule_value;
         $arr['weight'] = $this->rule_weight;
         $arr['rule_json_path'] = $this->rule_json_path;
+        $arr['rule_lang'] = $this->rule_lang;
 
 
         return $arr;

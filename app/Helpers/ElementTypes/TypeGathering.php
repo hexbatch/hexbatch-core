@@ -110,8 +110,7 @@ class TypeGathering
         if (!$this->current_type) {return;}
 
         $user = Utilities::getTypeCastedAuthUser();
-        if ($this->current_type->type_owner?->inAdminGroup($user->id) ) { return; }
-        if ($this->current_type->editing_group?->isMember($user->id) ) { return; }
+        if ($this->current_type->canUserEdit($user)) {return;}
 
         throw new HexbatchPermissionException(__("msg.element_type_not_admin",['ref'=>$this->current_type->getName()]),
             \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,

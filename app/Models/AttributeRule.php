@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property AttributeRuleType rule_type
  * @property int  rule_value
  * @property string rule_json_path
+ * @property string rule_lang
  *
  * @property string created_at
  * @property string updated_at
@@ -104,7 +105,7 @@ class AttributeRule extends Model
         $use_rule_hint = $rule_hint;
         if (is_array($rule_hint)) {
             if (!array_key_exists('target',$rule_hint)) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_schema_missing_rule_attribute"),
+                throw new HexbatchNotPossibleException(__("msg.attribute_rule_missing_attribute"),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
             }
@@ -124,7 +125,7 @@ class AttributeRule extends Model
                 $test_regex = "/$bare_regex/";
                 $issues = Utilities::regexHasErrors($test_regex);
                 if ($issues) {
-                    throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_bad_regex", ['issue' => $issues]),
+                    throw new HexbatchNotPossibleException(__("msg.attribute_rule_bad_regex", ['issue' => $issues]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                 }
@@ -135,7 +136,7 @@ class AttributeRule extends Model
          */
         $found_attribute = (new Attribute())->resolveRouteBinding($use_rule_hint);
         if (!$ret->delete_mode && $found_attribute->is_retired) {
-            throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_retired",['name'=>$found_attribute->getName()]),
+            throw new HexbatchNotPossibleException(__("msg.attribute_rule_retired",['name'=>$found_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
         }

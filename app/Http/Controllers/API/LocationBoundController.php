@@ -18,9 +18,7 @@ use Illuminate\Validation\ValidationException;
 
 class LocationBoundController extends Controller
 {
-    /**
-     * @uses LocationBound::bound_owner()
-     */
+
     protected function adminCheck(LocationBound $bound) {
         $bound->bound_owner->checkAdminGroup(Utilities::getTypeCastedAuthUser()?->id);
     }

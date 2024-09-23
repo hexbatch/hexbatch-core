@@ -28,8 +28,8 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property string ref_uuid
  * @property int parent_attribute_id
- * @property int pointer_id
  * @property int owner_element_type_id
+ * @property int applied_rule_bundle_id
  * @property boolean is_retired
  * @property boolean is_system
  * @property boolean is_final
@@ -55,7 +55,6 @@ use Illuminate\Validation\ValidationException;
  */
 class Attribute extends Model
 {
-    use TResourceCommon;
 
     protected $table = 'attributes';
     public $timestamps = false;
@@ -125,25 +124,6 @@ return $this->hasManyThrough(
         //!later also check for attributes used in types
     }
 
-    /**
-     * @param string $name
-     * @param ElementType $owner
-     * @return void
-
-     */
-    public function setName(string $name, ElementType $owner) {
-        try {
-            Validator::make(['attribute_name' => $name], [
-                'attribute_name' => ['required', 'string', new AttributeNameReq($owner,$this)],
-            ])->validate();
-        } catch (ValidationException $v) {
-            throw new HexbatchNotPossibleException($v->getMessage(),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_BAD_NAME);
-        }
-
-        $this->attribute_name = $name;
-    }
 
 
 

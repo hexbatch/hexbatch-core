@@ -23,9 +23,10 @@ use Illuminate\Validation\ValidationException;
  */
 class TimeBoundController extends Controller
 {
-    /**
-     * @uses TimeBound::bound_owner()
-     */
+    //todo update, no longer using the user_id, its a property of a rule now, so put into the nested api for the type/att/rules/bounds
+//      but bounds should be sharable , so no longer has attribute owner, or a rule owner.
+//      Make once, use anywhere the user has edit access to the types
+
     protected function adminCheck(TimeBound $bound) {
         $user = Utilities::getTypeCastedAuthUser();
         $bound->bound_owner->checkAdminGroup($user->id);

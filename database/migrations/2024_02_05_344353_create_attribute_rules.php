@@ -84,6 +84,9 @@ return new class extends Migration
             $table->text('rule_json_path')->nullable()->default(null)
                 ->comment("if set matches path to the the target json value");
 
+            $table->string('rule_lang',10)->nullable()->default(null)->index()
+                ->comment("the language (general or regional) in the environment can be part of the rules ");
+
 
             $table->timestamps();
         });

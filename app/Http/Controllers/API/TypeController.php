@@ -11,6 +11,8 @@ use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 
 
+use App\Http\Resources\AttributeCollection;
+use App\Http\Resources\AttributeResource;
 use App\Http\Resources\ElementTypeCollection;
 use App\Http\Resources\ElementTypeResource;
 use App\Models\Attribute;
@@ -92,30 +94,40 @@ class TypeController extends Controller
         return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
     }
 
-    public function new_attribute(Request $request,ElementType $element_type, ?Attribute $parent_attribute=null): JsonResponse {
-        //$attribute = (new AttributeGathering($request,$parent_attribute,$element_type) )->assign();
-        //todo create attributes here first
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    public function new_attribute(Request $request,ElementType $element_type): JsonResponse {
+        $attribute = (new AttributeGathering($request,$element_type,null) )->assign();
+        $out = Attribute::buildAttribute(id:$attribute->id);
+        return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function edit_attribute(ElementType $element_type, Attribute $attribute): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    public function edit_attribute(Request $request,ElementType $element_type, Attribute $attribute): JsonResponse {
+        $attribute = (new AttributeGathering($request,$element_type,$attribute) )->assign();
+        $out = Attribute::buildAttribute(id:$attribute->id);
+        return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function copy_attribute(ElementType $element_type, Attribute $source_attribute): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+        $cloned = AttributeGathering::cloneAttribute($element_type,$source_attribute);
+        $out = Attribute::buildAttribute(id:$cloned->id);
+        return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function delete_attribute(ElementType $element_type, Attribute $doomed_attribute): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+        AttributeGathering::deleteAttribute($element_type,$doomed_attribute);
+        return response()->json(new AttributeResource($doomed_attribute,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attribute_get(ElementType $element_type, Attribute $attribute): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        return response()->json(new AttributeResource($attribute,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attributes_list(ElementType $element_type,?string $filter = null): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+        AttributeGathering::attributeListCheck($element_type);
+        $laravel_list = Attribute::buildAttribute(element_type_id: $element_type->id);
+        $ret = $laravel_list->cursorPaginate();
+        return (new AttributeCollection($ret))
+            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attribute_list_rules(ElementType $element_type,?string $filter = null): JsonResponse {

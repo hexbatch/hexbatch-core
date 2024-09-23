@@ -16,15 +16,6 @@ return new class extends Migration
         Schema::create('time_bounds', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('owner_attribute_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The owner of the bound")
-                ->index('idx_time_bound_owner_attribute_id')
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
 
             $table->timestamps();
 
@@ -55,9 +46,6 @@ return new class extends Migration
             $table->string('bound_name',128)->nullable(false)->index()
                 ->comment("The unique name of the time bound, using the naming rules");
 
-
-
-            $table->unique(['bound_name']);
         });
 
         DB::statement('ALTER TABLE time_bounds ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

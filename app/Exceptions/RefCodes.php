@@ -51,6 +51,8 @@ class RefCodes {
     const ATTRIBUTE_BAD_NAME = 4005;
 
     const ATTRIBUTE_CANNOT_EDIT = 4010;
+    const ATTRIBUTE_CANNOT_CLONE = 4011;
+    const ATTRIBUTE_CANNOT_DELETE = 4012;
 
     //remotes start at 5000
 
@@ -112,6 +114,8 @@ class RefCodes {
         self::ATTRIBUTE_SCHEMA_ISSUE => '',
         self::ATTRIBUTE_CANNOT_EDIT => '',
         self::ATTRIBUTE_BAD_NAME => '',
+        self::ATTRIBUTE_CANNOT_CLONE => '',
+        self::ATTRIBUTE_CANNOT_DELETE => '',
 
         self::REMOTE_NOT_FOUND => '',
         self::REMOTE_SCHEMA_ISSUE => '',

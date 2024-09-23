@@ -35,7 +35,7 @@ class StandardController extends Controller
      * @throws ValidationException
      */
     public function attribute_ping(Request $request, Attribute $attribute, AttributePingType $attribute_ping_type) {
-
+        //todo put this into helper and use in the type/attribute ping
         $location_to_ping = $request->get('location_ping');
         $shape_to_ping = $request->get('shape_ping');
         $time_string = $request->get('time_string');
