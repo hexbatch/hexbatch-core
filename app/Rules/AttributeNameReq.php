@@ -26,7 +26,7 @@ class AttributeNameReq extends ResourceNameReq
         parent::validate($attribute,$value,$fail);
 
         //see if type name is unique for the type
-        $laravel = Attribute::where('owner_element_type_id',$this->element_type->id)->where('type_name',$value);
+        $laravel = Attribute::where('owner_element_type_id',$this->element_type->id)->where('attribute_name',$value);
         if ($this->attribute?->id) {
             $laravel->whereNot('id',$this->attribute->id);
         }

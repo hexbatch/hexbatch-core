@@ -167,4 +167,5 @@ return new class extends Migration
         DB::statement("DROP TYPE type_of_attribute_access;");
 
     }
+    //todo make trigger to control recursion of the parent
 };

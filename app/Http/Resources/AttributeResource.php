@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
-
- * @method getName()
- * @method getValue()
+ * @uses \App\Models\Attribute::getAncestorChain(),\App\Models\Attribute::getName()
+ * @method getName(bool $b_redo = false,bool $b_strip_system_prefix = true,bool $short_name = false)
+ * @method getAncestorChain(int $level = 0)
  */
 class AttributeResource extends JsonResource
 {
@@ -43,6 +43,7 @@ class AttributeResource extends JsonResource
         $ret =  [
             'uuid' => $this->ref_uuid,
             'name' => $this->getName(),
+            'short_name' => $this->getName(short_name: true ),
 
             'owner' => new ElementTypeResource($this->type_owner),
             'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
@@ -63,6 +64,18 @@ class AttributeResource extends JsonResource
 
 
         ];
+
+        if ($this->attribute_parent) {
+            $ret['parent'] = new AttributeResource($this->attribute_parent,null,$this->n_display_level - 1 );
+        }
+        $ancestors = $this->getAncestorChain(1); //do not show parent, that is above
+        if (count($ancestors) ) {
+            $ret['ancestors'] = [];
+            foreach ($ancestors as $ancestor) {
+                $ret['ancestors'][] = new AttributeResource($ancestor,null,$this->n_display_level - 1 );
+            }
+        }
+
 
         return $ret;
     }

@@ -33,7 +33,7 @@ class AttributeGathering
     public ?bool $is_final = null;
     public ?bool $is_lazy = null;
     public ?string $value_json_path = null;
-    public ?array $attribute_value = [];
+    public ?array $attribute_value = null;
     public ?string $attribute_name  = null;
     public ?AttributeServerAccessType $server_access_type = null;
     public ?AttributeAccessType $attribute_access_type = null;
@@ -47,7 +47,7 @@ class AttributeGathering
             $this->parent_attribute = (new Attribute())->resolveRouteBinding($parent_stuff);
         }
 
-        if ($parent_type->ref_uuid === $current_attribute?->type_owner?->ref_uuid??null) {
+        if ($current_attribute && ($parent_type->ref_uuid !== ($current_attribute->type_owner?->ref_uuid??null) ) ) {
 
             throw new HexbatchPermissionException(__("msg.attribute_owner_does_not_match_type_given",['ref'=>$current_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
@@ -115,9 +115,17 @@ class AttributeGathering
             $this->value_json_path = $request->request->getString('value_json_path');
         }
 
+
         if ( $request->request->has('attribute_value')) {
-            $this->attribute_value = $request->get('attribute_value');
+            $pre_value = $request->get('attribute_value');
+            if ( is_array($this->attribute_value) ) {
+                $this->attribute_value = $pre_value;
+            } else {
+                $this->attribute_value = [$pre_value];
+            }
         }
+
+
 
         if ( $request->request->has('attribute_name')) {
             $maybe_name = $request->request->getString('attribute_name');
@@ -232,9 +240,10 @@ class AttributeGathering
                 RefCodes::ATTRIBUTE_CANNOT_CLONE);
         }
 
-        $cloned = $current_attribute->replicate();
+        $cloned = $current_attribute->replicate(['created_at_ts','updated_at_ts','ref_uuid']);
         $cloned->owner_element_type_id = $new_parent_type->id;
         $cloned->save();
+        $cloned->refresh();
         return $cloned;
     }
 
@@ -262,7 +271,7 @@ class AttributeGathering
     }
 
     public static function compareAttributeOwner(ElementType $parent_type,Attribute $current_attribute) : void  {
-        if ($parent_type->ref_uuid === $current_attribute?->type_owner?->ref_uuid??null) {
+        if ($parent_type->ref_uuid !== ($current_attribute->type_owner?->ref_uuid??null) ) {
 
             throw new HexbatchPermissionException(__("msg.attribute_owner_does_not_match_type_given",['ref'=>$current_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,

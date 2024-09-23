@@ -96,19 +96,19 @@ class TypeController extends Controller
 
     public function new_attribute(Request $request,ElementType $element_type): JsonResponse {
         $attribute = (new AttributeGathering($request,$element_type,null) )->assign();
-        $out = Attribute::buildAttribute(id:$attribute->id);
+        $out = Attribute::buildAttribute(id:$attribute->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function edit_attribute(Request $request,ElementType $element_type, Attribute $attribute): JsonResponse {
         $attribute = (new AttributeGathering($request,$element_type,$attribute) )->assign();
-        $out = Attribute::buildAttribute(id:$attribute->id);
+        $out = Attribute::buildAttribute(id:$attribute->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function copy_attribute(ElementType $element_type, Attribute $source_attribute): JsonResponse {
         $cloned = AttributeGathering::cloneAttribute($element_type,$source_attribute);
-        $out = Attribute::buildAttribute(id:$cloned->id);
+        $out = Attribute::buildAttribute(id:$cloned->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -117,9 +117,9 @@ class TypeController extends Controller
         return response()->json(new AttributeResource($doomed_attribute,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function attribute_get(ElementType $element_type, Attribute $attribute): JsonResponse {
+    public function attribute_get(ElementType $element_type, Attribute $attribute,?int $levels = 2): JsonResponse {
         AttributeGathering::compareAttributeOwner($element_type,$attribute);
-        return response()->json(new AttributeResource($attribute,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new AttributeResource($attribute,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attributes_list(ElementType $element_type,?string $filter = null): JsonResponse {

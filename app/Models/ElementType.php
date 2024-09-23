@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 
 /**
@@ -129,14 +131,8 @@ class ElementType extends Model
                     $build = $this->where('ref_uuid', $value);
                 } else {
                     if (is_string($value)) {
-                        //the name, but scope to the user id of the owner
-                        //if this user is not the owner, then the group owner id can be scoped
                         $parts = explode('.', $value);
-                        if (count($parts) === 1) {
-                            //must be owned by the user
-                            $user = Utilities::getTypeCastedAuthUser();
-                            $build = $this->where('user_id', $user?->id)->where('type_name', $value);
-                        } else {
+                        if (count($parts) >= 2) {
                             $owner_hint = $parts[0];
                             $maybe_name = $parts[1];
                             /**
@@ -154,7 +150,11 @@ class ElementType extends Model
                     $ret = ElementType::buildElementType(id:$first_id)->first();
                 }
             }
-        } finally {
+        }
+        catch (\Exception $e) {
+            Log::warning('Element Type resolving: '. $e->getMessage());
+        }
+        finally {
             if (empty($ret) || empty($first_id) || empty($build)) {
                 throw new HexbatchNotFound(
                     __('msg.element_type_not_found',['ref'=>$value]),

@@ -5,12 +5,11 @@ namespace App\Models;
 use App\Enums\Attributes\AttributeAccessType;
 use App\Enums\Attributes\AttributeServerAccessType;
 use App\Exceptions\HexbatchNotFound;
-use App\Exceptions\HexbatchNotPossibleException;
+
 use App\Exceptions\RefCodes;
 use App\Helpers\Standard\StandardAttributes;
 use App\Helpers\Utilities;
-use App\Models\Traits\TResourceCommon;
-use App\Rules\AttributeNameReq;
+
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -18,8 +17,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 
 /**
@@ -84,9 +83,12 @@ class Attribute extends Model
         'attribute_access_type' => AttributeAccessType::class,
     ];
 
+
     public function attribute_parent() : BelongsTo {
         return $this->belongsTo('App\Models\Attribute','parent_attribute_id')
-            ->with('attribute_parent');
+            ->with('attribute_parent')
+            ->select('*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts");
 
     }
 
@@ -109,12 +111,15 @@ return $this->hasManyThrough(
         );
 
          */
-        return $this->hasManyThrough(AttributeRule::class,AttributeRuleBundle::class,'rule_bundle_owner_id','applied_rule_bundle_id')
+        $what =  $this->hasManyThrough(AttributeRule::class,AttributeRuleBundle::class,'id','rule_bundle_owner_id')
+
             /** @uses AttributeRule::rule_target(),AttributeRule::rule_group(),AttributeRule::rule_owner(),AttributeRuleBundle::creator_attribute() */
             /** @uses AttributeRule::rule_location_bounds(),AttributeRule::rule_time_bounds() */
             ->with('rule_target','rule_group','rule_location_bounds','rule_time_bounds','rule_owner','rule_owner.creator_attribute')
             ->orderBy('rule_type')
             ->orderBy('target_attribute_id');
+            //$raw = $what->toRawSql();
+            return $what;
     }
 
 
@@ -128,7 +133,11 @@ return $this->hasManyThrough(
 
 
     public ?string $fully_qualified_name = null;
-    public function getName(bool $b_redo = false,bool $b_strip_system_prefix = true) : string  {
+    public function getName(bool $b_redo = false,bool $b_strip_system_prefix = true,bool $short_name = false) : string  {
+
+        if ($short_name) {
+            return $this->type_owner->getName() .  '.'. $this->attribute_name;
+        }
         //get ancestor chain
        if (!$b_redo && $this->fully_qualified_name) {return $this->fully_qualified_name;}
         $ancestors = [];
@@ -256,8 +265,8 @@ return $this->hasManyThrough(
     /**
      * Retrieve the model for a bound value.
      *
-     * @param  mixed  $value
-     * @param  string|null  $field
+     * @param mixed $value
+     * @param string|null $field
      * @return Model|null
      */
     public function resolveRouteBinding($value, $field = null)
@@ -278,38 +287,52 @@ return $this->hasManyThrough(
                         //if this user is not the owner, then the group owner id can be scoped
                         $parts = explode('.', $value);
                         $owner = null;
-                         if (count($parts) > 1) {
+                        $what_route =  Route::current();
+                        $owner_name = $what_route->originalParameter('element_type');
+                        if($owner_name && count($parts) === 1) {
+                            $attribute_name = $parts[0];
+                            /** @var ElementType $owner */
+                            $owner = (new ElementType)->resolveRouteBinding($owner_name);
+                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
+                        }
+                        else if (count($parts) === 2) {
                             $owner_string = $parts[0];
                             $maybe_name = $parts[1];
-                            /** @var User $owner */
+                            /** @var ElementType $owner */
                             $owner = (new ElementType)->resolveRouteBinding($owner_string);
                             $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $maybe_name);
-                        }
+                        } else {
+                            if (count($parts) >= 3) {
+                                $user_string = $parts[0];
+                                $owner_string = $parts[1];
+                                $maybe_name = $parts[2];
 
-                        if ($build && $owner) {
-                            if (count($parts) > 2) {
-                                //loop through and get the rest of the chain
-                                $attr = $build->first();
-                                for ($i = 2; !empty($attr) && $i < count($parts); $i++) {
-                                    $sub_name = $parts[$i];
-                                    $build = $this->where('user_id', $owner->id)->where('parent_attribute_id',$attr->id)->where('attribute_name', $sub_name);
-                                    $attr = $build->first();
-                                }
-                                if (empty($attr)) {
-                                    $build = null;
-                                }
+                                /** @var User $user */
+                                $user = (new User)->resolveRouteBinding($user_string);
+
+                                /** @var ElementType $owner */
+                                $owner = (new ElementType)->resolveRouteBinding($user->ref_uuid . '.' . $owner_string);
+                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $maybe_name);
                             }
                         }
+
                     }
                 }
             }
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = Attribute::buildAttribute(id:$first_id)->first();
+
+                    $first_build = Attribute::buildAttribute(id: $first_id);
+                    $ret = $first_build->first();
+
                 }
             }
-        } finally {
+        }
+        catch (\Exception $e) {
+            Log::warning('Attribute resolving: '. $e->getMessage());
+        }
+        finally {
             if (empty($ret) || empty($first_id) || empty($build)) {
                 throw new HexbatchNotFound(
                     __('msg.attribute_not_found',['ref'=>$value]),
@@ -325,6 +348,31 @@ return $this->hasManyThrough(
 
     public function getValue() {
         return $this->attribute_value;
+    }
+
+    /**
+     * @param int $skip_first_number_ancestors set to 1 to also show direct parent, 2 to not show the grandparent
+     * @return array
+     */
+    public function getAncestorChain(int $skip_first_number_ancestors = 1) {
+        if ($skip_first_number_ancestors < 1) {$skip_first_number_ancestors = 1;}
+       $ancestors = [];
+       $current = $this;
+       $counter = 0;
+       while($parent = $current->attribute_parent) {
+           $current = $parent;
+           $ancestors[] = $parent;
+           $counter++;
+       }
+//       if ($counter > 0) {
+//           $ancestors[] = $current;
+//       }
+       for($i = 0; $i < $skip_first_number_ancestors; $i++) {
+           array_shift($ancestors);
+       }
+       $out = array_reverse($ancestors);
+       return $out;
+
     }
 
 }
