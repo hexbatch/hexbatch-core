@@ -2,9 +2,11 @@
 
 namespace App\Helpers\ElementTypes;
 
+use App\Enums\Attributes\AttributePingType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Attributes\AttributeGathering;
 use App\Helpers\UserGroups\GroupGathering;
 use App\Helpers\Utilities;
 use App\Models\ElementType;
@@ -115,6 +117,29 @@ class TypeGathering
         throw new HexbatchPermissionException(__("msg.element_type_not_admin",['ref'=>$this->current_type->getName()]),
             \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
             RefCodes::ELEMENT_TYPE_NOT_AUTHORIZED);
+
+    }
+
+
+    public static function doPing(Request $request,ElementType $type,AttributePingType $attribute_ping_type) : array
+    {
+        $ret = [];
+        foreach ($type->type_attributes as $attribute) {
+            $newt = AttributeGathering::doPing($request,$attribute,$attribute_ping_type);
+            static::mergePingData($ret,$newt);
+        }
+        return $ret;
+    }
+
+    public static function mergePingData(array &$ret, array $newt) : void {
+        if ($newt['read_time']??false) { $ret['read_time'] = $newt['read_time'];}
+        if ($newt['write_time']??false) { $ret['write_time'] = $newt['write_time'];}
+        if ($newt['read_map']??false) { $ret['read_map'] = $newt['read_map'];}
+        if ($newt['write_map']??false) { $ret['write_map'] = $newt['write_map'];}
+        if ($newt['read_shape']??false) { $ret['read_shape'] = $newt['read_shape'];}
+        if ($newt['write_shape']??false) { $ret['write_shape'] = $newt['write_shape'];}
+        if ($newt['read_user']??false) { $ret['read_user'] = $newt['read_user'];}
+        if ($newt['write_user']??false) { $ret['write_user'] = $newt['write_user'];}
 
     }
 

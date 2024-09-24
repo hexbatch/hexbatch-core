@@ -2,12 +2,11 @@
 
 namespace App\Rules;
 
-use App\Helpers\Utilities;
+
 use App\Models\Attribute;
 use App\Models\ElementType;
 use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Facades\Auth;
+
 
 class AttributeNameReq extends ResourceNameReq
 {

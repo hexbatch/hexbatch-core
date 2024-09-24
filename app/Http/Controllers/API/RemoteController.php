@@ -28,6 +28,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 
 class RemoteController extends Controller
@@ -196,7 +197,7 @@ class RemoteController extends Controller
 
     public function remote_delete(Remote $remote) {
         $this->adminCheck($remote);
-        $remote->checkIsInUse();
+        if ($remote->isInUse()) {throw new RuntimeException('code will be refactored');}
         $out = Remote::buildRemote(id: $remote->id)->first();
         $remote->delete();
         return response()->json(new RemoteResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);

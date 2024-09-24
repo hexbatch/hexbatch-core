@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -50,7 +49,7 @@ use Illuminate\Support\Facades\Route;
  * @property Attribute attribute_parent
  * @property ElementType type_owner
  *
- * @property AttributeRule[] da_rules
+ * @property AttributeRuleBundle rule_bundle
  */
 class Attribute extends Model
 {
@@ -98,35 +97,17 @@ class Attribute extends Model
 
     }
 
+    public function rule_bundle() : BelongsTo {
+        return $this->belongsTo(AttributeRuleBundle::class,'applied_rule_bundle_id')
+            /** @uses AttributeRuleBundle::rules_in_group(),AttributeRuleBundle::creator_attribute() */
+            ->with('rules_in_group','creator_attribute');
 
-    public function da_rules() : HasManyThrough {
-        /*
-return $this->hasManyThrough(
-            Deployment::class,
-            Environment::class,
-            'project_id', // Foreign key on the environments table...
-            'environment_id', // Foreign key on the deployments table...
-            'id', // Local key on the projects table...
-            'id' // Local key on the environments table...
-        );
-
-         */
-        $what =  $this->hasManyThrough(AttributeRule::class,AttributeRuleBundle::class,'id','rule_bundle_owner_id')
-
-            /** @uses AttributeRule::rule_target(),AttributeRule::rule_group(),AttributeRule::rule_owner(),AttributeRuleBundle::creator_attribute() */
-            /** @uses AttributeRule::rule_location_bounds(),AttributeRule::rule_time_bounds() */
-            ->with('rule_target','rule_group','rule_location_bounds','rule_time_bounds','rule_owner','rule_owner.creator_attribute')
-            ->orderBy('rule_type')
-            ->orderBy('target_attribute_id');
-            //$raw = $what->toRawSql();
-            return $what;
     }
 
 
 
     public function isInUse() : bool {
-        return false;
-        //!later also check for attributes used in types
+        return $this->type_owner->isInUse();
     }
 
 
@@ -171,8 +152,8 @@ return $this->hasManyThrough(
 
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::da_rules() */
-            ->with('attribute_parent', 'type_owner','da_rules')
+            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::rule_bundle() */
+            ->with('attribute_parent', 'type_owner','rule_bundle')
 
 
        ;
@@ -286,7 +267,7 @@ return $this->hasManyThrough(
                         //the name, but scope to the user id of the owner
                         //if this user is not the owner, then the group owner id can be scoped
                         $parts = explode('.', $value);
-                        $owner = null;
+
                         $what_route =  Route::current();
                         $owner_name = $what_route->originalParameter('element_type');
                         if($owner_name && count($parts) === 1) {
@@ -358,21 +339,22 @@ return $this->hasManyThrough(
         if ($skip_first_number_ancestors < 1) {$skip_first_number_ancestors = 1;}
        $ancestors = [];
        $current = $this;
-       $counter = 0;
        while($parent = $current->attribute_parent) {
            $current = $parent;
            $ancestors[] = $parent;
-           $counter++;
+
        }
-//       if ($counter > 0) {
-//           $ancestors[] = $current;
-//       }
+
        for($i = 0; $i < $skip_first_number_ancestors; $i++) {
            array_shift($ancestors);
        }
        $out = array_reverse($ancestors);
        return $out;
 
+    }
+
+    public function canUserSeeAttribute() : bool {
+        return ($this->rule_bundle?->canUserSee()??true);
     }
 
 }

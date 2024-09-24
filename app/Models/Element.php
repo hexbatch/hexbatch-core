@@ -15,8 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property string ref_uuid
- * @property int element_type_id
- * @property int user_id
+ * @property int element_parent_type_id
+ * @property int element_owner_user_id
  * @property string created_at
  * @property string updated_at
  *
@@ -35,8 +35,8 @@ class Element extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'element_type_id',
-        'user_id'
+        'element_parent_type_id',
+        'element_owner_user_id'
     ];
 
     /**
@@ -54,7 +54,7 @@ class Element extends Model
     protected $casts = [];
     public function element_owner(): BelongsTo
     {
-        return $this->belongsTo('App\Models\User', 'user_id');
+        return $this->belongsTo('App\Models\User', 'element_owner_user_id');
     }
 
     public static function buildElement(

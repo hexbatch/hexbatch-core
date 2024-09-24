@@ -94,7 +94,7 @@ class RemoteFromMap extends Model
                     $ret->remote_json_path = $maybe_json_path;
                 } /** @noinspection PhpRedundantCatchClauseInspection */
                 catch (InvalidJsonPathException) {
-                    throw new HexbatchNotPossibleException(__("msg.remote_map_invalid_json_path",['ref'=>$maybe_json_path]),
+                    throw new HexbatchNotPossibleException(__("msg.invalid_json_path",['ref'=>$maybe_json_path]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::REMOTE_SCHEMA_ISSUE);
 

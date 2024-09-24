@@ -3,11 +3,14 @@
 namespace App\Helpers;
 
 use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
 use JsonException;
+use JsonPath\InvalidJsonPathException;
+use JsonPath\JsonPath;
 use LogicException;
 
 class Utilities {
@@ -91,6 +94,20 @@ class Utilities {
             return json_last_error_msg();
         }
         return null;
+    }
+
+    public static function testValidJsonPath(?string $maybe_json_path): void {
+        if (empty($maybe_json_path)) {return;}
+        try {
+            $test = [1,2,3,"apples"=>"two"];//this is just to test, and is ok to keep, this can be any array
+            JsonPath::get($test,$maybe_json_path);
+        } /** @noinspection PhpRedundantCatchClauseInspection */
+        catch (InvalidJsonPathException) {
+            throw new HexbatchNotPossibleException(__("msg.invalid_json_path",['ref'=>$maybe_json_path]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::JSON_PATH_ISSUE);
+
+        }
     }
 
 

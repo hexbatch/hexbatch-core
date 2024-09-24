@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
 
 
 /**
@@ -85,6 +84,9 @@ class ElementType extends Model
     public function type_attributes() : HasMany {
         return $this->hasMany('App\Models\Attribute','owner_element_type_id','id');
     }
+    public function type_children() : HasMany {
+        return $this->hasMany(ElementType::class,'parent_type_id','id');
+    }
 
     public static function buildElementType(
         ?int $id = null,
@@ -97,6 +99,7 @@ class ElementType extends Model
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
             /** @uses ElementType::type_owner(),ElementType::editing_group(),ElementType::inheriting_group(),ElementType::new_elements_group(),ElementType::type_attributes() */
+            /** @uses ElementType::type_children() */
             ->with('type_owner', 'editing_group', 'inheriting_group', 'new_elements_group','type_attributes')
             ;
 
@@ -172,6 +175,8 @@ class ElementType extends Model
     }
 
     public function isInUse() : bool {
+        if (Element::where('element_parent_type_id',$this->id)->count() ) {return true;}
+        if (ElementTypeParent::where('parent_type_id',$this->id)->count() ) {return true;}
         return false;
     }
 

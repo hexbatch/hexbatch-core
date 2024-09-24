@@ -9,6 +9,8 @@ class RefCodes {
     const JSON_ISSUE = 3;
     const MAP_COORDINATE_ISSUE = 4;
     const TIMEZONE_ISSUE = 7;
+    const JSON_PATH_ISSUE = 8;
+    const GEO_JSON_ISSUE = 9;
 
     const SHAPE_COORDINATE_ISSUE = 12;
 
@@ -40,8 +42,11 @@ class RefCodes {
     const BOUND_CANNOT_EDIT = 3005;
     const BOUND_NEEDS_MIN_INFO = 3006;
 
+
     const BOUND_CANNOT_PING = 3007;
     const BOUND_TYPE_DEF = 3008;
+
+    const BOUND_INVALID_NAME = 3010;
 
     // attributes start at 4000
     const ATTRIBUTE_NOT_FOUND = 4001;
@@ -50,9 +55,14 @@ class RefCodes {
     const ATTRIBUTE_SCHEMA_ISSUE = 4004;
     const ATTRIBUTE_BAD_NAME = 4005;
 
+
+
     const ATTRIBUTE_CANNOT_EDIT = 4010;
     const ATTRIBUTE_CANNOT_CLONE = 4011;
     const ATTRIBUTE_CANNOT_DELETE = 4012;
+
+    const RULE_SCHEMA_ISSUE = 4100;
+    const RULE_NOT_FOUND = 4101;
 
     //remotes start at 5000
 
@@ -86,6 +96,8 @@ class RefCodes {
         self::JSON_ISSUE => '',
         self::MAP_COORDINATE_ISSUE => '',
         self::TIMEZONE_ISSUE => '',
+        self::JSON_PATH_ISSUE => '',
+        self::GEO_JSON_ISSUE => '',
 
         self::SERVER_NOT_FOUND => '',
 
@@ -108,6 +120,9 @@ class RefCodes {
         self::BOUND_NEEDS_MIN_INFO => '',
         self::BOUND_CANNOT_PING => '',
         self::BOUND_TYPE_DEF => '',
+        self::BOUND_INVALID_NAME => '',
+
+
         self::ATTRIBUTE_NOT_FOUND => '',
         self::ATTRIBUTE_PING_DATA_MISSING => '',
         self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
@@ -116,6 +131,8 @@ class RefCodes {
         self::ATTRIBUTE_BAD_NAME => '',
         self::ATTRIBUTE_CANNOT_CLONE => '',
         self::ATTRIBUTE_CANNOT_DELETE => '',
+
+        self::RULE_SCHEMA_ISSUE => '',
 
         self::REMOTE_NOT_FOUND => '',
         self::REMOTE_SCHEMA_ISSUE => '',

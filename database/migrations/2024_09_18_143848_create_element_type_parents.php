@@ -38,7 +38,14 @@ return new class extends Migration
                 ->comment('if true then the parent attributes are active in the child elements, else not');
 
             $table->timestamps();
+
+            $table->uuid('ref_uuid')
+                ->unique()
+                ->nullable(false)
+                ->comment("used for display and id outside the code");
         });
+
+        DB::statement('ALTER TABLE element_type_parents ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
         DB::statement("ALTER TABLE element_type_parents ALTER COLUMN created_at SET DEFAULT NOW();");
 

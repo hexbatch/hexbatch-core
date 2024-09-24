@@ -14,6 +14,7 @@ return [
     'not_map_coordinate' => 'The value is not a map coordinate',
     'not_shape_coordinate' => 'The value is not a shape coordinate',
     'not_timezone' => 'The value is not a timezone',
+    'invalid_json_path' => 'The json path is not valid :ref',
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
@@ -47,7 +48,8 @@ return [
     'location_wrong_number_coordinates' => 'Location needs two numbers in each point to make a map, and three to make a shape',
     'location_bound_json_invalid_geo_json' => 'Location bound was not given geo json :msg',
     'location_bound_geo_json_not_polygon' => 'Location bound needs polygon or multipolygon geojson',
-    'location_bounds_needs_minimum_info' => 'Location bound needs a name and a geo json',
+    'location_bounds_needs_minimum_info' => 'Location bound needs a name and a geo json and the type of location',
+    'location_bounds_has_wrong_type' => 'Location bound needs a valid location type, :bad_type found',
     'location_bounds_only_pings_these' => 'Location bound can only ping with a polygon, a multipology or a point',
     'location_bounds_shape_is_3d' => 'Location bounds shapes must be 3d and all coordinates must have x,y,z',
     'location_bounds_map_is_2d' => 'Location bounds map must be 2d and not cross date line and be in normal numbers, and all coodrinates have lat and long',
@@ -69,6 +71,14 @@ return [
     'attribute_owner_does_not_match_type_given' => 'The type given does not match the attribute :ref type',
     'attribute_unique_name_per_type' => 'Attributes in each type must have unique names',
 
+    'rule_needs_type' => 'Each rule needs a rule_type set. Nothing was set',
+    'rule_needs_type_found_bad' => 'Each rule needs a rule_type set. Found :bad_type',
+    'rule_can_only_target_attributes_user_can_see' => 'The attribute :ref is not visible at all to the user, so cannot be added to a rule',
+    'rule_can_use_group_if_admin' => 'You are not an admin of the  group :ref, so cannot be added to a rule',
+    'rule_not_found' => 'The rule was not found by :ref',
+    'rule_not_used_by_attribute' => 'The rule :rule is not used by attribute :attr',
+    'rule_cannot_be_deleted_if_in_use' => 'The rule :rule cannot be deleted because its attribute :attr in use',
+
 
     'attribute_rule_missing_attribute' => 'When adding rules as object, need the attribute key to hold the name or id',
     'attribute_rule_bad_regex' => 'When making an attribute rule, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
@@ -78,7 +88,6 @@ return [
     //remotes
     'remote_not_found' => 'Remote not found using :ref',
     'remote_not_in_usage_group' => 'You are not allowed to use this remote :ref',
-    'remote_schema_meta_bounds_admin_group' => 'When adding meta time bounds or location as object, need to be in the admin group of the bounds :ref',
     'remote_schema_meta_map_wrong_type' => 'When adding meta map bounds, this has to be a map type :ref',
     'remote_schema_meta_empty_meta' => 'Meta needs a non empty string value when set: :ref',
     'remote_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
@@ -97,7 +106,7 @@ return [
     'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
     'remote_activity_not_found' => 'Remote activity not found using :ref',
     'remote_activity_only_manual_updated' => 'Can only update manual types of remotes, but not :ref',
-    'remote_map_invalid_json_path' => 'The json path is not valid :ref',
+
     'remote_map_invalid_regex' => 'The regex is not valid :ref',
     'remote_map_invalid_name' => 'The name of the map entry should follow the same rules as the other names and be less than :limit characters :ref : :error',
     'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',

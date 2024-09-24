@@ -19,7 +19,6 @@ enum AttributePingType : string {
 
     case ALL_USER = 'all_user';
     case READ_USER = 'read_user';
-    case USAGE_USER = 'usage_user';
     case WRITE_USER = 'write_user';
 
 }

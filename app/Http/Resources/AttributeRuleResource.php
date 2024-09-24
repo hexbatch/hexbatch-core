@@ -34,8 +34,8 @@ class AttributeRuleResource extends JsonResource
                 'uuid' => $this->ref_uuid,
                 'target' => $this->rule_target?->getName(),
                 'rule_group' => $this->rule_group?->getName(),
-                'rule_time_bounds' => $this->rule_time_bounds?->getName(),
-                'rule_location_bounds' => $this->rule_location_bounds?->getName(),
+                'rule_time_bound' => $this->rule_time_bound?->getName(),
+                'rule_location_bound' => $this->rule_location_bound?->getName(),
 
             ];
         }
@@ -53,12 +53,12 @@ class AttributeRuleResource extends JsonResource
                 $arr['rule_group'] = new UserGroupResource($this->rule_group,null,$this->n_display_level - 1);
             }
 
-            if($this->rule_time_bounds) {
-                $arr['rule_time_bounds'] = new TimeBoundResource($this->rule_time_bounds,null,$this->n_display_level - 1);
+            if($this->rule_time_bound) {
+                $arr['rule_time_bound'] = new TimeBoundResource($this->rule_time_bound,null,$this->n_display_level - 1);
             }
 
-            if($this->rule_location_bounds) {
-                $arr['rule_location_bounds'] = new LocationBoundResource($this->rule_location_bounds,null,$this->n_display_level - 1);
+            if($this->rule_location_bound) {
+                $arr['rule_location_bound'] = new LocationBoundResource($this->rule_location_bound,null,$this->n_display_level - 1);
             }
         }
 

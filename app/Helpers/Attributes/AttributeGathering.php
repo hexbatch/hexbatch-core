@@ -3,10 +3,12 @@
 namespace App\Helpers\Attributes;
 
 use App\Enums\Attributes\AttributeAccessType;
+use App\Enums\Attributes\AttributePingType;
 use App\Enums\Attributes\AttributeServerAccessType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\ElementTypes\TypeGathering;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\ElementType;
@@ -39,6 +41,18 @@ class AttributeGathering
     public ?AttributeAccessType $attribute_access_type = null;
 
 
+    public static function checkCurrentUserEditAttribute(?Attribute $current_attribute) {
+        if (!$current_attribute) {return;}
+
+        $user = Utilities::getTypeCastedAuthUser();
+
+        if ( !$current_attribute->type_owner->canUserEdit($user)) {
+            throw new HexbatchPermissionException(__("msg.attribute_cannot_be_edited_due_to_pivs",['ref'=>$current_attribute->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+                RefCodes::ATTRIBUTE_CANNOT_EDIT);
+
+        }
+    }
     public function __construct(Request $request,ElementType $parent_type,?Attribute $current_attribute )
     {
         $this->parent_type = $parent_type;
@@ -60,12 +74,7 @@ class AttributeGathering
 
         $user = Utilities::getTypeCastedAuthUser();
 
-        if ($current_attribute && !$current_attribute->type_owner->canUserEdit($user)) {
-            throw new HexbatchPermissionException(__("msg.attribute_cannot_be_edited_due_to_pivs",['ref'=>$current_attribute->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::ATTRIBUTE_CANNOT_EDIT);
-
-        }
+        static::checkCurrentUserEditAttribute($current_attribute);
 
         if ($this->parent_attribute) {
             if ($current_attribute ) {
@@ -122,6 +131,7 @@ class AttributeGathering
 
         if ( $request->request->has('value_json_path')) {
             $this->value_json_path = $request->request->getString('value_json_path');
+            Utilities::testValidJsonPath($this->value_json_path);
         }
 
 
@@ -298,5 +308,16 @@ class AttributeGathering
             \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
             RefCodes::ELEMENT_TYPE_NOT_AUTHORIZED);
 
+    }
+
+    public static function doPing(Request $request,Attribute $attribute,AttributePingType $attribute_ping_type) : array
+    {
+        $ret = [];
+        foreach ($attribute->rule_bundle->rules_in_group as $rule) {
+            $newt = RuleGathering::doPing($request,$rule,$attribute_ping_type);
+            TypeGathering::mergePingData($ret,$newt);
+        }
+
+        return $ret;
     }
 }

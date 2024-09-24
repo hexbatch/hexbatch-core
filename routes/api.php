@@ -2,10 +2,9 @@
 
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\ElementController;
-use App\Http\Controllers\API\LocationBoundController;
 use App\Http\Controllers\API\RemoteController;
 use App\Http\Controllers\API\StackController;
-use App\Http\Controllers\API\TimeBoundController;
+
 use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\API\UserGroupController;
 use Illuminate\Support\Facades\Route;
@@ -61,25 +60,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('/{user_group}/admin/remove/{user}', [UserGroupController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
         });
 
-        Route::prefix('bounds')->group(function () {
-            Route::prefix('schedule')->group(function () {
-                Route::get('/{time_bound}/get', [TimeBoundController::class, 'time_bound_get'])->name('core.bounds.schedule.get');
-                Route::delete('/{time_bound}/delete', [TimeBoundController::class, 'time_bound_delete'])->name('core.bounds.schedule.delete');
-                Route::patch('/{time_bound}/edit', [TimeBoundController::class, 'time_bound_edit'])->name('core.bounds.schedule.edit');
-                Route::get('/{time_bound}/ping/{time_to_ping}', [TimeBoundController::class, 'time_bound_ping'])->name('core.bounds.schedule.ping');
-                Route::post('/create', [TimeBoundController::class, 'time_bound_create'])->name('core.bounds.schedule.create');
-                Route::get('/list/{user?}', [TimeBoundController::class, 'time_bound_list'])->name('core.bounds.schedule.list');
-            });
 
-            Route::prefix('locations')->group(function () {
-                Route::get('/{location_bound}/get', [LocationBoundController::class, 'location_bound_get'])->name('core.bounds.location.get');
-                Route::delete('/{location_bound}/delete', [LocationBoundController::class, 'location_bound_delete'])->name('core.bounds.location.delete');
-                Route::patch('/{location_bound}/edit', [LocationBoundController::class, 'location_bound_edit'])->name('core.bounds.location.edit');
-                Route::get('/{location_bound}/ping/{location_json_to_ping}', [LocationBoundController::class, 'location_bound_ping'])->name('core.bounds.location.ping');
-                Route::post('/create/{location_type}', [LocationBoundController::class, 'location_bound_create'])->name('core.bounds.location.create');
-                Route::get('/list/{user?}', [LocationBoundController::class, 'location_bound_list'])->name('core.bounds.location.list');
-            });
-        }); //end bounds
 
 
 
@@ -108,7 +89,7 @@ Route::prefix('v1')->group(function () {
                     Route::patch('/{attribute_rule}/edit', [TypeController::class, 'attribute_edit_rule'])->name('core.types.attributes.rules.edit');
                     Route::delete('/{attribute_rule}/destroy', [TypeController::class, 'attribute_delete_rule'])->name('core.types.attributes.rules.destroy');
                     Route::get('/{attribute_rule}/get/{levels?}', [TypeController::class, 'attribute_get_rule'])->name('core.types.attributes.rules.get');
-                    Route::get('/{attribute_rule}/ping/{attribute_ping_type}', [TypeController::class, 'attribute_ping'])->name('core.types.attributes.rules.ping');
+                    Route::get('/{attribute_rule}/ping/{attribute_ping_type}', [TypeController::class, 'attribute_rule_ping'])->name('core.types.attributes.rules.ping');
                 });
             });
 

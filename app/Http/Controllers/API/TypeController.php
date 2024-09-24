@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\API;
 
 
+use App\Enums\Attributes\AttributePingType;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Attributes\AttributeGathering;
+use App\Helpers\Attributes\RuleGathering;
 use App\Helpers\ElementTypes\TypeGathering;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
@@ -13,6 +15,8 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
+use App\Http\Resources\AttributeRuleCollection;
+use App\Http\Resources\AttributeRuleResource;
 use App\Http\Resources\ElementTypeCollection;
 use App\Http\Resources\ElementTypeResource;
 use App\Models\Attribute;
@@ -86,12 +90,28 @@ class TypeController extends Controller
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function type_ping(): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    public function type_ping(Request $request,ElementType $element_type,AttributePingType $attribute_ping_type): JsonResponse {
+        AttributeGathering::attributeListCheck($element_type);
+        $ret = TypeGathering::doPing($request,$element_type,$attribute_ping_type);
+        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function attribute_ping(): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    public function attribute_ping(Request $request,ElementType $element_type,Attribute $attribute,AttributePingType $attribute_ping_type): JsonResponse {
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        AttributeGathering::attributeListCheck($element_type);
+        $ret = AttributeGathering::doPing($request,$attribute,$attribute_ping_type);
+        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+
+    }
+
+    public function attribute_rule_ping(Request $request,ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule,AttributePingType $attribute_ping_type)
+    : JsonResponse
+    {
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        RuleGathering::checkRuleBelongsInAttribute($attribute,$attribute_rule);
+        AttributeGathering::attributeListCheck($element_type);
+        $ret = RuleGathering::doPing($request,$attribute_rule,$attribute_ping_type);
+        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function new_attribute(Request $request,ElementType $element_type): JsonResponse {
@@ -123,6 +143,7 @@ class TypeController extends Controller
     }
 
     public function attributes_list(ElementType $element_type,?string $filter = null): JsonResponse {
+        Utilities::ignoreVar($filter);
         AttributeGathering::attributeListCheck($element_type);
         $laravel_list = Attribute::buildAttribute(element_type_id: $element_type->id);
         $ret = $laravel_list->cursorPaginate();
@@ -130,28 +151,57 @@ class TypeController extends Controller
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function attribute_list_rules(ElementType $element_type,?string $filter = null): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    public function attribute_list_rules(ElementType $element_type,Attribute $attribute,?string $filter = null): JsonResponse {
+        Utilities::ignoreVar($filter);
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        AttributeGathering::attributeListCheck($element_type);
+        $out = $attribute->rule_bundle?->rules_in_group??[];
+        return response()->json(new AttributeRuleCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function attribute_new_rule(ElementType $element_type,Attribute $attribute): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    public function attribute_new_rule(Request $request,ElementType $element_type,Attribute $attribute): JsonResponse {
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        AttributeGathering::checkCurrentUserEditAttribute($attribute);
+        $rule = (new RuleGathering($request,$element_type,$attribute))->assign();
+        $out = AttributeRule::buildAttributeRule(id:$rule->id)->first();
+        return response()->json(new AttributeRuleResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function attribute_clear_rules(ElementType $element_type,Attribute $attribute): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
-    }
 
-    public function attribute_edit_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+
+    public function attribute_edit_rule(Request $request,ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        RuleGathering::checkRuleBelongsInAttribute($attribute,$attribute_rule);
+        RuleGathering::checkRuleEditPermission($attribute,$attribute_rule);
+        $rule = (new RuleGathering($request,$element_type,$attribute,$attribute_rule))->assign();
+        $out = AttributeRule::buildAttributeRule(id:$rule->id)->first();
+        return response()->json(new AttributeRuleResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attribute_delete_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        RuleGathering::checkRuleBelongsInAttribute($attribute,$attribute_rule);
+        RuleGathering::deleteRule($attribute,$attribute_rule);
+        return response()->json(new AttributeRuleResource($attribute_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function attribute_get_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
-        return response()->json(['needs implementation'=>true], \Symfony\Component\HttpFoundation\Response::HTTP_ACCEPTED);
+    public function attribute_clear_rules(ElementType $element_type,Attribute $attribute): JsonResponse {
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        AttributeGathering::checkCurrentUserEditAttribute($attribute);
+        $old_rules = [];
+        if ($attribute->rule_bundle?->creator_attribute?->ref_uuid === $attribute->ref_uuid) {
+            $old_rules = $attribute->rule_bundle?->rules_in_group??[];
+            $attribute->rule_bundle?->delete();
+        }
+
+        return response()->json(new AttributeRuleCollection($old_rules), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function attribute_get_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule,?string $levels = null): JsonResponse {
+        AttributeGathering::compareAttributeOwner($element_type,$attribute);
+        AttributeGathering::attributeListCheck($element_type);
+        RuleGathering::checkRuleBelongsInAttribute($attribute,$attribute_rule);
+        return response()->json(new AttributeRuleResource($attribute_rule,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 }

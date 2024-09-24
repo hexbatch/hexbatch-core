@@ -4,17 +4,18 @@ namespace App\Models;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNameConflictException;
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
-use App\Models\Traits\TResourceCommon;
+use App\Helpers\Utilities;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Carbon\Exceptions\InvalidTimeZoneException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 /**
@@ -23,7 +24,6 @@ use InvalidArgumentException;
  * @property int id
  * @property string ref_uuid
 
- * @property boolean is_retired
  * @property string bound_name
  * @property string bound_start
  * @property string bound_stop
@@ -38,12 +38,11 @@ use InvalidArgumentException;
  * @property int created_at_ts
  * @property int updated_at_ts
  * @property TimeBoundSpan[] time_spans
- * @property User bound_owner
+ * @property AttributeRule[] time_rules
  *
  */
 class TimeBound extends Model
 {
-    use TResourceCommon;
 
     protected $table = 'time_bounds';
     public $timestamps = false;
@@ -53,7 +52,6 @@ class TimeBound extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'is_retired',
         'bound_name',
         'bound_start',
         'bound_stop',
@@ -65,7 +63,10 @@ class TimeBound extends Model
     const MAKE_REPEAT_SECONDS = 60*30;
 
 
-
+    public function time_rules() : HasMany {
+        return $this->hasMany(AttributeRule::class,'rule_time_bound_id','id')
+            ->orderBy('span_start');
+    }
 
     public function time_spans() : HasMany {
         return $this->hasMany('App\Models\TimeBoundSpan')
@@ -73,20 +74,14 @@ class TimeBound extends Model
     }
 
     public function getName() {
-        return $this->bound_owner->username . '.' .$this->bound_name;
+        return $this->bound_name;
     }
 
-    public function isInUse() : bool {
-        if (!$this->id) {return false;}
-        return Attribute::where('read_time_bounds_id',$this->id)
-            ->orWhere('write_time_bounds_id',$this->id)
-            ->exists()
-            ;
-    }
+
 
     /**
      * @param int[] $only_ids
-     * @throws \Exception
+
      */
     public static function generateSpans(array $only_ids = []) : void {
 
@@ -127,21 +122,23 @@ class TimeBound extends Model
         } while( $paginator->hasPages() );
     }
 
-    /**
-     * @throws \Exception
-     */
+
     public function makeSpansUntil(int $unix_timestamp) {
-        if ($this->bound_cron) {
-            $cron = new \Cron\CronExpression($this->bound_cron);
-            $next_time_ts = time();
-            $skip = 0;
-            while($next_time_ts < $unix_timestamp) {
-                $next_date_time = $cron->getNextRunDate('now',$skip++,true,$this->bound_cron_timezone);
-                $next_time_ts = Carbon::create($next_date_time)->unix();
-                $this->insertSpan($next_time_ts,$next_time_ts + ($this->bound_period_length??1 ));
+        try {
+            if ($this->bound_cron) {
+                $cron = new \Cron\CronExpression($this->bound_cron);
+                $next_time_ts = time();
+                $skip = 0;
+                while ($next_time_ts < $unix_timestamp) {
+                    $next_date_time = $cron->getNextRunDate('now', $skip++, true, $this->bound_cron_timezone);
+                    $next_time_ts = Carbon::create($next_date_time)->unix();
+                    $this->insertSpan($next_time_ts, $next_time_ts + ($this->bound_period_length ?? 1));
+                }
+            } else {
+                $this->insertSpan($this->bound_start_ts, $this->bound_stop_ts);
             }
-        } else {
-            $this->insertSpan($this->bound_start_ts,$this->bound_stop_ts);
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(),$e->getCode(),$e);
         }
     }
 
@@ -163,18 +160,57 @@ class TimeBound extends Model
     }
 
 
-    public static function buildTimeBound(?int $user_id = null,?int $id = null,?int $type_id = null) : Builder {
+    public static function buildTimeBound(?int $id = null,?int $type_id = null,?int $rule_id = null) : Builder {
         $build =  TimeBound::select('time_bounds.*')
             ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts")
-            /** @uses TimeBound::time_spans() */
-            ->with('time_spans');
+            /** @uses TimeBound::time_spans(),TimeBound::time_rules() */
+            ->with('time_spans','time_rules');
 
-       if ($user_id) {
-           //todo do the joins to figure this out
+
+
+       if ($rule_id) {
+           $build->join('attribute_rules as attached_rules',
+               /**
+                * @param JoinClause $join
+                */
+               function (JoinClause $join)  {
+                   $join
+                       ->on('time_bounds.id','=','attached_rules.rule_time_bound_id');
+               }
+           );
        }
 
        if ($type_id) {
-           //todo do the joins to figure this out
+           $build->join('attribute_rules as type_rules',
+               /**
+                * @param JoinClause $join
+                */
+               function (JoinClause $join)  {
+                   $join
+                       ->on('time_bounds.id','=','type_rules.rule_time_bound_id');
+               }
+           );
+
+           $build->join('attribute_rule_bundles as type_rule_bundles',
+               /**
+                * @param JoinClause $join
+                */
+               function (JoinClause $join)  {
+                   $join
+                       ->on('attribute_rule_bundles.id','=','attribute_rules.rule_bundle_owner_id');
+               }
+           );
+
+           $build->join('attribute_rule_bundles as type_rule_attributes',
+               /**
+                * @param JoinClause $join
+                */
+               function (JoinClause $join) use ($type_id) {
+                   $join
+                       ->on('type_rule_bundles.id','=','type_rule_attributes.applied_rule_bundle_id')
+                       ->where('owner_element_type_id',$type_id);
+               }
+           );
        }
 
        if ($id) {
@@ -218,9 +254,7 @@ class TimeBound extends Model
         $this->bound_cron_timezone = $timezone;
     }
 
-    /**
-     * @throws \Exception
-     */
+
     public function setTimes(string|int $start, string|int $stop,
                              ?string $bound_cron = null, ?int $period_length = null,?string $bound_cron_timezone = null
     ) :void
@@ -258,9 +292,7 @@ class TimeBound extends Model
         $this->redoTimeSpans();
     }
 
-    /**
-     * @throws \Exception
-     */
+
     public function redoTimeSpans() {
         TimeBoundSpan::where('time_bound_id',$this->id)->delete();
         $this->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);
@@ -275,6 +307,43 @@ class TimeBound extends Model
         $hit = TimeBoundSpan::where('time_bound_id',$this->id)->where('span_start','<=',$ping_ts)->where('span_stop','>=',$ping_ts)->first();
         if ($hit) {return $ping_ts;}
         return null;
+    }
+
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $build = null;
+        $ret = null;
+        try {
+            if ($field) {
+                $ret = $this->where($field, $value)->first();
+            } else {
+                if (Utilities::is_uuid($value)) {
+                    $build = $this->where('ref_uuid', $value);
+                }
+            }
+
+            if ($build) {
+                $first_id = (int)$build->value('id');
+                if ($first_id) {
+                    $first_build = TimeBound::buildTimeBound(id: $first_id);
+                    $ret = $first_build->first();
+                }
+            }
+        }
+        catch (\Exception $e) {
+            Log::warning('TimeBound resolving: '. $e->getMessage());
+        }
+        finally {
+            if (empty($ret)) {
+                throw new HexbatchNotFound(
+                    __('msg.bound_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::BOUND_NOT_FOUND
+                );
+            }
+        }
+        return $ret;
     }
 
 

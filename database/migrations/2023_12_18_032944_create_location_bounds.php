@@ -15,10 +15,6 @@ return new class extends Migration
         Schema::create('location_bounds', function (Blueprint $table) {
             $table->id();
 
-
-            $table->boolean('is_retired')->default(false)->nullable(false)
-                ->comment('if true then cannot be added to token types or make new tokens');
-
         });
 
         DB::statement("CREATE TYPE type_of_location AS ENUM ('map', 'shape');");

@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\Bounds\LocationType;
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\Traits\TResourceCommon;
+use App\Helpers\Utilities;
+
 use App\Rules\GeoJsonPolyReq;
 use App\Rules\GeoJsonReq;
 use ArrayObject;
@@ -16,15 +18,16 @@ use GeoJson\Geometry\Polygon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property string ref_uuid
- * @property boolean is_retired
  * @property string bound_name
  * @property LocationType location_type
  * @property ArrayObject geo_json
@@ -35,12 +38,11 @@ use Illuminate\Support\Facades\Validator;
  * @property int created_at_ts
  * @property int updated_at_ts
  * @property string geom_as_geo_json
- * @property User bound_owner
  *
  */
 class LocationBound extends Model
 {
-    use TResourceCommon;
+
 
     protected $table = 'location_bounds';
     public $timestamps = false;
@@ -59,20 +61,57 @@ class LocationBound extends Model
 
 
     public function getName() {
-        return $this->bound_owner->username . '.' .$this->bound_name;
+        return $this->bound_name;
     }
 
-     public static function buildLocationBound(?int $user_id = null,?int $id = null,?int $type_id = null) : Builder {
+     public static function buildLocationBound(?int $id = null,?int $type_id = null,?int $rule_id = null) : Builder {
         /** @var Builder $build */
         $build =  LocationBound::select('location_bounds.*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
 
-        if ($user_id) {
-            //todo bound joins here
-        }
+         if ($rule_id) {
+             $build->join('attribute_rules as attached_rules',
+                 /**
+                  * @param JoinClause $join
+                  */
+                 function (JoinClause $join)  {
+                     $join
+                         ->on('time_bounds.id','=','attached_rules.rule_time_bound_id');
+                 }
+             );
+         }
 
         if ($type_id) {
-            //todo bound joins here
+            $build->join('attribute_rules as type_rules',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('location_bounds.id','=','type_rules.rule_location_bound_id');
+                }
+            );
+
+            $build->join('attribute_rule_bundles as type_rule_bundles',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('attribute_rule_bundles.id','=','attribute_rules.rule_bundle_owner_id');
+                }
+            );
+
+            $build->join('attribute_rule_bundles as type_rule_attributes',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($type_id) {
+                    $join
+                        ->on('type_rule_bundles.id','=','type_rule_attributes.applied_rule_bundle_id')
+                        ->where('owner_element_type_id',$type_id);
+                }
+            );
         }
 
         if ($id) {
@@ -82,26 +121,24 @@ class LocationBound extends Model
         return $build;
     }
 
-    public function isInUse() : bool {
-        if (!$this->id) {return false;}
-        return Attribute::where('read_map_location_bounds_id',$this->id)
-            ->orWhere('write_map_location_bounds_id',$this->id)
-            ->orWhere('read_shape_location_bounds_id',$this->id)
-            ->orWhere('write_shape_location_bounds_id',$this->id)
-            ->exists()
-            ;
-    }
+
 
     /**
      * @param string $geo_json
      * @param LocationType $shape_type
      * @return void
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function setShape(string $geo_json, LocationType $shape_type) {
-        Validator::make(['location'=>$geo_json], [
-            'location'=>['required',new GeoJsonPolyReq],
-        ])->validate();
+        try {
+            Validator::make(['location' => $geo_json], [
+                'location' => ['required', new GeoJsonPolyReq],
+            ])->validate();
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException(__("msg.location_bound_json_invalid_geo_json",['msg'=>__("msg.location_wrong_number_coordinates")])
+                . ' : '. $v->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::BOUND_TYPE_DEF);
+        }
 
         $this->geo_json = new ArrayObject(json_decode($geo_json,true));
         /** @var Polygon|MultiPolygon $geometry */
@@ -206,12 +243,17 @@ class LocationBound extends Model
     /**
      * @param string $location_json_to_ping
      * @return bool
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function ping(string $location_json_to_ping) : bool {
-        Validator::make(['location'=>$location_json_to_ping], [
-            'location'=>['required',new GeoJsonReq],
-        ])->validate();
+        try {
+            Validator::make(['location' => $location_json_to_ping], [
+                'location' => ['required', new GeoJsonReq],
+            ])->validate();
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::GEO_JSON_ISSUE);
+        }
         $location_geo = json_decode($location_json_to_ping);
         $geometry = GeoJson::jsonUnserialize($location_geo);
         if (!(get_class($geometry) === Polygon::class || get_class($geometry) === MultiPolygon::class || get_class($geometry) === Point::class) ) {
@@ -229,5 +271,40 @@ class LocationBound extends Model
         return false;
     }
 
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $build = null;
+        $ret = null;
+        try {
+            if ($field) {
+                $ret = $this->where($field, $value)->first();
+            } else {
+                if (Utilities::is_uuid($value)) {
+                    $build = $this->where('ref_uuid', $value);
+                }
+            }
+
+            if ($build) {
+                $first_id = (int)$build->value('id');
+                if ($first_id) {
+                    $first_build = LocationBound::buildLocationBound(id: $first_id);
+                    $ret = $first_build->first();
+                }
+            }
+        }
+        catch (\Exception $e) {
+            Log::warning('Location Bound resolving: '. $e->getMessage());
+        }
+        finally {
+            if (empty($ret)) {
+                throw new HexbatchNotFound(
+                    __('msg.bound_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::BOUND_NOT_FOUND
+                );
+            }
+        }
+        return $ret;
+    }
 
 }

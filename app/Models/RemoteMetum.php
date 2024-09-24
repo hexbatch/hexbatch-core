@@ -5,14 +5,12 @@ use App\Enums\Bounds\LocationType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Traits\TResourceCommon;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use ResourceBundle;
 
 /**
@@ -38,7 +36,7 @@ use ResourceBundle;
  */
 class RemoteMetum extends Model
 {
-    use TResourceCommon;
+
 
     protected $table = 'remote_meta';
     public $timestamps = false;
@@ -98,11 +96,7 @@ class RemoteMetum extends Model
                  * @var TimeBound $time_bound
                  */
                 $time_bound = (new TimeBound())->resolveRouteBinding($time_hint);
-                if (!$time_bound->bound_owner->user_group->isAdmin(Auth::id())) {
-                    throw new HexbatchNotPossibleException(__("msg.remote_schema_meta_bounds_admin_group", ['ref' => $time_bound->getName()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::REMOTE_SCHEMA_ISSUE);
-                }
+
                 $ret->remote_time_bounds_id = $time_bound->id;
             } else {
                 $ret->remote_time_bounds_id = null;
@@ -121,11 +115,7 @@ class RemoteMetum extends Model
                  * @var LocationBound $map_bound
                  */
                 $map_bound = (new LocationBound())->resolveRouteBinding($map_hint);
-                if (!$map_bound->bound_owner->user_group->isAdmin(Auth::id())) {
-                    throw new HexbatchNotPossibleException(__("msg.remote_schema_meta_bounds_admin_group", ['ref' => $map_bound->getName()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::REMOTE_SCHEMA_ISSUE);
-                }
+
                 if ($map_bound->location_type !== LocationType::MAP) {
                     throw new HexbatchNotPossibleException(__("msg.remote_schema_meta_map_wrong_type", ['ref' => $map_bound->getName()]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

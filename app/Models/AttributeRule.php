@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Enums\Attributes\AttributeRuleType;
-use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
 
 /**
@@ -37,6 +38,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property AttributeRuleBundle rule_owner
  * @property Attribute rule_target
  * @property UserGroup rule_group
+ * @property TimeBound rule_time_bound
+ * @property LocationBound rule_location_bound
  *
  */
 class AttributeRule extends Model
@@ -70,6 +73,34 @@ class AttributeRule extends Model
         'rule_type' => AttributeRuleType::class,
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (AttributeRule $rule) {
+            if ($rule->rule_user_group_id) {
+                $count_groups = AttributeRule::where('rule_user_group_id',$rule->rule_user_group_id)->whereNot('id',$this->id)->count();
+                if (!$count_groups) {
+                    if ($rule->rule_group->isAdmin(Utilities::getTypeCastedAuthUser()->id)) {
+                        $rule->rule_group->delete();
+                    }
+                }
+            }
+
+            if ($rule->rule_time_bound_id) {
+                $count_times = AttributeRule::where('rule_time_bound_id',$rule->rule_time_bound_id)->whereNot('id',$this->id)->count();
+                if (!$count_times) {
+                    $rule->rule_time_bound->delete();
+                }
+            }
+
+            if ($rule->rule_location_bound_id) {
+                $count_locs = AttributeRule::where('rule_location_bound_id',$rule->rule_location_bound_id)->whereNot('id',$this->id)->count();
+                if (!$count_locs) {
+                    $rule->rule_location_bound->delete();
+                }
+            }
+        });
+    }
+
 
     public function rule_owner() : BelongsTo {
         return $this->belongsTo('App\Models\AttributeRuleBundle','rule_bundle_owner_id');
@@ -83,74 +114,77 @@ class AttributeRule extends Model
         return $this->belongsTo('App\Models\UserGroup','rule_user_group_id');
     }
 
-    public function rule_time_bounds() : BelongsTo {
+    public function rule_time_bound() : BelongsTo {
         return $this->belongsTo(TimeBound::class,'rule_time_bound_id');
     }
 
-    public function rule_location_bounds() : BelongsTo {
+    public function rule_location_bound() : BelongsTo {
         return $this->belongsTo(LocationBound::class,'rule_location_bound_id');
     }
 
+    public function getName() : string {
+        if ($this->rule_name) {return $this->rule_name;}
+        return $this->ref_uuid;
+    }
 
-    const DEFAULT_WEIGHT = 1;
+    public static function buildAttributeRule(
+        ?int $id = null,
+    )
+    : Builder
+    {
 
-    public bool $delete_mode = false;
+        $build = ElementType::select('attribute_rules.*')
+            ->selectRaw(" extract(epoch from  attribute_rules.created_at) as created_at_ts,  extract(epoch from  attribute_rules.updated_at) as updated_at_ts")
 
-    public static function createRule(string|array $rule_hint, AttributeRuleType $rule_type, ?Attribute $parent = null) : AttributeRule {
-        $ret = new AttributeRule();
-        $ret->rule_type = $rule_type;
-        if ($parent) {
-            $ret->rule_bundle_owner_id = $parent->id;
+            /** @uses AttributeRule::rule_target(),AttributeRule::rule_group(), */
+            /** @uses AttributeRule::rule_location_bound(),AttributeRule::rule_time_bound(),AttributeRule::rule_owner() */
+            ->with('rule_target','rule_group','rule_location_bound','rule_time_bound','rule_owner')
+        ;
+
+        if ($id) {
+            $build->where('attribute_rules.id', $id);
         }
-        $use_rule_hint = $rule_hint;
-        if (is_array($rule_hint)) {
-            if (!array_key_exists('target',$rule_hint)) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_rule_missing_attribute"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-            }
-            $use_rule_hint = $rule_hint['target'];
-            if (array_key_exists('delete',$rule_hint) && Utilities::boolishToBool($rule_hint['delete'])) {
-                $ret->delete_mode = true;
-            }
-
-            if (array_key_exists('weight',$rule_hint) && !is_array($rule_hint['weight'])) {
-                $ret->rule_weight = (int)$rule_hint['weight'];
-            }
 
 
-            if (array_key_exists('regex',$rule_hint) && !is_array($rule_hint['regex'])) {
-                $rest_regex = $rule_hint['regex'];
-                $bare_regex = trim($rest_regex, '/');
-                $test_regex = "/$bare_regex/";
-                $issues = Utilities::regexHasErrors($test_regex);
-                if ($issues) {
-                    throw new HexbatchNotPossibleException(__("msg.attribute_rule_bad_regex", ['issue' => $issues]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        return $build;
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $build = null;
+        $ret = null;
+        try {
+            if ($field) {
+                $ret = $this->where($field, $value)->first();
+            } else {
+                if (Utilities::is_uuid($value)) {
+                    $build = $this->where('ref_uuid', $value);
+                }
+            }
+
+            if ($build) {
+                $first_id = (int)$build->value('id');
+                if ($first_id) {
+                    $first_build = AttributeRule::buildAttributeRule(id: $first_id);
+                    $ret = $first_build->first();
                 }
             }
         }
-        /**
-         * @var Attribute $found_attribute
-         */
-        $found_attribute = (new Attribute())->resolveRouteBinding($use_rule_hint);
-        if (!$ret->delete_mode && $found_attribute->is_retired) {
-            throw new HexbatchNotPossibleException(__("msg.attribute_rule_retired",['name'=>$found_attribute->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        catch (\Exception $e) {
+            Log::warning('Attribute rule resolving: '. $e->getMessage());
         }
-        $ret->target_attribute_id = $found_attribute->id;
+        finally {
+            if (empty($ret)) {
+                throw new HexbatchNotFound(
+                    __('msg.rule_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::RULE_NOT_FOUND
+                );
+            }
+        }
         return $ret;
     }
 
-    public function deleteModeActivate() {
-        if ($this->delete_mode) {
-            AttributeRule::where('rule_bundle_owner_id',$this->rule_bundle_owner_id)
-                ->where('target_attribute_id',$this->target_attribute_id)
-                ->where('rule_type',$this->rule_type->value)
-                ->delete();
-        }
-    }
+
 
 }

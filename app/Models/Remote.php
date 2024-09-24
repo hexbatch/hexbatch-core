@@ -15,7 +15,7 @@ use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Traits\TResourceCommon;
+
 use App\Rules\ResourceNameReq;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
@@ -91,7 +91,7 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Remote extends Model
 {
-    use TResourceCommon;
+
     protected $table = 'remotes';
     public $timestamps = false;
 

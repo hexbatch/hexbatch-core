@@ -26,6 +26,11 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->timestamps();
+
+            $table->uuid('ref_uuid')
+                ->unique()
+                ->nullable(false)
+                ->comment("used for display and id outside the code");
         });
 
 
@@ -34,6 +39,8 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON attribute_rule_bundles FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+
+        DB::statement('ALTER TABLE attribute_rule_bundles ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
     }
 
     /**

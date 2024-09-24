@@ -19,8 +19,6 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->boolean('is_retired')->default(false)->nullable(false)
-                ->comment('if true then cannot be added to token types or make new tokens');
 
             $table->dateTime('bound_start')->nullable(false)
                 ->comment('When this time bound starts (inclusive)');
