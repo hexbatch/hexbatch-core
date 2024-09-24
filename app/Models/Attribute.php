@@ -33,8 +33,7 @@ use Illuminate\Support\Facades\Route;
  * @property boolean is_final
  * @property boolean is_final_parent
  * @property boolean is_using_ancestor_bundle
- * @property boolean is_static
- * @property boolean is_lazy
+ * @property boolean is_const
  * @property string attribute_name
  * @property string value_json_path
  * @property ArrayObject attribute_value

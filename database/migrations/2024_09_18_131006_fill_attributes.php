@@ -69,14 +69,11 @@ return new class extends Migration
             $table->boolean('is_nullable')->default(true)->nullable(false)
                 ->comment('if true then value is nullable');
 
-            $table->boolean('is_static')->default(false)->nullable(false)
+            $table->boolean('is_const')->default(false)->nullable(false)
                 ->comment('if true then all elements share this static value. This is per server');
 
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then child types do not inherit this attribute');
-
-            $table->boolean('is_lazy')->default(false)->nullable(false)
-                ->comment('if true then elements from this type only create this attribute when written. Until then they return null');
 
 
             $table->timestamps();
@@ -152,8 +149,7 @@ return new class extends Migration
             $table->dropColumn('is_nullable');
             $table->dropColumn('is_final_parent');
             $table->dropColumn('is_using_ancestor_bundle');
-            $table->dropColumn('is_static');
-            $table->dropColumn('is_lazy');
+            $table->dropColumn('is_const');
             $table->dropColumn('value_json_path');
             $table->dropColumn('attribute_value');
             $table->dropColumn('attribute_name');

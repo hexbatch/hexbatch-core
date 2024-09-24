@@ -34,8 +34,6 @@ return new class extends Migration
             $table->integer('parent_rank')->nullable(false)->default(1)
                 ->comment("The order of the parent being inherited");
 
-            $table->boolean('is_active')->default(false)->nullable(false)
-                ->comment('if true then the parent attributes are active in the child elements, else not');
 
             $table->timestamps();
 
@@ -43,6 +41,8 @@ return new class extends Migration
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
+
+            $table->unique(['parent_type_id','parent_rank']);
         });
 
         DB::statement('ALTER TABLE element_type_parents ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

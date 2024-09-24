@@ -39,7 +39,7 @@ class TypeGathering
         } else {
             $this->current_type = $request->route('element_type');
         }
-
+        //todo need to add in the type parents, and fill in the hordes
         $this->adminCheck();
 
         try {

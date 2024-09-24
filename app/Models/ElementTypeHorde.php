@@ -5,25 +5,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property string ref_uuid
- * @property int child_type_id
- * @property int parent_type_id
- * @property int parent_rank
- * @property string created_at
- * @property string updated_at
+ * @property int horde_type_id
+ * @property int horde_attribute_id
  *
- *
+ * @property Attribute horde_attribute
+ * @property ElementType horde_type
  */
-class ElementTypeParent extends Model
+class ElementTypeHorde extends Model
 {
 
-    protected $table = 'element_type_parents';
+    protected $table = 'element_type_hordes';
     public $timestamps = false;
 
     /**
@@ -32,9 +30,8 @@ class ElementTypeParent extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'child_type_id',
-        'parent_type_id',
-        'parent_rank',
+        'horde_type_id',
+        'horde_attribute_id',
     ];
 
     /**
@@ -51,8 +48,13 @@ class ElementTypeParent extends Model
      */
     protected $casts = [];
 
+    public function horde_attribute() : BelongsTo {
+        return $this->belongsTo(Attribute::class,'horde_attribute_id');
 
-    public function getName() :string {
-        return $this->ref_uuid;
+    }
+
+
+    public function horde_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'horde_type_id');
     }
 }

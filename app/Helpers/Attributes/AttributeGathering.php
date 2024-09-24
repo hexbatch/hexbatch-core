@@ -31,9 +31,8 @@ class AttributeGathering
     public ?bool $is_final_parent = null;
     public ?bool $is_using_ancestor_bundle = null;
     public ?bool $is_nullable = null;
-    public ?bool $is_static = null;
+    public ?bool $is_const = null;
     public ?bool $is_final = null;
-    public ?bool $is_lazy = null;
     public ?string $value_json_path = null;
     public ?array $attribute_value = null;
     public ?string $attribute_name  = null;
@@ -117,17 +116,15 @@ class AttributeGathering
             $this->is_nullable = $request->request->getBoolean('is_nullable');
         }
 
-        if ( $request->request->has('is_static')) {
-            $this->is_static = $request->request->getBoolean('is_static');
+        if ( $request->request->has('is_const')) {
+            $this->is_const = $request->request->getBoolean('is_const');
         }
 
         if ( $request->request->has('is_final')) {
             $this->is_final = $request->request->getBoolean('is_final');
         }
 
-        if ( $request->request->has('is_lazy')) {
-            $this->is_lazy = $request->request->getBoolean('is_lazy');
-        }
+
 
         if ( $request->request->has('value_json_path')) {
             $this->value_json_path = $request->request->getString('value_json_path');
@@ -223,9 +220,8 @@ class AttributeGathering
             if ($this->is_final_parent !== null ) { $node->is_final_parent = $this->is_final_parent; }
             if ($this->is_using_ancestor_bundle !== null ) { $node->is_using_ancestor_bundle = $this->is_using_ancestor_bundle; }
             if ($this->is_nullable !== null ) { $node->is_nullable = $this->is_nullable; }
-            if ($this->is_static !== null ) { $node->is_static = $this->is_static; }
+            if ($this->is_const !== null ) { $node->is_const = $this->is_const; }
             if ($this->is_final !== null ) { $node->is_final = $this->is_final; }
-            if ($this->is_lazy !== null ) { $node->is_lazy = $this->is_lazy; }
             if ($this->value_json_path !== null ) { $node->value_json_path = $this->value_json_path; }
             if ($this->attribute_value !== null ) { $node->attribute_value = $this->attribute_value; }
             if ($this->attribute_name !== null ) { $node->attribute_name = $this->attribute_name; }
@@ -289,6 +285,7 @@ class AttributeGathering
         $doomed_attribute->delete();
     }
 
+    //todo the below only looks at the attributes defined in the type, and not any inherited attributes by possible type parents
     public static function compareAttributeOwner(ElementType $parent_type,Attribute $current_attribute) : void  {
         if ($parent_type->ref_uuid !== ($current_attribute->type_owner?->ref_uuid??null) ) {
 
