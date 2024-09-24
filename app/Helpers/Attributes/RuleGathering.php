@@ -32,7 +32,7 @@ class RuleGathering
 
 
     public ?int $target_attribute_id = null;
-    public ?int $rule_user_group_id = null;
+    public ?int $rule_rw_user_group_id = null;
     public ?int $rule_time_bound_id = null;
     public ?int $rule_location_bound_id = null;
     public ?int $is_target_including_descendants = null;
@@ -99,7 +99,8 @@ class RuleGathering
             /** @var Attribute $target_attribute */
             $target_attribute = (new Attribute())->resolveRouteBinding($hint_attribute);
             $this->target_attribute_id = $target_attribute->id;
-            if (!$target_attribute->canUserSeeAttribute()) {
+            $user = Utilities::getTypeCastedAuthUser();
+            if (!$target_attribute->type_owner->canUserViewDetails($user->id)) {
                 throw new HexbatchNotPossibleException(__("msg.rule_can_only_target_attributes_user_can_see",['ref'=>$target_attribute->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::RULE_SCHEMA_ISSUE);
@@ -115,7 +116,7 @@ class RuleGathering
             $hint_group = $request->request->getString('rule_user_group');
             /** @var UserGroup $user_group */
             $user_group = (new UserGroup())->resolveRouteBinding($hint_group);
-            $this->rule_user_group_id = $user_group->id;
+            $this->rule_rw_user_group_id = $user_group->id;
             if (!$user_group->isAdmin(Utilities::getTypeCastedAuthUser()->id)) {
                 throw new HexbatchNotPossibleException(__("msg.rule_can_use_group_if_admin",['ref'=>$user_group->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -175,7 +176,7 @@ class RuleGathering
 
         if (!$this->attribute->isInUse()) {
             if ($this->target_attribute_id !== null ) { $node->target_attribute_id = $this->target_attribute_id; }
-            if ($this->rule_user_group_id !== null ) { $node->rule_user_group_id = $this->rule_user_group_id; }
+            if ($this->rule_rw_user_group_id !== null ) { $node->rule_rw_user_group_id = $this->rule_rw_user_group_id; }
             if ($this->rule_time_bound_id !== null ) { $node->rule_time_bound_id = $this->rule_time_bound_id; }
             if ($this->rule_location_bound_id !== null ) { $node->rule_location_bound_id = $this->rule_location_bound_id; }
             if ($this->is_target_including_descendants !== null ) { $node->is_target_including_descendants = $this->is_target_including_descendants; }
@@ -246,117 +247,4 @@ class RuleGathering
         $doomed_rule->delete();
     }
 
-
-    public static function doPing(Request $request, AttributeRule $rule, AttributePingType $attribute_ping_type) : array {
-
-        $location_to_ping = $request->get('location_ping');
-        $shape_to_ping = $request->get('shape_ping');
-        $time_string = $request->get('time_string');
-        $user_lookup = $request->get('user');
-
-        $location_to_ping_json = '';
-        if (!empty($location_to_ping)) {
-            $location_to_ping_json = json_encode($location_to_ping);
-        }
-
-        $shape_to_ping_json = '';
-        if (!empty($shape_to_ping)) {
-            $shape_to_ping_json = json_encode($shape_to_ping);
-        }
-
-        /** @var User $check_user */
-        $check_user = null;
-        if ($user_lookup) {
-            $check_user = (new User)->resolveRouteBinding($user_lookup);
-        }
-
-
-        $ret = [];
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_TIME || $attribute_ping_type === AttributePingType::READ_TIME) {
-            if ($rule->rule_time_bound && $rule->rule_type === AttributeRuleType::READ) {
-                $ret['read_time'] = $rule->rule_time_bound->ping($time_string);
-            }
-        }
-
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_TIME || $attribute_ping_type === AttributePingType::WRITE_TIME) {
-            if($rule->rule_time_bound && $rule->rule_type === AttributeRuleType::WRITE) {
-                $ret['write_time'] = $rule->rule_time_bound->ping($time_string);
-            }
-        }
-
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_MAP || $attribute_ping_type === AttributePingType::READ_MAP) {
-            if (empty($location_to_ping )) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
-            }
-            if($rule->rule_location_bound && $rule->rule_location_bound->location_type === LocationType::MAP &&$rule->rule_type === AttributeRuleType::READ) {
-                $ret['read_map'] = $rule->rule_location_bound->ping($location_to_ping_json);
-            }
-        }
-
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_MAP || $attribute_ping_type === AttributePingType::WRITE_MAP) {
-            if (!$location_to_ping) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
-            }
-            if($rule->rule_location_bound && $rule->rule_location_bound->location_type === LocationType::MAP &&$rule->rule_type === AttributeRuleType::WRITE) {
-                $ret['write_map'] = $rule->rule_location_bound->ping($location_to_ping_json);
-            }
-        }
-
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_SHAPE || $attribute_ping_type === AttributePingType::READ_SHAPE) {
-            if (!$shape_to_ping) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
-            }
-
-            if($rule->rule_location_bound && $rule->rule_location_bound->location_type === LocationType::SHAPE &&$rule->rule_type === AttributeRuleType::READ) {
-                $ret['read_shape'] = $rule->rule_location_bound->ping($shape_to_ping_json);
-            }
-
-        }
-
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_SHAPE || $attribute_ping_type === AttributePingType::WRITE_SHAPE) {
-            if (!$shape_to_ping) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
-            }
-
-            if($rule->rule_location_bound && $rule->rule_location_bound->location_type === LocationType::SHAPE &&$rule->rule_type === AttributeRuleType::WRITE) {
-                $ret['write_shape'] = $rule->rule_location_bound->ping($shape_to_ping_json);
-            }
-        }
-
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_USER || $attribute_ping_type === AttributePingType::READ_USER) {
-            if (!$check_user) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
-            }
-
-            if($rule->rule_group && $rule->rule_type === AttributeRuleType::READ) {
-                $ret['read_user'] = (bool)$rule->rule_group->isMember($check_user->id);
-            }
-
-        }
-
-        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_USER || $attribute_ping_type === AttributePingType::WRITE_USER) {
-            if (!$check_user) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
-            }
-
-            if($rule->rule_group && $rule->rule_type === AttributeRuleType::WRITE) {
-                $ret['write_user'] = (bool)$rule->rule_group->isMember($check_user->id);
-            }
-
-        }
-
-        return $ret;
-    }
 }

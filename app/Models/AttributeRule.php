@@ -18,16 +18,12 @@ use Illuminate\Support\Facades\Log;
  * @property int id
  * @property int rule_bundle_owner_id
  * @property int target_attribute_id
- * @property int rule_user_group_id
- * @property int rule_time_bound_id
- * @property int rule_location_bound_id
  * @property string ref_uuid
  * @property string rule_name
  * @property int rule_weight
  * @property AttributeRuleType rule_type
  * @property int  rule_value
  * @property string rule_json_path
- * @property string rule_lang
  *
  * @property string created_at
  * @property string updated_at
@@ -37,7 +33,12 @@ use Illuminate\Support\Facades\Log;
  * @property int updated_at_ts
  * @property AttributeRuleBundle rule_owner
  * @property Attribute rule_target
- * @property UserGroup rule_group
+ *
+ * @property int rule_rw_user_group_id //todo remove these
+ * @property int rule_time_bound_id
+ * @property int rule_location_bound_id
+ * @property string rule_lang
+ * @property UserGroup rule_rw_group
  * @property TimeBound rule_time_bound
  * @property LocationBound rule_location_bound
  *
@@ -76,11 +77,11 @@ class AttributeRule extends Model
     protected static function booted(): void
     {
         static::deleting(function (AttributeRule $rule) {
-            if ($rule->rule_user_group_id) {
-                $count_groups = AttributeRule::where('rule_user_group_id',$rule->rule_user_group_id)->whereNot('id',$this->id)->count();
+            if ($rule->rule_rw_user_group_id) {
+                $count_groups = AttributeRule::where('rule_rw_user_group_id',$rule->rule_rw_user_group_id)->whereNot('id',$this->id)->count();
                 if (!$count_groups) {
-                    if ($rule->rule_group->isAdmin(Utilities::getTypeCastedAuthUser()->id)) {
-                        $rule->rule_group->delete();
+                    if ($rule->rule_rw_group->isAdmin(Utilities::getTypeCastedAuthUser()->id)) {
+                        $rule->rule_rw_group->delete();
                     }
                 }
             }
@@ -110,8 +111,8 @@ class AttributeRule extends Model
         return $this->belongsTo('App\Models\Attribute','target_attribute_id');
     }
 
-    public function rule_group() : BelongsTo {
-        return $this->belongsTo('App\Models\UserGroup','rule_user_group_id');
+    public function rule_rw_group() : BelongsTo {
+        return $this->belongsTo('App\Models\UserGroup','rule_rw_user_group_id');
     }
 
     public function rule_time_bound() : BelongsTo {
@@ -136,9 +137,9 @@ class AttributeRule extends Model
         $build = ElementType::select('attribute_rules.*')
             ->selectRaw(" extract(epoch from  attribute_rules.created_at) as created_at_ts,  extract(epoch from  attribute_rules.updated_at) as updated_at_ts")
 
-            /** @uses AttributeRule::rule_target(),AttributeRule::rule_group(), */
+            /** @uses AttributeRule::rule_target(),AttributeRule::rule_rw_group(), */
             /** @uses AttributeRule::rule_location_bound(),AttributeRule::rule_time_bound(),AttributeRule::rule_owner() */
-            ->with('rule_target','rule_group','rule_location_bound','rule_time_bound','rule_owner')
+            ->with('rule_target','rule_rw_group','rule_location_bound','rule_time_bound','rule_owner')
         ;
 
         if ($id) {

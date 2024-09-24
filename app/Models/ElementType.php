@@ -19,6 +19,18 @@ use Illuminate\Support\Facades\Log;
  * @property int editing_user_group_id
  * @property int inheriting_user_group_id
  * @property int new_elements_user_group_id
+ * @property int type_read_user_group_id
+ * @property int type_write_user_group_id
+ *
+ *
+ * @property int type_start_ts //todo implement these new
+ * @property int type_end_ts
+ * @property int type_next_period_starts_ts
+ *
+ * @property string type_sum_geom_map
+ * @property string type_sum_geom_shape
+ *
+ *
  * @property string ref_uuid
  * @property int user_id
  * @property boolean is_retired
@@ -29,9 +41,13 @@ use Illuminate\Support\Facades\Log;
  * @property string updated_at
  *
  * @property User type_owner
+ * @property Attribute[] type_attributes
+ * @property ElementType[] type_parents
  * @property UserGroup editing_group
  * @property UserGroup inheriting_group
  * @property UserGroup new_elements_group
+ * @property UserGroup read_whitelist_group //todo add in gathering
+ * @property UserGroup write_whitelist_group
  *
  */
 class ElementType extends Model
@@ -70,15 +86,23 @@ class ElementType extends Model
     }
 
     public function editing_group() : BelongsTo {
-        return $this->belongsTo('App\Models\UserGroup','editing_user_group_id');
+        return $this->belongsTo(UserGroup::class,'editing_user_group_id');
     }
 
     public function inheriting_group() : BelongsTo {
-        return $this->belongsTo('App\Models\UserGroup','inheriting_user_group_id');
+        return $this->belongsTo(UserGroup::class,'inheriting_user_group_id');
     }
 
     public function new_elements_group() : BelongsTo {
-        return $this->belongsTo('App\Models\UserGroup','new_elements_user_group_id');
+        return $this->belongsTo(UserGroup::class,'new_elements_user_group_id');
+    }
+
+    public function read_whitelist_group() : BelongsTo {
+        return $this->belongsTo(UserGroup::class,'type_read_user_group_id');
+    }
+
+    public function write_whitelist_group() : BelongsTo {
+        return $this->belongsTo(UserGroup::class,'type_write_user_group_id');
     }
 
     public function type_attributes() : HasMany {
@@ -86,6 +110,10 @@ class ElementType extends Model
     }
     public function type_children() : HasMany {
         return $this->hasMany(ElementType::class,'parent_type_id','id');
+    }
+
+    public function type_parents() : HasMany {
+        return $this->hasMany(ElementTypeParent::class,'child_type_id','id');
     }
 
     public static function buildElementType(
@@ -99,8 +127,9 @@ class ElementType extends Model
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
             /** @uses ElementType::type_owner(),ElementType::editing_group(),ElementType::inheriting_group(),ElementType::new_elements_group(),ElementType::type_attributes() */
-            /** @uses ElementType::type_children() */
-            ->with('type_owner', 'editing_group', 'inheriting_group', 'new_elements_group','type_attributes')
+            /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::read_whitelist_group(),ElementType::write_whitelist_group() */
+            ->with('type_owner', 'editing_group', 'inheriting_group', 'new_elements_group','type_attributes',
+                'type_parents','type_children','read_whitelist_group','write_whitelist_group')
             ;
 
         if ($id) {

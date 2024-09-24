@@ -89,7 +89,6 @@ Route::prefix('v1')->group(function () {
                     Route::patch('/{attribute_rule}/edit', [TypeController::class, 'attribute_edit_rule'])->name('core.types.attributes.rules.edit');
                     Route::delete('/{attribute_rule}/destroy', [TypeController::class, 'attribute_delete_rule'])->name('core.types.attributes.rules.destroy');
                     Route::get('/{attribute_rule}/get/{levels?}', [TypeController::class, 'attribute_get_rule'])->name('core.types.attributes.rules.get');
-                    Route::get('/{attribute_rule}/ping/{attribute_ping_type}', [TypeController::class, 'attribute_rule_ping'])->name('core.types.attributes.rules.ping');
                 });
             });
 

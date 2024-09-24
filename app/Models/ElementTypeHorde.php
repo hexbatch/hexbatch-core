@@ -15,6 +15,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int horde_type_id
  * @property int horde_attribute_id
  *
+ * @property boolean is_whitelisted_reading //todo implement new
+ * @property boolean is_whitelisted_writing
+ * @property boolean is_map_bound
+ * @property boolean is_shape_bound
+ * @property boolean is_time_bound
+ * @property boolean is_per_set_value
+ * @property boolean is_locked_to_type_editor_membership
+ * @property boolean is_locked_to_element_owner_membership
+ *
  * @property Attribute horde_attribute
  * @property ElementType horde_type
  */

@@ -33,7 +33,7 @@ class AttributeRuleResource extends JsonResource
                 'name' => $this->rule_name,
                 'uuid' => $this->ref_uuid,
                 'target' => $this->rule_target?->getName(),
-                'rule_group' => $this->rule_group?->getName(),
+                'rule_rw_group' => $this->rule_rw_group?->getName(),
                 'rule_time_bound' => $this->rule_time_bound?->getName(),
                 'rule_location_bound' => $this->rule_location_bound?->getName(),
 
@@ -49,8 +49,8 @@ class AttributeRuleResource extends JsonResource
                 $arr['target'] = new AttributeResource($this->rule_target,null,$this->n_display_level - 1 );
             }
 
-            if($this->rule_group) {
-                $arr['rule_group'] = new UserGroupResource($this->rule_group,null,$this->n_display_level - 1);
+            if($this->rule_rw_group) {
+                $arr['rule_rw_group'] = new UserGroupResource($this->rule_rw_group,null,$this->n_display_level - 1);
             }
 
             if($this->rule_time_bound) {

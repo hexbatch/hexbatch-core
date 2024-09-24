@@ -3,12 +3,9 @@ namespace App\Enums\Attributes;
 enum AttributeRuleType : string {
 
     case INACTIVE = 'inactive';
-    case ALLERGY = 'allergy';
-    case AFFINITY = 'affinity';
-    case READ = 'read';
-    case WRITE = 'write';
     case REQUIRED = 'required';
-    case FORBIDDEN = 'forbidden';
+    case SET_MEMBERSHIP_AFFINITY = 'set_membership_affinity';
+    case SET_TOGGLE_AFFINITY = 'set_toggle_affinity';
 
 }
 

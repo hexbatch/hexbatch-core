@@ -28,12 +28,15 @@ use Illuminate\Support\Facades\Route;
  * @property int parent_attribute_id
  * @property int owner_element_type_id
  * @property int applied_rule_bundle_id
+ * @property int attribute_time_bound_id
+ * @property int attribute_location_bound_id //todo implement new
  * @property boolean is_retired
  * @property boolean is_system
  * @property boolean is_final
  * @property boolean is_final_parent
  * @property boolean is_using_ancestor_bundle
  * @property boolean is_const
+ * @property boolean is_per_set_value
  * @property string attribute_name
  * @property string value_json_path
  * @property ArrayObject attribute_value
@@ -49,9 +52,13 @@ use Illuminate\Support\Facades\Route;
  * @property ElementType type_owner
  *
  * @property AttributeRuleBundle rule_bundle
+ * @property TimeBound attribute_time_bound
+ * @property LocationBound attribute_location_bound
  */
 class Attribute extends Model
 {
+
+
 
     protected $table = 'attributes';
     public $timestamps = false;
@@ -103,6 +110,13 @@ class Attribute extends Model
 
     }
 
+    public function attribute_time_bound() : BelongsTo {
+        return $this->belongsTo(TimeBound::class,'attribute_time_bound_id');
+    }
+
+    public function attribute_location_bound() : BelongsTo {
+        return $this->belongsTo(LocationBound::class,'attribute_location_bound_id');
+    }
 
 
     public function isInUse() : bool {
@@ -152,7 +166,8 @@ class Attribute extends Model
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
             /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::rule_bundle() */
-            ->with('attribute_parent', 'type_owner','rule_bundle')
+            /** @uses Attribute::attribute_time_bound(),Attribute::attribute_location_bound(), */
+            ->with('attribute_parent', 'type_owner','rule_bundle','attribute_time_bound','attribute_location_bound')
 
 
        ;
@@ -352,8 +367,5 @@ class Attribute extends Model
 
     }
 
-    public function canUserSeeAttribute() : bool {
-        return ($this->rule_bundle?->canUserSee()??true);
-    }
 
 }

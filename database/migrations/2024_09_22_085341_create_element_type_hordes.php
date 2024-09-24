@@ -30,6 +30,30 @@ return new class extends Migration
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+
+            $table->boolean('is_whitelisted_reading')->default(false)->nullable(false)
+                ->comment('if true then check the read user group in the type before reading');
+
+            $table->boolean('is_whitelisted_writing')->default(false)->nullable(false)
+                ->comment('if true then check the write user group in the type before writing');
+
+            $table->boolean('is_map_bound')->default(false)->nullable(false)
+                ->comment('if true then this attribute will not readable/writable in all sets, check the attribute location bounds');
+
+            $table->boolean('is_shape_bound')->default(false)->nullable(false)
+                ->comment('if true then this attribute will not be readable/writable in all shapes, check the attribute location bounds');
+
+            $table->boolean('is_time_bound')->default(false)->nullable(false)
+                ->comment('if true then this attribute will not be readable/writable every time, check the attribute time bounds');
+
+            $table->boolean('is_per_set_value')->default(false)->nullable(false)
+                ->comment('if true then this attribute will have different values per set. Otherwise an element value of this will not change when in different sets');
+
+            $table->boolean('is_locked_to_type_editor_membership')->default(false)->nullable(false)
+                ->comment('if true then this attribute can only be read or written by the users in the editor group of the type not the child type');
+
+            $table->boolean('is_locked_to_element_owner_membership')->default(false)->nullable(false)
+                ->comment('if true then this attribute can only be read or written by the owner of the element or those who have membership in his personal user group');
         });
     }
 

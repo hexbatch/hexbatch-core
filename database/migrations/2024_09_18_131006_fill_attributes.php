@@ -43,7 +43,23 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
+            $table->foreignId('attribute_time_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The value points to a time bounds.")
+                ->index('idx_attribute_time_bound_id')
+                ->constrained('time_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
+            $table->foreignId('attribute_location_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The value points to a location bounds")
+                ->index('idx_attribute_location_bound_id')
+                ->constrained('location_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
 
             $table->uuid('ref_uuid')
@@ -74,6 +90,9 @@ return new class extends Migration
 
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then child types do not inherit this attribute');
+
+            $table->boolean('is_per_set_value')->default(false)->nullable(false)
+                ->comment('if true then the element value of this is different for each set');
 
 
             $table->timestamps();
@@ -138,10 +157,14 @@ return new class extends Migration
             $table->dropForeign(['parent_attribute_id']);
             $table->dropForeign(['owner_element_type_id']);
             $table->dropForeign(['applied_rule_bundle_id']);
+            $table->dropForeign(['attribute_time_bound_id']);
+            $table->dropForeign(['attribute_location_bound_id']);
 
             $table->dropColumn('parent_attribute_id');
             $table->dropColumn('owner_element_type_id');
             $table->dropColumn('applied_rule_bundle_id');
+            $table->dropColumn('attribute_time_bound_id');
+            $table->dropColumn('attribute_location_bound_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_retired');
             $table->dropColumn('is_final');
@@ -150,6 +173,7 @@ return new class extends Migration
             $table->dropColumn('is_final_parent');
             $table->dropColumn('is_using_ancestor_bundle');
             $table->dropColumn('is_const');
+            $table->dropColumn('is_per_set_value');
             $table->dropColumn('value_json_path');
             $table->dropColumn('attribute_value');
             $table->dropColumn('attribute_name');

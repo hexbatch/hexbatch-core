@@ -40,31 +40,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('rule_user_group_id')
-                ->nullable()->default(null)
-                ->comment("Optional user group that when members matches, this turns on some rules.")
-                ->index('idx_rule_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreignId('rule_time_bound_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The value points to a time bounds.")
-                ->index('idx_rule_time_id')
-                ->constrained('time_bounds')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreignId('rule_location_bound_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The value points to a location bounds")
-                ->index('idx_rule_location_id')
-                ->constrained('location_bounds')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -84,8 +59,6 @@ return new class extends Migration
             $table->text('rule_json_path')->nullable()->default(null)
                 ->comment("if set matches path to the the target json value");
 
-            $table->string('rule_lang',10)->nullable()->default(null)->index()
-                ->comment("the language (general or regional) in the environment can be part of the rules ");
 
 
             $table->timestamps();
@@ -93,9 +66,14 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_attribute_rule AS ENUM (
             'inactive',
-            'allergy' , 'affinity',
-            'read','write','required','forbidden'
+            'required',
+            'set_membership_affinity'
+            'set_toggle_affinity'
             );");
+
+        // Affinity membership depends on elements in a set to decide to join it when asked by command,
+        // Affinity toggle can turn an attribute to not be readable or writable (both at the same time) in a set based on the contents
+        // and the required is build time, so no checking there
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_type type_of_attribute_rule NOT NULL default 'inactive';");
 

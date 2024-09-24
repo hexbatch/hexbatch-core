@@ -8,7 +8,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\User;
-
+//todo redo standard setup because all attributes exists in types only, also add in attribute for expiration_at
 
 /**
  * Standard attributes are all final, except for the ones that are parents.

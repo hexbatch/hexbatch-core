@@ -43,7 +43,23 @@ return new class extends Migration
             $table->foreignId('new_elements_user_group_id')
                 ->nullable()->default(null)
                 ->comment("Additional users who can create elements from this token. Null is anyone")
-                ->index('idx_allowed_creators_group_id')
+                ->index('idx_type_new_elements_user_group_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+            $table->foreignId('type_read_user_group_id')
+                ->nullable()->default(null)
+                ->comment("Optional whitelist to be able to read any attributes in this type")
+                ->index('idx_type_read_user_group_id')
+                ->constrained('user_groups')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+            $table->foreignId('type_write_user_group_id')
+                ->nullable()->default(null)
+                ->comment("Optional whitelist to be able to write any attributes in this type")
+                ->index('idx_type_write_user_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
@@ -65,10 +81,34 @@ return new class extends Migration
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then cannot be added as parent');
 
+            $table->integer('type_start_ts')->default(null)->nullable()
+                ->comment('The union of all child attribute time bounds. This is updated to show current span start');
+
+            $table->integer('type_end_ts')->default(null)->nullable()
+                ->comment('The union of all child attribute time bounds. This is updated to show current span start');
+
+            $table->integer('type_next_period_starts_ts')->default(null)->nullable()
+                ->comment('When the next period after the end ts will start, used to knowing when to update');
+
+
+
+        });
+
+        DB::statement("ALTER TABLE element_types
+                              Add COLUMN type_sum_geom_map
+                              geometry
+                              ;
+                    ");
+
+        DB::statement("ALTER TABLE element_types
+                              Add COLUMN type_sum_geom_shape
+                              geometry
+                              ;
+                    ");
+
+        Schema::table('element_types', function (Blueprint $table) {
             $table->string('type_name',128)->nullable(false)->index()
                 ->comment("The unique name of the type, using the naming rules");
-
-
         });
 
         DB::statement('ALTER TABLE element_types ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -95,11 +135,15 @@ return new class extends Migration
             $table->dropForeign(['editing_user_group_id']);
             $table->dropForeign(['inheriting_user_group_id']);
             $table->dropForeign(['new_elements_user_group_id']);
+            $table->dropForeign(['type_write_user_group_id']);
+            $table->dropForeign(['type_read_user_group_id']);
 
             $table->dropColumn('user_id');
             $table->dropColumn('editing_user_group_id');
             $table->dropColumn('inheriting_user_group_id');
             $table->dropColumn('new_elements_user_group_id');
+            $table->dropColumn('type_write_user_group_id');
+            $table->dropColumn('type_read_user_group_id');
             $table->dropColumn('type_name');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('created_at');
@@ -107,6 +151,14 @@ return new class extends Migration
             $table->dropColumn('is_retired');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final');
+            $table->dropColumn('type_start_ts');
+            $table->dropColumn('type_end_ts');
+            $table->dropColumn('type_next_period_starts_ts');
+            $table->dropColumn('type_sum_geom_map');
+            $table->dropColumn('type_sum_geom_shape');
+
+
+
         });
     }
 };

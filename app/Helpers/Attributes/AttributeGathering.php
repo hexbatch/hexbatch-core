@@ -4,14 +4,18 @@ namespace App\Helpers\Attributes;
 
 use App\Enums\Attributes\AttributeAccessType;
 use App\Enums\Attributes\AttributePingType;
+use App\Enums\Attributes\AttributeRuleType;
 use App\Enums\Attributes\AttributeServerAccessType;
+use App\Enums\Bounds\LocationType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\ElementTypes\TypeGathering;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
+use App\Models\AttributeRule;
 use App\Models\ElementType;
+use App\Models\User;
 use App\Rules\AttributeNameReq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -285,7 +289,7 @@ class AttributeGathering
         $doomed_attribute->delete();
     }
 
-    //todo the below only looks at the attributes defined in the type, and not any inherited attributes by possible type parents
+    //todo the below only looks at the attributes defined in the type, and not any inherited attributes by possible type parents. Fix this to allow parent attributes, if the user can read them or write them based on sub type permissions
     public static function compareAttributeOwner(ElementType $parent_type,Attribute $current_attribute) : void  {
         if ($parent_type->ref_uuid !== ($current_attribute->type_owner?->ref_uuid??null) ) {
 
@@ -295,24 +299,53 @@ class AttributeGathering
         }
     }
 
-    public static function attributeListCheck(ElementType $element_type) {
 
-
-        $user = Utilities::getTypeCastedAuthUser();
-        if ($element_type->canUserViewDetails($user)) {return;}
-
-        throw new HexbatchPermissionException(__("msg.element_type_not_viewer",['ref'=>$element_type->getName()]),
-            \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-            RefCodes::ELEMENT_TYPE_NOT_AUTHORIZED);
-
-    }
 
     public static function doPing(Request $request,Attribute $attribute,AttributePingType $attribute_ping_type) : array
     {
         $ret = [];
-        foreach ($attribute->rule_bundle->rules_in_group as $rule) {
-            $newt = RuleGathering::doPing($request,$rule,$attribute_ping_type);
-            TypeGathering::mergePingData($ret,$newt);
+
+        $location_to_ping = $request->get('location_ping');
+        $shape_to_ping = $request->get('shape_ping');
+        $time_string = $request->get('time_string');
+
+        $location_to_ping_json = '';
+        if (!empty($location_to_ping)) {
+            $location_to_ping_json = json_encode($location_to_ping);
+        }
+
+        $shape_to_ping_json = '';
+        if (!empty($shape_to_ping)) {
+            $shape_to_ping_json = json_encode($shape_to_ping);
+        }
+
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_TIME) {
+            if ($attribute->attribute_time_bound) {
+                $ret['time'] = $attribute->attribute_time_bound->ping($time_string);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_MAP) {
+            if (empty($location_to_ping )) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === LocationType::MAP ) {
+                $ret['map'] = $attribute->attribute_location_bound->ping($location_to_ping_json);
+            }
+        }
+
+        if ($attribute_ping_type === AttributePingType::ALL || $attribute_ping_type === AttributePingType::ALL_SHAPE) {
+            if (empty($location_to_ping )) {
+                throw new HexbatchNotPossibleException(__("msg.attribute_ping_missing_data"),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_PING_DATA_MISSING);
+            }
+            if($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === LocationType::SHAPE ) {
+                $ret['shape'] = $attribute->attribute_location_bound->ping($shape_to_ping_json);
+            }
         }
 
         return $ret;

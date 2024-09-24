@@ -91,28 +91,19 @@ class TypeController extends Controller
     }
 
     public function type_ping(Request $request,ElementType $element_type,AttributePingType $attribute_ping_type): JsonResponse {
-        AttributeGathering::attributeListCheck($element_type);
+        TypeGathering::TypeListCheck($element_type);
         $ret = TypeGathering::doPing($request,$element_type,$attribute_ping_type);
         return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function attribute_ping(Request $request,ElementType $element_type,Attribute $attribute,AttributePingType $attribute_ping_type): JsonResponse {
         AttributeGathering::compareAttributeOwner($element_type,$attribute);
-        AttributeGathering::attributeListCheck($element_type);
+        TypeGathering::TypeListCheck($element_type);
         $ret = AttributeGathering::doPing($request,$attribute,$attribute_ping_type);
         return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
 
     }
 
-    public function attribute_rule_ping(Request $request,ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule,AttributePingType $attribute_ping_type)
-    : JsonResponse
-    {
-        AttributeGathering::compareAttributeOwner($element_type,$attribute);
-        RuleGathering::checkRuleBelongsInAttribute($attribute,$attribute_rule);
-        AttributeGathering::attributeListCheck($element_type);
-        $ret = RuleGathering::doPing($request,$attribute_rule,$attribute_ping_type);
-        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
-    }
 
     public function new_attribute(Request $request,ElementType $element_type): JsonResponse {
         $attribute = (new AttributeGathering($request,$element_type,null) )->assign();
@@ -144,7 +135,7 @@ class TypeController extends Controller
 
     public function attributes_list(ElementType $element_type,?string $filter = null): JsonResponse {
         Utilities::ignoreVar($filter);
-        AttributeGathering::attributeListCheck($element_type);
+        TypeGathering::TypeListCheck($element_type);
         $laravel_list = Attribute::buildAttribute(element_type_id: $element_type->id);
         $ret = $laravel_list->cursorPaginate();
         return (new AttributeCollection($ret))
@@ -154,7 +145,7 @@ class TypeController extends Controller
     public function attribute_list_rules(ElementType $element_type,Attribute $attribute,?string $filter = null): JsonResponse {
         Utilities::ignoreVar($filter);
         AttributeGathering::compareAttributeOwner($element_type,$attribute);
-        AttributeGathering::attributeListCheck($element_type);
+        TypeGathering::TypeListCheck($element_type);
         $out = $attribute->rule_bundle?->rules_in_group??[];
         return response()->json(new AttributeRuleCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
@@ -199,7 +190,7 @@ class TypeController extends Controller
 
     public function attribute_get_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule,?string $levels = null): JsonResponse {
         AttributeGathering::compareAttributeOwner($element_type,$attribute);
-        AttributeGathering::attributeListCheck($element_type);
+        TypeGathering::TypeListCheck($element_type);
         RuleGathering::checkRuleBelongsInAttribute($attribute,$attribute_rule);
         return response()->json(new AttributeRuleResource($attribute_rule,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
