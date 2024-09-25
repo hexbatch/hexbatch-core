@@ -3,8 +3,6 @@
 namespace App\Models;
 
 
-use App\Enums\Attributes\AttributeRuleType;
-use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,9 +59,8 @@ class AttributeRuleBundle extends Model
 
     public function rules_in_group() : HasMany {
         return $this->hasMany('App\Models\AttributeRule','rule_bundle_owner_id')
-            /** @uses AttributeRule::rule_target(),AttributeRule::rule_rw_group(), */
-            /** @uses AttributeRule::rule_location_bound(),AttributeRule::rule_time_bound() */
-            ->with('rule_target','rule_rw_group','rule_location_bound','rule_time_bound')
+            /** @uses AttributeRule::rule_target(), */
+            ->with('rule_target',)
             ->orderBy('rule_type');
     }
 

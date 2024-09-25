@@ -24,7 +24,7 @@ use App\Models\AttributeRule;
 use App\Models\ElementType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use JsonPath\JsonPath;
 
 
 class TypeController extends Controller
@@ -35,27 +35,17 @@ class TypeController extends Controller
      * @throws \Exception
      */
     public function create_type(Request $request): JsonResponse {
-        try {
-            DB::beginTransaction();
-            $gathering = new TypeGathering($request);
-            $element_type = $gathering->assign();
-            $refreshed = ElementType::buildElementType(id: $element_type->id)?->first();
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+
+        $element_type = (new TypeGathering($request))->assign();
+        $refreshed = ElementType::buildElementType(id: $element_type->id)?->first();
         return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     /**
-     * @param ElementType $element_type
-     * @param Request $request
-     * @return JsonResponse
+     * @throws \Exception
      */
     public function edit_type(ElementType $element_type,Request $request): JsonResponse {
-        $gathering = new TypeGathering($request,$element_type);
-        $element_type = $gathering->assign();
+        $element_type = (new TypeGathering($request,$element_type))->assign();
         $refreshed = ElementType::buildElementType(id:$element_type->id)->first();
         return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
@@ -105,24 +95,36 @@ class TypeController extends Controller
     }
 
 
+    /**
+     * @throws \Exception
+     */
     public function new_attribute(Request $request,ElementType $element_type): JsonResponse {
         $attribute = (new AttributeGathering($request,$element_type,null) )->assign();
         $out = Attribute::buildAttribute(id:$attribute->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function edit_attribute(Request $request,ElementType $element_type, Attribute $attribute): JsonResponse {
         $attribute = (new AttributeGathering($request,$element_type,$attribute) )->assign();
         $out = Attribute::buildAttribute(id:$attribute->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function copy_attribute(ElementType $element_type, Attribute $source_attribute): JsonResponse {
         $cloned = AttributeGathering::cloneAttribute($element_type,$source_attribute);
         $out = Attribute::buildAttribute(id:$cloned->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function delete_attribute(ElementType $element_type, Attribute $doomed_attribute): JsonResponse {
         AttributeGathering::deleteAttribute($element_type,$doomed_attribute);
         return response()->json(new AttributeResource($doomed_attribute,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);

@@ -2,9 +2,9 @@
 
 namespace App\Helpers\Attributes;
 
-use App\Enums\Attributes\AttributePingType;
+
 use App\Enums\Attributes\AttributeRuleType;
-use App\Enums\Bounds\LocationType;
+
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
@@ -17,7 +17,7 @@ use App\Models\AttributeRuleBundle;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
-use App\Models\User;
+
 use App\Models\UserGroup;
 use App\Rules\BoundNameReq;
 use Illuminate\Http\Request;
@@ -32,14 +32,13 @@ class RuleGathering
 
 
     public ?int $target_attribute_id = null;
-    public ?int $rule_rw_user_group_id = null;
+
     public ?int $rule_time_bound_id = null;
     public ?int $rule_location_bound_id = null;
     public ?int $is_target_including_descendants = null;
     public ?int $rule_weight = null;
     public ?int $rule_value = null;
     public ?string $rule_json_path = null;
-    public ?string $rule_lang = null;
     public ?AttributeRuleType $rule_type = null;
     public ?string $rule_name = null;
 
@@ -73,10 +72,7 @@ class RuleGathering
             Utilities::testValidJsonPath($this->rule_json_path);
         }
 
-        if ($request->request->has('rule_lang')) {
-            $this->rule_lang = mb_trim($request->request->getString('rule_lang'));
-            if(!$this->rule_lang) {$this->rule_lang = null;}
-        }
+
 
         if ( $request->request->has('rule_type')) {
             $test_string = $request->request->getString('rule_type');
@@ -112,49 +108,9 @@ class RuleGathering
             }
         }
 
-        if ( $request->request->has('rule_user_group')) {
-            $hint_group = $request->request->getString('rule_user_group');
-            /** @var UserGroup $user_group */
-            $user_group = (new UserGroup())->resolveRouteBinding($hint_group);
-            $this->rule_rw_user_group_id = $user_group->id;
-            if (!$user_group->isAdmin(Utilities::getTypeCastedAuthUser()->id)) {
-                throw new HexbatchNotPossibleException(__("msg.rule_can_use_group_if_admin",['ref'=>$user_group->getName()]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::RULE_SCHEMA_ISSUE);
-            }
-        }
 
-        if ( $request->request->has('rule_time_bound')) {
-            /**
-             * @var TimeBound|null $time_bound
-             */
-            $time_bound = null;
-            $hint_time_bound = $request->get('rule_time_bound');
-            if (is_string($hint_time_bound) && Utilities::is_uuid($hint_time_bound)) {
-                $time_bound = (new TimeBound())->resolveRouteBinding($hint_time_bound);
-            } else if (is_array($hint_time_bound)) {
-                $time_bound = (new TimeBoundGathering($request->collect('rule_time_bound')))->assign();
-            }
-            if ($time_bound) {
-                $this->rule_time_bound_id = $time_bound->id;
-            }
-        }
 
-        if ( $request->request->has('rule_location_bound')) {
-            /**
-             * @var LocationBound|null $time_bound
-             */
-            $loc_bound = null;
-            $hint_location_bound = $request->get('rule_location_bound');
-            if (is_string($hint_location_bound) && Utilities::is_uuid($hint_location_bound)) {
-                $loc_bound = (new LocationBound())->resolveRouteBinding($hint_location_bound);
-            } else if (is_array($hint_location_bound)) {
-                $loc_bound = (new LocationBoundGathering($request->collect('rule_location_bound')))->assign();
-            }
-            if ($loc_bound) {
-                $this->rule_location_bound_id = $loc_bound->id;
-            }
-        }
+
 
     }
 
@@ -176,14 +132,10 @@ class RuleGathering
 
         if (!$this->attribute->isInUse()) {
             if ($this->target_attribute_id !== null ) { $node->target_attribute_id = $this->target_attribute_id; }
-            if ($this->rule_rw_user_group_id !== null ) { $node->rule_rw_user_group_id = $this->rule_rw_user_group_id; }
-            if ($this->rule_time_bound_id !== null ) { $node->rule_time_bound_id = $this->rule_time_bound_id; }
-            if ($this->rule_location_bound_id !== null ) { $node->rule_location_bound_id = $this->rule_location_bound_id; }
             if ($this->is_target_including_descendants !== null ) { $node->is_target_including_descendants = $this->is_target_including_descendants; }
             if ($this->rule_weight !== null ) { $node->rule_weight = $this->rule_weight; }
             if ($this->rule_value !== null ) { $node->rule_value = $this->rule_value; }
             if ($this->rule_json_path !== null ) { $node->rule_json_path = $this->rule_json_path; }
-            if ($this->rule_lang !== null ) { $node->rule_lang = $this->rule_lang; }
             if ($this->rule_type !== null ) { $node->rule_type = $this->rule_type; }
         }
 

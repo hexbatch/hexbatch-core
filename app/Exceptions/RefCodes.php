@@ -84,6 +84,8 @@ class RefCodes {
     const ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE = 7004;
     const ELEMENT_TYPE_CANNOT_DELETE = 7005;
     const ELEMENT_TYPE_INVALID_NAME = 7006;
+    const ELEMENT_TYPE_BAD_SCHEMA = 7007;
+    const ELEMENT_TYPE_CANNOT_INHERIT = 7008;
 
     //elements start at 8000
 
@@ -148,6 +150,8 @@ class RefCodes {
         self::ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE => '',
         self::ELEMENT_TYPE_CANNOT_DELETE => '',
         self::ELEMENT_TYPE_INVALID_NAME => '',
+        self::ELEMENT_TYPE_BAD_SCHEMA => '',
+        self::ELEMENT_TYPE_CANNOT_INHERIT => '',
 
         self::ELEMENT_NOT_FOUND => '',
 

@@ -31,6 +31,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->unique(['horde_type_id','horde_attribute_id']);
+
             $table->boolean('is_whitelisted_reading')->default(false)->nullable(false)
                 ->comment('if true then check the read user group in the type before reading');
 

@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\Route;
  * @property int owner_element_type_id
  * @property int applied_rule_bundle_id
  * @property int attribute_time_bound_id
- * @property int attribute_location_bound_id //todo implement new
+ * @property int attribute_location_bound_id
  * @property boolean is_retired
  * @property boolean is_system
  * @property boolean is_final
@@ -87,6 +87,27 @@ class Attribute extends Model
         'server_access_type' => AttributeServerAccessType::class,
         'attribute_access_type' => AttributeAccessType::class,
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Attribute $attribute) {
+
+
+            if ($attribute->attribute_time_bound_id) {
+                $count_times = AttributeRule::where('attribute_time_bound_id',$attribute->attribute_time_bound_id)->whereNot('id',$this->id)->count();
+                if (!$count_times) {
+                    $attribute->attribute_time_bound->delete();
+                }
+            }
+
+            if ($attribute->attribute_location_bound_id) {
+                $count_locs = AttributeRule::where('attribute_location_bound_id',$attribute->attribute_location_bound_id)->whereNot('id',$this->id)->count();
+                if (!$count_locs) {
+                    $attribute->attribute_location_bound->delete();
+                }
+            }
+        });
+    }
 
 
     public function attribute_parent() : BelongsTo {

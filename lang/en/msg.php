@@ -80,9 +80,7 @@ return [
     'rule_cannot_be_deleted_if_in_use' => 'The rule :rule cannot be deleted because its attribute :attr in use',
 
 
-    'attribute_rule_missing_attribute' => 'When adding rules as object, need the attribute key to hold the name or id',
-    'attribute_rule_bad_regex' => 'When making an attribute rule, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
-    'attribute_rule_retired' => 'This attribute, ":name" has been retired and new rules using this cannot be added to an attribute',
+    'attribute_rule_requirement_failed' => 'This attribute, ":ref" has forbidden the type from having this combination of attributes in the type',
 
 
     //remotes
@@ -122,6 +120,8 @@ return [
     //element types
     'element_type_not_found' => 'Element type not found using :ref',
     'element_type_must_have_name' => 'Element types need a name',
+    'child_types_must_be_string_names' => 'The child type must already exist and be refered to by the name, which is a string and not an object',
+    'child_type_is_not_inheritable' => 'The child type must allow you to inherit, and also not be retired or final',
     'element_type_not_admin' => 'You are not in the owner admin group or a member in the editing group for the type :ref',
     'element_type_not_viewer' => 'You are not in the owner admin group or a member in the editing or inheriting group for the type :ref',
     'element_type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',

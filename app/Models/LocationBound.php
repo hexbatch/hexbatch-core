@@ -18,6 +18,7 @@ use GeoJson\Geometry\Polygon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -39,6 +40,8 @@ use Illuminate\Validation\ValidationException;
  * @property int updated_at_ts
  * @property string geom_as_geo_json
  *
+ * @property Attribute[] location_attributes
+ *
  */
 class LocationBound extends Model
 {
@@ -58,60 +61,56 @@ class LocationBound extends Model
         'location_type' => LocationType::class,
     ];
 
-
+    public function location_attributes() : HasMany {
+        return $this->hasMany(Attribute::class,'attribute_location_bound_id','id');
+    }
 
     public function getName() {
         return $this->bound_name;
     }
 
-     public static function buildLocationBound(?int $id = null,?int $type_id = null,?int $rule_id = null) : Builder {
-        /** @var Builder $build */
-        $build =  LocationBound::select('location_bounds.*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json");
+     public static function buildLocationBound(?int $id = null,?int $type_id = null,?int $attribute_id = null) : Builder {
 
-         if ($rule_id) {
-             $build->join('attribute_rules as attached_rules',
+        $build =  LocationBound::select('location_bounds.*')
+            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json")
+            /** @uses LocationBound::location_attributes() */
+            ->with('location_attributes');
+
+         if ($attribute_id) {
+             $build->join('attributes as bounded_attr',
                  /**
                   * @param JoinClause $join
                   */
                  function (JoinClause $join)  {
                      $join
-                         ->on('time_bounds.id','=','attached_rules.rule_time_bound_id');
+                         ->on('time_bounds.id','=','bounded_attr.attribute_location_bound_id');
                  }
              );
          }
 
         if ($type_id) {
-            $build->join('attribute_rules as type_rules',
+
+            $build->join('attributes as tounded_attr',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('location_bounds.id','=','type_rules.rule_location_bound_id');
+                        ->on('location_bounds.id','=','tounded_attr.attribute_location_bound_id');
                 }
             );
 
-            $build->join('attribute_rule_bundles as type_rule_bundles',
+            $build->join('element_type_hordes as bounded_horde',
                 /**
                  * @param JoinClause $join
                  */
-                function (JoinClause $join)  {
+                function (JoinClause $join)  use($type_id) {
                     $join
-                        ->on('attribute_rule_bundles.id','=','attribute_rules.rule_bundle_owner_id');
+                        ->on('bounded_horde.horde_attribute_id','=','tounded_attr.id')
+                        ->where('bounded_horde.horde_type_id',$type_id);
                 }
             );
 
-            $build->join('attribute_rule_bundles as type_rule_attributes',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use ($type_id) {
-                    $join
-                        ->on('type_rule_bundles.id','=','type_rule_attributes.applied_rule_bundle_id')
-                        ->where('owner_element_type_id',$type_id);
-                }
-            );
         }
 
         if ($id) {

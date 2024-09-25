@@ -43,6 +43,6 @@ class ElementSet extends Model
      */
     protected $casts = [];
 
-//todo  -affinity to attribute in set means cannot be added to a set. but +affinity offsets that, so calculated in a sum, all rules for such in a type reacting at the same time
+//-affinity to attribute in set means cannot be added to a set. but +affinity offsets that, so calculated in a sum, all rules for such in a type reacting at the same time
 // to all using the visible attributes/rules. Inactive attributes in the set's elements don't count
 }

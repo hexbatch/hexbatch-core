@@ -31,6 +31,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->unique(['parent_type_id','child_type_id']);
+
             $table->integer('parent_rank')->nullable(false)->default(1)
                 ->comment("The order of the parent being inherited");
 
@@ -42,7 +44,7 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-            $table->unique(['parent_type_id','parent_rank']);
+
         });
 
         DB::statement('ALTER TABLE element_type_parents ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

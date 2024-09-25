@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 
@@ -23,7 +25,7 @@ use Illuminate\Support\Facades\Log;
  * @property int type_write_user_group_id
  *
  *
- * @property int type_start_ts //todo implement these new
+ * @property int type_start_ts
  * @property int type_end_ts
  * @property int type_next_period_starts_ts
  *
@@ -43,10 +45,11 @@ use Illuminate\Support\Facades\Log;
  * @property User type_owner
  * @property Attribute[] type_attributes
  * @property ElementType[] type_parents
+ * @property ElementTypeHorde[] type_hordes
  * @property UserGroup editing_group
  * @property UserGroup inheriting_group
  * @property UserGroup new_elements_group
- * @property UserGroup read_whitelist_group //todo add in gathering
+ * @property UserGroup read_whitelist_group
  * @property UserGroup write_whitelist_group
  *
  */
@@ -107,6 +110,14 @@ class ElementType extends Model
 
     public function type_attributes() : HasMany {
         return $this->hasMany('App\Models\Attribute','owner_element_type_id','id');
+    }
+
+    public function type_hordes() : HasMany {
+        return $this->hasMany(ElementTypeHorde::class,'horde_type_id','id')
+            /**
+             * @uses ElementTypeHorde::horde_attribute()
+             */
+            ->with('horde_attribute');
     }
     public function type_children() : HasMany {
         return $this->hasMany(ElementType::class,'parent_type_id','id');
@@ -206,6 +217,7 @@ class ElementType extends Model
     public function isInUse() : bool {
         if (Element::where('element_parent_type_id',$this->id)->count() ) {return true;}
         if (ElementTypeParent::where('parent_type_id',$this->id)->count() ) {return true;}
+        if (ElementTypeHorde::where('horde_type_id',$this->id)->count() ) {return true;}
         return false;
     }
 
@@ -220,5 +232,81 @@ class ElementType extends Model
         if ($this->editing_group?->isMember($user->id) ) { return true; }
         if ($this->inheriting_group?->isMember($user->id) ) { return true; }
         return false;
+    }
+
+    public function canUserInherit(User $user) : bool {
+        return $this->canUserViewDetails($user);
+    }
+
+    public static function updateAggregatedStats() {
+        //update for each type that has a bound:
+         // type_start_ts,type_end_ts,type_next_period_starts_ts,type_sum_geom_map,type_sum_geom_shape
+
+        //the time spans may better better off as ranges:
+            //https://www.postgresql.org/docs/current/rangetypes.html
+            //
+        //todo implement the current or next time range of the merged together time ranges
+        //do spans
+        // get time spans for the bounded types , the other cron jobs will have created and trimmed them
+        // merge the spans if they intersect  https://stackoverflow.com/questions/38384249/coalesce-overlapping-time-ranges-in-postgresql
+        // get the current one, or the next one if not one current now and put into type_start_ts and type_end_ts
+        // put the start of the next one in the type_next_period_starts_ts
+        Attribute::whereNotNull('attribute_time_bound_id')
+            ->join('time_bound_spans',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('attributes.attribute_time_bound_id','=','time_bound_spans.time_bound_id')
+                        ->orWhere(function ($q)  {
+                            $q->whereRaw('time_bound_spans.span_start > extract(epoch from  NOW())')
+                            ->WhereRaw('time_bound_spans.span_stop < extract(epoch from  NOW())');
+                        })
+                        ->orWhere(function ($q)  {
+                            $q->whereRaw('time_bound_spans.span_start > extract(epoch from  NOW())');
+                        });
+                }
+            );
+
+
+
+    }
+
+    public function sumGeoFromAttributes() {
+        //then for the attributes that have a map, do a union of their geometries and store in type_sum_geom_map
+        $id = $this->id;
+        DB::statement("
+            UPDATE element_types
+            SET type_sum_geom_map=subquery.sum_geo
+
+            FROM (
+                    SELECT t.id as element_type_id , ST_Union(b.geom) as sum_geo
+                    FROM  element_types t
+                    INNER JOIN attributes a  ON a.owner_element_type_id = t.id
+                    INNER JOIN location_bounds b  ON a.attribute_location_bound_id = b.id AND b.location_type = 'map'
+                    WHERE t.id = $id
+                    GROUP BY t.id
+                    ) AS subquery
+            WHERE element_types.id=subquery.element_type_id;
+        ");
+
+
+        //then for the attributes that have a shape, do a union of their geometries and store in type_sum_geom_shape
+
+        DB::statement("
+            UPDATE element_types
+            SET type_sum_geom_shape=subquery.sum_geo
+
+            FROM (
+                    SELECT t.id as element_type_id , ST_Union(b.geom) as sum_geo
+                    FROM  element_types t
+                    INNER JOIN attributes a  ON a.owner_element_type_id = t.id
+                    INNER JOIN location_bounds b  ON a.attribute_location_bound_id = b.id AND b.location_type = 'shape'
+                    WHERE t.id = $id
+                    GROUP BY t.id
+                    ) AS subquery
+            WHERE element_types.id=subquery.element_type_id;
+        ");
     }
 }

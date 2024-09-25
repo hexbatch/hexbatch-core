@@ -38,7 +38,7 @@ use InvalidArgumentException;
  * @property int created_at_ts
  * @property int updated_at_ts
  * @property TimeBoundSpan[] time_spans
- * @property AttributeRule[] time_rules
+ * @property AttributeRule[] time_attributes
  *
  */
 class TimeBound extends Model
@@ -63,8 +63,8 @@ class TimeBound extends Model
     const MAKE_REPEAT_SECONDS = 60*30;
 
 
-    public function time_rules() : HasMany {
-        return $this->hasMany(AttributeRule::class,'rule_time_bound_id','id')
+    public function time_attributes() : HasMany {
+        return $this->hasMany(Attribute::class,'attribute_time_bound_id','id')
             ->orderBy('span_start');
     }
 
@@ -160,58 +160,50 @@ class TimeBound extends Model
     }
 
 
-    public static function buildTimeBound(?int $id = null,?int $type_id = null,?int $rule_id = null) : Builder {
+    public static function buildTimeBound(?int $id = null,?int $type_id = null,?int $attribute_id = null) : Builder {
         $build =  TimeBound::select('time_bounds.*')
             ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts")
-            /** @uses TimeBound::time_spans(),TimeBound::time_rules() */
-            ->with('time_spans','time_rules');
+            /** @uses TimeBound::time_spans(),TimeBound::time_attributes() */
+            ->with('time_spans','time_attributes');
 
 
 
-       if ($rule_id) {
-           $build->join('attribute_rules as attached_rules',
-               /**
-                * @param JoinClause $join
-                */
-               function (JoinClause $join)  {
-                   $join
-                       ->on('time_bounds.id','=','attached_rules.rule_time_bound_id');
-               }
-           );
-       }
+        if ($attribute_id) {
+            $build->join('attributes as bounded_attr',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('time_bounds.id','=','bounded_attr.attribute_time_bound_id');
+                }
+            );
+        }
 
-       if ($type_id) {
-           $build->join('attribute_rules as type_rules',
-               /**
-                * @param JoinClause $join
-                */
-               function (JoinClause $join)  {
-                   $join
-                       ->on('time_bounds.id','=','type_rules.rule_time_bound_id');
-               }
-           );
+        if ($type_id) {
 
-           $build->join('attribute_rule_bundles as type_rule_bundles',
-               /**
-                * @param JoinClause $join
-                */
-               function (JoinClause $join)  {
-                   $join
-                       ->on('attribute_rule_bundles.id','=','attribute_rules.rule_bundle_owner_id');
-               }
-           );
+            $build->join('attributes as tounded_attr',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('time_bounds.id','=','tounded_attr.attribute_time_bound_id');
+                }
+            );
 
-           $build->join('attribute_rule_bundles as type_rule_attributes',
-               /**
-                * @param JoinClause $join
-                */
-               function (JoinClause $join) use ($type_id) {
-                   $join
-                       ->on('type_rule_bundles.id','=','type_rule_attributes.applied_rule_bundle_id')
-                       ->where('owner_element_type_id',$type_id);
-               }
-           );
-       }
+            $build->join('element_type_hordes as bounded_horde',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  use($type_id) {
+                    $join
+                        ->on('bounded_horde.horde_attribute_id','=','tounded_attr.id')
+                        ->where('bounded_horde.horde_type_id',$type_id);
+                }
+            );
+
+        }
 
        if ($id) {
            $build->where('id',$id);
