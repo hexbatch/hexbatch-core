@@ -36,7 +36,7 @@ services:
       context: ./docker/postgres
     restart: always
     environment:
-      POSTGRES_DB: "${HBC_DATABASE_NAME}"
+      POSTGRES_DB: "${HBC_DATABASE_ROOT_USER}"
       POSTGRES_USER: "${HBC_DATABASE_ROOT_USER}"
       POSTGRES_PASSWORD: "${HBC_DATABASE_ROOT_PW}"
       APP_USERNAME: "${HBC_DATABASE_USER_NAME}"
