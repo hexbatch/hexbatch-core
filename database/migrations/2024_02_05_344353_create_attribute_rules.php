@@ -94,6 +94,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
+
+
         DB::statement("CREATE TYPE type_of_rule AS ENUM (
             'inactive',
             'required',
@@ -107,12 +109,12 @@ return new class extends Migration
                 */
 
 
-
-
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_type type_of_rule NOT NULL default 'inactive';");
 
-         DB::statement("CREATE TYPE type_of_rule_trigger AS ENUM (
-            'none'
+
+
+         DB::statement("CREATE TYPE type_of_rule_trigger_action AS ENUM (
+            'no_trigger',
             'exists',
             'not_exist',
             'turned_off'
@@ -125,25 +127,25 @@ return new class extends Migration
          destroy set ( element is still there, just has no set), contents popped out to parent, can only destroy if such set has a parent
           */
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_type type_of_rule_trigger NOT NULL default 'none';");
+       DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_action type_of_rule_trigger_action NOT NULL default 'no_trigger';");
 
 
 
 
 
         DB::statement("CREATE TYPE type_of_rule_target AS ENUM (
-            'target_attribute'
+            'target_attribute',
             'type_of_target_attribute',
-            'set_of_attribute
+            'set_of_attribute'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_target_scope type_of_rule_target NOT NULL default 'target_attribute';");
 
 
         DB::statement("CREATE TYPE type_of_rule_target_scope AS ENUM (
-            'same_set'
+            'same_set',
             'parent_set',
-            'child_set
+            'child_set'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_set_scope_target type_of_rule_target_scope NOT NULL default 'same_set';");
@@ -151,9 +153,9 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_rule_restriction AS ENUM (
-            'own_type'
+            'own_type',
             'other_type',
-            'all
+            'all'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_restriction_trigger type_of_rule_restriction NOT NULL default 'own_type';");
@@ -163,7 +165,7 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_rule_quantity AS ENUM (
-            'one'
+            'one',
             'all'
             );");
 
@@ -172,23 +174,23 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_rule_child_logic AS ENUM (
-            'and'
-            'or'
-            'xor'
-            'nand'
+            'and',
+            'or',
+            'xor',
+            'nand',
             'nor'
             );");
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_rule_child_logic NOT NULL default 'one';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_rule_child_logic NOT NULL default 'and';");
 
 
         DB::statement("CREATE TYPE rule_target_action_type AS ENUM (
-            'no_action'
-            'toggle'
-            'off'
-            'on'
-            'write'
-            'make_set'
+            'no_action',
+            'toggle',
+            'off',
+            'on',
+            'write',
+            'make_set',
             'destroy_set'
             );");
 
@@ -196,10 +198,10 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE rule_target_write_type AS ENUM (
-            'none'
-            'overwrite'
-            'or_merge'
-            'and_merge'
+            'none',
+            'overwrite',
+            'or_merge',
+            'and_merge',
             'xor_merge'
             );");
 
@@ -233,7 +235,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('attribute_rules');
         DB::statement("DROP TYPE type_of_rule;");
-        DB::statement("DROP TYPE type_of_rule_trigger;");
+        DB::statement("DROP TYPE type_of_rule_trigger_action;");
         DB::statement("DROP TYPE type_of_rule_target;");
         DB::statement("DROP TYPE type_of_rule_target_scope;");
         DB::statement("DROP TYPE type_of_rule_restriction;");

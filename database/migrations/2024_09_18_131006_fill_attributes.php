@@ -108,8 +108,7 @@ return new class extends Migration
         DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method rule_target_write_type NOT NULL default 'none';");
 
 
-        DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_type_parent_name ON attributes (owner_element_type_id,attribute_name) NULLS NOT DISTINCT;");
+
 
 
 
@@ -154,6 +153,9 @@ return new class extends Migration
             $table->string('attribute_name',128)->nullable(false)->index()
                 ->comment("The unique name of the attribute, using the naming rules");
         });
+
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_type_parent_name ON attributes (owner_element_type_id,attribute_name) NULLS NOT DISTINCT;");
     } //up
 
     /**
