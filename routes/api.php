@@ -25,6 +25,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthenticationController::class, 'login'])->name('core.users.login');
         Route::post('/register', [AuthenticationController::class, 'register'])->name('core.users.register');
         Route::get('/get/{user}', [ElementController::class, 'get_user'])->name('core.users.read');
+        //todo api (get) to check if username is valid and available
     });
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -43,6 +44,8 @@ Route::prefix('v1')->group(function () {
 
                 Route::delete('/delete', [AuthenticationController::class, 'delete_this_token'])
                     ->name('core.users.auth.delete');
+
+                //todo delete user (The user is deleted from this server, any ownership of type and elements and groups is set to the special user for deleted users
             });
 
             Route::get('/groups', [UserGroupController::class, 'list_my_groups'])->name('core.users.groups.list');
