@@ -14,20 +14,20 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use JsonPath\JsonPath;
 
-
+//todo add new fields for rules
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int rule_bundle_owner_id
- * @property int target_attribute_id
+ * @property int rule_trigger_attribute_id
  * @property string ref_uuid
  * @property string rule_name
  * @property int rule_weight
  * @property AttributeRuleType rule_type
  * @property int  rule_value
  * @property string rule_json_path
- * @property bool is_target_including_descendants
+ * @property bool target_descendant_range
  *
  * @property string created_at
  * @property string updated_at
@@ -80,7 +80,7 @@ class AttributeRule extends Model
     }
 
     public function rule_target() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','target_attribute_id');
+        return $this->belongsTo('App\Models\Attribute','rule_trigger_attribute_id');
     }
 
 
@@ -153,16 +153,16 @@ class AttributeRule extends Model
             Log::warning("checkRequired is being run on a different rule type: ".$this->rule_type->value);
             return true;
         }
-        if (!$this->target_attribute_id) {return true;}
+        if (!$this->rule_trigger_attribute_id) {return true;}
         $total_sum = 0;
         //see if the target matches any attribute in the horde
 
-        //get all the decendants of the attribute in the horde, unless is_target_including_descendants
-        if($this->is_target_including_descendants) {
+        //get all the decendants of the attribute in the horde, unless target_descendant_range
+        if($this->target_descendant_range) {
             $builder = ElementTypeHorde::getDecendants($this->rule_target);
         } else {
             /** @var ElementTypeHorde $horde_found */
-            $horde_found = $type->type_hordes()->where('horde_attribute_id',$this->target_attribute_id)->first();
+            $horde_found = $type->type_hordes()->where('horde_attribute_id',$this->rule_trigger_attribute_id)->first();
             if (!$horde_found) {return true;}
             $builder = Attribute::where('id',$horde_found->horde_attribute_id);
         }

@@ -8,17 +8,12 @@ use App\Enums\Attributes\AttributeRuleType;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Bounds\LocationBoundGathering;
-use App\Helpers\Bounds\TimeBoundGathering;
+
 use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\AttributeRule;
 use App\Models\AttributeRuleBundle;
 use App\Models\ElementType;
-use App\Models\LocationBound;
-use App\Models\TimeBound;
-
-use App\Models\UserGroup;
 use App\Rules\BoundNameReq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -26,16 +21,16 @@ use Illuminate\Validation\ValidationException;
 
 class RuleGathering
 {
+    //todo update the rule gathering
     public ?AttributeRule $current_rule;
     public Attribute $attribute;
     public ElementType $parent_type;
 
 
-    public ?int $target_attribute_id = null;
+    public ?int $rule_trigger_attribute_id = null;
+    public ?int $target_descendant_range = null;
 
-    public ?int $rule_time_bound_id = null;
-    public ?int $rule_location_bound_id = null;
-    public ?int $is_target_including_descendants = null;
+
     public ?int $rule_weight = null;
     public ?int $rule_value = null;
     public ?string $rule_json_path = null;
@@ -94,7 +89,7 @@ class RuleGathering
             $hint_attribute = $request->request->getString('target_attribute');
             /** @var Attribute $target_attribute */
             $target_attribute = (new Attribute())->resolveRouteBinding($hint_attribute);
-            $this->target_attribute_id = $target_attribute->id;
+            $this->rule_trigger_attribute_id = $target_attribute->id;
             $user = Utilities::getTypeCastedAuthUser();
             if (!$target_attribute->type_owner->canUserViewDetails($user->id)) {
                 throw new HexbatchNotPossibleException(__("msg.rule_can_only_target_attributes_user_can_see",['ref'=>$target_attribute->getName()]),
@@ -103,8 +98,9 @@ class RuleGathering
             }
 
             //only fill this in if the attribute is in the rule
-            if ( $request->request->has('is_target_including_descendants')) {
-                $this->is_target_including_descendants = $request->request->getBoolean('is_target_including_descendants');
+            if ( $request->request->has('target_descendant_range')) {
+                $this->target_descendant_range = $request->request->getInt('target_descendant_range');
+                if ($this->target_descendant_range < 0) { $this->target_descendant_range = 0;}
             }
         }
 
@@ -131,8 +127,8 @@ class RuleGathering
         if ($this->rule_name !== null ) { $node->rule_name = $this->rule_name; }
 
         if (!$this->attribute->isInUse()) {
-            if ($this->target_attribute_id !== null ) { $node->target_attribute_id = $this->target_attribute_id; }
-            if ($this->is_target_including_descendants !== null ) { $node->is_target_including_descendants = $this->is_target_including_descendants; }
+            if ($this->rule_trigger_attribute_id !== null ) { $node->rule_trigger_attribute_id = $this->rule_trigger_attribute_id; }
+            if ($this->target_descendant_range !== null ) { $node->target_descendant_range = $this->target_descendant_range; }
             if ($this->rule_weight !== null ) { $node->rule_weight = $this->rule_weight; }
             if ($this->rule_value !== null ) { $node->rule_value = $this->rule_value; }
             if ($this->rule_json_path !== null ) { $node->rule_json_path = $this->rule_json_path; }

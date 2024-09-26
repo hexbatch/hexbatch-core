@@ -5,14 +5,24 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+// todo rules are actions, they can have a target attribute or type that the user making the rule has edit privilege . See below
 /*
- attribute_force_rules:
-        parent_attribute_id
-        attribute_id:
-        weight: integer:  (negative means more repulsed, positive means more attracted)
-        numeric_min: number nullable
-        numeric_max: number nullable
-        string_value: (constant or regex)
+ * Add to rules:
+
+ *
+ * --discussion
+ *
+ *  new types for triggers: the attribute changes value (any value), be turned off, or turned on.
+ *
+ *  The trigger has to be something not whitelisted and the user is not on that . The target must be editable.
+ *  Remotes can be linked together in a tree, with each node doing its own bool logic from the children (and or xor)
+ * so add bool logic column to the remotes, as well as a parent remote.
+ *  Rules in a tree do not have to do anything except for the root, but any node can do a regular rule if its bool from children is truthful
+ *  Independent rules just listen to triggers
+ *  Need new api to copy over all the rules from one attribute to another, and not just one at a time.
+ *
+ * Remote chains and unrelated can be saved per attribute, and that attribute copied.
+ * Remote chains can listen to ancestors so can be reused for different things.
  */
 return new class extends Migration
 {
@@ -21,6 +31,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+
         Schema::create('attribute_rules', function (Blueprint $table) {
             $table->id();
 
@@ -32,10 +43,34 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('target_attribute_id')
+            $table->foreignId('parent_rule_id')
+                ->nullable()->default(null)
+                ->comment("Rules can be chained")
+                ->index('idx_parent_rule_id')
+                ->constrained('attribute_rules')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('rule_trigger_attribute_id')
                 ->nullable()->default(null)
                 ->comment("If this rule is depending on an attribute,this can be a stand alone, or ancestor, affecting all decendants")
-                ->index('idx_target_attribute_id')
+                ->index('idx_rule_trigger_attribute_id')
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('rule_target_attribute_id')
+                ->nullable()->default(null)
+                ->comment("The target of the rule, this can be descendants or not")
+                ->index('idx_rule_target_attribute_id')
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('data_attribute_id')
+                ->nullable()->default(null)
+                ->comment("If doing a write, use this. If not set and a write, then only works if target is nullable, then set to null")
+                ->index('idx_data_source_attribute_id')
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -46,8 +81,20 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-            $table->boolean('is_target_including_descendants')->default(true)->nullable(false)
-                ->comment('if true then value is nullable');
+            $table->integer('trigger_descendant_range')->default(0)->nullable(false)
+                ->comment('default means do not use descenands, otherwise how many generations, positive only');
+
+            $table->integer('target_descendant_range')->default(0)->nullable(false)
+                ->comment('default means do not use descenands, otherwise how many generations, positive only');
+
+            $table->integer('data_descendant_range')->default(0)->nullable(false)
+                ->comment('default means do not use descenands, otherwise how many generations, positive only');
+
+            $table->integer('scope_range_target')->default(0)->nullable(false)
+                ->comment('how many parent sets or child sets to range');
+
+            $table->integer('scope_range_trigger')->default(0)->nullable(false)
+                ->comment('how many parent sets or child sets to range');
 
 
             $table->integer('rule_weight')->nullable(false)->default(1)
@@ -64,18 +111,118 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("CREATE TYPE type_of_attribute_rule AS ENUM (
+        DB::statement("CREATE TYPE type_of_rule AS ENUM (
             'inactive',
             'required',
             'set_membership_affinity'
-            'set_toggle_affinity'
+            'set_toggle_affinity',
+            'action'
             );");
+
+
 
         // Affinity membership depends on elements in a set to decide to join it when asked by command,
         // Affinity toggle can turn an attribute to not be readable or writable (both at the same time) in a set based on the contents
         // and the required is build time, so no checking there
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_type type_of_attribute_rule NOT NULL default 'inactive';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_type type_of_rule NOT NULL default 'inactive';");
+
+         DB::statement("CREATE TYPE type_of_rule_trigger AS ENUM (
+            'none'
+            'exists',
+            'not_exist',
+            'turned_off'
+            'turned_on',
+            'set_created'
+            'set_destroyed'
+            );");
+         /*
+         make set, just ignore if set already exists
+         destroy set ( element is still there, just has no set), contents popped out to parent, can only destroy if such set has a parent
+          */
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_type type_of_rule_trigger NOT NULL default 'none';");
+
+
+
+
+
+        DB::statement("CREATE TYPE type_of_rule_target AS ENUM (
+            'target_attribute'
+            'type_of_target_attribute',
+            'set_of_attribute
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_target_scope type_of_rule_target NOT NULL default 'target_attribute';");
+
+
+        DB::statement("CREATE TYPE type_of_rule_target_scope AS ENUM (
+            'same_set'
+            'parent_set',
+            'child_set
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_set_scope_target type_of_rule_target_scope NOT NULL default 'same_set';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_set_scope_trigger type_of_rule_target_scope NOT NULL default 'same_set';");
+
+
+        DB::statement("CREATE TYPE type_of_rule_restriction AS ENUM (
+            'own_type'
+            'other_type',
+            'all
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_restriction_trigger type_of_rule_restriction NOT NULL default 'own_type';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_restriction_target type_of_rule_restriction NOT NULL default 'own_type';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_restriction_data type_of_rule_restriction NOT NULL default 'own_type';");
+
+
+
+        DB::statement("CREATE TYPE type_of_rule_quantity AS ENUM (
+            'one'
+            'all'
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN scope_quantity_target type_of_rule_quantity NOT NULL default 'one';");
+
+
+
+        DB::statement("CREATE TYPE type_of_rule_child_logic AS ENUM (
+            'and'
+            'or'
+            'xor'
+            'nand'
+            'nor'
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_rule_child_logic NOT NULL default 'one';");
+
+
+        DB::statement("CREATE TYPE rule_target_action_type AS ENUM (
+            'no_action'
+            'toggle'
+            'off'
+            'on'
+            'write'
+            'make_set'
+            'destroy_set'
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN target_action rule_target_action_type NOT NULL default 'no_action';");
+
+
+        DB::statement("CREATE TYPE rule_target_write_type AS ENUM (
+            'overwrite'
+            'or_merge'
+            'and_merge'
+            'xor_merge'
+            );");
+
+
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN target_writing_method rule_target_write_type NOT NULL default 'overwrite';");
+
+
 
         DB::statement("ALTER TABLE attribute_rules ALTER COLUMN created_at SET DEFAULT NOW();");
 
@@ -100,6 +247,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('attribute_rules');
-        DB::statement("DROP TYPE type_of_attribute_rule;");
+        DB::statement("DROP TYPE type_of_rule;");
+        DB::statement("DROP TYPE type_of_rule_trigger;");
     }
 };
