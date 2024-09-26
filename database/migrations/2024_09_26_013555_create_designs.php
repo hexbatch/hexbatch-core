@@ -31,10 +31,17 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('design_set_id')
+            $table->foreignId('design_type_as_set_id')
                 ->nullable()->default(null)
-                ->comment("The set this design information is for")
-                ->constrained('element_sets')
+                ->comment("Design to show the sets made by the type")
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('design_type_as_element_id')
+                ->nullable()->default(null)
+                ->comment("Design to show the elements made by the type")
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -59,10 +66,13 @@ return new class extends Migration
             "CREATE UNIQUE INDEX udx_design_attribute_id ON designs (design_attribute_id) NULLS NOT DISTINCT;");
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_design_set_id ON designs (design_set_id) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_design_type_as_set_id ON designs (design_type_as_set_id) NULLS NOT DISTINCT;");
+
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_design_type_as_element_id ON designs (design_type_as_element_id) NULLS NOT DISTINCT;");
 
         DB::statement("ALTER TABLE designs ADD CONSTRAINT chk_one_design_target_is_not_null CHECK (
-            num_nonnulls(design_type_id, design_attribute_id,design_set_id) = 1)
+            num_nonnulls(design_type_id, design_attribute_id,design_type_as_set_id,design_type_as_element_id) = 1)
         ;");
 
         DB::statement("ALTER TABLE designs
