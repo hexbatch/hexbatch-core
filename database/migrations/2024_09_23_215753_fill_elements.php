@@ -70,3 +70,26 @@ return new class extends Migration
         });
     }
 };
+
+// todo about the element value table, when a row is popped off due to an element coming back from the child set, the json can be optionally merged into its higher shell value, this is a table bool on the attribute (so adjust that table), but its marked on this table too, for lookup speed
+
+// todo sets can be destroyed or created via api calls, and also by rules. If an element is already doing a set, that creation is ignored, likewise opposite.
+
+// todo rules are actions, they can have a target attribute or type that the user making the rule has edit privilege . See below
+/*
+ * Add to rules:
+ *  new types for targets: toggle|turn off|turn on , the target attribute or type's attributes, set to a constant,
+ *       or set the target value with the value of another attribute (add new attribute to get that from, and a new json field for the constant)
+ *
+ *  new types for triggers: the attribute changes value (any value), be turned off, or turned on.
+ *  Change name of existing target to trigger attribute.
+ *  The trigger has to be something not whitelisted and the user is not on that . The target must be editable.
+ *  Remotes can be linked together in a tree, with each node doing its own bool logic from the children (and or xor)
+ * so add bool logic column to the remotes, as well as a parent remote.
+ *  Rules in a tree do not have to do anything except for the root, but any node can do a regular rule if its bool from children is truthful
+ *  Independent rules just listen to triggers
+ *  Need new api to copy over all the rules from one attribute to another, and not just one at a time.
+ *
+ * Remote chains and unrelated can be saved per attribute, and that attribute copied.
+ * Remote chains can listen to ancestors so can be reused for different things.
+ */

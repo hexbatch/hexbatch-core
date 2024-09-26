@@ -41,6 +41,7 @@ class StandardAttributes
     const STANDARD_ATTRIBUTE_SMALL_THUMB =  'small_thumbnail';
     const STANDARD_ATTRIBUTE_MEDIUM_THUMB =  'medium_thumbnail';
 
+    //todo add in standard attribute for expiration
 
     const UUIDS = [
         self::BASE_ATTRIBUTE_NAME => 'a8f8c420-cbba-41a7-b893-c31c478c97fc',
