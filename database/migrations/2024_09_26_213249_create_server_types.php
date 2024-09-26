@@ -12,23 +12,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_types', function (Blueprint $table) {
+        Schema::create('server_types', function (Blueprint $table) {
             $table->id();
 
 
-            $table->foreignId('owner_user_id')
+            $table->foreignId('server_user_type_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The owner of this type")
-                ->index('idx_element_owner_user_id')
-                ->constrained('users')
+                ->comment("The owner of the element")
+                ->index('idx_server_user_type_id')
+                ->constrained('user_types')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
 
-            $table->foreignId('user_type_id')
+            $table->foreignId('server_type_id')
                 ->nullable()->default(null)
-                ->comment("The type made for this user")
-                ->index('idx_user_type_id')
+                ->comment("The type made for this server")
+                ->index('idx_server_type_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -36,10 +36,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("ALTER TABLE user_types ALTER COLUMN created_at SET DEFAULT NOW();");
+        DB::statement("ALTER TABLE server_types ALTER COLUMN created_at SET DEFAULT NOW();");
 
         DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON user_types FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+            CREATE TRIGGER update_modified_time BEFORE UPDATE ON server_types FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
     }
 
@@ -48,6 +48,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_types');
+        Schema::dropIfExists('server_types');
     }
 };

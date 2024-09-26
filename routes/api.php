@@ -45,7 +45,8 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/delete', [AuthenticationController::class, 'delete_this_token'])
                     ->name('core.users.auth.delete');
 
-                //todo delete user (The user is deleted from this server, any ownership of type and elements and groups is set to the special user for deleted users
+                //todo delete user (The user is deleted from this server, any ownership of type and elements and groups,
+                //  if in use is set to the special user for deleted users, anything not in use is deleted
             });
 
             Route::get('/groups', [UserGroupController::class, 'list_my_groups'])->name('core.users.groups.list');

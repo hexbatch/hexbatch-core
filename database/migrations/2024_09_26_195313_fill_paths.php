@@ -48,9 +48,18 @@ return new class extends Migration
 
             $table->foreignId('path_element_set_id')
                 ->nullable()->default(null)
-                ->comment("The attribute the path part may be about")
+                ->comment("The set this should be in")
                 ->index('idx_path_element_set_id')
                 ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('path_user_type_id')
+                ->nullable()
+                ->default(null)
+                ->comment("When the searched must be owned by someone")
+                ->index('idx_path_user_type_id')
+                ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -115,12 +124,14 @@ return new class extends Migration
             $table->dropForeign(['path_type_id']);
             $table->dropForeign(['path_attribute_id']);
             $table->dropForeign(['path_element_set_id']);
+            $table->dropForeign(['path_user_type_id']);
 
             $table->dropColumn('path_owner_id');
             $table->dropColumn('parent_path_id');
             $table->dropColumn('path_type_id');
             $table->dropColumn('path_attribute_id');
             $table->dropColumn('path_element_set_id');
+            $table->dropColumn('path_user_type_id');
 
             $table->dropColumn('ref_uuid');
             $table->dropColumn('path_min_gap');

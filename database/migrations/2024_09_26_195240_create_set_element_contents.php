@@ -18,20 +18,21 @@ return new class extends Migration
             $table->foreignId('owning_set_id')
                 ->nullable()->default(null)
                 ->comment("the set this is about")
+                ->index('idx_owning_set_id')
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('member_element_id')
+            $table->foreignId('set_content_element_id')
                 ->nullable()->default(null)
                 ->comment("The element that belongs to the set ")
+                ->index('idx_set_content_element_id')
                 ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->timestamps();
         });
-
 
 
 

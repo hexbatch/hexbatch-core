@@ -42,6 +42,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('rule_trigger_type_associated_id')
+                ->nullable()->default(null)
+                ->comment("If this rule is depending on the attribute having a type or subtype (ancestor type like a user token)")
+                ->index('idx_rule_trigger_type_associated_id')
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->foreignId('rule_target_attribute_id')
                 ->nullable()->default(null)
                 ->comment("The target of the rule, this can be descendants or not")
@@ -78,6 +86,12 @@ return new class extends Migration
 
             $table->integer('scope_range_trigger')->default(0)->nullable(false)
                 ->comment('how many parent sets or child sets to range');
+
+            $table->integer('rule_min_matches')->default(null)->nullable()
+                ->comment('If there is a minimum number of matches needed for this rule');
+
+            $table->integer('rule_max_matches')->default(null)->nullable()
+                ->comment('If there is a maximum number of matches needed for this rule');
 
 
             $table->integer('rule_weight')->nullable(false)->default(1)
@@ -164,13 +178,6 @@ return new class extends Migration
 
 
 
-        DB::statement("CREATE TYPE type_of_rule_quantity AS ENUM (
-            'one',
-            'all'
-            );");
-
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN scope_quantity_target type_of_rule_quantity NOT NULL default 'one';");
-
 
 
         DB::statement("CREATE TYPE type_of_child_logic AS ENUM (
@@ -242,7 +249,6 @@ return new class extends Migration
         DB::statement("DROP TYPE type_of_rule_target;");
         DB::statement("DROP TYPE type_of_rule_target_scope;");
         DB::statement("DROP TYPE type_of_rule_restriction;");
-        DB::statement("DROP TYPE type_of_rule_quantity;");
         DB::statement("DROP TYPE type_of_child_logic;");
         DB::statement("DROP TYPE rule_target_action_type;");
         DB::statement("DROP TYPE rule_target_write_type;");

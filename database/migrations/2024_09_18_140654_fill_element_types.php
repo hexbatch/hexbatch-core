@@ -21,7 +21,7 @@ return new class extends Migration
                 ->index('idx_element_owner_type_id')
                 ->constrained('user_types')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
 
 
             $table->foreignId('editing_user_group_id')
@@ -80,6 +80,12 @@ return new class extends Migration
 
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then cannot be added as parent');
+
+            //todo remember this flag
+            $table->boolean('do_children_inherit_attributes')->default(true)->nullable(false)
+                ->comment('A type can have children types without adding to their horde. Only if all attr is const. '.
+                    'This is usually for standard types being base types. '.
+                'Can read const parent or ancestor types marked this way by regular read, and the system will lookup the first attr in the ancestors that match');
 
             $table->integer('type_start_ts')->default(null)->nullable()
                 ->comment('The union of all child attribute time bounds. This is updated to show current span start');
@@ -151,6 +157,7 @@ return new class extends Migration
             $table->dropColumn('is_retired');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final');
+            $table->dropColumn('do_children_inherit_attributes');
             $table->dropColumn('type_start_ts');
             $table->dropColumn('type_end_ts');
             $table->dropColumn('type_next_period_starts_ts');

@@ -30,7 +30,7 @@ return new class extends Migration
                 ->index('idx_element_owner_user_type_id')
                 ->constrained('user_types')
                 ->cascadeOnUpdate()
-                ->nullOnDelete();
+                ->restrictOnDelete();
 
             $table->uuid('ref_uuid')
                 ->unique()

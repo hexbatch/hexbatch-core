@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('parent_set_id')
                 ->nullable()->default(null)
                 ->comment("the set this is about")
+                ->index('idx_parent_set_id')
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->foreignId('child_set_id')
                 ->nullable()->default(null)
                 ->comment("The element that belongs to the set ")
+                ->index('idx_child_set_id')
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
