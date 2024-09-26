@@ -19,7 +19,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
-
+//add in popped_writing_method
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder

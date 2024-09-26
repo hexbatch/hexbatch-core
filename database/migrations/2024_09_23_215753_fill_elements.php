@@ -71,14 +71,4 @@ return new class extends Migration
     }
 };
 
-// todo about the element value table, when a row is popped off due to an element coming back from the child set,
-//  the json can be optionally merged into its higher shell value, this is a table bool on the attribute (so adjust that table), but its marked on this table too, for lookup speed
-
-// todo sets can be destroyed or created via api calls, and also by rules. If an element is already doing a set, that creation is ignored, likewise opposite.
-
-
-
-//todo special attributes update db status for mechanics when they are written to. This is how events mark the waiting items for completion
-// here, the code will listen to changes on a special system attribute, when it writes attributes (an if statement)
-// and each child attribute there will write to a specific column identified by its value (ref_uuid stored)
-// so when something is pending, we have its ref and then update cancelled or approved for it
+//todo the element_values table should have a pointer to a set, this is runtime only and allows searching attributes that show link sets in the search

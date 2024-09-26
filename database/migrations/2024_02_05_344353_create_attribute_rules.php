@@ -5,25 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-// todo rules are actions, they can have a target attribute or type that the user making the rule has edit privilege . See below
-/*
- * Add to rules:
 
- *
- * --discussion
- *
- *  new types for triggers: the attribute changes value (any value), be turned off, or turned on.
- *
- *  The trigger has to be something not whitelisted and the user is not on that . The target must be editable.
- *  Remotes can be linked together in a tree, with each node doing its own bool logic from the children (and or xor)
- * so add bool logic column to the remotes, as well as a parent remote.
- *  Rules in a tree do not have to do anything except for the root, but any node can do a regular rule if its bool from children is truthful
- *  Independent rules just listen to triggers
- *  Need new api to copy over all the rules from one attribute to another, and not just one at a time.
- *
- * Remote chains and unrelated can be saved per attribute, and that attribute copied.
- * Remote chains can listen to ancestors so can be reused for different things.
- */
+
 return new class extends Migration
 {
     /**
@@ -118,12 +101,13 @@ return new class extends Migration
             'set_toggle_affinity',
             'action'
             );");
+        /* Affinity membership depends on elements in a set to decide to join it when asked by command,
+                 Affinity toggle can turn an attribute to not be readable or writable (both at the same time) in a set based on the contents
+                 and the required is build time, so no checking there
+                */
 
 
 
-        // Affinity membership depends on elements in a set to decide to join it when asked by command,
-        // Affinity toggle can turn an attribute to not be readable or writable (both at the same time) in a set based on the contents
-        // and the required is build time, so no checking there
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_type type_of_rule NOT NULL default 'inactive';");
 
@@ -212,6 +196,7 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE rule_target_write_type AS ENUM (
+            'none'
             'overwrite'
             'or_merge'
             'and_merge'
@@ -220,7 +205,7 @@ return new class extends Migration
 
 
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN target_writing_method rule_target_write_type NOT NULL default 'overwrite';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN target_writing_method rule_target_write_type NOT NULL default 'none';");
 
 
 
@@ -249,5 +234,13 @@ return new class extends Migration
         Schema::dropIfExists('attribute_rules');
         DB::statement("DROP TYPE type_of_rule;");
         DB::statement("DROP TYPE type_of_rule_trigger;");
+        DB::statement("DROP TYPE type_of_rule_target;");
+        DB::statement("DROP TYPE type_of_rule_target_scope;");
+        DB::statement("DROP TYPE type_of_rule_restriction;");
+        DB::statement("DROP TYPE type_of_rule_quantity;");
+        DB::statement("DROP TYPE type_of_rule_child_logic;");
+        DB::statement("DROP TYPE rule_target_action_type;");
+        DB::statement("DROP TYPE rule_target_write_type;");
+
     }
 };

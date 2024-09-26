@@ -98,17 +98,15 @@ return new class extends Migration
             $table->timestamps();
 
 
-            $table->text('value_json_path')->nullable()->default(null)
-                ->comment("if set the value json has to match this, pointer whitelist can apply");
 
-            $table->jsonb('attribute_value')
-                ->nullable()->default(null)->comment("The value of the attribute");
 
-            $table->string('attribute_name',128)->nullable(false)->index()
-                ->comment("The unique name of the attribute, using the naming rules");
+
 
 
         });
+
+        DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method rule_target_write_type NOT NULL default 'none';");
+
 
         DB::statement(/** @lang text */
             "CREATE UNIQUE INDEX udx_type_parent_name ON attributes (owner_element_type_id,attribute_name) NULLS NOT DISTINCT;");
@@ -144,6 +142,18 @@ return new class extends Migration
             );");
 
         DB::statement("ALTER TABLE attributes Add COLUMN attribute_access_type type_of_attribute_access NOT NULL default 'normal';");
+
+        Schema::table('attributes', function (Blueprint $table) {
+            $table->jsonb('attribute_value')
+                ->nullable()->default(null)->comment("The value of the attribute");
+
+
+            $table->text('value_json_path')->nullable()->default(null)
+                ->comment("if set the value json has to match this, pointer whitelist can apply");
+
+            $table->string('attribute_name',128)->nullable(false)->index()
+                ->comment("The unique name of the attribute, using the naming rules");
+        });
     } //up
 
     /**
@@ -181,6 +191,7 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('server_access_type');
             $table->dropColumn('attribute_access_type');
+            $table->dropColumn('popped_writing_method');
         });
 
         DB::statement("DROP TYPE type_of_server_access;");

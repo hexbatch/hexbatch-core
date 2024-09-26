@@ -10,6 +10,13 @@ use App\Models\Attribute;
 use App\Models\User;
 //todo redo standard setup because all attributes exists in types only, also add in attribute for expiration_at
 
+
+//todo special attributes update db status for mechanics when they are written to. This is how events mark the waiting items for completion
+
+    // here, the code will listen to changes on a special system attribute, when it writes attributes (an if statement)
+    // and each child attribute there will write to a specific column identified by its value (ref_uuid stored)
+    // so when something is pending, we have its ref and then update cancelled or approved for it
+
 /**
  * Standard attributes are all final, except for the ones that are parents.
  * They are readable by anyone, unless made private in type

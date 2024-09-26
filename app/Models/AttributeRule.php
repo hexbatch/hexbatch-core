@@ -15,6 +15,26 @@ use Illuminate\Support\Facades\Log;
 use JsonPath\JsonPath;
 
 //todo add new fields for rules
+
+/*
+ * Add to rules:
+
+ *
+ * --discussion
+ *
+ *  new types for triggers: the attribute changes value (any value), be turned off, or turned on.
+ *
+ *  The trigger has to be something not whitelisted and the user is not on that . The target must be editable.
+ *  Remotes can be linked together in a tree, with each node doing its own bool logic from the children (and or xor)
+ * so add bool logic column to the remotes, as well as a parent remote.
+ *  Rules in a tree do not have to do anything except for the root, but any node can do a regular rule if its bool from children is truthful
+ *  Independent rules just listen to triggers
+ *  Need new api to copy over all the rules from one attribute to another, and not just one at a time.
+ *
+ * Remote chains and unrelated can be saved per attribute, and that attribute copied.
+ * Remote chains can listen to ancestors so can be reused for different things.
+ */
+
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
