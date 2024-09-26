@@ -173,15 +173,18 @@ return new class extends Migration
 
 
 
-        DB::statement("CREATE TYPE type_of_rule_child_logic AS ENUM (
+        DB::statement("CREATE TYPE type_of_child_logic AS ENUM (
             'and',
             'or',
             'xor',
             'nand',
-            'nor'
+            'nor',
+            'xnor',
+            'always_true',
+            'always_false'
             );");
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_rule_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
 
 
         DB::statement("CREATE TYPE rule_target_action_type AS ENUM (
@@ -240,7 +243,7 @@ return new class extends Migration
         DB::statement("DROP TYPE type_of_rule_target_scope;");
         DB::statement("DROP TYPE type_of_rule_restriction;");
         DB::statement("DROP TYPE type_of_rule_quantity;");
-        DB::statement("DROP TYPE type_of_rule_child_logic;");
+        DB::statement("DROP TYPE type_of_child_logic;");
         DB::statement("DROP TYPE rule_target_action_type;");
         DB::statement("DROP TYPE rule_target_write_type;");
 

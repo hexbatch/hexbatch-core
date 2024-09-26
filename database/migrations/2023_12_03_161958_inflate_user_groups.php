@@ -15,11 +15,11 @@ return new class extends Migration
         Schema::table('user_groups', function (Blueprint $table) {
 
 
-            $table->foreignId('user_id')
+            $table->foreignId('owning_user_type_id')
                 ->nullable(false)
                 ->comment("The owner")
-                ->index('idx_group_owner_user_id')
-                ->constrained('users')
+                ->index('idx_owning_user_type_id')
+                ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -52,7 +52,7 @@ return new class extends Migration
                 ->comment("The unique name of the group, using the naming rules");
 
 
-            $table->unique(['user_id','group_name']);
+            $table->unique(['owning_user_type_id','group_name']);
         });
 
 
@@ -69,10 +69,10 @@ return new class extends Migration
 
             DB::statement("DROP TRIGGER update_modified_time ON user_groups");
 
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['owning_user_type_id']);
             $table->dropColumn('group_name');
             $table->dropColumn('ref_uuid');
-            $table->dropColumn('user_id');
+            $table->dropColumn('owning_user_type_id');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
         });

@@ -23,12 +23,12 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('element_owner_user_id')
+            $table->foreignId('owner_user_type_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The owner of the remote")
-                ->index('idx_element_owner_user_id')
-                ->constrained('users')
+                ->comment("The owner of the element")
+                ->index('idx_element_owner_user_type_id')
+                ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
@@ -59,10 +59,10 @@ return new class extends Migration
 
         Schema::table('elements', function (Blueprint $table) {
             $table->dropForeign(['element_parent_type_id']);
-            $table->dropForeign(['element_owner_user_id']);
+            $table->dropForeign(['owner_user_type_id']);
 
             $table->dropColumn('element_parent_type_id');
-            $table->dropColumn('element_owner_user_id');
+            $table->dropColumn('owner_user_type_id');
 
             $table->dropColumn('ref_uuid');
             $table->dropColumn('created_at');

@@ -25,11 +25,11 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-            $table->foreignId('user_id')
+            $table->foreignId('member_user_type_id')
                 ->nullable(false)
                 ->comment("The group member/maybe admin too")
-                ->index('idx_group_member_user_id')
-                ->constrained('users')
+                ->index('idx_member_user_type_id')
+                ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -38,7 +38,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['user_group_id','user_id']);
+            $table->unique(['user_group_id','member_user_type_id']);
         });
 
 

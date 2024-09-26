@@ -14,19 +14,19 @@ return new class extends Migration
     {
         Schema::table('element_types', function (Blueprint $table) {
 
-            $table->foreignId('user_id')
+            $table->foreignId('owner_type_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The owner of the remote")
-                ->index('idx_element_type_user_id')
-                ->constrained('users')
+                ->index('idx_element_owner_type_id')
+                ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
 
             $table->foreignId('editing_user_group_id')
                 ->nullable()->default(null)
-                ->comment("Optional user group that allows editing of type. Null fallsback on the owner admin group")
+                ->comment("Optional group that allows editing of type. Null fallsback on the owner admin group")
                 ->index('idx_element_type_editing_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
@@ -34,7 +34,7 @@ return new class extends Migration
 
             $table->foreignId('inheriting_user_group_id')
                 ->nullable()->default(null)
-                ->comment("Optional user group that controls inheritance, and who can use this as ancestor. Null is anyone")
+                ->comment("Optional group that controls inheritance, and who can use this as ancestor. Null is anyone")
                 ->index('idx_element_type_inheriting_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
@@ -42,7 +42,7 @@ return new class extends Migration
 
             $table->foreignId('new_elements_user_group_id')
                 ->nullable()->default(null)
-                ->comment("Additional users who can create elements from this token. Null is anyone")
+                ->comment("Optinal group who can create elements from this token. Null is anyone")
                 ->index('idx_type_new_elements_user_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
@@ -120,7 +120,7 @@ return new class extends Migration
         ");
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_user_per_type_name ON element_types (user_id,type_name) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_user_per_type_name ON element_types (owner_type_id,type_name) NULLS NOT DISTINCT;");
     }
 
     /**
@@ -131,14 +131,14 @@ return new class extends Migration
         DB::statement("DROP TRIGGER update_modified_time ON element_types");
 
         Schema::table('element_types', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['owner_type_id']);
             $table->dropForeign(['editing_user_group_id']);
             $table->dropForeign(['inheriting_user_group_id']);
             $table->dropForeign(['new_elements_user_group_id']);
             $table->dropForeign(['type_write_user_group_id']);
             $table->dropForeign(['type_read_user_group_id']);
 
-            $table->dropColumn('user_id');
+            $table->dropColumn('owner_type_id');
             $table->dropColumn('editing_user_group_id');
             $table->dropColumn('inheriting_user_group_id');
             $table->dropColumn('new_elements_user_group_id');
