@@ -33,6 +33,7 @@ use JsonPath\JsonPath;
  *
  * Remote chains and unrelated can be saved per attribute, and that attribute copied.
  * Remote chains can listen to ancestors so can be reused for different things.
+ * todo rules can be edited even if the type is in use and has elements, this is because rules are static
  */
 
 /**

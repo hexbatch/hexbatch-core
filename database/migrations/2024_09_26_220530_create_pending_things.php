@@ -24,6 +24,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('thing_call_result_set_id')
+                ->nullable()->default(null)
+                ->comment("each non trivial thing to do has a remote or stack reprented here")
+                ->index('idx_thing_call_result_set_id')
+                ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+
             $table->foreignId('thing_one_set_id')
                 ->nullable()->default(null)
                 ->comment("When a source set A is needed")
@@ -110,6 +119,8 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_thing_to_do AS ENUM (
             'nothing',
+            'remote',
+            'stack',
             'element_creation',
             'element_batch_creation',
             'owner_change',
@@ -121,6 +132,7 @@ return new class extends Migration
             'set_leave',
             'set_child_created',
             'set_child_destroyed',
+            'set_top_level_destroyed',
             'set_link_created',
             'set_link_destroyed',
             'server_add_element',

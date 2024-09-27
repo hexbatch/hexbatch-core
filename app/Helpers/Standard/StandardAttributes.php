@@ -9,9 +9,18 @@ use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\User;
 //todo redo standard setup because all attributes exists in types only, also add in attribute for expiration_at
+// standard type has no attributes
+// this_server type (no child will inherit attributes) parent is standard type
+// need description type (child will inherit attributes), parent is this_server
+// display type ( child will inherit attributes) , parent is this_server
+// user type (no child will inherit attributes) (parents are display and description)
+// admin type (child will inherit attributes) (parent is user)
+// server type (no child will inherit attributes) (parent is user)
+// media type (child will inherit attributes) (, parent is this_server)
+// events type ( no child will inherit attributes, contains the event attributes) (parent is this_server) custom events inherit from here
+// note: all standard attributes can be used by anyone, in other types, and no standard attribute will have bounds
+// note: see standard in docs for more to fles this out
 
-
-//todo special attributes update db status for mechanics when they are written to. This is how events mark the waiting items for completion
 
     // here, the code will listen to changes on a special system attribute, when it writes attributes (an if statement)
     // and each child attribute there will write to a specific column identified by its value (ref_uuid stored)

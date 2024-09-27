@@ -36,7 +36,8 @@ return new class extends Migration
 
             $table->foreignId('rule_trigger_attribute_id')
                 ->nullable()->default(null)
-                ->comment("If this rule is depending on an attribute,this can be a stand alone, or ancestor, affecting all decendants")
+                ->comment("If this rule is depending on an attribute,this can be a stand alone, or ancestor, affecting all decendants. ".
+                    "This can also be an event attribute")
                 ->index('idx_rule_trigger_attribute_id')
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
@@ -44,7 +45,8 @@ return new class extends Migration
 
             $table->foreignId('rule_trigger_type_associated_id')
                 ->nullable()->default(null)
-                ->comment("If this rule is depending on the attribute having a type or subtype (ancestor type like a user token)")
+                ->comment("If this rule is depending on the attribute having a type or subtype (ancestor type like a user token). ".
+                    "If listening to event, then this should point to the event type")
                 ->index('idx_rule_trigger_type_associated_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
