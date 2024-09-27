@@ -27,7 +27,7 @@ return new class extends Migration
 
             $table->foreignId('user_type_id')
                 ->nullable()->default(null)
-                ->comment("The type made for this user. This is derived from the standard user_type")
+                ->comment("The type made for this user. This is derived from at least one server type")
                 ->index('idx_user_type_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()

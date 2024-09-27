@@ -15,23 +15,21 @@ return new class extends Migration
         Schema::create('server_types', function (Blueprint $table) {
             $table->id();
 
-
-            $table->foreignId('server_user_type_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The owner of the element")
-                ->index('idx_server_user_type_id')
-                ->constrained('user_types')
+            $table->foreignId('owning_server_id')
+                ->nullable()->default(null)
+                ->comment("The server that owns this type")
+                ->unique('udx_owning_server_id')
+                ->constrained('servers')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
             $table->foreignId('server_type_id')
                 ->nullable()->default(null)
-                ->comment("The type made for this server")
-                ->index('idx_server_type_id')
+                ->comment("Each server has its own type, table here casts it in other tables")
+                ->unique('udx_server_type_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
 
             $table->timestamps();
         });

@@ -89,7 +89,7 @@ return new class extends Migration
                 ->comment('if true then all elements share this static value. This is per server');
 
             $table->boolean('is_final')->default(false)->nullable(false)
-                ->comment('if true then child types do not inherit this attribute');
+                ->comment('if true then child types do not inherit this attribute. But this can be used as a parent in an attribute in the child');
 
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then the element value of this is different for each set');

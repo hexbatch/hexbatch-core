@@ -10,16 +10,16 @@ use App\Models\Attribute;
 use App\Models\User;
 //todo redo standard setup because all attributes exists in types only, also add in attribute for expiration_at
 // standard type has no attributes
-// this_server type (no child will inherit attributes) parent is standard type
-// need description type (child will inherit attributes), parent is this_server
-// display type ( child will inherit attributes) , parent is this_server
-// user type (no child will inherit attributes) (parents are display and description)
-// admin type (child will inherit attributes) (parent is user)
-// server type (no child will inherit attributes) (parent is user)
-// media type (child will inherit attributes) (, parent is this_server)
-// events type ( no child will inherit attributes, contains the event attributes) (parent is this_server) custom events inherit from here
+// server type (no attributes) parent is standard type
+// this_server type (no attributes) parent is this_server
+// description type , parent is this_server, its final and its attributes are final, and can be parents, and inherit from a base description attribute also here
+// display type  , parent is this_server, its final and its attributes are final, and can be parents, and inherit from a base display attribute also here
+// user type (no attributes) (parent is this_server, combined with maybe another server type), it can be used as a child for each user type here derived from it.
+// media type  (parent is this_server) its final and its attributes are final, and can be parents, and inherit from a base event attribute also here
+// events type ( contains the event attributes) (parent is this_server)  its final and its attributes are final, and can be parents, and inherit from a base event attribute also here
 // note: all standard attributes can be used by anyone, in other types, and no standard attribute will have bounds
 // note: see standard in docs for more to fles this out
+// the attributes and types here all have the same uuid except for this_server which has the one below
 
 
     // here, the code will listen to changes on a special system attribute, when it writes attributes (an if statement)
