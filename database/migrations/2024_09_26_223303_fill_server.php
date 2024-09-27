@@ -14,12 +14,12 @@ return new class extends Migration
     {
         Schema::table('servers', function (Blueprint $table) {
 
-            $table->foreignId('server_owner_user_type_id')
+            $table->foreignId('server_type_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The link to the server's user type. The user type inherits from the server type")
-                ->index('idx_server_owner_user_type_id')
-                ->constrained('server_types')
+                ->index('idx_server_type_id')
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
@@ -32,6 +32,7 @@ return new class extends Migration
                 ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
+
 
             $table->timestamps();
 
@@ -79,11 +80,11 @@ return new class extends Migration
         DB::statement("DROP TRIGGER update_modified_time ON servers");
 
         Schema::table('servers', function (Blueprint $table) {
-            $table->dropForeign(['server_owner_user_type_id']);
+            $table->dropForeign(['server_type_id']);
             $table->dropForeign(['server_admin_user_type_id']);
 
 
-            $table->dropColumn('server_owner_user_type_id');
+            $table->dropColumn('server_type_id');
             $table->dropColumn('server_admin_user_type_id');
 
 

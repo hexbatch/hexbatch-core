@@ -71,4 +71,3 @@ return new class extends Migration
     }
 };
 
-//todo the element_values table should have a pointer to a set, this is runtime only and allows searching attributes that show link sets in the search

@@ -50,7 +50,7 @@ return new class extends Migration
 
             $table->foreignId('type_read_user_group_id')
                 ->nullable()->default(null)
-                ->comment("Optional whitelist to be able to read any attributes in this type")
+                ->comment("Optional whitelist to be able to read any attributes in this type. If missing anyone")
                 ->index('idx_type_read_user_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
@@ -58,11 +58,29 @@ return new class extends Migration
 
             $table->foreignId('type_write_user_group_id')
                 ->nullable()->default(null)
-                ->comment("Optional whitelist to be able to write any attributes in this type")
+                ->comment("Optional whitelist to be able to write any attributes in this type. If missing only editor group")
                 ->index('idx_type_write_user_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
+
+            $table->foreignId('type_time_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The value points to a time bounds.")
+                ->index('idx_type_time_bound_id')
+                ->constrained('time_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('type_location_map_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The value points to a location map bounds")
+                ->index('idx_type_location_map_bound_id')
+                ->constrained('location_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -137,6 +155,8 @@ return new class extends Migration
             $table->dropForeign(['new_elements_user_group_id']);
             $table->dropForeign(['type_write_user_group_id']);
             $table->dropForeign(['type_read_user_group_id']);
+            $table->dropForeign(['type_time_bound_id']);
+            $table->dropForeign(['type_location_map_bound_id']);
 
             $table->dropColumn('owner_type_id');
             $table->dropColumn('editing_user_group_id');
@@ -144,6 +164,9 @@ return new class extends Migration
             $table->dropColumn('new_elements_user_group_id');
             $table->dropColumn('type_write_user_group_id');
             $table->dropColumn('type_read_user_group_id');
+            $table->dropColumn('type_time_bound_id');
+            $table->dropColumn('type_location_map_bound_id');
+
             $table->dropColumn('type_name');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('created_at');

@@ -90,9 +90,13 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE path_relationship_type AS ENUM (
             'no_relationship',
+
+            'shape_intersecting',
+            'shape_bordering',
+            'shape_seperated',
             'shares_type',
-            'in_childish',
-            'in_linkish'
+            'childish',
+            'linkish'
             );");
 
         DB::statement("ALTER TABLE paths Add COLUMN path_relationship path_relationship_type NOT NULL default 'no_relationship';");

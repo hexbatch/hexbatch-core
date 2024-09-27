@@ -57,6 +57,9 @@ return new class extends Migration
             $table->boolean('is_on')->default(true)->nullable(false)
                 ->comment('if off, then not seen by any rules');
 
+            $table->boolean('is_const')->default(true)->nullable(false)
+                ->comment('if true, then get value from attribute via hord');
+
             $table->jsonb('element_value')
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
         });

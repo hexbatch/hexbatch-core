@@ -119,26 +119,38 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_thing_to_do AS ENUM (
             'nothing',
+            'attribute_read',
+            'attribute_write',
+            'owner_change',
+
             'remote',
             'stack',
             'element_creation',
             'element_batch_creation',
-            'owner_change',
-            'set_operation',
             'element_destruction',
-            'attribute_read',
-            'attribute_write',
+
+            'server_add_element',
+            'server_add_user', -- not register user, just get its token?
+            'server_allowed',
+            'server_removed',
+
+            'set_operation',
             'set_enter',
             'set_leave',
+            'set_transport',
+            'set_kick',
             'set_child_created',
             'set_child_destroyed',
             'set_top_level_destroyed',
             'set_link_created',
             'set_link_destroyed',
-            'server_add_element',
-            'server_add_user', -- not register user, just get its token?
-            'server_allowed',
-            'server_removed'
+
+             'shape_intersection_enter',
+             'shape_intersection_leave',
+             'shape_bordering_attached',
+             'shape_bordering_seperated'
+
+
             );");
 
         DB::statement("ALTER TABLE pending_things Add COLUMN thing_to_do type_of_thing_to_do NOT NULL default 'nothing';");

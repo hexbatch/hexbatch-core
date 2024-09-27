@@ -13,7 +13,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-
+//todo type construction takes place in the user's home set
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder

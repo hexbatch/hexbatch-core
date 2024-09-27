@@ -43,20 +43,13 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
-            $table->foreignId('attribute_time_bound_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The value points to a time bounds.")
-                ->index('idx_attribute_time_bound_id')
-                ->constrained('time_bounds')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
-            $table->foreignId('attribute_location_bound_id')
+
+            $table->foreignId('attribute_location_shape_bound_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The value points to a location bounds")
-                ->index('idx_attribute_location_bound_id')
+                ->comment("The value points to a location shape bounds")
+                ->index('idx_attribute_location_shape_bound_id')
                 ->constrained('location_bounds')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -169,14 +162,12 @@ return new class extends Migration
             $table->dropForeign(['parent_attribute_id']);
             $table->dropForeign(['owner_element_type_id']);
             $table->dropForeign(['applied_rule_bundle_id']);
-            $table->dropForeign(['attribute_time_bound_id']);
-            $table->dropForeign(['attribute_location_bound_id']);
+            $table->dropForeign(['attribute_location_shape_bound_id']);
 
             $table->dropColumn('parent_attribute_id');
             $table->dropColumn('owner_element_type_id');
             $table->dropColumn('applied_rule_bundle_id');
-            $table->dropColumn('attribute_time_bound_id');
-            $table->dropColumn('attribute_location_bound_id');
+            $table->dropColumn('attribute_location_shape_bound_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_retired');
             $table->dropColumn('is_final');

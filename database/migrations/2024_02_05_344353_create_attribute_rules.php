@@ -68,6 +68,23 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('rule_target_destination_set_id')
+                ->nullable()->default(null)
+                ->comment("When the action is putting target to another set")
+                ->index('idx_rule_target_destination_set_id')
+                ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            //todo how to keep track of called remotes when not doing event?
+            $table->foreignId('rule_trigger_remote_type_id')
+                ->nullable()->default(null)
+                ->comment("If this rule calling a remote then put this here")
+                ->index('idx_rule_trigger_remote_type_id')
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -201,9 +218,12 @@ return new class extends Migration
             'toggle',
             'off',
             'on',
+            'read',
             'write',
             'make_set',
-            'destroy_set'
+            'destroy_set',
+            'add_to_set_a',
+            'add_to_set_a_remove_from_current'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN target_action rule_target_action_type NOT NULL default 'no_action';");

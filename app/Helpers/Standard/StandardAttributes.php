@@ -9,6 +9,7 @@ use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\User;
 //todo redo standard setup because all attributes exists in types only, also add in attribute for expiration_at
+// none of these have bounds
 // standard type has no attributes
 // server type (no attributes) parent is standard type
 // this_server type (no attributes) parent is this_server
@@ -20,6 +21,10 @@ use App\Models\User;
 // note: all standard attributes can be used by anyone, in other types, and no standard attribute will have bounds
 // note: see standard in docs for more to fles this out
 // the attributes and types here all have the same uuid except for this_server which has the one below
+
+//todo add new attribute for offset of shapes (x,y,z point), when writing to this attribute will update the shape location by that offset (triggers done then)
+
+//todo console task can edit all standards, and make new ones
 
 
     // here, the code will listen to changes on a special system attribute, when it writes attributes (an if statement)
