@@ -25,7 +25,17 @@ return new class extends Migration
             // all remotes and sets are processed by queue for each remote call, the data for the remote calls are in the remote element
             // all remote elements are also put into standard sets for pending, completed, failed
 
+            //when an api call is made that can possibly toggle events,
+            // the parent has the api type and the user type, and  has the rest of the data set also
+            // the request data is set in the top parent json data
+            // when no children (no events) or all children ready, then the call is made (switch statement with api type guid and what to call)
+
             //todo add parent thing,  (request to do something can lead to a cascade), all children and descendants need to be finished_ok before parent runs
+
+            //todo add api call type, nullable, to note the api call
+            // todo add user type who made this api call, this is to allow them to get the result later
+            // todo add new column and type for user getting result (none,direct, polled, callback_successful, callback_error) to mark when the user gets info api call result
+            // todo add url for callback when this is done (this url can have query), when callback_error  put callback_http_status in new column
 
             $table->foreignId('thing_event_attribute_id')
                 ->nullable()->default(null)
@@ -134,6 +144,18 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_thing_to_do AS ENUM (
             'nothing',
+
+            'type_parent_add',
+            'type_attribute_parent_add', -- grandchildren further decendants trigger both events
+
+            'user_group_member_add',
+            'user_group_admin_add',
+            'user_admin_removing_member',
+            'user_owner_removing_admin',
+
+
+            'type_parent_add',
+
             'read',
             'write',
             'pragma',

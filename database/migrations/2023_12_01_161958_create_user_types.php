@@ -33,7 +33,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            //todo add two more types that are created when the user is: private info and public info, these are also put into the user home set
+            //todo add two more types that are created when the user is: private info and public info
+            // elements are created from each, and these are also put into the user home set
 
             //todo when the user home set is created from the user type element, its put into the Standard set, all_users
 

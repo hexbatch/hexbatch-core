@@ -82,6 +82,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo add in an optional element_value that can contain rules for the type construction events
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)

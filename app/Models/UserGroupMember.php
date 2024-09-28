@@ -23,7 +23,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class UserGroupMember extends Model
 {
-
+    //look to the user private element to see if any events on this for groups
+    /*
+     *      'user_group_member_add', a user can deny him being added to a group as a member, group maintainers can automate stuff
+            'user_group_admin_add', a user can deny him being added to a group as an admin, also automation
+            'user_admin_removing_member', an admin can stop a member being removed (who is not an admin)
+            'user_owner_removing_admin', the group owner can automate some stuff when removing an admin
+     */
     protected $table = 'user_group_members';
     public $timestamps = false;
     /**

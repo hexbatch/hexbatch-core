@@ -35,7 +35,6 @@ use App\Models\User;
 * ends_at iso_8601
 * created_at iso_8601
 * updated_at iso_8601
-* domain includes subdomain, not path or protocol
 * identifier any
 * size_px number
 * size_cm number
@@ -52,9 +51,17 @@ use App\Models\User;
 * language_code
 * iso_region
  *
+ * todo add outside_data
+ * resource_url
+ * remote_url
  *
+ * todo add api_call type
+ *  each api call here has its own type
+ *  add an api_set where one element is made of each, later fill in docs url
 
  */
+
+//todo move Standard attributes to the seeding section
 
 // todo add public_info and private_info types, they have attributes
 //  make sure that joined, url , description  is there
