@@ -13,7 +13,7 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-//todo type construction takes place in the user's home set
+//todo type construction (except user tokens) takes place in the user's home set, the rules can react there when creation events to things in the set
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
@@ -242,13 +242,18 @@ class ElementType extends Model
         //update for each type that has a bound:
          // type_start_ts,type_end_ts,type_next_period_starts_ts,type_sum_geom_map,type_sum_geom_shape
 
-        //the time spans may better better off as ranges:
+        //todo the time spans may better better off as ranges:
             //https://www.postgresql.org/docs/current/rangetypes.html
             //
-        //todo implement the current or next time range of the merged together time ranges
+        //todo implement the current or next time range of span
+
+        //todo update the element_values when doing the start and stop
+
+        //todo parent types have option to restrict their children to keep the same bounds for time, and same or lesser bounds for map
+           //over
         //do spans
         // get time spans for the bounded types , the other cron jobs will have created and trimmed them
-        // merge the spans if they intersect  https://stackoverflow.com/questions/38384249/coalesce-overlapping-time-ranges-in-postgresql
+
         // get the current one, or the next one if not one current now and put into type_start_ts and type_end_ts
         // put the start of the next one in the type_next_period_starts_ts
         Attribute::whereNotNull('attribute_time_bound_id')

@@ -77,6 +77,8 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             //todo how to keep track of called remotes when not doing event?
+
+            //todo each attribute has at most one rule, or rule chain, so put the rule_id in the attributes and not the attribute in the rule id
             $table->foreignId('rule_trigger_remote_type_id')
                 ->nullable()->default(null)
                 ->comment("If this rule calling a remote then put this here")

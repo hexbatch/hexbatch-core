@@ -23,7 +23,7 @@ return new class extends Migration
                 ->index('idx_element_owner_user_id')
                 ->constrained('users')
                 ->cascadeOnUpdate()
-                ->restrictOnDelete();
+                ->nullOnDelete();
 
             $table->foreignId('user_type_id')
                 ->nullable()->default(null)
@@ -31,7 +31,13 @@ return new class extends Migration
                 ->index('idx_user_type_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->restrictOnDelete();
+
+            //todo add two more types that are created when the user is: private info and public info, these are also put into the user home set
+
+            //todo when the user home set is created from the user type element, its put into the Standard set, all_users
+
+            //todo put in user_base_attribute for easy lookup
 
             $table->foreignId('user_home_set_id')
                 ->nullable()
@@ -40,7 +46,7 @@ return new class extends Migration
                 ->unique('udx_user_element_id')
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
-                ->nullOnDelete();
+                ->restrictOnDelete();
 
 
             $table->foreignId('user_admin_group_id')
@@ -50,7 +56,7 @@ return new class extends Migration
                 ->unique('udx_user_admin_group_id')
                 ->constrained('user_groups')
                 ->cascadeOnUpdate()
-                ->nullOnDelete();
+                ->restrictOnDelete();
 
             $table->foreignId('user_server_id')
                 ->nullable()
@@ -59,7 +65,7 @@ return new class extends Migration
                 ->index('idx_user_server_id')
                 ->constrained('servers')
                 ->cascadeOnUpdate()
-                ->nullOnDelete();
+                ->restrictOnDelete();
 
             $table->timestamps();
         });

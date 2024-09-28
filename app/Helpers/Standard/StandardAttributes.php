@@ -23,13 +23,50 @@ use App\Models\User;
 // the attributes and types here all have the same uuid except for this_server which has the one below
 
 //todo add new attribute for offset of shapes (x,y,z point), when writing to this attribute will update the shape location by that offset (triggers done then)
+// this is updated to facet_offset in element_values
 
-//todo console task can edit all standards, and make new ones
 
+// todo add the following types (inherit from the this_server),
+//  story, blog, post, news, message
+
+/*
+ #todo add  data type
+* starts_at  iso_8601
+* ends_at iso_8601
+* created_at iso_8601
+* updated_at iso_8601
+* domain includes subdomain, not path or protocol
+* identifier any
+* size_px number
+* size_cm number
+* weight_kg number
+
+ #todo add content type
+# Content (base attribute Content)
+* author
+* copywrite
+* url
+* rating
+* mime_type
+* keywords
+* language_code
+* iso_region
+ */
+
+// todo add public_info and private_info types, they have attributes
+//  make sure that joined, url , description  is there
+//  in public, put in the user_base_attribute that is the parent of any attribute the user makes, that has a null parent when they enter it
 
     // here, the code will listen to changes on a special system attribute, when it writes attributes (an if statement)
     // and each child attribute there will write to a specific column identified by its value (ref_uuid stored)
     // so when something is pending, we have its ref and then update cancelled or approved for it
+
+//todo have private and public for servers too, including this server, these inherit from the user public and private (although the user token inherits from the server)
+// this inherits from this_server and it used as an additional parent for the server's user token
+// attr includes server related stuff, including version for now
+
+//todo add standard set, all_users, put the set element of each in there
+
 
 /**
  * Standard attributes are all final, except for the ones that are parents.

@@ -139,6 +139,7 @@ return new class extends Migration
             $table->jsonb('attribute_value')
                 ->nullable()->default(null)->comment("The value of the attribute");
 
+//todo need jsonb for the display of the shape
 
             $table->text('value_json_path')->nullable()->default(null)
                 ->comment("if set the value json has to match this, pointer whitelist can apply");

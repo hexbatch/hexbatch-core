@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    //todo how to keep track of what rules do? do we link rule_id for events and for non events too?
+
     /**
      * Run the migrations.
      */

@@ -75,6 +75,14 @@ return new class extends Migration
 
             $table->integer('path_max_gap')->nullable()->default(null)
                 ->comment("How max number of relationships must exist between here and there");
+
+            //todo need a bool if partial or full match of the name
+
+            //todo need json path for the value in the search
+
+            //todo need two timestamps, start and end;  and another type to show how timestamp is used (before,during,after),
+            // and a second type for if this applies to the age of the element, how long its been in the set, the age of the type, or when the value in the set was changed
+                // can use a second node for same stuff to do multiple matching for ages (example match age when element joined set and when value changed there)
         });
 
         DB::statement('ALTER TABLE paths ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

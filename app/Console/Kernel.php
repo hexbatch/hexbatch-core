@@ -25,3 +25,7 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 }
+
+//todo make new command to give ownership to someone of abandoned user_tokens
+
+//todo get token for the server user so that can be updated

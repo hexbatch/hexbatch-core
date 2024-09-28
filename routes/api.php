@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
+    //todo add server info, at least version for now
+
     Route::prefix('users')->group(function () {
         Route::post('/login', [AuthenticationController::class, 'login'])->name('core.users.login');
         Route::post('/register', [AuthenticationController::class, 'register'])->name('core.users.register');
@@ -131,6 +133,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{remote_stack}/delete', [StackController::class, 'stack_delete'])->name('core.stacks.delete');
         });
     }); //end auth protected
+
+
 
 }); //end v1
 

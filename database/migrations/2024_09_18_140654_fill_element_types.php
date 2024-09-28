@@ -178,7 +178,7 @@ return new class extends Migration
             $table->dropColumn('type_end_ts');
             $table->dropColumn('type_next_period_starts_ts');
             $table->dropColumn('type_sum_geom_map');
-            $table->dropColumn('type_sum_geom_shape');
+            $table->dropColumn('type_sum_geom_shape'); //todo remove the sum shape
 
 
 
