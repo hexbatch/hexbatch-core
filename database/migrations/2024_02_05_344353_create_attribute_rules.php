@@ -14,7 +14,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-
+        //todo also create the attribute_rules_debugs table, that records the rule, its element_value of the parent attribute, what the rule found
+        // (list multiple  on each new row)
+        // list what the rule found for trigger_attribute,  type_associated,  target_attribute, data_attribute, destination set
+        // table should have the rule_id, batch_number (set by code, all the results in a rule same),
+        //    trigger_attribute,  type_associated,  target_attribute, data_attribute, destination set, element_value,timestamps
         Schema::create('attribute_rules', function (Blueprint $table) {
             $table->id();
 
@@ -60,6 +64,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //read_write will read from here, and write to the target
             $table->foreignId('data_attribute_id')
                 ->nullable()->default(null)
                 ->comment("If doing a write, use this. If not set and a write, then only works if target is nullable, then set to null")
@@ -70,19 +75,20 @@ return new class extends Migration
 
             $table->foreignId('rule_target_destination_set_id')
                 ->nullable()->default(null)
-                ->comment("When the action is putting target to another set")
+                ->comment("When the action is putting target to another set. This can be an ancestor for multiple copies")
                 ->index('idx_rule_target_destination_set_id')
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo how to keep track of called remotes when not doing event?
+
 
             //todo each attribute has at most one rule, or rule chain, so put the rule_id in the attributes and not the attribute in the rule id
 
             //todo add pragma, and types of pragma, when filled in , the value is instead used to update something not the value on the target,
             //  here will update facet_offset in the element values. So right now, facet_offset is a pragma
             // change the on|off|toggle to be pragmas too. The pragmas can toggle events and stacks
+            // thing_update is a pragma, which will update the rule table with the value of the target attribute (cast to boolean)
 
             //todo add command, and types of commands
             // the set operations here are commands all commands, and reads and writes can activate events and stacks
@@ -229,6 +235,7 @@ return new class extends Migration
             'no_action',
             'pragma',
             'command',
+            'read_write',
             'read',
             'write',
             );");

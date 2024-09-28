@@ -29,3 +29,7 @@ class Kernel extends ConsoleKernel
 //todo make new command to give ownership to someone of abandoned user_tokens
 
 //todo get token for the server user so that can be updated
+
+//todo write command to trim pending things if they are done and too old
+
+//todo write command to clear attribute_rules_debugs

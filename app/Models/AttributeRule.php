@@ -9,12 +9,14 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use JsonPath\JsonPath;
 
 //todo add new fields for rules
+
+//todo when debug_non_event_rules mode is set (config), then write what rule does to the attribute_rules_debugs table
+// there should be another config to restrict this to an ancestor attribute that rule is on
 
 /*
  * Add to rules:
@@ -180,7 +182,7 @@ class AttributeRule extends Model
         $total_sum = 0;
         //see if the target matches any attribute in the horde
 
-        //get all the decendants of the attribute in the horde, unless target_descendant_range
+        //get all the descendants of the attribute in the horde, unless target_descendant_range
         if($this->target_descendant_range) {
             $builder = ElementTypeHorde::getDecendants($this->rule_target);
         } else {

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    //todo how to keep track of what rules do? do we link rule_id for events and for non events too?
+
 
     /**
      * Run the migrations.
@@ -16,7 +16,16 @@ return new class extends Migration
     {
         Schema::create('pending_things', function (Blueprint $table) {
             $table->id();
-            //error
+            //filter what is readable or writable first before here
+            // when an event returns, then process parent if all children are done
+            // if no remotes, then run immediately
+            // remotes when finishing will call the code to complete the stack or individual remote,
+            // the rule pragma thing_update will update the result , and the pragma call will start the evaluation,
+            // the thing uuid is stored as a value in the attribute that has the rule to the pragma, so that is passed here for lookup
+            // all remotes and sets are processed by queue for each remote call, the data for the remote calls are in the remote element
+            // all remote elements are also put into standard sets for pending, completed, failed
+
+            //todo add parent thing,  (request to do something can lead to a cascade), all children and descendants need to be finished_ok before parent runs
 
             $table->foreignId('thing_event_attribute_id')
                 ->nullable()->default(null)
@@ -83,6 +92,10 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo add in element_values id, for read or write after
+
+            //todo add in rule_id to mark which rule started this
+
             $table->foreignId('thing_user_type_id')
                 ->nullable()
                 ->default(null)
@@ -121,8 +134,9 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_thing_to_do AS ENUM (
             'nothing',
-            'attribute_read',
-            'attribute_write',
+            'read',
+            'write',
+            'pragma',
             'turned_off',
             'turned_on',
 
@@ -176,12 +190,14 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_thing_status AS ENUM (
             'pending',
-            'ready',
-            'finished',
+            'finished_approved',
+            'finished_denied',
             'error'
             );");
 
         DB::statement("ALTER TABLE pending_things Add COLUMN thing_status type_of_thing_status NOT NULL default 'pending';");
+
+        //todo add a column for the pragma type
 
         Schema::table('pending_things', function (Blueprint $table) {
 

@@ -22,6 +22,8 @@ use App\Models\User;
 // note: see standard in docs for more to fles this out
 // the attributes and types here all have the same uuid except for this_server which has the one below
 
+//todo add remote type, inherits from this_server, when a new remote is made the parents are ths and user_token.
+// Remote has some standard attributes that are inherited, but will be added later
 
 
 // todo add the following types (inherit from the this_server),
@@ -49,6 +51,9 @@ use App\Models\User;
 * keywords
 * language_code
 * iso_region
+ *
+ *
+
  */
 
 // todo add public_info and private_info types, they have attributes
@@ -65,6 +70,7 @@ use App\Models\User;
 
 //todo add standard set, all_users, put the set element of each in there
 
+//todo add standard sets, for remote_pending, remote_completed, remote_failed
 
 /**
  * Standard attributes are all final, except for the ones that are parents.
