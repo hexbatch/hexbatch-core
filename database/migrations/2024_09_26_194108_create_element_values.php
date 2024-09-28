@@ -63,7 +63,7 @@ return new class extends Migration
             $table->jsonb('element_value')
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
 
-            //todo add geo for the offset (x,y,z), call it facet_offset which is updated by the s. attribute for that
+            //todo add geo for the offset (x,y,z), call it facet_offset which is updated by pragma in a rule
         });
     }
 

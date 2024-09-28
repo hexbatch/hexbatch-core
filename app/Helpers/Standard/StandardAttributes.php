@@ -22,8 +22,6 @@ use App\Models\User;
 // note: see standard in docs for more to fles this out
 // the attributes and types here all have the same uuid except for this_server which has the one below
 
-//todo add new attribute for offset of shapes (x,y,z point), when writing to this attribute will update the shape location by that offset (triggers done then)
-// this is updated to facet_offset in element_values
 
 
 // todo add the following types (inherit from the this_server),

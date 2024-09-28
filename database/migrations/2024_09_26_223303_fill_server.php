@@ -47,6 +47,7 @@ return new class extends Migration
         DB::statement("CREATE TYPE type_of_server_status AS ENUM (
             'pending',
             'allowed',
+            'paused',
             'blocked'
             );");
 

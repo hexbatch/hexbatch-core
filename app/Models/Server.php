@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Server extends Model
 {
-
+    //todo add this server to here when making the standard attributes
     protected $table = 'servers';
     public $timestamps = false;
 

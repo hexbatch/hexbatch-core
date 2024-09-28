@@ -123,6 +123,9 @@ return new class extends Migration
             'nothing',
             'attribute_read',
             'attribute_write',
+            'turned_off',
+            'turned_on',
+
             'owner_change',
 
             'remote',
@@ -132,13 +135,25 @@ return new class extends Migration
             'element_destruction',
 
             'server_add_element',
-            'server_add_user', -- not register user, just get its token?
+            'server_add_type',
+            'server_add_set',
+            'server_remove_element',
+            'server_remove_type',
+            'server_remove_set',
+
+            'server_add_remote_user',
+            'server_add_home_user',
+            'server_remove_remote_user',
+            'server_remove_home_user',
+
             'server_allowed',
             'server_removed',
+            'server_paused',
 
             'set_operation',
             'set_enter',
             'set_leave',
+            'set_contents_shape_changed',
             'set_transport',
             'set_kick',
             'set_child_created',

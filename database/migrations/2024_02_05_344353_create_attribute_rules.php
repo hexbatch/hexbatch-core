@@ -79,6 +79,14 @@ return new class extends Migration
             //todo how to keep track of called remotes when not doing event?
 
             //todo each attribute has at most one rule, or rule chain, so put the rule_id in the attributes and not the attribute in the rule id
+
+            //todo add pragma, and types of pragma, when filled in , the value is instead used to update something not the value on the target,
+            //  here will update facet_offset in the element values. So right now, facet_offset is a pragma
+            // change the on|off|toggle to be pragmas too. The pragmas can toggle events and stacks
+
+            //todo add command, and types of commands
+            // the set operations here are commands all commands, and reads and writes can activate events and stacks
+
             $table->foreignId('rule_trigger_remote_type_id')
                 ->nullable()->default(null)
                 ->comment("If this rule calling a remote then put this here")
@@ -214,18 +222,15 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
 
+        //todo toggle|off|on|offset now pragmas . Put pragma here as option
 
+        //todo the make_set|destroy_set|add_to_set_a|add_to_set_a_remove_from_current are now commands
         DB::statement("CREATE TYPE rule_target_action_type AS ENUM (
             'no_action',
-            'toggle',
-            'off',
-            'on',
+            'pragma',
+            'command',
             'read',
             'write',
-            'make_set',
-            'destroy_set',
-            'add_to_set_a',
-            'add_to_set_a_remove_from_current'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN target_action rule_target_action_type NOT NULL default 'no_action';");
