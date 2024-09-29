@@ -30,19 +30,52 @@ return new class extends Migration
             // the request data is set in the top parent json data
             // when no children (no events) or all children ready, then the call is made (switch statement with api type guid and what to call)
 
-            //todo add parent thing,  (request to do something can lead to a cascade), all children and descendants need to be finished_ok before parent runs
 
-            //todo add api call type, nullable, to note the api call
-            // todo add user type who made this api call, this is to allow them to get the result later
-            // todo add new column and type for user getting result (none,direct, polled, callback_successful, callback_error) to mark when the user gets info api call result
-            // todo add url for callback when this is done (this url can have query), when callback_error  put callback_http_status in new column
-            // todo add new attribute column for group aggregates source
+
+
+
+
+
+            $table->foreignId('parent_thing_id')
+                ->nullable()->default(null)
+                ->comment("If this is a child")
+                ->index('idx_parent_thing_id')
+                ->constrained('pending_things')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('api_call_type_id')
+                ->nullable()->default(null)
+                ->comment("When api is made, its type is put here")
+                ->index('idx_thing_api_call_type_id')
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('caller_user_type_id')
+                ->nullable()->default(null)
+                ->comment("When api is made, the logged in user type")
+                ->index('idx_thing_caller_user_type_id')
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->foreignId('thing_event_attribute_id')
                 ->nullable()->default(null)
                 ->comment("The attribute which represents the event")
                 ->index('idx_thing_event_attribute_id')
                 ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('thing_rule_id')
+                ->nullable()->default(null)
+                ->comment("Which rule made the row")
+                ->index('idx_thing_rule_id')
+                ->constrained('attribute_rules')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -103,13 +136,45 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo add in filter_set for dynamic filtering of group_operations. add on enum for how to use the filter (must_match, must_exclude)
 
-            //todo add in path so searches can run here
+            $table->foreignId('group_aggregate_source_attribute_id')
+                ->nullable()->default(null)
+                ->comment("The attribute which has aggregation")
+                ->index('idx_group_aggregate_source_attribute_id')
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-            //todo add in element_values id, for read or write after, or for aggregation results
+            $table->foreignId('thing_element_values_id')
+                ->nullable()->default(null)
+                ->comment("for read or write after, or for aggregation results")
+                ->index('idx_thing_element_values_id')
+                ->constrained('element_values')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-            //todo add in rule_id to mark which rule started this
+
+
+            $table->foreignId('filter_set_id')
+                ->nullable()->default(null)
+                ->comment("for dynamic filtering")
+                ->index('idx_thing_filter_set_id')
+                ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('thing_paths')
+                ->nullable()
+                ->default(null)
+                ->comment("so searches can run here")
+                ->index('idx_thing_paths_id')
+                ->constrained('paths')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
+
+
 
             $table->foreignId('thing_user_type_id')
                 ->nullable()
@@ -164,7 +229,7 @@ return new class extends Migration
             'element_batch_creation',
             'element_destruction',
 
-            'group_operation'
+            'group_operation',
 
 
             'remote',
@@ -228,13 +293,12 @@ return new class extends Migration
              'shape_bordering_seperated',
 
             -- grandchildren further decendants trigger both events in this area
-             'type_parent_add',
             'type_attribute_parent_add',
             'type_parent_add',
             'type_created_before',
             'type_updated_before',
             'type_created_after',
-            'type_created_after',
+            'type_updated_after',
 
             -- servers that user inherits can listen to these below
              'user_add_before',
@@ -265,18 +329,48 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE pending_things Add COLUMN thing_status type_of_thing_status NOT NULL default 'pending';");
 
-        //todo add a column for the pragma type
+
+
+        DB::statement("CREATE TYPE type_user_followup AS ENUM (
+            'nothing',
+            'direct',
+            'polled',
+            'callback_successful',
+            'callback_error'
+            );");
+
+        DB::statement("ALTER TABLE pending_things Add COLUMN user_followup type_user_followup NOT NULL default 'nothing';");
+
+
+        DB::statement("CREATE TYPE type_filter_set_usage AS ENUM (
+            'none',
+            'must_match',
+            'must_exclude'
+            );");
+
+        DB::statement("ALTER TABLE pending_things Add COLUMN filter_set_usage type_filter_set_usage NOT NULL default 'none';");
+
+        DB::statement("ALTER TABLE pending_things Add COLUMN given_rule_pragma rule_pragma_type NOT NULL default 'no_pragma';");
 
         Schema::table('pending_things', function (Blueprint $table) {
 
             $table->dateTime('status_change_at')->nullable()->default(null)
                 ->comment('When the last status was made at');
 
-            //todo add string for group operation, php constants used here later
-            // group operations can used chained things here, the result set for children are the source set for the parent
+            $table->integer('callback_http_status')->nullable()->default(null)
+                ->comment('When the callback was made, what was the code returned');
+
+
 
             $table->jsonb('thing_value')
                 ->nullable()->default(null)->comment("When something needs a value");
+
+            $table->string('callback_url')->nullable()->default(null)
+                ->comment('If set, this will be called with the result or error');
+
+            // group operations can used chained things here, the result set for children are the source set for the parent
+            $table->string('group_operation_name')->nullable()->default(null)
+                ->comment('php constants used here');
         });
 
 
@@ -299,5 +393,7 @@ return new class extends Migration
         Schema::dropIfExists('pending_things');
         DB::statement("DROP TYPE type_of_thing_to_do;");
         DB::statement("DROP TYPE type_of_thing_status;");
+        DB::statement("DROP TYPE type_user_followup;");
+        DB::statement("DROP TYPE type_filter_set_usage;");
     }
 };

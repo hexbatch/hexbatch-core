@@ -247,7 +247,8 @@ class ElementType extends Model
             //
         //todo implement the current or next time range of span
 
-        //todo update the element_values when doing the start and stop
+        //todo update the element_values is_visible when doing the start and stop
+
 
         //todo parent types have option to restrict their children to keep the same bounds for time, and same or lesser bounds for map
            //over

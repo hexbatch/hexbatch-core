@@ -14,21 +14,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //todo also create the attribute_rules_debugs table, that records the rule, its element_value of the parent attribute, what the rule found
-        // (list multiple  on each new row)
-        // list what the rule found for trigger_attribute,  type_associated,  target_attribute, data_attribute, destination set
-        // table should have the rule_id, batch_number (set by code, all the results in a rule same),
-        //    trigger_attribute,  type_associated,  target_attribute, data_attribute, destination set, element_value,timestamps
+
         Schema::create('attribute_rules', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('rule_bundle_owner_id')
-                ->nullable(false)
-                ->comment("The bundle that owns this rule")
-                ->index('idx_rule_bundle_owner_id')
-                ->constrained('attribute_rule_bundles')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('parent_rule_id')
                 ->nullable()->default(null)
@@ -83,24 +71,7 @@ return new class extends Migration
 
 
 
-            //todo each attribute has at most one rule, or rule chain, so put the rule_id in the attributes and not the attribute in the rule id
 
-            //todo add pragma, and types of pragma, when filled in , the value is instead used to update something not the value on the target,
-            //  here will update facet_offset in the element values. So right now, facet_offset is a pragma
-            // change the on|off|toggle to be pragmas too. The pragmas can toggle events and stacks
-            // thing_update is a pragma, which will update the rule table with the value of the target attribute (cast to boolean)
-            // toggle|off|on|offset now pragmas .
-            // read_setting pragmas for time, map, shape, path bounds, convert to json and write to target
-            // new pragma to set rotation of shape
-
-            //todo add command, and types of commands
-            // the make_set|destroy_set|add_to_set_a|add_to_set_a_remove_from_current are now commands
-            //   all commands, and reads and writes can activate events and stacks
-            //  command 'destroy_user', requires same user to run this command
-            //  command 'create_element', single only
-            //  command 'destroy_element'
-            //  group commands for add|remove user|admin  user running this is checked for being able to do that and other commands above
-            // command for delete user and assign user to empty, only if running this as the server user
 
 
             $table->foreignId('rule_trigger_remote_type_id')
@@ -175,16 +146,9 @@ return new class extends Migration
          DB::statement("CREATE TYPE type_of_rule_trigger_action AS ENUM (
             'no_trigger',
             'exists',
-            'not_exist',
-            'turned_off'
-            'turned_on',
-            'set_created'
-            'set_destroyed'
+            'not_exist'
             );");
-         /*
-         make set, just ignore if set already exists
-         destroy set ( element is still there, just has no set), contents popped out to parent, can only destroy if such set has a parent
-          */
+
 
        DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_action type_of_rule_trigger_action NOT NULL default 'no_trigger';");
 
@@ -195,7 +159,7 @@ return new class extends Migration
         DB::statement("CREATE TYPE type_of_rule_target AS ENUM (
             'target_attribute',
             'type_of_target_attribute',
-            'set_of_attribute'
+            'set_of_target_attribute'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_target_scope type_of_rule_target NOT NULL default 'target_attribute';");
@@ -245,7 +209,7 @@ return new class extends Migration
             'command',
             'read_write',
             'read',
-            'write',
+            'write'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN target_action rule_target_action_type NOT NULL default 'no_action';");
@@ -264,6 +228,49 @@ return new class extends Migration
         DB::statement("ALTER TABLE attribute_rules Add COLUMN target_writing_method rule_target_write_type NOT NULL default 'none';");
 
 
+        //the value is instead used to update something not the value on the target
+        DB::statement("CREATE TYPE rule_pragma_type AS ENUM (
+            'no_pragma',
+            'facet_offset',
+            'facet_rotation',
+            'element_on',
+            'element_toggle',
+            'element_off',
+            'read_bounds_time', -- convert to json and write to target
+            'read_bounds_shape',
+            'read_bounds_map',
+            'read_bounds_path'
+            );");
+
+
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_pragma rule_pragma_type NOT NULL default 'no_pragma';");
+
+
+
+
+
+        DB::statement("CREATE TYPE rule_command_type AS ENUM (
+            'no_command',
+            'make_set',
+            'destroy_set',
+            'add_to_set_a',
+            'add_to_set_a_remove_from_current',
+            'destroy_user', -- server user
+            'assign_user_to_empty', -- server user
+            'create_element', -- single only
+            'destroy_element',
+            'group_add_member', -- group found by the type of the attribute chosen
+            'group_add_admin',
+            'group_remove_member',
+            'group_remove_admin'
+            );");
+
+
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_command rule_command_type NOT NULL default 'no_command';");
+
+
 
         DB::statement("ALTER TABLE attribute_rules ALTER COLUMN created_at SET DEFAULT NOW();");
 
@@ -276,8 +283,6 @@ return new class extends Migration
                 ->comment("The unique name of the rule in the bundle, using the naming rules");
         });
 
-        DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_rule_parent_name ON attribute_rules (rule_bundle_owner_id,rule_name) NULLS NOT DISTINCT;");
 
         DB::statement('ALTER TABLE attribute_rules ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
     }
@@ -296,6 +301,8 @@ return new class extends Migration
         DB::statement("DROP TYPE type_of_child_logic;");
         DB::statement("DROP TYPE rule_target_action_type;");
         DB::statement("DROP TYPE rule_target_write_type;");
+        DB::statement("DROP TYPE rule_pragma_type;");
+        DB::statement("DROP TYPE rule_command_type;");
 
     }
 };

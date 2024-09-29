@@ -77,7 +77,7 @@ use App\Models\User;
 
 //todo add standard set, all_users, put the set element of each in there
 
-//todo add standard sets, for remote_pending, remote_completed, remote_failed
+//todo add standard sets, for remote_pending, remote_completed, remote_failed, mutual containers
 
 //todo type server_description, standard global set server description these all go into
 //todo type type_description, standard global set type description these all go into

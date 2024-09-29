@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -52,7 +53,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->boolean('is_visible')->default(true)->nullable(false)
-                ->comment('shorcut to see if this is visible'); //todo update this when updating the type type_start_ts and type_end_ts
+                ->comment('shortcut to see if this is visible');
 
             $table->boolean('is_on')->default(true)->nullable(false)
                 ->comment('if off, then not seen by any rules');
@@ -60,12 +61,19 @@ return new class extends Migration
             $table->boolean('is_const')->default(true)->nullable(false)
                 ->comment('if true, then get value from attribute via hord');
 
+            $table->timestamp('when_dynamic_value_changed')->default(null)->nullable()
+                ->comment('Updated when the value is updated here, otherwise null');
+
             $table->jsonb('element_value')
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
 
-            //todo add geo for the offset (x,y,z), call it facet_offset which is updated by pragma in a rule
-            //todo add new column jsonb for rotation. Possible to combine these columns?
         });
+
+        DB::statement("ALTER TABLE element_values
+                              Add COLUMN element_shape
+                              geometry
+                              ;
+                    ");
     }
 
     /**

@@ -41,7 +41,7 @@ return new class extends Migration
             $table->foreignId('design_type_as_element_id')
                 ->nullable()->default(null)
                 ->comment("Design to show the elements made by the type")
-                ->constrained('element_types')
+                ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

@@ -35,11 +35,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('applied_rule_bundle_id')
+            $table->foreignId('applied_rule_id')
                 ->nullable()->default(null)
-                ->comment("The bundle that is used, attributes do not need rules, or can inherit from parent")
-                ->index('idx_applied_rule_bundle_id')
-                ->constrained('attribute_rule_bundles')
+                ->comment("The single or root rule used here")
+                ->index('idx_applied_rule_id')
+                ->constrained('attribute_rules')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
@@ -87,6 +87,8 @@ return new class extends Migration
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then the element value of this is different for each set');
 
+            $table->timestamp('when_const_value_changed')->default(null)->nullable()
+                ->comment('Updated when the value is updated here, otherwise null');
 
             $table->timestamps();
 
@@ -139,7 +141,9 @@ return new class extends Migration
             $table->jsonb('attribute_value')
                 ->nullable()->default(null)->comment("The value of the attribute");
 
-//todo need jsonb for the display of the shape
+            $table->jsonb('attribute_shape_display')
+                ->nullable()->default(null)->comment("The value of the attribute");
+
 
             $table->text('value_json_path')->nullable()->default(null)
                 ->comment("if set the value json has to match this, pointer whitelist can apply");
@@ -162,13 +166,13 @@ return new class extends Migration
         Schema::table('attributes', function (Blueprint $table) {
             $table->dropForeign(['parent_attribute_id']);
             $table->dropForeign(['owner_element_type_id']);
-            $table->dropForeign(['applied_rule_bundle_id']);
             $table->dropForeign(['attribute_location_shape_bound_id']);
+            $table->dropForeign(['applied_rule_id']);
 
             $table->dropColumn('parent_attribute_id');
             $table->dropColumn('owner_element_type_id');
-            $table->dropColumn('applied_rule_bundle_id');
             $table->dropColumn('attribute_location_shape_bound_id');
+            $table->dropColumn('applied_rule_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_retired');
             $table->dropColumn('is_final');
@@ -186,6 +190,8 @@ return new class extends Migration
             $table->dropColumn('server_access_type');
             $table->dropColumn('attribute_access_type');
             $table->dropColumn('popped_writing_method');
+            $table->dropColumn('attribute_shape_display');
+            $table->dropColumn('when_const_value_changed');
         });
 
         DB::statement("DROP TYPE type_of_server_access;");

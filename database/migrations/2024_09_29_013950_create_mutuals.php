@@ -13,8 +13,22 @@ return new class extends Migration
     {
         Schema::create('mutuals', function (Blueprint $table) {
             $table->id();
+
+
+            $table->foreignId('containing_set_id')
+                ->nullable()->default(null)
+                ->comment("the set which holds the mutual elements")
+                ->index('idx_containing_set_id')
+                ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->timestamps();
-            //todo create this table, name, set (events off) add that type to Standard, user_token
+
+
+
+            $table->string('mutual_name',128)->nullable()->default(null)
+                ->comment("The optional name of the mutual, using the naming rules");
         });
     }
 

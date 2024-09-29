@@ -25,20 +25,49 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
+            $table->foreignId('user_server_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The server this user belongs to, null means this one")
+                ->index('idx_user_server_id')
+                ->constrained('servers')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->foreignId('user_type_id')
                 ->nullable()->default(null)
                 ->comment("The type made for this user. This is derived from at least one server type")
-                ->index('idx_user_type_id')
+                ->unique('udx_user_type_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            //todo add two more types that are created when the user is: private info and public info
-            // elements are created from each, and these are also put into the user home set
+            //get the public and private types from the elements
+            $table->foreignId('public_element_id')
+                ->nullable()->default(null)
+                ->comment("The element having the public information for the user")
+                ->unique('udx_user_public_element_id')
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
-            //todo when the user home set is created from the user type element, its put into the Standard set, all_users
+            $table->foreignId('private_element_id')
+                ->nullable()->default(null)
+                ->comment("The element having the private information for the user")
+                ->unique('udx_private_element_id')
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
-            //todo put in user_base_attribute for easy lookup
+            $table->foreignId('base_user_attribute_id')
+                ->nullable()->default(null)
+                ->comment("This is the attribute that is the parent for all attributes the user makes, which do not have a parent when created")
+                ->unique('udx_base_user_attribute_id')
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+
 
             $table->foreignId('user_home_set_id')
                 ->nullable()
@@ -59,14 +88,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->foreignId('user_server_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The server this user belongs to, null means this one")
-                ->index('idx_user_server_id')
-                ->constrained('servers')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
+
 
             $table->timestamps();
         });

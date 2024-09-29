@@ -82,10 +82,24 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo add in an optional element_value that can contain rules for the type construction events, this is standard type_description and user based
-            // and all these are put into the standard type description set
+            $table->foreignId('type_bound_path_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Only can join sets found in path. Is not evicted due to path result change")
+                ->index('idx_type_bound_path_id')
+                ->constrained('paths')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-            //todo add in path_id to restrict further which sets the type's elements can be added
+            $table->foreignId('type_description_element_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Only can join sets found in path. Is not evicted due to path result change")
+                ->unique('udx_type_description_element_id')
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -123,11 +137,6 @@ return new class extends Migration
                               ;
                     ");
 
-        DB::statement("ALTER TABLE element_types
-                              Add COLUMN type_sum_geom_shape
-                              geometry
-                              ;
-                    ");
 
         Schema::table('element_types', function (Blueprint $table) {
             $table->string('type_name',128)->nullable(false)->index()
@@ -162,6 +171,8 @@ return new class extends Migration
             $table->dropForeign(['type_read_user_group_id']);
             $table->dropForeign(['type_time_bound_id']);
             $table->dropForeign(['type_location_map_bound_id']);
+            $table->dropForeign(['type_bound_path_id']);
+            $table->dropForeign(['type_description_element_id']);
 
             $table->dropColumn('owner_type_id');
             $table->dropColumn('editing_user_group_id');
@@ -171,6 +182,8 @@ return new class extends Migration
             $table->dropColumn('type_read_user_group_id');
             $table->dropColumn('type_time_bound_id');
             $table->dropColumn('type_location_map_bound_id');
+            $table->dropColumn('type_bound_path_id');
+            $table->dropColumn('type_description_element_id');
 
             $table->dropColumn('type_name');
             $table->dropColumn('ref_uuid');
@@ -183,7 +196,6 @@ return new class extends Migration
             $table->dropColumn('type_end_ts');
             $table->dropColumn('type_next_period_starts_ts');
             $table->dropColumn('type_sum_geom_map');
-            $table->dropColumn('type_sum_geom_shape'); //todo remove the sum shape
 
 
 

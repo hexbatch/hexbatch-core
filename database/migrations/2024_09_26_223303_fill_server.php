@@ -33,8 +33,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            //todo optional element of standard type server_description (inherits from user also), this is put into the server description standard set
-            // can put description and rules
+            $table->foreignId('server_element_id')
+                ->nullable()->default(null)
+                ->comment("The element having description and hooks. Marks this as saved")
+                ->unique('udx_server_element_id')
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
 
 
             $table->timestamps();
@@ -43,11 +49,6 @@ return new class extends Migration
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
-
-            //todo add string for the token used for that server's message incoming
-            //todo add string for the token used outgoing
-
-            //todo create server_user_type_tokens which is simply the server_id, the user_type, and the string token: delete when invalid so no status
 
         });
 
@@ -68,6 +69,14 @@ return new class extends Migration
             $table->string('server_domain')->unique()
                 ->nullable(false)
                 ->comment("the url to the server");
+
+            $table->string('server_incoming_token')
+                ->nullable()->default(null)
+                ->comment("the token to send the server for any requests");
+
+            $table->string('server_outgoing_token')->unique()
+                ->nullable()->default(null)
+                ->comment("The token sent by the server to here");
         });
 
         DB::statement('ALTER TABLE servers ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -90,16 +99,20 @@ return new class extends Migration
         Schema::table('servers', function (Blueprint $table) {
             $table->dropForeign(['server_type_id']);
             $table->dropForeign(['server_admin_user_type_id']);
+            $table->dropForeign(['server_element_id']);
 
 
             $table->dropColumn('server_type_id');
             $table->dropColumn('server_admin_user_type_id');
+            $table->dropColumn('server_element_id');
 
 
             $table->dropColumn('ref_uuid');
             $table->dropColumn('server_domain');
             $table->dropColumn('status_change_at');
             $table->dropColumn('server_status');
+            $table->dropColumn('server_incoming_token');
+            $table->dropColumn('server_outgoing_token');
 
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');

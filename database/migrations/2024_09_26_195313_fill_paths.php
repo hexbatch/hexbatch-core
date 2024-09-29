@@ -64,6 +64,24 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('path_location_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("If set contrain sets to this bound")
+                ->index('idx_path_location_bound_id')
+                ->constrained('location_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('path_description_element_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Only can join sets found in path. Is not evicted due to path result change")
+                ->unique('udx_path_description_element_id')
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
@@ -77,22 +95,29 @@ return new class extends Migration
             $table->integer('path_max_gap')->nullable()->default(null)
                 ->comment("How max number of relationships must exist between here and there");
 
-            //todo need a bool if partial or full match of the name
 
-            //todo need json path for the value in the search
+            $table->boolean('is_partial_matching_name')
+                ->nullable(false)->default(false)
+                ->comment("If false then only match full names, else wildcard on right");
 
-            //todo need two timestamps, start and end;  and another type to show how timestamp is used (before,during,after),
-            // and a second postgres type and column for if this applies to the age of the element, how long its been in the set, the age of the type, or when the value in the set was changed
-                // can use a second node for same stuff to do multiple matching for ages (example match age when element joined set and when value changed there)
+            $table->boolean('is_sorting_order_asc')
+                ->nullable(false)->default(false)
+                ->comment("If false then desc");
 
-            //todo add two columns json_path for ordering, and if asc|desc
 
-            //todo need location bounds so can search map  or shapes
+            $table->timestamp('path_start')->nullable()->default(null)
+                ->comment("if set then time comparison starts here");
 
-            //todo paths need min and max count range, if what is found is not between these counts, search fails, default null (disregard) for each
+            $table->timestamp('path_end')->nullable()->default(null)
+                ->comment("if set then time comparison ends here");
 
-            //todo optional element of standard type path_description (inherits from user also), this is put into the path_description standard set
-            // can add rules and info about the path (search_results event fired when this is run under these conditions)
+
+            $table->integer('path_min_count')->nullable()->default(null)
+                ->comment("The min number of results required");
+
+            $table->integer('path_max_count')->nullable()->default(null)
+                ->comment("How max number of results required");
+
 
         });
 
@@ -121,14 +146,39 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE paths Add COLUMN path_relationship path_relationship_type NOT NULL default 'no_relationship';");
 
+
+
+        // and a second postgres type and column for if this applies to the age of the element, how long its been in the set, the age of the type, or when the value in the set was changed
+        // can use a second node for same stuff to do multiple matching for ages (example match age when element joined set and when value changed there)
+
+        DB::statement("CREATE TYPE time_comparison_type AS ENUM (
+            'no_time_comparison',
+            'age_element',
+            'joined_set_at',
+            'age_type',
+            'element_value_changed' -- dynamic or const
+            );");
+
+        DB::statement("ALTER TABLE paths Add COLUMN time_comparison time_comparison_type NOT NULL default 'no_time_comparison';");
+
+
+
         Schema::table('paths', function (Blueprint $table) {
 
 
             $table->text('path_attribute_json_path')->nullable()->default(null)
                 ->comment("The matching of the attribute value, optional");
 
-            $table->string('path_part_name',128)->nullable(false)->index()
-                ->comment("The unique name of the attribute, using the naming rules");
+            $table->string('path_part_name',128)->nullable()->default(null)
+                ->comment("The optional name of the path part, using the naming rules");
+
+            $table->string('value_json_path')
+                ->nullable()->default(null)
+                ->comment("if set then only values that match the json path are used");
+
+            $table->string('ordering_json_path')
+                ->nullable()->default(null)
+                ->comment("if set then the values are ordered by this. Not valid past a certain result set size");
         });
 
         DB::statement(/** @lang text */
@@ -149,7 +199,11 @@ return new class extends Migration
             $table->dropForeign(['path_attribute_id']);
             $table->dropForeign(['path_element_set_id']);
             $table->dropForeign(['path_user_type_id']);
+            $table->dropForeign(['path_description_element_id']);
+            $table->dropForeign(['path_location_bound_id']);
 
+            $table->dropColumn('path_description_element_id');
+            $table->dropColumn('path_location_bound_id');
             $table->dropColumn('path_owner_id');
             $table->dropColumn('parent_path_id');
             $table->dropColumn('path_type_id');
@@ -166,7 +220,17 @@ return new class extends Migration
             $table->dropColumn('path_relationship');
             $table->dropColumn('path_attribute_json_path');
             $table->dropColumn('path_part_name');
+            $table->dropColumn('is_partial_matching_name');
+            $table->dropColumn('path_start');
+            $table->dropColumn('path_end');
+            $table->dropColumn('time_comparison');
+            $table->dropColumn('ordering_json_path');
+            $table->dropColumn('path_min_count');
+            $table->dropColumn('path_max_count');
+            $table->dropColumn('value_json_path');
+            $table->dropColumn('is_sorting_order_asc');
         });
         DB::statement("DROP TYPE path_relationship_type;");
+        DB::statement("DROP TYPE time_comparison_type;");
     }
 };

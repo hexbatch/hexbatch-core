@@ -29,8 +29,14 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-            //todo optional element of standard type group_description (inherits from user also), this is put into the group_description standard set
-            // can add rules and info about the group
+
+            $table->foreignId('group_element_id')
+                ->nullable()->default(null)
+                ->comment("The element having description and hooks")
+                ->unique('udx_group_element_id')
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
 
             $table->timestamps();
 
@@ -72,6 +78,9 @@ return new class extends Migration
             DB::statement("DROP TRIGGER update_modified_time ON user_groups");
 
             $table->dropForeign(['owning_user_type_id']);
+            $table->dropForeign(['group_element_id']);
+
+            $table->dropColumn('group_element_id');
             $table->dropColumn('group_name');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('owning_user_type_id');

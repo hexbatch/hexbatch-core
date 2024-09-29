@@ -18,7 +18,11 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\HasApiTokens;
 
+//todo add private and public types and put into the user home set
 
+//todo when the user home set is created from the user type element, its put into the Standard set, all_users
+
+//todo create user_base_attribute
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
