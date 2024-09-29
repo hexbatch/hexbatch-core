@@ -33,3 +33,5 @@ class Kernel extends ConsoleKernel
 //todo write command to trim pending things if they are done and too old
 
 //todo write command to clear attribute_rules_debugs
+
+//todo command to trim unsaved paths

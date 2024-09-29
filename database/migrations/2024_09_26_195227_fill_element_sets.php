@@ -28,6 +28,11 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
             $table->timestamps();
+
+            //todo add column has_events, default true.
+            // this is only set to false if by group or mutual operation
+            // If false then no events raised, and no rules fired, entering , leaving set, or inside set.
+            // Children sets not affected.
         });
 
         DB::statement('ALTER TABLE element_sets ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

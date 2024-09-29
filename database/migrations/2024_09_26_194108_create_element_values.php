@@ -64,6 +64,7 @@ return new class extends Migration
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
 
             //todo add geo for the offset (x,y,z), call it facet_offset which is updated by pragma in a rule
+            //todo add new column jsonb for rotation. Possible to combine these columns?
         });
     }
 

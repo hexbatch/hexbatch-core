@@ -33,6 +33,9 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+            //todo optional element of standard type server_description (inherits from user also), this is put into the server description standard set
+            // can put description and rules
+
 
             $table->timestamps();
 
@@ -41,6 +44,10 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
+            //todo add string for the token used for that server's message incoming
+            //todo add string for the token used outgoing
+
+            //todo create server_user_type_tokens which is simply the server_id, the user_type, and the string token: delete when invalid so no status
 
         });
 

@@ -18,6 +18,11 @@ use Illuminate\Database\Eloquent\Model;
 class Server extends Model
 {
     //todo add this server to here when making the standard attributes
+
+    //get, list, are done by paths
+    // edit means details in the element
+    //read and write attributes regular data updates in the api
+
     protected $table = 'servers';
     public $timestamps = false;
 

@@ -89,9 +89,19 @@ return new class extends Migration
             //  here will update facet_offset in the element values. So right now, facet_offset is a pragma
             // change the on|off|toggle to be pragmas too. The pragmas can toggle events and stacks
             // thing_update is a pragma, which will update the rule table with the value of the target attribute (cast to boolean)
+            // toggle|off|on|offset now pragmas .
+            // read_setting pragmas for time, map, shape, path bounds, convert to json and write to target
+            // new pragma to set rotation of shape
 
             //todo add command, and types of commands
-            // the set operations here are commands all commands, and reads and writes can activate events and stacks
+            // the make_set|destroy_set|add_to_set_a|add_to_set_a_remove_from_current are now commands
+            //   all commands, and reads and writes can activate events and stacks
+            //  command 'destroy_user', requires same user to run this command
+            //  command 'create_element', single only
+            //  command 'destroy_element'
+            //  group commands for add|remove user|admin  user running this is checked for being able to do that and other commands above
+            // command for delete user and assign user to empty, only if running this as the server user
+
 
             $table->foreignId('rule_trigger_remote_type_id')
                 ->nullable()->default(null)
@@ -228,9 +238,7 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
 
-        //todo toggle|off|on|offset now pragmas . Put pragma here as option
 
-        //todo the make_set|destroy_set|add_to_set_a|add_to_set_a_remove_from_current are now commands
         DB::statement("CREATE TYPE rule_target_action_type AS ENUM (
             'no_action',
             'pragma',

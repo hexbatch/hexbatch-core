@@ -5,6 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+
 return new class extends Migration
 {
     /**
@@ -81,8 +82,18 @@ return new class extends Migration
             //todo need json path for the value in the search
 
             //todo need two timestamps, start and end;  and another type to show how timestamp is used (before,during,after),
-            // and a second type for if this applies to the age of the element, how long its been in the set, the age of the type, or when the value in the set was changed
+            // and a second postgres type and column for if this applies to the age of the element, how long its been in the set, the age of the type, or when the value in the set was changed
                 // can use a second node for same stuff to do multiple matching for ages (example match age when element joined set and when value changed there)
+
+            //todo add two columns json_path for ordering, and if asc|desc
+
+            //todo need location bounds so can search map  or shapes
+
+            //todo paths need min and max count range, if what is found is not between these counts, search fails, default null (disregard) for each
+
+            //todo optional element of standard type path_description (inherits from user also), this is put into the path_description standard set
+            // can add rules and info about the path (search_results event fired when this is run under these conditions)
+
         });
 
         DB::statement('ALTER TABLE paths ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -96,6 +107,7 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE paths Add COLUMN path_logic type_of_child_logic NOT NULL default 'and';");
 
+        //relationship with the path parent
         DB::statement("CREATE TYPE path_relationship_type AS ENUM (
             'no_relationship',
 

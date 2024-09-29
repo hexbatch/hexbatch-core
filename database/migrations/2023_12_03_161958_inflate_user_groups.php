@@ -29,6 +29,8 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
+            //todo optional element of standard type group_description (inherits from user also), this is put into the group_description standard set
+            // can add rules and info about the group
 
             $table->timestamps();
 
