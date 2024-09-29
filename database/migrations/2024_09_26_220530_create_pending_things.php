@@ -350,7 +350,7 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE pending_things Add COLUMN filter_set_usage type_filter_set_usage NOT NULL default 'none';");
 
-        DB::statement("ALTER TABLE pending_things Add COLUMN given_rule_pragma rule_pragma_type NOT NULL default 'no_pragma';");
+
 
         Schema::table('pending_things', function (Blueprint $table) {
 

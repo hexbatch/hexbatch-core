@@ -100,7 +100,7 @@ return new class extends Migration
 
         });
 
-        DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method rule_target_write_type NOT NULL default 'none';");
+        DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method type_merge_json NOT NULL default 'overwrite';");
 
 
 

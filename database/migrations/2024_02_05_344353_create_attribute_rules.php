@@ -26,52 +26,29 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('rule_trigger_attribute_id')
+            $table->foreignId('target_path_id')
                 ->nullable()->default(null)
-                ->comment("If this rule is depending on an attribute,this can be a stand alone, or ancestor, affecting all decendants. ".
-                    "This can also be an event attribute")
-                ->index('idx_rule_trigger_attribute_id')
-                ->constrained('attributes')
+                ->comment("This rule follows a path")
+                ->index('idx_target_path_id')
+                ->constrained('paths')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('rule_trigger_type_associated_id')
+            $table->foreignId('trigger_path_id')
                 ->nullable()->default(null)
-                ->comment("If this rule is depending on the attribute having a type or subtype (ancestor type like a user token). ".
-                    "If listening to event, then this should point to the event type")
-                ->index('idx_rule_trigger_type_associated_id')
-                ->constrained('element_types')
+                ->comment("This rule follows a path")
+                ->index('idx_trigger_path_id')
+                ->constrained('paths')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('rule_target_attribute_id')
+            $table->foreignId('data_path_id')
                 ->nullable()->default(null)
-                ->comment("The target of the rule, this can be descendants or not")
-                ->index('idx_rule_target_attribute_id')
-                ->constrained('attributes')
+                ->comment("This rule follows a path")
+                ->index('idx_data_path_id')
+                ->constrained('paths')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-
-            //read_write will read from here, and write to the target
-            $table->foreignId('data_attribute_id')
-                ->nullable()->default(null)
-                ->comment("If doing a write, use this. If not set and a write, then only works if target is nullable, then set to null")
-                ->index('idx_data_source_attribute_id')
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreignId('rule_target_destination_set_id')
-                ->nullable()->default(null)
-                ->comment("When the action is putting target to another set. This can be an ancestor for multiple copies")
-                ->index('idx_rule_target_destination_set_id')
-                ->constrained('element_sets')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-
-
-
 
 
             $table->foreignId('rule_trigger_remote_type_id')
@@ -88,27 +65,6 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-            $table->integer('trigger_descendant_range')->default(0)->nullable(false)
-                ->comment('default means do not use descenands, otherwise how many generations, positive only');
-
-            $table->integer('target_descendant_range')->default(0)->nullable(false)
-                ->comment('default means do not use descenands, otherwise how many generations, positive only');
-
-            $table->integer('data_descendant_range')->default(0)->nullable(false)
-                ->comment('default means do not use descenands, otherwise how many generations, positive only');
-
-            $table->integer('scope_range_target')->default(0)->nullable(false)
-                ->comment('how many parent sets or child sets to range');
-
-            $table->integer('scope_range_trigger')->default(0)->nullable(false)
-                ->comment('how many parent sets or child sets to range');
-
-            $table->integer('rule_min_matches')->default(null)->nullable()
-                ->comment('If there is a minimum number of matches needed for this rule');
-
-            $table->integer('rule_max_matches')->default(null)->nullable()
-                ->comment('If there is a maximum number of matches needed for this rule');
-
 
             $table->integer('rule_weight')->nullable(false)->default(1)
                 ->comment("when combined with others of its type, how important is this?");
@@ -116,9 +72,8 @@ return new class extends Migration
             $table->integer('rule_value')->nullable(false)->default(1)
                 ->comment("summed with others of its type, if total <= 0 rule is not applied");
 
-            $table->text('rule_json_path')->nullable()->default(null)
-                ->comment("if set matches path to the the target json value");
-
+            $table->jsonb('rule_constant_data')->nullable()->default(null)
+                ->comment("if no data attribute this is used. if remote this is used as input to the remote");
 
 
             $table->timestamps();
@@ -126,66 +81,14 @@ return new class extends Migration
 
 
 
-        DB::statement("CREATE TYPE type_of_rule AS ENUM (
-            'inactive',
-            'required',
-            'set_membership_affinity'
-            'set_toggle_affinity',
-            'action'
-            );");
-        /* Affinity membership depends on elements in a set to decide to join it when asked by command,
-                 Affinity toggle can turn an attribute to not be readable or writable (both at the same time) in a set based on the contents
-                 and the required is build time, so no checking there
-                */
-
-
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_type type_of_rule NOT NULL default 'inactive';");
-
-
 
          DB::statement("CREATE TYPE type_of_rule_trigger_action AS ENUM (
-            'no_trigger',
             'exists',
             'not_exist'
             );");
 
 
-       DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_action type_of_rule_trigger_action NOT NULL default 'no_trigger';");
-
-
-
-
-
-        DB::statement("CREATE TYPE type_of_rule_target AS ENUM (
-            'target_attribute',
-            'type_of_target_attribute',
-            'set_of_target_attribute'
-            );");
-
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_target_scope type_of_rule_target NOT NULL default 'target_attribute';");
-
-
-        DB::statement("CREATE TYPE type_of_rule_target_scope AS ENUM (
-            'same_set',
-            'parent_set',
-            'child_set'
-            );");
-
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_set_scope_target type_of_rule_target_scope NOT NULL default 'same_set';");
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_set_scope_trigger type_of_rule_target_scope NOT NULL default 'same_set';");
-
-
-        DB::statement("CREATE TYPE type_of_rule_restriction AS ENUM (
-            'own_type',
-            'other_type',
-            'all'
-            );");
-
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_restriction_trigger type_of_rule_restriction NOT NULL default 'own_type';");
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_restriction_target type_of_rule_restriction NOT NULL default 'own_type';");
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_restriction_data type_of_rule_restriction NOT NULL default 'own_type';");
-
-
+       DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_action type_of_rule_trigger_action NOT NULL default 'exists';");
 
 
 
@@ -202,21 +105,48 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
 
+        DB::statement("CREATE TYPE rule_data_action_type AS ENUM (
+            'no_action',
+            'pragma_read_bounds_time', -- convert to json and write to target
+            'pragma_read_bounds_shape',
+            'pragma_read_bounds_map',
+            'pragma_read_bounds_path',
+            'read'
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_data_action rule_data_action_type NOT NULL default 'no_action';");
 
         DB::statement("CREATE TYPE rule_target_action_type AS ENUM (
             'no_action',
-            'pragma',
-            'command',
-            'read_write',
-            'read',
+            'pragma_facet_offset',
+            'pragma_facet_rotation',
+            'pragma_element_on',
+            'pragma_element_toggle',
+            'pragma_element_off',
+            'pragma_element_type_on',
+            'pragma_element_type_toggle',
+            'pragma_element_type_off',
+            'command_make_set',
+            'command_destroy_set',
+            'command_add_to_set',
+            'command_change_set',
+            'command_destroy_user', -- server user
+            'command_assign_user_to_empty', -- server user
+            'command_create_element', -- single only
+            'command_destroy_element',
+            'command_group_add_member', -- group found by the type of the attribute chosen
+            'command_group_add_admin',
+            'command_group_remove_member',
+            'command_group_remove_admin',
+            'type_attribute_required',
+            'set_membership_affinity',
             'write'
             );");
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN target_action rule_target_action_type NOT NULL default 'no_action';");
 
 
-        DB::statement("CREATE TYPE rule_target_write_type AS ENUM (
-            'none',
+        DB::statement("CREATE TYPE type_merge_json AS ENUM (
             'overwrite',
             'or_merge',
             'and_merge',
@@ -225,51 +155,7 @@ return new class extends Migration
 
 
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN target_writing_method rule_target_write_type NOT NULL default 'none';");
-
-
-        //the value is instead used to update something not the value on the target
-        DB::statement("CREATE TYPE rule_pragma_type AS ENUM (
-            'no_pragma',
-            'facet_offset',
-            'facet_rotation',
-            'element_on',
-            'element_toggle',
-            'element_off',
-            'read_bounds_time', -- convert to json and write to target
-            'read_bounds_shape',
-            'read_bounds_map',
-            'read_bounds_path'
-            );");
-
-
-
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_pragma rule_pragma_type NOT NULL default 'no_pragma';");
-
-
-
-
-
-        DB::statement("CREATE TYPE rule_command_type AS ENUM (
-            'no_command',
-            'make_set',
-            'destroy_set',
-            'add_to_set_a',
-            'add_to_set_a_remove_from_current',
-            'destroy_user', -- server user
-            'assign_user_to_empty', -- server user
-            'create_element', -- single only
-            'destroy_element',
-            'group_add_member', -- group found by the type of the attribute chosen
-            'group_add_admin',
-            'group_remove_member',
-            'group_remove_admin'
-            );");
-
-
-
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_command rule_command_type NOT NULL default 'no_command';");
-
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN target_writing_method type_merge_json NOT NULL default 'overwrite';");
 
 
         DB::statement("ALTER TABLE attribute_rules ALTER COLUMN created_at SET DEFAULT NOW();");
@@ -293,16 +179,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('attribute_rules');
-        DB::statement("DROP TYPE type_of_rule;");
         DB::statement("DROP TYPE type_of_rule_trigger_action;");
-        DB::statement("DROP TYPE type_of_rule_target;");
-        DB::statement("DROP TYPE type_of_rule_target_scope;");
-        DB::statement("DROP TYPE type_of_rule_restriction;");
         DB::statement("DROP TYPE type_of_child_logic;");
         DB::statement("DROP TYPE rule_target_action_type;");
-        DB::statement("DROP TYPE rule_target_write_type;");
-        DB::statement("DROP TYPE rule_pragma_type;");
-        DB::statement("DROP TYPE rule_command_type;");
+        DB::statement("DROP TYPE type_merge_json;");
+        DB::statement("DROP TYPE rule_data_action_type;");
 
     }
 };

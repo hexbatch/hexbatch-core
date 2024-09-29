@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('path_owner_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The owner of the path")
+                ->comment("The optional owner of the path")
                 ->index('idx_path_owner_id')
                 ->constrained('user_types')
                 ->cascadeOnUpdate()

@@ -18,6 +18,12 @@ use JsonPath\JsonPath;
 //todo when debug_non_event_rules mode is set (config), then write what rule does to the attribute_rules_debugs table
 // there should be another config to restrict this to an ancestor attribute that rule is on
 
+
+/* Affinity membership depends on elements in a set to decide to join it when asked by command,
+                 Affinity toggle can turn an attribute to not be readable or writable (both at the same time) in a set based on the contents
+                 and the required is build time, so no checking there
+                */
+
 /*
  * Add to rules:
 
