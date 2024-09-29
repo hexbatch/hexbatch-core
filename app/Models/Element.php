@@ -14,13 +14,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property string ref_uuid
  * @property int element_parent_type_id
- * @property int element_owner_user_id
+ * @property int owner_user_type_id
+ * @property string ref_uuid
+ *
  * @property string created_at
  * @property string updated_at
  *
- * @property User element_owner
+ * @property UserType owner_user_type
+ * @property ElementType element_parent_type
  *
  */
 class Element extends Model

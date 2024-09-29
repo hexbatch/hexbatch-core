@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Bounds\LocationType;
+use App\Enums\Bounds\TypeOfLocation;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -30,7 +30,7 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property string ref_uuid
  * @property string bound_name
- * @property LocationType location_type
+ * @property TypeOfLocation location_type
  * @property ArrayObject geo_json
  * @property string geom
  * @property string created_at
@@ -58,7 +58,7 @@ class LocationBound extends Model
     ];
     protected $casts = [
         'geo_json' => AsArrayObject::class,
-        'location_type' => LocationType::class,
+        'location_type' => TypeOfLocation::class,
     ];
 
     public function location_attributes() : HasMany {
@@ -124,10 +124,10 @@ class LocationBound extends Model
 
     /**
      * @param string $geo_json
-     * @param LocationType $shape_type
+     * @param TypeOfLocation $shape_type
      * @return void
      */
-    public function setShape(string $geo_json, LocationType $shape_type) {
+    public function setShape(string $geo_json, TypeOfLocation $shape_type) {
         try {
             Validator::make(['location' => $geo_json], [
                 'location' => ['required', new GeoJsonPolyReq],
@@ -191,14 +191,14 @@ class LocationBound extends Model
             }
         }
 
-        if ($shape_type === LocationType::SHAPE) {
+        if ($shape_type === TypeOfLocation::SHAPE) {
             //points need to be 3d, but can be any value
             if (!$b_is_3d) {
                 throw new HexbatchNotPossibleException(__("msg.location_bounds_shape_is_3d"),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::BOUND_TYPE_DEF);
             }
-        } elseif ($shape_type === LocationType::MAP) {
+        } elseif ($shape_type === TypeOfLocation::MAP) {
             if ($b_is_3d) {
                 throw new HexbatchNotPossibleException(__("msg.location_bounds_map_is_2d"),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

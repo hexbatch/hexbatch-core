@@ -220,9 +220,12 @@ return new class extends Migration
 
             'attribute_read',
             'attribute_write',
-            'attribute_pragma',
+
             'attribute_turned_off',
-            'attribute_urned_on',
+            'attribute_turned_on',
+
+            'type_attributes_turned_off',
+            'type_attributes_turned_on',
 
 
             'element_creation',
@@ -244,7 +247,9 @@ return new class extends Migration
             'set_contents_shape_changed',
             'set_transport',
             'set_kick',
+            'set_created',
             'set_child_created',
+            'set_destroyed',
             'set_child_destroyed',
             'set_top_level_destroyed',
             'set_link_created',

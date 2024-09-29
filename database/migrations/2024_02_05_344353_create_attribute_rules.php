@@ -51,7 +51,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-            $table->foreignId('rule_trigger_remote_type_id')
+            $table->foreignId('rule_remote_type_id')
                 ->nullable()->default(null)
                 ->comment("If this rule calling a remote then put this here")
                 ->index('idx_rule_trigger_remote_type_id')
@@ -82,13 +82,13 @@ return new class extends Migration
 
 
 
-         DB::statement("CREATE TYPE type_of_rule_trigger_action AS ENUM (
+         DB::statement("CREATE TYPE rule_trigger_action_type AS ENUM (
             'exists',
             'not_exist'
             );");
 
 
-       DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_action type_of_rule_trigger_action NOT NULL default 'exists';");
+       DB::statement("ALTER TABLE attribute_rules Add COLUMN attribute_trigger_action rule_trigger_action_type NOT NULL default 'exists';");
 
 
 
@@ -140,6 +140,7 @@ return new class extends Migration
             'command_group_remove_admin',
             'type_attribute_required',
             'set_membership_affinity',
+            'read',
             'write'
             );");
 
@@ -179,7 +180,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('attribute_rules');
-        DB::statement("DROP TYPE type_of_rule_trigger_action;");
+        DB::statement("DROP TYPE rule_trigger_action_type;");
         DB::statement("DROP TYPE type_of_child_logic;");
         DB::statement("DROP TYPE rule_target_action_type;");
         DB::statement("DROP TYPE type_merge_json;");

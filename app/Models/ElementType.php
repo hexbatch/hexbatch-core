@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -18,31 +17,24 @@ use Illuminate\Support\Facades\Log;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int owner_user_type_id
  * @property int editing_user_group_id
  * @property int inheriting_user_group_id
  * @property int new_elements_user_group_id
  * @property int type_read_user_group_id
  * @property int type_write_user_group_id
- *
- *
- * @property int type_start_ts
- * @property int type_end_ts
- * @property int type_next_period_starts_ts
- *
- * @property string type_sum_geom_map
- * @property string type_sum_geom_shape
- *
- *
+ * @property int type_time_bound_id
+ * @property int type_location_map_bound_id
+ * @property int type_bound_path_id
+ * @property int type_description_element_id
+ * @property bool is_retired
+ * @property bool is_system
+ * @property bool is_final
  * @property string ref_uuid
- * @property int user_id
- * @property boolean is_retired
- * @property boolean is_system
- * @property boolean is_final
+ * @property string type_sum_geom_map
  * @property string type_name
- * @property string created_at
- * @property string updated_at
  *
- * @property User type_owner
+ * @property UserType owner_user_type
  * @property Attribute[] type_attributes
  * @property ElementType[] type_parents
  * @property ElementTypeHorde[] type_hordes
@@ -52,6 +44,8 @@ use Illuminate\Support\Facades\Log;
  * @property UserGroup read_whitelist_group
  * @property UserGroup write_whitelist_group
  *
+ * @property string created_at
+ * @property string updated_at
  */
 class ElementType extends Model
 {
@@ -238,46 +232,6 @@ class ElementType extends Model
         return $this->canUserViewDetails($user);
     }
 
-    public static function updateAggregatedStats() {
-        //update for each type that has a bound:
-         // type_start_ts,type_end_ts,type_next_period_starts_ts,type_sum_geom_map,type_sum_geom_shape
-
-        //todo the time spans may better better off as ranges:
-            //https://www.postgresql.org/docs/current/rangetypes.html
-            //
-        //todo implement the current or next time range of span
-
-        //todo update the element_values is_visible when doing the start and stop
-
-
-        //todo parent types have option to restrict their children to keep the same bounds for time, and same or lesser bounds for map
-           //over
-        //do spans
-        // get time spans for the bounded types , the other cron jobs will have created and trimmed them
-
-        // get the current one, or the next one if not one current now and put into type_start_ts and type_end_ts
-        // put the start of the next one in the type_next_period_starts_ts
-        Attribute::whereNotNull('attribute_time_bound_id')
-            ->join('time_bound_spans',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('attributes.attribute_time_bound_id','=','time_bound_spans.time_bound_id')
-                        ->orWhere(function ($q)  {
-                            $q->whereRaw('time_bound_spans.span_start > extract(epoch from  NOW())')
-                            ->WhereRaw('time_bound_spans.span_stop < extract(epoch from  NOW())');
-                        })
-                        ->orWhere(function ($q)  {
-                            $q->whereRaw('time_bound_spans.span_start > extract(epoch from  NOW())');
-                        });
-                }
-            );
-
-
-
-    }
 
     public function sumGeoFromAttributes() {
         //then for the attributes that have a map, do a union of their geometries and store in type_sum_geom_map

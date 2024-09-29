@@ -2,10 +2,10 @@
 
 namespace App\Helpers\Attributes;
 
-use App\Enums\Attributes\AttributeAccessType;
+use App\Enums\Attributes\TypeOfAttributeAccess;
 use App\Enums\Attributes\AttributePingType;
 use App\Enums\Attributes\AttributeServerAccessType;
-use App\Enums\Bounds\LocationType;
+use App\Enums\Bounds\TypeOfLocation;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
@@ -44,7 +44,7 @@ class AttributeGathering
     public ?array $attribute_value = null;
     public ?string $attribute_name  = null;
     public ?AttributeServerAccessType $server_access_type = null;
-    public ?AttributeAccessType $attribute_access_type = null;
+    public ?TypeOfAttributeAccess $attribute_access_type = null;
     public ?int $attribute_time_bound_id = null;
     public ?int $attribute_location_bound_id = null;
 
@@ -184,7 +184,7 @@ class AttributeGathering
 
             if ($request->request->has('attribute_access_type')) {
                 $test_string = $request->request->getString('attribute_access_type');
-                $this->attribute_access_type = AttributeAccessType::tryFrom($test_string);
+                $this->attribute_access_type = TypeOfAttributeAccess::tryFrom($test_string);
                 if (!$this->attribute_access_type) {
                     throw new HexbatchNotPossibleException(__("msg.attribute_bad_access_type", ['bad_type' => $test_string]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -424,7 +424,7 @@ class AttributeGathering
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::ATTRIBUTE_PING_DATA_MISSING);
             }
-            if($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === LocationType::MAP ) {
+            if($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::MAP ) {
                 $ret['map'] = $attribute->attribute_location_bound->ping($location_to_ping_json);
             }
         }
@@ -435,7 +435,7 @@ class AttributeGathering
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::ATTRIBUTE_PING_DATA_MISSING);
             }
-            if($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === LocationType::SHAPE ) {
+            if($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::SHAPE ) {
                 $ret['shape'] = $attribute->attribute_location_bound->ping($shape_to_ping_json);
             }
         }

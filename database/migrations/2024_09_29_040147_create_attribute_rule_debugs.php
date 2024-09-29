@@ -32,53 +32,38 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('found_trigger_attribute_id')
+            $table->foreignId('found_trigger_element_id')
                 ->nullable()->default(null)
-                ->comment("Found this attribute")
-                ->unique('idx_debug_found_trigger_attribute_id')
-                ->constrained('attributes')
+                ->comment("Found trigger")
+                ->unique('idx_debug_found_trigger_element_id')
+                ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('found_type_associated_id')
+            $table->foreignId('found_data_element_id')
                 ->nullable()->default(null)
-                ->comment("Found this type")
-                ->unique('idx_debug_found_type_associated_id')
+                ->comment("Found data")
+                ->unique('idx_debug_found_data_element_id')
                 ->constrained('element_types')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreignId('found_data_attribute_id')
-                ->nullable()->default(null)
-                ->comment("Found this attribute")
-                ->unique('idx_found_data_attribute_id')
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-
-            $table->foreignId('found_target_attribute_id')
-                ->nullable()->default(null)
-                ->comment("Found this attribute")
-                ->unique('idx_debug_found_target_attribute_id')
-                ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->foreignId('found_target_element_id')
                 ->nullable()->default(null)
-                ->comment("Found this element to act on")
+                ->comment("Found target")
                 ->unique('idx_debug_found_target_element_id')
-                ->constrained('elements')
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
 
-
             $table->timestamps();
 
-            $table->jsonb('data_value')->nullable()->default(null)
-                ->comment('found this value from data');
+            $table->jsonb('read_data_value')->nullable()->default(null)
+                ->comment('read this');
+
+            $table->jsonb('write_data_value')->nullable()->default(null)
+                ->comment('wrote this');
         });
 
         DB::statement("ALTER TABLE attribute_rule_debugs ALTER COLUMN created_at SET DEFAULT NOW();");

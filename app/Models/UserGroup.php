@@ -15,20 +15,20 @@ use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int owning_user_type_id
+ * @property int group_element_id
  * @property string ref_uuid
- * @property int user_id
  * @property string group_name
  * @property string created_at
  * @property string updated_at
  *
  * @property UserGroupMember[] group_members
  * @property UserGroupMember[] group_admins
- * @property User group_owner
+ * @property UserType group_owner
  */
 class UserGroup extends Model
 {

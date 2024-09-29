@@ -22,7 +22,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('element_hord_id')
+            $table->foreignId('element_horde_id')
                 ->nullable()->default(null)
                 ->comment("The attribute this value is about")
                 ->constrained('element_type_hordes')
@@ -43,7 +43,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->foreignId('parent_value_id')
+            $table->foreignId('parent_element_value_id')
                 ->nullable()->default(null)
                 ->comment("when in push pop context, this is where the last value is")
                 ->constrained('element_values')
@@ -52,8 +52,6 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->boolean('is_visible')->default(true)->nullable(false)
-                ->comment('shortcut to see if this is visible');
 
             $table->boolean('is_on')->default(true)->nullable(false)
                 ->comment('if off, then not seen by any rules');
@@ -61,7 +59,7 @@ return new class extends Migration
             $table->boolean('is_const')->default(true)->nullable(false)
                 ->comment('if true, then get value from attribute via hord');
 
-            $table->timestamp('when_dynamic_value_changed')->default(null)->nullable()
+            $table->timestamp('dynamic_value_changed_at')->default(null)->nullable()
                 ->comment('Updated when the value is updated here, otherwise null');
 
             $table->jsonb('element_value')

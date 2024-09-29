@@ -3,9 +3,9 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
-use App\Models\RemoteStack;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Models\RemoteStack;
 
 /**
  * @mixin RemoteStack

@@ -3,7 +3,7 @@
 namespace App\Helpers\Bounds;
 
 
-use App\Enums\Bounds\LocationType;
+use App\Enums\Bounds\TypeOfLocation;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -21,11 +21,11 @@ class LocationBoundGathering
 
     public ?string $bound_name =null;
 
-    public ?LocationType $location_type = null;
+    public ?TypeOfLocation $location_type = null;
 
 
 
-    public function __construct(Collection $request,?LocationBound $current_bound = null,?LocationType $location_type = null )
+    public function __construct(Collection $request,?LocationBound $current_bound = null,?TypeOfLocation $location_type = null )
     {
         $this->current_bound = $current_bound;
 
@@ -42,7 +42,7 @@ class LocationBoundGathering
         } else {
             if ( $request->has('location_type')) {
                 $test_string = $request->get('location_type');
-                $this->location_type  = LocationType::tryFrom($test_string);
+                $this->location_type  = TypeOfLocation::tryFrom($test_string);
                 if (!$this->location_type ) {
                     throw new HexbatchNotPossibleException(__("msg.location_bounds_has_wrong_type",['bad_type'=>$test_string]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

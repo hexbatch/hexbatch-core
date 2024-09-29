@@ -24,16 +24,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->integer('span_start')->nullable(false)
-                ->comment('When this span starts (inclusive)');
-
-            $table->integer('span_stop')->nullable(false)
-                ->comment('When this span stops (inclusive)');
-
-            $table->unique(['time_bound_id','span_start','span_stop'],'udx_unique_time_spans');
         });
+        DB::statement(/** @lang text */ "
+                ALTER TABLE time_bound_spans
+                ADD COLUMN time_slice_range daterange NOT NULL;
+        ");
 
-        DB::statement('ALTER TABLE time_bound_spans ADD CONSTRAINT time_span_start_before_stop_constraint CHECK (span_start < span_stop)');
+        DB::statement("
+            CREATE INDEX ON time_bound_spans USING GIST (time_slice_range);
+        ");
     }
 
     /**

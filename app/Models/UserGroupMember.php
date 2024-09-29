@@ -12,12 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int user_group_id
- * @property int user_id
+ * @property int member_user_type_id
  * @property bool is_admin
+ *
  * @property string created_at
  * @property string updated_at
  *
- * @property User member_user
+ * @property UserType member_user
  * @property UserGroup parent_group
  *
  */

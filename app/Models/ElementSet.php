@@ -12,7 +12,13 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
-
+ * @property int parent_set_element_id
+ * @property bool has_events
+ * @property string ref_uuid
+ *
+ * @property string created_at
+ * @property string updated_at
+ *
  */
 class ElementSet extends Model
 {
@@ -25,9 +31,7 @@ class ElementSet extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-
-    ];
+    protected $fillable = [];
 
     /**
      * The attributes that should be hidden for serialization.

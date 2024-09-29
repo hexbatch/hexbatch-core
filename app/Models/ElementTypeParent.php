@@ -19,6 +19,7 @@ use Illuminate\Support\Collection;
  * @property int child_type_id
  * @property int parent_type_id
  * @property int parent_rank
+ *
  * @property string created_at
  * @property string updated_at
  *

@@ -3,9 +3,9 @@
 namespace App\Models;
 
 
-use App\Enums\Attributes\AttributeAccessType;
+use App\Enums\Attributes\TypeOfAttributeAccess;
 use App\Enums\Attributes\AttributeRuleType;
-use App\Enums\Bounds\LocationType;
+use App\Enums\Bounds\TypeOfLocation;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,8 +27,8 @@ use Illuminate\Support\Facades\DB;
  * @property boolean is_shape_bound
  * @property boolean is_time_bound
  * @property boolean is_per_set_value
- * @property boolean is_locked_to_type_editor_membership
- * @property boolean is_locked_to_element_owner_membership
+ * @property boolean is_access_type_editor
+ * @property boolean is_access_element_owner
  *
  * @property Attribute horde_attribute
  */
@@ -76,12 +76,12 @@ class ElementTypeHorde extends Model
 
             'is_whitelisted_reading' => (bool)$type->read_whitelist_group,
             'is_whitelisted_writing' => (bool)$type->write_whitelist_group,
-            'is_map_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === LocationType::MAP),
-            'is_shape_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === LocationType::SHAPE),
+            'is_map_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::MAP),
+            'is_shape_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::SHAPE),
             'is_time_bound' => (bool)$attribute->attribute_time_bound,
             'is_per_set_value' => $attribute->is_per_set_value,
-            'is_locked_to_type_editor_membership' => $attribute->attribute_access_type === AttributeAccessType::TYPE_PRIVATE,
-            'is_locked_to_element_owner_membership' => $attribute->attribute_access_type === AttributeAccessType::ELEMENT_PRIVATE
+            'is_access_type_editor' => $attribute->attribute_access_type === TypeOfAttributeAccess::TYPE_PRIVATE,
+            'is_access_element_owner' => $attribute->attribute_access_type === TypeOfAttributeAccess::ELEMENT_PRIVATE
         ],['horde_type_id','horde_attribute_id']);
         $horde->refresh();
         return $horde;

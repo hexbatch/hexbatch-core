@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('server_user_type_tokens', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('to_server_user_type')
+            $table->foreignId('token_user_type_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The owner of this type")
-                ->index('idx_to_server_user_type')
+                ->index('idx_token_user_type_id')
                 ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
@@ -32,11 +32,19 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+
             $table->string('user_server_token')
                 ->nullable()->default(null)
-                ->comment("the token the server sends for that user");
+                ->comment("the token used");
 
             $table->timestamps();
+
+            $table->text('user_server_public_key')
+                ->nullable()->default(null)
+                ->comment("optional public key used to encrypt the data, instead of token");
         });
     }
 

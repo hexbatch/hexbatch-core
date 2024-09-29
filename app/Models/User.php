@@ -27,26 +27,20 @@ use Laravel\Sanctum\HasApiTokens;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property string ref_uuid
  * @property string name
  * @property string username
  * @property string password
  * @property string email
  * @property string email_verified_at
  * @property string remember_token
- * @property string created_at
- * @property string updated_at
  * @property string two_factor_secret
  * @property string two_factor_recovery_codes
  * @property string two_factor_confirmed_at
  * @property int element_type_id
- * @property int element_id
- * @property int user_group_id
- * @property int server_id
- * @property string ref_uuid
  *
- * @property Element user_element
- * @property UserGroup user_group
- * @property ElementType user_type
+ * @property string created_at
+ * @property string updated_at
  *
  */
 class User extends Authenticatable

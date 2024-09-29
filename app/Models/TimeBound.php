@@ -84,7 +84,7 @@ class TimeBound extends Model
 
      */
     public static function generateSpans(array $only_ids = []) : void {
-
+        //todo fixup with new span range
         $now_ts = time();
         $unix_timestamp = $now_ts + static::MAKE_PERIOD_SECONDS;
         $query = TimeBound::select('*')

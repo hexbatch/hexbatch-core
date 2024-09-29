@@ -63,20 +63,12 @@ return new class extends Migration
 
         Schema::table('servers', function (Blueprint $table) {
 
-            $table->dateTime('status_change_at')->nullable()->default(null)
+            $table->timestamp('status_change_at')->nullable()->default(null)
                 ->comment('When the last status was made at');
 
             $table->string('server_domain')->unique()
                 ->nullable(false)
-                ->comment("the url to the server");
-
-            $table->string('server_incoming_token')
-                ->nullable()->default(null)
-                ->comment("the token to send the server for any requests");
-
-            $table->string('server_outgoing_token')->unique()
-                ->nullable()->default(null)
-                ->comment("The token sent by the server to here");
+                ->comment("the url to the server, example localhost, eggs.waffle_time.org");
         });
 
         DB::statement('ALTER TABLE servers ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -111,8 +103,6 @@ return new class extends Migration
             $table->dropColumn('server_domain');
             $table->dropColumn('status_change_at');
             $table->dropColumn('server_status');
-            $table->dropColumn('server_incoming_token');
-            $table->dropColumn('server_outgoing_token');
 
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');

@@ -3,10 +3,10 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
-use App\Models\RemoteActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Models\RemoteActivity;
 
 /**
  * @mixin RemoteActivity

@@ -14,11 +14,11 @@ return new class extends Migration
     {
         Schema::table('element_types', function (Blueprint $table) {
 
-            $table->foreignId('owner_type_id')
+            $table->foreignId('owner_user_type_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The owner of the remote")
-                ->index('idx_element_owner_type_id')
+                ->index('idx_type_owner_user_type_id')
                 ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
@@ -118,15 +118,6 @@ return new class extends Migration
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then cannot be added as parent');
 
-            $table->integer('type_start_ts')->default(null)->nullable()
-                ->comment('The union of all child attribute time bounds. This is updated to show current span start');
-
-            $table->integer('type_end_ts')->default(null)->nullable()
-                ->comment('The union of all child attribute time bounds. This is updated to show current span start');
-
-            $table->integer('type_next_period_starts_ts')->default(null)->nullable()
-                ->comment('When the next period after the end ts will start, used to knowing when to update');
-
 
 
         });
@@ -152,7 +143,7 @@ return new class extends Migration
         ");
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_user_per_type_name ON element_types (owner_type_id,type_name) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_user_per_type_name ON element_types (owner_user_type_id,type_name) NULLS NOT DISTINCT;");
     }
 
     /**
@@ -163,7 +154,7 @@ return new class extends Migration
         DB::statement("DROP TRIGGER update_modified_time ON element_types");
 
         Schema::table('element_types', function (Blueprint $table) {
-            $table->dropForeign(['owner_type_id']);
+            $table->dropForeign(['owner_user_type_id']);
             $table->dropForeign(['editing_user_group_id']);
             $table->dropForeign(['inheriting_user_group_id']);
             $table->dropForeign(['new_elements_user_group_id']);
@@ -174,7 +165,7 @@ return new class extends Migration
             $table->dropForeign(['type_bound_path_id']);
             $table->dropForeign(['type_description_element_id']);
 
-            $table->dropColumn('owner_type_id');
+            $table->dropColumn('owner_user_type_id');
             $table->dropColumn('editing_user_group_id');
             $table->dropColumn('inheriting_user_group_id');
             $table->dropColumn('new_elements_user_group_id');
@@ -192,9 +183,6 @@ return new class extends Migration
             $table->dropColumn('is_retired');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final');
-            $table->dropColumn('type_start_ts');
-            $table->dropColumn('type_end_ts');
-            $table->dropColumn('type_next_period_starts_ts');
             $table->dropColumn('type_sum_geom_map');
 
 

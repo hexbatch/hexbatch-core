@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\Remote::getName()
+ * @uses \Models\Remote::getName()
  * @method getName()
  */
 class RemoteMetaResource extends JsonResource

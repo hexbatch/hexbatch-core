@@ -51,10 +51,10 @@ return new class extends Migration
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then this attribute will have different values per set. Otherwise an element value of this will not change when in different sets');
 
-            $table->boolean('is_locked_to_type_editor_membership')->default(false)->nullable(false)
+            $table->boolean('is_access_type_editor')->default(false)->nullable(false)
                 ->comment('if true then this attribute can only be read or written by the editor group of the type not the child type');
 
-            $table->boolean('is_locked_to_element_owner_membership')->default(false)->nullable(false)
+            $table->boolean('is_access_element_owner')->default(false)->nullable(false)
                 ->comment('if true then this attribute can only be read or written by the owner of the element or those who have membership in his personal group');
         });
     }

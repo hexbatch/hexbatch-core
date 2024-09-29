@@ -87,7 +87,7 @@ return new class extends Migration
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then the element value of this is different for each set');
 
-            $table->timestamp('when_const_value_changed')->default(null)->nullable()
+            $table->timestamp('const_value_changed_at')->default(null)->nullable()
                 ->comment('Updated when the value is updated here, otherwise null');
 
             $table->timestamps();
@@ -191,7 +191,7 @@ return new class extends Migration
             $table->dropColumn('attribute_access_type');
             $table->dropColumn('popped_writing_method');
             $table->dropColumn('attribute_shape_display');
-            $table->dropColumn('when_const_value_changed');
+            $table->dropColumn('const_value_changed_at');
         });
 
         DB::statement("DROP TYPE type_of_server_access;");

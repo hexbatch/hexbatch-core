@@ -13,7 +13,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use JsonPath\JsonPath;
 
-//todo add new fields for rules
 
 //todo when debug_non_event_rules mode is set (config), then write what rule does to the attribute_rules_debugs table
 // there should be another config to restrict this to an ancestor attribute that rule is on
@@ -50,27 +49,24 @@ use JsonPath\JsonPath;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int rule_bundle_owner_id
- * @property int rule_trigger_attribute_id
- * @property string ref_uuid
- * @property string rule_name
+ * @property int parent_rule_id
+ * @property int target_path_id
+ * @property int trigger_path_id
+ * @property int data_path_id
+ * @property int rule_remote_type_id
  * @property int rule_weight
- * @property AttributeRuleType rule_type
- * @property int  rule_value
- * @property string rule_json_path
- * @property bool target_descendant_range
+ * @property int rule_value
+ * @property string ref_uuid
+ * @property string rule_constant_data
+ * @property string attribute_trigger_action
+ * @property string child_logic
+ * @property string rule_data_action
+ * @property string target_action
+ * @property string target_writing_method
+ * @property string rule_name
  *
  * @property string created_at
  * @property string updated_at
- *
- *
- * @property int created_at_ts
- * @property int updated_at_ts
- *
- * @property AttributeRuleBundle rule_owner
- * @property Attribute rule_target
- *
- *
  */
 class AttributeRule extends Model
 {

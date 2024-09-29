@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Attributes\AttributeAccessType;
+use App\Enums\Attributes\TypeOfAttributeAccess;
 use App\Enums\Attributes\AttributeServerAccessType;
 use App\Exceptions\HexbatchNotFound;
 
@@ -24,26 +24,30 @@ use Illuminate\Support\Facades\Route;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property string ref_uuid
- * @property int parent_attribute_id
  * @property int owner_element_type_id
- * @property int applied_rule_bundle_id
- * @property int attribute_time_bound_id
- * @property int attribute_location_bound_id
- * @property boolean is_retired
- * @property boolean is_system
- * @property boolean is_final
- * @property boolean is_final_parent
- * @property boolean is_using_ancestor_bundle
- * @property boolean is_const
- * @property boolean is_per_set_value
- * @property string attribute_name
+ * @property int parent_attribute_id
+ * @property int applied_rule_id
+ * @property int attribute_location_shape_bound_id
+ * @property bool is_retired
+ * @property bool is_final_parent
+ * @property bool is_using_ancestor_bundle
+ * @property bool is_system
+ * @property bool is_nullable
+ * @property bool is_const
+ * @property bool is_final
+ * @property bool is_per_set_value
+ * @property AttributeServerAccessType server_access_type
+ * @property TypeOfAttributeAccess attribute_access_type
+ * @property string ref_uuid
+ * @property string popped_writing_method
+ * @property string attribute_value
+ * @property string attribute_shape_display
  * @property string value_json_path
- * @property ArrayObject attribute_value
+ * @property string attribute_name
+ * @property string const_value_changed_at
+ *
  * @property string created_at
  * @property string updated_at
- * @property AttributeServerAccessType server_access_type
- * @property AttributeAccessType attribute_access_type
  *
  * @property int created_at_ts
  * @property int updated_at_ts
@@ -85,7 +89,7 @@ class Attribute extends Model
     protected $casts = [
         'attribute_value' => AsArrayObject::class,
         'server_access_type' => AttributeServerAccessType::class,
-        'attribute_access_type' => AttributeAccessType::class,
+        'attribute_access_type' => TypeOfAttributeAccess::class,
     ];
 
     protected static function booted(): void

@@ -12,7 +12,16 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int server_type_id
+ * @property int server_admin_user_type_id
+ * @property int server_element_id
  * @property string ref_uuid
+ * @property string server_status
+ * @property string server_domain
+ * @property string status_change_at
+ *
+ *  @property string created_at
+ *  @property string updated_at
  *
  */
 class Server extends Model

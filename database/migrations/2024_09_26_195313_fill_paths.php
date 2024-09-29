@@ -105,10 +105,10 @@ return new class extends Migration
                 ->comment("If false then desc");
 
 
-            $table->timestamp('path_start')->nullable()->default(null)
+            $table->timestamp('path_start_at')->nullable()->default(null)
                 ->comment("if set then time comparison starts here");
 
-            $table->timestamp('path_end')->nullable()->default(null)
+            $table->timestamp('path_end_at')->nullable()->default(null)
                 ->comment("if set then time comparison ends here");
 
 
@@ -135,7 +135,6 @@ return new class extends Migration
         //relationship with the path parent
         DB::statement("CREATE TYPE path_relationship_type AS ENUM (
             'no_relationship',
-
             'shape_intersecting',
             'shape_bordering',
             'shape_seperated',
@@ -221,8 +220,8 @@ return new class extends Migration
             $table->dropColumn('path_attribute_json_path');
             $table->dropColumn('path_part_name');
             $table->dropColumn('is_partial_matching_name');
-            $table->dropColumn('path_start');
-            $table->dropColumn('path_end');
+            $table->dropColumn('path_start_at');
+            $table->dropColumn('path_end_at');
             $table->dropColumn('time_comparison');
             $table->dropColumn('ordering_json_path');
             $table->dropColumn('path_min_count');
