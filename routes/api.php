@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\ElementController;
-use App\Http\Controllers\API\NamespaceController;
 use App\Http\Controllers\API\ServerController;
 use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\API\UserGroupController;
@@ -26,7 +25,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/login', [AuthenticationController::class, 'login'])->name('core.users.login');
         Route::post('/register', [AuthenticationController::class, 'register'])->name('core.users.register');
         Route::get('/get/{user}', [ElementController::class, 'get_user'])->name('core.users.read');
-        //todo api (get) to check if username is valid and available
+        Route::get('/avialable', [AuthenticationController::class, 'available']);
     });
 
     Route::prefix('servers')->group(function () {
@@ -40,6 +39,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/me', [AuthenticationController::class, 'me']);
 
             Route::post('/logout', [AuthenticationController::class, 'logout'])->name('core.users.logout');
+            Route::delete('/delete', [AuthenticationController::class, 'delete_user'])->name('core.users.logout');
+            Route::delete('/purge', [AuthenticationController::class, 'purge_user'])->name('core.users.auth.purge');
 
             Route::prefix('auth')->group(function () {
 
@@ -49,21 +50,24 @@ Route::prefix('v1')->group(function () {
                 Route::get('/passthrough', [AuthenticationController::class, 'get_token_passthrough'])
                     ->name('core.users.auth.passthrough');
 
-                Route::delete('/delete', [AuthenticationController::class, 'delete_this_token'])
+                Route::delete('/delete', [AuthenticationController::class, 'delete_user'])
                     ->name('core.users.auth.delete');
 
-                //todo delete user (The user is deleted from this server, but user types remain,
-                // however any standard descriptions are removed from the default user type
+                Route::delete('/purge', [AuthenticationController::class, 'purge_user'])
+                    ->name('core.users.auth.purge');
+
             });
 
             Route::get('/groups', [UserGroupController::class, 'list_my_groups'])->name('core.users.groups.list');
         });
 
         Route::prefix('namespaces')->group(function () {
-            Route::post('/create', [NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
+            Route::post('/create', [UserGroupController::class, 'create_namespace'])->name('core.namespaces.create');
+            Route::post('/user_type}/transfer/{user}', [UserGroupController::class, 'transfer_namespace'])->name('core.namespaces.transfer');
             Route::get('/{?user}/list', [UserGroupController::class, 'list_namespaces'])->name('core.namespaces.list');
             Route::get('/{user_type}/get', [UserGroupController::class, 'get_namespace'])->name('core.namespaces.get');
             Route::delete('/{user_type}/destroy', [UserGroupController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
+            Route::delete('/{user_type}/purge', [UserGroupController::class, 'purge_namespace'])->name('core.namespaces.destroy');
         });
 
         Route::group(['prefix' => '{user_type}'], function () {

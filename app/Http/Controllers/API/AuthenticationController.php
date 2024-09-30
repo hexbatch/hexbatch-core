@@ -114,5 +114,28 @@ class AuthenticationController extends Controller
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NO_CONTENT);
     }
 
+    public function delete_user(): JsonResponse
+    {
+        //todo implement delete user, removes this user, unlinks the namespaces, and { foreach namespace {foreach resource} } not in use delete
+        // make new s.a attribute on the private and set this as ok_to_delete = false default, must set this as truthful before can delete
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function purge_user(): JsonResponse
+    {
+        //todo implement purge user, which removes the s.a. descriptors, as well as the delete user { foreach namespace {foreach resource} } nullify s.a. descriptors
+        // make new s.a attribute on the private and set this as ok_to_purge = false default, must set this as truthful before can purge
+        // for user deletion , this must be set on the default namespace private , same for above!
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function available(Request $request): JsonResponse
+    {
+        //todo implement available which looks through both the usernames and the namespaces, default ns is the username
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+
+
 
 }

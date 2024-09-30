@@ -83,9 +83,9 @@ class UserGroupController extends Controller
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function list_members(UserType $user_type ): JsonResponse {
-        $ret = UserGroup::buildGroup(Utilities::getTypeCastedAuthUser()?->id)->cursorPaginate();
-        return (new UserGroupCollection($ret))
+    public function list_members(UserGroup $user_group ): JsonResponse {
+        $ret = UserGroupMember::buildGroupMembers(group_id: $user_group->id)->cursorPaginate();
+        return (new UserGroupMemberCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -161,5 +161,37 @@ class UserGroupController extends Controller
         $this->memberCheck($group,$user);
         $ret = UserGroup::buildGroup($user->id)->first();
         return response()->json(new UserGroupResource($ret,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function create_namespace(Request $request): JsonResponse {
+        //todo imp
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function transfer_namespace(Request $request): JsonResponse {
+        //todo implement transfer
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function list_namespaces(?User $user = null): JsonResponse {
+        //todo in the user resource, list the same named ns as the default one
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function get_namespace(UserType $userType): JsonResponse {
+        //todo in user resource show this as the default if same named as the username
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function destroy_namespace(UserType $userType): JsonResponse {
+        //todo cannot destroy namespace that has same name as the username
+        // see user delete
+        //
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    }
+
+    public function purge_namespace(UserType $userType): JsonResponse {
+        //todo see user purge, cannot purge default
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 }

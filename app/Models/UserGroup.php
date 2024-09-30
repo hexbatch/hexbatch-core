@@ -25,8 +25,12 @@ use Illuminate\Validation\ValidationException;
  * @property int group_element_id
  * @property string ref_uuid
  * @property string group_name
+
+
  * @property string created_at
  * @property string updated_at
+ * @property int created_at_ts
+ * @property int updated_at_ts
  *
  * @property UserGroupMember[] group_members
  * @property UserGroupMember[] group_admins

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -15,11 +16,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int member_user_type_id
  * @property bool is_admin
  *
- * @property string created_at
- * @property string updated_at
- *
  * @property UserType member_user
  * @property UserGroup parent_group
+ *
+ * @property string created_at
+ * @property string updated_at
+ * @property int created_at_ts
+ * @property int updated_at_ts
  *
  */
 class UserGroupMember extends Model
@@ -64,5 +67,26 @@ class UserGroupMember extends Model
 
     public function parent_group() : BelongsTo {
         return $this->belongsTo('App\Models\UserGroup','user_group_id');
+    }
+
+    public static function buildGroupMembers(?int $id = null,int $member_user_type_id = null, int $group_id = null) : Builder {
+
+        $build =  UserGroup::select('user_group_members.*')
+            ->selectRaw(" extract(epoch from  user_group_members.created_at) as created_at_ts,  extract(epoch from  user_group_members.updated_at) as updated_at_ts")
+            /** @uses UserGroup::member_user() */
+            ->with('member_user');
+
+        if ($id) {
+            $build->where('user_group_members.id', $id);
+        }
+
+        if ($member_user_type_id) {
+            $build->where('user_group_members.member_user_type_id', $member_user_type_id);
+        }
+
+        if ($group_id) {
+            $build->where('user_group_members.user_group_id',$group_id);
+        }
+        return $build;
     }
 }
