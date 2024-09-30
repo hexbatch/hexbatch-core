@@ -3,7 +3,9 @@
 namespace App\Models;
 
 
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -17,8 +19,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int found_trigger_element_id
  * @property int found_data_element_id
  * @property int found_target_element_id
- * @property string read_data_value
- * @property string write_data_value
+ * @property ArrayObject read_data_value
+ * @property ArrayObject write_data_value
  *
  * @property string created_at
  * @property string updated_at
@@ -48,6 +50,9 @@ class AttributeRuleDebug extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'read_data_value' => AsArrayObject::class,
+        'write_data_value' => AsArrayObject::class,
+    ];
 
 }

@@ -2,27 +2,18 @@
 
 namespace App\Models;
 
-use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchNotFound;
-use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
-use App\Helpers\UserGroups\GroupGathering;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Query\JoinClause;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\HasApiTokens;
 
-//todo add private and public types and put into the user home set
 
-//todo when the user home set is created from the user type element, its put into the Standard set, all_users
-
-//todo create user_base_attribute
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
@@ -37,7 +28,6 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string two_factor_secret
  * @property string two_factor_recovery_codes
  * @property string two_factor_confirmed_at
- * @property int element_type_id
  *
  * @property string created_at
  * @property string updated_at
@@ -83,19 +73,9 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    const SYSTEM_NAME = 'system';
-    const SYSTEM_UUID = '2e3bfcdc-ac5b-4229-8919-b5a9a67f7701';
 
-    public function user_element() : BelongsTo {
-        return $this->belongsTo('App\Models\Element','element_id');
-    }
-
-    public function user_type() : BelongsTo {
-        return $this->belongsTo('App\Models\ElementType','element_type_id');
-    }
-
-    public function user_group() : BelongsTo {
-        return $this->belongsTo('App\Models\UserGroup','user_group_id');
+    public function my_user_types() : HasMany {
+        return $this->hasMany(UserType::class,'owner_user_id');
     }
 
     /**
@@ -115,9 +95,6 @@ class User extends Authenticatable
                 if (Utilities::is_uuid($value)) {
                     //the ref
                     $ret = $this->where('ref_uuid', $value)->first();
-                    if (!$ret) {
-                        $ret = static::getUserByTokenRef($value);
-                    }
 
                 } else {
                     //the name
@@ -139,64 +116,6 @@ class User extends Authenticatable
 
     }
 
-    public static function getUserByTokenRef(string $token_ref, bool $fail = false) : ?User {
-        $builder =  User::select('users.*')
-            ->join('elements',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($token_ref) {
-                    $join
-                        ->on('elements.id','=','users.element_id')
-                        ->where('elements.ref_uuid',$token_ref);
-                }
-            );
-        if ($fail) {
-            return $builder->firstOrFail();
-        }
-
-       return  $builder->first();
-    }
-
-
-    public function initUser() {
-
-
-        if (!$this->user_group_id) {
-            $group =  GroupGathering::SetupNewGroup($this->username);
-            $this->user_group_id = $group->id;
-            $this->save();
-        }
-
-    }
-
-    protected static ?User $system_user = null;
-    public static function getOrCreateSystemUser(bool &$b_new = false) : User {
-        if (static::$system_user) {return static::$system_user;}
-        $user = User::where('ref_uuid',User::SYSTEM_UUID)->first();
-        if ($user) {
-            return static::$system_user = $user;
-        }
-        $b_new = true;
-        $pw = config('hbc.system_user_pw');
-        if (!$pw) {
-            throw new \LogicException("System user pw is not set in .evn");
-        }
-        try {
-
-            $user = (new CreateNewUser)->create([
-                "username" => User::SYSTEM_NAME,
-                "password" => $pw,
-                "password_confirmation" => $pw
-            ]);
-            $user->ref_uuid =  User::SYSTEM_UUID;
-            $user->save();
-            $user->refresh();
-            return static::$system_user = $user;
-        } catch (ValidationException $e) {
-            throw new \LogicException("Cannot create system user because ".$e->getMessage());
-        }
-    }
 
     public static function buildUser(
         ?int $id = null )
@@ -206,8 +125,8 @@ class User extends Authenticatable
         $build =  User::select('users.*')
             ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts")
 
-            /** @uses User::user_element(),User::user_type(),User::user_group() */
-            ->with('user_element','user_type','user_group')
+            /** @uses User::my_user_types() */
+            ->with('my_user_types')
 
 
         ;
@@ -218,22 +137,6 @@ class User extends Authenticatable
 
 
         return $build;
-    }
-
-
-    public function inAdminGroup(int $user_id) : bool {
-        $this->initUser();
-        if ($this->id === $user_id) {return true;}
-        return !!$this->user_group->isAdmin($user_id);
-    }
-
-    public function checkAdminGroup(int $user_id) : void {
-
-        if (!$this->inAdminGroup($user_id)) {
-            throw new HexbatchPermissionException(__("msg.user_not_priv"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::USER_NOT_PRIV);
-        }
     }
 
     public function getName() : string {

@@ -3,7 +3,13 @@
 namespace App\Models;
 
 
+use App\Enums\Things\TypeFilterSetUsage;
+use App\Enums\Things\TypeOfThingStatus;
+use App\Enums\Things\TypeOfThingToDo;
+use App\Enums\Things\TypeUserFollowup;
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -32,15 +38,15 @@ use Illuminate\Database\Eloquent\Model;
  * @property int thing_server_type_id
  * @property int thing_hex_error_id
  * @property string ref_uuid
- * @property string thing_to_do
- * @property string thing_status
- * @property string user_followup
- * @property string filter_set_usage
  * @property string status_change_at
  * @property string callback_http_status
- * @property string thing_value
  * @property string callback_url
  * @property string group_operation_name
+ * @property ArrayObject thing_value
+ * @property TypeOfThingToDo thing_to_do
+ * @property TypeOfThingStatus thing_status
+ * @property TypeUserFollowup user_followup
+ * @property TypeFilterSetUsage filter_set_usage
  *
  * @property string created_at
  * @property string updated_at
@@ -70,6 +76,12 @@ class PendingThing extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'thing_value' => AsArrayObject::class,
+        'thing_to_do' => TypeOfThingToDo::class,
+        'thing_status' => TypeOfThingStatus::class,
+        'user_followup' => TypeUserFollowup::class,
+        'filter_set_usage' => TypeFilterSetUsage::class,
+    ];
 
 }

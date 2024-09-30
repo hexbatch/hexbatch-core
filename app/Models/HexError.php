@@ -3,7 +3,9 @@
 namespace App\Models;
 
 
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -14,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int hex_error_code
  * @property string hex_error_message
- * @property string hex_error_trace
+ * @property ArrayObject hex_error_trace
  * @property string hex_error_file
  *
  * @property string created_at
@@ -45,6 +47,8 @@ class HexError extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'hex_error_trace' => AsArrayObject::class,
+    ];
 
 }

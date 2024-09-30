@@ -3,7 +3,9 @@
 namespace App\Models;
 
 
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -20,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool is_on
  * @property bool is_const
  *
- * @property string element_value
+ * @property ArrayObject element_value
  * @property string element_shape
  *
  * @property string dynamic_value_changed_at
@@ -53,6 +55,8 @@ class ElementValue extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'element_value' => AsArrayObject::class,
+    ];
 
 }

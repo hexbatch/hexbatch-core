@@ -3,7 +3,9 @@
 namespace App\Models;
 
 
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int design_type_as_element_id
  * @property string ref_uuid
  * @property string design_text_notes
- * @property string design_look
+ * @property ArrayObject design_look
  * @property string design_geom
  *
  * @property string created_at
@@ -49,6 +51,8 @@ class Design extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'design_look' => AsArrayObject::class,
+    ];
 
 }

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 
+use App\Enums\Paths\PathRelationshipType;
+use App\Enums\Paths\TimeComparisonType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,12 +32,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property string path_start_at
  * @property string path_end_at
  * @property string path_logic
- * @property string path_relationship
- * @property string time_comparison
  * @property string path_attribute_json_path
  * @property string path_part_name
  * @property string value_json_path
  * @property string ordering_json_path
+ * @property PathRelationshipType path_relationship
+ * @property TimeComparisonType time_comparison
  *
  * @property string created_at
  * @property string updated_at
@@ -65,6 +67,9 @@ class Path extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'path_relationship' => PathRelationshipType::class,
+        'time_comparison' => TimeComparisonType::class,
+    ];
 
 }

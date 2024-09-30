@@ -91,6 +91,11 @@ return new class extends Migration
 
 
             $table->timestamps();
+
+            $table->string('namespace',61)
+                ->nullable(false)
+                ->unique()
+                ->comment("All things created by this user_token is prefixed by this name");
         });
 
         DB::statement("ALTER TABLE user_types ALTER COLUMN created_at SET DEFAULT NOW();");

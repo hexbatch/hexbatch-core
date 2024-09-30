@@ -39,8 +39,8 @@ class UserGroupMember extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'member_user_type_id',
         'user_group_id',
-        'user_id',
         'is_admin'
     ];
 
@@ -59,7 +59,7 @@ class UserGroupMember extends Model
     protected $casts = [];
 
     public function member_user() : BelongsTo {
-        return $this->belongsTo('App\Models\User','user_id');
+        return $this->belongsTo(UserType::class,'member_user_type_id');
     }
 
     public function parent_group() : BelongsTo {

@@ -91,9 +91,11 @@ use App\Models\User;
  */
 class StandardAttributes
 {
+    const SYSTEM_UUID = '2e3bfcdc-ac5b-4229-8919-b5a9a67f7701';
+    const SYSTEM_NAME = 'system';
     const DEFAULT_SERVER_ATTRIBUTE_BASE_UUID = 'default-server-uuid';
     const BASE_ATTRIBUTE_NAME = 'base';
-    const SYSTEM_NAME = User::SYSTEM_NAME;
+
     const STANDARD_ATTRIBUTE =  'standard_attribute';
     const STANDARD_ATTRIBUTE_INFO =  'info';
 

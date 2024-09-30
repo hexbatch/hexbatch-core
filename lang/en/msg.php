@@ -21,6 +21,9 @@ return [
     'user_not_found' => 'User not found using :ref',
     'user_not_priv' => 'Not in the admin group of this user',
 
+    //user types
+    'user_type_not_found' => 'User type not found using :ref',
+
     //groups
     'group_not_found' => 'Group not found using :ref',
     'group_only_owner_can_delete' => 'Only the group owner can delete a group',

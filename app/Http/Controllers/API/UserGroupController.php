@@ -17,6 +17,7 @@ use App\Http\Resources\UserGroupResource;
 use App\Models\User;
 use App\Models\UserGroup;
 use App\Models\UserGroupMember;
+use App\Models\UserType;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -69,6 +70,23 @@ class UserGroupController extends Controller
         }
 
         return response()->json(new UserGroupResource($group), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+    }
+
+    public function list_groups(UserType $user_type ): JsonResponse {
+        $ret = UserGroup::buildGroup(owner_user_type_id: $user_type->id)->cursorPaginate();
+        return (new UserGroupCollection($ret))
+            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+    public function belong_to_groups(UserType $user_type ): JsonResponse {
+        $ret = UserGroup::buildGroup(member_user_type_id: $user_type->id)->cursorPaginate();
+        return (new UserGroupCollection($ret))
+            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function list_members(UserType $user_type ): JsonResponse {
+        $ret = UserGroup::buildGroup(Utilities::getTypeCastedAuthUser()?->id)->cursorPaginate();
+        return (new UserGroupCollection($ret))
+            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function group_destroy(UserGroup $group): JsonResponse {

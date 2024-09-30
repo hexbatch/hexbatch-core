@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int server_admin_user_type_id
  * @property int server_element_id
  * @property string ref_uuid
- * @property string server_status
+ * @property TypeOfServerStatus server_status
  * @property string server_domain
  * @property string status_change_at
  *
@@ -54,7 +55,9 @@ class Server extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'server_status' => TypeOfServerStatus::class,
+    ];
 
 
     public static function buildServer(

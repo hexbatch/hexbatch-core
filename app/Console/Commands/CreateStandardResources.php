@@ -38,7 +38,7 @@ class CreateStandardResources extends Command
         try {
             DB::beginTransaction();
             $b_new = false;
-            $system_user = User::getOrCreateSystemUser($b_new);
+            //todo redo this command
             if ($b_new) {
                 $this->info("created system user " . $system_user->getName());
             }

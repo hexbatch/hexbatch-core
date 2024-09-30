@@ -3,10 +3,16 @@
 namespace App\Models;
 
 use App\Enums\Attributes\AttributeRuleType;
+use App\Enums\Rules\RuleTargetActionType;
+use App\Enums\Rules\RuleTriggerActionType;
+use App\Enums\Rules\TypeMergeJson;
+use App\Enums\Rules\TypeOfChildLogic;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
@@ -57,13 +63,14 @@ use JsonPath\JsonPath;
  * @property int rule_weight
  * @property int rule_value
  * @property string ref_uuid
- * @property string rule_constant_data
- * @property string attribute_trigger_action
- * @property string child_logic
- * @property string rule_data_action
- * @property string target_action
- * @property string target_writing_method
  * @property string rule_name
+ * @property ArrayObject rule_constant_data
+ * @property RuleTriggerActionType attribute_trigger_action
+ * @property TypeOfChildLogic child_logic
+ * @property RuleTriggerActionType rule_data_action
+ * @property RuleTargetActionType target_action
+ * @property TypeMergeJson target_writing_method
+ *
  *
  * @property string created_at
  * @property string updated_at
@@ -96,7 +103,12 @@ class AttributeRule extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'rule_type' => AttributeRuleType::class,
+        'rule_constant_data' => AsArrayObject::class,
+        'attribute_trigger_action' => RuleTriggerActionType::class,
+        'child_logic' => TypeOfChildLogic::class,
+        'rule_data_action' => RuleTriggerActionType::class,
+        'target_action' => RuleTargetActionType::class,
+        'target_writing_method' => TypeMergeJson::class,
     ];
 
 

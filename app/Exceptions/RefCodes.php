@@ -24,6 +24,9 @@ class RefCodes {
     const USER_NOT_FOUND = 1003;
     const USER_NOT_PRIV = 1004;
 
+    // user types start at 1500
+    const USER_TYPE_NOT_FOUND = 1503;
+
     //groups start at 2000
     const ONLY_OWNERS_CAN_DELETE_GROUPS = 2001;
     const ONLY_ADMINS_CAN_CHANGE_MEMBERSHIP = 2002;
@@ -106,6 +109,10 @@ class RefCodes {
         self::BAD_LOGIN => '',
         self::USER_NOT_FOUND => '',
         self::USER_NOT_PRIV => '',
+
+        self::USER_TYPE_NOT_FOUND => '',
+
+
         self::RESOURCE_NAME_UNIQUE_PER_USER => '',
         self::ONLY_OWNERS_CAN_DELETE_GROUPS => '',
         self::ONLY_ADMINS_CAN_CHANGE_MEMBERSHIP => '',

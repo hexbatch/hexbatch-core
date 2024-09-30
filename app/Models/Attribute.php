@@ -40,8 +40,8 @@ use Illuminate\Support\Facades\Route;
  * @property TypeOfAttributeAccess attribute_access_type
  * @property string ref_uuid
  * @property string popped_writing_method
- * @property string attribute_value
- * @property string attribute_shape_display
+ * @property ArrayObject attribute_value
+ * @property ArrayObject attribute_shape_display
  * @property string value_json_path
  * @property string attribute_name
  * @property string const_value_changed_at
@@ -88,6 +88,7 @@ class Attribute extends Model
      */
     protected $casts = [
         'attribute_value' => AsArrayObject::class,
+        'attribute_shape_display' => AsArrayObject::class,
         'server_access_type' => AttributeServerAccessType::class,
         'attribute_access_type' => TypeOfAttributeAccess::class,
     ];

@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -43,7 +45,7 @@ class UserGroup extends Model
     protected $fillable = [
         'is_retired',
         'group_name',
-        'user_id'
+        'owning_user_type_id'
     ];
 
     /**
@@ -76,11 +78,11 @@ class UserGroup extends Model
     }
 
     public function group_owner() : BelongsTo {
-        return $this->belongsTo('App\Models\User','user_id');
+        return $this->belongsTo(UserType::class,'owning_user_type_id');
     }
 
     public function getName() :string {
-        return $this->group_owner->username . '.'. $this->group_name;
+        return $this->group_owner->owner_user->getName() . '.'. $this->group_name;
     }
 
     /**
@@ -92,6 +94,7 @@ class UserGroup extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
+        $build = null;
         $ret = null;
         try {
             if ($field) {
@@ -102,26 +105,46 @@ class UserGroup extends Model
                     $ret = $this->where('ref_uuid', $value)->first();
                 } else {
                     if (is_string($value)) {
-                        //the name, but scope to the user id of the owner
-                        //if this user is not the owner, then the group owner id can be scoped
-                        $parts = explode('.', $value);
-                        if (count($parts) === 1) {
-                            //must be owned by the user
-                            $user = Utilities::getTypeCastedAuthUser();
-                            $ret = $this->where('user_id', $user?->id)->where('group_name', $value)->first();
-                        } else {
-                            $owner = $parts[0];
-                            $maybe_name = $parts[1];
-                            /** @var User $owner */
-                            $owner = (new User)->resolveRouteBinding($owner);
-                            $ret = $this->where('user_id', $owner?->id)->where('group_name', $maybe_name)->first();
+                        /** @var UserType $owner */
+                        $owner = null;
+                        $what_route = Route::current();
+                        if ($what_route->hasParameter('user_type')) {
+                            $owner = $what_route->parameter('user_type');
+                            $user_type_name = $what_route->originalParameter('user_type');
+                            if (!$owner) {
+                                $owner = (new UserType())->resolveRouteBinding($user_type_name);
+                            }
                         }
 
+                        $parts = explode('.', $value);
 
+                        if ($owner && count($parts) === 1) {
+                            //it is the group name, scoped the namespace
+                            $group_name = $parts[0];
+                            $build = $this->where('owning_user_type_id', $owner->id)->where('group_name', $group_name);
+                        } else if (count($parts) === 2) {
+                            // it is the owner.group
+                            $user_type_name = $parts[0];
+                            $group_name = $parts[1];
+                            /** @var UserType $owner */
+                            $owner = (new UserType())->resolveRouteBinding($user_type_name);
+                            $build = $this->where('owning_user_type_id', $owner?->id)->where('group_name', $group_name);
+                        }
                     }
                 }
             }
-        } finally {
+            if ($build) {
+                $first_id = (int)$build->value('id');
+                if ($first_id) {
+                    $first_build = UserGroup::buildGroup(group_id: $first_id);
+                    $ret = $first_build->first();
+                }
+            }
+        }
+        catch (\Exception $e) {
+            Log::warning('Group resolving: '. $e->getMessage());
+        }
+        finally {
             if (empty($ret)) {
                 throw new HexbatchNotFound(
                     __('msg.group_not_found',['ref'=>$value]),
@@ -134,31 +157,35 @@ class UserGroup extends Model
 
     }
 
-    public static function buildGroup(int $user_id = null,int $group_id = null) : Builder {
+    public static function buildGroup(int $owner_user_type_id = null,int $member_user_type_id = null, int $group_id = null) : Builder {
 
-        $laravel =  UserGroup::select('user_groups.*')
+        $build =  UserGroup::select('user_groups.*')
             ->selectRaw(" extract(epoch from  user_groups.created_at) as created_at_ts,  extract(epoch from  user_groups.updated_at) as updated_at_ts")
             /** @uses UserGroup::group_owner() */
             ->with('group_owner');
 
-            if ($user_id) {
-                $laravel->
+            if ($owner_user_type_id) {
+                $build->where('user_groups.owning_user_type_id', $owner_user_type_id);
+            }
+
+            if ($member_user_type_id) {
+                $build->
                 join('user_group_members',
                     /**
                      * @param JoinClause $join
                      */
-                    function (JoinClause $join) use ($user_id) {
+                    function (JoinClause $join) use ($member_user_type_id) {
                         $join
                             ->on('user_groups.id', '=', 'user_group_members.user_group_id')
-                            ->where('user_group_members.user_id', $user_id);
+                            ->where('user_group_members.member_user_type_id', $member_user_type_id);
                     }
                 );
             }
 
             if ($group_id) {
-                $laravel->where('user_groups.id',$group_id);
+                $build->where('user_groups.id',$group_id);
             }
-            return $laravel;
+            return $build;
     }
 
 
