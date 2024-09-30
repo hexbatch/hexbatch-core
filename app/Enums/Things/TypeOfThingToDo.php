@@ -44,6 +44,7 @@ enum TypeOfThingToDo : string {
 
   case SERVER_ADD_ELEMENT = 'server_add_element';
   case SERVER_ADD_TYPE = 'server_add_type';
+  case SERVER_PROCESS_EVENT = 'server_process_event';
   case SERVER_ADD_SET = 'server_add_set';
   case SERVER_REMOVE_ELEMENT = 'server_remove_element';
   case SERVER_REMOVE_TYPE = 'server_remove_type';
@@ -75,6 +76,9 @@ enum TypeOfThingToDo : string {
   case SERVER_SENT_CALLBACK_ELEMENT_REQUEST = 'server_sent_callback_element_request';
   case SERVER_SENT_CALLBACK_ELEMENT_REMOVE = 'server_sent_callback_element_remove';
   case SERVER_SENT_CALLBACK_SET_ADD = 'server_sent_callback_set_add';
+  case SERVER_SENT_CALLBACK_PROCESS_EVENT = 'server_sent_callback_process_event';
+
+
   case SERVER_SENT_CALLBACK_ASK_USER_PERMISSION = 'server_sent_callback_ask_user_permission';
 
 

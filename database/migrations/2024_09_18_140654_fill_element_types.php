@@ -17,12 +17,14 @@ return new class extends Migration
             $table->foreignId('owner_user_type_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The owner of the remote")
+                ->comment("The owner of the type")
                 ->index('idx_type_owner_user_type_id')
                 ->constrained('user_types')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+            //todo add table to list which types were received from which servers (element_type_id, server_id, timestamps)
+            //todo need table to list which remote types have rules for events, (above table , attribute_event_id)
 
             $table->foreignId('editing_user_group_id')
                 ->nullable()->default(null)

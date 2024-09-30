@@ -212,6 +212,7 @@ class ElementType extends Model
         if (Element::where('element_parent_type_id',$this->id)->count() ) {return true;}
         if (ElementTypeParent::where('parent_type_id',$this->id)->count() ) {return true;}
         if (ElementTypeHorde::where('horde_type_id',$this->id)->count() ) {return true;}
+        //todo also see if sent to another server
         return false;
     }
 

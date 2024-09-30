@@ -258,6 +258,7 @@ return new class extends Migration
 
             'server_add_element',
             'server_add_type',
+            'server_process_event',
             'server_add_set',
             'server_remove_element',
             'server_remove_type',
@@ -288,6 +289,7 @@ return new class extends Migration
             'server_sent_callback_element_add',
             'server_sent_callback_element_request',
             'server_sent_callback_element_remove',
+            'server_sent_callback_process_event',
             'server_sent_callback_set_add',
             'server_sent_callback_ask_user_permission',
 

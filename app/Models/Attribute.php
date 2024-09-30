@@ -62,8 +62,6 @@ use Illuminate\Support\Facades\Route;
 class Attribute extends Model
 {
 
-  //todo attribute consts can be edited while in use because not stored in the element_values
-
     protected $table = 'attributes';
     public $timestamps = false;
 
