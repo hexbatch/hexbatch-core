@@ -25,6 +25,7 @@ return new class extends Migration
 
             //todo add table to list which types were received from which servers (element_type_id, server_id, timestamps)
             //todo need table to list which remote types have rules for events, (above table , attribute_event_id)
+            //todo need table type server whitelist  ( element_type_id,server_id)
 
             $table->foreignId('editing_user_group_id')
                 ->nullable()->default(null)
@@ -96,7 +97,7 @@ return new class extends Migration
             $table->foreignId('type_description_element_id')
                 ->nullable()
                 ->default(null)
-                ->comment("Only can join sets found in path. Is not evicted due to path result change")
+                ->comment("This is an optional description/hook element")
                 ->unique('udx_type_description_element_id')
                 ->constrained('elements')
                 ->cascadeOnUpdate()

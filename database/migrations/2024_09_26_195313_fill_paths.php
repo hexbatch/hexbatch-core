@@ -76,9 +76,18 @@ return new class extends Migration
             $table->foreignId('path_description_element_id')
                 ->nullable()
                 ->default(null)
-                ->comment("Only can join sets found in path. Is not evicted due to path result change")
+                ->comment("This is an optional description/hook element")
                 ->unique('udx_path_description_element_id')
                 ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+            $table->foreignId('path_server_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The type/element must be from this server")
+                ->unique('idx_path_server_id')
+                ->constrained('servers')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
@@ -200,9 +209,11 @@ return new class extends Migration
             $table->dropForeign(['path_user_type_id']);
             $table->dropForeign(['path_description_element_id']);
             $table->dropForeign(['path_location_bound_id']);
+            $table->dropForeign(['path_server_id']);
 
             $table->dropColumn('path_description_element_id');
             $table->dropColumn('path_location_bound_id');
+            $table->dropColumn('path_server_id');
             $table->dropColumn('path_owner_id');
             $table->dropColumn('parent_path_id');
             $table->dropColumn('path_type_id');

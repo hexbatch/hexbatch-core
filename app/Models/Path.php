@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int path_owner_id
  * @property int parent_path_id
  * @property int path_type_id
+ * @property int path_server_id
  * @property int path_attribute_id
  * @property int path_element_set_id
  * @property int path_user_type_id
