@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Types\TypeOfWhitelistPermission;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -33,9 +34,12 @@ use Illuminate\Support\Facades\Log;
  * @property Attribute[] type_attributes
  * @property ElementType[] type_parents
  * @property ElementTypeHorde[] type_hordes
+ * @property ElementTypeWhitelist[] type_whitelists
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * @property UserNamespace type_owner
  */
 class ElementType extends Model
 {
@@ -51,7 +55,7 @@ class ElementType extends Model
     protected $fillable = [
         'is_retired',
         'type_name',
-        'user_id'
+        'owner_namespace_id'
     ];
 
     /**
@@ -69,18 +73,17 @@ class ElementType extends Model
     protected $casts = [];
 
     public function type_owner() : BelongsTo {
-        return $this->belongsTo('App\Models\User','user_id');
+        return $this->belongsTo(UserNamespace::class,'owner_namespace_id');
     }
 
-
-
-    public function new_elements_group() : BelongsTo {
-        return $this->belongsTo(UserGroup::class,'new_elements_user_group_id');
-    }
 
 
     public function type_attributes() : HasMany {
         return $this->hasMany('App\Models\Attribute','owner_element_type_id','id');
+    }
+
+    public function type_whitelists() : HasMany {
+        return $this->hasMany(ElementTypeWhitelist::class,'whitelist_owning_type_id','id');
     }
 
     public function type_hordes() : HasMany {
@@ -100,7 +103,7 @@ class ElementType extends Model
 
     public static function buildElementType(
         ?int $id = null,
-        ?int $user_id = null
+        ?int $owner_namespace_id = null
     )
     : Builder
     {
@@ -108,17 +111,16 @@ class ElementType extends Model
         $build = ElementType::select('element_types.*')
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
-            /** @uses ElementType::type_owner(),ElementType::editing_group(),ElementType::inheriting_group(),ElementType::new_elements_group(),ElementType::type_attributes() */
-            /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::read_whitelist_group(),ElementType::write_whitelist_group() */
-            ->with('type_owner', 'editing_group', 'inheriting_group', 'new_elements_group','type_attributes',
-                'type_parents','type_children','read_whitelist_group','write_whitelist_group')
+            /** @uses ElementType::type_owner(), ElementType::type_attributes(), ElementType::type_whitelists() */
+            /** @uses ElementType::type_children(),ElementType::type_parents() */
+            ->with('type_owner', 'type_attributes', 'type_children', 'type_parents','type_whitelists')
             ;
 
         if ($id) {
             $build->where('element_types.id', $id);
         }
-        if ($user_id) {
-            $build->where('element_types.user_id', $user_id);
+        if ($owner_namespace_id) {
+            $build->where('element_types.owner_namespace_id', $owner_namespace_id);
         }
 
         return $build;
@@ -150,10 +152,10 @@ class ElementType extends Model
                             $owner_hint = $parts[0];
                             $maybe_name = $parts[1];
                             /**
-                             * @var User $owner
+                             * @var UserNamespace $owner
                              */
-                            $owner = (new User)->resolveRouteBinding($owner_hint);
-                            $build = $this->where('user_id', $owner?->id)->where('type_name', $maybe_name);
+                            $owner = (new UserNamespace())->resolveRouteBinding($owner_hint);
+                            $build = $this->where('owner_namespace_id', $owner?->id)->where('type_name', $maybe_name);
                         }
                     }
                 }
@@ -182,36 +184,34 @@ class ElementType extends Model
     }
 
     public function getName() :string {
-        return $this->type_owner->username.UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
+        return $this->type_owner->getName().UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
     }
 
     public function isInUse() : bool {
         if (Element::where('element_parent_type_id',$this->id)->count() ) {return true;}
         if (ElementTypeParent::where('parent_type_id',$this->id)->count() ) {return true;}
         if (ElementTypeHorde::where('horde_type_id',$this->id)->count() ) {return true;}
-        //todo also see if sent to another server
+
         return false;
     }
 
-    public function canUserEdit(User $user) : bool {
-        if ($this->type_owner?->inAdminGroup($user->id) ) { return true; }
-        if ($this->editing_group?->isMember($user->id) ) { return true; }
-        return false;
+    public function canNamespaceEdit(UserNamespace $namespace) : bool {
+        return (bool)$this->type_owner?->isNamespaceAdmin($namespace) ;
     }
 
-    public function canUserViewDetails(User $user) : bool {
-        if ($this->type_owner?->inAdminGroup($user->id) ) { return true; }
-        if ($this->editing_group?->isMember($user->id) ) { return true; }
-        if ($this->inheriting_group?->isMember($user->id) ) { return true; }
-        return false;
+    public function canNamespaceViewDetails(UserNamespace $namespace) : bool {
+        return (bool)$this->type_owner?->isNamespaceMember($namespace) ;
     }
 
-    public function canUserInherit(User $user) : bool {
-        return $this->canUserViewDetails($user);
+    public function canNamespaceInherit(UserNamespace $namespace) : bool {
+        if (empty($this->type_whitelists)) {return true;}
+        return ElementTypeWhitelist::where('whitelist_owning_type_id',$this->id)
+            ->where('whitelist_namespace_id',$namespace->id)
+            ->where('whitelist_permission',TypeOfWhitelistPermission::INHERITING)->exists();
     }
 
 
-    public function sumGeoFromAttributes() {
+    public function sumMapFromAttributes() {
         //then for the attributes that have a map, do a union of their geometries and store in type_sum_geom_map
         $id = $this->id;
         DB::statement("
@@ -229,22 +229,5 @@ class ElementType extends Model
             WHERE element_types.id=subquery.element_type_id;
         ");
 
-
-        //then for the attributes that have a shape, do a union of their geometries and store in type_sum_geom_shape
-
-        DB::statement("
-            UPDATE element_types
-            SET type_sum_geom_shape=subquery.sum_geo
-
-            FROM (
-                    SELECT t.id as element_type_id , ST_Union(b.geom) as sum_geo
-                    FROM  element_types t
-                    INNER JOIN attributes a  ON a.owner_element_type_id = t.id
-                    INNER JOIN location_bounds b  ON a.attribute_location_bound_id = b.id AND b.location_type = 'shape'
-                    WHERE t.id = $id
-                    GROUP BY t.id
-                    ) AS subquery
-            WHERE element_types.id=subquery.element_type_id;
-        ");
     }
 }

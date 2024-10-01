@@ -28,6 +28,7 @@ class RefCodes {
     const NAMESPACE_NOT_FOUND = 1503;
     const NAMESPACE_NOT_OWNER = 1504;
     const NAMESPACE_NOT_ADMIN = 1505;
+    const NAMESPACE_MEMBER_MISSING_ISSUE = 1506;
 
     //groups start at 2000
     const ONLY_OWNERS_CAN_DELETE_GROUPS = 2001;
@@ -115,6 +116,7 @@ class RefCodes {
         self::NAMESPACE_NOT_FOUND => '',
         self::NAMESPACE_NOT_OWNER => '',
         self::NAMESPACE_NOT_ADMIN => '',
+        self::NAMESPACE_MEMBER_MISSING_ISSUE => '',
 
 
         self::RESOURCE_NAME_UNIQUE_PER_USER => '',

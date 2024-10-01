@@ -9,14 +9,21 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses UserGroup::group_owner()
- * @uses UserGroup::group_members()
- * @uses UserGroup::group_admins()
- * @method UserNamespaceMember[]|Collection group_members()
+ * @uses UserNamespace::owner_user()
+ * @uses UserNamespace::namespace_members()
+ * @uses UserNamespace::namespace_admins()
+ * @uses UserNamespace::isUserAdmin()
+ *
+ * @method  owner_user()
+ * @method UserNamespaceMember[]|Collection  namespace_members()
+ * @method UserNamespaceMember[]|Collection namespace_admins()
+ * @method isUserAdmin(\App\Models\User $user)
+ *
+ * @method group_members()
  * @method UserNamespaceMember[]|Collection group_admins()
  * @method getName()
  */
-class UserGroupResource extends JsonResource
+class UserNamespaceResource extends JsonResource
 {
     protected int $n_display_level = 1;
     public function __construct($resource, mixed $unused = null,int $n_display_level = 1) {
@@ -40,12 +47,12 @@ class UserGroupResource extends JsonResource
 
         return [
             'group_name' => $this->getName(),
-            'owner' =>   new UserResource($this->group_owner,null,$this->n_display_level - 1),
+
             'uuid' => $this->ref_uuid,
             'members_count' => $this->group_members()->count(),
             'admins_count' => $this->group_admins()->count(),
-            'is_admin' => $this->whenNotNull($this->is_admin),
-            'is_owner' => Utilities::getTypeCastedAuthUser()?->id === $this->user_id,
+            'is_admin' => $this->isUserAdmin(Utilities::getTypeCastedAuthUser()),
+            'is_owner' => Utilities::getTypeCastedAuthUser()?->id === $this->namespace_user_id,
         ];
     }
 }

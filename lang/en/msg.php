@@ -26,6 +26,8 @@ return [
     'namespace_not_owner' => 'You are not the owner of the namespace :ref',
     'namespace_not_admin' => 'You are not an administor of the namespace :ref',
     'namespace_not_member' => 'You are not a member of the namespace :ref',
+    'namespace_admin_not_found' => 'The namespace :ref is not an admin of :me',
+    'namespace_member_not_found' => 'The namespace :ref is not an admin of :me',
 
     //groups
     'group_not_found' => 'Group not found using :ref',

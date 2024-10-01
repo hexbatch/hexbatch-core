@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int path_namespace_id
+ * @property int path_owning_namespace_id
  * @property int parent_path_id
  * @property int path_type_id
  * @property int path_server_id

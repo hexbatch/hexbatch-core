@@ -107,7 +107,7 @@ class ElementTypeHorde extends Model
         }
 
         //finally update the map info in the type
-        $parent->sumGeoFromAttributes();
+        $parent->sumMapFromAttributes();
     }
 
 

@@ -63,8 +63,9 @@ class ElementTypeParent extends Model
 
 
     public static function addParent(ElementType $parent,ElementType $child) :ElementTypeParent {
-        $user = Utilities::getTypeCastedAuthUser();
-        if ($parent->is_retired || $parent->is_final || !$parent->canUserInherit($user)) {
+
+        $user_namespace = Utilities::getCurrentNamespace();
+        if ($parent->is_retired || $parent->is_final || !$parent->canNamespaceInherit($user_namespace)) {
             throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ELEMENT_TYPE_CANNOT_INHERIT);

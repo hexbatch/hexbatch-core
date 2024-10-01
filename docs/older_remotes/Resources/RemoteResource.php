@@ -74,7 +74,7 @@ class RemoteResource extends JsonResource
         ];
 
         if ($this->usage_group &&  $this->n_display_level > 1 ) {
-            $ret['usage_group'] = new UserGroupResource($this->usage_group,null,$this->n_display_level - 1);
+            $ret['usage_group'] = new UserNamespaceResource($this->usage_group,null,$this->n_display_level - 1);
         }
 
         if ($this->meta_of_remote &&  $this->n_display_level > 1 ) {

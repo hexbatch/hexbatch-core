@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\UserNamespace;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use JsonException;
 use JsonPath\InvalidJsonPathException;
 use JsonPath\JsonPath;
@@ -176,6 +177,26 @@ class Utilities {
 
         $user = static::getTypeCastedAuthUser();
         return $user->default_namespace;
+    }
+
+    public static function getCurrentNamespace() : ?UserNamespace {
+
+        $namespace = null;
+        $what_route = Route::current();
+        if ($what_route->hasParameter('user_namespace')) {
+            $namespace = $what_route->parameter('user_namespace');
+            if (!$namespace) {
+                $user_namespace_name = $what_route->originalParameter('user_namespace');
+                if ($user_namespace_name) {
+                    $namespace = (new UserNamespace())->resolveRouteBinding($user_namespace_name);
+                }
+
+            }
+            if (!$namespace instanceof UserNamespace::class) {
+                throw new \LogicException("getCurrentNamespace does not see a Namespace in the parameter");
+            }
+        }
+        return $namespace;
     }
 
     public static function runDbFile(?string $start_path) :bool {

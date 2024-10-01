@@ -121,7 +121,7 @@ class UserNamespace extends Model
             ->orderBy('updated_at');
     }
 
-    public static function buildUserType(
+    public static function buildNamespace(
         ?int $id = null,
         ?int $user_id = null,
         int $id_is_member_of_namespace = null,
@@ -183,7 +183,7 @@ class UserNamespace extends Model
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = UserNamespace::buildUserType(id:$first_id)->first();
+                    $ret = UserNamespace::buildNamespace(id:$first_id)->first();
                 }
             }
         }

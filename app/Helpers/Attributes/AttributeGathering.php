@@ -49,19 +49,10 @@ class AttributeGathering
     public ?int $attribute_location_bound_id = null;
 
 
-    public static function checkCurrentUserEditAttribute(?Attribute $current_attribute) {
-        if (!$current_attribute) {return;}
-
-        $user = Utilities::getTypeCastedAuthUser();
-
-        if ( !$current_attribute->type_owner->canUserEdit($user)) {
-            throw new HexbatchPermissionException(__("msg.attribute_cannot_be_edited_due_to_pivs",['ref'=>$current_attribute->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::ATTRIBUTE_CANNOT_EDIT);
-
-        }
-    }
-    public function __construct(Request $request,ElementType $parent_type,?Attribute $current_attribute )
+    /**
+     * @throws \Exception
+     */
+    public function __construct(Request $request, ElementType $parent_type, ?Attribute $current_attribute )
     {
         try {
             DB::beginTransaction();
@@ -78,26 +69,7 @@ class AttributeGathering
                     RefCodes::ATTRIBUTE_CANNOT_EDIT);
             }
 
-            /*
-             * given a parent, see if its type is readable
-             */
 
-            $user = Utilities::getTypeCastedAuthUser();
-
-            static::checkCurrentUserEditAttribute($current_attribute);
-
-            if ($this->parent_attribute) {
-                if ($current_attribute) {
-                    throw new HexbatchPermissionException(__("msg.attribute_parent_cannnot_change", ['ref' => $this->parent_attribute->getName()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                        RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
-                }
-                if (!$this->parent_attribute->type_owner->canUserEdit($user)) {
-                    throw new HexbatchPermissionException(__("msg.attribute_cannot_be_used_at_parent_permissions", ['ref' => $this->parent_attribute->getName()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                        RefCodes::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT);
-                }
-            }
 
             //given a parent, see if its retired or is_final_parent
             if ($this->parent_attribute->is_retired || $this->parent_attribute->is_final_parent) {
@@ -305,7 +277,6 @@ class AttributeGathering
      * @throws \Exception
      */
     public static function cloneAttribute(ElementType $new_parent_type, Attribute $current_attribute) : Attribute {
-        $user = Utilities::getTypeCastedAuthUser();
 
         if ($new_parent_type->ref_uuid === $current_attribute->type_owner->ref_uuid) {
 
@@ -313,15 +284,15 @@ class AttributeGathering
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ATTRIBUTE_CANNOT_CLONE);
         }
-
-        if (!$current_attribute->type_owner->canUserEdit($user)) {
+        $current_namespace = Utilities::getCurrentNamespace();
+        if (!$current_attribute->type_owner->canNamespaceEdit($current_namespace)) {
             throw new HexbatchPermissionException(__("msg.attribute_cannot_be_cloned_due_to_pivs",['ref'=>$current_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ATTRIBUTE_CANNOT_CLONE);
 
         }
 
-        if (!$new_parent_type->canUserEdit($user)) {
+        if (!$new_parent_type->canNamespaceEdit($current_namespace)) {
             throw new HexbatchPermissionException(__("msg.attribute_cannot_be_cloned_due_to_pivs",['ref'=>$current_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ATTRIBUTE_CANNOT_CLONE);
@@ -347,7 +318,10 @@ class AttributeGathering
     }
 
 
-    public static function deleteAttribute(ElementType $element_type,Attribute $doomed_attribute) : void {
+    /**
+     * @throws \Exception
+     */
+    public static function deleteAttribute(ElementType $element_type, Attribute $doomed_attribute) : void {
         if ($element_type->ref_uuid !== $doomed_attribute->type_owner->ref_uuid) {
 
             throw new HexbatchPermissionException(__("msg.attribute_owner_does_not_match_type_given",['ref'=>$doomed_attribute->getName()]),
@@ -360,9 +334,9 @@ class AttributeGathering
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ATTRIBUTE_CANNOT_DELETE);
         }
-        $user = Utilities::getTypeCastedAuthUser();
+        $current_namespace = Utilities::getCurrentNamespace();
 
-        if (!$doomed_attribute->type_owner->canUserEdit($user)) {
+        if (!$doomed_attribute->type_owner->canNamespaceEdit($current_namespace)) {
             throw new HexbatchPermissionException(__("msg.attribute_cannot_be_deleted_priv",['ref'=>$doomed_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ATTRIBUTE_CANNOT_DELETE);
@@ -380,16 +354,6 @@ class AttributeGathering
         }
     }
 
-
-    public static function compareAttributeOwner(ElementType $parent_type,Attribute $current_attribute) : void  {
-        //get the attribute owner type from the horde, this shows belonging
-        $b_exists = ElementTypeHorde::where('horde_type_id',$parent_type->id)->where('horde_attribute_id',$current_attribute->id)->exists();
-        if (!$b_exists ) {
-            throw new HexbatchPermissionException(__("msg.attribute_owner_does_not_match_type_given",['ref'=>$current_attribute->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::ATTRIBUTE_CANNOT_EDIT);
-        }
-    }
 
 
 

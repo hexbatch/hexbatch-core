@@ -3,11 +3,15 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
+use App\Models\UserNamespace;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-
-class ActionResource extends JsonResource
+/**
+ * @uses \App\Models\UserNamespaceMember::namespace_member()
+ * @property UserNamespace  namespace_member
+ */
+class UserNamespaceMemberResource extends JsonResource
 {
     protected int $n_display_level = 1;
     public function __construct($resource, mixed $unused = null,int $n_display_level = 1) {
@@ -22,11 +26,9 @@ class ActionResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        if ($this->n_display_level <=0) {
-            return [$this->ref_uuid];
-        }
         return [
-            'uuid' => $this->ref_uuid
+          'member' => $this->n_display_level <=1 ? $this->namespace_member->getName():new UserNamespaceResource($this->namespace_member,null,$this->n_display_level),
+          'is_admin' => $this->is_admin
         ];
     }
 }

@@ -1,21 +1,19 @@
 <?php
 
-namespace App\Helpers\ElementTypes;
+namespace App\Helpers\Types;
 
 use App\Enums\Attributes\AttributePingType;
 
 use App\Exceptions\HexbatchNotPossibleException;
-use App\Exceptions\HexbatchPermissionException;
+
 use App\Exceptions\RefCodes;
 use App\Helpers\Attributes\AttributeGathering;
-use App\Helpers\UserGroups\GroupGathering;
 use App\Helpers\Utilities;
 
 use App\Models\ElementType;
 use App\Models\ElementTypeHorde;
 use App\Models\ElementTypeParent;
 use App\Models\User;
-use App\Models\UserGroup;
 use App\Rules\ElementTypeNameReq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,11 +24,7 @@ class TypeGathering
 {
     public ?string $type_name = null;
     public ?ElementType $current_type = null;
-    public ?UserGroup $editing_user_group = null;
-    public ?UserGroup $inheriting_user_group = null;
-    public ?UserGroup $new_elements_user_group = null;
-    public ?UserGroup $read_whitelist_group = null;
-    public ?UserGroup $write_whitelist_group = null;
+
 
     /**
      * @var ElementType[] $parents
@@ -56,10 +50,9 @@ class TypeGathering
                 $this->current_type = $request->route('element_type');
             }
 
-            $this->adminCheck();
 
             //see if any parents, fail if a parent does not allow this
-            $user = Utilities::getTypeCastedAuthUser();
+
             if ( $request->request->has('parents')) {
 
                 $parent_collection = $request->collect('parents');
@@ -75,7 +68,8 @@ class TypeGathering
                      * @var ElementType|null $some_parent
                      */
                     $some_parent =  (new ElementType())->resolveRouteBinding($some_parent_hint);
-                    if ($some_parent->is_retired || $some_parent->is_final || !$some_parent->canUserInherit($user)) {
+                    $user_namespace = Utilities::getCurrentNamespace();
+                    if ($some_parent->is_retired || $some_parent->is_final || !$some_parent->canNamespaceInherit($user_namespace)) {
                         throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::ELEMENT_TYPE_CANNOT_INHERIT);
@@ -103,30 +97,6 @@ class TypeGathering
                     RefCodes::ELEMENT_TYPE_INVALID_NAME);
             }
 
-            $this->editing_user_group = null;
-            $this->inheriting_user_group = null;
-            $this->new_elements_user_group = null;
-
-
-            if ($editing_user_group = $request->get('editing_user_group')) {
-                $this->editing_user_group = GroupGathering::adminCheckOrMakeGroupWithUserAdmin($editing_user_group);
-            }
-
-            if ($inheriting_user_group = $request->get('inheriting_user_group')) {
-                $this->inheriting_user_group = GroupGathering::adminCheckOrMakeGroupWithUserAdmin($inheriting_user_group);
-            }
-
-            if ($new_elements_user_group = $request->get('new_elements_user_group')) {
-                $this->new_elements_user_group = GroupGathering::adminCheckOrMakeGroupWithUserAdmin($new_elements_user_group);
-            }
-
-            if ($read_whitelist_group = $request->get('read_whitelist_group')) {
-                $this->read_whitelist_group = GroupGathering::adminCheckOrMakeGroupWithUserAdmin($read_whitelist_group);
-            }
-
-            if ($write_whitelist_group = $request->get('write_whitelist_group')) {
-                $this->write_whitelist_group = GroupGathering::adminCheckOrMakeGroupWithUserAdmin($write_whitelist_group);
-            }
 
             $this->is_retired = Utilities::boolishToBool($request->get('is_retired',false));
             $this->is_final = Utilities::boolishToBool($request->get('is_final',false));
@@ -145,8 +115,8 @@ class TypeGathering
 
         if(empty($this->current_type)) {
             $this->current_type = new ElementType();
-            $user = Utilities::getTypeCastedAuthUser();
-            $this->current_type->user_id = $user->id;
+            $current_namespace = Utilities::getCurrentNamespace();
+            $this->current_type->owner_namespace_id = $current_namespace->id;
         }
 
         if ($this->type_name && !$this->current_type->isInUse()) {
@@ -177,29 +147,6 @@ class TypeGathering
         return $this->current_type;
     }
 
-    public function adminCheck() {
-        if (!$this->current_type) {return;}
-
-        $user = Utilities::getTypeCastedAuthUser();
-        if ($this->current_type->canUserEdit($user)) {return;}
-
-        throw new HexbatchPermissionException(__("msg.element_type_not_admin",['ref'=>$this->current_type->getName()]),
-            \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-            RefCodes::ELEMENT_TYPE_NOT_AUTHORIZED);
-
-    }
-
-    public static function TypeListCheck(ElementType $element_type) {
-
-
-        $user = Utilities::getTypeCastedAuthUser();
-        if ($element_type->canUserViewDetails($user)) {return;}
-
-        throw new HexbatchPermissionException(__("msg.element_type_not_viewer",['ref'=>$element_type->getName()]),
-            \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-            RefCodes::ELEMENT_TYPE_NOT_AUTHORIZED);
-
-    }
 
 
     public static function doPing(Request $request,ElementType $type,AttributePingType $attribute_ping_type) : array

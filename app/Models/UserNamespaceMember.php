@@ -65,7 +65,7 @@ class UserNamespaceMember extends Model
     }
 
     public function parent_namespace() : BelongsTo {
-        return $this->belongsTo('App\Models\UserGroup','parent_namespace_id');
+        return $this->belongsTo(UserNamespace::class,'parent_namespace_id');
     }
 
     public static function buildGroupMembers(?int $id = null,int $member_namespace_id = null, int $namespace_parent_id = null) : Builder {

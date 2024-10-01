@@ -39,8 +39,6 @@ class RuleGathering
 
     public function __construct(Request $request,ElementType $parent_type,Attribute $attribute,?AttributeRule $current_rule = null )
     {
-        AttributeGathering::compareAttributeOwner($parent_type,$attribute);
-        AttributeGathering::checkCurrentUserEditAttribute($attribute);
         $this->current_rule = $current_rule;
         $this->attribute = $attribute;
         $this->parent_type = $parent_type;
@@ -90,8 +88,8 @@ class RuleGathering
             /** @var Attribute $target_attribute */
             $target_attribute = (new Attribute())->resolveRouteBinding($hint_attribute);
             $this->rule_trigger_attribute_id = $target_attribute->id;
-            $user = Utilities::getTypeCastedAuthUser();
-            if (!$target_attribute->type_owner->canUserViewDetails($user->id)) {
+            $current_namespace = Utilities::getCurrentNamespace();
+            if (!$target_attribute->type_owner->canNamespaceViewDetails($current_namespace)) {
                 throw new HexbatchNotPossibleException(__("msg.rule_can_only_target_attributes_user_can_see",['ref'=>$target_attribute->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::RULE_SCHEMA_ISSUE);
@@ -160,13 +158,7 @@ class RuleGathering
                 RefCodes::ATTRIBUTE_CANNOT_DELETE);
         }
 
-        if ($da_rule->rule_owner?->creator_attribute?->ref_uuid !== $parent_attribute->ref_uuid) {
-            if ($da_rule->rule_owner?->creator_attribute) {
-                AttributeGathering::checkCurrentUserEditAttribute($da_rule->rule_owner->creator_attribute);
-            }
-        } else {
-            AttributeGathering::checkCurrentUserEditAttribute($parent_attribute);
-        }
+
     }
 
     public static function checkRuleBelongsInAttribute(Attribute $parent_attribute,AttributeRule $da_rule) {
