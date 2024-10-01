@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('parent_element_id')
                 ->nullable()->default(null)
                 ->comment("The element these values are about")
+                ->index()
                 ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->foreignId('element_horde_id')
                 ->nullable()->default(null)
                 ->comment("The attribute this value is about")
+                ->index()
                 ->constrained('element_type_hordes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -32,6 +34,7 @@ return new class extends Migration
             $table->foreignId('containing_set_id')
                 ->nullable()->default(null)
                 ->comment("The set this value is for")
+                ->index()
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -39,6 +42,7 @@ return new class extends Migration
             $table->foreignId('pointer_to_set_id')
                 ->nullable()->default(null)
                 ->comment("values can point to sets")
+                ->index()
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
@@ -46,6 +50,7 @@ return new class extends Migration
             $table->foreignId('parent_element_value_id')
                 ->nullable()->default(null)
                 ->comment("when in push pop context, this is where the last value is")
+                ->index()
                 ->constrained('element_values')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();

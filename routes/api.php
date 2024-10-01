@@ -4,7 +4,7 @@ use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\ServerController;
 use App\Http\Controllers\API\TypeController;
-use App\Http\Controllers\API\UserGroupController;
+use App\Http\Controllers\API\NamespaceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,37 +58,37 @@ Route::prefix('v1')->group(function () {
 
             });
 
-            Route::get('/groups', [UserGroupController::class, 'list_my_groups'])->name('core.users.groups.list');
+            Route::get('/groups', [NamespaceController::class, 'list_my_groups'])->name('core.users.groups.list');
         });
 
         Route::prefix('namespaces')->group(function () {
-            Route::post('/create', [UserGroupController::class, 'create_namespace'])->name('core.namespaces.create');
-            Route::post('/user_type}/transfer/{user}', [UserGroupController::class, 'transfer_namespace'])->name('core.namespaces.transfer');
-            Route::get('/{?user}/list', [UserGroupController::class, 'list_namespaces'])->name('core.namespaces.list');
-            Route::get('/{user_type}/get', [UserGroupController::class, 'get_namespace'])->name('core.namespaces.get');
-            Route::delete('/{user_type}/destroy', [UserGroupController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
-            Route::delete('/{user_type}/purge', [UserGroupController::class, 'purge_namespace'])->name('core.namespaces.destroy');
+            Route::post('/create', [NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
+            Route::post('/user_namespace}/transfer/{user}', [NamespaceController::class, 'transfer_namespace'])->name('core.namespaces.transfer');
+            Route::get('/{?user}/list', [NamespaceController::class, 'list_namespaces'])->name('core.namespaces.list');
+            Route::get('/{user_namespace}/get', [NamespaceController::class, 'get_namespace'])->name('core.namespaces.get');
+            Route::delete('/{user_namespace}/destroy', [NamespaceController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
+            Route::delete('/{user_namespace}/purge', [NamespaceController::class, 'purge_namespace'])->name('core.namespaces.destroy');
         });
 
-        Route::group(['prefix' => '{user_type}'], function () {
+        Route::group(['prefix' => '{user_namespace}'], function () {
             Route::prefix('groups')->group(function () {
-                Route::post('/create', [UserGroupController::class, 'group_create'])->name('core.groups.create');
-                Route::get('/list', [UserGroupController::class, 'list_groups'])->name('core.groups.list');
-                Route::get('/belong_to', [UserGroupController::class, 'belong_to_groups'])->name('core.groups.create');
-                Route::delete('/{user_group}/destroy', [UserGroupController::class, 'group_destroy'])->name('core.groups.destroy');
-                Route::get('/{user_group}/list_members', [UserGroupController::class, 'list_members'])->name('core.groups.list_members');
-                Route::get('/{user_group}/get', [UserGroupController::class, 'group_get'])->name('core.groups.get');
-                Route::put('/{user_group}/member/add/{user}', [UserGroupController::class, 'group_member_add'])->name('core.groups.member.add');
-                Route::delete('/{user_group}/member/remove/{user}', [UserGroupController::class, 'group_member_remove'])->name('core.groups.member.remove');
-                Route::put('/{user_group}/admin/add/{user}', [UserGroupController::class, 'group_admin_add'])->name('core.groups.admin.add');
-                Route::patch('/{user_group}/admin/remove/{user}', [UserGroupController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
+                Route::post('/create', [NamespaceController::class, 'group_create'])->name('core.groups.create');
+                Route::get('/list', [NamespaceController::class, 'list_groups'])->name('core.groups.list');
+                Route::get('/belong_to', [NamespaceController::class, 'belong_to_groups'])->name('core.groups.create');
+                Route::delete('/{user_group}/destroy', [NamespaceController::class, 'group_destroy'])->name('core.groups.destroy');
+                Route::get('/{user_group}/list_members', [NamespaceController::class, 'list_members'])->name('core.groups.list_members');
+                Route::get('/{user_group}/get', [NamespaceController::class, 'group_get'])->name('core.groups.get');
+                Route::put('/{user_group}/member/add/{user}', [NamespaceController::class, 'group_member_add'])->name('core.groups.member.add');
+                Route::delete('/{user_group}/member/remove/{user}', [NamespaceController::class, 'group_member_remove'])->name('core.groups.member.remove');
+                Route::put('/{user_group}/admin/add/{user}', [NamespaceController::class, 'group_admin_add'])->name('core.groups.admin.add');
+                Route::patch('/{user_group}/admin/remove/{user}', [NamespaceController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
             });
         });
 
 
 
 
-        Route::group(['prefix' => '{user_type}'], function () {
+        Route::group(['prefix' => '{user_namespace}'], function () {
             Route::prefix('types')->group(function () {
             Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
             Route::patch('/{element_type}/edit', [TypeController::class, 'edit_type'])->name('core.types.edit');

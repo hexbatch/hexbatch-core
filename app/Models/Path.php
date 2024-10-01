@@ -14,13 +14,13 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int path_owner_id
+ * @property int path_namespace_id
  * @property int parent_path_id
  * @property int path_type_id
  * @property int path_server_id
  * @property int path_attribute_id
  * @property int path_element_set_id
- * @property int path_user_type_id
+ * @property int path_namespace_id
  * @property int path_location_bound_id
  * @property int path_description_element_id
  * @property int path_min_gap

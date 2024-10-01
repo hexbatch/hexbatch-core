@@ -12,21 +12,16 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_set_element_id
- * @property bool has_events
- * @property string ref_uuid
+ * @property int imported_type_id
+ * @property int from_server_id
  *
  * @property string created_at
  * @property string updated_at
- *
  */
-class ElementSet extends Model
+class ServerImportedType extends Model
 {
 
-    /*
-     * sets always stay on the originating server, they can be copied to others
-     */
-    protected $table = 'element_sets';
+    protected $table = 'server_imported_types';
     public $timestamps = false;
 
     /**
@@ -50,6 +45,4 @@ class ElementSet extends Model
      */
     protected $casts = [];
 
-//-affinity to attribute in set means cannot be added to a set. but +affinity offsets that, so calculated in a sum, all rules for such in a type reacting at the same time
-// to all using the visible attributes/rules. Inactive attributes in the set's elements don't count
 }

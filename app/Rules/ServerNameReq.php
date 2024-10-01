@@ -5,7 +5,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class UserNameReq extends ResourceNameReq
+class ServerNameReq extends UserNameReq
 {
     const MAX_NAME_LENGTH = 30;
     /**

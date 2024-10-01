@@ -54,10 +54,10 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-            $table->foreignId('caller_user_type_id')
+            $table->foreignId('caller_namespace_id')
                 ->nullable()->default(null)
-                ->comment("When api is made, the logged in user type")
-                ->index('idx_thing_caller_user_type_id')
+                ->comment("When api is made, the namespace it is done with")
+                ->index('idx_thing_caller_namespace_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -174,14 +174,21 @@ return new class extends Migration
 
 
 
-
-
-            $table->foreignId('thing_user_type_id')
+            $table->foreignId('thing_user_id')
                 ->nullable()
                 ->default(null)
                 ->comment("When something needs a user")
-                ->index('idx_thing_user_type_id')
-                ->constrained('user_types')
+                ->index('idx_thing_user_id')
+                ->constrained('users')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('thing_namespace_id')
+                ->nullable()
+                ->default(null)
+                ->comment("When something needs a namespace")
+                ->index('idx_thing_namespace_id')
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -190,7 +197,7 @@ return new class extends Migration
                 ->default(null)
                 ->comment("When something needs a server")
                 ->index('idx_thing_server_type_id')
-                ->constrained('user_types')
+                ->constrained('servers')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -266,32 +273,36 @@ return new class extends Migration
             'server_run_rules',
             'server_read',
             'server_write',
-            'server_get_user_token',
-            'server_add_remote_user', -- after user token given
-            'server_user_regenerate_key',
-            'server_remove_remote_user',
+            'server_get_namespace_token',
+
+            'server_add_namespace',
+            'server_adding_namespace',
+            'server_added_namespace',
+            'server_namespace_regenerate_key',
+            'server_removed_namespace',
             'server_created',
             'server_allowed',
             'server_removed',
             'server_after_removed',
             'server_paused',
             'server_regenerate_key',
+            'server_regenerate_namespace_key',
 
-            'server_sent_callback_server_regenerated_key',
-            'server_sent_callback_user_regenerated_key',
-            'server_sent_callback_got_user_token',
-            'server_sent_callback_removed_remote_user',
-            'server_sent_callback_create',
-            'server_sent_callback_destroy',
+
+            'server_sent_callback_element_add',
+            'server_sent_callback_process_event',
+            'server_sent_callback_set_add',
+            'server_sent_callback_element_remove',
             'server_sent_callback_run_rules',
             'server_sent_callback_read',
             'server_sent_callback_write',
-            'server_sent_callback_element_add',
-            'server_sent_callback_element_request',
-            'server_sent_callback_element_remove',
-            'server_sent_callback_process_event',
-            'server_sent_callback_set_add',
-            'server_sent_callback_ask_user_permission',
+            'server_sent_callback_add_namespace',
+            'server_sent_callback_server_regenerated_key',
+            'server_sent_callback_namespace_regenerated_key',
+
+
+
+
 
 
              'shape_intersection_enter',
@@ -307,18 +318,14 @@ return new class extends Migration
             'type_created_after',
             'type_updated_after',
 
-            -- servers that user inherits can listen to these below
-             'user_add_before',
-             'user_remove_before',
-             'user_add_after',
-             'user_remove_after',
-             'user_owner_change',
+
+             'namespace_owner_change',
 
 
-             'user_group_member_add',
-             'user_group_admin_add',
-             'user_admin_removing_member',
-             'user_owner_removing_admin'
+             'namespace_member_add',
+             'namespace_adding_admin',
+             'namespace_removing_member',
+             'namespace_removing_admin'
 
 
             );");

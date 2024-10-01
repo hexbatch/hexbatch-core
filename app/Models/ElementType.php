@@ -17,12 +17,7 @@ use Illuminate\Support\Facades\Log;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int owner_user_type_id
- * @property int editing_user_group_id
- * @property int inheriting_user_group_id
- * @property int new_elements_user_group_id
- * @property int type_read_user_group_id
- * @property int type_write_user_group_id
+ * @property int owner_namespace_id
  * @property int type_time_bound_id
  * @property int type_location_map_bound_id
  * @property int type_bound_path_id
@@ -34,15 +29,10 @@ use Illuminate\Support\Facades\Log;
  * @property string type_sum_geom_map
  * @property string type_name
  *
- * @property UserType owner_user_type
+ * @property UserNamespace owner_namespace
  * @property Attribute[] type_attributes
  * @property ElementType[] type_parents
  * @property ElementTypeHorde[] type_hordes
- * @property UserGroup editing_group
- * @property UserGroup inheriting_group
- * @property UserGroup new_elements_group
- * @property UserGroup read_whitelist_group
- * @property UserGroup write_whitelist_group
  *
  * @property string created_at
  * @property string updated_at
@@ -82,25 +72,12 @@ class ElementType extends Model
         return $this->belongsTo('App\Models\User','user_id');
     }
 
-    public function editing_group() : BelongsTo {
-        return $this->belongsTo(UserGroup::class,'editing_user_group_id');
-    }
 
-    public function inheriting_group() : BelongsTo {
-        return $this->belongsTo(UserGroup::class,'inheriting_user_group_id');
-    }
 
     public function new_elements_group() : BelongsTo {
         return $this->belongsTo(UserGroup::class,'new_elements_user_group_id');
     }
 
-    public function read_whitelist_group() : BelongsTo {
-        return $this->belongsTo(UserGroup::class,'type_read_user_group_id');
-    }
-
-    public function write_whitelist_group() : BelongsTo {
-        return $this->belongsTo(UserGroup::class,'type_write_user_group_id');
-    }
 
     public function type_attributes() : HasMany {
         return $this->hasMany('App\Models\Attribute','owner_element_type_id','id');
@@ -168,7 +145,7 @@ class ElementType extends Model
                     $build = $this->where('ref_uuid', $value);
                 } else {
                     if (is_string($value)) {
-                        $parts = explode('.', $value);
+                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
                         if (count($parts) >= 2) {
                             $owner_hint = $parts[0];
                             $maybe_name = $parts[1];
@@ -205,7 +182,7 @@ class ElementType extends Model
     }
 
     public function getName() :string {
-        return $this->type_owner->username.'.'.$this->type_name;
+        return $this->type_owner->username.UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
     }
 
     public function isInUse() : bool {

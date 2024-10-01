@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,22 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('server_user_type_tokens', function (Blueprint $table) {
+        Schema::create('server_namespace_tokens', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('token_user_type_id')
+            $table->foreignId('token_namespace_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The owner of this type")
-                ->index('idx_token_user_type_id')
-                ->constrained('user_types')
+                ->comment("The namespace this is about")
+                ->index('idx_token_namespace_id')
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
             $table->foreignId('to_server_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The server this user belongs to, null means this one")
+                ->comment("The server this namespace is registered at, null means this server")
                 ->index('idx_to_server_id')
                 ->constrained('servers')
                 ->cascadeOnUpdate()
@@ -42,10 +43,14 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->text('user_server_public_key')
-                ->nullable()->default(null)
-                ->comment("optional public key used to encrypt the data, instead of token");
+
         });
+
+        DB::statement("ALTER TABLE server_namespace_tokens ALTER COLUMN created_at SET DEFAULT NOW();");
+
+        DB::statement("
+            CREATE TRIGGER update_modified_time BEFORE UPDATE ON server_namespace_tokens FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+        ");
     }
 
     /**
@@ -53,6 +58,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('server_user_type_tokens');
+        Schema::dropIfExists('server_namespace_tokens');
     }
 };

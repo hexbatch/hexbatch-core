@@ -130,14 +130,15 @@ return new class extends Migration
             'command_destroy_set',
             'command_add_to_set',
             'command_change_set',
+            'command_destroy_namespace', -- server user or ns owner
             'command_destroy_user', -- server user
-            'command_assign_user_to_empty', -- server user
+            'command_assign_user_to_namespace', -- server user
             'command_create_element', -- single only
             'command_destroy_element',
-            'command_group_add_member', -- group found by the type of the attribute chosen
-            'command_group_add_admin',
-            'command_group_remove_member',
-            'command_group_remove_admin',
+            'command_namespace_add_member', -- namespace found by the type of the attribute chosen,server user or ns owner
+            'command_namespace_add_admin',
+            'command_namespace_remove_member',
+            'command_namespace_remove_admin',
             'type_attribute_required',
             'set_membership_affinity',
             'read',

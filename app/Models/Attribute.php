@@ -44,7 +44,6 @@ use Illuminate\Support\Facades\Route;
  * @property ArrayObject attribute_shape_display
  * @property string value_json_path
  * @property string attribute_name
- * @property string const_value_changed_at
  *
  * @property string created_at
  * @property string updated_at
@@ -154,7 +153,7 @@ class Attribute extends Model
     public function getName(bool $b_redo = false,bool $b_strip_system_prefix = true,bool $short_name = false) : string  {
 
         if ($short_name) {
-            return $this->type_owner->getName() .  '.'. $this->attribute_name;
+            return $this->type_owner->getName() .  UserNamespace::NAMESPACE_SEPERATOR . $this->attribute_name;
         }
         //get ancestor chain
        if (!$b_redo && $this->fully_qualified_name) {return $this->fully_qualified_name;}
@@ -171,11 +170,11 @@ class Attribute extends Model
 
         }
         if (empty($ancestors)) {
-            return $this->type_owner->getName() . '.'. $this->attribute_name;
+            return $this->type_owner->getName() . UserNamespace::NAMESPACE_SEPERATOR. $this->attribute_name;
         }
         $oldest_first = array_reverse($names);
-        $root = implode('.',$oldest_first);
-        return $this->type_owner->getName() . '.'.$root . '.'. $this->attribute_name;
+        $root = implode(UserNamespace::NAMESPACE_SEPERATOR,$oldest_first);
+        return $this->type_owner->getName() . UserNamespace::NAMESPACE_SEPERATOR.$root . UserNamespace::NAMESPACE_SEPERATOR. $this->attribute_name;
     }
 
 
@@ -206,7 +205,7 @@ class Attribute extends Model
 
         if ($user_id) {
 
-
+//todo redo these joins, out of date
             $build->join('element_types',
                 /**
                  * @param JoinClause $join
@@ -227,51 +226,51 @@ class Attribute extends Model
                 }
             );
 
-            $build->join('user_groups as user_admin_group',
+            $build->join('user_namespaces as user_admin_group',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('user_groups.id','=','user_owner.user_group_id');
+                        ->on('user_namespaces.id','=','user_owner.parent_namespace_id');
                 }
             );
 
-            $build->join('user_groups as editing_admin_group',
+            $build->join('user_namespaces as editing_admin_group',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('user_groups.id','=','element_types.editing_user_group_id');
+                        ->on('user_namespaces.id','=','element_types.editing_user_group_id');
                 }
             );
 
-            $build->leftJoin('user_group_members as editing_admin_group_admins',
+            $build->leftJoin('user_namespace_members as editing_admin_group_admins',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join) use($user_id) {
                     $join
-                        ->on('editing_admin_group_admins.user_group_id','=','editing_admin_group.id')
+                        ->on('editing_admin_group_admins.parent_namespace_id','=','editing_admin_group.id')
                         ->where('editing_admin_group_admins.user_id',$user_id);
                 }
             );
 
-            $build->leftJoin('user_group_members as user_admin_group_members',
+            $build->leftJoin('user_namespace_members as user_admin_group_members',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join) use($user_id) {
                     $join
-                        ->on('user_admin_group_members.user_group_id','=','user_admin_group.id')
+                        ->on('user_admin_group_members.parent_namespace_id','=','user_admin_group.id')
                         ->where('user_admin_group_members.user_id',$user_id)
                         ->where('user_admin_group_members.is_admin',true);
                 }
             );
 
             $build->where(function ($q)  {
-                $q->whereNotNull('user_group_members.id')
+                $q->whereNotNull('user_namespace_members.id')
                     ->orWhereNotNull('editing_admin_group_admins.id');
             });
         }
@@ -304,7 +303,7 @@ class Attribute extends Model
                     if (is_string($value)) {
                         //the name, but scope to the user id of the owner
                         //if this user is not the owner, then the group owner id can be scoped
-                        $parts = explode('.', $value);
+                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
 
                         $what_route =  Route::current();
                         $owner_name = $what_route->originalParameter('element_type');
@@ -330,7 +329,7 @@ class Attribute extends Model
                                 $user = (new User)->resolveRouteBinding($user_string);
 
                                 /** @var ElementType $owner */
-                                $owner = (new ElementType)->resolveRouteBinding($user->ref_uuid . '.' . $owner_string);
+                                $owner = (new ElementType)->resolveRouteBinding($user->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $owner_string);
                                 $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $maybe_name);
                             }
                         }

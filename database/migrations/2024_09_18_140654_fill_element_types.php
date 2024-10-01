@@ -14,58 +14,16 @@ return new class extends Migration
     {
         Schema::table('element_types', function (Blueprint $table) {
 
-            $table->foreignId('owner_user_type_id')
+            $table->foreignId('owner_namespace_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The owner of the type")
-                ->index('idx_type_owner_user_type_id')
-                ->constrained('user_types')
+                ->index('idx_type_owner_namespace_id')
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            //todo add table to list which types were received from which servers (element_type_id, server_id, timestamps)
-            //todo need table to list which remote types have rules for events, (above table , attribute_event_id)
-            //todo need table type server whitelist  ( element_type_id,server_id)
 
-            $table->foreignId('editing_user_group_id')
-                ->nullable()->default(null)
-                ->comment("Optional group that allows editing of type. Null fallsback on the owner admin group")
-                ->index('idx_element_type_editing_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreignId('inheriting_user_group_id')
-                ->nullable()->default(null)
-                ->comment("Optional group that controls inheritance, and who can use this as ancestor. Null is anyone")
-                ->index('idx_element_type_inheriting_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreignId('new_elements_user_group_id')
-                ->nullable()->default(null)
-                ->comment("Optinal group who can create elements from this token. Null is anyone")
-                ->index('idx_type_new_elements_user_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreignId('type_read_user_group_id')
-                ->nullable()->default(null)
-                ->comment("Optional whitelist to be able to read any attributes in this type. If missing anyone")
-                ->index('idx_type_read_user_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreignId('type_write_user_group_id')
-                ->nullable()->default(null)
-                ->comment("Optional whitelist to be able to write any attributes in this type. If missing only editor group")
-                ->index('idx_type_write_user_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
 
             $table->foreignId('type_time_bound_id')
                 ->nullable()
@@ -146,7 +104,7 @@ return new class extends Migration
         ");
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_user_per_type_name ON element_types (owner_user_type_id,type_name) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_user_per_type_name ON element_types (owner_namespace_id,type_name) NULLS NOT DISTINCT;");
     }
 
     /**
@@ -157,23 +115,14 @@ return new class extends Migration
         DB::statement("DROP TRIGGER update_modified_time ON element_types");
 
         Schema::table('element_types', function (Blueprint $table) {
-            $table->dropForeign(['owner_user_type_id']);
-            $table->dropForeign(['editing_user_group_id']);
-            $table->dropForeign(['inheriting_user_group_id']);
-            $table->dropForeign(['new_elements_user_group_id']);
-            $table->dropForeign(['type_write_user_group_id']);
-            $table->dropForeign(['type_read_user_group_id']);
+            $table->dropForeign(['owner_namespace_id']);
             $table->dropForeign(['type_time_bound_id']);
             $table->dropForeign(['type_location_map_bound_id']);
             $table->dropForeign(['type_bound_path_id']);
             $table->dropForeign(['type_description_element_id']);
 
-            $table->dropColumn('owner_user_type_id');
-            $table->dropColumn('editing_user_group_id');
-            $table->dropColumn('inheriting_user_group_id');
-            $table->dropColumn('new_elements_user_group_id');
-            $table->dropColumn('type_write_user_group_id');
-            $table->dropColumn('type_read_user_group_id');
+            $table->dropColumn('owner_namespace_id');
+
             $table->dropColumn('type_time_bound_id');
             $table->dropColumn('type_location_map_bound_id');
             $table->dropColumn('type_bound_path_id');

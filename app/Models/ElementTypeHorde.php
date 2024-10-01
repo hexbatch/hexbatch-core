@@ -74,7 +74,7 @@ class ElementTypeHorde extends Model
             'horde_attribute_id' => $attribute->id,
             'horde_type_id' => $type->id,
 
-            'is_whitelisted_reading' => (bool)$type->read_whitelist_group,
+            'is_whitelisted_reading' => (bool)$type->read_whitelist_group, //todo redo this group stuff
             'is_whitelisted_writing' => (bool)$type->write_whitelist_group,
             'is_map_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::MAP),
             'is_shape_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::SHAPE),

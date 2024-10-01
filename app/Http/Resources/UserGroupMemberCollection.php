@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 /**
- * @uses \App\Models\UserGroupMember::parent_group()
+ * @uses \App\Models\UserNamespaceMember::parent_namespace()
  */
 class UserGroupMemberCollection extends ResourceCollection
 {

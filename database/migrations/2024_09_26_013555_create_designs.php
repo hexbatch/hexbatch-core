@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('design_attribute_id')
                 ->nullable()->default(null)
                 ->comment("The attribute that has this type design info")
+                ->index()
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->foreignId('design_type_id')
                 ->nullable()->default(null)
                 ->comment("The type this design information is for")
+                ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -34,6 +36,7 @@ return new class extends Migration
             $table->foreignId('design_type_as_set_id')
                 ->nullable()->default(null)
                 ->comment("Design to show the sets made by the type")
+                ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -41,6 +44,7 @@ return new class extends Migration
             $table->foreignId('design_type_as_element_id')
                 ->nullable()->default(null)
                 ->comment("Design to show the elements made by the type")
+                ->index()
                 ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();

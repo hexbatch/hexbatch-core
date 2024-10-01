@@ -21,20 +21,18 @@ use Illuminate\Validation\ValidationException;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int owning_user_type_id
+ * @property int owning_namespace_id
  * @property int group_element_id
  * @property string ref_uuid
  * @property string group_name
-
-
  * @property string created_at
  * @property string updated_at
  * @property int created_at_ts
  * @property int updated_at_ts
  *
- * @property UserGroupMember[] group_members
- * @property UserGroupMember[] group_admins
- * @property UserType group_owner
+ * @property UserNamespaceMember[] group_members
+ * @property UserNamespaceMember[] group_admins
+ * @property UserNamespace group_owner
  */
 class UserGroup extends Model
 {
@@ -49,7 +47,7 @@ class UserGroup extends Model
     protected $fillable = [
         'is_retired',
         'group_name',
-        'owning_user_type_id'
+        'owning_namespace_id'
     ];
 
     /**
@@ -67,26 +65,26 @@ class UserGroup extends Model
     protected $casts = [];
 
     public function group_members() : HasMany {
-        return $this->hasMany('App\Models\UserGroupMember')
-            /** @uses UserGroupMember::member_user */
+        return $this->hasMany('App\Models\UserNamespaceMember','parent_namespace_id')
+            /** @uses UserNamespaceMember::namespace_member */
             ->with('member_user')
             ->orderBy('created_at');
     }
 
     public function group_admins() : HasMany {
-        return $this->hasMany('App\Models\UserGroupMember')
+        return $this->hasMany('App\Models\UserNamespaceMember','parent_namespace_id')
             ->where('is_admin',true)
-            /** @uses UserGroupMember::member_user */
+            /** @uses UserNamespaceMember::namespace_member() */
             ->with('member_user')
             ->orderBy('updated_at');
     }
 
     public function group_owner() : BelongsTo {
-        return $this->belongsTo(UserType::class,'owning_user_type_id');
+        return $this->belongsTo(UserNamespace::class,'owning_namespace_id');
     }
 
     public function getName() :string {
-        return $this->group_owner->owner_user->getName() . '.'. $this->group_name;
+        return $this->group_owner->owner_user->getName() . UserNamespace::NAMESPACE_SEPERATOR. $this->group_name;
     }
 
     /**
@@ -109,30 +107,33 @@ class UserGroup extends Model
                     $ret = $this->where('ref_uuid', $value)->first();
                 } else {
                     if (is_string($value)) {
-                        /** @var UserType $owner */
+                        /** @var UserNamespace $owner */
                         $owner = null;
                         $what_route = Route::current();
-                        if ($what_route->hasParameter('user_type')) {
-                            $owner = $what_route->parameter('user_type');
-                            $user_type_name = $what_route->originalParameter('user_type');
+                        if ($what_route->hasParameter('user_namespace')) {
+                            $owner = $what_route->parameter('user_namespace');
+
                             if (!$owner) {
-                                $owner = (new UserType())->resolveRouteBinding($user_type_name);
+                                $user_namespace_name = $what_route->originalParameter('user_namespace');
+                                if ($user_namespace_name) {
+                                    $owner = (new UserNamespace())->resolveRouteBinding($user_namespace_name);
+                                }
                             }
                         }
 
-                        $parts = explode('.', $value);
+                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
 
                         if ($owner && count($parts) === 1) {
                             //it is the group name, scoped the namespace
                             $group_name = $parts[0];
-                            $build = $this->where('owning_user_type_id', $owner->id)->where('group_name', $group_name);
+                            $build = $this->where('owning_namespace_id', $owner->id)->where('group_name', $group_name);
                         } else if (count($parts) === 2) {
                             // it is the owner.group
-                            $user_type_name = $parts[0];
+                            $user_namespace_name = $parts[0];
                             $group_name = $parts[1];
-                            /** @var UserType $owner */
-                            $owner = (new UserType())->resolveRouteBinding($user_type_name);
-                            $build = $this->where('owning_user_type_id', $owner?->id)->where('group_name', $group_name);
+                            /** @var UserNamespace $owner */
+                            $owner = (new UserNamespace())->resolveRouteBinding($user_namespace_name);
+                            $build = $this->where('owning_namespace_id', $owner?->id)->where('group_name', $group_name);
                         }
                     }
                 }
@@ -161,27 +162,27 @@ class UserGroup extends Model
 
     }
 
-    public static function buildGroup(int $owner_user_type_id = null,int $member_user_type_id = null, int $group_id = null) : Builder {
+    public static function buildGroup(int $owner_namespace_id = null,int $member_namespace_id = null, int $group_id = null) : Builder {
 
         $build =  UserGroup::select('user_groups.*')
             ->selectRaw(" extract(epoch from  user_groups.created_at) as created_at_ts,  extract(epoch from  user_groups.updated_at) as updated_at_ts")
             /** @uses UserGroup::group_owner() */
             ->with('group_owner');
 
-            if ($owner_user_type_id) {
-                $build->where('user_groups.owning_user_type_id', $owner_user_type_id);
+            if ($owner_namespace_id) {
+                $build->where('user_groups.owning_namespace_id', $owner_namespace_id);
             }
 
-            if ($member_user_type_id) {
+            if ($member_namespace_id) {
                 $build->
-                join('user_group_members',
+                join('user_namespace_members',
                     /**
                      * @param JoinClause $join
                      */
-                    function (JoinClause $join) use ($member_user_type_id) {
+                    function (JoinClause $join) use ($member_namespace_id) {
                         $join
-                            ->on('user_groups.id', '=', 'user_group_members.user_group_id')
-                            ->where('user_group_members.member_user_type_id', $member_user_type_id);
+                            ->on('user_groups.id', '=', 'user_namespace_members.parent_namespace_id')
+                            ->where('user_namespace_members.member_namespace_id', $member_namespace_id);
                     }
                 );
             }
@@ -214,27 +215,27 @@ class UserGroup extends Model
         $this->group_name = $group_name;
     }
 
-    public function isAdmin(?int $user_id) : ?UserGroupMember {
+    public function isAdmin(?int $user_id) : ?UserNamespaceMember {
         if (!$user_id) {return null;}
-        return UserGroupMember::where('user_group_id',$this->id)->where('user_id',$user_id)->where('is_admin',true)->first();
+        return UserNamespaceMember::where('parent_namespace_id',$this->id)->where('user_id',$user_id)->where('is_admin',true)->first();
     }
 
-    public function isMember(?int $user_id) : ?UserGroupMember {
+    public function isMember(?int $user_id) : ?UserNamespaceMember {
         if (!$user_id) {return null;}
-        return UserGroupMember::where('user_group_id',$this->id)->where('user_id',$user_id)->first();
+        return UserNamespaceMember::where('parent_namespace_id',$this->id)->where('user_id',$user_id)->first();
     }
 
-    public function addMember(int $user_id,bool $is_admin=false) : UserGroupMember {
-        $member = new UserGroupMember();
+    public function addMember(int $user_id,bool $is_admin=false) : UserNamespaceMember {
+        $member = new UserNamespaceMember();
         $member->user_id = $user_id;
-        $member->user_group_id = $this->id;
+        $member->parent_namespace_id = $this->id;
         $member->is_admin = $is_admin;
         $member->save();
         $member->refresh();
         return $member;
     }
 
-    public function removeMember(int $user_id) : ?UserGroupMember {
+    public function removeMember(int $user_id) : ?UserNamespaceMember {
         $member = $this->isMember($user_id);
         $member?->delete();
         return $member;
@@ -243,7 +244,7 @@ class UserGroup extends Model
     public function isInUse() : bool {
         if (!$this->id) {return false;}
 
-        if( User::where('user_group_id',$this->id)->exists() ) {return true;}
+        if( User::where('parent_namespace_id',$this->id)->exists() ) {return true;}
         return false;
     }
 }

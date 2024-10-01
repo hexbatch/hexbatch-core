@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\UserGroupMember::member_user()
+ * @uses \App\Models\UserNamespaceMember::namespace_member()
  * @method  getName()
  */
 class UserGroupMemberResource extends JsonResource

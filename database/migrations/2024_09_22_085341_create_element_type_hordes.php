@@ -34,10 +34,10 @@ return new class extends Migration
             $table->unique(['horde_type_id','horde_attribute_id']);
 
             $table->boolean('is_whitelisted_reading')->default(false)->nullable(false)
-                ->comment('if true then check the read group in the type before reading');
+                ->comment('if true then check the whitelist before reading');
 
             $table->boolean('is_whitelisted_writing')->default(false)->nullable(false)
-                ->comment('if true then check the write group in the type before writing');
+                ->comment('if true then check the whitelist before writing');
 
             $table->boolean('is_map_bound')->default(false)->nullable(false)
                 ->comment('if true then this attribute will not readable/writable in all sets, check the attribute location bounds');
@@ -52,10 +52,10 @@ return new class extends Migration
                 ->comment('if true then this attribute will have different values per set. Otherwise an element value of this will not change when in different sets');
 
             $table->boolean('is_access_type_editor')->default(false)->nullable(false)
-                ->comment('if true then this attribute can only be read or written by the editor group of the type not the child type');
+                ->comment('if true then this attribute can only be read or written by the namespace admin group of the type not the child type');
 
             $table->boolean('is_access_element_owner')->default(false)->nullable(false)
-                ->comment('if true then this attribute can only be read or written by the owner of the element or those who have membership in his personal group');
+                ->comment('if true then this attribute can only be read or written by the owner of the element or those who have membership in it');
         });
     }
 

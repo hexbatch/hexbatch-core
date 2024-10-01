@@ -152,21 +152,9 @@ class TypeGathering
         if ($this->type_name && !$this->current_type->isInUse()) {
             $this->current_type->type_name = $this->type_name;
         }
-        if ($this->editing_user_group) {
-            $this->current_type->editing_user_group_id = $this->editing_user_group->id;
-        }
-        if ($this->inheriting_user_group) {
-            $this->current_type->inheriting_user_group_id = $this->inheriting_user_group->id;
-        }
-        if ($this->new_elements_user_group) {
-            $this->current_type->new_elements_user_group_id = $this->new_elements_user_group->id;
-        }
-        if ($this->read_whitelist_group) {
-            $this->current_type->type_read_user_group_id = $this->read_whitelist_group->id;
-        }
-        if ($this->write_whitelist_group) {
-            $this->current_type->type_write_user_group_id = $this->write_whitelist_group->id;
-        }
+
+
+
         $this->current_type->is_retired = $this->is_retired;
         $this->current_type->is_final = $this->is_final;
 

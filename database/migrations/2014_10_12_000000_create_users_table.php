@@ -15,6 +15,13 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('default_namespace_id')
+                ->nullable()->default(null)
+                ->comment("The main namespace that is created for the user. Cannot delete")
+                ->index()
+                ->constrained('user_namespaces')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -22,7 +29,7 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
             $table->string('name')->nullable();
-            $table->string('username',61)->unique();//username is only 30, but visiting users have their server name appended
+            $table->string('username',30)->unique();
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

@@ -11,7 +11,7 @@ use App\Models\Server;
 use App\Models\TimeBound;
 use App\Models\User;
 use App\Models\UserGroup;
-use App\Models\UserType;
+use App\Models\UserNamespace;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -42,7 +42,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::model('user', User::class);
-        Route::model('user_type', UserType::class);
+        Route::model('user_namespace', UserNamespace::class);
         Route::model('user_group', UserGroup::class);
         Route::model('time_bound', TimeBound::class);
         Route::model('location_bound', LocationBound::class);

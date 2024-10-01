@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\Server;
 use App\Models\User;
-use App\Models\UserType;
+use App\Models\UserNamespace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 //todo implement these

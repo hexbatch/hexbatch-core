@@ -15,12 +15,12 @@ return new class extends Migration
     {
         Schema::table('paths', function (Blueprint $table) {
 
-            $table->foreignId('path_owner_id')
+            $table->foreignId('path_owning_namespace_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The optional owner of the path")
-                ->index('idx_path_owner_id')
-                ->constrained('user_types')
+                ->index('idx_path_owning_namespace_id')
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -55,12 +55,12 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('path_user_type_id')
+            $table->foreignId('path_namespace_id')
                 ->nullable()
                 ->default(null)
                 ->comment("When the searched must be owned by someone")
-                ->index('idx_path_user_type_id')
-                ->constrained('user_types')
+                ->index('idx_path_namespace_id')
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -201,12 +201,12 @@ return new class extends Migration
         DB::statement("DROP TRIGGER update_modified_time ON paths");
 
         Schema::table('paths', function (Blueprint $table) {
-            $table->dropForeign(['path_owner_id']);
+            $table->dropForeign(['path_owning_namespace_id']);
             $table->dropForeign(['parent_path_id']);
             $table->dropForeign(['path_type_id']);
             $table->dropForeign(['path_attribute_id']);
             $table->dropForeign(['path_element_set_id']);
-            $table->dropForeign(['path_user_type_id']);
+            $table->dropForeign(['path_namespace_id']);
             $table->dropForeign(['path_description_element_id']);
             $table->dropForeign(['path_location_bound_id']);
             $table->dropForeign(['path_server_id']);
@@ -214,12 +214,12 @@ return new class extends Migration
             $table->dropColumn('path_description_element_id');
             $table->dropColumn('path_location_bound_id');
             $table->dropColumn('path_server_id');
-            $table->dropColumn('path_owner_id');
+            $table->dropColumn('path_namespace_id');
             $table->dropColumn('parent_path_id');
             $table->dropColumn('path_type_id');
             $table->dropColumn('path_attribute_id');
             $table->dropColumn('path_element_set_id');
-            $table->dropColumn('path_user_type_id');
+            $table->dropColumn('path_owning_namespace_id');
 
             $table->dropColumn('ref_uuid');
             $table->dropColumn('path_min_gap');

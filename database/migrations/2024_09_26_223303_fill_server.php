@@ -14,24 +14,24 @@ return new class extends Migration
     {
         Schema::table('servers', function (Blueprint $table) {
 
+            $table->foreignId('owning_namespace_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The admin namespace for this server")
+                ->index('idx_server_owning_namespace_id')
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->foreignId('server_type_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The link to the server's user type. The user type inherits from the server type")
+                ->comment("The link to the server's type")
                 ->index('idx_server_type_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-
-            $table->foreignId('server_admin_user_type_id')
-                ->nullable()
-                ->default(null)
-                ->comment("Who changed the last status manually")
-                ->index('idx_server_admin_user_type_id')
-                ->constrained('user_types')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
 
             $table->foreignId('server_element_id')
                 ->nullable()->default(null)
@@ -66,9 +66,15 @@ return new class extends Migration
             $table->timestamp('status_change_at')->nullable()->default(null)
                 ->comment('When the last status was made at');
 
+            $table->string('server_name',30)->unique();
+
             $table->string('server_domain')->unique()
                 ->nullable(false)
                 ->comment("the url to the server, example localhost, eggs.waffle_time.org");
+
+            $table->text('server_public_key')
+                ->nullable()->default(null)
+                ->comment("optional public key used to encrypt the data, instead of token");
         });
 
         DB::statement('ALTER TABLE servers ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -90,12 +96,12 @@ return new class extends Migration
 
         Schema::table('servers', function (Blueprint $table) {
             $table->dropForeign(['server_type_id']);
-            $table->dropForeign(['server_admin_user_type_id']);
+            $table->dropForeign(['owning_namespace_id']);
             $table->dropForeign(['server_element_id']);
 
 
             $table->dropColumn('server_type_id');
-            $table->dropColumn('server_admin_user_type_id');
+            $table->dropColumn('owning_namespace_id');
             $table->dropColumn('server_element_id');
 
 
@@ -103,6 +109,8 @@ return new class extends Migration
             $table->dropColumn('server_domain');
             $table->dropColumn('status_change_at');
             $table->dropColumn('server_status');
+            $table->dropColumn('server_name');
+            $table->dropColumn('server_public_key');
 
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');

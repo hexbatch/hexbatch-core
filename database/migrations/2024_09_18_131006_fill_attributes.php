@@ -84,11 +84,16 @@ return new class extends Migration
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then child types do not inherit this attribute. But this can be used as a parent in an attribute in the child');
 
+            $table->boolean('is_protected_read')->default(false)->nullable(false)
+                ->comment('if true then only ns members/element owners can read');
+
+            $table->boolean('is_protected_write')->default(false)->nullable(false)
+                ->comment('if true then only ns members/element owners can write');
+
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then the element value of this is different for each set');
 
-            $table->timestamp('const_value_changed_at')->default(null)->nullable()
-                ->comment('Updated when the value is updated here, otherwise null');
+
 
             $table->timestamps();
 
@@ -182,6 +187,8 @@ return new class extends Migration
             $table->dropColumn('is_using_ancestor_bundle');
             $table->dropColumn('is_const');
             $table->dropColumn('is_per_set_value');
+            $table->dropColumn('is_protected_read');
+            $table->dropColumn('is_protected_write');
             $table->dropColumn('value_json_path');
             $table->dropColumn('attribute_value');
             $table->dropColumn('attribute_name');
@@ -191,7 +198,6 @@ return new class extends Migration
             $table->dropColumn('attribute_access_type');
             $table->dropColumn('popped_writing_method');
             $table->dropColumn('attribute_shape_display');
-            $table->dropColumn('const_value_changed_at');
         });
 
         DB::statement("DROP TYPE type_of_server_access;");

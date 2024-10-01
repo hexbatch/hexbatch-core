@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
-use App\Models\UserGroupMember;
+use App\Models\UserNamespaceMember;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -12,8 +12,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @uses UserGroup::group_owner()
  * @uses UserGroup::group_members()
  * @uses UserGroup::group_admins()
- * @method UserGroupMember[]|Collection group_members()
- * @method UserGroupMember[]|Collection group_admins()
+ * @method UserNamespaceMember[]|Collection group_members()
+ * @method UserNamespaceMember[]|Collection group_admins()
  * @method getName()
  */
 class UserGroupResource extends JsonResource

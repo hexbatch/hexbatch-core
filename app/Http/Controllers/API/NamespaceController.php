@@ -16,14 +16,14 @@ use App\Http\Resources\UserGroupResource;
 
 use App\Models\User;
 use App\Models\UserGroup;
-use App\Models\UserGroupMember;
-use App\Models\UserType;
+use App\Models\UserNamespaceMember;
+use App\Models\UserNamespace;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 
-class UserGroupController extends Controller
+class NamespaceController extends Controller
 {
 
     protected function adminCheck(UserGroup $group) {
@@ -36,7 +36,7 @@ class UserGroupController extends Controller
         }
     }
 
-    protected function memberCheck(UserGroup $group,User $da_user) : UserGroupMember {
+    protected function memberCheck(UserGroup $group,User $da_user) : UserNamespaceMember {
         $member = $group->isMember($da_user->id);
         if (!$member) {
             throw new HexbatchPermissionException(__("msg.group_this_member_does_not_exist",["username"=>$da_user->username]),
@@ -59,7 +59,7 @@ class UserGroupController extends Controller
     /**
      * @throws \Exception
      */
-    public function group_create(Request $request ): JsonResponse {
+    public function group_create(Request $request, UserNamespace $user_namespace ): JsonResponse {
         try {
             DB::beginTransaction();
             $group = GroupGathering::adminCheckOrMakeGroupWithUserAdmin($request->request->all());
@@ -72,24 +72,24 @@ class UserGroupController extends Controller
         return response()->json(new UserGroupResource($group), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
-    public function list_groups(UserType $user_type ): JsonResponse {
-        $ret = UserGroup::buildGroup(owner_user_type_id: $user_type->id)->cursorPaginate();
+    public function list_groups(UserNamespace $user_namespace ): JsonResponse {
+        $ret = UserGroup::buildGroup(owner_namespace_id: $user_namespace->id)->cursorPaginate();
         return (new UserGroupCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
-    public function belong_to_groups(UserType $user_type ): JsonResponse {
-        $ret = UserGroup::buildGroup(member_user_type_id: $user_type->id)->cursorPaginate();
+    public function belong_to_groups(UserNamespace $user_namespace ): JsonResponse {
+        $ret = UserGroup::buildGroup(member_namespace_id: $user_namespace->id)->cursorPaginate();
         return (new UserGroupCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function list_members(UserGroup $user_group ): JsonResponse {
-        $ret = UserGroupMember::buildGroupMembers(group_id: $user_group->id)->cursorPaginate();
+    public function list_members(UserNamespace $user_namespace ): JsonResponse {
+        $ret = UserNamespaceMember::buildGroupMembers(namespace_parent_id: $user_namespace->id)->cursorPaginate();
         return (new UserGroupMemberCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function group_destroy(UserGroup $group): JsonResponse {
+    public function group_destroy(UserNamespace $user_namespace, UserGroup $group): JsonResponse {
 
         $user = Utilities::getTypeCastedAuthUser();
         if ($group->user_id !== $user->id) {
@@ -168,29 +168,31 @@ class UserGroupController extends Controller
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
-    public function transfer_namespace(Request $request): JsonResponse {
-        //todo implement transfer
+    public function transfer_namespace(Request $request,User $user): JsonResponse {
+        //todo implement transfer, new s.a in the private to allow the transfer to the user ref stored as the value
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
     public function list_namespaces(?User $user = null): JsonResponse {
         //todo in the user resource, list the same named ns as the default one
+        //todo new standard attribute in the public to not list this if set to true, unless in the ns admin group
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
-    public function get_namespace(UserType $userType): JsonResponse {
+    public function get_namespace(UserNamespace $user_namespace): JsonResponse {
         //todo in user resource show this as the default if same named as the username
+        //todo not found if the no_list is set, unless in the admin group
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
-    public function destroy_namespace(UserType $userType): JsonResponse {
+    public function destroy_namespace(UserNamespace $user_namespace): JsonResponse {
         //todo cannot destroy namespace that has same name as the username
         // see user delete
         //
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
-    public function purge_namespace(UserType $userType): JsonResponse {
+    public function purge_namespace(UserNamespace $user_namespace): JsonResponse {
         //todo see user purge, cannot purge default
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }

@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int parent_thing_id
  * @property int api_call_type_id
- * @property int caller_user_type_id
+ * @property int caller_namespace_id
  * @property int thing_event_attribute_id
  * @property int thing_rule_id
  * @property int thing_call_result_set_id
@@ -34,7 +34,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int thing_element_values_id
  * @property int filter_set_id
  * @property int thing_paths
- * @property int thing_user_type_id
+ * @property int thing_namespace_id
+ * @property int thing_user_id
  * @property int thing_server_type_id
  * @property int thing_hex_error_id
  * @property string ref_uuid

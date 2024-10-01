@@ -52,34 +52,32 @@ enum TypeOfThingToDo : string {
   case SERVER_RUN_RULES = 'server_run_rules';
   case SERVER_READ = 'server_read';
   case SERVER_WRITE = 'server_write';
-  case SERVER_GET_USER_TOKEN = 'server_get_user_token';
-  case SERVER_ADD_REMOTE_USER = 'server_add_remote_user';
-  case SERVER_USER_REGENERATE_KEY = 'server_user_regenerate_key';
-  case SERVER_REMOVE_REMOTE_USER = 'server_remove_remote_user';
+  case SERVER_GET_NAMESPACE_TOKEN = 'server_get_namespace_token';
+  case SERVER_ADDED_NAMESPACE = 'server_added_namespace';
+  case SERVER_NAMESPACE_REGENERATE_KEY = 'server_namespace_regenerate_key';
+  case SERVER_REMOVED_NAMESPACE = 'server_removed_namespace';
   case SERVER_CREATED = 'server_created';
   case SERVER_ALLOWED = 'server_allowed';
   case SERVER_REMOVED = 'server_removed';
   case SERVER_AFTER_REMOVED = 'server_after_removed';
   case SERVER_PAUSED = 'server_paused';
   case SERVER_REGENERATE_KEY = 'server_regenerate_key';
+  case SERVER_REGENERATE_NAMESPACE_KEY = 'server_regenerate_namespace_key';
 
   case SERVER_SENT_CALLBACK_SERVER_REGENERATED_KEY = 'server_sent_callback_server_regenerated_key';
-  case SERVER_SENT_CALLBACK_USER_REGENERATED_KEY = 'server_sent_callback_user_regenerated_key';
-  case SERVER_SENT_CALLBACK_GOT_USER_TOKEN = 'server_sent_callback_got_user_token';
-  case SERVER_SENT_CALLBACK_REMOVED_REMOTE_USER = 'server_sent_callback_removed_remote_user';
-  case SERVER_SENT_CALLBACK_CREATE = 'server_sent_callback_create';
-  case SERVER_SENT_CALLBACK_DESTROY = 'server_sent_callback_destroy';
+  case SERVER_SENT_CALLBACK_NAMESPACE_REGENERATED_KEY = 'server_sent_callback_namespace_regenerated_key';
+  case SERVER_SENT_CALLBACK_ADD_NAMESPACE = 'server_sent_callback_add_namespace';
   case SERVER_SENT_CALLBACK_RUN_RULES = 'server_sent_callback_run_rules';
   case SERVER_SENT_CALLBACK_READ = 'server_sent_callback_read';
   case SERVER_SENT_CALLBACK_WRITE = 'server_sent_callback_write';
   case SERVER_SENT_CALLBACK_ELEMENT_ADD = 'server_sent_callback_element_add';
-  case SERVER_SENT_CALLBACK_ELEMENT_REQUEST = 'server_sent_callback_element_request';
   case SERVER_SENT_CALLBACK_ELEMENT_REMOVE = 'server_sent_callback_element_remove';
   case SERVER_SENT_CALLBACK_SET_ADD = 'server_sent_callback_set_add';
   case SERVER_SENT_CALLBACK_PROCESS_EVENT = 'server_sent_callback_process_event';
 
 
-  case SERVER_SENT_CALLBACK_ASK_USER_PERMISSION = 'server_sent_callback_ask_user_permission';
+  case SERVER_ADDING_NAMESPACE = 'server_adding_namespace';
+  case SERVER_ADD_NAMESPACE = 'server_add_namespace';
 
 
   case SHAPE_INTERSECTION_ENTER = 'shape_intersection_enter';
@@ -94,19 +92,16 @@ enum TypeOfThingToDo : string {
   case TYPE_CREATED_AFTER = 'type_created_after';
   case TYPE_UPDATED_AFTER = 'type_updated_after';
 
-  case USER_ADD_BEFORE = 'user_add_before';
-  case USER_REMOVE_BEFORE = 'user_remove_before';
-  case USER_ADD_AFTER = 'user_add_after';
-  case USER_REMOVE_AFTER = 'user_remove_after';
-  case USER_OWNER_CHANGE = 'user_owner_change';
+  case NAMESPACE_OWNER_CHANGE = 'namespace_owner_change';
 
 
-  case USER_GROUP_MEMBER_ADD = 'user_group_member_add';
-  case USER_GROUP_ADMIN_ADD = 'user_group_admin_add';
-  case USER_ADMIN_REMOVING_MEMBER = 'user_admin_removing_member';
-  case USER_OWNER_REMOVING_ADMIN = 'user_owner_removing_admin';
+  case NAMESPACE_MEMBER_ADD = 'namespace_member_add';
+  case NAMESPACE_ADDING_ADMIN = 'namespace_adding_admin';
+  case NAMESPACE_REMOVING_MEMBER = 'namespace_removing_member';
+  case NAMESPACE_REMOVING_ADMIN = 'namespace_removing_admin';
 
 
 }
+
 
 

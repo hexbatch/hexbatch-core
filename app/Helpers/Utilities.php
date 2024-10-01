@@ -6,6 +6,7 @@ use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
+use App\Models\UserNamespace;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
 use JsonException;
@@ -169,6 +170,12 @@ class Utilities {
          */
         $user = auth()->user();
         return $user;
+    }
+
+    public static function getDefaultNamespace() : ?UserNamespace {
+
+        $user = static::getTypeCastedAuthUser();
+        return $user->default_namespace;
     }
 
     public static function runDbFile(?string $start_path) :bool {

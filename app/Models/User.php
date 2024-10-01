@@ -8,6 +8,7 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -18,6 +19,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int default_namespace_id
  * @property string ref_uuid
  * @property string name
  * @property string username
@@ -31,6 +33,9 @@ use Laravel\Sanctum\HasApiTokens;
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * @property UserNamespace default_namespace
+ * @property UserNamespace[] my_namespaces
  *
  */
 class User extends Authenticatable
@@ -48,6 +53,13 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = ['default_namespace'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -74,8 +86,12 @@ class User extends Authenticatable
     ];
 
 
-    public function my_user_types() : HasMany {
-        return $this->hasMany(UserType::class,'owner_user_id');
+    public function my_namespaces() : HasMany {
+        return $this->hasMany(UserNamespace::class,'namespace_user_id');
+    }
+
+    public function default_namespace() : BelongsTo {
+        return $this->belongsTo(UserNamespace::class,'default_namespace_id');
     }
 
     /**
@@ -125,8 +141,8 @@ class User extends Authenticatable
         $build =  User::select('users.*')
             ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts")
 
-            /** @uses User::my_user_types() */
-            ->with('my_user_types')
+            /** @uses User::my_namespaces(),User::default_namespace() */
+            ->with('my_namespaces','default_namespace')
 
 
         ;

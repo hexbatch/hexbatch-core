@@ -22,7 +22,10 @@ return [
     'user_not_priv' => 'Not in the admin group of this user',
 
     //user types
-    'user_type_not_found' => 'User type not found using :ref',
+    'namespace_not_found' => 'Namespace not found using :ref',
+    'namespace_not_owner' => 'You are not the owner of the namespace :ref',
+    'namespace_not_admin' => 'You are not an administor of the namespace :ref',
+    'namespace_not_member' => 'You are not a member of the namespace :ref',
 
     //groups
     'group_not_found' => 'Group not found using :ref',

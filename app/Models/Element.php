@@ -15,19 +15,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int element_parent_type_id
- * @property int owner_user_type_id
+ * @property int element_namespace_id
  * @property string ref_uuid
  *
  * @property string created_at
  * @property string updated_at
  *
- * @property UserType owner_user_type
- * @property ElementType element_parent_type
+ * @property UserNamespace element_namespace
  *
  */
 class Element extends Model
 {
 
+    /*
+     * elements always stay on the originating server, but they can be copied
+     */
     protected $table = 'elements';
     public $timestamps = false;
 
@@ -54,7 +56,7 @@ class Element extends Model
      * @var array<string, string>
      */
     protected $casts = [];
-    public function element_owner(): BelongsTo
+    public function element_namespace(): BelongsTo
     {
         return $this->belongsTo('App\Models\User', 'element_owner_user_id');
     }

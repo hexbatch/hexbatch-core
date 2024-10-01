@@ -12,12 +12,11 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int token_user_type_id
+ * @property int token_namespace_id
  * @property int to_server_id
  * @property int last_used_at
  * @property string expires_at
  * @property string user_server_token
- * @property string user_server_public_key
  *
  * @property string created_at
  * @property string updated_at
@@ -27,7 +26,7 @@ use Illuminate\Database\Eloquent\Model;
 class ServerUserTypeToken extends Model
 {
 
-    protected $table = 'server_user_type_tokens';
+    protected $table = 'server_namespace_tokens';
     public $timestamps = false;
 
     /**
