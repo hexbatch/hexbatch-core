@@ -13,6 +13,9 @@ enum PathRelationshipType : string {
   case SHARES_TYPE = 'shares_type';
   case CHILDISH = 'childish';
   case LINKISH = 'linkish';
+  case ANCESTOR = 'ancestor';
+  case DESCENDANT = 'descendant';
+  case NAMESPACE_OWNS = 'namespace_owns';
 
     public static function tryFromInput(string|int|bool|null $test ) : PathRelationshipType {
         $maybe  = PathRelationshipType::tryFrom($test);

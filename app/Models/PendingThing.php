@@ -85,4 +85,12 @@ class PendingThing extends Model
         'filter_set_usage' => TypeFilterSetUsage::class,
     ];
 
+    /*
+     * todo when rule rejects attr or needs attr, the response should list what is needed and why
+     *  more exactly, the response to each event from the api is determined here, because we have no way to know if this is immediate or delayed return
+     *  it may be a direct return, or the user may have a callback, or its polled later
+     *  so, need a structured way to match responses, and data gathering for them, to finished events
+     *  the best way is for each event to have its own class and interface, with setters for the input data, and getter for the response data
+     */
+
 }

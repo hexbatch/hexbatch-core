@@ -69,6 +69,10 @@ return new class extends Migration
 
             $table->timestamps();
 
+            //todo rm this, add in the published enum (developing,published,retired,suspended,deletion_pending_last_element)
+            // the published event is whenever that value is set to published, once there can never be developing again
+            // the type deleted event is when the type is deleted
+            // the retired and suspended only happens after the publishing, these can be toggled any time back and forth
             $table->boolean('is_retired')->default(false)->nullable(false)
                 ->comment('if true then cannot be added as parent, or have new elements created');
 

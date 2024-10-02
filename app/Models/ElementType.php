@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-//todo type construction (except user tokens) takes place in the user's home set, the rules can react there when creation events to things in the set
+//todo type construction (except user tokens) takes place in the owning namespace's home set,
+// the rules can react there when creation events to things in the set, the paths in the rules can filter about whose home set we want
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder

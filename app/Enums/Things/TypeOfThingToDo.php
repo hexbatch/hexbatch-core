@@ -21,8 +21,12 @@ enum TypeOfThingToDo : string {
   case GROUP_OPERATION = 'group_operation';
 
 
-  case REMOTE = 'remote';
-  case STACK = 'stack';
+  case REMOTE_SUCCESS = 'remote_success';
+  case REMOTE_FAIL = 'remote_fail';
+  case REMOTE_ALWAYS = 'remote_always';
+  case STACK_SUCCESS = 'stack_success';
+  case STACK_FAIL = 'stack_fail';
+  case STACK_ALWAYS = 'stack_always';
 
   case SEARCH_RESULTS = 'search_results';
 

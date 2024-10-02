@@ -17,7 +17,10 @@ return new class extends Migration
 
         Schema::create('attribute_rules', function (Blueprint $table) {
             $table->id();
-            // todo figure out logic of how to make sure rule can be reused but can find the correct attribute that chain is for (redo migration)
+            // todo add parent attribute (removing that rule link in the attribute)
+            //  attr is only set when the rule has no rule parent, and this is a unique column to ensure only one rule chain per attr
+            //  when attr is inherited, the parent rule is run before the child rule, going back to the root ancestor
+            //  events have no children, and the to-do only looks at the top rules for the attrs involved, to start
             $table->foreignId('parent_rule_id')
                 ->nullable()->default(null)
                 ->comment("Rules can be chained")

@@ -242,8 +242,12 @@ return new class extends Migration
             'group_operation',
 
 
-            'remote',
-            'stack',
+            'remote_success',
+            'remote_fail',
+            'remote_always',
+            'stack_success',
+            'stack_fail',
+            'stack_always',
 
             'search_results',
 
@@ -378,6 +382,13 @@ return new class extends Migration
 
             $table->jsonb('thing_value')
                 ->nullable()->default(null)->comment("When something needs a value");
+
+            //todo need to store the response of this completed thing in a new jsonb
+            // this is the data that is merged to the parent
+
+            //todo add a merge policy for how the parent will work with all its children
+            // but no logic needed with children, its either an all or nothing, if any of its children fail, the parent fails
+            // the rules, stacks will do the complicated logic for deciding if failure is ok
 
             $table->string('callback_url')->nullable()->default(null)
                 ->comment('If set, this will be called with the result or error');

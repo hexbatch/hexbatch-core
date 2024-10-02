@@ -39,11 +39,13 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo put in a sorting attribute, and put in a json path for read that data to sort with
+
             $table->foreignId('path_attribute_id')
                 ->nullable()->default(null)
                 ->comment("The attribute the path part may be about")
                 ->index('idx_path_attribute_id')
-                ->constrained('element_types')
+                ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -55,6 +57,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo add enum for member matching on the namespace set, (union|intersection|no_intersection)
+            // and add another namespace for the set
             $table->foreignId('path_namespace_id')
                 ->nullable()
                 ->default(null)
@@ -104,10 +108,12 @@ return new class extends Migration
             $table->integer('path_max_gap')->nullable()->default(null)
                 ->comment("How max number of relationships must exist between here and there");
 
+            //todo put in enum for type of data reading for the values: element data, attribute data, used in required rules
 
             $table->boolean('is_partial_matching_name')
                 ->nullable(false)->default(false)
                 ->comment("If false then only match full names, else wildcard on right");
+
 
             $table->boolean('is_sorting_order_asc')
                 ->nullable(false)->default(false)
@@ -148,6 +154,9 @@ return new class extends Migration
             'shape_bordering',
             'shape_seperated',
             'shares_type',
+            'ancestor',
+            'descendant',
+            'namespace_owns',
             'childish',
             'linkish'
             );");
@@ -168,6 +177,7 @@ return new class extends Migration
             );");
 
         DB::statement("ALTER TABLE paths Add COLUMN time_comparison time_comparison_type NOT NULL default 'no_time_comparison';");
+
 
 
 

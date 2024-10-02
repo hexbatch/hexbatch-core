@@ -51,7 +51,12 @@ use Illuminate\Validation\ValidationException;
  * Remote chains can listen to ancestors so can be reused for different things.
  * todo rules can be edited even if the type is in use and has elements, this is because rules are static
  *
- * todo when rule rejects attr or needs attr, the response should list what is needed and why
+ *
+ *
+ * required goes to the to-do , and can use type ancestors and the children can listen for remotes
+ *
+ * for event handlers, the only called are the top level rule, one can put in attributes for the events in the children, but unless
+ * its for listening to remote or stack events (which are only fired when the rules are being processed) they will not be used for event triggers
  */
 
 /**
