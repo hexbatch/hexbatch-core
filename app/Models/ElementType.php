@@ -277,16 +277,18 @@ class ElementType extends Model
                 });
             }
 
-            try {
-                if ($this->type_name = $collect->get('type_name')) {
-                    Validator::make(['type_name' => $this->type_name], [
-                        'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type)],
-                    ])->validate();
+            if ($collect->has('type_name')) {
+                try {
+                    if ($this->type_name = $collect->get('type_name')) {
+                        Validator::make(['type_name' => $this->type_name], [
+                            'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type)],
+                        ])->validate();
+                    }
+                } catch (ValidationException $v) {
+                    throw new HexbatchNotPossibleException($v->getMessage(),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::TYPE_INVALID_NAME);
                 }
-            } catch (ValidationException $v) {
-                throw new HexbatchNotPossibleException($v->getMessage(),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::TYPE_INVALID_NAME);
             }
 
             if (!$this->type_name && !$this->id) {

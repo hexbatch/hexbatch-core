@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use App\Enums\Attributes\AttributeRuleType;
 use App\Enums\Rules\RuleDataActionType;
 use App\Enums\Rules\RuleTargetActionType;
 use App\Enums\Rules\RuleTriggerActionType;
 use App\Enums\Rules\TypeMergeJson;
 use App\Enums\Rules\TypeOfChildLogic;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use ArrayObject;
@@ -19,7 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use JsonPath\JsonPath;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 
 //todo when debug_non_event_rules mode is set (config), then write what rule does to the attribute_rules_debugs table
@@ -189,44 +190,6 @@ class AttributeRule extends Model
         return $ret;
     }
 
-    public function checkRequired(ElementType $type) : bool{
-        if ($this->rule_type !== AttributeRuleType::REQUIRED) {
-            Log::warning("checkRequired is being run on a different rule type: ".$this->rule_type->value);
-            return true;
-        }
-        if (!$this->rule_trigger_attribute_id) {return true;}
-        $total_sum = 0;
-        //see if the target matches any attribute in the horde
-
-        //get all the descendants of the attribute in the horde, unless target_descendant_range
-        if($this->target_descendant_range) {
-            $builder = ElementTypeHorde::getDecendants($this->rule_target);
-        } else {
-            /** @var ElementTypeHorde $horde_found */
-            $horde_found = $type->type_hordes()->where('horde_attribute_id',$this->rule_trigger_attribute_id)->first();
-            if (!$horde_found) {return true;}
-            $builder = Attribute::where('id',$horde_found->horde_attribute_id);
-        }
-
-        $builder
-            ->chunk(200, function (Collection $attributes) use(&$total_sum)  {
-
-                /**
-                 * @var Attribute $attr
-                 */
-            foreach ($attributes as $attr) {
-                //this matches the target, either directly or desc
-                if ($this->rule_json_path) {
-                    $json_res = JsonPath::get($attr->attribute_value,$this->rule_json_path);
-                    if (empty($json_res)) { continue;}
-                    if (empty($json_res[0])) { continue;}
-                }
-                $total_sum+= $this->rule_value * $this->rule_weight;
-            }
-        });
-
-        return $total_sum > 0;
-    }
 
     /**
      * @throws \Exception
@@ -239,10 +202,18 @@ class AttributeRule extends Model
             if (is_string($collect) && Utilities::is_uuid($collect)) {
                 $rule = (new AttributeRule())->resolveRouteBinding($collect);
             } else {
+                if ($parent_attribute->isInUse()) {
+                    throw new HexbatchNotPossibleException(__('msg.type_add_rules_when_not_in_use'),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::ATTRIBUTE_CANNOT_EDIT);
+                }
                 $rule = new AttributeRule();
+
                 $rule->editRule($collect);
             }
 
+
+            $rule = AttributeRule::buildAttributeRule(id:$rule->id)->first();
             DB::commit();
             return $rule;
         } catch (\Exception $e) {
@@ -252,9 +223,108 @@ class AttributeRule extends Model
     }
 
 
+    /**
+     * @throws ValidationException
+     */
     public function editRule(Collection $collect) : void {
         try {
             DB::beginTransaction();
+
+            //rule names are the only thing that in use attributes can change
+
+            if ($collect->has('rule_name')) {
+                try {
+                    if ($this->rule_name = $collect->get('rule_name')) {
+                        Validator::make(['rule_name' => $this->rule_name], [
+                            'rule_name' => ['required', 'string', 'max:255'],
+                        ])->validate();
+                    }
+                } catch (ValidationException $v) {
+                    throw new HexbatchNotPossibleException($v->getMessage(),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::RULE_SCHEMA_ISSUE);
+                }
+            }
+            $parent_attribute = $this->getParentAttribute(); //todo this must not be null
+            if (!$parent_attribute?->isInUse()) {
+
+                if ($collect->has('children')) {
+                    AttributeRule::where('parent_rule_id', $this->id)->delete();
+                    $hint_rule = $collect->get('children');
+                    if (is_string($hint_rule) || $hint_rule instanceof Collection) {
+                        AttributeRule::collectRule($hint_rule, $parent_attribute);
+                    }
+                }
+
+            }
+
+            if ($collect->has('target_path')) {
+                $hint_path_bound = $collect->get('target_path');
+                if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
+                    $path = Path::collectPath($hint_path_bound);
+                    $this->target_path_id = $path->id;
+                }
+            }
+
+            if ($collect->has('trigger_path')) {
+                $hint_path_bound = $collect->get('trigger_path');
+                if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
+                    $path = Path::collectPath($hint_path_bound);
+                    $this->trigger_path_id = $path->id;
+                }
+            }
+
+            if ($collect->has('data_path')) {
+                $hint_path_bound = $collect->get('data_path');
+                if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
+                    $path = Path::collectPath($hint_path_bound);
+                    $this->data_path_id = $path->id;
+                }
+            }
+
+            if ($collect->has('rule_weight')) {
+                $this->rule_weight = (int)$collect->get('rule_weight');
+            }
+
+            if ($collect->has('rule_value')) {
+                $this->rule_value = (int)$collect->get('rule_value');
+            }
+
+            if ($collect->has('constant_data')) {
+                $data = $collect->get('constant_data');
+                if ($data instanceof Collection ) {
+                    $this->rule_constant_data = $data->toArray();
+                } else {
+                    if ($data === null || $data === '') {
+                        $this->rule_constant_data = null;
+                    } else {
+                        $this->rule_constant_data = [$data];
+                    }
+                }
+            }
+
+
+            if ($collect->has('attribute_trigger_action')) {
+                $this->attribute_trigger_action = RuleTriggerActionType::tryFromInput($collect->get('attribute_trigger_action'));
+            }
+
+            if ($collect->has('child_logic')) {
+                $this->child_logic = TypeOfChildLogic::tryFromInput($collect->get('child_logic'));
+            }
+
+            if ($collect->has('rule_data_action')) {
+                $this->rule_data_action = RuleDataActionType::tryFromInput($collect->get('rule_data_action'));
+            }
+
+            if ($collect->has('target_action')) {
+                $this->target_action = RuleTargetActionType::tryFromInput($collect->get('target_action'));
+            }
+
+            if ($collect->has('target_writing_method')) {
+                $this->target_writing_method = TypeMergeJson::tryFromInput($collect->get('target_writing_method'));
+            }
+
+            $this->save();
 
             DB::commit();
 
@@ -262,6 +332,12 @@ class AttributeRule extends Model
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function getParentAttribute() : ?Attribute {
+
+        //todo implement getting parent
+        return null;
     }
 
 

@@ -113,6 +113,7 @@ return [
     'child_type_is_not_inheritable' => 'The child type must allow you to inherit, and also not be retired or final',
     'type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
     'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements',
+    'type_add_rules_when_not_in_use' => 'Can only add new rules when the type is not in use',
 
     //elements
     'element_not_found' => 'Element not found using :ref',

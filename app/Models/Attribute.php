@@ -334,17 +334,21 @@ class Attribute extends Model
                                 $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
                                 $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
 
-                        } else if (count($parts) === 4) {
+                        } else if (count($parts) >= 4) {
                                 $server_string = $parts[0];
                                 $namespace_string = $parts[1];
                                 $type_string = $parts[2];
-                                $attr_name = $parts[3];
+                                $attr_name = $parts[3]; //can be first of many here
 
                                 /** @var UserNamespace $user_namespace */
                                 $user_namespace = (new UserNamespace())->resolveRouteBinding($server_string . UserNamespace::NAMESPACE_SEPERATOR . $namespace_string);
 
                                 /** @var ElementType $owner */
                                 $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
+
+                                //if the attribute is being denoted by its dot path, then we reverse that path and validate it
+                                $oldest_first = array_reverse(array_slice($parts,3));
+                                //todo figure out how to validate if parent is from another type and we only have a partial name here
                                 $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
 
                         }

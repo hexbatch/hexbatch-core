@@ -89,22 +89,7 @@ class ElementTypeHorde extends Model
 
     public static function checkAttributeConflicts(ElementType $parent) :void {
 
-        /*
-         get each attribute and run its rules for AttributeRuleType::REQUIRED
-         */
-
-        foreach ($parent->type_attributes as $att) {
-            foreach ($att->rule_bundle->rules_in_group as $rule) {
-                if ($rule->rule_type === AttributeRuleType::REQUIRED) {
-                    $res = $rule->checkRequired($parent);
-                    if (!$res) {
-                        throw new HexbatchPermissionException(__("msg.rule_requirement_failed",['ref'=>$att->getName()]),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                            RefCodes::ATTRIBUTE_CANNOT_EDIT);
-                    }
-                }
-            }
-        }
+        //todo check the rule chain for the required here
 
         //finally update the map info in the type
         $parent->sumMapFromAttributes();

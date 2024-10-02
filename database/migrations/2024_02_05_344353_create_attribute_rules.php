@@ -17,7 +17,7 @@ return new class extends Migration
 
         Schema::create('attribute_rules', function (Blueprint $table) {
             $table->id();
-
+            // todo figure out logic of how to make sure rule can be reused but can find the correct attribute that chain is for (redo migration)
             $table->foreignId('parent_rule_id')
                 ->nullable()->default(null)
                 ->comment("Rules can be chained")
@@ -167,8 +167,8 @@ return new class extends Migration
         ");
 
         Schema::table('attribute_rules', function (Blueprint $table) {
-            $table->string('rule_name',128)->nullable(false)->index()
-                ->comment("The unique name of the rule in the bundle, using the naming rules");
+            $table->string('rule_name',256)->nullable()->default(null)->index()
+                ->comment("The name of the rule (does not have to be unique and is optional. Can also have notes");
         });
 
 
