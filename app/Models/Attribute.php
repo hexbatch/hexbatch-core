@@ -57,7 +57,6 @@ use Illuminate\Validation\ValidationException;
  * @property Attribute attribute_parent
  * @property ElementType type_owner
  *
- * @property AttributeRuleBundle rule_bundle
  * @property TimeBound attribute_time_bound
  * @property LocationBound attribute_location_bound
  */
@@ -129,12 +128,8 @@ class Attribute extends Model
 
     }
 
-    public function rule_bundle() : BelongsTo {
-        return $this->belongsTo(AttributeRuleBundle::class,'applied_rule_bundle_id')
-            /** @uses AttributeRuleBundle::rules_in_group(),AttributeRuleBundle::creator_attribute() */
-            ->with('rules_in_group','creator_attribute');
+    //todo put in new way for the types to list the rules
 
-    }
 
     public function attribute_time_bound() : BelongsTo {
         return $this->belongsTo(TimeBound::class,'attribute_time_bound_id');
@@ -191,9 +186,9 @@ class Attribute extends Model
 
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::rule_bundle() */
+            /** @uses Attribute::attribute_parent(),Attribute::type_owner() */
             /** @uses Attribute::attribute_time_bound(),Attribute::attribute_location_bound(), */
-            ->with('attribute_parent', 'type_owner','rule_bundle','attribute_time_bound','attribute_location_bound')
+            ->with('attribute_parent', 'type_owner','attribute_time_bound','attribute_location_bound')
 
 
        ;
@@ -334,7 +329,7 @@ class Attribute extends Model
                                 $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
                                 $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
 
-                        } else if (count($parts) >= 4) {
+                        } else if (count($parts) === 4) {
                                 $server_string = $parts[0];
                                 $namespace_string = $parts[1];
                                 $type_string = $parts[2];
@@ -346,9 +341,6 @@ class Attribute extends Model
                                 /** @var ElementType $owner */
                                 $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
 
-                                //if the attribute is being denoted by its dot path, then we reverse that path and validate it
-                                $oldest_first = array_reverse(array_slice($parts,3));
-                                //todo figure out how to validate if parent is from another type and we only have a partial name here
                                 $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
 
                         }
@@ -421,7 +413,7 @@ class Attribute extends Model
                 $attribute = (new Attribute())->resolveRouteBinding($collect);
             } else {
                 $attribute = new Attribute();
-                $attribute->editAttribute($collect);
+                $attribute->editAttribute($collect,$owner);
             }
 
             DB::commit();
@@ -433,8 +425,9 @@ class Attribute extends Model
     }
 
 
-    public function editAttribute(Collection $collect) : void {
+    public function editAttribute(Collection $collect,ElementType $owner) : void {
         try {
+
             DB::beginTransaction();
 
             DB::commit();

@@ -29,6 +29,7 @@ class Element extends Model
 
     /*
      * elements always stay on the originating server, but they can be copied
+     * only published types can make elements
      */
     protected $table = 'elements';
     public $timestamps = false;

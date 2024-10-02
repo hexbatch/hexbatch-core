@@ -95,20 +95,25 @@ enum TypeOfThingToDo : string {
   case TYPE_UPDATED_BEFORE = 'type_updated_before';
   case TYPE_CREATED_AFTER = 'type_created_after';
   case TYPE_UPDATED_AFTER = 'type_updated_after';
+  case TYPE_PUBLISHED = 'type_published';
+  case TYPE_RETIRED = 'type_retired';
+  case TYPE_SUSPENDED = 'type_suspended';
+
 
   case NAMESPACE_OWNER_CHANGE = 'namespace_owner_change';
 
 
+  //fired only on the ns private element
   case NAMESPACE_MEMBER_ADD = 'namespace_member_add';
   case NAMESPACE_ADDING_ADMIN = 'namespace_adding_admin';
   case NAMESPACE_REMOVING_MEMBER = 'namespace_removing_member';
   case NAMESPACE_REMOVING_ADMIN = 'namespace_removing_admin';
 
 
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfChildLogic {
-        $maybe  = TypeOfChildLogic::tryFrom($test);
+    public static function tryFromInput(string|int|bool|null $test ) : TypeOfThingToDo {
+        $maybe  = TypeOfThingToDo::tryFrom($test);
         if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfChildLogic::cases(),'value'));
+            $delimited_values = implode('|',array_column(TypeOfThingToDo::cases(),'value'));
             throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
         }
         return $maybe;

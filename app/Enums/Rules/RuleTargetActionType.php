@@ -24,12 +24,14 @@ enum RuleTargetActionType: string
     case COMMAND_ASSIGN_USER_TO_NAMESPACE = 'command_assign_user_to_namespace';
     case COMMAND_CREATE_ELEMENT = 'command_create_element';
     case COMMAND_DESTROY_ELEMENT = 'command_destroy_element';
+    case COMMAND_ADD_LIVE_TYPE_ELEMENT = 'command_add_live_type_element';
+    case COMMAND_REMOVE_LIVE_TYPE_ELEMENT = 'command_remove_live_type_element';
     case COMMAND_NAMESPACE_ADD_MEMBER = 'command_namespace_add_member';
     case COMMAND_NAMESPACE_ADD_ADMIN = 'command_namespace_add_admin';
     case COMMAND_NAMESPACE_REMOVE_MEMBER = 'command_namespace_remove_member';
     case COMMAND_NAMESPACE_REMOVE_ADMIN = 'command_namespace_remove_admin';
     case TYPE_ATTRIBUTE_REQUIRED = 'type_attribute_required';
-    case SET_MEMBERSHIP_AFFINITY = 'set_membership_affinity';
+    case MEMBERSHIP_AFFINITY = 'membership_affinity';
     case WRITE = 'write';
     case READ = 'read';
 

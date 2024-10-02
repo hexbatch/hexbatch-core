@@ -54,6 +54,7 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON element_type_parents FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+        //todo add parent_type enum : design (default) | live
     }
 
     /**

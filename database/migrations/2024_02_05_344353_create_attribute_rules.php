@@ -138,12 +138,14 @@ return new class extends Migration
             'command_assign_user_to_namespace', -- server user
             'command_create_element', -- single only
             'command_destroy_element',
+            'command_add_live_type_element', -- type(s) found in the data path
+            'command_remove_live_type_element',
             'command_namespace_add_member', -- namespace found by the type of the attribute chosen,server user or ns owner
             'command_namespace_add_admin',
             'command_namespace_remove_member',
             'command_namespace_remove_admin',
             'type_attribute_required',
-            'set_membership_affinity',
+            'membership_affinity',
             'read',
             'write'
             );");

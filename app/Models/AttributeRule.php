@@ -214,7 +214,7 @@ class AttributeRule extends Model
                 }
                 $rule = new AttributeRule();
 
-                $rule->editRule($collect);
+                $rule->editRule($collect,$parent_attribute);
             }
 
 
@@ -231,7 +231,7 @@ class AttributeRule extends Model
     /**
      * @throws ValidationException
      */
-    public function editRule(Collection $collect) : void {
+    public function editRule(Collection $collect,Attribute $parent_attribute) : void {
         try {
             DB::beginTransaction();
 

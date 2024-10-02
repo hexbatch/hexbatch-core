@@ -39,7 +39,22 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo put in a sorting attribute, and put in a json path for read that data to sort with
+            //todo put in a sorting attribute, this is used when sorting types or elements
+            //  if the above set: if neither the attribute or path set sort by type.attribute.element natural order in set in that priority only
+            // put in a limit
+
+            /*
+             * how can I select a ns whose home space has a type or attribute?
+             * A1: get the set:home, owned by ns, containing apples.red
+             *
+             * Then, I was to see if this ns is not an admin of any ns I own
+             * A2: me: me(owns) nor-> them(admin of ns)
+             *
+             * Then I was to see if the A1 and A2 intersect
+             * A1 and-> A2
+             *
+             * top parent of children only need the logic saved, as well as
+             */
 
             $table->foreignId('path_attribute_id')
                 ->nullable()->default(null)
@@ -57,12 +72,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo add enum for member matching on the namespace set, (union|intersection|no_intersection)
-            // and add another namespace for the set
+
             $table->foreignId('path_namespace_id')
                 ->nullable()
                 ->default(null)
-                ->comment("When the searched must be owned by someone")
+                ->comment("When the searched must be owned by someone. Or the ns here has a relationship")
                 ->index('idx_path_namespace_id')
                 ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
@@ -153,10 +167,20 @@ return new class extends Migration
             'shape_intersecting',
             'shape_bordering',
             'shape_seperated',
+            'intersecting_map',
+            'bordering_map',
+            'seperated_map',
+            'time_overlapping',
+            'time_distinct',
             'shares_type',
             'ancestor',
             'descendant',
-            'namespace_owns',
+            'namespace_owns_element',
+            'namespace_owns_type',
+            'member_of_namespace',
+            'admin_of_namespace',
+            'owner_of_namespace',
+            'set_contains',
             'childish',
             'linkish'
             );");
@@ -184,11 +208,14 @@ return new class extends Migration
         Schema::table('paths', function (Blueprint $table) {
 
 
+            //todo rm because enum uses the value path on what its set to
             $table->text('path_attribute_json_path')->nullable()->default(null)
                 ->comment("The matching of the attribute value, optional");
 
+            // this is the name of the attr or the type or the ns or the server
+            // can use all together so total of 30*4 = 120 + 3 dots
             $table->string('path_part_name',128)->nullable()->default(null)
-                ->comment("The optional name of the path part, using the naming rules");
+                ->comment("the name of the attr or the type or the ns or the server,  for attr can use server.ns.type.attribute");
 
             $table->string('value_json_path')
                 ->nullable()->default(null)

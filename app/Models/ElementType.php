@@ -21,6 +21,10 @@ use Illuminate\Validation\ValidationException;
 
 //todo type construction (except user tokens) takes place in the owning namespace's home set,
 // the rules can react there when creation events to things in the set, the paths in the rules can filter about whose home set we want
+
+//todo I do need to add or remove live types to existing elements
+// I cannot change type A, but I can add the rules and element_values of Type B to that specific element of A, and then later remove it too, if I want
+// the requirement rules of both A and B still work here, use parent_type live value column on the type_parent table
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder

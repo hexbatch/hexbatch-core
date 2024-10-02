@@ -46,6 +46,8 @@ class Server extends Model
 
     //only namespaces are transferred not users themselves
 
+    //live types on elements are transferred
+
     protected $table = 'servers';
     public $timestamps = false;
 

@@ -10,10 +10,10 @@ enum TypeOfServerStatus : string {
   case PAUSED = 'paused';
   case BLOCKED = 'blocked';
 
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfChildLogic {
-        $maybe  = TypeOfChildLogic::tryFrom($test);
+    public static function tryFromInput(string|int|bool|null $test ) : TypeOfServerStatus {
+        $maybe  = TypeOfServerStatus::tryFrom($test);
         if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfChildLogic::cases(),'value'));
+            $delimited_values = implode('|',array_column(TypeOfServerStatus::cases(),'value'));
             throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
         }
         return $maybe;

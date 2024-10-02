@@ -10,12 +10,26 @@ enum PathRelationshipType : string {
   case SHAPE_INTERSECTING = 'shape_intersecting';
   case SHAPE_BORDERING = 'shape_bordering';
   case SHAPE_SEPERATED = 'shape_seperated';
+  case SEPERATED_MAP = 'seperated_map';
+  case BORDERING_MAP = 'bordering_map';
+  case INTERSECTING_MAP = 'intersecting_map';
+  case TIME_OVERLAPPING = 'time_overlapping';
+  case TIME_DISTINCT = 'time_distinct';
+  case SET_CONTAINS = 'set_contains';
+
+
   case SHARES_TYPE = 'shares_type';
   case CHILDISH = 'childish';
   case LINKISH = 'linkish';
   case ANCESTOR = 'ancestor';
   case DESCENDANT = 'descendant';
-  case NAMESPACE_OWNS = 'namespace_owns';
+  case NAMESPACE_OWNS_ELEMENT = 'namespace_owns_element';
+  case NAMESPACE_OWNS_TYPE = 'namespace_owns_type';
+
+  case MEMBER_OF_NAMESPACE = 'member_of_namespace';
+  case ADMIN_OF_NAMESPACE = 'admin_of_namespace';
+  case OWNER_OF_NAMESPACE = 'owner_of_namespace';
+
 
     public static function tryFromInput(string|int|bool|null $test ) : PathRelationshipType {
         $maybe  = PathRelationshipType::tryFrom($test);

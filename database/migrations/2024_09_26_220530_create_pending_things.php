@@ -322,6 +322,11 @@ return new class extends Migration
             'type_created_after',
             'type_updated_after',
 
+            -- only on the type itself
+            'type_published',
+            'type_retired',
+            'type_suspended',
+
 
              'namespace_owner_change',
 
