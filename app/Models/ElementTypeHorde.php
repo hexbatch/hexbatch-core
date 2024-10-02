@@ -98,7 +98,7 @@ class ElementTypeHorde extends Model
                 if ($rule->rule_type === AttributeRuleType::REQUIRED) {
                     $res = $rule->checkRequired($parent);
                     if (!$res) {
-                        throw new HexbatchPermissionException(__("msg.attribute_rule_requirement_failed",['ref'=>$att->getName()]),
+                        throw new HexbatchPermissionException(__("msg.rule_requirement_failed",['ref'=>$att->getName()]),
                             \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                             RefCodes::ATTRIBUTE_CANNOT_EDIT);
                     }

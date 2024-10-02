@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Attributes\AttributeRuleType;
+use App\Enums\Rules\RuleDataActionType;
 use App\Enums\Rules\RuleTargetActionType;
 use App\Enums\Rules\RuleTriggerActionType;
 use App\Enums\Rules\TypeMergeJson;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use JsonPath\JsonPath;
 
@@ -67,7 +69,7 @@ use JsonPath\JsonPath;
  * @property ArrayObject rule_constant_data
  * @property RuleTriggerActionType attribute_trigger_action
  * @property TypeOfChildLogic child_logic
- * @property RuleTriggerActionType rule_data_action
+ * @property RuleDataActionType rule_data_action
  * @property RuleTargetActionType target_action
  * @property TypeMergeJson target_writing_method
  *
@@ -106,7 +108,7 @@ class AttributeRule extends Model
         'rule_constant_data' => AsArrayObject::class,
         'attribute_trigger_action' => RuleTriggerActionType::class,
         'child_logic' => TypeOfChildLogic::class,
-        'rule_data_action' => RuleTriggerActionType::class,
+        'rule_data_action' => RuleDataActionType::class,
         'target_action' => RuleTargetActionType::class,
         'target_writing_method' => TypeMergeJson::class,
     ];
@@ -224,6 +226,42 @@ class AttributeRule extends Model
         });
 
         return $total_sum > 0;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function collectRule(Collection|string $collect,Attribute $parent_attribute) : AttributeRule {
+        //todo if string then see if current namespace has permission to use (in admin group of type ns)
+        //
+        try {
+            DB::beginTransaction();
+            if (is_string($collect) && Utilities::is_uuid($collect)) {
+                $rule = (new AttributeRule())->resolveRouteBinding($collect);
+            } else {
+                $rule = new AttributeRule();
+                $rule->editRule($collect);
+            }
+
+            DB::commit();
+            return $rule;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+
+    public function editRule(Collection $collect) : void {
+        try {
+            DB::beginTransaction();
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
 

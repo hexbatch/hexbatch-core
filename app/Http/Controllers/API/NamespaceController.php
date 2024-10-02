@@ -12,6 +12,8 @@ use App\Http\Resources\UserNamespaceCollection;
 use App\Http\Resources\UserNamespaceMemberCollection;
 use App\Http\Resources\UserNamespaceMemberResource;
 
+use App\Http\Resources\UserNamespaceResource;
+use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespaceMember;
 use App\Models\UserNamespace;
@@ -90,32 +92,45 @@ class NamespaceController extends Controller
     }
 
 
-    public function create_namespace(Request $request): JsonResponse {
-        //todo imp
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    public function create_namespace(Request $request,?Server $server): JsonResponse {
+        $user = Utilities::getTypeCastedAuthUser();
+        $namespace = UserNamespace::createNamespace($request->request->getString('namespace_name'),$user,$server);
+        return response()->json(new UserNamespaceResource($namespace), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
     }
 
     public function transfer_namespace(Request $request,User $user): JsonResponse {
+        Utilities::ignoreVar($request,$user);
         //todo implement transfer, new s.a in the private to allow the transfer to the user ref stored as the value
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
 
-    public function get_namespace(UserNamespace $user_namespace): JsonResponse {
-        //todo in user resource show this as the default if same named as the username
-        //todo not found if the no_list is set, unless in the admin group
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+    public function get_namespace(UserNamespace $user_namespace,?int $levels = 3): JsonResponse {
+        return (new UserNamespaceResource($user_namespace,null,$levels))
+            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function destroy_namespace(UserNamespace $user_namespace): JsonResponse {
-        //todo cannot destroy namespace that has same name as the username
-        // see user delete
-        //
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+
+        if ($user_namespace->isDefault()) {
+            throw new HexbatchNotPossibleException(__("msg.namespace_cannot_delete_default",
+                ['ref' => $user_namespace->getName(),'user_name'=>$user_namespace->owner_user->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::NAMESPACE_CANNOT_DELETE_CORE_PARTS);
+        }
+
+        if ($user_namespace->isInUse()) {
+            throw new HexbatchNotPossibleException(__("msg.namespace_cannot_delete_while_in_use",
+                ['ref' => $user_namespace->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::RESOURCE_CANNOT_DELETE_IN_USE);
+        }
+        $user_namespace->freeResources();
+        $user_namespace->purgeHome();
+        $user_namespace->delete();
+
+        return (new UserNamespaceResource($user_namespace,null,2))
+            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function purge_namespace(UserNamespace $user_namespace): JsonResponse {
-        //todo see user purge, cannot purge default
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
-    }
 }

@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
     }
 }
 
-//todo make new command to give ownership to someone of abandoned user_tokens
+//todo make new command to give ownership to someone of abandoned namespace
 
 //todo get token for the server user so that can be updated
 

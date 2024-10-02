@@ -13,15 +13,19 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @uses UserNamespace::namespace_members()
  * @uses UserNamespace::namespace_admins()
  * @uses UserNamespace::isUserAdmin()
+ * @uses UserNamespace::isDefault()
+ * @uses UserNamespace::$ref_uuid
+ * @uses UserNamespace::$namespace_user_id
  *
  * @method  owner_user()
+ * @method  isDefault()
  * @method UserNamespaceMember[]|Collection  namespace_members()
  * @method UserNamespaceMember[]|Collection namespace_admins()
  * @method isUserAdmin(\App\Models\User $user)
- *
- * @method group_members()
- * @method UserNamespaceMember[]|Collection group_admins()
  * @method getName()
+ *
+ * @property string ref_uuid
+ * @property string namespace_user_id
  */
 class UserNamespaceResource extends JsonResource
 {
@@ -42,17 +46,18 @@ class UserNamespaceResource extends JsonResource
         if (!$this->id) {return [];}
 
         if ($this->n_display_level <=0) {
-            return ['group_name' => [$this->getName()] ];
+            return ['namespace_name' => [$this->getName()] ];
         }
 
         return [
-            'group_name' => $this->getName(),
-
+            'namespace_name' => $this->getName(),
+            'is_default' => $this->isDefault(),
             'uuid' => $this->ref_uuid,
-            'members_count' => $this->group_members()->count(),
-            'admins_count' => $this->group_admins()->count(),
+            'members_count' => $this->namespace_members()->count(),
+            'admins_count' => $this->namespace_admins()->count(),
             'is_admin' => $this->isUserAdmin(Utilities::getTypeCastedAuthUser()),
             'is_owner' => Utilities::getTypeCastedAuthUser()?->id === $this->namespace_user_id,
+
         ];
     }
 }

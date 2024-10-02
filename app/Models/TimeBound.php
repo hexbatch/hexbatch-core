@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Rules\BoundNameReq;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Carbon\Exceptions\InvalidTimeZoneException;
@@ -14,8 +16,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 /**
@@ -143,6 +149,7 @@ class TimeBound extends Model
     }
 
     protected function insertSpan(int $from_ts,int $to_ts) {
+        //todo change to range
         DB::affectingStatement("
                 INSERT INTO time_bound_spans(time_bound_id,span_start,span_stop)
                 SELECT :bounds_id,:start_at,:stop_at
@@ -338,5 +345,92 @@ class TimeBound extends Model
         return $ret;
     }
 
+    /**
+     * @throws \Exception
+     */
+    public static function collectTimeBound(Collection|string $collect) : TimeBound {
+        try {
+            DB::beginTransaction();
+            if (is_string($collect) && Utilities::is_uuid($collect)) {
+                $bound = (new TimeBound())->resolveRouteBinding($collect);
+            } else {
+                $bound = new TimeBound();
+
+                if ($collect->has('bound_name')) {
+                    $name = $collect->get('bound_name');
+                    if (is_string($name) && Str::trim($name)) {
+                        try {
+                            Validator::make(['time_bound_name' => $name], [
+                                'time_bound_name' => ['required', 'string', new BoundNameReq()],
+                            ])->validate();
+                        } catch (ValidationException $v) {
+                            throw new HexbatchNotPossibleException($v->getMessage(),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::BOUND_INVALID_NAME);
+                        }
+                        $bound->bound_name = Str::trim($name);
+                    }
+                }
+
+                if ($collect->has('bound_start')) {
+                    $test = $collect->get('bound_start');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_start = Str::trim($test);
+                    }
+                }
+
+                if ($collect->has('bound_stop')) {
+                    $test = $collect->get('bound_stop');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_stop = Str::trim($test);
+                    }
+                }
+
+                if ($collect->has('bound_cron')) {
+                    $test = $collect->get('bound_cron');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_cron = Str::trim($test);
+                    }
+                }
+
+                if ($collect->has('bound_cron_timezone')) {
+                    $test = $collect->get('bound_cron_timezone');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_cron_timezone = Str::trim($test);
+                    }
+                }
+
+                if ($collect->has('bound_period_length')) {
+                    $test = $collect->get('bound_period_length');
+                    if (intval($test) && intval($test) > 0) {
+                        $bound->bound_period_length = intval($test);
+                    }
+                }
+
+                if (!$bound->bound_name || !$bound->bound_stop || !$bound->bound_start) {
+                    throw new HexbatchCoreException(__("msg.time_bounds_needs_minimum_info"),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::BOUND_NEEDS_MIN_INFO);
+                }
+
+                //this saves too
+                $bound->setTimes(start: $bound->bound_start,stop:$bound->bound_stop,
+                    bound_cron: $bound->bound_cron,period_length: $bound->bound_period_length,
+                    bound_cron_timezone: $bound->bound_cron_timezone); //saves and processes
+                $bound->refresh();
+
+                $bound = TimeBound::buildTimeBound(id: $bound->id)->first();
+
+            }//end else
+
+
+
+            DB::commit();
+            return $bound;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 
 }

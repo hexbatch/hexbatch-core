@@ -8,7 +8,14 @@ enum AttributeServerAccessType : string {
     case WHITELISTED_SERVERS_READ_ONLY = 'whitelisted_servers_read_only';
     case OTHER_SERVERS_READ_ONLY = 'other_servers_read_only';
 
-
+    public static function tryFromInput(string|int|bool|null $test ) : AttributeServerAccessType {
+        $maybe  = AttributeServerAccessType::tryFrom($test);
+        if (!$maybe ) {
+            $delimited_values = implode('|',array_column(AttributeServerAccessType::cases(),'value'));
+            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
+        }
+        return $maybe;
+    }
 }
 
 

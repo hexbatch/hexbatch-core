@@ -42,8 +42,9 @@ Route::prefix('v1')->group(function () {
             Route::get('/me', [AuthenticationController::class, 'me']);
 
             Route::post('/logout', [AuthenticationController::class, 'logout'])->name('core.users.logout');
-            Route::delete('/delete', [AuthenticationController::class, 'delete_user'])->name('core.users.logout');
-            Route::delete('/purge', [AuthenticationController::class, 'purge_user'])->name('core.users.auth.purge');
+
+            Route::delete('/delete', [AuthenticationController::class, 'delete_user'])
+                ->name('core.users.auth.delete');
 
             Route::prefix('auth')->group(function () {
 
@@ -53,11 +54,10 @@ Route::prefix('v1')->group(function () {
                 Route::get('/passthrough', [AuthenticationController::class, 'get_token_passthrough'])
                     ->name('core.users.auth.passthrough');
 
-                Route::delete('/delete', [AuthenticationController::class, 'delete_user'])
-                    ->name('core.users.auth.delete');
+                Route::get('/remove_current_token', [AuthenticationController::class, 'remove_current_token'])
+                    ->name('core.users.auth.remove_current_token');
 
-                Route::delete('/purge', [AuthenticationController::class, 'purge_user'])
-                    ->name('core.users.auth.purge');
+
 
             });
 
@@ -66,13 +66,12 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('namespaces')->group(function () {
 
-            Route::post('/create', [NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
+            Route::post('/create/{?server}', [NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
 
             Route::group(['prefix' => '{user_namespace}'], function () {
                 Route::group([], function () {
                     Route::post('/transfer/{user}', [NamespaceController::class, 'transfer_namespace'])->name('core.namespaces.transfer');
                     Route::delete('/destroy', [NamespaceController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
-                    Route::delete('/purge', [NamespaceController::class, 'purge_namespace'])->name('core.namespaces.destroy');
 
                     Route::put('/admin/add/{user_namespace}', [NamespaceController::class, 'group_admin_add'])->name('core.groups.admin.add');
                     Route::patch('/admin/remove/{user_namespace}', [NamespaceController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
@@ -86,8 +85,8 @@ Route::prefix('v1')->group(function () {
                 })->middleware(ValidateNamespaceAdmin::class);
 
                 Route::group([], function () {
-                    Route::get('/get', [NamespaceController::class, 'get_namespace'])->name('core.namespaces.get');
-                    Route::get('/list_members', [NamespaceController::class, 'list_members'])->name('core.groups.list_members');
+                    Route::get('/get/{levels?}', [NamespaceController::class, 'get_namespace'])->name('core.namespaces.get');
+                    Route::get('/list_members/{levels?}', [NamespaceController::class, 'list_members'])->name('core.groups.list_members');
 
                 })->middleware(ValidateNamespaceMember::class);
             });

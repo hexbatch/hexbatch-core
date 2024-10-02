@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\Bounds\TypeOfLocation;
+use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 
+use App\Rules\BoundNameReq;
 use App\Rules\GeoJsonPolyReq;
 use App\Rules\GeoJsonReq;
 use ArrayObject;
@@ -20,8 +22,11 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -304,6 +309,67 @@ class LocationBound extends Model
             }
         }
         return $ret;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function collectLocationBound(Collection|string $collect) : LocationBound {
+        try {
+            DB::beginTransaction();
+
+            if (is_string($collect) && Utilities::is_uuid($collect)) {
+                $bound = (new TimeBound())->resolveRouteBinding($collect);
+            } else {
+                $bound = new LocationBound();
+                if ($collect->has('bound_name')) {
+                    $name  = $collect->get('bound_name');
+                    if (is_string($name) && Str::trim($name)) {
+                        try {
+                            Validator::make(['location_bound_name' => $name], [
+                                'location_bound_name' => ['required', 'string', new BoundNameReq()],
+                            ])->validate();
+                        } catch (ValidationException $v) {
+                            throw new HexbatchNotPossibleException($v->getMessage(),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::BOUND_INVALID_NAME);
+                        }
+                        $bound->bound_name = Str::trim($name);
+                    }
+                }
+
+                if ( $collect->has('location_type')) {
+                    $test_string = $collect->get('location_type');
+                    $bound->location_type  = TypeOfLocation::tryFromInput($test_string);
+                }
+
+                if ($collect->has('geo_json')) {
+                    $what_geo =  $collect->get('geo_json');
+                    if (is_array($what_geo) && !empty($what_geo)) {
+                        $bound->geo_json = $what_geo;
+                    }
+                }
+
+                if ((!$bound->bound_name || !$bound->geo_json || !$bound->location_type) ) {
+                    throw new HexbatchCoreException(__("msg.location_bounds_needs_minimum_info"),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::BOUND_NEEDS_MIN_INFO);
+                }
+
+                if ($bound->location_type && $bound->geo_json) {
+                    $bound->setShape(json_encode($bound->geo_json),$bound->location_type);
+                }
+
+                $bound->save();
+                $bound->refresh();
+                $bound = LocationBound::buildLocationBound(id:$bound->id);
+            }
+            DB::commit();
+            return $bound;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
 }

@@ -67,6 +67,8 @@ class AuthenticationController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
+        //todo put in db transaction, the user and ns creation and the ns home set stuff
+        //  the username and the default namespace need to be the same name (convention, not needed otherwise)
         $user = (new CreateNewUser)->create($request->all());
         $user->refresh();
         return response()->json(new UserResource($user,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
@@ -108,7 +110,7 @@ class AuthenticationController extends Controller
         return response()->json($h);
     }
 
-    public function delete_this_token(Request $request): JsonResponse
+    public function remove_current_token(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NO_CONTENT);
@@ -116,22 +118,15 @@ class AuthenticationController extends Controller
 
     public function delete_user(): JsonResponse
     {
-        //todo implement delete user, removes this user, unlinks the namespaces, and { foreach namespace {foreach resource} } not in use delete
-        // make new s.a attribute on the private and set this as ok_to_delete = false default, must set this as truthful before can delete
+        //todo implement delete user, removes this user, deletes the namespaces, including the default
+        // make new s.a attribute on the private in default and set this as ok_to_delete = false default, must set this as truthful before can delete
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
-    public function purge_user(): JsonResponse
-    {
-        //todo implement purge user, which removes the s.a. descriptors, as well as the delete user { foreach namespace {foreach resource} } nullify s.a. descriptors
-        // make new s.a attribute on the private and set this as ok_to_purge = false default, must set this as truthful before can purge
-        // for user deletion , this must be set on the default namespace private , same for above!
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
-    }
 
     public function available(Request $request): JsonResponse
     {
-        //todo implement available which looks through both the usernames and the namespaces, default ns is the username
+        //todo implement available which looks through both the usernames and the namespaces (with null server), default ns is the username
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 

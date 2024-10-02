@@ -7,7 +7,8 @@ use App\Enums\Paths\PathRelationshipType;
 use App\Enums\Paths\TimeComparisonType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -72,5 +73,21 @@ class Path extends Model
         'path_relationship' => PathRelationshipType::class,
         'time_comparison' => TimeComparisonType::class,
     ];
+
+    /**
+     * @throws \Exception
+     */
+    public static function collectPath(Collection|string $collect) : Path {
+        try {
+            DB::beginTransaction();
+            $path = new Path();
+
+            DB::commit();
+            return $path;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 
 }

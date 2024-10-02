@@ -36,7 +36,8 @@ class TypeController extends Controller
      */
     public function create_type(Request $request): JsonResponse {
 
-        $element_type = (new TypeGathering($request))->assign();
+        $element_type = new ElementType();
+        $element_type->editType($request->collect());
         $refreshed = ElementType::buildElementType(id: $element_type->id)?->first();
         return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
@@ -45,7 +46,7 @@ class TypeController extends Controller
      * @throws \Exception
      */
     public function edit_type(ElementType $element_type,Request $request): JsonResponse {
-        $element_type = (new TypeGathering($request,$element_type))->assign();
+        $element_type->editType($request->collect());
         $refreshed = ElementType::buildElementType(id:$element_type->id)->first();
         return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
@@ -53,23 +54,23 @@ class TypeController extends Controller
     public function destroy_type(ElementType $element_type): JsonResponse {
         $user = Utilities::getTypeCastedAuthUser();
         if ($element_type->user_id !== $user->id) {
-            throw new HexbatchPermissionException(__("msg.element_type_only_owner_can_delete",['ref'=>$element_type->getName()]),
+            throw new HexbatchPermissionException(__("msg.type_only_owner_can_delete",['ref'=>$element_type->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::ELEMENT_TYPE_ONLY_OWNER_CAN_DELETE);
+                RefCodes::TYPE_ONLY_OWNER_CAN_DELETE);
         }
 
         if ($element_type->isInUse()) {
-            throw new HexbatchPermissionException(__("msg.element_type_only_delete_if_unused",['ref'=>$element_type->getName()]),
+            throw new HexbatchPermissionException(__("msg.type_only_delete_if_unused",['ref'=>$element_type->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::ELEMENT_TYPE_CANNOT_DELETE);
+                RefCodes::TYPE_CANNOT_DELETE);
         }
 
         $element_type->delete();
         return response()->json(new ElementTypeResource($element_type), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
 
     }
-    public function get_type(ElementType $element_type): JsonResponse {
-        return response()->json(new ElementTypeResource($element_type,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    public function get_type(ElementType $element_type,?int $levels = 3): JsonResponse {
+        return response()->json(new ElementTypeResource($element_type,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     public function list_types(): JsonResponse {
@@ -105,6 +106,7 @@ class TypeController extends Controller
      * @throws \Exception
      */
     public function edit_attribute(Request $request,ElementType $element_type, Attribute $attribute): JsonResponse {
+        //todo edit and the others, still need to make sure the attr belongs to the element type
         $attribute = (new AttributeGathering($request,$element_type,$attribute) )->assign();
         $out = Attribute::buildAttribute(id:$attribute->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);

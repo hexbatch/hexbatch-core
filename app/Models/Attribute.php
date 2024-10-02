@@ -16,8 +16,11 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 
 //add in popped_writing_method
 /**
@@ -314,24 +317,36 @@ class Attribute extends Model
                             $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
                         }
                         else if (count($parts) === 2) {
-                            $owner_string = $parts[0];
-                            $maybe_name = $parts[1];
+                            $type_string = $parts[0];
+                            $attr_name = $parts[1];
                             /** @var ElementType $owner */
-                            $owner = (new ElementType)->resolveRouteBinding($owner_string);
-                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $maybe_name);
-                        } else {
-                            if (count($parts) >= 3) {
-                                $user_string = $parts[0];
-                                $owner_string = $parts[1];
-                                $maybe_name = $parts[2];
+                            $owner = (new ElementType)->resolveRouteBinding($type_string);
+                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
+                        } else if (count($parts) === 3) {
+                                $namespace_string = $parts[0];
+                                $type_string = $parts[1];
+                                $attr_name = $parts[2];
 
-                                /** @var User $user */
-                                $user = (new User)->resolveRouteBinding($user_string);
+                                /** @var UserNamespace $user_namespace */
+                                $user_namespace = (new UserNamespace())->resolveRouteBinding($namespace_string);
 
                                 /** @var ElementType $owner */
-                                $owner = (new ElementType)->resolveRouteBinding($user->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $owner_string);
-                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $maybe_name);
-                            }
+                                $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
+                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
+
+                        } else if (count($parts) === 4) {
+                                $server_string = $parts[0];
+                                $namespace_string = $parts[1];
+                                $type_string = $parts[2];
+                                $attr_name = $parts[3];
+
+                                /** @var UserNamespace $user_namespace */
+                                $user_namespace = (new UserNamespace())->resolveRouteBinding($server_string . UserNamespace::NAMESPACE_SEPERATOR . $namespace_string);
+
+                                /** @var ElementType $owner */
+                                $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
+                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
+
                         }
 
                     }
@@ -388,6 +403,42 @@ class Attribute extends Model
        $out = array_reverse($ancestors);
        return $out;
 
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function collectAttribute(Collection|string $collect,ElementType $owner) : Attribute {
+        //todo if string then see if current namespace has permission to use (in admin group of type ns), and make sure the owner and attribute match
+        //
+        try {
+            DB::beginTransaction();
+            if (is_string($collect) && Utilities::is_uuid($collect)) {
+                $attribute = (new Attribute())->resolveRouteBinding($collect);
+            } else {
+                $attribute = new Attribute();
+                $attribute->editAttribute($collect);
+            }
+
+            DB::commit();
+            return $attribute;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+
+    public function editAttribute(Collection $collect) : void {
+        try {
+            DB::beginTransaction();
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
 

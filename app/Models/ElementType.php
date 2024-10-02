@@ -2,16 +2,22 @@
 
 namespace App\Models;
 
+use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Types\TypeOfWhitelistPermission;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Rules\ElementTypeNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 //todo type construction (except user tokens) takes place in the user's home set, the rules can react there when creation events to things in the set
 /**
@@ -173,9 +179,9 @@ class ElementType extends Model
         finally {
             if (empty($ret) || empty($first_id) || empty($build)) {
                 throw new HexbatchNotFound(
-                    __('msg.element_type_not_found',['ref'=>$value]),
+                    __('msg.type_not_found',['ref'=>$value]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::ELEMENT_TYPE_NOT_FOUND
+                    RefCodes::TYPE_NOT_FOUND
                 );
             }
         }
@@ -205,6 +211,7 @@ class ElementType extends Model
 
     public function canNamespaceInherit(UserNamespace $namespace) : bool {
         if (empty($this->type_whitelists)) {return true;}
+        if ($this->type_owner->isNamespaceAdmin($namespace)) {return true;}
         return ElementTypeWhitelist::where('whitelist_owning_type_id',$this->id)
             ->where('whitelist_namespace_id',$namespace->id)
             ->where('whitelist_permission',TypeOfWhitelistPermission::INHERITING)->exists();
@@ -229,5 +236,106 @@ class ElementType extends Model
             WHERE element_types.id=subquery.element_type_id;
         ");
 
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function editType(Collection $collect) : void {
+        try
+        {
+            DB::beginTransaction();
+
+            if ($this->isInUse()) {
+                $this->is_retired = Utilities::boolishToBool($collect->get('is_retired',false));
+                $this->is_final = Utilities::boolishToBool($collect->get('is_final',false));
+                $this->save();
+                return;
+            }
+
+
+            if ($collect->has('parents')) {
+
+                collect($collect->get('parents'))->each(function ($some_parent_hint, int $key) {
+                    Utilities::ignoreVar($key);
+                    if (!is_string($some_parent_hint)) {
+                        throw new HexbatchNotPossibleException(__('msg.child_types_must_be_string_names'),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::TYPE_BAD_SCHEMA);
+                    }
+                    /**
+                     * @var ElementType|null $some_parent
+                     */
+                    $some_parent = (new ElementType())->resolveRouteBinding($some_parent_hint);
+                    $user_namespace = Utilities::getCurrentNamespace();
+                    if ($some_parent->is_retired || $some_parent->is_final || !$some_parent->canNamespaceInherit($user_namespace)) {
+                        throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::TYPE_CANNOT_INHERIT);
+                    }
+                    ElementTypeParent::addParent($some_parent, $this);
+                });
+            }
+
+            try {
+                if ($this->type_name = $collect->get('type_name')) {
+                    Validator::make(['type_name' => $this->type_name], [
+                        'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type)],
+                    ])->validate();
+                }
+            } catch (ValidationException $v) {
+                throw new HexbatchNotPossibleException($v->getMessage(),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::TYPE_INVALID_NAME);
+            }
+
+            if (!$this->type_name && !$this->id) {
+                throw new HexbatchNotPossibleException(__('msg.type_must_have_name'),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::TYPE_INVALID_NAME);
+            }
+
+
+            if ($collect->has('time_bound')) {
+                $hint_time_bound = $collect->get('time_bound');
+                if (is_string($hint_time_bound) || $hint_time_bound instanceof Collection) {
+                    $time_bound = TimeBound::collectTimeBound($hint_time_bound);
+                    $this->type_time_bound_id = $time_bound->id;
+                }
+            }
+
+            if ($collect->has('map_bound')) {
+                $hint_location_bound = $collect->get('map_bound');
+                if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
+                    $bound = LocationBound::collectLocationBound($hint_location_bound);
+                    if ($bound->location_type === TypeOfLocation::SHAPE) {
+                        throw new HexbatchNotPossibleException(__('msg.type_must_have_map_bound'),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::TYPE_BAD_SCHEMA);
+                    }
+                    $this->type_location_map_bound_id = $bound->id;
+                }
+            }
+
+
+            if ($collect->has('path_bound')) {
+                $hint_path_bound = $collect->get('path_bound');
+                if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
+                    $path = Path::collectPath($hint_path_bound);
+                    $this->type_bound_path_id = $path->id;
+                }
+            }
+            $this->save();
+
+            collect($collect->get('attributes'))->each(function ($some_attribute_hint, int $key) {
+                Utilities::ignoreVar($key);
+                Attribute::collectAttribute($some_attribute_hint,$this);
+            });
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }

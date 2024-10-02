@@ -81,7 +81,7 @@ use App\Models\User;
 
 //todo type server_description, standard global set server description these all go into
 //todo type type_description, standard global set type description these all go into
-//todo type group_description, standard global set group description these all go into
+
 //todo type path_description, standard global set path description these all go into
 
 /**

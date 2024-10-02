@@ -9,14 +9,12 @@ use App\Enums\Bounds\TypeOfLocation;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Bounds\LocationBoundGathering;
-use App\Helpers\Bounds\TimeBoundGathering;
+
 use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\ElementTypeHorde;
-use App\Models\LocationBound;
-use App\Models\TimeBound;
+
 use App\Rules\AttributeNameReq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -164,38 +162,6 @@ class AttributeGathering
                 }
             }
 
-
-            if ($request->request->has('attribute_time_bound')) {
-                /**
-                 * @var TimeBound|null $time_bound
-                 */
-                $time_bound = null;
-                $hint_time_bound = $request->get('attribute_time_bound');
-                if (is_string($hint_time_bound) && Utilities::is_uuid($hint_time_bound)) {
-                    $time_bound = (new TimeBound())->resolveRouteBinding($hint_time_bound);
-                } else if (is_array($hint_time_bound)) {
-                    $time_bound = (new TimeBoundGathering($request->collect('attribute_time_bound')))->assign();
-                }
-                if ($time_bound) {
-                    $this->attribute_time_bound_id = $time_bound->id;
-                }
-            }
-
-            if ($request->request->has('attribute_location_bound')) {
-                /**
-                 * @var LocationBound|null $time_bound
-                 */
-                $loc_bound = null;
-                $hint_location_bound = $request->get('attribute_location_bound');
-                if (is_string($hint_location_bound) && Utilities::is_uuid($hint_location_bound)) {
-                    $loc_bound = (new LocationBound())->resolveRouteBinding($hint_location_bound);
-                } else if (is_array($hint_location_bound)) {
-                    $loc_bound = (new LocationBoundGathering($request->collect('attribute_location_bound')))->assign();
-                }
-                if ($loc_bound) {
-                    $this->attribute_location_bound_id = $loc_bound->id;
-                }
-            }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

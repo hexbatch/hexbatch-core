@@ -9,6 +9,7 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -62,37 +63,48 @@ class ElementTypeParent extends Model
     }
 
 
-    public static function addParent(ElementType $parent,ElementType $child) :ElementTypeParent {
+    /**
+     * @throws \Exception
+     */
+    public static function addParent(ElementType $parent, ElementType $child) :ElementTypeParent {
 
-        $user_namespace = Utilities::getCurrentNamespace();
-        if ($parent->is_retired || $parent->is_final || !$parent->canNamespaceInherit($user_namespace)) {
-            throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ELEMENT_TYPE_CANNOT_INHERIT);
-        }
-        $par = new ElementTypeParent();
-
-        $current_step = ElementTypeParent::where('child_type_id',$child->id)
-            ->where('parent_type_id',$parent->id)
-            ->max('parent_rank')??0;
-
-        if (!$current_step) {
-            $current_step =ElementTypeParent::where('child_type_id',$child->id)->max('parent_rank')??0;
-        }
-
-        $par->upsert([
-            'child_type_id' => $child->id,
-            'parent_type_id' => $parent->id,
-            'parent_rank' => $current_step,
-        ],['parent_type_id','child_type_id']);
-
-        //add attributes of parent to the horde
-        Attribute::where('owner_element_type_id',$child->id)->chunk(200, function (Collection $attributes) use($child) {
-            foreach ($attributes as $attr) {
-                ElementTypeHorde::addAttribute($attr,$child);
+        try {
+            DB::beginTransaction();
+            $user_namespace = Utilities::getCurrentNamespace();
+            if ($parent->is_retired || $parent->is_final || !$parent->canNamespaceInherit($user_namespace)) {
+                throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::TYPE_CANNOT_INHERIT);
             }
-        });
-        return $par;
+            $par = new ElementTypeParent();
+
+            $current_step = ElementTypeParent::where('child_type_id', $child->id)
+                ->where('parent_type_id', $parent->id)
+                ->max('parent_rank') ?? 0;
+
+            if (!$current_step) {
+                $current_step = ElementTypeParent::where('child_type_id', $child->id)->max('parent_rank') ?? 0;
+            }
+
+            $par->upsert([
+                'child_type_id' => $child->id,
+                'parent_type_id' => $parent->id,
+                'parent_rank' => $current_step,
+            ], ['parent_type_id', 'child_type_id']);
+
+            //add attributes of parent to the horde
+            Attribute::where('owner_element_type_id', $child->id)->chunk(200, function (Collection $attributes) use ($child) {
+                foreach ($attributes as $attr) {
+                    ElementTypeHorde::addAttribute($attr, $child);
+                }
+            });
+            ElementTypeHorde::checkAttributeConflicts($child);
+            DB::commit();
+            return $par;
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
     }
 
 

@@ -11,7 +11,14 @@ enum TypeOfWhitelistPermission : string {
   case READ_ELEMENTS = 'read_elements';
   case WRITE_ELEMENTS = 'write_elements';
 
-
+    public static function tryFromInput(string|int|bool|null $test ) : TypeOfWhitelistPermission {
+        $maybe  = TypeOfWhitelistPermission::tryFrom($test);
+        if (!$maybe ) {
+            $delimited_values = implode('|',array_column(TypeOfWhitelistPermission::cases(),'value'));
+            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
+        }
+        return $maybe;
+    }
 }
 
 

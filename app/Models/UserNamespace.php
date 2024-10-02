@@ -17,11 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-//todo add private and public types and put into the user home set
 
-//todo when the user home set is created from the user type element, its put into the Standard set, all_users
-
-//todo create user_base_attribute
 
 /**
  * @mixin Builder
@@ -147,6 +143,32 @@ class UserNamespace extends Model
         if ($user_id) {
             $build->where('user_namespaces.namespace_user_id', $user_id);
         }
+
+        if ($id_is_member_of_namespace) {
+            $build->join('user_namespace_members as ms',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($id_is_member_of_namespace) {
+                    $join
+                        ->on('user_namespaces.id', '=', 'ms.parent_namespace_id')
+                        ->where('ms.member_namespace_id', $id_is_member_of_namespace);
+                }
+            );
+        }
+
+        if ($id_is_admin_of_namespace) {
+            $build->join('user_namespace_members as ma',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($id_is_admin_of_namespace) {
+                    $join
+                        ->on('user_namespaces.id', '=', 'ma.parent_namespace_id')
+                        ->where('ma.member_namespace_id', $id_is_admin_of_namespace);
+                }
+            )->where('ma.is_admin',true);
+        }
         return $build;
     }
 
@@ -223,7 +245,7 @@ class UserNamespace extends Model
         } catch (ValidationException $v) {
             throw new HexbatchNotPossibleException($v->getMessage(),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ELEMENT_TYPE_INVALID_NAME);
+                RefCodes::TYPE_INVALID_NAME);
         }
         $this->namespace_name = $name;
     }
@@ -283,15 +305,52 @@ class UserNamespace extends Model
     }
 
     /**
-     * A namespace is in use if its the default namespace for the user
-     * todo complete inuse
+     * A namespace is in use if it is the default namespace for the user,
+     * or if it owns a type
+     * or if it owns a server
+     * or if it owns any elements
+     * or if there are pending things
+     * t
      * @return bool
      */
     public function isInUse() : bool {
         if (!$this->id) {return false;}
-
         if( User::where('parent_namespace_id',$this->id)->exists() ) {return true;}
+        if( ElementType::where('owner_namespace_id',$this->id)->exists() ) {return true;}
+        if( Server::where('owning_namespace_id',$this->id)->exists() ) {return true;}
+        if( Element::where('element_namespace_id',$this->id)->exists() ) {return true;}
+        if( PendingThing::where('caller_namespace_id',$this->id)->orWhere('thing_namespace_id',$this->id)->exists() ) {return true;}
         return false;
+    }
+
+    public function isDefault() {
+        return $this->namespace_user_id && ($this->id === $this->owner_user->default_namespace_id);
+    }
+
+    public function freeResources() :void {
+        //todo namespace {foreach resource} } not in use delete
+    }
+
+    public function purgeHome() :void {
+        //todo delete the contents of the home set
+    }
+
+    /**
+     *
+     * //todo add private and public types and put into the user home set
+     *
+     * //todo when the user home set is created from the user type element, its put into the Standard set, all_users
+     *
+     * //todo create user_base_attribute
+     */
+    public static function createNamespace(string $namespace_name,?User $owning_user = null,?Server $server = null) : UserNamespace {
+        $node = new UserNamespace();
+        $node->namespace_user_id = $owning_user?->id;
+        $node->namespace_server_id = $server?->id;
+        $node->setNamespaceName($namespace_name);
+        $node->save();
+        $node->refresh();
+        return static::buildNamespace(id:$node->id)->first();
     }
 
 }
