@@ -124,6 +124,8 @@ return new class extends Migration
 
             //todo put in enum for type of data reading for the values: element data, attribute data, used in required rules
 
+            //todo put in what should be returned (type|element|namespace)
+
             $table->boolean('is_partial_matching_name')
                 ->nullable(false)->default(false)
                 ->comment("If false then only match full names, else wildcard on right");
