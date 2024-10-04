@@ -87,8 +87,7 @@ return new class extends Migration
         });
 
 
-
-
+        //todo remove this, too hard to implement the not exist
          DB::statement("CREATE TYPE rule_trigger_action_type AS ENUM (
             'exists',
             'not_exist'
@@ -112,6 +111,7 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
 
+        //todo add pragma type to read the defining attribute or combine all the type data into one json
         DB::statement("CREATE TYPE rule_data_action_type AS ENUM (
             'no_action',
             'pragma_read_bounds_time', -- convert to json and write to target

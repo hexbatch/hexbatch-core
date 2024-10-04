@@ -57,6 +57,7 @@ return new class extends Migration
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then this attribute will have different values per set. Otherwise an element value of this will not change when in different sets');
 
+
             //todo rm
             $table->boolean('is_access_type_editor')->default(false)->nullable(false)
                 ->comment('if true then this attribute can only be read or written by the namespace admin group of the type not the child type');
@@ -65,11 +66,11 @@ return new class extends Migration
             $table->boolean('is_access_element_owner')->default(false)->nullable(false)
                 ->comment('if true then this attribute can only be read or written by the owner of the element or those who have membership in it');
         });
-        //todo enum for pending constraint or full on approval
+        //todo type_approval_status new column
 
         /*
-         * todo add in access enum
-         * todo add in protected enum
+         * todo add in type_of_server_access enum
+         * todo add in type_of_attribute_access enum
          */
     }
 

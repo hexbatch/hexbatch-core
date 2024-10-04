@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    //todo paths need to look into rules, there should be relationships found between rules, types, attributes, so that path can find the working chains
     /**
      * Run the migrations.
      */

@@ -35,6 +35,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo remove this
             $table->foreignId('applied_rule_id')
                 ->nullable()->default(null)
                 ->comment("The single or root rule used here")
@@ -144,8 +145,10 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_attribute_access AS ENUM (
             'normal',
-            'element_private',
-            'type_private'
+            'element_private', -- membership of the element owner can read
+            'element_private_admin',  -- only the admin in  ns that owns this element can read
+            'type_private', -- membership group of ns that owns this type can read
+            'type_private_admin' -- only the admin in  ns that owns this type can read
             );");
 
         DB::statement("ALTER TABLE attributes Add COLUMN attribute_access_type type_of_attribute_access NOT NULL default 'normal';");

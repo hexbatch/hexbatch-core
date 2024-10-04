@@ -43,7 +43,7 @@ return new class extends Migration
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
-            //todo add enum to mark status of this parenting, usually pending a constraint so: pending|approved
+            //todo enum column type_approval_status pending|approved|not_applicable
 
         });
 

@@ -113,6 +113,7 @@ class TypeController extends Controller
     }
 
     /**
+     * todo attributes cannot be copied, make a new one to inherit the older one, so remove this api call
      * @throws \Exception
      */
     public function copy_attribute(ElementType $element_type, Attribute $source_attribute): JsonResponse {
@@ -147,6 +148,8 @@ class TypeController extends Controller
         return response()->json(new AttributeRuleCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    //todo change to make it easier for chaining, add parent rule and maybe other helpers
+    // here we can add branches to the tree, or remove branches
     public function attribute_new_rule(Request $request,ElementType $element_type,Attribute $attribute): JsonResponse {
         $rule = (new RuleGathering($request,$element_type,$attribute))->assign();
         $out = AttributeRule::buildAttributeRule(id:$rule->id)->first();
@@ -169,6 +172,7 @@ class TypeController extends Controller
         return response()->json(new AttributeRuleResource($attribute_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
+    //todo add ability to trim branches from rules here
     public function attribute_clear_rules(ElementType $element_type,Attribute $attribute): JsonResponse {
         $old_rules = [];
         if ($attribute->rule_bundle?->creator_attribute?->ref_uuid === $attribute->ref_uuid) {
