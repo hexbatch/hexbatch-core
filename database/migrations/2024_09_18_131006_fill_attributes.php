@@ -68,6 +68,7 @@ return new class extends Migration
             $table->boolean('is_final_parent')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
 
+            //todo rm ancestor bundle
             $table->boolean('is_using_ancestor_bundle')->default(false)->nullable(false)
                 ->comment('if false then if this has parent, not using its rules');
 
@@ -75,21 +76,27 @@ return new class extends Migration
                 ->index('idx_attr_is_system')
                 ->comment('if true then this attribute is a standard attribute');
 
+            //todo rm nullable, put rules in json_path for value
             $table->boolean('is_nullable')->default(true)->nullable(false)
                 ->comment('if true then value is nullable');
 
+            //todo remove is const
             $table->boolean('is_const')->default(false)->nullable(false)
                 ->comment('if true then all elements share this static value. This is per server');
 
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then child types do not inherit this attribute. But this can be used as a parent in an attribute in the child');
 
+            //todo rm is_protected_read,is_protected_write
             $table->boolean('is_protected_read')->default(false)->nullable(false)
                 ->comment('if true then only ns members/element owners can read');
 
             $table->boolean('is_protected_write')->default(false)->nullable(false)
                 ->comment('if true then only ns members/element owners can write');
 
+            //todo enum set_value_behavior for how it behaves going into child sets, and how it returns from child sets when that child is destroyed
+            // values are static (def), per_child (only when put into a child), per_set (for all being different), per_all
+            // rm this
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then the element value of this is different for each set');
 
@@ -105,6 +112,7 @@ return new class extends Migration
 
         });
 
+        //todo add new column for merge live (used for the merging B to the A on the type that is the mergee)
         DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method type_merge_json NOT NULL default 'overwrite';");
 
 
@@ -142,6 +150,8 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE attributes Add COLUMN attribute_access_type type_of_attribute_access NOT NULL default 'normal';");
 
+        //todo add in enum and col for if this is namespace protected read or write or both, none (def)
+
         Schema::table('attributes', function (Blueprint $table) {
             $table->jsonb('attribute_value')
                 ->nullable()->default(null)->comment("The value of the attribute");
@@ -156,7 +166,8 @@ return new class extends Migration
             $table->string('attribute_name',128)->nullable(false)->index()
                 ->comment("The unique name of the attribute, using the naming rules");
         });
-
+        //todo add type of encryption_policy: none, namespace encrypts via rules, server encrypts via rules
+        //todo add type of merging for re-entry of previously exported elements that are sent back later to the server
         DB::statement(/** @lang text */
             "CREATE UNIQUE INDEX udx_type_parent_name ON attributes (owner_element_type_id,attribute_name) NULLS NOT DISTINCT;");
     } //up

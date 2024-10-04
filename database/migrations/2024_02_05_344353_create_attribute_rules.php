@@ -21,6 +21,9 @@ return new class extends Migration
             //  attr is only set when the rule has no rule parent, and this is a unique column to ensure only one rule chain per attr
             //  when attr is inherited, the parent rule is run before the child rule, going back to the root ancestor
             //  events have no children, and the to-do only looks at the top rules for the attrs involved, to start
+
+            //todo add event type for listening to events
+
             $table->foreignId('parent_rule_id')
                 ->nullable()->default(null)
                 ->comment("Rules can be chained")
@@ -54,6 +57,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
+            //todo remove the remote, its now a command and uses the target which is a remote
             $table->foreignId('rule_remote_type_id')
                 ->nullable()->default(null)
                 ->comment("If this rule calling a remote then put this here")
@@ -121,14 +125,19 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE rule_target_action_type AS ENUM (
             'no_action',
-            'pragma_facet_offset',
-            'pragma_facet_rotation',
+            'pragma_shape_offset',
+            'pragma_shape_rotation',
+            'pragma_shape_color',
+            'pragma_shape_texture',
+            'pragma_shape_opacity',
+            'pragma_shape_zorder',
             'pragma_element_on',
             'pragma_element_toggle',
             'pragma_element_off',
             'pragma_element_type_on',
             'pragma_element_type_toggle',
             'pragma_element_type_off',
+            'command_run_remote',
             'command_make_set',
             'command_destroy_set',
             'command_add_to_set',
@@ -153,6 +162,7 @@ return new class extends Migration
         DB::statement("ALTER TABLE attribute_rules Add COLUMN target_action rule_target_action_type NOT NULL default 'no_action';");
 
 
+        //todo add ignore, oldest, newest (if no time difference or cannot tell defaults to overwrite)
         DB::statement("CREATE TYPE type_merge_json AS ENUM (
             'overwrite',
             'or_merge',
@@ -160,7 +170,7 @@ return new class extends Migration
             'xor_merge'
             );");
 
-
+        //todo if have children, add a merge strategy between all the children and the data here, null means not using children data
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN target_writing_method type_merge_json NOT NULL default 'overwrite';");
 

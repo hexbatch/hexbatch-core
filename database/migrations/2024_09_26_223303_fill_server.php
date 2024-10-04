@@ -33,9 +33,10 @@ return new class extends Migration
                 ->restrictOnDelete();
 
 
+            //todo remove the server element_id, this is the public and private elements from the ns home set
             $table->foreignId('server_element_id')
                 ->nullable()->default(null)
-                ->comment("The element having description and hooks. Marks this as saved")
+                ->comment("The element having description and hooks. This made from the server type")
                 ->unique('udx_server_element_id')
                 ->constrained('elements')
                 ->cascadeOnUpdate()

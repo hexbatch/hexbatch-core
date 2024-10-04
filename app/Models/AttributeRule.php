@@ -48,15 +48,30 @@ use Illuminate\Validation\ValidationException;
  *  Need new api to copy over all the rules from one attribute to another, and not just one at a time.
  *
  * Remote chains and unrelated can be saved per attribute, and that attribute copied.
- * Remote chains can listen to ancestors so can be reused for different things.
+ * Remote chains can listen to ancestors so can be reused for different things. Ancestors run parallel and can refuse
+ * (always and logic when listening to multiple event rules)
+ *
  * todo rules can be edited even if the type is in use and has elements, this is because rules are static
  *
  *
  *
  * required goes to the to-do , and can use type ancestors and the children can listen for remotes
  *
- * for event handlers, the only called are the top level rule, one can put in attributes for the events in the children, but unless
- * its for listening to remote or stack events (which are only fired when the rules are being processed) they will not be used for event triggers
+ * event handlers are ignored in rule chains
+ * * unless the top rule (with an attribute owning id) has an event its listening to
+ * * a command is executed by a child, and the parent (not necessarily the top level one) can listen to events caused by the child command
+ *
+ * All rules are passed information from the api call or event
+ *   caller ns (directly or indirectly)
+ *   api type
+ *   event type
+ *   thing ref
+ *   set id of the context
+ *   server type
+ * This is sent via a standard element that always has the same id and uuid, but has different reads. No writes, its just a special system hook
+ *
+ * Short circuit,
+ *  rule chain A parent of B, B returns true or false and A logic makes it true or false no matter what A does, A will not do any target stuff, and will pass the data up
  */
 
 /**

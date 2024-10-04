@@ -98,6 +98,7 @@ class ElementTypeParent extends Model
                     ElementTypeHorde::addAttribute($attr, $child);
                 }
             });
+            //todo this is marked as tentative until the check_constraint event returns
             ElementTypeHorde::checkAttributeConflicts($child);
             DB::commit();
             return $par;

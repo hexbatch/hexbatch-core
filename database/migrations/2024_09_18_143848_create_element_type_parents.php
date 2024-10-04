@@ -43,7 +43,7 @@ return new class extends Migration
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
-
+            //todo add enum to mark status of this parenting, usually pending a constraint so: pending|approved
 
         });
 
@@ -55,6 +55,7 @@ return new class extends Migration
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON element_type_parents FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
         //todo add parent_type enum : design (default) | live
+        //todo add merge strategy when combining same attributes
     }
 
     /**

@@ -38,6 +38,14 @@ class Server extends Model
      * When transferring sets, will fail to transfer set if any of the types in the set are forbidden on the other server
      *
      * server ns are not initially owned, but can be assigned to a user later
+     *
+     * When an element has linked to a set, and that element owner ns is registered on the same server that set is being copied to,
+     * then also transfer that element
+     *
+     * All elements transferred have the same uuid in the newly created elements
+     * All ns transferred keep their uuid
+     *
+     * The server has a ns
      */
 
     //get, list, are done by paths
@@ -47,6 +55,9 @@ class Server extends Model
     //only namespaces are transferred not users themselves
 
     //live types on elements are transferred
+
+    //copied elements are always copied inside a set, this set can be a type already known, or a container
+    //when previously copied element is sent back to this server, that is updated via the attribute's merge policy for this re-import (different from live merge)
 
     protected $table = 'servers';
     public $timestamps = false;

@@ -12,16 +12,17 @@ use App\Models\User;
 // none of these have bounds
 // standard type has no attributes
 // server type (no attributes) parent is standard type
-// this_server type (no attributes) parent is this_server
+// this_server type (no attributes) parent is this_server, all descendants have the same uuid across all servers but have a different parent (this server)
 // description type , parent is this_server, its final and its attributes are final, and can be parents, and inherit from a base description attribute also here
 // display type  , parent is this_server, its final and its attributes are final, and can be parents, and inherit from a base display attribute also here
 // user type (no attributes) (parent is this_server, combined with maybe another server type), it can be used as a child for each user type here derived from it.
-// media type  (parent is this_server) its final and its attributes are final, and can be parents, and inherit from a base event attribute also here
-// events type ( contains the event attributes) (parent is this_server)  its final and its attributes are final, and can be parents, and inherit from a base event attribute also here
+// media type  (parent is this_server) its final and its attributes are final, and can be parents, and inherit this_server
+// events each have a type, that always have the same uuid but inherits from this_server , attributes have docs and meta and stuff
+// each api call has a type, and its like the events, except other parents are the possible events directly raised by that api (secondary rules can be anything)
 // note: all standard attributes can be used by anyone, in other types, and no standard attribute will have bounds
 // note: see standard in docs for more to fles this out
 // the attributes and types here all have the same uuid except for this_server which has the one below
-
+// todo standard attribute all rules get exposed to that contains the caller data and env
 //todo add remote type, inherits from this_server, when a new remote is made the parents are ths and user_token.
 // Remote has some standard attributes that are inherited, but will be added later
 

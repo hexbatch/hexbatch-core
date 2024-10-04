@@ -1,9 +1,7 @@
 <?php
 namespace App\Enums\Things;
-/**
- * postgres enum type_of_thing_to_do
- */
-enum TypeOfThingToDo : string {
+
+enum TypeOfEvent : string {
   case NOTHING = 'nothing';
 
   case ATTRIBUTE_READ = 'attribute_read';
@@ -11,8 +9,10 @@ enum TypeOfThingToDo : string {
 
   case ATTRIBUTE_TURNED_OFF = 'attribute_turned_off';
   case ATTRIBUTE_TURNED_ON = 'attribute_turned_on';
-  case TYPE_ATTRIBUTES_TURNED_OFF = 'type_attributes_turned_off';
-  case TYPE_ATTRIBUTES_TURNED_ON = 'type_attributes_turned_on';
+  case ATTRIBUTES_TURNED_OFF = 'attributes_turned_off';
+  case ATTRIBUTES_TURNED_ON = 'attributes_turned_on';
+
+  case ATTRIBUTE_CONSTRAINT = 'attribute_constraint';
 
   case ELEMENT_CREATION = 'element_creation';
   case ELEMENT_BATCH_CREATION = 'element_batch_creation';
@@ -47,6 +47,8 @@ enum TypeOfThingToDo : string {
 
 
   case SERVER_ADD_ELEMENT = 'server_add_element';
+  case SERVER_ELEMENT_RECIEVED = 'server_element_recieved'; //when the other server gave it to this server, it is fired on this server, and the element was created
+  case SERVER_NAMESPACE_RECIEVED = 'server_namespace_recieved'; //same as above, anyone can listen to these as long as element or ns can be found in a path
   case SERVER_ADD_TYPE = 'server_add_type';
   case SERVER_PROCESS_EVENT = 'server_process_event';
   case SERVER_ADD_SET = 'server_add_set';
@@ -89,15 +91,21 @@ enum TypeOfThingToDo : string {
   case SHAPE_BORDERING_ATTACHED = 'shape_bordering_attached';
   case SHAPE_BORDERING_SEPERATED = 'shape_bordering_seperated';
 
-  case TYPE_ATTRIBUTE_PARENT_ADD = 'type_attribute_parent_add';
+
   case TYPE_PARENT_ADD = 'type_parent_add';
   case TYPE_CREATED_BEFORE = 'type_created_before';
   case TYPE_UPDATED_BEFORE = 'type_updated_before';
   case TYPE_CREATED_AFTER = 'type_created_after';
   case TYPE_UPDATED_AFTER = 'type_updated_after';
+  case TYPE_PUBLISH_BEFORE = 'type_publish_before';
+  case TYPE_RETIRE_BEFORE = 'type_retire_before';
+  case TYPE_SUSPEND_BEFORE = 'type_suspend_before';
   case TYPE_PUBLISHED = 'type_published';
   case TYPE_RETIRED = 'type_retired';
   case TYPE_SUSPENDED = 'type_suspended';
+  case TYPE_CONSTRAINT = 'type_constraint';
+  case TYPE_LIVE = 'type_live';
+  case TYPE_LIVE_REMOVED = 'type_live_removed';
 
 
   case NAMESPACE_OWNER_CHANGE = 'namespace_owner_change';
@@ -110,10 +118,10 @@ enum TypeOfThingToDo : string {
   case NAMESPACE_REMOVING_ADMIN = 'namespace_removing_admin';
 
 
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfThingToDo {
-        $maybe  = TypeOfThingToDo::tryFrom($test);
+    public static function tryFromInput(string|int|bool|null $test ) : TypeOfEvent {
+        $maybe  = TypeOfEvent::tryFrom($test);
         if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfThingToDo::cases(),'value'));
+            $delimited_values = implode('|',array_column(TypeOfEvent::cases(),'value'));
             throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
         }
         return $maybe;

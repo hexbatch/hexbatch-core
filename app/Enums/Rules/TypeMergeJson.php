@@ -8,7 +8,7 @@ enum TypeMergeJson : string {
     case OR_MERGE = 'or_merge';
     case AND_MERGE = 'and_merge';
     case XOR_MERGE = 'xor_merge';
-
+//todo add oldest and newest (defaults to overwrite if cannot tell times)
     public static function tryFromInput(string|int|bool|null $test ) : TypeMergeJson {
         $maybe  = TypeMergeJson::tryFrom($test);
         if (!$maybe ) {

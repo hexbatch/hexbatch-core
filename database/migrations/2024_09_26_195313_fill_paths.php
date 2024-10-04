@@ -39,6 +39,10 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo put in enum that shows if this type is always on the caller type (for rules) values [rule_type_is_context]
+            //todo put in enum that shows if the set is the set the element of the type that has the rule is at
+            //  (for rules) values [rule_set_is_context]
+
             //todo put in a sorting attribute, this is used when sorting types or elements
             //  if the above set: if neither the attribute or path set sort by type.attribute.element natural order in set in that priority only
             // put in a limit
@@ -124,7 +128,7 @@ return new class extends Migration
 
             //todo put in enum for type of data reading for the values: element data, attribute data, used in required rules
 
-            //todo put in what should be returned (type|element|namespace)
+            //todo put in what should be returned (type|element|namespace|scalar_count|scalar_partial_count|scalar_sum|scalar_average|array_scalars|exists)
 
             $table->boolean('is_partial_matching_name')
                 ->nullable(false)->default(false)
@@ -219,6 +223,8 @@ return new class extends Migration
             $table->string('path_part_name',128)->nullable()->default(null)
                 ->comment("the name of the attr or the type or the ns or the server,  for attr can use server.ns.type.attribute");
 
+            //todo need new col for enum on what the path_part_name is: values name|uuid
+
             $table->string('value_json_path')
                 ->nullable()->default(null)
                 ->comment("if set then only values that match the json path are used");
@@ -226,6 +232,8 @@ return new class extends Migration
             $table->string('ordering_json_path')
                 ->nullable()->default(null)
                 ->comment("if set then the values are ordered by this. Not valid past a certain result set size");
+
+            //todo add text column to store compiled sql
         });
 
         DB::statement(/** @lang text */

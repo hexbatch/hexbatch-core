@@ -33,7 +33,8 @@ return new class extends Migration
 
 
 
-
+            //todo add context set, each api call has a set context, if this is a user doing that, its the ns home set
+            // if its a rule, then its the set the element of the type that has the rule that is reacting
 
 
             $table->foreignId('parent_thing_id')
@@ -49,6 +50,14 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("When api is made, its type is put here")
                 ->index('idx_thing_api_call_type_id')
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('thing_event_type_id')
+                ->nullable()->default(null)
+                ->comment("When this is an event being processed")
+                ->index('idx_thing_event_type_id')
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -221,125 +230,7 @@ return new class extends Migration
 
 
 
-        DB::statement("CREATE TYPE type_of_thing_to_do AS ENUM (
 
-            'nothing',
-
-            'attribute_read',
-            'attribute_write',
-
-            'attribute_turned_off',
-            'attribute_turned_on',
-
-            'type_attributes_turned_off',
-            'type_attributes_turned_on',
-
-
-            'element_creation',
-            'element_batch_creation',
-            'element_destruction',
-
-            'group_operation',
-
-
-            'remote_success',
-            'remote_fail',
-            'remote_always',
-            'stack_success',
-            'stack_fail',
-            'stack_always',
-
-            'search_results',
-
-
-            'set_operation',
-            'set_enter',
-            'set_leave',
-            'set_contents_shape_changed',
-            'set_transport',
-            'set_kick',
-            'set_created',
-            'set_child_created',
-            'set_destroyed',
-            'set_child_destroyed',
-            'set_top_level_destroyed',
-            'set_link_created',
-            'set_link_destroyed',
-
-
-            'server_add_element',
-            'server_add_type',
-            'server_process_event',
-            'server_add_set',
-            'server_remove_element',
-            'server_remove_type',
-            'server_remove_set',
-            'server_run_rules',
-            'server_read',
-            'server_write',
-            'server_get_namespace_token',
-
-            'server_add_namespace',
-            'server_adding_namespace',
-            'server_added_namespace',
-            'server_namespace_regenerate_key',
-            'server_removed_namespace',
-            'server_created',
-            'server_allowed',
-            'server_removed',
-            'server_after_removed',
-            'server_paused',
-            'server_regenerate_key',
-            'server_regenerate_namespace_key',
-
-
-            'server_sent_callback_element_add',
-            'server_sent_callback_process_event',
-            'server_sent_callback_set_add',
-            'server_sent_callback_element_remove',
-            'server_sent_callback_run_rules',
-            'server_sent_callback_read',
-            'server_sent_callback_write',
-            'server_sent_callback_add_namespace',
-            'server_sent_callback_server_regenerated_key',
-            'server_sent_callback_namespace_regenerated_key',
-
-
-
-
-
-
-             'shape_intersection_enter',
-             'shape_intersection_leave',
-             'shape_bordering_attached',
-             'shape_bordering_seperated',
-
-            -- grandchildren further decendants trigger both events in this area
-            'type_attribute_parent_add',
-            'type_parent_add',
-            'type_created_before',
-            'type_updated_before',
-            'type_created_after',
-            'type_updated_after',
-
-            -- only on the type itself
-            'type_published',
-            'type_retired',
-            'type_suspended',
-
-
-             'namespace_owner_change',
-
-
-             'namespace_member_add',
-             'namespace_adding_admin',
-             'namespace_removing_member',
-             'namespace_removing_admin'
-
-
-            );");
-
-        DB::statement("ALTER TABLE pending_things Add COLUMN thing_to_do type_of_thing_to_do NOT NULL default 'nothing';");
 
 
 
@@ -391,9 +282,10 @@ return new class extends Migration
             //todo need to store the response of this completed thing in a new jsonb
             // this is the data that is merged to the parent
 
-            //todo add a merge policy for how the parent will work with all its children
+            //todo add a merge policy for how the parent will work with all its children (null means no data from children used)
             // but no logic needed with children, its either an all or nothing, if any of its children fail, the parent fails
             // the rules, stacks will do the complicated logic for deciding if failure is ok
+
 
             $table->string('callback_url')->nullable()->default(null)
                 ->comment('If set, this will be called with the result or error');
@@ -421,7 +313,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('pending_things');
-        DB::statement("DROP TYPE type_of_thing_to_do;");
         DB::statement("DROP TYPE type_of_thing_status;");
         DB::statement("DROP TYPE type_user_followup;");
         DB::statement("DROP TYPE type_filter_set_usage;");

@@ -5,7 +5,6 @@ namespace App\Models;
 
 use App\Enums\Things\TypeFilterSetUsage;
 use App\Enums\Things\TypeOfThingStatus;
-use App\Enums\Things\TypeOfThingToDo;
 use App\Enums\Things\TypeUserFollowup;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int parent_thing_id
  * @property int api_call_type_id
+ * @property int thing_event_type_id
  * @property int caller_namespace_id
  * @property int thing_event_attribute_id
  * @property int thing_rule_id
@@ -44,7 +44,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string callback_url
  * @property string group_operation_name
  * @property ArrayObject thing_value
- * @property TypeOfThingToDo thing_to_do
  * @property TypeOfThingStatus thing_status
  * @property TypeUserFollowup user_followup
  * @property TypeFilterSetUsage filter_set_usage
@@ -79,7 +78,6 @@ class PendingThing extends Model
      */
     protected $casts = [
         'thing_value' => AsArrayObject::class,
-        'thing_to_do' => TypeOfThingToDo::class,
         'thing_status' => TypeOfThingStatus::class,
         'user_followup' => TypeUserFollowup::class,
         'filter_set_usage' => TypeFilterSetUsage::class,

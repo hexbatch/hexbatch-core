@@ -33,30 +33,44 @@ return new class extends Migration
 
             $table->unique(['horde_type_id','horde_attribute_id']);
 
+            //todo rm
             $table->boolean('is_whitelisted_reading')->default(false)->nullable(false)
                 ->comment('if true then check the whitelist before reading');
 
+            //todo rm
             $table->boolean('is_whitelisted_writing')->default(false)->nullable(false)
                 ->comment('if true then check the whitelist before writing');
 
+
+            //todo rm
             $table->boolean('is_map_bound')->default(false)->nullable(false)
                 ->comment('if true then this attribute will not readable/writable in all sets, check the attribute location bounds');
 
+            //todo rm
             $table->boolean('is_shape_bound')->default(false)->nullable(false)
                 ->comment('if true then this attribute will not be readable/writable in all shapes, check the attribute location bounds');
 
             $table->boolean('is_time_bound')->default(false)->nullable(false)
                 ->comment('if true then this attribute will not be readable/writable every time, check the attribute time bounds');
 
+            //todo change to enum set_value_behavior
             $table->boolean('is_per_set_value')->default(false)->nullable(false)
                 ->comment('if true then this attribute will have different values per set. Otherwise an element value of this will not change when in different sets');
 
+            //todo rm
             $table->boolean('is_access_type_editor')->default(false)->nullable(false)
                 ->comment('if true then this attribute can only be read or written by the namespace admin group of the type not the child type');
 
+            //todo rm
             $table->boolean('is_access_element_owner')->default(false)->nullable(false)
                 ->comment('if true then this attribute can only be read or written by the owner of the element or those who have membership in it');
         });
+        //todo enum for pending constraint or full on approval
+
+        /*
+         * todo add in access enum
+         * todo add in protected enum
+         */
     }
 
     /**

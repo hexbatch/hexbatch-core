@@ -8,14 +8,20 @@ enum RuleTargetActionType: string
 {
 
     case NO_ACTION = 'no_action';
-    case PRAGMA_FACET_OFFSET = 'pragma_facet_offset';
-    case PRAGMA_FACET_ROTATION = 'pragma_facet_rotation';
+    case PRAGMA_SHAPE_OFFSET = 'pragma_shape_offset';
+    case PRAGMA_SHAPE_ROTATION = 'pragma_shape_rotation';
+    case pragma_shape_color = 'pragma_shape_color';
+    case pragma_shape_texture = 'pragma_shape_texture';
+    case pragma_shape_opacity = 'pragma_shape_opacity';
+    case pragma_shape_zorder = 'pragma_shape_zorder';
+
     case PRAGMA_ELEMENT_ON = 'pragma_element_on';
     case PRAGMA_ELEMENT_TOGGLE = 'pragma_element_toggle';
     case PRAGMA_ELEMENT_OFF = 'pragma_element_off';
     case PRAGMA_ELEMENT_TYPE_ON = 'pragma_element_type_on';
     case PRAGMA_ELEMENT_TYPE_TOGGLE = 'pragma_element_type_toggle';
     case PRAGMA_ELEMENT_TYPE_OFF = 'pragma_element_type_off';
+    case COMMAND_RUN_REMOTE = 'command_run_remote';
     case COMMAND_MAKE_SET = 'command_make_set';
     case COMMAND_DESTROY_SET = 'command_destroy_set';
     case COMMAND_ADD_TO_SET = 'command_add_to_set';

@@ -24,12 +24,13 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('element_horde_id')
-                ->nullable()->default(null)
+                ->nullable(false)
                 ->comment("The attribute this value is about")
                 ->index()
                 ->constrained('element_type_hordes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+            //todo mark somehow if this is from its design or live, so can lookup what to do (bool, enum?)
 
             $table->foreignId('containing_set_id')
                 ->nullable()->default(null)
@@ -47,6 +48,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+            //todo put enum what sort of pointer : to a child set or to a link
+
             $table->foreignId('parent_element_value_id')
                 ->nullable()->default(null)
                 ->comment("when in push pop context, this is where the last value is")
@@ -61,9 +64,11 @@ return new class extends Migration
             $table->boolean('is_on')->default(true)->nullable(false)
                 ->comment('if off, then not seen by any rules');
 
+            //todo drop is_const
             $table->boolean('is_const')->default(true)->nullable(false)
                 ->comment('if true, then get value from attribute via hord');
 
+            //todo rename
             $table->timestamp('dynamic_value_changed_at')->default(null)->nullable()
                 ->comment('Updated when the value is updated here, otherwise null');
 
@@ -71,6 +76,7 @@ return new class extends Migration
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
 
         });
+        //todo add new column for json that affects how the shape looks (color:texture, opacity, ordering for those that are using same bound parts for which is drawn)
 
         DB::statement("ALTER TABLE element_values
                               Add COLUMN element_shape
