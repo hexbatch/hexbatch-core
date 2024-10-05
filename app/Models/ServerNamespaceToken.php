@@ -3,7 +3,6 @@
 namespace App\Models;
 
 
-use App\Enums\Types\TypeOfServerWhitelist;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,18 +12,21 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int server_whitelist_type_id
+ * @property int token_namespace_id
  * @property int to_server_id
- *
- * @property TypeOfServerWhitelist server_whitelist
+ * @property int last_used_at
+ * @property string expires_at
+ * @property string user_server_token
  *
  * @property string created_at
  * @property string updated_at
+ *
+ *
  */
-class ServerWhitelist extends Model
+class ServerNamespaceToken extends Model
 {
 
-    protected $table = 'element_type_server_whitelist';
+    protected $table = 'server_namespace_tokens';
     public $timestamps = false;
 
     /**
@@ -46,8 +48,6 @@ class ServerWhitelist extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'server_whitelist' => TypeOfServerWhitelist::class,
-    ];
+    protected $casts = [];
 
 }

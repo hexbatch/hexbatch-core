@@ -35,6 +35,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('design_attribute_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Optional attribute, does not have to be on the type, whose shape is shown when the attribute is shown.")
+                ->index()
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
 
 
 
@@ -167,10 +176,12 @@ return new class extends Migration
 
         Schema::table('attributes', function (Blueprint $table) {
             $table->dropForeign(['parent_attribute_id']);
+            $table->dropForeign(['design_attribute_id']);
             $table->dropForeign(['owner_element_type_id']);
             $table->dropForeign(['attribute_location_shape_bound_id']);
 
             $table->dropColumn('parent_attribute_id');
+            $table->dropColumn('design_attribute_id');
             $table->dropColumn('owner_element_type_id');
             $table->dropColumn('attribute_location_shape_bound_id');
             $table->dropColumn('ref_uuid');

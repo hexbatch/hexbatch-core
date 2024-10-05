@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int containing_set_id
  * @property string mutual_name
+ * @property string ref_uuid
  *
  * @property string created_at
  * @property string updated_at

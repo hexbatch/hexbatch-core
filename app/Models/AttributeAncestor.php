@@ -12,21 +12,16 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int token_namespace_id
- * @property int to_server_id
- * @property int last_used_at
- * @property string expires_at
- * @property string user_server_token
+ * @property int owning_child_attribute_id
+ * @property int ancestor_attribute_id
+ * @property int attribute_gap
  *
- * @property string created_at
- * @property string updated_at
- *
- *
+
  */
-class ServerUserTypeToken extends Model
+class AttributeAncestor extends Model
 {
 
-    protected $table = 'server_namespace_tokens';
+    protected $table = 'attribute_ancestors';
     public $timestamps = false;
 
     /**

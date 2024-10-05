@@ -12,16 +12,16 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_imported_type_id
- * @property int imported_event_type_id
+ * @property int owning_child_type_id
+ * @property int ancestor_type_id
+ * @property int type_gap
  *
- * @property string created_at
- * @property string updated_at
+
  */
-class ServerImportedTypeEvent extends Model
+class ElementTypeAncestor extends Model
 {
 
-    protected $table = 'server_imported_type_events';
+    protected $table = 'element_type_ancestors';
     public $timestamps = false;
 
     /**

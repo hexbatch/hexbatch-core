@@ -15,11 +15,11 @@ return new class extends Migration
         Schema::create('server_imported_type_events', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('parent_import_id')
+            $table->foreignId('parent_imported_type_id')
                 ->nullable()->default(null)
                 ->comment("The imported type")
                 ->index()
-                ->constrained('server_imported_types')
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

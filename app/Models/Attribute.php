@@ -22,13 +22,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
-//add in popped_writing_method
+
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int owner_element_type_id
  * @property int parent_attribute_id
+ * @property int design_attribute_id
  * @property int attribute_location_shape_bound_id
  * @property bool is_retired
  * @property bool is_final_parent

@@ -81,11 +81,10 @@ return new class extends Migration
                     ");
 
         DB::statement("CREATE TYPE type_of_set_pointer_mode AS ENUM (
-                'child_of_set',
                 'link_to_set'
             );");
 
-        DB::statement("ALTER TABLE element_values Add COLUMN set_pointer_mode type_of_set_pointer_mode NOT NULL default 'child_of_set';");
+        DB::statement("ALTER TABLE element_values Add COLUMN set_pointer_mode type_of_set_pointer_mode NOT NULL default 'link_to_set';");
     }
 
     /**

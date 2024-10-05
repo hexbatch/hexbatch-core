@@ -42,7 +42,7 @@ return new class extends Migration
 
 
         });
-        DB::statement("ALTER TABLE element_type_parents Add COLUMN attribute_approval type_of_approval NOT NULL default 'automatic';");
+        DB::statement("ALTER TABLE element_type_hordes Add COLUMN attribute_approval type_of_approval NOT NULL default 'automatic';");
 
     }
 

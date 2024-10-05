@@ -3,9 +3,8 @@
 namespace App\Models;
 
 
-use ArrayObject;
+use App\Enums\Types\TypeOfServerWhitelist;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -14,22 +13,18 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int design_attribute_id
- * @property int design_type_id
- * @property int design_type_as_set_id
- * @property int design_type_as_element_id
- * @property string ref_uuid
- * @property string design_text_notes
- * @property ArrayObject design_look
- * @property string design_geom
+ * @property int server_whitelist_type_id
+ * @property int to_server_id
+ *
+ * @property TypeOfServerWhitelist server_whitelist
  *
  * @property string created_at
  * @property string updated_at
  */
-class Design extends Model
+class ElementTypeServerWhitelist extends Model
 {
 
-    protected $table = 'designs';
+    protected $table = 'element_type_server_whitelist';
     public $timestamps = false;
 
     /**
@@ -52,7 +47,7 @@ class Design extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'design_look' => AsArrayObject::class,
+        'server_whitelist' => TypeOfServerWhitelist::class,
     ];
 
 }

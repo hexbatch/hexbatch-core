@@ -12,16 +12,19 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int imported_type_id
- * @property int from_server_id
+ * @property int set_thing_id
+ * @property int set_attribute_id
+ * @property int set_type_id
+ * @property int set_element_id
+ * @property int set_set_id
+ * @property int set_namespace_id
+ * @property int set_user_id
  *
- * @property string created_at
- * @property string updated_at
  */
-class ServerImportedType extends Model
+class ThingSet extends Model
 {
 
-    protected $table = 'server_imported_types';
+    protected $table = 'thing_sets';
     public $timestamps = false;
 
     /**

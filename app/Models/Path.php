@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\Paths\PathRelationshipType;
 use App\Enums\Paths\PathReturnsType;
 use App\Enums\Paths\TimeComparisonType;
+use App\Enums\Rules\TypeOfChildLogic;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -35,11 +36,12 @@ use Illuminate\Support\Facades\DB;
  * @property string ref_uuid
  * @property string path_start_at
  * @property string path_end_at
- * @property string path_logic
  * @property string path_part_name
  * @property string value_json_path
  * @property string sort_json_path
  * @property string path_compiled_sql
+ *
+ * @property TypeOfChildLogic path_logic
  * @property PathRelationshipType path_relationship
  * @property TimeComparisonType time_comparison
  * @property PathReturnsType path_returns
@@ -76,6 +78,7 @@ class Path extends Model
         'path_relationship' => PathRelationshipType::class,
         'time_comparison' => TimeComparisonType::class,
         'path_returns' => PathReturnsType::class,
+        'path_logic' => TypeOfChildLogic::class,
     ];
 
     /**

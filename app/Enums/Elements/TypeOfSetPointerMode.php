@@ -5,7 +5,6 @@ namespace App\Enums\Elements;
  */
 enum TypeOfSetPointerMode : string {
 
-  case CHILD_OF_SET = 'child_of_set';
   case LINK_TO_SET = 'link_to_set';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfSetPointerMode {
