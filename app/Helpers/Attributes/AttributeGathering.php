@@ -77,13 +77,7 @@ class AttributeGathering
             }
 
 
-            //fill in the local values
-            if ($request->request->has('is_using_ancestor_bundle')) {
-                $this->is_using_ancestor_bundle = $request->request->getBoolean('is_using_ancestor_bundle');
-            }
-            if ($this->is_using_ancestor_bundle && $this->parent_attribute) {
-                $this->applied_rule_bundle_id = $this->parent_attribute->applied_rule_bundle_id;
-            }
+
 
             if ($request->request->has('is_retired')) {
                 $this->is_retired = $request->request->getBoolean('is_retired');
@@ -93,21 +87,12 @@ class AttributeGathering
                 $this->is_final_parent = $request->request->getBoolean('is_final_parent');
             }
 
-            if ($request->request->has('is_nullable')) {
-                $this->is_nullable = $request->request->getBoolean('is_nullable');
-            }
-
-            if ($request->request->has('is_const')) {
-                $this->is_const = $request->request->getBoolean('is_const');
-            }
 
             if ($request->request->has('is_final')) {
                 $this->is_final = $request->request->getBoolean('is_final');
             }
 
-            if ($request->request->has('is_per_set_value')) {
-                $this->is_per_set_value = $request->request->getBoolean('is_per_set_value');
-            }
+
 
 
             if ($request->request->has('value_json_path')) {
@@ -209,11 +194,7 @@ class AttributeGathering
         } else {
             if ($this->is_retired !== null ) { $node->is_retired = $this->is_retired; }
             if ($this->is_final_parent !== null ) { $node->is_final_parent = $this->is_final_parent; }
-            if ($this->is_using_ancestor_bundle !== null ) { $node->is_using_ancestor_bundle = $this->is_using_ancestor_bundle; }
-            if ($this->is_nullable !== null ) { $node->is_nullable = $this->is_nullable; }
-            if ($this->is_const !== null ) { $node->is_const = $this->is_const; }
             if ($this->is_final !== null ) { $node->is_final = $this->is_final; }
-            if ($this->is_per_set_value !== null ) { $node->is_per_set_value = $this->is_per_set_value; }
             if ($this->value_json_path !== null ) { $node->value_json_path = $this->value_json_path; }
             if ($this->attribute_value !== null ) { $node->attribute_value = $this->attribute_value; }
             if ($this->attribute_name !== null ) { $node->attribute_name = $this->attribute_name; }

@@ -89,6 +89,10 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
+            $table->text('namespace_public_key')
+                ->nullable()->default(null)
+                ->comment("optional public key used to encrypt the data, instead of token");
+
             $table->string('namespace_name',61)
                 ->nullable(false)
                 ->index()
@@ -137,6 +141,7 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('namespace_name');
             $table->dropColumn('ref_uuid');
+            $table->dropColumn('namespace_public_key');
         });
 
     }

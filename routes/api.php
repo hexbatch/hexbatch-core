@@ -136,7 +136,7 @@ Route::prefix('v1')->group(function () {
 
                         Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
                             Route::get('/clear', [TypeController::class, 'attribute_clear_rules'])->name('core.types.attributes.rules.clear');
-                            Route::post('/new', [TypeController::class, 'attribute_new_rule'])->name('core.types.attributes.rules.create');
+                            Route::post('/new/{attribute_rule?}', [TypeController::class, 'attribute_new_rule'])->name('core.types.attributes.rules.create');
                             Route::patch('/{attribute_rule}/edit', [TypeController::class, 'attribute_edit_rule'])->name('core.types.attributes.rules.edit');
                             Route::delete('/{attribute_rule}/destroy', [TypeController::class, 'attribute_delete_rule'])->name('core.types.attributes.rules.destroy');
                         });
@@ -153,9 +153,7 @@ Route::prefix('v1')->group(function () {
         });
         });
 
-        Route::prefix('standard')->group(function () {
-            Route::get('/list/{filter}', [\App\Http\Controllers\API\StandardController::class, 'attribute_list_standard'])->name('core.standard.list');
-        });
+
 
 
     }); //end auth protected

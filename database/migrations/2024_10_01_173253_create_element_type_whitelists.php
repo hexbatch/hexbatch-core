@@ -52,13 +52,10 @@ return new class extends Migration
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON element_type_whitelists FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
 
-        //todo remove the read and write elements here, that protection is namespace based and set on the attribute
         DB::statement("CREATE TYPE type_of_whitelist_permission AS ENUM (
             'inheriting',
             'create_elements',
-            'own_elements',
-            'read_elements',
-            'write_elements'
+            'own_elements'
             );");
 
         DB::statement("ALTER TABLE element_type_whitelists Add COLUMN whitelist_permission type_of_whitelist_permission NOT NULL default 'inheriting';");

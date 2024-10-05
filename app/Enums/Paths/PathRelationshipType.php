@@ -7,6 +7,11 @@ namespace App\Enums\Paths;
  */
 enum PathRelationshipType : string {
   case NO_RELATIONSHIP = 'no_relationship';
+  case RULE_EVENT = 'rule_event';
+  case RULE_ACTION = 'rule_action';
+  case RULE_PARENT = 'rule_parent';
+  case RULE_CHILD = 'rule_child';
+  case OWNS_RULE = 'owns_rule';
   case SHAPE_INTERSECTING = 'shape_intersecting';
   case SHAPE_BORDERING = 'shape_bordering';
   case SHAPE_SEPERATED = 'shape_seperated';

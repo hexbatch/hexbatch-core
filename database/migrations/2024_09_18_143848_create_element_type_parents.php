@@ -43,7 +43,7 @@ return new class extends Migration
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
-            //todo enum column type_approval_status pending|approved|not_applicable
+
 
         });
 
@@ -54,8 +54,26 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON element_type_parents FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
-        //todo add parent_type enum : design (default) | live
-        //todo add merge strategy when combining same attributes
+
+
+        DB::statement("CREATE TYPE type_of_parent_role AS ENUM (
+            'designed',
+            'live'
+            );");
+
+        DB::statement("ALTER TABLE element_type_parents Add COLUMN parent_role type_of_parent_role NOT NULL default 'designed';");
+
+
+
+        DB::statement("CREATE TYPE type_of_approval AS ENUM (
+            'automatic',
+            'pending',
+            'approved'
+            );");
+
+        DB::statement("ALTER TABLE element_type_parents Add COLUMN approval type_of_approval NOT NULL default 'automatic';");
+
+
     }
 
     /**
@@ -64,5 +82,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('element_type_parents');
+        DB::statement("DROP TYPE type_of_parent_role;");
+        DB::statement("DROP TYPE type_of_approval;");
     }
 };

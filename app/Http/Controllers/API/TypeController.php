@@ -148,9 +148,9 @@ class TypeController extends Controller
         return response()->json(new AttributeRuleCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    //todo change to make it easier for chaining, add parent rule and maybe other helpers
+
     // here we can add branches to the tree, or remove branches
-    public function attribute_new_rule(Request $request,ElementType $element_type,Attribute $attribute): JsonResponse {
+    public function attribute_new_rule(Request $request,ElementType $element_type,Attribute $attribute,?AttributeRule $parent_rule=null): JsonResponse {
         $rule = (new RuleGathering($request,$element_type,$attribute))->assign();
         $out = AttributeRule::buildAttributeRule(id:$rule->id)->first();
         return response()->json(new AttributeRuleResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);

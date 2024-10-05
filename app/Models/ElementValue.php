@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Enums\Elements\TypeOfSetPointerMode;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -20,12 +21,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property int pointer_to_set_id
  * @property int parent_element_value_id
  * @property bool is_on
- * @property bool is_const
  *
+ * @property TypeOfSetPointerMode set_pointer_mode
  * @property ArrayObject element_value
+ * @property ArrayObject element_shape_appearance
  * @property string element_shape
  *
- * @property string dynamic_value_changed_at
+ * @property string value_changed_at
  *
  * @property string created_at
  * @property string updated_at
@@ -57,6 +59,8 @@ class ElementValue extends Model
      */
     protected $casts = [
         'element_value' => AsArrayObject::class,
+        'element_shape_appearance' => AsArrayObject::class,
+        'set_pointer_mode' => TypeOfSetPointerMode::class,
     ];
 
 }

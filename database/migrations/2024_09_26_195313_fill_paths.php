@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    //todo paths need to look into rules, there should be relationships found between rules, types, attributes, so that path can find the working chains
+
     /**
      * Run the migrations.
      */
@@ -20,13 +20,14 @@ return new class extends Migration
                 ->nullable()
                 ->default(null)
                 ->comment("The optional owner of the path")
-                ->index('idx_path_owning_namespace_id')
+                ->index()
                 ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->foreignId('parent_path_id')
                 ->nullable()->default(null)
+                ->index()
                 ->comment("Paths have nested rules")
                 ->constrained('paths')
                 ->cascadeOnUpdate()
@@ -34,19 +35,14 @@ return new class extends Migration
 
             $table->foreignId('path_type_id')
                 ->nullable()->default(null)
-                ->comment("The type the path part may be about")
-                ->index('idx_path_type_id')
+                ->comment("The type the path part may be about. System type for always caller type")
+                ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo put in enum that shows if this type is always on the caller type (for rules) values [rule_type_is_context]
-            //todo put in enum that shows if the set is the set the element of the type that has the rule is at
-            //  (for rules) values [rule_set_is_context]
 
-            //todo put in a sorting attribute, this is used when sorting types or elements
-            //  if the above set: if neither the attribute or path set sort by type.attribute.element natural order in set in that priority only
-            // put in a limit
+
 
             /*
              * how can I select a ns whose home space has a type or attribute?
@@ -64,15 +60,25 @@ return new class extends Migration
             $table->foreignId('path_attribute_id')
                 ->nullable()->default(null)
                 ->comment("The attribute the path part may be about")
-                ->index('idx_path_attribute_id')
+                ->index()
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+
+            $table->foreignId('sorting_attribute_id')
+                ->nullable()->default(null)
+                ->comment(" attribute to sort types and elements, use with sort_json_path. If not set then uses natural order ")
+                ->index()
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
             $table->foreignId('path_element_set_id')
                 ->nullable()->default(null)
-                ->comment("The set this should be in")
-                ->index('idx_path_element_set_id')
+                ->comment("The set this should be in.. System type for always caller set")
+                ->index()
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -82,7 +88,7 @@ return new class extends Migration
                 ->nullable()
                 ->default(null)
                 ->comment("When the searched must be owned by someone. Or the ns here has a relationship")
-                ->index('idx_path_namespace_id')
+                ->index()
                 ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -91,19 +97,12 @@ return new class extends Migration
                 ->nullable()
                 ->default(null)
                 ->comment("If set contrain sets to this bound")
-                ->index('idx_path_location_bound_id')
+                ->index()
                 ->constrained('location_bounds')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('path_description_element_id')
-                ->nullable()
-                ->default(null)
-                ->comment("This is an optional description/hook element")
-                ->unique('udx_path_description_element_id')
-                ->constrained('elements')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
+
 
             $table->foreignId('path_server_id')
                 ->nullable()
@@ -127,9 +126,7 @@ return new class extends Migration
             $table->integer('path_max_gap')->nullable()->default(null)
                 ->comment("How max number of relationships must exist between here and there");
 
-            //todo put in enum for type of data reading for the values: element data, attribute data, used in required rules
 
-            //todo put in what should be returned (type|element|namespace|scalar_count|scalar_partial_count|scalar_sum|scalar_average|array_scalars|exists)
 
             $table->boolean('is_partial_matching_name')
                 ->nullable(false)->default(false)
@@ -139,6 +136,9 @@ return new class extends Migration
             $table->boolean('is_sorting_order_asc')
                 ->nullable(false)->default(false)
                 ->comment("If false then desc");
+
+            $table->integer('path_result_limit')->nullable()->default(null)
+                ->comment("If set, this node will only return X results");
 
 
             $table->timestamp('path_start_at')->nullable()->default(null)
@@ -168,10 +168,15 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE paths Add COLUMN path_logic type_of_child_logic NOT NULL default 'and';");
 
-        //todo add relations: target,trigger,event,data to allow rule tracing
+
         //relationship with the path parent
         DB::statement("CREATE TYPE path_relationship_type AS ENUM (
             'no_relationship',
+            'rule_event',
+            'rule_action',
+            'rule_parent',
+            'rule_child',
+            'owns_rule',
             'shape_intersecting',
             'shape_bordering',
             'shape_seperated',
@@ -211,35 +216,46 @@ return new class extends Migration
         DB::statement("ALTER TABLE paths Add COLUMN time_comparison time_comparison_type NOT NULL default 'no_time_comparison';");
 
 
+        DB::statement("CREATE TYPE path_returns_type AS ENUM (
+            'exists',
+            'type',
+            'element',
+            'attribute',
+            'namespace',
+            'count'
+            );");
+
+        DB::statement("ALTER TABLE paths Add COLUMN path_returns path_returns_type NOT NULL default 'exists';");
+
 
 
         Schema::table('paths', function (Blueprint $table) {
 
 
-            //todo rm because enum uses the value path on what its set to
-            $table->text('path_attribute_json_path')->nullable()->default(null)
-                ->comment("The matching of the attribute value, optional");
-
             // this is the name of the attr or the type or the ns or the server
             // can use all together so total of 30*4 = 120 + 3 dots
+            //if this is a uuid, then will search for this in the uuid and not the name
             $table->string('path_part_name',128)->nullable()->default(null)
                 ->comment("the name of the attr or the type or the ns or the server,  for attr can use server.ns.type.attribute");
 
-            //todo need new col for enum on what the path_part_name is: values name|uuid
+
 
             $table->string('value_json_path')
                 ->nullable()->default(null)
                 ->comment("if set then only values that match the json path are used");
 
-            $table->string('ordering_json_path')
+            $table->string('sort_json_path')
                 ->nullable()->default(null)
                 ->comment("if set then the values are ordered by this. Not valid past a certain result set size");
 
-            //todo add text column to store compiled sql
+            $table->text('path_compiled_sql')
+                ->nullable()->default(null)
+                ->comment("Stores sql this path was converted to, the parents will include the children");
+
         });
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_path_parent_name ON paths (parent_path_id,path_part_name) NULLS DISTINCT;");
+            "CREATE UNIQUE INDEX udx_path_parent_name ON paths (parent_path_id,path_part_name) NULLS NOT DISTINCT;");
     }
 
     /**
@@ -254,19 +270,19 @@ return new class extends Migration
             $table->dropForeign(['parent_path_id']);
             $table->dropForeign(['path_type_id']);
             $table->dropForeign(['path_attribute_id']);
+            $table->dropForeign(['sorting_attribute_id']);
             $table->dropForeign(['path_element_set_id']);
             $table->dropForeign(['path_namespace_id']);
-            $table->dropForeign(['path_description_element_id']);
             $table->dropForeign(['path_location_bound_id']);
             $table->dropForeign(['path_server_id']);
 
-            $table->dropColumn('path_description_element_id');
             $table->dropColumn('path_location_bound_id');
             $table->dropColumn('path_server_id');
             $table->dropColumn('path_namespace_id');
             $table->dropColumn('parent_path_id');
             $table->dropColumn('path_type_id');
             $table->dropColumn('path_attribute_id');
+            $table->dropColumn('sorting_attribute_id');
             $table->dropColumn('path_element_set_id');
             $table->dropColumn('path_owning_namespace_id');
 
@@ -277,19 +293,22 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('path_logic');
             $table->dropColumn('path_relationship');
-            $table->dropColumn('path_attribute_json_path');
+            $table->dropColumn('path_returns');
             $table->dropColumn('path_part_name');
             $table->dropColumn('is_partial_matching_name');
             $table->dropColumn('path_start_at');
             $table->dropColumn('path_end_at');
             $table->dropColumn('time_comparison');
-            $table->dropColumn('ordering_json_path');
+            $table->dropColumn('sort_json_path');
             $table->dropColumn('path_min_count');
             $table->dropColumn('path_max_count');
             $table->dropColumn('value_json_path');
             $table->dropColumn('is_sorting_order_asc');
+            $table->dropColumn('path_result_limit');
+            $table->dropColumn('path_compiled_sql');
         });
         DB::statement("DROP TYPE path_relationship_type;");
         DB::statement("DROP TYPE time_comparison_type;");
+        DB::statement("DROP TYPE path_returns_type;");
     }
 };

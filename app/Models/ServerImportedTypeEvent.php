@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int parent_import_id
- * @property int imported_event_attribute_id
+ * @property int imported_event_type_id
  *
  * @property string created_at
  * @property string updated_at

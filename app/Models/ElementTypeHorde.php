@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\Attributes\TypeOfAttributeAccess;
 use App\Enums\Attributes\AttributeRuleType;
 use App\Enums\Bounds\TypeOfLocation;
+use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,15 +21,8 @@ use Illuminate\Support\Facades\DB;
  * @property int id
  * @property int horde_type_id
  * @property int horde_attribute_id
+ * @property TypeOfApproval attribute_approval
  *
- * @property boolean is_whitelisted_reading
- * @property boolean is_whitelisted_writing
- * @property boolean is_map_bound
- * @property boolean is_shape_bound
- * @property boolean is_time_bound
- * @property boolean is_per_set_value
- * @property boolean is_access_type_editor
- * @property boolean is_access_element_owner
  *
  * @property Attribute horde_attribute
  */
@@ -60,7 +54,9 @@ class ElementTypeHorde extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'attribute_approval' => TypeOfApproval::class
+    ];
 
     public function horde_attribute() : BelongsTo
     {
@@ -73,15 +69,6 @@ class ElementTypeHorde extends Model
         $horde->upsert([
             'horde_attribute_id' => $attribute->id,
             'horde_type_id' => $type->id,
-
-            'is_whitelisted_reading' => (bool)$type->read_whitelist_group, //todo redo this group stuff
-            'is_whitelisted_writing' => (bool)$type->write_whitelist_group,
-            'is_map_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::MAP),
-            'is_shape_bound' => ($attribute->attribute_location_bound && $attribute->attribute_location_bound->location_type === TypeOfLocation::SHAPE),
-            'is_time_bound' => (bool)$attribute->attribute_time_bound,
-            'is_per_set_value' => $attribute->is_per_set_value,
-            'is_access_type_editor' => $attribute->attribute_access_type === TypeOfAttributeAccess::TYPE_PRIVATE,
-            'is_access_element_owner' => $attribute->attribute_access_type === TypeOfAttributeAccess::ELEMENT_PRIVATE
         ],['horde_type_id','horde_attribute_id']);
         $horde->refresh();
         return $horde;

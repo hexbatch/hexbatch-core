@@ -6,9 +6,8 @@ namespace App\Enums\Things;
 enum TypeOfThingStatus : string {
 
   case PENDING = 'pending';
-  case FINISHED_APPROVED = 'finished_approved';
-  case FINISHED_DENIED = 'finished_denied';
-  case ERROR = 'error';
+  case THING_PENDING = 'thing_pending';
+  case THING_ERROR = 'thing_error';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfThingStatus {
         $maybe  = TypeOfThingStatus::tryFrom($test);

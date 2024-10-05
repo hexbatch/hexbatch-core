@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use App\Enums\Attributes\TypeOfAttributeAccess;
 use App\Enums\Attributes\AttributeServerAccessType;
+use App\Enums\Attributes\TypeOfAttributeAccess;
+use App\Enums\Attributes\TypeOfEncryptionPolicy;
+use App\Enums\Attributes\TypeOfSetValuePolicy;
+use App\Enums\Rules\TypeMergeJson;
 use App\Exceptions\HexbatchNotFound;
-
 use App\Exceptions\RefCodes;
 use App\Helpers\Standard\StandardAttributes;
 use App\Helpers\Utilities;
-
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -20,7 +21,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Validation\ValidationException;
 
 //add in popped_writing_method
 /**
@@ -29,20 +29,19 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property int owner_element_type_id
  * @property int parent_attribute_id
- * @property int applied_rule_id
  * @property int attribute_location_shape_bound_id
  * @property bool is_retired
  * @property bool is_final_parent
- * @property bool is_using_ancestor_bundle
  * @property bool is_system
- * @property bool is_nullable
- * @property bool is_const
  * @property bool is_final
- * @property bool is_per_set_value
  * @property AttributeServerAccessType server_access_type
  * @property TypeOfAttributeAccess attribute_access_type
  * @property string ref_uuid
- * @property string popped_writing_method
+ * @property TypeMergeJson popped_writing_method
+ * @property TypeMergeJson live_merge_method
+ * @property TypeMergeJson reentry_merge_method
+ * @property TypeOfEncryptionPolicy encryption_policy
+ * @property TypeOfSetValuePolicy set_value_policy
  * @property ArrayObject attribute_value
  * @property ArrayObject attribute_shape_display
  * @property string value_json_path
@@ -90,6 +89,11 @@ class Attribute extends Model
         'attribute_shape_display' => AsArrayObject::class,
         'server_access_type' => AttributeServerAccessType::class,
         'attribute_access_type' => TypeOfAttributeAccess::class,
+        'popped_writing_method' => TypeMergeJson::class,
+        'live_merge_method' => TypeMergeJson::class,
+        'reentry_merge_method' => TypeMergeJson::class,
+        'encryption_policy' => TypeOfEncryptionPolicy::class,
+        'set_value_policy' => TypeOfSetValuePolicy::class,
     ];
 
     protected static function booted(): void

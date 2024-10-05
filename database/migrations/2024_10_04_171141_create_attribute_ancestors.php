@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -13,8 +14,30 @@ return new class extends Migration
     {
         Schema::create('attribute_ancestors', function (Blueprint $table) {
             $table->id();
-            //todo A , B, Gap where A is every attribute and B is one row for each entire ancestor chain, and Gap is how many generations
+            // A , B, Gap where A is every attribute and B is one row for each entire ancestor chain, and Gap is how many generations
+
+            $table->foreignId('owning_child_attribute_id')
+                ->nullable()->default(null)
+                ->comment("The attribute which has parents and/or ancestors")
+                ->index()
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('ancestor_attribute_id')
+                ->nullable()->default(null)
+                ->comment("The attribute which is the parent or ancestor")
+                ->index()
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->integer('attribute_gap')->nullable()->default(null)
+                ->comment('How many generations apart');
         });
+
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_owning_ancestor_attribute ON attribute_ancestors (owning_child_attribute_id,ancestor_attribute_id) NULLS NOT DISTINCT;");
     }
 
     /**

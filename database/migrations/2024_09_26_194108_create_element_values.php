@@ -30,7 +30,7 @@ return new class extends Migration
                 ->constrained('element_type_hordes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-            //todo mark somehow if this is from its design or live, so can lookup what to do (bool, enum?)
+
 
             $table->foreignId('containing_set_id')
                 ->nullable()->default(null)
@@ -48,7 +48,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            //todo put enum what sort of pointer : to a child set or to a link
 
             $table->foreignId('parent_element_value_id')
                 ->nullable()->default(null)
@@ -60,29 +59,33 @@ return new class extends Migration
 
             $table->timestamps();
 
-
             $table->boolean('is_on')->default(true)->nullable(false)
                 ->comment('if off, then not seen by any rules');
 
-            //todo drop is_const
-            $table->boolean('is_const')->default(true)->nullable(false)
-                ->comment('if true, then get value from attribute via hord');
 
-            //todo rename
-            $table->timestamp('dynamic_value_changed_at')->default(null)->nullable()
+            $table->timestamp('value_changed_at')->default(null)->nullable()
                 ->comment('Updated when the value is updated here, otherwise null');
 
             $table->jsonb('element_value')
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
 
+            $table->jsonb('element_shape_appearance')
+                ->nullable()->default(null)->comment("The value of the attribute in this row");
+
         });
-        //todo add new column for json that affects how the shape looks (color:texture, opacity, ordering for those that are using same bound parts for which is drawn)
 
         DB::statement("ALTER TABLE element_values
                               Add COLUMN element_shape
                               geometry
                               ;
                     ");
+
+        DB::statement("CREATE TYPE type_of_set_pointer_mode AS ENUM (
+                'child_of_set',
+                'link_to_set'
+            );");
+
+        DB::statement("ALTER TABLE element_values Add COLUMN set_pointer_mode type_of_set_pointer_mode NOT NULL default 'child_of_set';");
     }
 
     /**
@@ -91,5 +94,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('element_values');
+        DB::statement("DROP TYPE type_of_set_pointer_mode;");
+
     }
 };

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 
+use App\Enums\Types\TypeOfApproval;
+use App\Enums\Types\TypeOfParentRole;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -20,6 +22,8 @@ use Illuminate\Support\Facades\DB;
  * @property int child_type_id
  * @property int parent_type_id
  * @property int parent_rank
+ * @property TypeOfParentRole parent_role
+ * @property TypeOfApproval approval
  *
  * @property string created_at
  * @property string updated_at
@@ -55,7 +59,10 @@ class ElementTypeParent extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'parent_role' => TypeOfParentRole::class,
+        'approval' => TypeOfApproval::class
+    ];
 
 
     public function getName() :string {
@@ -71,7 +78,8 @@ class ElementTypeParent extends Model
         try {
             DB::beginTransaction();
             $user_namespace = Utilities::getCurrentNamespace();
-            if ($parent->is_retired || $parent->is_final || !$parent->canNamespaceInherit($user_namespace)) {
+            //todo update this
+            if ( $parent->is_final || !$parent->canNamespaceInherit($user_namespace)) {
                 throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::TYPE_CANNOT_INHERIT);

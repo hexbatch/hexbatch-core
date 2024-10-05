@@ -2,18 +2,13 @@
 
 namespace App\Models;
 
-use App\Enums\Rules\RuleDataActionType;
-use App\Enums\Rules\RuleTargetActionType;
-use App\Enums\Rules\RuleTriggerActionType;
 use App\Enums\Rules\TypeMergeJson;
 use App\Enums\Rules\TypeOfChildLogic;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Collection;
@@ -23,8 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 
-//todo when debug_non_event_rules mode is set (config), then write what rule does to the attribute_rules_debugs table
-// there should be another config to restrict this to an ancestor attribute that rule is on
+
 
 
 /* Affinity membership depends on elements in a set to decide to join it when asked by command,
@@ -68,31 +62,36 @@ use Illuminate\Validation\ValidationException;
  *   thing ref
  *   set id of the context
  *   server type
+ *   thing uuid
  * This is sent via a standard element that always has the same id and uuid, but has different reads. No writes, its just a special system hook
  *
  * Short circuit,
  *  rule chain A parent of B, B returns true or false and A logic makes it true or false no matter what A does, A will not do any target stuff, and will pass the data up
+ *
+ * //  when attr is inherited, the parent rule is run before the child rule, if the parent fails the child rule does not run. going back to the root ancestor
+    //  events have no children, so can only listen to one event at a time
+
+remotes are executed by command in the rule
+
+//todo group operations are rule sets, each operation step is mini api, make standard attributes each have the rules to do the group operation
+
+rule children pass up either path results or data
  */
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int owning_attribute_id
  * @property int parent_rule_id
- * @property int target_path_id
- * @property int trigger_path_id
- * @property int data_path_id
- * @property int rule_remote_type_id
- * @property int rule_weight
- * @property int rule_value
+ * @property int rule_event_type_id
+ * @property int rule_path_id
  * @property string ref_uuid
  * @property string rule_name
- * @property ArrayObject rule_constant_data
- * @property RuleTriggerActionType attribute_trigger_action
+ * @property string filter_json_path
  * @property TypeOfChildLogic child_logic
- * @property RuleDataActionType rule_data_action
- * @property RuleTargetActionType target_action
- * @property TypeMergeJson target_writing_method
+ * @property TypeOfChildLogic my_logic
+ * @property TypeMergeJson rule_merge_method
  *
  *
  * @property string created_at
@@ -126,12 +125,9 @@ class AttributeRule extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'rule_constant_data' => AsArrayObject::class,
-        'attribute_trigger_action' => RuleTriggerActionType::class,
         'child_logic' => TypeOfChildLogic::class,
-        'rule_data_action' => RuleDataActionType::class,
-        'target_action' => RuleTargetActionType::class,
-        'target_writing_method' => TypeMergeJson::class,
+        'my_logic' => TypeOfChildLogic::class,
+        'rule_merge_method' => TypeMergeJson::class,
     ];
 
 
@@ -286,62 +282,33 @@ class AttributeRule extends Model
                 }
             }
 
-            if ($collect->has('trigger_path')) {
-                $hint_path_bound = $collect->get('trigger_path');
+            if ($collect->has('rule_path')) {
+                $hint_path_bound = $collect->get('rule_path');
                 if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
                     $path = Path::collectPath($hint_path_bound);
-                    $this->trigger_path_id = $path->id;
-                }
-            }
-
-            if ($collect->has('data_path')) {
-                $hint_path_bound = $collect->get('data_path');
-                if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
-                    $path = Path::collectPath($hint_path_bound);
-                    $this->data_path_id = $path->id;
-                }
-            }
-
-            if ($collect->has('rule_weight')) {
-                $this->rule_weight = (int)$collect->get('rule_weight');
-            }
-
-            if ($collect->has('rule_value')) {
-                $this->rule_value = (int)$collect->get('rule_value');
-            }
-
-            if ($collect->has('constant_data')) {
-                $data = $collect->get('constant_data');
-                if ($data instanceof Collection ) {
-                    $this->rule_constant_data = $data->toArray();
-                } else {
-                    if ($data === null || $data === '') {
-                        $this->rule_constant_data = null;
-                    } else {
-                        $this->rule_constant_data = [$data];
-                    }
+                    $this->rule_path_id = $path->id;
                 }
             }
 
 
-            if ($collect->has('attribute_trigger_action')) {
-                $this->attribute_trigger_action = RuleTriggerActionType::tryFromInput($collect->get('attribute_trigger_action'));
-            }
+
+
+
+
+
+
+
 
             if ($collect->has('child_logic')) {
                 $this->child_logic = TypeOfChildLogic::tryFromInput($collect->get('child_logic'));
             }
 
-            if ($collect->has('rule_data_action')) {
-                $this->rule_data_action = RuleDataActionType::tryFromInput($collect->get('rule_data_action'));
-            }
 
-            if ($collect->has('target_action')) {
-                $this->target_action = RuleTargetActionType::tryFromInput($collect->get('target_action'));
-            }
 
-            if ($collect->has('target_writing_method')) {
-                $this->target_writing_method = TypeMergeJson::tryFromInput($collect->get('target_writing_method'));
+
+
+            if ($collect->has('rule_merge_method')) {
+                $this->rule_merge_method = TypeMergeJson::tryFromInput($collect->get('rule_merge_method'));
             }
 
             $this->save();

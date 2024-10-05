@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int hex_error_code
+ * @property int hex_error_line
+ * @property float hex_code_version
  * @property string hex_error_message
  * @property ArrayObject hex_error_trace
  * @property string hex_error_file

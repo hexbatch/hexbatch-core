@@ -23,11 +23,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('imported_event_attribute_id')
+            $table->foreignId('imported_event_type_id')
                 ->nullable()->default(null)
                 ->comment("The event that this imported type will call")
                 ->index()
-                ->constrained('attributes') //todo change to event types
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

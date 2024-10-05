@@ -5,8 +5,8 @@ namespace App\Enums\Types;
  */
 enum TypeOfServerWhitelist : string {
 
-  case access = 'access';
-  case CREATE_ELEMENTS = 'create_elements';
+  case SERVER_ACCESS = 'server_access';
+  case SERVER_CAN_CREATE_ELEMENTS = 'server_can_create_elements';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfServerWhitelist {
         $maybe  = TypeOfServerWhitelist::tryFrom($test);

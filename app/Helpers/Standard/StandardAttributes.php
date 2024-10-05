@@ -17,7 +17,7 @@ use App\Models\User;
 // display type  , parent is this_server, its final and its attributes are final, and can be parents, and inherit from a base display attribute also here
 // user type (no attributes) (parent is this_server, combined with maybe another server type), it can be used as a child for each user type here derived from it.
 // media type  (parent is this_server) its final and its attributes are final, and can be parents, and inherit this_server
-// events each have a type, that always have the same uuid but inherits from this_server , attributes have docs and meta and stuff
+// events each have a type, that always have the same uuid but inherits from this_server , attributes have docs and meta and stuff. Event types have no children
 // each api call has a type, and its like the events, except other parents are the possible events directly raised by that api (secondary rules can be anything)
 // note: all standard attributes can be used by anyone, in other types, and no standard attribute will have bounds
 // note: see standard in docs for more to fles this out
@@ -25,7 +25,8 @@ use App\Models\User;
 // todo standard attribute all rules get exposed to that contains the caller data and env
 //todo add remote type, inherits from this_server, when a new remote is made the parents are ths and user_token.
 // Remote has some standard attributes that are inherited, but will be added later
-
+// standard type to show that this is the caller's type in the paths
+// standard set to show that this is the caller's set in the paths
 
 // todo add the following types (inherit from the this_server),
 //  story, blog, post, news, message

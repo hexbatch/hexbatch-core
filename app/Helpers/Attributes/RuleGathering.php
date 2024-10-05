@@ -49,15 +49,6 @@ class RuleGathering
             $this->validateName($this->rule_name);
         }
 
-        if ($request->request->has('rule_weight')) {
-            $this->rule_weight = $request->request->getInt('rule_weight');
-            if(!$this->rule_weight) {$this->rule_weight = null;}
-        }
-
-        if ($request->request->has('rule_value')) {
-            $this->rule_value = $request->request->getInt('rule_value');
-            if(!$this->rule_value) {$this->rule_value = null;}
-        }
 
         if ($request->rule_json_path->has('rule_json_path')) {
             $this->rule_json_path = mb_trim($request->request->getString('rule_json_path'));
@@ -127,8 +118,7 @@ class RuleGathering
         if (!$this->attribute->isInUse()) {
             if ($this->rule_trigger_attribute_id !== null ) { $node->rule_trigger_attribute_id = $this->rule_trigger_attribute_id; }
             if ($this->target_descendant_range !== null ) { $node->target_descendant_range = $this->target_descendant_range; }
-            if ($this->rule_weight !== null ) { $node->rule_weight = $this->rule_weight; }
-            if ($this->rule_value !== null ) { $node->rule_value = $this->rule_value; }
+
             if ($this->rule_json_path !== null ) { $node->rule_json_path = $this->rule_json_path; }
             if ($this->rule_type !== null ) { $node->rule_type = $this->rule_type; }
         }

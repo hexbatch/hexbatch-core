@@ -16,12 +16,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int server_type_id
  * @property int owning_namespace_id
- * @property int server_element_id
  * @property string ref_uuid
  * @property TypeOfServerStatus server_status
  * @property string server_domain
  * @property string server_name
- * @property string server_public_key
  * @property string status_change_at
  *
  *  @property string created_at

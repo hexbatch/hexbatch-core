@@ -69,12 +69,15 @@ return new class extends Migration
 
             $table->timestamps();
 
-            //todo rm this, add in the published enum (developing,published,retired,suspended,deletion_pending_last_element)
-            // the published event is whenever that value is set to published, once there can never be developing again
-            // the type deleted event is when the type is deleted
-            // the retired and suspended only happens after the publishing, these can be toggled any time back and forth
-            $table->boolean('is_retired')->default(false)->nullable(false)
-                ->comment('if true then cannot be added as parent, or have new elements created');
+            DB::statement("CREATE TYPE type_of_lifecycle AS ENUM (
+                'developing',
+                'published',
+                'retired', -- these can be toggled any time back and forth
+                'suspended' -- these can be toggled any time back and forth
+            );");
+
+            DB::statement("ALTER TABLE element_types Add COLUMN lifecycle type_of_lifecycle NOT NULL default 'developing';");
+
 
             $table->boolean('is_system')->default(false)->nullable(false)
                 ->index('idx_type_is_system')
@@ -136,13 +139,15 @@ return new class extends Migration
             $table->dropColumn('ref_uuid');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
-            $table->dropColumn('is_retired');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final');
             $table->dropColumn('type_sum_geom_map');
+            $table->dropColumn('lifecycle');
 
 
 
         });
+
+        DB::statement("DROP TYPE type_of_lifecycle;");
     }
 };

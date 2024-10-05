@@ -8,8 +8,6 @@ enum TypeOfWhitelistPermission : string {
   case INHERITING = 'inheriting';
   case CREATE_ELEMENTS = 'create_elements';
   case OWN_ELEMENTS = 'own_elements';
-  case READ_ELEMENTS = 'read_elements';
-  case WRITE_ELEMENTS = 'write_elements';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfWhitelistPermission {
         $maybe  = TypeOfWhitelistPermission::tryFrom($test);

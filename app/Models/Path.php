@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use App\Enums\Paths\PathRelationshipType;
+use App\Enums\Paths\PathReturnsType;
 use App\Enums\Paths\TimeComparisonType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -20,26 +21,28 @@ use Illuminate\Support\Facades\DB;
  * @property int path_type_id
  * @property int path_server_id
  * @property int path_attribute_id
+ * @property int sorting_attribute_id
  * @property int path_element_set_id
  * @property int path_namespace_id
  * @property int path_location_bound_id
- * @property int path_description_element_id
  * @property int path_min_gap
  * @property int path_max_gap
  * @property int path_min_count
  * @property int path_max_count
+ * @property int path_result_limit
  * @property bool is_partial_matching_name
  * @property bool is_sorting_order_asc
  * @property string ref_uuid
  * @property string path_start_at
  * @property string path_end_at
  * @property string path_logic
- * @property string path_attribute_json_path
  * @property string path_part_name
  * @property string value_json_path
- * @property string ordering_json_path
+ * @property string sort_json_path
+ * @property string path_compiled_sql
  * @property PathRelationshipType path_relationship
  * @property TimeComparisonType time_comparison
+ * @property PathReturnsType path_returns
  *
  * @property string created_at
  * @property string updated_at
@@ -72,6 +75,7 @@ class Path extends Model
     protected $casts = [
         'path_relationship' => PathRelationshipType::class,
         'time_comparison' => TimeComparisonType::class,
+        'path_returns' => PathReturnsType::class,
     ];
 
     /**

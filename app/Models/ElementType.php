@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Bounds\TypeOfLocation;
+use App\Enums\Types\TypeOfLifecycle;
 use App\Enums\Types\TypeOfWhitelistPermission;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -34,12 +35,12 @@ use Illuminate\Validation\ValidationException;
  * @property int type_location_map_bound_id
  * @property int type_bound_path_id
  * @property int type_description_element_id
- * @property bool is_retired
  * @property bool is_system
  * @property bool is_final
  * @property string ref_uuid
  * @property string type_sum_geom_map
  * @property string type_name
+ * @property TypeOfLifecycle lifecycle
  *
  * @property UserNamespace owner_namespace
  * @property Attribute[] type_attributes
@@ -64,7 +65,6 @@ class ElementType extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'is_retired',
         'type_name',
         'owner_namespace_id'
     ];
@@ -81,7 +81,9 @@ class ElementType extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'lifecycle'=> TypeOfLifecycle::class
+    ];
 
     public function type_owner() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'owner_namespace_id');
@@ -252,7 +254,7 @@ class ElementType extends Model
             DB::beginTransaction();
 
             if ($this->isInUse()) {
-                $this->is_retired = Utilities::boolishToBool($collect->get('is_retired',false));
+                //todo update this
                 $this->is_final = Utilities::boolishToBool($collect->get('is_final',false));
                 $this->save();
                 return;
@@ -273,7 +275,8 @@ class ElementType extends Model
                      */
                     $some_parent = (new ElementType())->resolveRouteBinding($some_parent_hint);
                     $user_namespace = Utilities::getCurrentNamespace();
-                    if ($some_parent->is_retired || $some_parent->is_final || !$some_parent->canNamespaceInherit($user_namespace)) {
+                    //todo update this
+                    if ( $some_parent->is_final || !$some_parent->canNamespaceInherit($user_namespace)) {
                         throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                             RefCodes::TYPE_CANNOT_INHERIT);

@@ -42,11 +42,11 @@ return new class extends Migration
         ");
 
         DB::statement("CREATE TYPE type_of_server_whitelist AS ENUM (
-            'access',
-            'create_elements'
+            'server_access',
+            'server_can_create_elements'
             );");
 
-        DB::statement("ALTER TABLE element_type_server_whitelist Add COLUMN server_whitelist type_of_server_whitelist NOT NULL default 'access';");
+        DB::statement("ALTER TABLE element_type_server_whitelist Add COLUMN server_whitelist type_of_server_whitelist NOT NULL default 'server_access';");
     }
 
     /**

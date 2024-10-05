@@ -32,6 +32,7 @@ use Illuminate\Validation\ValidationException;
  * @property int namespace_home_set_id
  * @property string namespace_name
  * @property string ref_uuid
+ * @property string namespace_public_key
  *
  * @property string created_at
  * @property string updated_at
@@ -319,7 +320,7 @@ class UserNamespace extends Model
         if( ElementType::where('owner_namespace_id',$this->id)->exists() ) {return true;}
         if( Server::where('owning_namespace_id',$this->id)->exists() ) {return true;}
         if( Element::where('element_namespace_id',$this->id)->exists() ) {return true;}
-        if( Thing::where('caller_namespace_id',$this->id)->orWhere('thing_namespace_id',$this->id)->exists() ) {return true;}
+        if( Thing::where('thing_namespace_id',$this->id)->orWhere('thing_namespace_id',$this->id)->exists() ) {return true;} //todo put thing status in first
         return false;
     }
 

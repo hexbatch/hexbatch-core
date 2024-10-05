@@ -17,7 +17,13 @@ return new class extends Migration
 
             $table->integer('hex_error_code')->default(null)->nullable()
                 ->comment('The code of the exception');
-            //todo put in code version
+
+            $table->integer('hex_error_line')->default(null)->nullable()
+                ->comment('The line of the exception');
+
+            $table->float('hex_code_version')->default(null)->nullable()
+                ->comment('The line of the exception');
+
             $table->text('hex_error_message')->default(null)->nullable()
                 ->comment('the message');
 

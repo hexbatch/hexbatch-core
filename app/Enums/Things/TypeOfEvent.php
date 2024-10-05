@@ -82,7 +82,6 @@ enum TypeOfEvent : string {
   case SERVER_SENT_CALLBACK_PROCESS_EVENT = 'server_sent_callback_process_event';
 
 
-  case SERVER_ADDING_NAMESPACE = 'server_adding_namespace';
   case SERVER_ADD_NAMESPACE = 'server_add_namespace';
 
 
@@ -92,19 +91,12 @@ enum TypeOfEvent : string {
   case SHAPE_BORDERING_SEPERATED = 'shape_bordering_seperated';
 
 
-  case TYPE_PARENT_ADD = 'type_parent_add';
-  case TYPE_CREATED_BEFORE = 'type_created_before';
-  case TYPE_UPDATED_BEFORE = 'type_updated_before';
-  case TYPE_CREATED_AFTER = 'type_created_after';
-  case TYPE_UPDATED_AFTER = 'type_updated_after';
-  case TYPE_PUBLISH_BEFORE = 'type_publish_before';
-  case TYPE_RETIRE_BEFORE = 'type_retire_before';
-  case TYPE_SUSPEND_BEFORE = 'type_suspend_before';
   case TYPE_PUBLISHED = 'type_published';
   case TYPE_RETIRED = 'type_retired';
   case TYPE_SUSPENDED = 'type_suspended';
+  case TYPE_DELETED = 'type_deleted';
   case TYPE_CONSTRAINT = 'type_constraint';
-  case TYPE_LIVE = 'type_live';
+  case TYPE_LIVE_ADDED = 'type_live_added';
   case TYPE_LIVE_REMOVED = 'type_live_removed';
 
 
