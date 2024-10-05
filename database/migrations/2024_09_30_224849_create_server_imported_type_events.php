@@ -27,7 +27,7 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("The event that this imported type will call")
                 ->index()
-                ->constrained('attributes')
+                ->constrained('attributes') //todo change to event types
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

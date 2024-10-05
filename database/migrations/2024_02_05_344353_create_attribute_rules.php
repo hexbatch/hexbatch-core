@@ -111,6 +111,8 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
 
+        //todo all data action, and target action are s types representing mini api
+
         //todo add pragma type to read the defining attribute or combine all the type data into one json
         DB::statement("CREATE TYPE rule_data_action_type AS ENUM (
             'no_action',

@@ -319,7 +319,7 @@ class UserNamespace extends Model
         if( ElementType::where('owner_namespace_id',$this->id)->exists() ) {return true;}
         if( Server::where('owning_namespace_id',$this->id)->exists() ) {return true;}
         if( Element::where('element_namespace_id',$this->id)->exists() ) {return true;}
-        if( PendingThing::where('caller_namespace_id',$this->id)->orWhere('thing_namespace_id',$this->id)->exists() ) {return true;}
+        if( Thing::where('caller_namespace_id',$this->id)->orWhere('thing_namespace_id',$this->id)->exists() ) {return true;}
         return false;
     }
 

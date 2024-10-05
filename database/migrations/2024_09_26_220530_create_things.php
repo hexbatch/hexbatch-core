@@ -30,11 +30,27 @@ return new class extends Migration
             // the request data is set in the top parent json data
             // when no children (no events) or all children ready, then the call is made (switch statement with api type guid and what to call)
 
+            //todo group operations are rule sets, each operation step is mini api
+            //todo thing gets a haircut, less columns
+            // intermediate results, like collections of attributes or types found, or elements being processed, are put into thing_sets by the row that finds them
+            /*
+             * in thing:
+             *  parent thing
+             *  api type  (includes mini api for rules, regular api, and events)
+             *  rule  (the rule this is from)
+             *  path
+             *  context set (also caller set, and sources, destination set for the operation)
+             *  context type (when doing a filtering by type, caller type at the very top)
+             *  context attribute (when doing aggregation)
+             *  context element (when a single element is the target, is the caller element at the very top)
+             *  context namespace (when members or admin stuff, is the caller namespace at the very top, this also marks the outside servers that are talking)
+             *  context json (the input at the top, or else is data found)
+             *  type_of_thing_status
+
+             */
 
 
 
-            //todo add context set, each api call has a set context, if this is a user doing that, its the ns home set
-            // if its a rule, then its the set the element of the type that has the rule that is reacting
 
 
             $table->foreignId('parent_thing_id')
@@ -233,7 +249,6 @@ return new class extends Migration
 
 
 
-
         DB::statement("CREATE TYPE type_of_thing_status AS ENUM (
             'pending',
             'finished_approved',
@@ -255,7 +270,7 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE pending_things Add COLUMN user_followup type_user_followup NOT NULL default 'nothing';");
 
-
+        //todo set group operations have this covered, do more steps in tree to avoid this, rm set usage
         DB::statement("CREATE TYPE type_filter_set_usage AS ENUM (
             'none',
             'must_match',
@@ -279,12 +294,8 @@ return new class extends Migration
             $table->jsonb('thing_value')
                 ->nullable()->default(null)->comment("When something needs a value");
 
-            //todo need to store the response of this completed thing in a new jsonb
-            // this is the data that is merged to the parent
 
-            //todo add a merge policy for how the parent will work with all its children (null means no data from children used)
-            // but no logic needed with children, its either an all or nothing, if any of its children fail, the parent fails
-            // the rules, stacks will do the complicated logic for deciding if failure is ok
+
 
 
             $table->string('callback_url')->nullable()->default(null)

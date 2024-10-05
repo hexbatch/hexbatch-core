@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-
+//todo remove this, not needed because rules are treed in things
         Schema::create('attribute_rule_debugs', function (Blueprint $table) {
             $table->id();
 

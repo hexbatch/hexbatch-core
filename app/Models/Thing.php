@@ -51,7 +51,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string created_at
  * @property string updated_at
  */
-class PendingThing extends Model
+class Thing extends Model
 {
 
     protected $table = 'pending_things';

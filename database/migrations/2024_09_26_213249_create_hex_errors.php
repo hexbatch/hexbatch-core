@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->integer('hex_error_code')->default(null)->nullable()
                 ->comment('The code of the exception');
-
+            //todo put in code version
             $table->text('hex_error_message')->default(null)->nullable()
                 ->comment('the message');
 

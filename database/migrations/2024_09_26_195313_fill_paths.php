@@ -168,6 +168,7 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE paths Add COLUMN path_logic type_of_child_logic NOT NULL default 'and';");
 
+        //todo add relations: target,trigger,event,data to allow rule tracing
         //relationship with the path parent
         DB::statement("CREATE TYPE path_relationship_type AS ENUM (
             'no_relationship',

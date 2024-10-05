@@ -72,7 +72,7 @@ return new class extends Migration
             $table->string('server_domain')->unique()
                 ->nullable(false)
                 ->comment("the url to the server, example localhost, eggs.waffle_time.org");
-
+//todo move server_public_key to the namespaces
             $table->text('server_public_key')
                 ->nullable()->default(null)
                 ->comment("optional public key used to encrypt the data, instead of token");
