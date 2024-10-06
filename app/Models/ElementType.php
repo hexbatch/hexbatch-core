@@ -230,7 +230,7 @@ class ElementType extends Model
         if (Thing::where('thing_type_id',$this->id)->where('thing_status',TypeOfThingStatus::THING_PENDING)->count() ) {return true;}
 
         //and cannot delete if in a path used by a thing
-        if (Path::buildPath(pending_thing_type_id: $this->id)->exists() ) { return true;}
+        if (PathPart::buildPath(pending_thing_type_id: $this->id)->exists() ) { return true;}
         return false;
     }
 

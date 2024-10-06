@@ -79,6 +79,7 @@ return [
     'rule_requirement_failed' => 'This attribute, ":ref" has forbidden the type from having this combination of attributes in the type',
     'rule_cannot_be_edited' => 'The rule :ref cannot be edited because:  :error',
     'rule_parent_child_be_same_chain' => 'The rules :ref and :other have to share the same attribute',
+    'rule_tree_element_permissions' => 'The rule :ref is trying to use :element , but you are not in the namespace admin for that element',
 
 
     //remotes
@@ -129,8 +130,9 @@ return [
     'path_not_found' => 'Path not found using :ref',
     'path_only_admin_can_edit' => 'Only the admins in :ns can edit the path :ref',
     'path_parent_not_found' => 'Cannot find the parent path using :ref',
-    'path_tree_element_missing' => 'The path :ref is missing the tree element',
-    'path_tree_element_permissions' => 'The path :ref is trying to use :element which you are not in the namespace group for',
+    'path_needs_name' => 'Each path must be named unique to the namespace',
+    'path_tree_element_permissions' => 'The path :ref is trying to use :element , but you are not in the namespace admin for that element',
+    'path_cannot_be_edited' => 'The path :ref cannot be edited because:  :error',
 
 
 
