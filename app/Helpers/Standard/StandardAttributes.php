@@ -234,6 +234,33 @@ class StandardAttributes
 
     }
 
+    public static function getOrCreateSystemUser(bool &$b_new = false) : User {
+        if (static::$system_user) {return static::$system_user;}
+        $user = User::where('ref_uuid',User::SYSTEM_UUID)->first();
+        if ($user) {
+            return static::$system_user = $user;
+        }
+        $b_new = true;
+        $pw = config('hbc.system_user_pw');
+        if (!$pw) {
+            throw new \LogicException("System user pw is not set in .evn");
+        }
+        try {
+
+            $user = (new CreateNewUser)->create([
+                "username" => User::SYSTEM_NAME,
+                "password" => $pw,
+                "password_confirmation" => $pw
+            ]);
+            $user->ref_uuid =  User::SYSTEM_UUID;
+            $user->save();
+            $user->refresh();
+            return static::$system_user = $user;
+        } catch (ValidationException $e) {
+            throw new \LogicException("Cannot create system user because ".$e->getMessage());
+        }
+    }
+
     const DEF = [
 
 

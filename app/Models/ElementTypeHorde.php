@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
  * @property int id
  * @property int horde_type_id
  * @property int horde_attribute_id
+ * @property int originating_horde_id
  * @property TypeOfApproval attribute_approval
  *
  *
@@ -111,5 +112,7 @@ class ElementTypeHorde extends Model
         $builder =  Attribute::whereIn('id',$ids);
         return $builder;
     }
+
+//todo put in originating_horde_id for when the attribute is inherited, the element values will put that one in instead in the element_horde_id so bounds and stuff easily checked
 
 }

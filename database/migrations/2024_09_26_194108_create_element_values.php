@@ -22,7 +22,7 @@ return new class extends Migration
                 ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-
+//todo fill in from the horde type or originating
             $table->foreignId('element_horde_id')
                 ->nullable(false)
                 ->comment("The attribute this value is about")

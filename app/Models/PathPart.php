@@ -10,6 +10,7 @@ use App\Enums\Paths\TimeComparisonType;
 
 use App\Enums\Rules\TypeOfChildLogic;
 
+use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -63,6 +64,7 @@ use Illuminate\Validation\ValidationException;
  * @property PathRelationshipType path_relationship
  * @property TimeComparisonType time_comparison
  * @property PathReturnsType path_returns
+ * @property TypeOfLifecycle path_lifecycle
  *
  * @property string created_at
  * @property string updated_at
@@ -103,6 +105,7 @@ class PathPart extends Model
         'path_returns' => PathReturnsType::class,
         'path_child_logic' => TypeOfChildLogic::class,
         'path_logic' => TypeOfChildLogic::class,
+        'path_lifecycle' => TypeOfLifecycle::class,
     ];
 
 
