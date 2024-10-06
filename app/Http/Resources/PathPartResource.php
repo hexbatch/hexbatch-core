@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  */
-class PathResource extends JsonResource
+class PathPartResource extends JsonResource
 {
 
     protected int $n_display_level = 1;
@@ -26,7 +26,7 @@ class PathResource extends JsonResource
     public function toArray(Request $request): array
     {
         if ($this->n_display_level <= 0) {
-            return [$this->path_name];
+            return [$this->path_part_name];
         }
         else if ($this->n_display_level === 1) {
             $arr =  [

@@ -2,14 +2,16 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Attribute;
+
 use App\Models\ElementType;
-use App\Models\UserNamespace;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class ValidateAttributeOwnership
+/**
+ * makes sure the rule belongs to the attribute
+ */
+class ValidateTypeNotInUse
 {
     /**
      * See if the owner of the namespace
@@ -18,16 +20,6 @@ class ValidateAttributeOwnership
      */
     public function handle(Request $request, Closure $next): Response
     {
-        /**
-         * @var Attribute $attribute
-         */
-        $attribute = $request->route('attribute');
-        if (!$attribute ) {
-            throw new \LogicException("There is no attribute found in the route when asking for it");
-        }
-        if (!$attribute instanceof Attribute) {
-            throw new \LogicException("ValidateAttributeOwnership does not see an attribute in the parameter");
-        }
 
         /**
          * @var ElementType $owner
@@ -39,11 +31,11 @@ class ValidateAttributeOwnership
         if (!$owner instanceof ElementType) {
             throw new \LogicException("ValidateAttributeOwnership does not see an element_type in the parameter");
         }
-        $this->checkPermission($attribute,$owner);
+        $this->checkPermission($owner);
         return $next($request);
     }
 
-    protected function checkPermission(Attribute $attribute,ElementType $owner) {
-        $attribute->checkAttributeOwnership($owner);
+    protected function checkPermission(ElementType $type) {
+        $type->checkInUse();
     }
 }

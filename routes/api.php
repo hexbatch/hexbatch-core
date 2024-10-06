@@ -10,6 +10,9 @@ use App\Http\Middleware\ValidateAttributeOwnership;
 use App\Http\Middleware\ValidateNamespaceAdmin;
 use App\Http\Middleware\ValidateNamespaceMember;
 use App\Http\Middleware\ValidateNamespaceOwner;
+use App\Http\Middleware\ValidatePartOwnership;
+use App\Http\Middleware\ValidateRuleOwnership;
+use App\Http\Middleware\ValidateTypeNotInUse;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -99,25 +102,52 @@ Route::prefix('v1')->group(function () {
         Route::group(['prefix' => '{user_namespace}'], function () {
 
             Route::prefix('paths')->group(function () {
-                Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
+                Route::middleware(ValidateNamespaceOwner::class)->group(function () {
                     Route::post('/create', [PathController::class, 'create_path'])->name('core.paths.create');
                     Route::prefix('{path}')->group(function () {
-                        Route::patch('/edit', [PathController::class, 'edit_path'])->name('core.paths.edit');
+                        Route::delete('/delete', [PathController::class, 'delete_path'])->name('core.paths.delete');
                     });
                 });
+
+                Route::prefix('{path}')->middleware([ValidateNamespaceAdmin::class])->group(function () {
+                    Route::patch('/update', [PathController::class, 'update_path'])->name('core.paths.update');
+
+                    Route::prefix('/{path_part}')->middleware(ValidatePartOwnership::class)->group(function () {
+                        Route::patch('/edit_part', [PathController::class, 'edit_part'])->name('core.types.attributes.rules.edit_rule');
+                        Route::patch('/add_subtree', [PathController::class, 'add_part_subtree'])->name('core.types.attributes.rules.add_subtree');
+                        Route::delete('/remove_subtree', [PathController::class, 'delete_part_subtree'])->name('core.types.attributes.rules.remove_subtree');
+                    });
+                });
+
+
+                Route::middleware(ValidateNamespaceMember::class)->group(function (){
+                    Route::get('/list', [PathController::class, 'list_paths'])->name('core.types.attributes.rules.list');
+                    Route::get('/test', [PathController::class, 'path_test'])->name('core.types.attributes.rules.test');
+                    Route::prefix('/{path_part}')->middleware(ValidatePartOwnership::class)->group(function () {
+                        Route::get('/get/{levels?}', [PathController::class, 'get_part'])->name('core.types.attributes.rules.get');
+                    });
+
+                });
+
             });
 
             Route::prefix('types')->group(function () {
 
-                Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
 
-                Route::middleware(ValidateNamespaceOwner::class)->group(function (){
-                    Route::delete('/{element_type}/destroy', [TypeController::class, 'destroy_type'])->name('core.types.destroy');
+                Route::middleware(ValidateNamespaceOwner::class)->group(function () {
+                    Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
                 });
 
-                Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
-                    Route::patch('/{element_type}/edit', [TypeController::class, 'edit_type'])->name('core.types.edit');
+                Route::prefix('/{element_type}')->middleware([ValidateTypeNotInUse::class])->group(function () {
+                    Route::middleware(ValidateNamespaceOwner::class)->group(function () {
+                        Route::delete('/destroy', [TypeController::class, 'destroy_type'])->name('core.types.destroy');
+                    });
+
+                    Route::middleware(ValidateNamespaceAdmin::class)->group(function () {
+                        Route::patch('/edit', [TypeController::class, 'edit_type'])->name('core.types.edit');
+                    });
                 });
+
 
                 Route::middleware(ValidateNamespaceMember::class)->group(function (){
                     Route::get('/{element_type}/get/{levels?}', [TypeController::class, 'get_type'])->name('core.types.get');
@@ -130,7 +160,7 @@ Route::prefix('v1')->group(function () {
                 Route::group(['prefix' => '{element_type}/attributes'], function () {
 
 
-                    Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
+                    Route::middleware([ValidateNamespaceAdmin::class,ValidateTypeNotInUse::class])->group(function (){
                         Route::post('/create', [TypeController::class, 'new_attribute'])->name('core.types.attributes.create');
 
                         Route::prefix('{attribute}')->middleware(ValidateAttributeOwnership::class)->group(function () {
@@ -151,24 +181,34 @@ Route::prefix('v1')->group(function () {
 
 
 
-                    Route::prefix('{attribute}/rules')->middleware(ValidateAttributeOwnership::class)->group(function () {
+                    Route::prefix('{attribute}/rules')->middleware([ValidateAttributeOwnership::class,ValidateTypeNotInUse::class])->group(function () {
 
                         Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
-                            Route::post('/new', [TypeController::class, 'attribute_new_rule'])->name('core.types.attributes.rules.create');
-                            Route::patch('/{attribute_rule}/edit', [TypeController::class, 'attribute_edit_rule'])->name('core.types.attributes.rules.edit');
-                            Route::delete('/{attribute_rule}/destroy', [TypeController::class, 'attribute_delete_rule'])->name('core.types.attributes.rules.destroy');
+                            Route::post('/create', [TypeController::class, 'create_rules'])->name('core.types.attributes.rules.create');
+                            Route::patch('/update', [TypeController::class, 'update_rules'])->name('core.types.attributes.rules.update');
+                            Route::delete('/delete', [TypeController::class, 'delete_rules'])->name('core.types.attributes.rules.delete');
+
+                            Route::prefix('/{attribute_rule}')->middleware(ValidateRuleOwnership::class)->group(function () {
+                                Route::patch('/edit_rule', [TypeController::class, 'edit_rule'])->name('core.types.attributes.rules.edit_rule');
+                                Route::patch('/add_subtree', [TypeController::class, 'add_rule_subtree'])->name('core.types.attributes.rules.add_subtree');
+                                Route::delete('/remove_subtree', [TypeController::class, 'delete_rule_subtree'])->name('core.types.attributes.rules.remove_subtree');
+                            });
                         });
 
                         Route::middleware(ValidateNamespaceMember::class)->group(function (){
-                            Route::get('/list/{filter?}', [TypeController::class, 'attribute_list_rules'])->name('core.types.attributes.rules.list');
-                            Route::get('/{attribute_rule}/get/{levels?}', [TypeController::class, 'attribute_get_rule'])->name('core.types.attributes.rules.get');
+                            Route::get('/list', [TypeController::class, 'attribute_list_rules'])->name('core.types.attributes.rules.list');
+                            Route::get('/test', [TypeController::class, 'rule_test'])->name('core.types.attributes.rules.test');
+                            Route::prefix('/{attribute_rule}')->middleware(ValidateRuleOwnership::class)->group(function () {
+                                Route::get('/get/{levels?}', [TypeController::class, 'attribute_get_rule'])->name('core.types.attributes.rules.get');
+                            });
+
                         });
                     });
                 });
 
 
 
-        });
+            });
         });
 
 

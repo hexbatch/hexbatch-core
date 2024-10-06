@@ -42,7 +42,7 @@ use Illuminate\Validation\ValidationException;
  *
  * @property UserNamespace namespace_owner
  * @property Element path_handle
- * @property PathPart path_part_tree
+ * @property PathPart path_root_part
  */
 class Path extends Model
 {
@@ -81,7 +81,7 @@ class Path extends Model
         return $this->belongsTo(Element::class,'path_handle_element_id');
     }
 
-    public function path_part_tree() : HasOne {
+    public function path_root_part() : HasOne {
         return $this->hasOne(PathPart::class,'owning_path_id')
             /** @uses PathPart::path_part_children() */
             ->with('path_part_children')
@@ -159,9 +159,9 @@ class Path extends Model
 
 
         /**
-         * @uses Path::namespace_owner(),Path::path_handle(),Path::path_part_tree()
+         * @uses Path::namespace_owner(),Path::path_handle(),Path::path_root_part()
          */
-        $build->with('namespace_owner','path_handle','path_part_tree');
+        $build->with('namespace_owner','path_handle','path_root_part');
 
         return $build;
     }
@@ -179,15 +179,13 @@ class Path extends Model
         if (ElementType::where('type_bound_path_id',$this->id)->count() ) {return true;}
 
         //and cannot delete if in a path used by a thing
-        if (PathPart::buildPath(pending_thing_type_id: $this->id)->exists() ) { return true;}
+        if (PathPart::buildPathPart(pending_thing_type_id: $this->id)->exists() ) { return true;}
         return false;
     }
 
     public static function collectPath(Collection|string $collect,?UserNamespace $owner = null,?Path $path = null ) : Path {
 
-        if (!$owner) {
-            $owner = Utilities::getCurrentNamespace();
-        }
+
         try {
             DB::beginTransaction();
             if (is_string($collect) && Utilities::is_uuid($collect)) {
@@ -196,13 +194,7 @@ class Path extends Model
                  */
                 return (new Path())->resolveRouteBinding($collect);
             } else {
-                if (!$owner->isNamespaceAdmin(Utilities::getCurrentNamespace())) {
-                    throw new HexbatchNotFound(
-                        __('msg.path_only_admin_can_edit',['ref'=>$path?->getName(),'ns'=>$owner->getName()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                        RefCodes::PATH_CANNOT_EDIT
-                    );
-                }
+
                 if(!$path) {
                     if ($collect->has('uuid')) {
                         $maybe_uuid = $collect->get('uuid');
@@ -224,12 +216,15 @@ class Path extends Model
                 } else {
                     $path = new Path();
                 }
-
+                if ($owner) {
+                    $path->path_owning_namespace_id = $owner->id;
+                }
                 $path->editPath($collect,$owner);
             }
 
             DB::commit();
-            return $path;
+
+            return Path::buildPath(id:$path->id)->first();
         } catch (\Exception $e) {
             DB::rollBack();
             if ($e instanceof HexbatchCoreException) {

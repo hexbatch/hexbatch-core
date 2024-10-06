@@ -29,13 +29,29 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-            $table->foreignId('rule_handle_element_id')
-                ->nullable()
-                ->comment("Optional element for helping describe the rule tree")
+            $table->foreignId('parent_rule_id')
+                ->nullable()->default(null)
+                ->comment("Rules can be chained")
+                ->index('idx_parent_rule_id')
+                ->constrained('attribute_rules')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('rule_event_type_id')
+                ->nullable()->default(null)
+                ->comment("The event that is being listened")
                 ->index()
-                ->constrained('elements')
+                ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
+
+            $table->foreignId('rule_path_id')
+                ->nullable()->default(null)
+                ->comment("This rule follows a path for data,trigger and targets")
+                ->index()
+                ->constrained('paths')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
 
 
@@ -48,13 +64,48 @@ return new class extends Migration
 
 
             $table->timestamps();
-
-            $table->string('rule_name',256)
-                ->nullable(false)->index()
-                ->comment("The name of the rule");
         });
 
 
+
+
+
+        //child rules return a boolean value , as well as data or results they found. The child logic will combine the children,
+        // the rule_logic will combine this node with the calculated child truthfulness
+        /*
+         * false:
+         *   no results
+         *   json with success at top level set to false
+         *   empty json
+         *   impossible to run (no target found, no event fired)
+         */
+        DB::statement("CREATE TYPE type_of_child_logic AS ENUM (
+            'and',
+            'or',
+            'xor',
+            'nand',
+            'nor',
+            'xnor',
+            'always_true',
+            'always_false'
+            );");
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_logic type_of_child_logic NOT NULL default 'and';");
+
+
+        DB::statement("CREATE TYPE type_merge_json AS ENUM (
+            'no_merge',
+            'overwrite',
+            'or_merge',
+            'and_merge',
+            'xor_merge'
+            'oldest'
+            'newest'
+            );");
+
+
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_merge_method type_merge_json NOT NULL default 'overwrite';");
 
 
         DB::statement("ALTER TABLE attribute_rules ALTER COLUMN created_at SET DEFAULT NOW();");
@@ -69,11 +120,19 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("if set then the data this rule node has will filter the child results to only have matching in one json to give to the parent");
 
-
+            $table->string('rule_name',256)->nullable(false)
+                ->comment("The name of the rule (does not have to be unique and is optional. Can also have notes");
         });
 
 
         DB::statement('ALTER TABLE attribute_rules ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
+
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_rule_parent_name ON attribute_rules (owning_attribute_id,rule_name) NULLS NOT DISTINCT;");
+
+
+        DB::statement("CREATE UNIQUE INDEX idx_one_rule_root_per_tree
+                                ON attribute_rules (owning_attribute_id, (parent_rule_id IS NULL)) WHERE parent_rule_id IS NULL;");
 
     }
 
@@ -83,5 +142,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('attribute_rules');
+        DB::statement("DROP TYPE type_of_child_logic;");
+        DB::statement("DROP TYPE type_merge_json;");
+
     }
 };

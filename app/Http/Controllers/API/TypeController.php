@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -11,7 +13,6 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Resources\AttributeCollection;
 use App\Http\Resources\AttributeResource;
-use App\Http\Resources\AttributeRuleCollection;
 use App\Http\Resources\AttributeRuleResource;
 use App\Http\Resources\ElementTypeCollection;
 use App\Http\Resources\ElementTypeResource;
@@ -123,6 +124,7 @@ class TypeController extends Controller
     }
 
     public function attribute_get(ElementType $element_type, Attribute $attribute,?int $levels = 2): JsonResponse {
+        Utilities::ignoreVar($element_type);
         return response()->json(new AttributeResource($attribute,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -134,50 +136,96 @@ class TypeController extends Controller
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function attribute_list_rules(ElementType $element_type,Attribute $attribute,?string $filter = null): JsonResponse {
-        Utilities::ignoreVar($filter,$element_type);
-        return response()->json(new AttributeRuleCollection($attribute->top_rule), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+
+    /*
+     * ******************************************************************************
+     *                           Rules                                              *
+     * ******************************************************************************
+     */
+
+    public function attribute_list_rules(ElementType $element_type,Attribute $attribute): JsonResponse {
+        Utilities::ignoreVar($element_type);
+        return response()->json(new AttributeRuleResource($attribute->top_rule), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 
-    public function attribute_new_rule(Request $request,ElementType $element_type,Attribute $attribute): JsonResponse {
+    /*
+     * create rule tree (can be all or add in a parent)
+     * edit rule tree (all in one go, can be a subtree)
+     * edit rule node (cannot change parents or children)
+     * delete rule tree (trims children)
+     */
+    public function create_rules(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
         Utilities::ignoreVar($element_type); //checked in the middleware
-        $mod_rule = AttributeRule::collectRule(collect: $request->collect(),owner_attr: $attribute);
-        $out = AttributeRule::buildAttributeRule(id:$mod_rule->id)->first();
-        return response()->json(new AttributeRuleResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
-    }
-
-
-
-    public function attribute_edit_rule(Request $request,ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
-        Utilities::ignoreVar($element_type); //checked in the middleware
-        $mod_rule = AttributeRule::collectRule(collect: $request->collect(), rule: $attribute_rule,owner_attr: $attribute);
-        $out = AttributeRule::buildAttributeRule(id:$mod_rule->id)->first();
-        return response()->json(new AttributeRuleResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
-    }
-
-    public function attribute_delete_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule): JsonResponse {
-        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
-        if ($attribute_rule->isInUse()) {
-
-            throw new HexbatchPermissionException(__("msg.attribute_cannot_be_deleted_if_in_use",['ref'=>$attribute_rule->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::RULE_CANNOT_DELETE);
+        if ($attribute->top_rule) {
+            throw new HexbatchNotPossibleException(
+                __('msg.rules_already_exist',['ref'=>$attribute->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::RULE_NOT_FOUND
+            );
         }
-        $attribute_rule->delete();
+        $mod_rule = AttributeRule::collectRule(collect: $request->collect(),owner_attr: $attribute);
+        return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function update_rules(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
+        Utilities::ignoreVar($element_type); //checked in the middleware
+        $attribute->top_rule->delete_subtree();
+        $mod_rule = AttributeRule::collectRule(collect: $request->collect(),owner_attr: $attribute);
+        return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+
+    public function add_rule_subtree(Request $request, ElementType $element_type, Attribute $attribute, AttributeRule $attribute_rule): JsonResponse {
+        Utilities::ignoreVar($element_type); //checked in the middleware
+        $mod_rule = AttributeRule::collectRule(collect: $request->collect(), parent_rule: $attribute_rule, owner_attr: $attribute);
+        return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function edit_rule(Request $request, ElementType $element_type, Attribute $attribute, AttributeRule $attribute_rule): JsonResponse {
+        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
+        $attribute_rule->editRule(collect: $request->collect());
+        $out = AttributeRule::buildAttributeRule(id:$attribute_rule->id)->first();
+        return response()->json(new AttributeRuleResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function delete_rules(ElementType $element_type, Attribute $attribute): JsonResponse {
+        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
+        $attribute->top_rule->delete_subtree();
+        return response()->json(new AttributeRuleResource($attribute->top_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function delete_rule_subtree(ElementType $element_type, Attribute $attribute, AttributeRule $attribute_rule): JsonResponse {
+        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
+        $attribute_rule->delete_subtree();
         return response()->json(new AttributeRuleResource($attribute_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 
 
     public function attribute_get_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule,?string $levels = null): JsonResponse {
-        Utilities::ignoreVar($element_type); //checked in the middleware
-        if ($attribute_rule->getAncestorAttribute?->id !== $attribute->id) {
-            throw new HexbatchPermissionException(__("msg.rule_not_found",['ref'=>$attribute_rule->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::RULE_NOT_FOUND);
-        }
+        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
         return response()->json(new AttributeRuleResource($attribute_rule,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function rule_test(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
+        Utilities::ignoreVar($request,$element_type,$attribute); //checked in the middleware
+        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_IMPLEMENTED);
     }
 
 }

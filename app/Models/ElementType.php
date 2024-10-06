@@ -9,6 +9,7 @@ use App\Enums\Types\TypeOfWhitelistPermission;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
@@ -230,7 +231,7 @@ class ElementType extends Model
         if (Thing::where('thing_type_id',$this->id)->where('thing_status',TypeOfThingStatus::THING_PENDING)->count() ) {return true;}
 
         //and cannot delete if in a path used by a thing
-        if (PathPart::buildPath(pending_thing_type_id: $this->id)->exists() ) { return true;}
+        if (PathPart::buildPathPart(pending_thing_type_id: $this->id)->exists() ) { return true;}
         return false;
     }
 
@@ -455,4 +456,14 @@ class ElementType extends Model
             throw $e;
         }
     }
+
+    public function checkInUse() {
+        if ($this->isInUse()) {
+
+            throw new HexbatchPermissionException(__("msg.type_in_use",['ref'=>$this->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+                RefCodes::RULE_CANNOT_DELETE);
+        }
+    }
+
 }

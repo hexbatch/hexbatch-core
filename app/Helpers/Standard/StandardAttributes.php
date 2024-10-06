@@ -90,6 +90,7 @@ use App\Models\User;
 
 //todo each iso top level language and each iso region needs its own local type, base local, then local->language and local->region then the langs and region code
 
+//todo group operations are rule sets, each operation step is mini api, make standard attributes each have the rules to do the group operation
 /**
  * Standard attributes are all final, except for the ones that are parents.
  * They are readable by anyone, unless made private in type

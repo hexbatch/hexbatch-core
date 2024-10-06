@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 
@@ -44,8 +45,8 @@ class NamespaceController extends Controller
     public function group_member_remove(UserNamespace $user_namespace,UserNamespace $ns_to_be_removed): JsonResponse {
         $existing_member = $user_namespace->isNamespaceMember($ns_to_be_removed);
         if (!$existing_member?->is_admin) {
-            throw new HexbatchNotPossibleException(__("msg.namespace_member_not_found", ['ref' => $ns_to_be_removed->getName(),'me'=>$user_namespace->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+            throw new HexbatchNotFound(__("msg.namespace_member_not_found", ['ref' => $ns_to_be_removed->getName(),'me'=>$user_namespace->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                 RefCodes::NAMESPACE_MEMBER_MISSING_ISSUE);
 
         }
@@ -72,8 +73,8 @@ class NamespaceController extends Controller
 
         $existing_member = $user_namespace->isNamespaceAdmin($ns_to_be_removed);
         if (!$existing_member?->is_admin) {
-            throw new HexbatchNotPossibleException(__("msg.namespace_admin_not_found", ['ref' => $ns_to_be_removed->getName(),'me'=>$user_namespace->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+            throw new HexbatchNotFound(__("msg.namespace_admin_not_found", ['ref' => $ns_to_be_removed->getName(),'me'=>$user_namespace->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                 RefCodes::NAMESPACE_MEMBER_MISSING_ISSUE);
 
         }

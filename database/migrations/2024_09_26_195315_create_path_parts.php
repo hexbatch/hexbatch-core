@@ -271,7 +271,10 @@ return new class extends Migration
         });
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_path_parent_name ON path_parts (parent_path_part_id,path_part_name) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_path_parent_name ON path_parts (owning_path_id,path_part_name) NULLS NOT DISTINCT;");
+
+        DB::statement("CREATE UNIQUE INDEX idx_one_path_root_per_tree
+                                ON path_parts (owning_path_id, (parent_path_part_id IS NULL)) WHERE parent_path_part_id IS NULL;");
     }
 
     /**

@@ -8,6 +8,7 @@ use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\Path;
+use App\Models\PathPart;
 use App\Models\Server;
 use App\Models\TimeBound;
 use App\Models\User;
@@ -48,6 +49,7 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('element_type', ElementType::class);
         Route::model('server', Server::class);
         Route::model('path', Path::class);
+        Route::model('path_part', PathPart::class);
 
         $this->routes(function () {
             Route::middleware('api')

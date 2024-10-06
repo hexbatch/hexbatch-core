@@ -153,7 +153,7 @@ class PathPart extends Model
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = PathPart::buildPath(id:$first_id)->first();
+                    $ret = PathPart::buildPathPart(id:$first_id)->first();
                 }
             }
         }
@@ -173,7 +173,7 @@ class PathPart extends Model
 
     }
 
-    public static function buildPath(
+    public static function buildPathPart(
         ?int $id = null,
         ?int $owner_path_id = null,
         ?int $type_id = null,
@@ -253,7 +253,7 @@ class PathPart extends Model
     }
 
 
-    public static function collectPathPart(Collection|string $collect, Path $owner , ?PathPart $path = null ) : PathPart {
+    public static function collectPathPart(Collection|string $collect, Path $owner , ?PathPart $parent = null, ?PathPart $part = null ) : PathPart {
 
 
         try {
@@ -264,20 +264,13 @@ class PathPart extends Model
                  */
                 return (new PathPart())->resolveRouteBinding($collect);
             } else {
-                if (!$owner->namespace_owner->isNamespaceAdmin(Utilities::getCurrentNamespace())) {
-                    throw new HexbatchNotFound(
-                        __('msg.path_only_admin_can_edit',['ref'=>$path?->getName(),'ns'=>$owner->getName()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                        RefCodes::PATH_CANNOT_EDIT
-                    );
-                }
-                if(!$path) {
+                if(!$part) {
                     if ($collect->has('uuid')) {
                         $maybe_uuid = $collect->get('uuid');
                         if (is_string($maybe_uuid) && Utilities::is_uuid($maybe_uuid)) {
-                            /** @var PathPart $path */
-                            $path = (new PathPart())->resolveRouteBinding($maybe_uuid);
-                            if ($path->path_owner->ref_uuid !== $owner->ref_uuid) {
+                            /** @var PathPart $part */
+                            $part = (new PathPart())->resolveRouteBinding($maybe_uuid);
+                            if ($part->path_owner->ref_uuid !== $owner->ref_uuid) {
                                 throw new \LogicException("Mismatch of path owner and passed in owner ");
                             }
                         } else {
@@ -290,14 +283,30 @@ class PathPart extends Model
                         }
                     }
                 } else {
-                    $path = new PathPart();
+                    $part = new PathPart();
                 }
 
-                $path->editPath($collect,$owner);
+                if ($parent) {
+                    if ($part?->owning_path_id !== $parent->owning_path_id) {
+                        throw new HexbatchNotPossibleException(
+                            __('msg.part_parent_is_on_different_tree', ['parent' => $parent->getName(),$part->getName()]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                            RefCodes::PATH_NOT_FOUND
+                        );
+                    }
+                    $part->parent_path_part_id = $parent->id;
+                }
+                $part->owning_path_id = $parent->id;
+
+                //check to make sure same rule chain
+
+
+                $part->editPath($collect,$owner);
             }
 
             DB::commit();
-            return $path;
+            return $part;
+
         } catch (\Exception $e) {
             DB::rollBack();
             if ($e instanceof HexbatchCoreException) {
@@ -337,165 +346,158 @@ class PathPart extends Model
 
 
             if (!$this->path_part_name) {
-                $this->path_part_name = null;
+                throw new HexbatchNotPossibleException(
+                    __('msg.path_part_needs_name',['path'=>$owner->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::PATH_BAD_NAME);
             }
 
 
+            if (!$owner->isInUse()) {
+                if ($collect->has('parent')) {
+                    $maybe_uuid = $collect->get('parent');
+                    if (is_string($maybe_uuid)) {
+                        /** @var PathPart $parent_path */
+                        $parent_path = (new PathPart())->resolveRouteBinding($maybe_uuid);
+                        $this->parent_path_part_id = $parent_path->id;
 
-            $this->owning_path_id = $owner->id;
-
-
-            //todo need top down from the path, or at least better here
-            //todo make sure the path id is put into every part
-            if ($collect->has('parent')) {
-                $maybe_uuid = $collect->get('parent');
-                if (is_string($maybe_uuid)) {
-                    /** @var PathPart $parent_path */
-                    $parent_path = (new PathPart())->resolveRouteBinding($maybe_uuid);
-                    $this->parent_path_part_id = $parent_path->id;
-
-                } else {
-                    throw new HexbatchNotPossibleException(
-                        __('msg.path_parent_not_found', ['ref' => $maybe_uuid]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::PATH_SCHEMA_ISSUE);
+                    } else {
+                        throw new HexbatchNotPossibleException(
+                            __('msg.path_parent_not_found', ['ref' => $maybe_uuid]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::PATH_SCHEMA_ISSUE);
+                    }
                 }
-            }
 
 
-            if ($collect->has('location_bound')) {
-                $hint_location_bound = $collect->get('location_bound');
-                if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
-                    $bound = LocationBound::collectLocationBound($hint_location_bound);
-                    $this->path_location_bound_id = $bound->id;
+                if ($collect->has('location_bound')) {
+                    $hint_location_bound = $collect->get('location_bound');
+                    if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
+                        $bound = LocationBound::collectLocationBound($hint_location_bound);
+                        $this->path_location_bound_id = $bound->id;
+                    }
                 }
-            }
 
-            if ($collect->has('namespace')) {
-                $hint_namespace = $collect->get('namespace');
-                /** @var UserNamespace $namespace */
-                $namespace = (new UserNamespace())->resolveRouteBinding($hint_namespace);
-                $this->path_namespace_id = $namespace->id;
-            }
+                if ($collect->has('namespace')) {
+                    $hint_namespace = $collect->get('namespace');
+                    /** @var UserNamespace $namespace */
+                    $namespace = (new UserNamespace())->resolveRouteBinding($hint_namespace);
+                    $this->path_namespace_id = $namespace->id;
+                }
 
-            if ($collect->has('server')) {
-                $hint_server = $collect->get('server');
-                /** @var Server $server */
-                $server = (new Server())->resolveRouteBinding($hint_server);
-                $this->path_server_id = $server->id;
-            }
+                if ($collect->has('server')) {
+                    $hint_server = $collect->get('server');
+                    /** @var Server $server */
+                    $server = (new Server())->resolveRouteBinding($hint_server);
+                    $this->path_server_id = $server->id;
+                }
 
-            if ($collect->has('type')) {
-                $hint_type = $collect->get('type');
-                /** @var ElementType $type */
-                $type = (new ElementType())->resolveRouteBinding($hint_type);
-                $this->path_type_id = $type->id;
-            }
+                if ($collect->has('type')) {
+                    $hint_type = $collect->get('type');
+                    /** @var ElementType $type */
+                    $type = (new ElementType())->resolveRouteBinding($hint_type);
+                    $this->path_type_id = $type->id;
+                }
 
-            if ($collect->has('set')) {
-                $set_hint = $collect->get('set');
-                /** @var ElementSet $set */
-                $set = (new ElementSet())->resolveRouteBinding($set_hint);
-                $this->path_element_set_id = $set->id;
-            }
+                if ($collect->has('set')) {
+                    $set_hint = $collect->get('set');
+                    /** @var ElementSet $set */
+                    $set = (new ElementSet())->resolveRouteBinding($set_hint);
+                    $this->path_element_set_id = $set->id;
+                }
 
-            if ($collect->has('element')) {
-                $element_hint = $collect->get('element');
-                /** @var Element $element */
-                $element = (new Element())->resolveRouteBinding($element_hint);
-                $this->path_element_id = $element->id;
-            }
+                if ($collect->has('element')) {
+                    $element_hint = $collect->get('element');
+                    /** @var Element $element */
+                    $element = (new Element())->resolveRouteBinding($element_hint);
+                    $this->path_element_id = $element->id;
+                }
 
-            if ($collect->has('sorting')) {
-                $hint_sort = $collect->get('sorting');
-                /** @var Attribute $attr */
-                $attr = (new Attribute())->resolveRouteBinding($hint_sort);
-                $this->sorting_attribute_id = $attr->id;
-            }
+                if ($collect->has('sorting')) {
+                    $hint_sort = $collect->get('sorting');
+                    /** @var Attribute $attr */
+                    $attr = (new Attribute())->resolveRouteBinding($hint_sort);
+                    $this->sorting_attribute_id = $attr->id;
+                }
 
-            if ($collect->has('attribute')) {
-                $attribute_type = $collect->get('attribute');
-                /** @var Attribute $sorter */
-                $sorter = (new Attribute())->resolveRouteBinding($attribute_type);
-                $this->path_attribute_id = $sorter->id;
-            }
-
+                if ($collect->has('attribute')) {
+                    $attribute_type = $collect->get('attribute');
+                    /** @var Attribute $sorter */
+                    $sorter = (new Attribute())->resolveRouteBinding($attribute_type);
+                    $this->path_attribute_id = $sorter->id;
+                }
 
 
-            if ($collect->has('is_partial_matching_name')) {
-                $this->is_partial_matching_name = Utilities::boolishToBool($collect->get('is_partial_matching_name',false));
-            }
+                if ($collect->has('is_partial_matching_name')) {
+                    $this->is_partial_matching_name = Utilities::boolishToBool($collect->get('is_partial_matching_name', false));
+                }
 
-            if ($collect->has('is_sorting_order_asc')) {
-                $this->is_sorting_order_asc = Utilities::boolishToBool($collect->get('is_sorting_order_asc',false));
-            }
-
-
-
-            if ($collect->has('path_min_gap')) {
-                $this->path_min_gap = intval($collect->get('path_min_gap'));
-            }
-
-            if ($collect->has('path_max_gap')) {
-                $this->path_max_gap = intval($collect->get('path_max_gap'));
-            }
-
-            if ($collect->has('path_result_limit')) {
-                $this->path_result_limit = intval($collect->get('path_result_limit'));
-            }
-
-            if ($collect->has('path_min_count')) {
-                $this->path_min_count = intval($collect->get('path_min_count'));
-            }
-
-            if ($collect->has('path_max_count')) {
-                $this->path_max_count = intval($collect->get('path_max_count'));
-            }
+                if ($collect->has('is_sorting_order_asc')) {
+                    $this->is_sorting_order_asc = Utilities::boolishToBool($collect->get('is_sorting_order_asc', false));
+                }
 
 
-            if ($collect->has('path_start_at')) {
-                $this->path_start_at = Carbon::parse($collect->get('path_start_at'))->setTimezone(config('app.timezone'));
-            }
+                if ($collect->has('path_min_gap')) {
+                    $this->path_min_gap = intval($collect->get('path_min_gap'));
+                }
 
-            if ($collect->has('path_end_at')) {
-                $this->path_end_at = Carbon::parse($collect->get('path_end_at'))->setTimezone(config('app.timezone'));
-            }
+                if ($collect->has('path_max_gap')) {
+                    $this->path_max_gap = intval($collect->get('path_max_gap'));
+                }
 
+                if ($collect->has('path_result_limit')) {
+                    $this->path_result_limit = intval($collect->get('path_result_limit'));
+                }
 
+                if ($collect->has('path_min_count')) {
+                    $this->path_min_count = intval($collect->get('path_min_count'));
+                }
 
-
-            if ($collect->has('filter_json_path')) {
-                $this->filter_json_path = $collect->get('filter_json_path');
-                Utilities::testValidJsonPath($this->filter_json_path);
-            }
-
-            if ($collect->has('sort_json_path')) {
-                $this->sort_json_path = $collect->get('sort_json_path');
-                Utilities::testValidJsonPath($this->sort_json_path);
-            }
-
+                if ($collect->has('path_max_count')) {
+                    $this->path_max_count = intval($collect->get('path_max_count'));
+                }
 
 
-            if ($collect->has('path_relationship')) {
-                $this->path_relationship = PathRelationshipType::tryFromInput($collect->get('path_relationship'));
-            }
+                if ($collect->has('path_start_at')) {
+                    $this->path_start_at = Carbon::parse($collect->get('path_start_at'))->setTimezone(config('app.timezone'));
+                }
 
-            if ($collect->has('time_comparison')) {
-                $this->time_comparison = TimeComparisonType::tryFromInput($collect->get('time_comparison'));
-            }
+                if ($collect->has('path_end_at')) {
+                    $this->path_end_at = Carbon::parse($collect->get('path_end_at'))->setTimezone(config('app.timezone'));
+                }
 
-            if ($collect->has('path_returns')) {
-                $this->path_returns = PathReturnsType::tryFromInput($collect->get('path_returns'));
-            }
 
-            if ($collect->has('path_child_logic')) {
-                $this->path_child_logic = TypeOfChildLogic::tryFromInput($collect->get('path_child_logic'));
-            }
+                if ($collect->has('filter_json_path')) {
+                    $this->filter_json_path = $collect->get('filter_json_path');
+                    Utilities::testValidJsonPath($this->filter_json_path);
+                }
 
-            if ($collect->has('path_logic')) {
-                $this->path_logic = TypeOfChildLogic::tryFromInput($collect->get('path_logic'));
-            }
+                if ($collect->has('sort_json_path')) {
+                    $this->sort_json_path = $collect->get('sort_json_path');
+                    Utilities::testValidJsonPath($this->sort_json_path);
+                }
 
+
+                if ($collect->has('path_relationship')) {
+                    $this->path_relationship = PathRelationshipType::tryFromInput($collect->get('path_relationship'));
+                }
+
+                if ($collect->has('time_comparison')) {
+                    $this->time_comparison = TimeComparisonType::tryFromInput($collect->get('time_comparison'));
+                }
+
+                if ($collect->has('path_returns')) {
+                    $this->path_returns = PathReturnsType::tryFromInput($collect->get('path_returns'));
+                }
+
+                if ($collect->has('path_child_logic')) {
+                    $this->path_child_logic = TypeOfChildLogic::tryFromInput($collect->get('path_child_logic'));
+                }
+
+                if ($collect->has('path_logic')) {
+                    $this->path_logic = TypeOfChildLogic::tryFromInput($collect->get('path_logic'));
+                }
+            } //end if not in use
 
 
             try {
@@ -507,11 +509,48 @@ class PathPart extends Model
                     RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
             }
 
+            if ($collect->has('children')) {
+                $myself_as_parent = Path::buildPath(id:$this->id)->first();
+                collect($collect->get('children'))->each(function ($hint_child, int $key) use($myself_as_parent,$owner) {
+                    Utilities::ignoreVar($key);
+                    PathPart::collectPathPart(collect: $hint_child, owner: $owner, parent: $myself_as_parent);
+                });
+            }
+
 
             DB::commit();
 
 
         } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function checkPartOwnership(Path $owner) {
+        if ($this->id && $this->owning_path_id !== $owner->id) {
+
+            throw new HexbatchNotFound(
+                __('msg.path_owner_does_not_match_part_given',['ref'=>$this->getName(),'path'=>$owner->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::RULE_NOT_FOUND
+            );
+        }
+    }
+
+    public function delete_subtree() :void {
+        if ($this->path_owner->isInUse()) {
+            throw new HexbatchNotFound(
+                __('msg.path_cannot_be_changed_if_in_use',['ref'=>$this->path_owner->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::PATH_NOT_FOUND
+            );
+        }
+        try {
+            DB::beginTransaction();
+            $this->delete();
+            DB::commit();
+        }catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }

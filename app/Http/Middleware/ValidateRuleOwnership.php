@@ -3,13 +3,16 @@
 namespace App\Http\Middleware;
 
 use App\Models\Attribute;
-use App\Models\ElementType;
+use App\Models\AttributeRule;
 use App\Models\UserNamespace;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class ValidateAttributeOwnership
+/**
+ * makes sure the rule belongs to the attribute
+ */
+class ValidateRuleOwnership
 {
     /**
      * See if the owner of the namespace
@@ -26,24 +29,24 @@ class ValidateAttributeOwnership
             throw new \LogicException("There is no attribute found in the route when asking for it");
         }
         if (!$attribute instanceof Attribute) {
-            throw new \LogicException("ValidateAttributeOwnership does not see an attribute in the parameter");
+            throw new \LogicException("ValidateRuleOwnership does not see an attribute in the parameter");
         }
 
         /**
-         * @var ElementType $owner
+         * @var AttributeRule $rule
          */
-        $owner = $request->route('element_type');
-        if (!$owner ) {
+        $rule = $request->route('attribute_rule');
+        if (!$rule ) {
             throw new \LogicException("There is no element_type found in the route when asking for it");
         }
-        if (!$owner instanceof ElementType) {
-            throw new \LogicException("ValidateAttributeOwnership does not see an element_type in the parameter");
+        if (!$rule instanceof AttributeRule) {
+            throw new \LogicException("ValidateRuleOwnership does not see a rule in the parameter");
         }
-        $this->checkPermission($attribute,$owner);
+        $this->checkPermission($attribute,$rule);
         return $next($request);
     }
 
-    protected function checkPermission(Attribute $attribute,ElementType $owner) {
-        $attribute->checkAttributeOwnership($owner);
+    protected function checkPermission(Attribute $attribute,AttributeRule $rule) {
+        $rule->checkRuleOwnership($attribute);
     }
 }

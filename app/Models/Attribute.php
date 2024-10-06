@@ -120,7 +120,8 @@ class Attribute extends Model
     }
 
     public function top_rule() : BelongsTo {
-        return $this->belongsTo(AttributeRule::class,'owning_attribute_id');
+        return $this->belongsTo(AttributeRule::class,'owning_attribute_id')
+            ->whereNull('parent_rule_id');
     }
 
 

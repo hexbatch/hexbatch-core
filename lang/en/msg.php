@@ -68,19 +68,13 @@ return [
     'attribute_cannot_use_map' => 'Attribute :ref can only use shapes and not maps',
     'attribute_cannot_use_design' => 'Attribute :ref can only be used for a design for :me if you are a member of its namespace and its not retired',
 
-    'rule_needs_type' => 'Each rule needs a rule_type set. Nothing was set',
-    'rule_needs_type_found_bad' => 'Each rule needs a rule_type set. Found :bad_type',
-    'rule_can_only_target_attributes_user_can_see' => 'The attribute :ref is not visible at all to the user, so cannot be added to a rule',
-    'rule_can_use_group_if_admin' => 'You are not an admin of the  group :ref, so cannot be added to a rule',
     'rule_not_found' => 'The rule was not found by :ref',
     'parent_rule_not_found' => 'The parent rule was not found by the uuid :ref',
-    'rule_not_used_by_attribute' => 'The rule :rule is not used by attribute :attr',
-    'rule_cannot_be_deleted_if_in_use' => 'The rule :rule cannot be deleted because its in use by pending things',
-    'rule_requirement_failed' => 'This attribute, ":ref" has forbidden the type from having this combination of attributes in the type',
+    'rule_cannot_be_deleted_if_in_use' => 'The rule :ref cannot be deleted because its in use by pending things',
     'rule_cannot_be_edited' => 'The rule :ref cannot be edited because:  :error',
     'rule_parent_child_be_same_chain' => 'The rules :ref and :other have to share the same attribute',
-    'rule_tree_element_permissions' => 'The rule :ref is trying to use :element , but you are not in the namespace admin for that element',
-
+    'rule_owner_does_not_match_attribute_given' => 'The rule given :ref is not owned by the attribute :attribute',
+    'rules_already_exist' => 'The attribute :ref already has rules, you can update them',
 
     //remotes
     'remote_not_found' => 'Remote not found using :ref',
@@ -119,6 +113,7 @@ return [
     'type_only_admin_can_edit' => 'Only the admins in :ns can edit the type :ref',
     'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements, no children',
     'type_cannot_be_edited' => 'The type :ref cannot be edited',
+    'type_in_use' => 'The type :ref is in use, or has been published, so cannot be significantly changed',
 
     //elements
     'element_not_found' => 'Element not found using :ref',
@@ -128,12 +123,14 @@ return [
 
     //paths
     'path_not_found' => 'Path not found using :ref',
-    'path_only_admin_can_edit' => 'Only the admins in :ns can edit the path :ref',
     'path_parent_not_found' => 'Cannot find the parent path using :ref',
     'path_needs_name' => 'Each path must be named unique to the namespace',
+    'path_part_needs_name' => 'Each path part must be named unique to the path :path',
     'path_tree_element_permissions' => 'The path :ref is trying to use :element , but you are not in the namespace admin for that element',
     'path_cannot_be_edited' => 'The path :ref cannot be edited because:  :error',
-
+    'path_owner_does_not_match_part_given' => 'The part given :ref is not owned by the path :path',
+    'path_cannot_be_changed_if_in_use' => 'The path :ref cannot be edited because its in use by pending things',
+    'part_parent_is_on_different_tree' => 'The parent given :parent is on a different path tree than this child :child',
 
 
 ];
