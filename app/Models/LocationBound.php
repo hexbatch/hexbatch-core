@@ -244,11 +244,11 @@ class LocationBound extends Model
         $this->location_type = $shape_type;
     }
 
-    /**
-     * @param string $location_json_to_ping
-     * @return bool
-     */
-    public function ping(string $location_json_to_ping) : bool {
+
+    public function ping(string|array $location_json_to_ping) : bool {
+        if (is_array($location_json_to_ping)) {
+            $location_json_to_ping = Utilities::maybeDecodeJson($location_json_to_ping);
+        }
         try {
             Validator::make(['location' => $location_json_to_ping], [
                 'location' => ['required', new GeoJsonReq],

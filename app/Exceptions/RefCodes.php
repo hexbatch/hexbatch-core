@@ -61,6 +61,7 @@ class RefCodes {
 
     const RULE_SCHEMA_ISSUE = 4100;
     const RULE_NOT_FOUND = 4101;
+    const RULE_CANNOT_DELETE = 4102;
 
     //remotes start at 5000
 
@@ -78,9 +79,12 @@ class RefCodes {
     const TYPE_NOT_FOUND = 7001;
     const TYPE_ONLY_OWNER_CAN_DELETE = 7004;
     const TYPE_CANNOT_DELETE = 7005;
+
     const TYPE_INVALID_NAME = 7006;
     const TYPE_BAD_SCHEMA = 7007;
     const TYPE_CANNOT_INHERIT = 7008;
+
+    const TYPE_CANNOT_EDIT = 7010;
 
     //elements start at 8000
 
@@ -88,6 +92,12 @@ class RefCodes {
 
     //sets start at 9000
 
+    // paths start at 10000
+    const PATH_NOT_FOUND =  10001;
+    const PATH_CANNOT_EDIT =  10002;
+    const PATH_BAD_NAME =  10003;
+
+    const PATH_SCHEMA_ISSUE = 10004;
 
     const URLS = [
         self::JSON_ISSUE => '',
@@ -131,6 +141,8 @@ class RefCodes {
         self::ATTRIBUTE_CANNOT_DELETE => '',
 
         self::RULE_SCHEMA_ISSUE => '',
+        self::RULE_NOT_FOUND => '',
+        self::RULE_CANNOT_DELETE => '',
 
         self::REMOTE_NOT_FOUND => '',
         self::REMOTE_SCHEMA_ISSUE => '',
@@ -145,8 +157,13 @@ class RefCodes {
         self::TYPE_INVALID_NAME => '',
         self::TYPE_BAD_SCHEMA => '',
         self::TYPE_CANNOT_INHERIT => '',
+        self::TYPE_CANNOT_EDIT => '',
 
         self::ELEMENT_NOT_FOUND => '',
+
+        self::PATH_NOT_FOUND => '',
+        self::PATH_CANNOT_EDIT => '',
+        self::PATH_BAD_NAME => '',
 
     ];
 }

@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  */
-class AttributeRuleResource extends JsonResource
+class PathResource extends JsonResource
 {
 
     protected int $n_display_level = 1;
@@ -30,14 +30,14 @@ class AttributeRuleResource extends JsonResource
         }
         else if ($this->n_display_level === 1) {
             $arr =  [
-                'name' => $this->rule_name,
+
                 'uuid' => $this->ref_uuid
 
             ];
         }
         else {
            $arr = [
-               'name' => $this->rule_name,
+
                'uuid' => $this->ref_uuid
            ];
 

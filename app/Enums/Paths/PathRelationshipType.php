@@ -29,6 +29,8 @@ enum PathRelationshipType : string {
   case ANCESTOR = 'ancestor';
   case DESCENDANT = 'descendant';
   case NAMESPACE_OWNS_ELEMENT = 'namespace_owns_element';
+  case IN_SUBTYPE = 'in_subtype';
+  case THING_SET = 'thing_set';
   case NAMESPACE_OWNS_TYPE = 'namespace_owns_type';
 
   case MEMBER_OF_NAMESPACE = 'member_of_namespace';

@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string updated_at
  *
  * @property UserNamespace element_namespace
- *
  */
 class Element extends Model
 {
@@ -57,10 +56,12 @@ class Element extends Model
      * @var array<string, string>
      */
     protected $casts = [];
-    public function element_namespace(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\User', 'element_owner_user_id');
+
+
+    public function element_namespace() : BelongsTo {
+        return $this->belongsTo(UserNamespace::class,'element_namespace_id');
     }
+
 
     public static function buildElement(
         ?int $id = null)
@@ -77,6 +78,9 @@ class Element extends Model
         if ($id) {
             $build->where('elements.id', $id);
         }
+
+        /** @uses Element::element_namespace() */
+        $build->with('element_namespace');
 
         return $build;
     }

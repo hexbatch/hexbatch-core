@@ -3,12 +3,8 @@
 namespace App\Models;
 
 
-use App\Enums\Attributes\TypeOfAttributeAccess;
-use App\Enums\Attributes\AttributeRuleType;
-use App\Enums\Bounds\TypeOfLocation;
+
 use App\Enums\Types\TypeOfApproval;
-use App\Exceptions\HexbatchPermissionException;
-use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -74,13 +70,6 @@ class ElementTypeHorde extends Model
         return $horde;
     }
 
-    public static function checkAttributeConflicts(ElementType $parent) :void {
-
-        //todo check the rule chain for the required here
-
-        //finally update the map info in the type
-        $parent->sumMapFromAttributes();
-    }
 
 
     public static function getDecendants(Attribute $attribute) : Builder {

@@ -100,7 +100,7 @@ return new class extends Migration
         });
 
         DB::statement("ALTER TABLE element_types
-                              Add COLUMN type_sum_geom_map
+                              Add COLUMN type_sum_geom_shape
                               geometry
                               ;
                     ");
@@ -151,7 +151,7 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final');
-            $table->dropColumn('type_sum_geom_map');
+            $table->dropColumn('type_sum_geom_shape');
             $table->dropColumn('lifecycle');
 
 

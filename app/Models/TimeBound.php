@@ -75,7 +75,7 @@ class TimeBound extends Model
     }
 
     public function time_spans() : HasMany {
-        return $this->hasMany('App\Models\TimeBoundSpan')
+        return $this->hasMany(TimeBoundSpan::class)
             ->orderBy('span_start');
     }
 

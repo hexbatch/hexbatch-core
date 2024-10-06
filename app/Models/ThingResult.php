@@ -4,7 +4,6 @@ namespace App\Models;
 
 
 use App\Enums\Things\TypeUserFollowup;
-use App\Enums\Types\TypeOfServerWhitelist;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;

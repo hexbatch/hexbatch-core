@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\Bounds\TypeOfLocation;
+use App\Enums\Things\TypeOfThingStatus;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Enums\Types\TypeOfWhitelistPermission;
+use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -20,8 +22,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-//todo type construction (except user tokens) takes place in the owning namespace's home set,
-// the rules can react there when creation events to things in the set, the paths in the rules can filter about whose home set we want
+
 
 
 /**
@@ -29,7 +30,7 @@ use Illuminate\Validation\ValidationException;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int owner_namespace_id
- * @property int parent_imported_type_id
+ * @property int imported_from_server_id
  * @property int type_time_bound_id
  * @property int type_location_map_bound_id
  * @property int type_bound_path_id
@@ -37,15 +38,16 @@ use Illuminate\Validation\ValidationException;
  * @property bool is_system
  * @property bool is_final
  * @property string ref_uuid
- * @property string type_sum_geom_map
+ * @property string type_sum_geom_shape
  * @property string type_name
  * @property TypeOfLifecycle lifecycle
  *
  * @property UserNamespace owner_namespace
  * @property Attribute[] type_attributes
  * @property ElementType[] type_parents
- * @property ElementTypeHorde[] type_hordes
  * @property ElementTypeWhitelist[] type_whitelists
+ * @property LocationBound type_map
+ * @property TimeBound type_time
  *
  * @property string created_at
  * @property string updated_at
@@ -84,27 +86,50 @@ class ElementType extends Model
         'lifecycle'=> TypeOfLifecycle::class
     ];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (ElementType $type) {
+
+
+            if ($type->type_time_bound_id) {
+                $count_times = ElementType::where('type_time_bound_id',$type->type_time_bound_id)->whereNot('id',$this->id)->count();
+                if (!$count_times) {
+                    $type->type_time->delete();
+                }
+            }
+
+            if ($type->type_location_map_bound_id) {
+                $count_times = ElementType::where('type_location_map_bound_id',$type->type_location_map_bound_id)->whereNot('id',$this->id)->count();
+                if (!$count_times) {
+                    $type->type_map->delete();
+                }
+            }
+        });
+    }
+
     public function type_owner() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'owner_namespace_id');
+    }
+
+    public function type_map() : BelongsTo {
+        return $this->belongsTo(LocationBound::class,'type_location_map_bound_id')
+            ->where('location_type',TypeOfLocation::MAP);
+    }
+
+    public function type_time() : BelongsTo {
+        return $this->belongsTo(TimeBound::class,'type_time_bound_id');
     }
 
 
 
     public function type_attributes() : HasMany {
-        return $this->hasMany('App\Models\Attribute','owner_element_type_id','id');
+        return $this->hasMany(Attribute::class,'owner_element_type_id','id');
     }
 
     public function type_whitelists() : HasMany {
         return $this->hasMany(ElementTypeWhitelist::class,'whitelist_owning_type_id','id');
     }
 
-    public function type_hordes() : HasMany {
-        return $this->hasMany(ElementTypeHorde::class,'horde_type_id','id')
-            /**
-             * @uses ElementTypeHorde::horde_attribute()
-             */
-            ->with('horde_attribute');
-    }
     public function type_children() : HasMany {
         return $this->hasMany(ElementType::class,'parent_type_id','id');
     }
@@ -124,8 +149,8 @@ class ElementType extends Model
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
             /** @uses ElementType::type_owner(), ElementType::type_attributes(), ElementType::type_whitelists() */
-            /** @uses ElementType::type_children(),ElementType::type_parents() */
-            ->with('type_owner', 'type_attributes', 'type_children', 'type_parents','type_whitelists')
+            /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_map(),ElementType::type_time() */
+            ->with('type_owner', 'type_attributes', 'type_children', 'type_parents','type_whitelists','type_map','type_time')
             ;
 
         if ($id) {
@@ -202,17 +227,22 @@ class ElementType extends Model
     public function isInUse() : bool {
         if (Element::where('element_parent_type_id',$this->id)->count() ) {return true;}
         if (ElementTypeParent::where('parent_type_id',$this->id)->count() ) {return true;}
-        if (ElementTypeHorde::where('horde_type_id',$this->id)->count() ) {return true;}
+        if (Thing::where('thing_type_id',$this->id)->where('thing_status',TypeOfThingStatus::THING_PENDING)->count() ) {return true;}
 
+        //and cannot delete if in a path used by a thing
+        if (Path::buildPath(pending_thing_type_id: $this->id)->exists() ) { return true;}
         return false;
     }
 
-    public function canNamespaceEdit(UserNamespace $namespace) : bool {
-        return (bool)$this->type_owner?->isNamespaceAdmin($namespace) ;
-    }
+    public function checkCurrentEditAbility() :void {
+        if (!$this->owner_namespace->isUserAdmin(Utilities::getCurrentNamespace())) {
 
-    public function canNamespaceViewDetails(UserNamespace $namespace) : bool {
-        return (bool)$this->type_owner?->isNamespaceMember($namespace) ;
+            throw new HexbatchNotFound(
+                __('msg.type_only_admin_can_edit',['ref'=>$this->getName(),'ns'=>$this->owner_namespace->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::TYPE_CANNOT_EDIT
+            );
+        }
     }
 
     public function canNamespaceInherit(UserNamespace $namespace) : bool {
@@ -224,18 +254,19 @@ class ElementType extends Model
     }
 
 
-    public function sumMapFromAttributes() {
-        //then for the attributes that have a map, do a union of their geometries and store in type_sum_geom_map
+
+    public function sumShapeFromAttributes() {
+        //then for the attributes that have a shape, do a union of their geometries and store in type_sum_geom_shape
         $id = $this->id;
         DB::statement("
             UPDATE element_types
-            SET type_sum_geom_map=subquery.sum_geo
+            SET type_sum_geom_shape=subquery.sum_geo
 
             FROM (
                     SELECT t.id as element_type_id , ST_Union(b.geom) as sum_geo
                     FROM  element_types t
                     INNER JOIN attributes a  ON a.owner_element_type_id = t.id
-                    INNER JOIN location_bounds b  ON a.attribute_location_bound_id = b.id AND b.location_type = 'map'
+                    INNER JOIN location_bounds b  ON a.attribute_location_bound_id = b.id AND b.location_type = 'shape'
                     WHERE t.id = $id
                     GROUP BY t.id
                     ) AS subquery
@@ -244,102 +275,179 @@ class ElementType extends Model
 
     }
 
+
+    public static function collectType(Collection $collect, ?Server $parent_server = null) : ElementType {
+        try {
+            DB::beginTransaction();
+            if (is_string($collect) && Utilities::is_uuid($collect)) {
+                /**
+                 * @var ElementType
+                 */
+                return (new ElementType())->resolveRouteBinding($collect);
+            } else {
+
+                if ($collect->has('uuid')) {
+                    $maybe_uuid = $collect->get('uuid');
+                    if (is_string($maybe_uuid) &&  Utilities::is_uuid($maybe_uuid) ) {
+                        $element_type =  (new ElementType())->resolveRouteBinding($maybe_uuid);
+                    } else {
+
+                        throw new HexbatchNotFound(
+                            __('msg.type_not_found',['ref'=>(string)$maybe_uuid]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                            RefCodes::TYPE_NOT_FOUND
+                        );
+                    }
+                } else {
+                    $element_type = new ElementType();
+                    if ($parent_server) {
+                        $element_type->imported_from_server_id = $parent_server->id;
+                    }
+                }
+
+                $element_type->editType($collect);
+            }
+
+            DB::commit();
+            return $element_type;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            if ($e instanceof HexbatchCoreException) {
+                throw $e;
+            }
+            throw new HexbatchNotPossibleException(
+                $e->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+
+        }
+    }
+
     /**
-     * @throws ValidationException
+     * @throws \Exception
      */
-    public function editType(Collection $collect) : void {
+    public  function editType(Collection $collect) : void {
         try
         {
             DB::beginTransaction();
 
-            if ($this->isInUse()) {
-                //todo update this
+            if ($collect->has('is_final')) {
                 $this->is_final = Utilities::boolishToBool($collect->get('is_final',false));
-                $this->save();
-                return;
             }
 
-
-            if ($collect->has('parents')) {
-
-                collect($collect->get('parents'))->each(function ($some_parent_hint, int $key) {
-                    Utilities::ignoreVar($key);
-                    if (!is_string($some_parent_hint)) {
-                        throw new HexbatchNotPossibleException(__('msg.child_types_must_be_string_names'),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::TYPE_BAD_SCHEMA);
-                    }
-                    /**
-                     * @var ElementType|null $some_parent
-                     */
-                    $some_parent = (new ElementType())->resolveRouteBinding($some_parent_hint);
-                    $user_namespace = Utilities::getCurrentNamespace();
-                    //todo update this
-                    if ( $some_parent->is_final || !$some_parent->canNamespaceInherit($user_namespace)) {
-                        throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::TYPE_CANNOT_INHERIT);
-                    }
-                    ElementTypeParent::addParent($some_parent, $this);
-                });
+            if ($collect->has('lifecycle')) {
+                $maybe_valid_lifecycle = TypeOfLifecycle::tryFromInput($collect->get('lifecycle'));
+                if (in_array($maybe_valid_lifecycle,[TypeOfLifecycle::RETIRED,TypeOfLifecycle::SUSPENDED])) {
+                    $this->lifecycle = $maybe_valid_lifecycle;
+                }
             }
 
-            if ($collect->has('type_name')) {
-                try {
-                    if ($this->type_name = $collect->get('type_name')) {
-                        Validator::make(['type_name' => $this->type_name], [
-                            'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type)],
-                        ])->validate();
+            if ($collect->has('description_element')) {
+                $describe_hint_here = $collect->get('description_element');
+                if (!is_string($describe_hint_here) || !Utilities::is_uuid($describe_hint_here)) {
+                    throw new HexbatchNotPossibleException(__('msg.type_descriptions_must_be_uuid'),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::TYPE_BAD_SCHEMA);
+                }
+                /**
+                 * @var Element|null $de_element
+                 */
+                $de_element = (new Element())->resolveRouteBinding($describe_hint_here);
+                $this->type_description_element_id = $de_element;
+            }
+
+            if (!$this->isInUse()) {
+
+
+                $this->owner_namespace_id = Utilities::getCurrentNamespace()->id;
+
+                if ($collect->has('parents')) {
+
+                    collect($collect->get('parents'))->each(function ($some_parent_hint, int $key) {
+                        Utilities::ignoreVar($key);
+                        if (!is_string($some_parent_hint)) {
+                            throw new HexbatchNotPossibleException(__('msg.parent_types_must_be_string_names'),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::TYPE_BAD_SCHEMA);
+                        }
+                        /**
+                         * @var ElementType|null $some_parent
+                         */
+                        $some_parent = (new ElementType())->resolveRouteBinding($some_parent_hint);
+
+                        ElementTypeParent::addParent($some_parent, $this);
+                    });
+                }
+
+                if ($collect->has('type_name')) {
+                    try {
+                        if ($this->type_name = $collect->get('type_name')) {
+                            Validator::make(['type_name' => $this->type_name], [
+                                'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type)],
+                            ])->validate();
+                        }
+                    } catch (ValidationException $v) {
+                        throw new HexbatchNotPossibleException($v->getMessage(),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::TYPE_INVALID_NAME);
                     }
-                } catch (ValidationException $v) {
-                    throw new HexbatchNotPossibleException($v->getMessage(),
+                }
+
+                if (!$this->type_name && !$this->id) {
+                    throw new HexbatchNotPossibleException(__('msg.type_must_have_name'),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::TYPE_INVALID_NAME);
                 }
-            }
-
-            if (!$this->type_name && !$this->id) {
-                throw new HexbatchNotPossibleException(__('msg.type_must_have_name'),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::TYPE_INVALID_NAME);
-            }
 
 
-            if ($collect->has('time_bound')) {
-                $hint_time_bound = $collect->get('time_bound');
-                if (is_string($hint_time_bound) || $hint_time_bound instanceof Collection) {
-                    $time_bound = TimeBound::collectTimeBound($hint_time_bound);
-                    $this->type_time_bound_id = $time_bound->id;
-                }
-            }
-
-            if ($collect->has('map_bound')) {
-                $hint_location_bound = $collect->get('map_bound');
-                if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
-                    $bound = LocationBound::collectLocationBound($hint_location_bound);
-                    if ($bound->location_type === TypeOfLocation::SHAPE) {
-                        throw new HexbatchNotPossibleException(__('msg.type_must_have_map_bound'),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::TYPE_BAD_SCHEMA);
+                if ($collect->has('time_bound')) {
+                    $hint_time_bound = $collect->get('time_bound');
+                    if (is_string($hint_time_bound) || $hint_time_bound instanceof Collection) {
+                        $time_bound = TimeBound::collectTimeBound($hint_time_bound);
+                        $this->type_time_bound_id = $time_bound->id;
                     }
-                    $this->type_location_map_bound_id = $bound->id;
                 }
-            }
 
-
-            if ($collect->has('path_bound')) {
-                $hint_path_bound = $collect->get('path_bound');
-                if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
-                    $path = Path::collectPath($hint_path_bound);
-                    $this->type_bound_path_id = $path->id;
+                if ($collect->has('map_bound')) {
+                    $hint_location_bound = $collect->get('map_bound');
+                    if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
+                        $bound = LocationBound::collectLocationBound($hint_location_bound);
+                        if ($bound->location_type === TypeOfLocation::SHAPE) {
+                            throw new HexbatchNotPossibleException(__('msg.type_must_have_map_bound'),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::TYPE_BAD_SCHEMA);
+                        }
+                        $this->type_location_map_bound_id = $bound->id;
+                    }
                 }
-            }
-            $this->save();
 
-            collect($collect->get('attributes'))->each(function ($some_attribute_hint, int $key) {
-                Utilities::ignoreVar($key);
-                Attribute::collectAttribute($some_attribute_hint,$this);
-            });
+
+                if ($collect->has('path_bound')) {
+                    $hint_path_bound = $collect->get('path_bound');
+                    if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
+                        $path = Path::collectPath($hint_path_bound);
+                        $this->type_bound_path_id = $path->id;
+                    }
+                }
+
+                try {
+                    $this->save();
+                } catch (\Exception $f) {
+                    throw new HexbatchNotPossibleException(
+                        __('msg.type_cannot_be_edited', ['ref' => $this->getName(), 'error' => $f->getMessage()]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::TYPE_CANNOT_EDIT);
+                }
+
+                collect($collect->get('attributes'))->each(function ($some_attribute_hint, int $key) {
+                    Utilities::ignoreVar($key);
+                    if ($some_attribute_hint instanceof Collection) {
+                        Attribute::collectAttribute(collect: $some_attribute_hint, owner: $this);
+                    }
+                });
+
+                $this->sumShapeFromAttributes();
+            }
 
             DB::commit();
         } catch (\Exception $e) {

@@ -26,7 +26,7 @@ class ValidateNamespaceOwner
         if (!$namespace ) {
             throw new \LogicException("There is no namespace found in the route when asking for it");
         }
-        if ($namespace instanceof UserNamespace) {
+        if (!$namespace instanceof UserNamespace) {
             throw new \LogicException("ValidateNamespaceOwner does not see a Namespace in the parameter");
         }
         $this->checkPermission($namespace);

@@ -27,6 +27,8 @@ use App\Models\User;
 // Remote has some standard attributes that are inherited, but will be added later
 // standard type to show that this is the caller's type in the paths
 // standard set to show that this is the caller's set in the paths
+// standard attribute to show that this is the rules' attribute in the paths
+// standard element to show that this is the caller element in the paths
 
 // todo add the following types (inherit from the this_server),
 //  story, blog, post, news, message
@@ -85,6 +87,8 @@ use App\Models\User;
 //todo type type_description, standard global set type description these all go into
 
 //todo type path_description, standard global set path description these all go into
+
+//todo each iso top level language and each iso region needs its own local type, base local, then local->language and local->region then the langs and region code
 
 /**
  * Standard attributes are all final, except for the ones that are parents.

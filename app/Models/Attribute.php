@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
-use App\Enums\Attributes\AttributeServerAccessType;
+use App\Enums\Attributes\TypeOfAttributeServerAccess;
 use App\Enums\Attributes\TypeOfAttributeAccess;
 use App\Enums\Attributes\TypeOfEncryptionPolicy;
 use App\Enums\Attributes\TypeOfSetValuePolicy;
+use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Rules\TypeMergeJson;
+use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Standard\StandardAttributes;
 use App\Helpers\Utilities;
+use App\Rules\AttributeNameReq;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -21,6 +24,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 
 /**
@@ -35,7 +40,7 @@ use Illuminate\Support\Facades\Route;
  * @property bool is_final_parent
  * @property bool is_system
  * @property bool is_final
- * @property AttributeServerAccessType server_access_type
+ * @property TypeOfAttributeServerAccess server_access_type
  * @property TypeOfAttributeAccess attribute_access_type
  * @property string ref_uuid
  * @property TypeMergeJson popped_writing_method
@@ -44,7 +49,7 @@ use Illuminate\Support\Facades\Route;
  * @property TypeOfEncryptionPolicy encryption_policy
  * @property TypeOfSetValuePolicy set_value_policy
  * @property ArrayObject attribute_value
- * @property ArrayObject attribute_shape_display
+ * @property ArrayObject attribute_shape_setting
  * @property string value_json_path
  * @property string attribute_name
  *
@@ -58,7 +63,8 @@ use Illuminate\Support\Facades\Route;
  * @property ElementType type_owner
  *
  * @property TimeBound attribute_time_bound
- * @property LocationBound attribute_location_bound
+ * @property LocationBound attribute_shape_bound
+ * @property AttributeRule top_rule
  */
 class Attribute extends Model
 {
@@ -87,8 +93,8 @@ class Attribute extends Model
      */
     protected $casts = [
         'attribute_value' => AsArrayObject::class,
-        'attribute_shape_display' => AsArrayObject::class,
-        'server_access_type' => AttributeServerAccessType::class,
+        'attribute_shape_setting' => AsArrayObject::class,
+        'server_access_type' => TypeOfAttributeServerAccess::class,
         'attribute_access_type' => TypeOfAttributeAccess::class,
         'popped_writing_method' => TypeMergeJson::class,
         'live_merge_method' => TypeMergeJson::class,
@@ -97,30 +103,11 @@ class Attribute extends Model
         'set_value_policy' => TypeOfSetValuePolicy::class,
     ];
 
-    protected static function booted(): void
-    {
-        static::deleting(function (Attribute $attribute) {
 
-
-            if ($attribute->attribute_time_bound_id) {
-                $count_times = AttributeRule::where('attribute_time_bound_id',$attribute->attribute_time_bound_id)->whereNot('id',$this->id)->count();
-                if (!$count_times) {
-                    $attribute->attribute_time_bound->delete();
-                }
-            }
-
-            if ($attribute->attribute_location_bound_id) {
-                $count_locs = AttributeRule::where('attribute_location_bound_id',$attribute->attribute_location_bound_id)->whereNot('id',$this->id)->count();
-                if (!$count_locs) {
-                    $attribute->attribute_location_bound->delete();
-                }
-            }
-        });
-    }
 
 
     public function attribute_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','parent_attribute_id')
+        return $this->belongsTo(Attribute::class,'parent_attribute_id')
             ->with('attribute_parent')
             ->select('*')
             ->selectRaw(" extract(epoch from  created_at) as created_at_ts");
@@ -129,61 +116,99 @@ class Attribute extends Model
 
 
     public function type_owner() : BelongsTo {
-        return $this->belongsTo('App\Models\ElementType','owner_element_type_id');
-
+        return $this->belongsTo(ElementType::class,'owner_element_type_id');
     }
 
-    //todo put in new way for the types to list the rules
-
-
-    public function attribute_time_bound() : BelongsTo {
-        return $this->belongsTo(TimeBound::class,'attribute_time_bound_id');
-    }
-
-    public function attribute_location_bound() : BelongsTo {
-        return $this->belongsTo(LocationBound::class,'attribute_location_bound_id');
-    }
-
-
-    public function isInUse() : bool {
-        return $this->type_owner->isInUse();
+    public function top_rule() : BelongsTo {
+        return $this->belongsTo(AttributeRule::class,'owning_attribute_id');
     }
 
 
 
 
-    public ?string $fully_qualified_name = null;
-    public function getName(bool $b_redo = false,bool $b_strip_system_prefix = true,bool $short_name = false) : string  {
+
+    public function attribute_shape_bound() : BelongsTo {
+        return $this->belongsTo(LocationBound::class,'attribute_location_bound_id')
+            ->where('location_type',TypeOfLocation::SHAPE);
+    }
+
+    const ATTRIBUTE_FAMILY_SEPERATOR = '\\';
+
+
+    public function getName(bool $short_name = true) : string  {
 
         if ($short_name) {
             return $this->type_owner->getName() .  UserNamespace::NAMESPACE_SEPERATOR . $this->attribute_name;
         }
         //get ancestor chain
-       if (!$b_redo && $this->fully_qualified_name) {return $this->fully_qualified_name;}
-        $ancestors = [];
         $names = [];
         $parent = $this->attribute_parent;
         while ($parent) {
-            $ancestors[] = $parent;
-            if ($b_strip_system_prefix) {
-                if ($parent->attribute_name === StandardAttributes::SYSTEM_NAME) { break; }
-            }
-            $names[] = $parent->attribute_name;
+            $names[] = $parent->getName();
             $parent = $parent->attribute_parent;
 
         }
-        if (empty($ancestors)) {
-            return $this->type_owner->getName() . UserNamespace::NAMESPACE_SEPERATOR. $this->attribute_name;
+        if (empty($names)) {
+            return $this->getName();
         }
-        $oldest_first = array_reverse($names);
-        $root = implode(UserNamespace::NAMESPACE_SEPERATOR,$oldest_first);
-        return $this->type_owner->getName() . UserNamespace::NAMESPACE_SEPERATOR.$root . UserNamespace::NAMESPACE_SEPERATOR. $this->attribute_name;
+
+        return  implode(static::ATTRIBUTE_FAMILY_SEPERATOR,$names);
+    }
+
+
+    public static function verifyNameString(string $attr_name) : void {
+        $attribute_parts = explode(static::ATTRIBUTE_FAMILY_SEPERATOR, $attr_name);
+        $children_first = array_reverse($attribute_parts);
+
+        /**
+         * @var Attribute $next_parent
+         */
+        $next_parent = null;
+        $bad = false;
+        $count = 0;
+        foreach ($children_first as $attr) {
+
+            /**
+             * @var Attribute $node
+             */
+            $node = (new Attribute())->resolveRouteBinding($attr,true);
+            if ($next_parent && $node->attribute_parent->ref_uuid !== $next_parent->ref_uuid) {
+                //next parent is not the parent of this node
+                $bad = true; break;
+            }
+            $next_parent = $node->attribute_parent; //this should be the next node, compare to the next child
+            $count++;
+            if (!$next_parent && $count < count($children_first)) {
+                //no parent before the end,node has no parent but not finished with string
+                $bad = true; break;
+            }
+        }
+
+        if ($bad) {
+            throw new HexbatchNotFound(
+                __('msg.attribute_not_found',['ref'=>$attr_name]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ATTRIBUTE_NOT_FOUND
+            );
+        }
+    }
+
+    public static function getLastNameWithoutType(string $attr_name, bool $verify = true) : string {
+
+        $attribute_parts = explode(static::ATTRIBUTE_FAMILY_SEPERATOR, $attr_name);
+        $last_attribute_name_full = $attribute_parts[count($attribute_parts) - 1];
+        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR,$last_attribute_name_full);
+        if (count($parts) === 1) {
+            return $parts[0];
+        }
+        if ($verify) { static::verifyNameString($attr_name);}
+        return $parts[1];
     }
 
 
     public static function buildAttribute(
         ?int $id = null,
-        ?int $user_id = null,
+        ?int $namespace_id = null,
         ?int $element_type_id = null
     )
     : Builder
@@ -191,9 +216,8 @@ class Attribute extends Model
 
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Attribute::attribute_parent(),Attribute::type_owner() */
-            /** @uses Attribute::attribute_time_bound(),Attribute::attribute_location_bound(), */
-            ->with('attribute_parent', 'type_owner','attribute_time_bound','attribute_location_bound')
+            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound(),Attribute::top_rule() */
+            ->with('attribute_parent', 'type_owner','attribute_shape_bound','top_rule')
 
 
        ;
@@ -206,76 +230,19 @@ class Attribute extends Model
             $build->where('attributes.owner_element_type_id',$element_type_id);
         }
 
-        if ($user_id) {
+        if ($namespace_id) {
 
-//todo redo these joins, out of date
+
             $build->join('element_types',
                 /**
                  * @param JoinClause $join
                  */
-                function (JoinClause $join)  {
+                function (JoinClause $join) use($namespace_id) {
                     $join
-                        ->on('element_types.id','=','attributes.owner_element_type_id');
+                        ->on('element_types.id','=','attributes.owner_element_type_id')
+                    ->where('owner_namespace_id',$namespace_id);
                 }
             );
-
-            $build->join('users as user_owner',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('user.id','=','element_types.user_id');
-                }
-            );
-
-            $build->join('user_namespaces as user_admin_group',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('user_namespaces.id','=','user_owner.parent_namespace_id');
-                }
-            );
-
-            $build->join('user_namespaces as editing_admin_group',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('user_namespaces.id','=','element_types.editing_user_group_id');
-                }
-            );
-
-            $build->leftJoin('user_namespace_members as editing_admin_group_admins',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($user_id) {
-                    $join
-                        ->on('editing_admin_group_admins.parent_namespace_id','=','editing_admin_group.id')
-                        ->where('editing_admin_group_admins.user_id',$user_id);
-                }
-            );
-
-            $build->leftJoin('user_namespace_members as user_admin_group_members',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($user_id) {
-                    $join
-                        ->on('user_admin_group_members.parent_namespace_id','=','user_admin_group.id')
-                        ->where('user_admin_group_members.user_id',$user_id)
-                        ->where('user_admin_group_members.is_admin',true);
-                }
-            );
-
-            $build->where(function ($q)  {
-                $q->whereNotNull('user_namespace_members.id')
-                    ->orWhereNotNull('editing_admin_group_admins.id');
-            });
         }
 
 
@@ -292,6 +259,11 @@ class Attribute extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
+        $use_verification = true;
+        if ($field === true) {
+            $use_verification = false;
+            $field = null;
+        }
         $build = null;
         $ret = null;
         $first_id = null;
@@ -311,34 +283,40 @@ class Attribute extends Model
                         $what_route =  Route::current();
                         $owner_name = $what_route->originalParameter('element_type');
                         if($owner_name && count($parts) === 1) {
-                            $attribute_name = $parts[0];
+                            $attr_name_raw = $parts[0];
+                            $attribute_name = static::getLastNameWithoutType($attr_name_raw,$use_verification);
                             /** @var ElementType $owner */
                             $owner = (new ElementType)->resolveRouteBinding($owner_name);
-                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
+                            $build = $this->where('owner_element_type_id', $owner?->id)
+                                ->where('attribute_name', $attribute_name);
                         }
                         else if (count($parts) === 2) {
+                            //here we do not call the helper functions, the resolve attr path will only call this
                             $type_string = $parts[0];
-                            $attr_name = $parts[1];
+                            $attr_name_raw = $parts[1];
+                            $attribute_name = static::getLastNameWithoutType($attr_name_raw,$use_verification);
                             /** @var ElementType $owner */
                             $owner = (new ElementType)->resolveRouteBinding($type_string);
-                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
+                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
                         } else if (count($parts) === 3) {
                                 $namespace_string = $parts[0];
                                 $type_string = $parts[1];
-                                $attr_name = $parts[2];
-
-                                /** @var UserNamespace $user_namespace */
-                                $user_namespace = (new UserNamespace())->resolveRouteBinding($namespace_string);
+                                $attr_name_raw = $parts[2];
+                                $attribute_name = static::getLastNameWithoutType($attr_name_raw,$use_verification);
+                                /** @var UserNamespace $da_namespace */
+                                $da_namespace = (new UserNamespace())->resolveRouteBinding($namespace_string);
 
                                 /** @var ElementType $owner */
-                                $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
-                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
+                                $owner = (new ElementType)->resolveRouteBinding($da_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
+                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
 
                         } else if (count($parts) === 4) {
                                 $server_string = $parts[0];
                                 $namespace_string = $parts[1];
                                 $type_string = $parts[2];
-                                $attr_name = $parts[3]; //can be first of many here
+                                $attr_name_raw = $parts[3]; //can be split by attribute family separator
+                                $attribute_name = static::getLastNameWithoutType($attr_name_raw);
+
 
                                 /** @var UserNamespace $user_namespace */
                                 $user_namespace = (new UserNamespace())->resolveRouteBinding($server_string . UserNamespace::NAMESPACE_SEPERATOR . $namespace_string);
@@ -346,7 +324,7 @@ class Attribute extends Model
                                 /** @var ElementType $owner */
                                 $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
 
-                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attr_name);
+                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
 
                         }
 
@@ -406,18 +384,52 @@ class Attribute extends Model
 
     }
 
-    /**
-     * @throws \Exception
-     */
-    public static function collectAttribute(Collection|string $collect,ElementType $owner) : Attribute {
-        //todo if string then see if current namespace has permission to use (in admin group of type ns), and make sure the owner and attribute match
-        //
+    public function checkAttributeOwnership(ElementType $owner) {
+        if ($this->id && $this->owner_element_type_id !== $owner->id) {
+
+            throw new HexbatchNotFound(
+                __('msg.attribute_owner_does_not_match_type_given',['ref'=>$this->getName(),'type'=>$owner->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::TYPE_CANNOT_EDIT
+            );
+        }
+    }
+
+
+    public static function collectAttribute(Collection|string $collect,ElementType $owner,?Attribute $attribute = null ) : Attribute {
+
+
         try {
             DB::beginTransaction();
             if (is_string($collect) && Utilities::is_uuid($collect)) {
-                $attribute = (new Attribute())->resolveRouteBinding($collect);
+                /**
+                 * @var Attribute
+                 */
+                return (new Attribute())->resolveRouteBinding($collect);
             } else {
-                $attribute = new Attribute();
+                $owner->checkCurrentEditAbility();
+                if(!$attribute) {
+                    if ($collect->has('uuid')) {
+                        $maybe_uuid = $collect->get('uuid');
+                        if (is_string($maybe_uuid) && Utilities::is_uuid($maybe_uuid)) {
+                            /** @var Attribute $attribute */
+                            $attribute = (new Attribute())->resolveRouteBinding($maybe_uuid);
+                            if ($attribute->type_owner->ref_uuid !== $owner->ref_uuid) {
+                                throw new \LogicException("Mismatch of attribute owner and passed in owner ");
+                            }
+                        } else {
+
+                            throw new HexbatchNotFound(
+                                __('msg.attribute_not_found', ['ref' => (string)$maybe_uuid]),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                                RefCodes::ATTRIBUTE_NOT_FOUND
+                            );
+                        }
+                    }
+                } else {
+                    $attribute = new Attribute();
+                }
+
                 $attribute->editAttribute($collect,$owner);
             }
 
@@ -425,17 +437,184 @@ class Attribute extends Model
             return $attribute;
         } catch (\Exception $e) {
             DB::rollBack();
-            throw $e;
+            if ($e instanceof HexbatchCoreException) {
+                throw $e;
+            }
+            throw new HexbatchNotPossibleException(
+                $e->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+
         }
     }
 
 
-    public function editAttribute(Collection $collect,ElementType $owner) : void {
+    /**
+     * @throws \Exception
+     */
+    public function editAttribute(Collection $collect, ElementType $owner) : void {
+        $this->checkAttributeOwnership($owner);
         try {
 
             DB::beginTransaction();
 
+
+            if ($collect->has('shape_setting')) {
+                $this->attribute_shape_setting = $collect->get('shape_settings');
+                if (empty($this->attribute_shape_setting)) { $this->attribute_shape_setting = null;}
+            }
+
+
+
+            if ($collect->has('is_retired')) {
+                $this->is_retired = Utilities::boolishToBool($collect->get('is_retired',false));
+            }
+
+            if ($collect->has('is_final_parent')) {
+                $this->is_final_parent = Utilities::boolishToBool($collect->get('is_final_parent',false));
+            }
+
+            if ($collect->has('is_final')) {
+                $this->is_final = Utilities::boolishToBool($collect->get('is_final',false));
+            }
+
+
+            if (!$owner->isInUse()) {
+
+                $this->owner_element_type_id = $owner->id;
+
+                if ($collect->has('attribute_name')) {
+                    $this->attribute_name = $collect->get('attribute_name');
+                    try {
+                        Validator::make(['attribute_name' => $this->attribute_name], [
+                            'attribute_name' => ['required', 'string', new AttributeNameReq($this->parent_type,$this->current_attribute)],
+                        ])->validate();
+                    } catch (ValidationException $v) {
+                        throw new HexbatchNotPossibleException($v->getMessage(),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_BAD_NAME);
+                    }
+                }
+
+                if (!$this->attribute_name) {
+
+                    throw new HexbatchNotPossibleException(__('msg.attribute_schema_must_have_name'),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::ATTRIBUTE_BAD_NAME);
+                }
+
+
+                if ($collect->has('parent')) {
+                    $maybe_uuid = $collect->get('parent');
+                    if (is_string($maybe_uuid)) {
+                        $parent_attribute = (new Attribute())->resolveRouteBinding($maybe_uuid);
+                        /** @var Attribute $parent_attribute */
+                        if (!$parent_attribute->type_owner->owner_namespace->isNamespaceAdmin(Utilities::getCurrentNamespace())) {
+                            throw new HexbatchNotPossibleException(
+                                __('msg.attribute_cannot_be_used_as_parent', ['ref' => $parent_attribute->getName()]),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                        }
+
+                        if ($parent_attribute->is_retired || $parent_attribute->is_final_parent) {
+                            throw new HexbatchNotPossibleException(
+                                __('msg.attribute_cannot_be_used_at_parent_final', ['ref' => $parent_attribute->getName()]),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                        }
+                        $this->parent_attribute_id = $parent_attribute->id;
+
+                    } else {
+                        throw new HexbatchNotPossibleException(
+                            __('msg.attribute_parent_not_found', ['ref' => $maybe_uuid]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+                    }
+                }
+
+
+                if ($collect->has('shape')) {
+                    $hint_location_bound = $collect->get('shape');
+                    if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
+                        $bound = LocationBound::collectLocationBound($hint_location_bound);
+                        if ($bound->location_type === TypeOfLocation::MAP) {
+                            throw new HexbatchNotPossibleException(__('msg.attribute_cannot_use_map',['ref'=>$this->getName()]),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::TYPE_BAD_SCHEMA);
+                        }
+                        $this->attribute_location_shape_bound_id = $bound->id;
+                    }
+                }
+
+                if ($collect->has('design')) {
+                    $hint_design = $collect->get('design');
+                    if (is_string($hint_design) || Utilities::is_uuid($hint_design)) {
+                        /** @var Attribute $design */
+                        $design = (new Attribute())->resolveRouteBinding($hint_design);
+                        if (!$design->type_owner->owner_namespace->isNamespaceMember(Utilities::getCurrentNamespace()) || $design->is_retired) {
+
+                            throw new HexbatchNotPossibleException(__('msg.attribute_cannot_use_design',['ref'=>$design->getName(),'me'=>$this->attribute_name]),
+                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                                RefCodes::TYPE_BAD_SCHEMA);
+                        }
+                        $this->design_attribute_id = $design->id;
+                    }
+                }
+
+                if ($collect->has('value_json_path')) {
+                    $this->value_json_path = $collect->get('value_json_path');
+                    Utilities::testValidJsonPath($this->value_json_path);
+                }
+
+                if ($collect->has('attribute_value')) {
+                    $this->attribute_value = $collect->get('attribute_value');
+                }
+
+
+                if ($collect->has('encryption_policy')) {
+                    $this->encryption_policy = TypeOfEncryptionPolicy::tryFromInput($collect->get('encryption_policy'));
+                }
+
+                if ($collect->has('attribute_access_type')) {
+                    $this->attribute_access_type = TypeOfAttributeAccess::tryFromInput($collect->get('attribute_access_type'));
+                }
+
+                if ($collect->has('server_access_type')) {
+                    $this->server_access_type = TypeOfAttributeServerAccess::tryFromInput($collect->get('server_access_type'));
+                }
+
+
+
+                if ($collect->has('set_value_policy')) {
+                    $this->set_value_policy = TypeOfSetValuePolicy::tryFromInput($collect->get('set_value_policy'));
+                }
+
+                if ($collect->has('popped_writing_method')) {
+                    $this->popped_writing_method = TypeMergeJson::tryFromInput($collect->get('popped_writing_method'));
+                }
+
+                if ($collect->has('reentry_merge_method')) {
+                    $this->reentry_merge_method = TypeMergeJson::tryFromInput($collect->get('reentry_merge_method'));
+                }
+
+                if ($collect->has('live_merge_method')) {
+                    $this->live_merge_method = TypeMergeJson::tryFromInput($collect->get('live_merge_method'));
+                }
+
+            }
+
+            try {
+                $this->save();
+            } catch (\Exception $f) {
+                throw new HexbatchNotPossibleException(
+                    __('msg.attribute_cannot_be_edited',['ref'=>$this->getName(),'error'=>$f->getMessage()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            }
+
+
             DB::commit();
+
 
         } catch (\Exception $e) {
             DB::rollBack();

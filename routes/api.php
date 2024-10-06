@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\ElementController;
+use App\Http\Controllers\API\PathController;
 use App\Http\Controllers\API\ServerController;
 use App\Http\Controllers\API\TypeController;
 use App\Http\Controllers\API\NamespaceController;
+use App\Http\Middleware\ValidateAttributeOwnership;
 use App\Http\Middleware\ValidateNamespaceAdmin;
 use App\Http\Middleware\ValidateNamespaceMember;
 use App\Http\Middleware\ValidateNamespaceOwner;
@@ -95,6 +97,16 @@ Route::prefix('v1')->group(function () {
 
 
         Route::group(['prefix' => '{user_namespace}'], function () {
+
+            Route::prefix('paths')->group(function () {
+                Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
+                    Route::post('/create', [PathController::class, 'create_path'])->name('core.paths.create');
+                    Route::prefix('{path}')->group(function () {
+                        Route::patch('/edit', [PathController::class, 'edit_path'])->name('core.paths.edit');
+                    });
+                });
+            });
+
             Route::prefix('types')->group(function () {
 
                 Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
@@ -110,7 +122,8 @@ Route::prefix('v1')->group(function () {
                 Route::middleware(ValidateNamespaceMember::class)->group(function (){
                     Route::get('/{element_type}/get/{levels?}', [TypeController::class, 'get_type'])->name('core.types.get');
                     Route::get('/list', [TypeController::class, 'list_types'])->name('core.types.list');
-                    Route::get('/ping/{attribute_ping_type}', [TypeController::class, 'type_ping'])->name('core.types.list');
+                    Route::get('/ping_map', [TypeController::class, 'type_ping_map'])->name('core.types.ping_map');
+                    Route::get('/ping_time', [TypeController::class, 'type_ping_time'])->name('core.types.ping_time');
                 });
 
 
@@ -119,24 +132,29 @@ Route::prefix('v1')->group(function () {
 
                     Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
                         Route::post('/create', [TypeController::class, 'new_attribute'])->name('core.types.attributes.create');
-                        Route::patch('/{attribute}/edit', [TypeController::class, 'edit_attribute'])->name('coretypes..attributes.edit');
-                        Route::delete('/{attribute}/destroy', [TypeController::class, 'delete_attribute'])->name('core.types.attributes.destroy');
+
+                        Route::prefix('{attribute}')->middleware(ValidateAttributeOwnership::class)->group(function () {
+                            Route::patch('/edit', [TypeController::class, 'edit_attribute'])->name('coretypes..attributes.edit');
+                            Route::delete('/destroy', [TypeController::class, 'delete_attribute'])->name('core.types.attributes.destroy');
+                        });
+
                     });
 
                     Route::middleware(ValidateNamespaceMember::class)->group(function (){
-                        Route::post('/{attribute}/copy', [TypeController::class, 'copy_attribute'])->name('core.types.attributes.copy');
-                        Route::get('/{attribute}/get/{levels?}', [TypeController::class, 'attribute_get'])->name('core.types.attributes.get');
-                        Route::get('/{attribute}/ping/{attribute_ping_type}', [TypeController::class, 'attribute_ping'])->name('core.types.attributes.ping');
+                        Route::prefix('{attribute}')->middleware(ValidateAttributeOwnership::class)->group(function () {
+                            Route::get('/get/{levels?}', [TypeController::class, 'attribute_get'])->name('core.types.attributes.get');
+                            Route::get('/ping_shape', [TypeController::class, 'attribute_ping_shape'])->name('core.types.attributes.ping');
+                        });
+
                         Route::get('/list/{filter?}', [TypeController::class, 'attributes_list'])->name('core.types.attributes.list');
                     });
 
 
 
-                    Route::prefix('{attribute}/rules')->group(function () {
+                    Route::prefix('{attribute}/rules')->middleware(ValidateAttributeOwnership::class)->group(function () {
 
                         Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
-                            Route::get('/clear', [TypeController::class, 'attribute_clear_rules'])->name('core.types.attributes.rules.clear');
-                            Route::post('/new/{attribute_rule?}', [TypeController::class, 'attribute_new_rule'])->name('core.types.attributes.rules.create');
+                            Route::post('/new', [TypeController::class, 'attribute_new_rule'])->name('core.types.attributes.rules.create');
                             Route::patch('/{attribute_rule}/edit', [TypeController::class, 'attribute_edit_rule'])->name('core.types.attributes.rules.edit');
                             Route::delete('/{attribute_rule}/destroy', [TypeController::class, 'attribute_delete_rule'])->name('core.types.attributes.rules.destroy');
                         });

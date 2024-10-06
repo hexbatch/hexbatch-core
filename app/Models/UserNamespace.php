@@ -104,14 +104,14 @@ class UserNamespace extends Model
     }
 
     public function namespace_members() : HasMany {
-        return $this->hasMany('App\Models\UserNamespaceMember')
+        return $this->hasMany(UserNamespaceMember::class)
             /** @uses UserNamespaceMember::namespace_member */
             ->with('member_user')
             ->orderBy('created_at');
     }
 
     public function namespace_admins() : HasMany {
-        return $this->hasMany('App\Models\UserNamespaceMember')
+        return $this->hasMany(UserNamespaceMember::class)
             ->where('is_admin',true)
             /** @uses UserNamespaceMember::namespace_member */
             ->with('member_user')

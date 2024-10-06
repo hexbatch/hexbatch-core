@@ -143,7 +143,9 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE things Add COLUMN thing_status type_of_thing_status NOT NULL default 'thing_pending';");
 
-
+        DB::statement("ALTER TABLE things Add COLUMN thing_child_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE things Add COLUMN thing_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE things Add COLUMN thing_merge_method type_merge_json NOT NULL default 'overwrite';");
 
         Schema::table('things', function (Blueprint $table) {
 

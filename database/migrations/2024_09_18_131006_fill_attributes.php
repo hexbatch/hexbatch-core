@@ -151,7 +151,7 @@ return new class extends Migration
             $table->jsonb('attribute_value')
                 ->nullable()->default(null)->comment("The value of the attribute");
 
-            $table->jsonb('attribute_shape_display')
+            $table->jsonb('attribute_shape_setting')
                 ->nullable()->default(null)->comment("The value of the attribute");
 
 
@@ -199,7 +199,7 @@ return new class extends Migration
             $table->dropColumn('popped_writing_method');
             $table->dropColumn('reentry_merge_method');
             $table->dropColumn('live_merge_method');
-            $table->dropColumn('attribute_shape_display');
+            $table->dropColumn('attribute_shape_setting');
             $table->dropColumn('encryption_policy');
             $table->dropColumn('set_value_policy');
 

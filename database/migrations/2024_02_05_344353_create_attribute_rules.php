@@ -22,8 +22,8 @@ return new class extends Migration
             $table->foreignId('owning_attribute_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The parent of the top level of the rule chain")
-                ->index()
+                ->comment("The parent of the top level of the rule chain. Each attribute can have one rule chain")
+                ->unique()
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -71,7 +71,7 @@ return new class extends Migration
 
 
         //child rules return a boolean value , as well as data or results they found. The child logic will combine the children,
-        // the my_logic will combine this node with the calculated child truthfulness
+        // the rule_logic will combine this node with the calculated child truthfulness
         /*
          * false:
          *   no results
@@ -90,8 +90,8 @@ return new class extends Migration
             'always_false'
             );");
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN my_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_child_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_logic type_of_child_logic NOT NULL default 'and';");
 
 
         DB::statement("CREATE TYPE type_merge_json AS ENUM (

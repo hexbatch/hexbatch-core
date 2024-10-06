@@ -25,6 +25,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+
+            $table->foreignId('path_tree_element_id')
+                ->nullable(false)
+                ->comment("Each path tree has an element")
+                ->index()
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->foreignId('parent_path_id')
                 ->nullable()->default(null)
                 ->index()
@@ -80,6 +89,14 @@ return new class extends Migration
                 ->comment("The set this should be in.. System type for always caller set")
                 ->index()
                 ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('path_element_id')
+                ->nullable()->default(null)
+                ->comment("When looking for an element.. there is a system type for using the context element here")
+                ->index()
+                ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -166,7 +183,7 @@ return new class extends Migration
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON paths FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
 
-        DB::statement("ALTER TABLE paths Add COLUMN path_logic type_of_child_logic NOT NULL default 'and';");
+
 
 
         //relationship with the path parent
@@ -188,6 +205,8 @@ return new class extends Migration
             'shares_type',
             'ancestor',
             'descendant',
+            'in_subtype',
+            'thing_set',
             'namespace_owns_element',
             'namespace_owns_type',
             'member_of_namespace',
@@ -227,6 +246,9 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE paths Add COLUMN path_returns path_returns_type NOT NULL default 'exists';");
 
+        DB::statement("ALTER TABLE paths Add COLUMN path_child_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE paths Add COLUMN path_logic type_of_child_logic NOT NULL default 'and';");
+
 
 
         Schema::table('paths', function (Blueprint $table) {
@@ -240,7 +262,7 @@ return new class extends Migration
 
 
 
-            $table->string('value_json_path')
+            $table->string('filter_json_path')
                 ->nullable()->default(null)
                 ->comment("if set then only values that match the json path are used");
 
@@ -268,6 +290,7 @@ return new class extends Migration
         Schema::table('paths', function (Blueprint $table) {
             $table->dropForeign(['path_owning_namespace_id']);
             $table->dropForeign(['parent_path_id']);
+            $table->dropForeign(['path_tree_element_id']);
             $table->dropForeign(['path_type_id']);
             $table->dropForeign(['path_attribute_id']);
             $table->dropForeign(['sorting_attribute_id']);
@@ -275,9 +298,11 @@ return new class extends Migration
             $table->dropForeign(['path_namespace_id']);
             $table->dropForeign(['path_location_bound_id']);
             $table->dropForeign(['path_server_id']);
+            $table->dropForeign(['path_element_id']);
 
             $table->dropColumn('path_location_bound_id');
             $table->dropColumn('path_server_id');
+            $table->dropColumn('path_tree_element_id');
             $table->dropColumn('path_namespace_id');
             $table->dropColumn('parent_path_id');
             $table->dropColumn('path_type_id');
@@ -285,12 +310,14 @@ return new class extends Migration
             $table->dropColumn('sorting_attribute_id');
             $table->dropColumn('path_element_set_id');
             $table->dropColumn('path_owning_namespace_id');
+            $table->dropColumn('path_element_id');
 
             $table->dropColumn('ref_uuid');
             $table->dropColumn('path_min_gap');
             $table->dropColumn('path_max_gap');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
+            $table->dropColumn('path_child_logic');
             $table->dropColumn('path_logic');
             $table->dropColumn('path_relationship');
             $table->dropColumn('path_returns');
@@ -302,7 +329,7 @@ return new class extends Migration
             $table->dropColumn('sort_json_path');
             $table->dropColumn('path_min_count');
             $table->dropColumn('path_max_count');
-            $table->dropColumn('value_json_path');
+            $table->dropColumn('filter_json_path');
             $table->dropColumn('is_sorting_order_asc');
             $table->dropColumn('path_result_limit');
             $table->dropColumn('path_compiled_sql');

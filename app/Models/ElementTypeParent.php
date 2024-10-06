@@ -45,6 +45,8 @@ class ElementTypeParent extends Model
         'child_type_id',
         'parent_type_id',
         'parent_rank',
+        'approval',
+        'parent_role',
     ];
 
     /**
@@ -75,15 +77,17 @@ class ElementTypeParent extends Model
      */
     public static function addParent(ElementType $parent, ElementType $child) :ElementTypeParent {
 
+
+
         try {
             DB::beginTransaction();
             $user_namespace = Utilities::getCurrentNamespace();
-            //todo update this
             if ( $parent->is_final || !$parent->canNamespaceInherit($user_namespace)) {
-                throw new HexbatchNotPossibleException(__('msg.child_type_is_not_inheritable'),
+                throw new HexbatchNotPossibleException(__('msg.parent_type_is_not_inheritable'),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::TYPE_CANNOT_INHERIT);
             }
+
             $par = new ElementTypeParent();
 
             $current_step = ElementTypeParent::where('child_type_id', $child->id)
@@ -93,11 +97,13 @@ class ElementTypeParent extends Model
             if (!$current_step) {
                 $current_step = ElementTypeParent::where('child_type_id', $child->id)->max('parent_rank') ?? 0;
             }
-
+            $approval_type = TypeOfApproval::AUTOMATIC;
+            //todo check the parent type, and its ancestors for having a rule for TYPE_CONSTRAINT event
             $par->upsert([
                 'child_type_id' => $child->id,
                 'parent_type_id' => $parent->id,
-                'parent_rank' => $current_step,
+                'parent_rank' => $current_step + 1,
+                'approval' => $approval_type,
             ], ['parent_type_id', 'child_type_id']);
 
             //add attributes of parent to the horde
@@ -106,8 +112,9 @@ class ElementTypeParent extends Model
                     ElementTypeHorde::addAttribute($attr, $child);
                 }
             });
-            //todo this is marked as tentative until the check_constraint event returns
-            ElementTypeHorde::checkAttributeConflicts($child);
+            //todo if the approval is not automatic, then send this to things
+            // type construction (except user tokens) takes place in the owning namespace's home set,
+
             DB::commit();
             return $par;
         } catch (\Exception $e) {

@@ -57,26 +57,28 @@ return [
 
     //attributes
     'attribute_not_found' => 'Attribute not found using :ref',
-    'attribute_ping_missing_data' => 'Cannot ping, check the ping type and data given for missing inputs',
+    'attribute_cannot_be_used_as_parent' => 'This attribute :ref cannot be used as a parent, you are not an admin of its namespace',
     'attribute_cannot_be_used_at_parent_final' => 'This attribute :ref cannot be used as a parent, it is either retired or marked to not be used for parenting',
-    'attribute_cannot_be_cloned_due_to_pivs' => 'This attribute :ref cannot be cloned by you because of permissions on the source or target. You have to be able to edit both types',
-    'attribute_cannot_be_cloned_into_its_type' => 'This attribute :ref cannot be cloned into the same type',
-    'attribute_bad_server_access_type' => 'This attribute given a value that is invalid for the attribute_access_type :bad_type',
-    'attribute_bad_access_type' => 'This attribute given a value that is invalid for the server_access_type :bad_type',
     'attribute_schema_must_have_name' => 'When making an attribute a name must be provided',
     'attribute_cannot_be_deleted_if_in_use' => 'Can only delete an attribute :ref if nothing uses it',
-    'attribute_cannot_be_deleted_priv' => 'Can only delete an attribute :ref in the user admin group or the editing group',
-    'attribute_owner_does_not_match_type_given' => 'The type given does not match the attribute :ref type',
+    'attribute_owner_does_not_match_type_given' => 'The type given :type does not own the attribute :ref',
     'attribute_unique_name_per_type' => 'Attributes in each type must have unique names',
+    'attribute_cannot_be_edited' => 'The attribute :ref cannot be edited because:  :error',
+    'attribute_parent_not_found' => 'The parent attribute was not found by using :ref',
+    'attribute_cannot_use_map' => 'Attribute :ref can only use shapes and not maps',
+    'attribute_cannot_use_design' => 'Attribute :ref can only be used for a design for :me if you are a member of its namespace and its not retired',
 
     'rule_needs_type' => 'Each rule needs a rule_type set. Nothing was set',
     'rule_needs_type_found_bad' => 'Each rule needs a rule_type set. Found :bad_type',
     'rule_can_only_target_attributes_user_can_see' => 'The attribute :ref is not visible at all to the user, so cannot be added to a rule',
     'rule_can_use_group_if_admin' => 'You are not an admin of the  group :ref, so cannot be added to a rule',
     'rule_not_found' => 'The rule was not found by :ref',
+    'parent_rule_not_found' => 'The parent rule was not found by the uuid :ref',
     'rule_not_used_by_attribute' => 'The rule :rule is not used by attribute :attr',
-    'rule_cannot_be_deleted_if_in_use' => 'The rule :rule cannot be deleted because its attribute :attr in use',
+    'rule_cannot_be_deleted_if_in_use' => 'The rule :rule cannot be deleted because its in use by pending things',
     'rule_requirement_failed' => 'This attribute, ":ref" has forbidden the type from having this combination of attributes in the type',
+    'rule_cannot_be_edited' => 'The rule :ref cannot be edited because:  :error',
+    'rule_parent_child_be_same_chain' => 'The rules :ref and :other have to share the same attribute',
 
 
     //remotes
@@ -109,17 +111,26 @@ return [
     'type_not_found' => 'Type not found using :ref',
     'type_must_have_name' => 'Types need a name',
     'type_must_have_map_bound' => 'Types can only use a map bound',
-    'child_types_must_be_string_names' => 'The child type must already exist and be refered to by the name, which is a string and not an object',
-    'child_type_is_not_inheritable' => 'The child type must allow you to inherit, and also not be retired or final',
+    'parent_types_must_be_string_names' => 'A parent type must already exist and be refered to by the name or uuid, which is a string and not an object',
+    'type_descriptions_must_be_uuid' => 'A description element has to be a UUID',
+    'parent_type_is_not_inheritable' => 'The child type must allow you to inherit, and also not be retired or final',
     'type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
-    'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements',
-    'type_add_rules_when_not_in_use' => 'Can only add new rules when the type is not in use',
+    'type_only_admin_can_edit' => 'Only the admins in :ns can edit the type :ref',
+    'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements, no children',
+    'type_cannot_be_edited' => 'The type :ref cannot be edited',
 
     //elements
     'element_not_found' => 'Element not found using :ref',
 
     //servers
-    'server_not_found' => "Server not found using :ref"
+    'server_not_found' => "Server not found using :ref",
+
+    //paths
+    'path_not_found' => 'Path not found using :ref',
+    'path_only_admin_can_edit' => 'Only the admins in :ns can edit the path :ref',
+    'path_parent_not_found' => 'Cannot find the parent path using :ref',
+    'path_tree_element_missing' => 'The path :ref is missing the tree element',
+    'path_tree_element_permissions' => 'The path :ref is trying to use :element which you are not in the namespace group for',
 
 
 
