@@ -3,27 +3,22 @@
 namespace App\Models;
 
 
-
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+
 
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int visible_type_id
- * @property int visibility_set_id
- * @property bool is_visible_for_map
- * @property bool is_visible_for_time
- * @property bool is_time_sensitive
- *
- *
+ * @property int holder_set_id
+ * @property int held_element_id
  */
-class ElementTypeSetVisibility extends Model
+class ElementSetMember extends Model
 {
 
-    protected $table = 'element_type_set_visibilities';
+    protected $table = 'element_set_members';
     public $timestamps = false;
 
     /**
@@ -47,5 +42,4 @@ class ElementTypeSetVisibility extends Model
      */
     protected $casts = [];
 
-//todo fill the values in from the horde type or originating, and set this type from the type in the horde row used
 }

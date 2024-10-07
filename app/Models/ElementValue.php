@@ -9,16 +9,22 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
-
+/*
+ * These are only made when there is a value written to an attribute for an element, or the attribute is sometimes off (type_set_visibility_id or toggled is_on)
+ * if missing from the row, then pick up the value from the attribute itself
+ *
+ * if not a row here, then it is assumed to be always visible and on for the attribute
+ *
+ * if row set but type_set_visibility_id is missing, then the attribute is always visible (unless its off)
+ */
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_element_id
+ * @property int element_set_member_id
  * @property int element_horde_id
  * @property int type_set_visibility_id
- * @property int containing_set_id
  * @property int pointer_to_set_id
  * @property int parent_element_value_id
  * @property bool is_on

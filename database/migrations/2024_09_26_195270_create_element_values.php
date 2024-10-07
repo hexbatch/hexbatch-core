@@ -15,13 +15,14 @@ return new class extends Migration
         Schema::create('element_values', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('parent_element_id')
+            $table->foreignId('element_set_member_id')
                 ->nullable(false)
-                ->comment("The element these values are about")
+                ->comment("The element/set these values are about")
                 ->index()
-                ->constrained('elements')
+                ->constrained('element_set_members')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+
 
 
 
@@ -34,7 +35,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('type_set_visibility_id')
-                ->nullable(false)
+                ->nullable()->default(null)
                 ->comment("About if the type the attribute belongs to is visible or not in this set")
                 ->index()
                 ->constrained('element_type_set_visibilities')
@@ -42,13 +43,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-            $table->foreignId('containing_set_id')
-                ->nullable(false)
-                ->comment("The set this value is for")
-                ->index()
-                ->constrained('element_sets')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+
 
             $table->foreignId('pointer_to_set_id')
                 ->nullable()->default(null)
@@ -70,7 +65,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->boolean('is_on')->default(true)->nullable(false)
-                ->comment('if off, then not seen by any rules');
+                ->comment('if off, then not seen by any rules. This can be local to the set');
 
 
             $table->timestamp('value_changed_at')->default(null)->nullable()
@@ -80,7 +75,7 @@ return new class extends Migration
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
 
             $table->jsonb('element_shape_appearance')
-                ->nullable()->default(null)->comment("The value of the attribute in this row");
+                ->nullable()->default(null)->comment("How the shape is changed here per set");
 
         });
 
