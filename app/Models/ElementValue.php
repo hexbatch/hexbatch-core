@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int parent_element_id
  * @property int element_horde_id
+ * @property int type_set_visibility_id
  * @property int containing_set_id
  * @property int pointer_to_set_id
  * @property int parent_element_value_id

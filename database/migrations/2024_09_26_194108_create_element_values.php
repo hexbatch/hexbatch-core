@@ -16,13 +16,15 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('parent_element_id')
-                ->nullable()->default(null)
+                ->nullable(false)
                 ->comment("The element these values are about")
                 ->index()
                 ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-//todo fill in from the horde type or originating
+
+
+
             $table->foreignId('element_horde_id')
                 ->nullable(false)
                 ->comment("The attribute this value is about")
@@ -31,9 +33,17 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('type_set_visibility_id')
+                ->nullable(false)
+                ->comment("About if the type the attribute belongs to is visible or not in this set")
+                ->index()
+                ->constrained('element_type_set_visibilities')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
 
             $table->foreignId('containing_set_id')
-                ->nullable()->default(null)
+                ->nullable(false)
                 ->comment("The set this value is for")
                 ->index()
                 ->constrained('element_sets')
