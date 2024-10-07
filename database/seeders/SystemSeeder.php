@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\System\Collections\SystemUsers;
+use App\System\SystemResources;
 use Illuminate\Database\Seeder;
 
 class SystemSeeder extends Seeder
@@ -12,6 +12,6 @@ class SystemSeeder extends Seeder
      */
     public function run(): void
     {
-        SystemUsers::generateObjects();
+        SystemResources::generateObjects();
     }
 }

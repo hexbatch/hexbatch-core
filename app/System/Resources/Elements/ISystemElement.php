@@ -2,10 +2,11 @@
 
 namespace App\System\Resources\Elements;
 
+use App\System\Resources\ISystemResource;
 use App\System\Resources\Namespaces\ISystemNamespace;
 use App\System\Resources\Types\ISystemType;
 
-interface ISystemElement
+interface ISystemElement extends ISystemResource
 {
     public function getElementUuid() :string;
 

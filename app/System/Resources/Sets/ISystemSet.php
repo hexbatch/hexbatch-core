@@ -3,8 +3,9 @@
 namespace App\System\Resources\Sets;
 
 use App\System\Resources\Elements\ISystemElement;
+use App\System\Resources\ISystemResource;
 
-interface ISystemSet
+interface ISystemSet extends ISystemResource
 {
     public function getSetUuid() :string;
     public function hasEvents() :bool;

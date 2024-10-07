@@ -5,6 +5,17 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+/*
+ * todo change name server_events
+ *  this now has all the events for this server too
+ *  event_id, base type to listen to, base attribute to listen to, server id
+ *  attributes will point to one of these, optionally
+ *  cannot listen to a system type or system attribute
+ *  rules, change the attribute they point to , to point to this
+ *  some events only listened to inside same set as trigger
+ *
+ *
+ */
 return new class extends Migration
 {
     /**

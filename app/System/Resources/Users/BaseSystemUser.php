@@ -6,10 +6,18 @@ namespace App\System\Resources\Users;
 use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchInitException;
 use App\Models\User;
+use App\System\Collections\SystemNamespaces;
+use App\System\Resources\ISystemResource;
+use App\System\Resources\Namespaces\ISystemNamespace;
 
 abstract class BaseSystemUser implements ISystemUser
 {
     protected ?User $user;
+
+    const UUID = '';
+    const NAMESPACE_UUID = '';
+
+    public function getUserUuid() :string { return static::UUID;}
 
     public function makeUser() :User
    {
@@ -28,10 +36,31 @@ abstract class BaseSystemUser implements ISystemUser
        }
    }
 
-    public function getUserObject() : User {
+    public function getUserObject() : ?User {
         if ($this->user) {return $this->user;}
         $this->user = $this->makeUser();
         return $this->user;
+    }
+
+    public function getUserNamespace() :?ISystemNamespace {
+        return SystemNamespaces::getSystemNamespaceByUuid(static::NAMESPACE_UUID);
+    }
+
+    public function onCall(): ISystemResource
+    {
+        $this->getUserObject();
+        return $this;
+    }
+
+    public function onNextStep(): void
+    {
+        //users add in the default namespace using the uuid of the now generated ns
+        $ns = $this->getUserNamespace();
+        if (!$ns) {
+            throw new HexbatchInitException('user next step cannot get ns');
+        }
+        $this->getUserObject()->default_namespace_id = $ns->getNamespaceObject()->id;
+        $this->getUserObject()->save();
     }
 
 

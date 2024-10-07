@@ -2,9 +2,10 @@
 
 namespace App\System\Resources\Attributes;
 
+use App\System\Resources\ISystemResource;
 use App\System\Resources\Types\ISystemType;
 
-interface ISystemAttribute
+interface ISystemAttribute extends ISystemResource
 {
     public function getAttributeUuid() :string;
     public function getOwningType() :ISystemType;

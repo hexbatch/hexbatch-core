@@ -17,6 +17,7 @@ enum TypeOfEvent : string {
   case ELEMENT_CREATION = 'element_creation';
   case ELEMENT_BATCH_CREATION = 'element_batch_creation';
   case ELEMENT_DESTRUCTION = 'element_destruction';
+  case ELEMENT_REENTERED = 'element_reentered'; //element with same uuid come back after copied out
 
   case GROUP_OPERATION = 'group_operation';
 
@@ -31,7 +32,7 @@ enum TypeOfEvent : string {
   case SEARCH_RESULTS = 'search_results';
 
 
-  case SET_OPERATION = 'set_operation';
+  case SET_OPERATION = 'set_operation'; //add each set operation here?
   case SET_ENTER = 'set_enter';
   case SET_LEAVE = 'set_leave';
   case SET_CONTENTS_SHAPE_CHANGED = 'set_contents_shape_changed';

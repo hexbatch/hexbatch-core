@@ -131,7 +131,7 @@ Route::prefix('v1')->group(function () {
 
                 Route::middleware(ValidateNamespaceOwner::class)->group(function () {
                     Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
-                });
+                });//todo add parent, remove parent, and put in design guard for the edit stuff
 
                 Route::prefix('/{element_type}')->middleware([ValidateTypeNotInUse::class])->group(function () {
                     Route::middleware(ValidateNamespaceOwner::class)->group(function () {

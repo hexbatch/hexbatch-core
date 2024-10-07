@@ -12,8 +12,8 @@ interface ISystemUser extends ISystemResource
     public function getUserUuid() :string;
     public function getUserName() :string;
     public function getUserPassword() :string;
-    public function getUserNamespace() :ISystemNamespace;
+    public function getUserNamespace() :?ISystemNamespace;
 
-    public function getUserObject() : User;
+    public function getUserObject() : ?User;
 
 }
