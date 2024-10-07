@@ -24,7 +24,7 @@ enum TypeTargetAction: string
     case COMMAND_MAKE_SET = 'command_make_set';
     case COMMAND_DESTROY_SET = 'command_destroy_set';
     case COMMAND_ADD_TO_SET = 'command_add_to_set';
-    case COMMAND_CHANGE_SET = 'command_change_set';
+    case COMMAND_REMOVE_FROM_SET = 'command_remove_from_set';
     case COMMAND_DESTROY_NAMESPACE = 'command_destroy_namespace';
     case COMMAND_DESTROY_USER = 'command_destroy_user';
     case COMMAND_ASSIGN_USER_TO_NAMESPACE = 'command_assign_user_to_namespace';

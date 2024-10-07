@@ -60,6 +60,10 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->boolean('is_listening_before')
+                ->nullable(false)->default(true)
+                ->comment("If true then the rules can block this event, if after then this is run after the event successfully completes");
+
             $table->timestamps();
 
         });

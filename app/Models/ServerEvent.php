@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\DB;
  * @property int event_target_type_id
  * @property int event_target_attribute_id
  * @property int owning_attribute_id
+ * @property bool is_listening_before
  *
  * @property string created_at
  * @property string updated_at
@@ -203,6 +204,11 @@ class ServerEvent extends Model
                     $event_type = (new Attribute())->resolveRouteBinding($hint_attr);
                     $this->event_target_attribute_id = $event_type->id;
                 }
+            }
+
+
+            if ($collect->has('is_listening_before')) {
+                $this->is_listening_before = Utilities::boolishToBool($collect->get('is_listening_before',true));
             }
 
 
