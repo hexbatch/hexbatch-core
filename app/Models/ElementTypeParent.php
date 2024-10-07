@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\DB;
  * @property int parent_type_id
  * @property int parent_rank
  * @property TypeOfParentRole parent_role
- * @property TypeOfApproval approval
+ * @property TypeOfApproval parent_type_approval
  *
  * @property string created_at
  * @property string updated_at
@@ -63,7 +63,7 @@ class ElementTypeParent extends Model
      */
     protected $casts = [
         'parent_role' => TypeOfParentRole::class,
-        'approval' => TypeOfApproval::class
+        'parent_type_approval' => TypeOfApproval::class
     ];
 
 

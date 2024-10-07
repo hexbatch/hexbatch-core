@@ -147,6 +147,17 @@ return new class extends Migration
         DB::statement("ALTER TABLE attributes Add COLUMN set_value_policy type_of_set_value_policy NOT NULL default 'static';");
 
 
+        DB::statement("CREATE TYPE type_of_approval AS ENUM (
+            'approval_not_set',
+            'automatic',
+            'pending',
+            'denied',
+            'approved'
+            );");
+
+        DB::statement("ALTER TABLE attributes Add COLUMN attribute_approval type_of_approval NOT NULL default 'approval_not_set';");
+
+
         Schema::table('attributes', function (Blueprint $table) {
             $table->jsonb('attribute_value')
                 ->nullable()->default(null)->comment("The value of the attribute");
@@ -202,6 +213,7 @@ return new class extends Migration
             $table->dropColumn('attribute_shape_setting');
             $table->dropColumn('encryption_policy');
             $table->dropColumn('set_value_policy');
+            $table->dropColumn('attribute_approval');
 
         });
 
@@ -209,6 +221,7 @@ return new class extends Migration
         DB::statement("DROP TYPE type_of_attribute_access;");
         DB::statement("DROP TYPE type_of_encryption_policy;");
         DB::statement("DROP TYPE type_of_set_value_policy;");
+        DB::statement("DROP TYPE type_of_approval;");
 
     }
 };

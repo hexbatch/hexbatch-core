@@ -8,6 +8,7 @@ use App\Enums\Attributes\TypeOfEncryptionPolicy;
 use App\Enums\Attributes\TypeOfSetValuePolicy;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Rules\TypeMergeJson;
+use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -44,15 +45,17 @@ use Illuminate\Validation\ValidationException;
  * @property TypeOfAttributeServerAccess server_access_type
  * @property TypeOfAttributeAccess attribute_access_type
  * @property string ref_uuid
+ * @property string value_json_path
+ * @property string attribute_name
+ *
  * @property TypeMergeJson popped_writing_method
  * @property TypeMergeJson live_merge_method
  * @property TypeMergeJson reentry_merge_method
  * @property TypeOfEncryptionPolicy encryption_policy
  * @property TypeOfSetValuePolicy set_value_policy
+ * @property TypeOfApproval attribute_approval
  * @property ArrayObject attribute_value
  * @property ArrayObject attribute_shape_setting
- * @property string value_json_path
- * @property string attribute_name
  *
  * @property string created_at
  * @property string updated_at
@@ -102,6 +105,7 @@ class Attribute extends Model
         'reentry_merge_method' => TypeMergeJson::class,
         'encryption_policy' => TypeOfEncryptionPolicy::class,
         'set_value_policy' => TypeOfSetValuePolicy::class,
+        'attribute_approval' => TypeOfApproval::class,
     ];
 
 

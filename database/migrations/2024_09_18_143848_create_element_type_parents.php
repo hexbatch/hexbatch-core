@@ -65,13 +65,7 @@ return new class extends Migration
 
 
 
-        DB::statement("CREATE TYPE type_of_approval AS ENUM (
-            'automatic',
-            'pending',
-            'approved'
-            );");
-
-        DB::statement("ALTER TABLE element_type_parents Add COLUMN approval type_of_approval NOT NULL default 'automatic';");
+        DB::statement("ALTER TABLE element_type_parents Add COLUMN parent_type_approval type_of_approval NOT NULL default 'approval_not_set';");
 
 
     }
@@ -83,6 +77,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('element_type_parents');
         DB::statement("DROP TYPE type_of_parent_role;");
-        DB::statement("DROP TYPE type_of_approval;");
+
     }
 };
