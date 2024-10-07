@@ -48,7 +48,7 @@ class AttributeResource extends JsonResource
             'owner' => new ElementTypeResource($this->type_owner),
             'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
             'value_json_path' => $this->value_json_path,
-            'top_rule' => new AttributeRuleResource($this->top_rule),
+            'attached_event' => $this->attached_event? new ServerEventResource($this->attached_event,null,$this->n_display_level - 1) : null ,
             'options'=> [
                 'is_retired' => $this->is_retired,
                 'is_system' => $this->is_system,

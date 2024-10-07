@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 
-use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
@@ -19,6 +18,7 @@ use App\Http\Resources\ElementTypeResource;
 use App\Models\Attribute;
 use App\Models\AttributeRule;
 use App\Models\ElementType;
+use App\Models\ServerEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -145,7 +145,7 @@ class TypeController extends Controller
 
     public function attribute_list_rules(ElementType $element_type,Attribute $attribute): JsonResponse {
         Utilities::ignoreVar($element_type);
-        return response()->json(new AttributeRuleResource($attribute->top_rule), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        return response()->json(new AttributeRuleResource($attribute->attached_event->top_rule), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
 
@@ -157,14 +157,14 @@ class TypeController extends Controller
      */
     public function create_rules(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
         Utilities::ignoreVar($element_type); //checked in the middleware
-        if ($attribute->top_rule) {
+        if ($attribute->attached_event) {
             throw new HexbatchNotPossibleException(
                 __('msg.rules_already_exist',['ref'=>$attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                 RefCodes::RULE_NOT_FOUND
             );
         }
-        $mod_rule = AttributeRule::collectRule(collect: $request->collect(),owner_attr: $attribute);
+        $mod_rule = ServerEvent::collectEvent(collect: $request->collect(), owner: $attribute);
         return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -173,8 +173,8 @@ class TypeController extends Controller
      */
     public function update_rules(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
         Utilities::ignoreVar($element_type); //checked in the middleware
-        $attribute->top_rule->delete_subtree();
-        $mod_rule = AttributeRule::collectRule(collect: $request->collect(),owner_attr: $attribute);
+        $attribute->attached_event->top_rule->delete_subtree();
+        $mod_rule = ServerEvent::collectEvent(collect: $request->collect(), owner: $attribute);
         return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -182,7 +182,7 @@ class TypeController extends Controller
 
     public function add_rule_subtree(Request $request, ElementType $element_type, Attribute $attribute, AttributeRule $attribute_rule): JsonResponse {
         Utilities::ignoreVar($element_type); //checked in the middleware
-        $mod_rule = AttributeRule::collectRule(collect: $request->collect(), parent_rule: $attribute_rule, owner_attr: $attribute);
+        $mod_rule = AttributeRule::collectRule(collect: $request->collect(), parent_rule: $attribute_rule, owner_event: $attribute->attached_event);
         return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -203,8 +203,8 @@ class TypeController extends Controller
      */
     public function delete_rules(ElementType $element_type, Attribute $attribute): JsonResponse {
         Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
-        $attribute->top_rule->delete_subtree();
-        return response()->json(new AttributeRuleResource($attribute->top_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+        $attribute->attached_event->top_rule->delete_subtree();
+        return response()->json(new AttributeRuleResource($attribute->attached_event->top_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
     /**

@@ -1,6 +1,9 @@
 <?php
 namespace App\Enums\Things;
 
+/*
+ * todo some events only listened to inside same set as trigger
+ */
 enum TypeOfEvent : string {
   case NOTHING = 'nothing';
 

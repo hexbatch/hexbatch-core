@@ -11,7 +11,7 @@ use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int api_call_type_id
  * @property int thing_type_id
  * @property int thing_attribute_id
- * @property int thing_rule_id
+ * @property int thing_server_event_id
  * @property int thing_set_id
  * @property int thing_element_id
  * @property int thing_path_id
@@ -44,21 +44,18 @@ class Thing extends Model
     public $timestamps = false;
 
     /**
-     * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [];
 
     /**
-     * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
     protected $hidden = [];
 
     /**
-     * The attributes that should be cast.
      *
      * @var array<string, string>
      */
@@ -76,5 +73,51 @@ class Thing extends Model
      *  so, need a structured way to match responses, and data gathering for them, to finished events
      *  todo  each event/api to have its own class and interface, with setters for the input data, and getter for the response data
      */
+
+
+    public static function buildThing(
+        ?int $id = null,
+        ?int $rule_id = null,
+        ?int $server_event_id = null,
+    )
+    : Builder
+    {
+
+        /**
+         * @var Builder $build
+         */
+        $build =  Thing::select('things.*')
+            ->selectRaw(" extract(epoch from  things.created_at) as created_at_ts,  extract(epoch from  things.updated_at) as updated_at_ts")
+        ;
+
+        if ($id) {
+            $build->where('things.id',$id);
+        }
+
+        if ($rule_id) {
+            $build->where('things.thing_rule_id',$rule_id);
+        }
+
+
+
+        if ($server_event_id) {
+
+
+            $build->join('attribute_rules',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($server_event_id) {
+                    $join
+                        ->on('attribute_rules.id','=','things.thing_rule_id')
+                        ->where('owning_server_event_id',$server_event_id);
+                }
+            );
+        }
+
+
+
+        return $build;
+    }
 
 }

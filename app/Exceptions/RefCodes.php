@@ -59,9 +59,13 @@ class RefCodes {
     const ATTRIBUTE_CANNOT_CLONE = 4011;
     const ATTRIBUTE_CANNOT_DELETE = 4012;
 
+
     const RULE_SCHEMA_ISSUE = 4100;
     const RULE_NOT_FOUND = 4101;
     const RULE_CANNOT_DELETE = 4102;
+
+    const RULE_CANNOT_EDIT = 4103;
+
 
     //remotes start at 5000
 
@@ -143,6 +147,7 @@ class RefCodes {
         self::RULE_SCHEMA_ISSUE => '',
         self::RULE_NOT_FOUND => '',
         self::RULE_CANNOT_DELETE => '',
+        self::RULE_CANNOT_EDIT => '',
 
         self::REMOTE_NOT_FOUND => '',
         self::REMOTE_SCHEMA_ISSUE => '',

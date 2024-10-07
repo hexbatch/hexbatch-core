@@ -47,6 +47,6 @@ class ValidateRuleOwnership
     }
 
     protected function checkPermission(Attribute $attribute,AttributeRule $rule) {
-        $rule->checkRuleOwnership($attribute);
+        $attribute->checkRuleOwnership($rule);
     }
 }

@@ -219,7 +219,7 @@ class Path extends Model
                 if ($owner) {
                     $path->path_owning_namespace_id = $owner->id;
                 }
-                $path->editPath($collect,$owner);
+                $path->editPath($collect);
             }
 
             DB::commit();
@@ -242,7 +242,7 @@ class Path extends Model
     /**
      * @throws \Exception
      */
-    public function editPath(Collection $collect, UserNamespace $owner) : void {
+    public function editPath(Collection $collect) : void {
 
         try {
 
@@ -286,8 +286,6 @@ class Path extends Model
             }
 
             if (!$this->isInUse()) {
-
-                $this->path_owning_namespace_id = $owner->id;
 
                 if ($collect->has('parts')) {
                     collect($collect->get('parts'))->each(function ($hint_child, int $key) {

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\Rules\TypeMergeJson;
 use App\Enums\Rules\TypeOfChildLogic;
-use App\Enums\Things\TypeOfThingStatus;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -87,7 +86,7 @@ the rules can react there when creation events to things in the set, the paths i
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int owning_attribute_id
+ * @property int owning_server_event_id
  * @property int parent_rule_id
  * @property int rule_event_type_id
  * @property int rule_path_id
@@ -102,7 +101,7 @@ the rules can react there when creation events to things in the set, the paths i
  * @property string created_at
  * @property string updated_at
  *
- * @property Attribute rule_owning_attribute
+ * @property ServerEvent owning_event
  * @property AttributeRule rule_parent
  * @property AttributeRule[] rule_children
  */
@@ -152,8 +151,8 @@ class AttributeRule extends Model
             ->with('rule_children');
     }
 
-    public function rule_owning_attribute() : BelongsTo {
-        return $this->belongsTo(Attribute::class,'owning_attribute_id');
+    public function owning_event() : BelongsTo {
+        return $this->belongsTo(ServerEvent::class,'owning_server_event_id'); //todo fixup
     }
 
 
@@ -172,9 +171,9 @@ class AttributeRule extends Model
         $build = ElementType::select('attribute_rules.*')
             ->selectRaw(" extract(epoch from  attribute_rules.created_at) as created_at_ts,  extract(epoch from  attribute_rules.updated_at) as updated_at_ts")
 
-            /** @uses AttributeRule::rule_owning_attribute() */
+            /** @uses AttributeRule::owning_event() */
             /** @uses AttributeRule::rule_parent(),AttributeRule::rule_children() */
-            ->with('rule_owning_attribute','rule_parent')
+            ->with('owning_event','rule_parent')
         ;
 
         if ($id) {
@@ -224,7 +223,7 @@ class AttributeRule extends Model
 
 
     public static function collectRule(
-        Collection|string $collect,?AttributeRule $rule = null,?AttributeRule $parent_rule = null,?Attribute $owner_attr = null)
+        Collection|string $collect,?AttributeRule $rule = null,?AttributeRule $parent_rule = null,?ServerEvent $owner_event = null)
     : AttributeRule
     {
         // one rule or a tree of rules can be passed in to be copied,  parents can be referred by uuid, or the parents can be collected
@@ -254,9 +253,8 @@ class AttributeRule extends Model
             }
 
 
-            if ($owner_attr) {
-                //this will throw if parent and child set, or attr already used as owner
-                $rule->owning_attribute_id = $owner_attr->id;
+            if ($owner_event) {
+                $rule->owning_server_event_id = $owner_event->id;
             }
             $rule->editRule($collect,$parent_rule);
 
@@ -283,7 +281,7 @@ class AttributeRule extends Model
      *
      * A rule or a rule chain can be created or edited here
      * If editing, pass in the rule uuid for lookup of the parent
-     * this ignores the owning attribute of the rule or chain
+     * this ignores the owning event of the rule or chain
      * @throws \Exception
      */
     public function editRule(Collection $collect,?AttributeRule $parent_rule = null) : void {
@@ -321,10 +319,10 @@ class AttributeRule extends Model
 
             if ($parent_rule) {
                 //check to make sure the parent and the child are in the same chain
-                $parent_attribute_id = $parent_rule->owning_attribute_id;
-                $this_attribute_id = $this->owning_attribute_id;
+                $parent_event_id = $parent_rule->owning_server_event_id;
+                $this_event_id = $this->owning_server_event_id;
 
-                if (!$parent_attribute_id || !$this_attribute_id || ($this_attribute_id !== $parent_attribute_id)) {
+                if (!$parent_event_id || !$this_event_id || ($this_event_id !== $parent_event_id)) {
                     throw new HexbatchNotPossibleException(
                         __('msg.rule_parent_child_be_same_chain',['ref'=>$this->getName(),'other'=>$parent_rule->getName()]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -337,10 +335,10 @@ class AttributeRule extends Model
 
 
             if ($collect->has('children')) {
-                $my_attribute = Attribute::buildAttribute(id:$this->owning_attribute_id)->first();
-                collect($collect->get('children'))->each(function ($hint_child, int $key) use($my_attribute) {
+                $my_event = ServerEvent::buildEvent(id:$this->owning_server_event_id)->first();
+                collect($collect->get('children'))->each(function ($hint_child, int $key) use($my_event) {
                     Utilities::ignoreVar($key);
-                    AttributeRule::collectRule(collect: $hint_child,parent_rule: $this,owner_attr: $my_attribute);
+                    AttributeRule::collectRule(collect: $hint_child,parent_rule: $this, owner_event: $my_event);
                 });
             }
 
@@ -354,14 +352,20 @@ class AttributeRule extends Model
                 }
             }
 
-            if (is_string($collect) && Utilities::is_uuid($collect)) {
-                /**
-                 * @var ElementType $event_type
-                 */
-                $event_type = (new ElementType())->resolveRouteBinding($collect);
-                //todo see if the event type is a valid event
-                $this->rule_event_type_id = $event_type->id;
+
+            if ($collect->has('event')) {
+                $hint_event = $collect->get('event');
+                if (is_string($hint_event) && Utilities::is_uuid($hint_event)) {
+                    /**
+                     * @var ElementType $event_type
+                     */
+                    $event_type = (new ElementType())->resolveRouteBinding($hint_event);
+                    //todo see if the event type is a valid event
+                    $this->rule_event_type_id = $event_type->id;
+                }
             }
+
+
 
 
 
@@ -401,27 +405,9 @@ class AttributeRule extends Model
     }
 
 
-    public function isInUse() : bool {
-
-        if (Thing::where('thing_rule_id',$this->id)->where('thing_status',TypeOfThingStatus::THING_PENDING)->count() ) {return true;}
-        //if this is not there, then its children are not there either (children in things processed before parents)
-
-        return false;
-    }
-
-    public function checkRuleOwnership(Attribute $owner) {
-        if ($this->id && $this->owning_attribute_id !== $owner->id) {
-
-            throw new HexbatchNotFound(
-                __('msg.rule_owner_does_not_match_attribute_given',['ref'=>$this->getName(),'attribute'=>$owner->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::RULE_NOT_FOUND
-            );
-        }
-    }
 
     public function delete_subtree() :void {
-        if ($this->isInUse()) {
+        if ($this->owning_event->isInUse()) {
             throw new HexbatchNotFound(
                 __('msg.rule_cannot_be_deleted_if_in_use',['ref'=>$this->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,

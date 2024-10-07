@@ -76,6 +76,9 @@ return [
     'rule_owner_does_not_match_attribute_given' => 'The rule given :ref is not owned by the attribute :attribute',
     'rules_already_exist' => 'The attribute :ref already has rules, you can update them',
 
+    'event_cannot_be_edited' => 'The event cannot be edited because:  :error',
+    'event_in_use' => 'The event is currently in use and cannot be updated',
+
     //remotes
     'remote_not_found' => 'Remote not found using :ref',
     'remote_not_in_usage_group' => 'You are not allowed to use this remote :ref',

@@ -19,12 +19,11 @@ return new class extends Migration
             $table->id();
 
 
-            $table->foreignId('owning_attribute_id')
-                ->nullable()
-                ->default(null)
+            $table->foreignId('owning_server_event_id')
+                ->nullable(false)
                 ->comment("The parent of the top level of the rule chain. Each attribute can have one rule chain")
-                ->unique()
-                ->constrained('attributes')
+                ->index()
+                ->constrained('server_events')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -128,11 +127,11 @@ return new class extends Migration
         DB::statement('ALTER TABLE attribute_rules ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_rule_parent_name ON attribute_rules (owning_attribute_id,rule_name) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_rule_parent_name ON attribute_rules (owning_server_event_id,rule_name) NULLS NOT DISTINCT;");
 
 
         DB::statement("CREATE UNIQUE INDEX idx_one_rule_root_per_tree
-                                ON attribute_rules (owning_attribute_id, (parent_rule_id IS NULL)) WHERE parent_rule_id IS NULL;");
+                                ON attribute_rules (owning_server_event_id, (parent_rule_id IS NULL)) WHERE parent_rule_id IS NULL;");
 
     }
 

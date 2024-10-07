@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -64,7 +65,7 @@ use Illuminate\Validation\ValidationException;
  *
  * @property TimeBound attribute_time_bound
  * @property LocationBound attribute_shape_bound
- * @property AttributeRule top_rule
+ * @property ServerEvent attached_event
  */
 class Attribute extends Model
 {
@@ -119,9 +120,10 @@ class Attribute extends Model
         return $this->belongsTo(ElementType::class,'owner_element_type_id');
     }
 
-    public function top_rule() : BelongsTo {
-        return $this->belongsTo(AttributeRule::class,'owning_attribute_id')
-            ->whereNull('parent_rule_id');
+    public function attached_event() : HasOne {
+        return $this->hasOne(ServerEvent::class,'owning_attribute_id')
+            /** @uses ServerEvent::top_rule() */
+            ->with('top_rule');
     }
 
 
@@ -217,8 +219,8 @@ class Attribute extends Model
 
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound(),Attribute::top_rule() */
-            ->with('attribute_parent', 'type_owner','attribute_shape_bound','top_rule')
+            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound(),Attribute::attached_event() */
+            ->with('attribute_parent', 'type_owner','attribute_shape_bound','attached_event')
 
 
        ;
@@ -623,5 +625,14 @@ class Attribute extends Model
         }
     }
 
+    public function checkRuleOwnership(AttributeRule $rule) {
+        if ($this->id && $this->attached_event->id !== $rule->owning_server_event_id) {
 
+            throw new HexbatchNotFound(
+                __('msg.rule_owner_does_not_match_attribute_given',['ref'=>$rule->getName(),'attribute'=>$this->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::RULE_NOT_FOUND
+            );
+        }
+    }
 }
