@@ -43,7 +43,7 @@ class Server extends Model
      * All elements transferred have the same uuid in the newly created elements
      * All ns transferred keep their uuid
      *
-     * The server has a ns
+     * The server has a ns, any element stuff is in its public or private element
      */
 
     //get, list, are done by paths

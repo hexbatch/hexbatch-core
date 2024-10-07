@@ -124,7 +124,7 @@ enum TypeOfEvent: string
     "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
      */
     //system wide
-    case REMOTE_RUNNING = 'remote_running';
+    case REMOTE_RUNNING = 'remote_running'; //a remote is about to be called
 
     case SET_TOP_LEVEL_DESTROYED = 'set_top_level_destroyed';
     case SET_TOP_LEVEL_CREATED = 'set_top_level_created';

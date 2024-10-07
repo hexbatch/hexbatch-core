@@ -4,7 +4,7 @@ namespace App\Enums\Rules;
 /**
  * postgres enum rule_target_action_type
  */
-enum TypeTargetAction: string
+enum TypeOfAction: string
 {
 //todo these are made into types for mini-api
 
@@ -40,10 +40,10 @@ enum TypeTargetAction: string
     case MEMBERSHIP_AFFINITY = 'membership_affinity';
     case WRITE = 'write';
 
-    public static function tryFromInput(string|int|bool|null $test ) : TypeTargetAction {
-        $maybe  = TypeTargetAction::tryFrom($test);
+    public static function tryFromInput(string|int|bool|null $test ) : TypeOfAction {
+        $maybe  = TypeOfAction::tryFrom($test);
         if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeTargetAction::cases(),'value'));
+            $delimited_values = implode('|',array_column(TypeOfAction::cases(),'value'));
             throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
         }
         return $maybe;

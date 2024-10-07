@@ -59,13 +59,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
-            $table->foreignId('base_namespace_attribute_id')
-                ->nullable()->default(null)
-                ->comment("This is the attribute that is the parent for all attributes the user makes, which do not have a parent when created")
-                ->unique('udx_base_namespace_attribute_id')
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
 
 
 
@@ -126,7 +119,6 @@ return new class extends Migration
             $table->dropForeign(['namespace_type_id']);
             $table->dropForeign(['public_element_id']);
             $table->dropForeign(['private_element_id']);
-            $table->dropForeign(['base_namespace_attribute_id']);
             $table->dropForeign(['namespace_home_set_id']);
 
             $table->dropColumn('namespace_user_id');
@@ -134,7 +126,6 @@ return new class extends Migration
             $table->dropColumn('namespace_type_id');
             $table->dropColumn('public_element_id');
             $table->dropColumn('private_element_id');
-            $table->dropColumn('base_namespace_attribute_id');
             $table->dropColumn('namespace_home_set_id');
 
             $table->dropColumn('created_at');

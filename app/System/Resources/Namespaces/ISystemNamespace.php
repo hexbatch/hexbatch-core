@@ -23,7 +23,6 @@ interface ISystemNamespace extends ISystemResource
     public function getPublicElement() : ?ISystemElement ;
     public function getPrivateElement() : ?ISystemElement ;
     public function getNamespaceType() : ?ISystemType ;
-    public function getBaseAttribute() : ?ISystemAttribute ;
     public function getHomeSet() : ?ISystemSet ;
 
     public function getNamespaceObject() : UserNamespace;

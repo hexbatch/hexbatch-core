@@ -28,7 +28,6 @@ use Illuminate\Validation\ValidationException;
  * @property int namespace_type_id
  * @property int public_element_id
  * @property int private_element_id
- * @property int base_namespace_attribute_id
  * @property int namespace_home_set_id
  * @property string namespace_name
  * @property string ref_uuid
@@ -44,7 +43,6 @@ use Illuminate\Validation\ValidationException;
  * @property Server namespace_home_server
  * @property Element public_element
  * @property Element user_private_element
- * @property Attribute user_base_attribute
  * @property ElementSet user_home_set
  * @property UserNamespace[] namespace_members
  * @property UserNamespace[] namespace_admins
@@ -96,9 +94,7 @@ class UserNamespace extends Model
         return $this->belongsTo(Element::class,'private_element_id');
     }
 
-    public function user_base_attribute() : BelongsTo {
-        return $this->belongsTo(Attribute::class,'base_namespace_attribute_id');
-    }
+
     public function user_home_set() : BelongsTo {
         return $this->belongsTo(ElementSet::class,'namespace_home_set_id');
     }
@@ -131,11 +127,11 @@ class UserNamespace extends Model
             ->selectRaw(" extract(epoch from  user_namespaces.created_at) as created_at_ts,  extract(epoch from  user_namespaces.updated_at) as updated_at_ts")
             /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
              * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
-             * @uses UserNamespace::user_base_attribute(),UserNamespace::user_home_set(),UserNamespace::namespace_admins() ,UserNamespace::namespace_members()
+             * @uses UserNamespace::user_home_set(),UserNamespace::namespace_admins() ,UserNamespace::namespace_members()
              */
             /**  */
             ->with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
-                'user_base_attribute', 'user_home_set', 'user_admin_group');
+                 'user_home_set', 'user_admin_group');
 
         if ($id) {
             $build->where('user_namespaces.id', $id);
@@ -342,7 +338,6 @@ class UserNamespace extends Model
      *
      * //todo when the user home set is created from the user type element, its put into the Standard set, all_users
      *
-     * //todo create user_base_attribute
      */
     public static function createNamespace(string $namespace_name,?User $owning_user = null,?Server $server = null) : UserNamespace {
         $node = new UserNamespace();

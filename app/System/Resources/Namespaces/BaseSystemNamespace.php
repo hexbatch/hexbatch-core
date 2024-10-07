@@ -54,7 +54,6 @@ abstract class BaseSystemNamespace implements ISystemNamespace
     public function getPublicElement() : ?ISystemElement { return $this->public_element;}
     public function getPrivateElement() : ?ISystemElement { return $this->private_element;}
     public function getNamespaceType() : ?ISystemType { return $this->type;}
-    public function getBaseAttribute() : ?ISystemAttribute { return $this->attribute;}
     public function getHomeSet() : ?ISystemSet { return $this->home_set;}
 
     public function getNamespaceObject() : UserNamespace {
