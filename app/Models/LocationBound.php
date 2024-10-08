@@ -39,6 +39,8 @@ use Illuminate\Validation\ValidationException;
  * @property TypeOfLocation location_type
  * @property ArrayObject geo_json
  * @property string geom
+ * @property string shape_bounding_box
+ * @property string map_bounding_box
  * @property string created_at
  * @property string updated_at
  *

@@ -43,6 +43,18 @@ return new class extends Migration
                               ;
                     ");
 
+        DB::statement("ALTER TABLE location_bounds
+                              Add COLUMN shape_bounding_box
+                              box3d
+                              ;
+                    ");
+
+        DB::statement("ALTER TABLE location_bounds
+                              Add COLUMN map_bounding_box
+                              box2d
+                              ;
+                    ");
+
         Schema::table('location_bounds', function (Blueprint $table) {
             $table->jsonb('geo_json')->comment("the original json that is used to make this geom");
             $table->timestamps();
@@ -67,6 +79,11 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
             BEGIN
                 NEW.geom = ST_AsText(ST_GeomFromGeoJSON(New.geo_json));
+                IF location_type = 'shape' THEN
+                  NEW.shape_bounding_box = ST_3DExtent(NEW.geom);
+                ELSE
+                  NEW.map_bounding_box = ST_Extent(NEW.geom);
+                END IF;
                 RETURN NEW;
             END;
             $$ language 'plpgsql';

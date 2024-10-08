@@ -8,12 +8,11 @@ enum TypeOfAction: string
 {
 //todo these are made into types for mini-api
 
-    case PRAGMA_SHAPE_OFFSET = 'pragma_shape_offset';
-    case PRAGMA_SHAPE_ROTATION = 'pragma_shape_rotation';
-    case PRAGMA_SHAPE_COLOR = 'pragma_shape_color';
-    case PRAGMA_SHAPE_TEXTURE = 'pragma_shape_texture';
-    case PRAGMA_SHAPE_OPACITY = 'pragma_shape_opacity';
-    case PRAGMA_SHAPE_ZORDER = 'pragma_shape_zorder';
+    case PRAGMA_SHAPE_COLOR = 'pragma_shape_color'; //see below
+    case PRAGMA_SHAPE_TEXTURE = 'pragma_shape_texture'; //see below
+    case PRAGMA_SHAPE_OPACITY = 'pragma_shape_opacity'; // visual effect stored in the attribute for its shape
+
+    case PRAGMA_SHAPE_ZORDER = 'pragma_shape_event_zorder'; //z-order for intersection events, not appearance
     case PRAGMA_ELEMENT_ON = 'pragma_element_on';
     case PRAGMA_ELEMENT_TOGGLE = 'pragma_element_toggle';
     case PRAGMA_ELEMENT_OFF = 'pragma_element_off';
@@ -32,6 +31,12 @@ enum TypeOfAction: string
     case COMMAND_DESTROY_ELEMENT = 'command_destroy_element';
     case COMMAND_ADD_LIVE_TYPE_ON_ELEMENT = 'command_add_live_type_on_element';
     case COMMAND_REMOVE_LIVE_TYPE_ON_ELEMENT = 'command_remove_live_type_on_element';
+
+    case COMMAND_ADD_LIVE_SHAPE_ON_ELEMENT = 'command_add_live_shape_on_element';
+    case COMMAND_REMOVE_SHAPE_TYPE_ON_ELEMENT = 'command_remove_live_shape_on_element';
+
+    case COMMAND_SHAPE_EVENT_BLOCKING_ON = 'command_shape_event_blocking_on'; // blocks set scope events based on z order of intersection
+    case COMMAND_SHAPE_EVENT_BLOCKING_OFF = 'command_shape_event_blocking_off'; // unblocks  for event or all set scoped events
     case COMMAND_NAMESPACE_ADD_MEMBER = 'command_namespace_add_member';
     case COMMAND_NAMESPACE_ADD_ADMIN = 'command_namespace_add_admin';
     case COMMAND_NAMESPACE_REMOVE_MEMBER = 'command_namespace_remove_member';

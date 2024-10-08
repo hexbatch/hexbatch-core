@@ -78,7 +78,7 @@ return new class extends Migration
          *   empty json
          *   impossible to run (no target found, no event fired)
          */
-        DB::statement("CREATE TYPE type_of_child_logic AS ENUM (
+        DB::statement("CREATE TYPE type_of_logic AS ENUM (
             'and',
             'or',
             'xor',
@@ -89,8 +89,8 @@ return new class extends Migration
             'always_false'
             );");
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_child_logic NOT NULL default 'and';");
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN child_logic type_of_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_logic type_of_logic NOT NULL default 'and';");
 
 
         DB::statement("CREATE TYPE type_merge_json AS ENUM (
@@ -141,7 +141,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('attribute_rules');
-        DB::statement("DROP TYPE type_of_child_logic;");
+        DB::statement("DROP TYPE type_of_logic;");
         DB::statement("DROP TYPE type_merge_json;");
 
     }

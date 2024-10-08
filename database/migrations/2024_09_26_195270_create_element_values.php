@@ -93,18 +93,12 @@ return new class extends Migration
             $table->jsonb('element_value')
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
 
-            $table->jsonb('element_shape_appearance')
-                ->nullable()->default(null)->comment("How the shape is changed here per set");
+
 
             $table->unique(['horde_type_id','horde_originating_type_id','horde_attribute_id']);
 
         });
 
-        DB::statement("ALTER TABLE element_values
-                              Add COLUMN element_shape
-                              geometry
-                              ;
-                    ");
 
         DB::statement("CREATE TYPE type_of_set_pointer_mode AS ENUM (
                 'link_to_set'

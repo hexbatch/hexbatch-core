@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\DB;
  * @property int event_target_attribute_id
  * @property int owning_attribute_id
  * @property bool is_listening_before
+ * @property bool is_clipped_shape
  *
  * @property string created_at
  * @property string updated_at

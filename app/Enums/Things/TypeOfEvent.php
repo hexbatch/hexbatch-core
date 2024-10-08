@@ -77,8 +77,6 @@ enum TypeOfEvent: string
 
     case SHAPE_INTERSECTION_ENTER = 'shape_intersection_enter';
     case SHAPE_INTERSECTION_LEAVE = 'shape_intersection_leave';
-    case SHAPE_BORDERING_ATTACHED = 'shape_bordering_attached';
-    case SHAPE_BORDERING_SEPERATED = 'shape_bordering_seperated';
 
     case TYPE_LIVE_ADDED = 'type_live_added';
     case TYPE_LIVE_REMOVED = 'type_live_removed';

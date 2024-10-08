@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Rules\TypeMergeJson;
-use App\Enums\Rules\TypeOfChildLogic;
+use App\Enums\Rules\TypeOfLogic;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -93,8 +93,8 @@ the rules can react there when creation events to things in the set, the paths i
  * @property string ref_uuid
  * @property string rule_name
  * @property string filter_json_path
- * @property TypeOfChildLogic rule_child_logic
- * @property TypeOfChildLogic rule_logic
+ * @property TypeOfLogic rule_child_logic
+ * @property TypeOfLogic rule_logic
  * @property TypeMergeJson rule_merge_method
  *
  *
@@ -133,8 +133,8 @@ class AttributeRule extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'rule_child_logic' => TypeOfChildLogic::class,
-        'rule_logic' => TypeOfChildLogic::class,
+        'rule_child_logic' => TypeOfLogic::class,
+        'rule_logic' => TypeOfLogic::class,
         'rule_merge_method' => TypeMergeJson::class,
     ];
 
@@ -370,11 +370,11 @@ class AttributeRule extends Model
 
 
             if ($collect->has('rule_child_logic')) {
-                $this->rule_child_logic = TypeOfChildLogic::tryFromInput($collect->get('rule_child_logic'));
+                $this->rule_child_logic = TypeOfLogic::tryFromInput($collect->get('rule_child_logic'));
             }
 
             if ($collect->has('rule_logic')) {
-                $this->rule_logic = TypeOfChildLogic::tryFromInput($collect->get('rule_logic'));
+                $this->rule_logic = TypeOfLogic::tryFromInput($collect->get('rule_logic'));
             }
 
 

@@ -8,7 +8,7 @@ use App\Enums\Paths\PathRelationshipType;
 use App\Enums\Paths\PathReturnsType;
 use App\Enums\Paths\TimeComparisonType;
 
-use App\Enums\Rules\TypeOfChildLogic;
+use App\Enums\Rules\TypeOfLogic;
 
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
@@ -59,8 +59,8 @@ use Illuminate\Validation\ValidationException;
  * @property string sort_json_path
  * @property string path_part_compiled_sql
  *
- * @property TypeOfChildLogic path_child_logic
- * @property TypeOfChildLogic path_logic
+ * @property TypeOfLogic path_child_logic
+ * @property TypeOfLogic path_logic
  * @property PathRelationshipType path_relationship
  * @property TimeComparisonType time_comparison
  * @property PathReturnsType path_returns
@@ -103,8 +103,8 @@ class PathPart extends Model
         'path_relationship' => PathRelationshipType::class,
         'time_comparison' => TimeComparisonType::class,
         'path_returns' => PathReturnsType::class,
-        'path_child_logic' => TypeOfChildLogic::class,
-        'path_logic' => TypeOfChildLogic::class,
+        'path_child_logic' => TypeOfLogic::class,
+        'path_logic' => TypeOfLogic::class,
         'path_lifecycle' => TypeOfLifecycle::class,
     ];
 
@@ -496,11 +496,11 @@ class PathPart extends Model
                 }
 
                 if ($collect->has('path_child_logic')) {
-                    $this->path_child_logic = TypeOfChildLogic::tryFromInput($collect->get('path_child_logic'));
+                    $this->path_child_logic = TypeOfLogic::tryFromInput($collect->get('path_child_logic'));
                 }
 
                 if ($collect->has('path_logic')) {
-                    $this->path_logic = TypeOfChildLogic::tryFromInput($collect->get('path_logic'));
+                    $this->path_logic = TypeOfLogic::tryFromInput($collect->get('path_logic'));
                 }
             } //end if not in use
 

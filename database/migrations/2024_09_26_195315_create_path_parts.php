@@ -240,8 +240,8 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE path_parts Add COLUMN path_returns path_returns_type NOT NULL default 'exists';");
 
-        DB::statement("ALTER TABLE path_parts Add COLUMN path_child_logic type_of_child_logic NOT NULL default 'and';");
-        DB::statement("ALTER TABLE path_parts Add COLUMN path_logic type_of_child_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE path_parts Add COLUMN path_child_logic type_of_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE path_parts Add COLUMN path_logic type_of_logic NOT NULL default 'and';");
 
         DB::statement("ALTER TABLE path_parts Add COLUMN path_lifecycle type_of_lifecycle DEFAULT NULL ;");
 

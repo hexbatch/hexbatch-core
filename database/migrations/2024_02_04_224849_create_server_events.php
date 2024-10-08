@@ -64,6 +64,10 @@ return new class extends Migration
                 ->nullable(false)->default(true)
                 ->comment("If true then the rules can block this event, if after then this is run after the event successfully completes");
 
+            $table->boolean('is_clipped_shape')
+                ->nullable(false)->default(false)
+                ->comment("If true then for events scoped to the same set this only listens if the attribute bounds intersect");
+
             $table->timestamps();
 
         });

@@ -72,23 +72,5 @@ class StandardAttributes
         return true;
     }
 
-    /** @noinspection PhpUnused */
-    public static function validateTimezone($what): void
-    {
-
-        if (is_string($what)) {
-            foreach (timezone_abbreviations_list() as $zone) {
-                foreach ($zone as $item) {
-                    if ($item["timezone_id"] === $what) {
-                        return;
-                    }
-                }
-            }
-        }
-
-        throw new HexbatchInvalidException(__("msg.not_timezone"),
-            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-            RefCodes::TIMEZONE_ISSUE);
-    }
 
 }

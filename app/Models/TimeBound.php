@@ -77,6 +77,8 @@ class TimeBound extends Model
 
     public function time_spans() : HasMany {
         return $this->hasMany(TimeBoundSpan::class)
+            ->select('*')
+            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts, extract(epoch from upper(time_slice_range)) as bound_stop_ts")
             ->orderBy('span_start');
     }
 
@@ -114,7 +116,7 @@ class TimeBound extends Model
         if (count($only_ids)) {
             $query->whereIn('id',$only_ids);
         }
-        $paginator = $query->cursorPaginate(20, ['*'], 'myCursorId');
+        $paginator = $query->cursorPaginate(20, ['*'], 'timeSpanCursorId');
 
         do  {
             /**
@@ -125,7 +127,7 @@ class TimeBound extends Model
             }
 
             $next = $paginator->nextCursor();
-            $paginator = $query->cursorPaginate(20, ['*'], 'myCursorId', $next);
+            $paginator = $query->cursorPaginate(20, ['*'], 'timeSpanCursorId', $next);
         } while( $paginator->hasPages() );
     }
 

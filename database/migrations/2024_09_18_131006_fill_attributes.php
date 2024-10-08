@@ -80,7 +80,14 @@ return new class extends Migration
             $table->boolean('is_final')->default(false)->nullable(false)
                 ->comment('if true then child types do not inherit this attribute. But this can be used as a parent in an attribute in the child');
 
-            $table->timestamps();
+
+            $table->integer('attribute_shape_z_order_for_events')
+                ->nullable(false)->default(0)
+                ->comment("Higher z levels have set wide events, scoped to the shape, called first. Affects only other attributes scoped to their shape");
+
+
+
+
 
         });
 
@@ -92,11 +99,7 @@ return new class extends Migration
         DB::statement('ALTER TABLE attributes ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
 
-        DB::statement("ALTER TABLE attributes ALTER COLUMN created_at SET DEFAULT NOW();");
 
-        DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON attributes FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
-        ");
 
 
 
@@ -159,6 +162,7 @@ return new class extends Migration
 
         Schema::table('attributes', function (Blueprint $table) {
 
+            $table->timestamps();
 
             $table->text('value_json_path')->nullable()->default(null)
                 ->comment("if set the value json has to match this, pointer whitelist can apply");
@@ -167,6 +171,11 @@ return new class extends Migration
                 ->comment("The unique name of the attribute, using the naming rules");
         });
 
+        DB::statement("ALTER TABLE attributes ALTER COLUMN created_at SET DEFAULT NOW();");
+
+        DB::statement("
+            CREATE TRIGGER update_modified_time BEFORE UPDATE ON attributes FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+        ");
 
         DB::statement(/** @lang text */
             "CREATE UNIQUE INDEX udx_type_parent_name ON attributes (owner_element_type_id,attribute_name) NULLS NOT DISTINCT;");
@@ -194,6 +203,7 @@ return new class extends Migration
             $table->dropColumn('is_final');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final_parent');
+            $table->dropColumn('attribute_shape_z_order_for_events');
             $table->dropColumn('value_json_path');
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');

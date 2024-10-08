@@ -36,6 +36,7 @@ use Illuminate\Validation\ValidationException;
  * @property int parent_attribute_id
  * @property int design_attribute_id
  * @property int attribute_location_shape_bound_id
+ * @property int attribute_shape_z_order_for_events
  * @property bool is_retired
  * @property bool is_final_parent
  * @property bool is_system
@@ -487,6 +488,8 @@ class Attribute extends Model
             }
 
 
+
+
             if (!$owner->isInUse()) {
 
 
@@ -554,6 +557,12 @@ class Attribute extends Model
                         }
                         $this->attribute_location_shape_bound_id = $bound->id;
                     }
+
+                }
+
+
+                if ($collect->has('z_order_for_shape_events')) {
+                    $this->attribute_shape_z_order_for_events = intval($collect->get('z_order_for_shape_events',false));
                 }
 
                 if ($collect->has('design')) {
@@ -577,14 +586,7 @@ class Attribute extends Model
                 }
 
 
-                /**
-                 * @var ElementValue $element_value
-                 */
-                $element_value = $this->original_element_value()->first();
-                if ($collect->has('shape_setting')) {
-                    $element_value->element_shape_appearance = $collect->get('shape_settings');
-                    if (empty($element_value->element_shape_appearance)) { $element_value->element_shape_appearance = null;}
-                }
+
 
                 if ($collect->has('attribute_value')) {
                     $element_value->element_value = $collect->get('attribute_value');

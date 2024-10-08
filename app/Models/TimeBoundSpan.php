@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Helpers\Bounds\DateRange;
-use App\Helpers\Bounds\DateRangeCast;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,7 +10,10 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int time_bound_id
- * @property DateRange time_slice_range
+ * @property string time_slice_range
+ *
+ * @property int bound_start_ts
+ * @property int bound_stop_ts
  *
  */
 class TimeBoundSpan extends Model
@@ -26,9 +27,7 @@ class TimeBoundSpan extends Model
      */
     protected $fillable = [];
 
-    protected $casts = [
-        'valid_range' => DateRangeCast::class,
-    ];
+    protected $casts = [];
 
     public static function cleanUpOld() {
         static::whereRaw("tstzrange( null,now() - interval '1 hour') &&  time_slice_range ")->delete();

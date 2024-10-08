@@ -5,7 +5,7 @@ namespace App\Models;
 
 
 use App\Enums\Rules\TypeMergeJson;
-use App\Enums\Rules\TypeOfChildLogic;
+use App\Enums\Rules\TypeOfLogic;
 use App\Enums\Things\TypeOfThingStatus;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,8 +30,8 @@ use Illuminate\Database\Query\JoinClause;
  * @property string ref_uuid
  * @property ArrayObject thing_value
  * @property TypeOfThingStatus thing_status
- * @property TypeOfChildLogic thing_child_logic
- * @property TypeOfChildLogic thing_logic
+ * @property TypeOfLogic thing_child_logic
+ * @property TypeOfLogic thing_logic
  * @property TypeMergeJson thing_merge_method
  *
  * @property string created_at
@@ -62,8 +62,8 @@ class Thing extends Model
     protected $casts = [
         'thing_value' => AsArrayObject::class,
         'thing_status' => TypeOfThingStatus::class,
-        'thing_logic' => TypeOfChildLogic::class,
-        'thing_child_logic' => TypeOfChildLogic::class,
+        'thing_logic' => TypeOfLogic::class,
+        'thing_child_logic' => TypeOfLogic::class,
         'thing_merge_method' => TypeMergeJson::class,
     ];
 

@@ -35,8 +35,6 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property TypeOfSetPointerMode set_pointer_mode
  * @property ArrayObject element_value
- * @property ArrayObject element_shape_appearance
- * @property string element_shape
  *
  * @property string value_changed_at
  *
@@ -70,7 +68,6 @@ class ElementValue extends Model
      */
     protected $casts = [
         'element_value' => AsArrayObject::class,
-        'element_shape_appearance' => AsArrayObject::class,
         'set_pointer_mode' => TypeOfSetPointerMode::class,
     ];
 
