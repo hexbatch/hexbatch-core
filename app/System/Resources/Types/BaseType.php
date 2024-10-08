@@ -68,7 +68,7 @@ abstract class BaseType implements ISystemType
 
     public function getDescriptionElement(): ?ISystemElement
     {
-        return SystemElements::getSystemElementByUuid(static::DESCRIPTION_ELEMENT_UUID);
+        return SystemElements::getElementByUuid(static::DESCRIPTION_ELEMENT_UUID);
     }
 
 
@@ -80,7 +80,7 @@ abstract class BaseType implements ISystemType
     }
 
     public function getTypeNamespace() :?ISystemNamespace {
-        return SystemNamespaces::getSystemNamespaceByUuid(static::NAMESPACE_UUID);
+        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
     }
 
     public function getTypeName(): string { return static::TYPE_NAME;}

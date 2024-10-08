@@ -10,7 +10,7 @@ class SystemElements extends SystemBase
     const SOURCE_FOLDER = 'app/System/Elements/Stock';
 
 
-    public static function getSystemElementByUuid(string $uuid) : ?ISystemElement {
+    public static function getElementByUuid(string $uuid) : ?ISystemElement {
         /** @var ISystemElement */
         return static::getResourceByUuid($uuid);
     }

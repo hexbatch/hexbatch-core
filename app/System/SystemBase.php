@@ -51,7 +51,8 @@ abstract class SystemBase
         }
     }
 
-    public static function getResourceByUuid(string $uuid) : ?ISystemResource {
+    public static function getResourceByUuid(?string $uuid) : ?ISystemResource {
+        if (empty($uuid)) {return null;}
         if (empty(static::$class_name_array)) {static::$class_name_array = static::findClasses();}
         $class_name = static::$uuid_class_names[$uuid]??null;
         if (!$class_name) {return null;}

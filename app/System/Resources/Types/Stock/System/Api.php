@@ -13,10 +13,10 @@ use App\System\Resources\Types\Stock\SystemType;
 /**
  * all descendants have the same uuid across all servers but have a different parent (this)
  */
-class PlaceholderType extends BaseType
+class Api extends BaseType
 {
-    const UUID = '4d1910aa-c16f-4fca-b8c0-e84094d2d76a';
-    const TYPE_NAME = 'placeholder';
+    const UUID = 'd314149a-0f51-4b1e-b954-590a890e7c44';
+    const TYPE_NAME = 'api';
     const NAMESPACE_UUID = SystemUserNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

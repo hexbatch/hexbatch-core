@@ -10,7 +10,7 @@ class SystemSets extends SystemBase
     const SOURCE_FOLDER = 'app/System/Sets/Stock';
 
 
-    public static function getSystemTypeByUuid(string $uuid) : ?ISystemSet {
+    public static function getSetByUuid(string $uuid) : ?ISystemSet {
         /** @var ISystemSet */
         return static::getResourceByUuid($uuid);
     }

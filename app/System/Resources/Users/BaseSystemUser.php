@@ -44,7 +44,7 @@ abstract class BaseSystemUser implements ISystemUser
     }
 
     public function getUserNamespace() :?ISystemNamespace {
-        return SystemNamespaces::getSystemNamespaceByUuid(static::NAMESPACE_UUID);
+        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
     }
 
     public function onCall(): ISystemResource

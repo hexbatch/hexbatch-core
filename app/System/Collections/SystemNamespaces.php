@@ -10,7 +10,7 @@ class SystemNamespaces extends SystemBase
     const SOURCE_FOLDER = 'app/System/Namespaces/Stock';
 
 
-    public static function getSystemNamespaceByUuid(string $uuid) : ?ISystemNamespace {
+    public static function getNamespaceByUuid(string $uuid) : ?ISystemNamespace {
         /** @var ISystemNamespace */
         return static::getResourceByUuid($uuid);
     }

@@ -5,6 +5,7 @@ namespace App\System\Resources\Types\Stock;
 
 
 use App\System\Resources\Attributes\Stock\Expiration;
+use App\System\Resources\Attributes\Stock\System\Event\Scope;
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
 
@@ -20,7 +21,8 @@ class SystemType extends BaseType
     const DESCRIPTION_ELEMENT_UUID = '';
 
     const ATTRIBUTE_UUIDS = [
-        Expiration::UUID
+        Expiration::UUID,
+        Scope::UUID,
     ];
 
     const PARENT_UUIDS = [];
