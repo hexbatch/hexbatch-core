@@ -1,26 +1,14 @@
 <?php
-//todo all namespace elements and sets and descriptors inherit this
-
-/*
- * attributes that do not inherit by subtype, must have these as parent attr
- * name (first last etc)
- * email
- * address stuff
- * phone
- * map location
- * timezone
- */
 
 
 namespace App\System\Resources\Types\Stock\System;
 
-use App\System\Resources\Attributes\Stock\System\NamespaceType\Address;
-use App\System\Resources\Attributes\Stock\System\NamespaceType\Email;
-use App\System\Resources\Attributes\Stock\System\NamespaceType\FirstName;
-use App\System\Resources\Attributes\Stock\System\NamespaceType\LastName;
-use App\System\Resources\Attributes\Stock\System\NamespaceType\MapLocation;
-use App\System\Resources\Attributes\Stock\System\NamespaceType\Phone;
-use App\System\Resources\Attributes\Stock\System\NamespaceType\Timezone;
+use App\System\Resources\Attributes\Stock\System\MetaData\NamespaceType\NamespaceData;
+use App\System\Resources\Attributes\Stock\System\MetaData\NamespaceType\NamespaceData\Address;
+use App\System\Resources\Attributes\Stock\System\MetaData\NamespaceType\NamespaceData\ContactInfo;
+use App\System\Resources\Attributes\Stock\System\MetaData\NamespaceType\NamespaceData\MapLocation;
+use App\System\Resources\Attributes\Stock\System\MetaData\NamespaceType\NamespaceData\Name;
+use App\System\Resources\Attributes\Stock\System\MetaData\NamespaceType\NamespaceData\Timezone;
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
 use App\System\Resources\Types\Stock\SystemType;
@@ -35,12 +23,11 @@ class NamespaceType extends BaseType
     const DESCRIPTION_ELEMENT_UUID = '';
 
     const ATTRIBUTE_UUIDS = [
-        FirstName::UUID,
-        LastName::UUID,
+        NamespaceData::UUID,
+        Name::UUID,
         Address::UUID,
-        Email::UUID,
+        ContactInfo::UUID,
         MapLocation::UUID,
-        Phone::UUID,
         Timezone::UUID,
     ];
 

@@ -4,8 +4,6 @@ namespace App\System\Resources\Types\Stock\System;
 
 
 
-use App\System\Resources\Attributes\Stock\System\Server\CommitHash;
-use App\System\Resources\Attributes\Stock\System\Server\Version;
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
 use App\System\Resources\Types\Stock\SystemType;

@@ -16,7 +16,7 @@ class Placeholder extends BaseType
     const DESCRIPTION_ELEMENT_UUID = '';
 
     const ATTRIBUTE_UUIDS = [
-
+        Placeholder::UUID
     ];
 
     const PARENT_UUIDS = [

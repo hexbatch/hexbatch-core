@@ -1,16 +1,16 @@
 <?php
 
-namespace App\System\Resources\Types\Stock\System\Namespace;
+namespace App\System\Resources\Types\Stock\System\Placeholder;
 
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
-use App\System\Resources\Types\Stock\System\NamespaceType;
+use App\System\Resources\Types\Stock\System\Placeholder;
 
 
-class Description extends BaseType
+class CurrentSet extends BaseType
 {
-    const UUID = 'd422d4f8-636e-45ff-9869-c64b089d36b8';
-    const TYPE_NAME = 'description';
+    const UUID = '14ef9d86-76be-446d-8ad6-ed5ac56fe5f1';
+    const TYPE_NAME = 'current_set';
     const NAMESPACE_UUID = SystemUserNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -20,7 +20,7 @@ class Description extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        NamespaceType::class
+        Placeholder::class
     ];
 
 }

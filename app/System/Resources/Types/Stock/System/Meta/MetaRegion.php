@@ -7,9 +7,7 @@ use App\System\Resources\Types\BaseType;
 use App\System\Resources\Types\Stock\System\Meta;
 use App\System\Resources\Types\Stock\SystemType;
 
-/**
- * all descendants have the same uuid across all servers but have a different parent (this)
- */
+
 class MetaRegion extends BaseType
 {
     const UUID = '2c9fa05c-5259-42b0-a0d2-0de629e91522';

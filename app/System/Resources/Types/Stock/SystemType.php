@@ -4,8 +4,8 @@ namespace App\System\Resources\Types\Stock;
 
 
 
-use App\System\Resources\Attributes\Stock\Expiration;
 use App\System\Resources\Attributes\Stock\System\Event\Scope;
+use App\System\Resources\Attributes\Stock\System\System\Expiration;
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
 
@@ -22,18 +22,10 @@ class SystemType extends BaseType
 
     const ATTRIBUTE_UUIDS = [
         Expiration::UUID,
-        Scope::UUID,
+        Scope::UUID
     ];
 
     const PARENT_UUIDS = [];
 
 }
-/*
- * todo base attributes
- *  metadata
- *  metadata -> personal_data -> ns attributes
- *  metadata -> media_meta
- *  metadata -> display_meta
- *  metadata -> content_meta
 
- */

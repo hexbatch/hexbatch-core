@@ -3,6 +3,7 @@
 
 namespace App\System\Resources\Types\Stock\System;
 
+use App\System\Resources\Attributes\Stock\System\MetaData\Media\MediaData;
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
 use App\System\Resources\Types\Stock\SystemType;
@@ -17,7 +18,7 @@ class Media extends BaseType
     const DESCRIPTION_ELEMENT_UUID = '';
 
     const ATTRIBUTE_UUIDS = [
-
+        MediaData::UUID
     ];
 
     const PARENT_UUIDS = [
@@ -27,7 +28,7 @@ class Media extends BaseType
 }
 
 /*//todo images, videos, sounds describes the resources
- attributes
+
 resource_url
 media_type
  */

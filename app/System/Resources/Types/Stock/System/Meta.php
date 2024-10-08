@@ -3,6 +3,7 @@
 
 namespace App\System\Resources\Types\Stock\System;
 
+use App\System\Resources\Attributes\Stock\System\MetaData\Metadata;
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
 use App\System\Resources\Types\Stock\SystemType;
@@ -17,7 +18,7 @@ class Meta extends BaseType
     const DESCRIPTION_ELEMENT_UUID = '';
 
     const ATTRIBUTE_UUIDS = [
-
+        Metadata::UUID,
     ];
 
     const PARENT_UUIDS = [
@@ -25,24 +26,3 @@ class Meta extends BaseType
     ];
 
 }
-
-
-/*
-//todo descriptions that are not about appearance
-* starts_at  iso_8601
-* ends_at    iso_8601
-* created_at iso_8601
-* updated_at iso_8601
-* joined_at  iso_8601
-
-* author
-* copywrite
-* url
-* rating
- * privacy
- * terms
-* mime_type
-* keywords
-* language_code
-* iso_region
- */

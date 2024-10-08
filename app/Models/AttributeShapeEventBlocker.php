@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /*
-can be set if namespace has admin privileges on both attributes
+can be set if namespace has admin privileges on the blocked, and can read the attribute on the blocker, and if both have shapes
 
 blocking set scope events for one attribute to another if intersect (one event or all) and the blocker has a higher z order on the intersection
 both attributes can block each other, if different z order then only one applies, if same z order then logic applies
