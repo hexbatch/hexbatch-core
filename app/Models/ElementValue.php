@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 /*
- * These are only made when there is a value written to an attribute for an element, or the attribute is sometimes off (type_set_visibility_id or toggled is_on)
- * if missing from the row, then pick up the value from the attribute itself
- *
- * if not a row here, then it is assumed to be always visible and on for the attribute
+ * This is the only place where the data is stored for the types, elements, attributes
+ * Row added when the attribute is made
+ * Then extra rows are only made when there is a value written to an attribute for an element,
+ *    or the value is allowed to change for each set, and the attribute of the element written to in a new set
+ *    or the attribute is sometimes off (type_set_visibility_id or toggled is_on)
  *
  * if row set but type_set_visibility_id is missing, then the attribute is always visible (unless its off)
  */
@@ -22,6 +23,9 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int horde_type_id
+ * @property int horde_originating_type_id
+ * @property int horde_attribute_id
  * @property int element_set_member_id
  * @property int element_horde_id
  * @property int type_set_visibility_id

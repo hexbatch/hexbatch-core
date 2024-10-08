@@ -47,5 +47,6 @@ class ElementTypeSetVisibility extends Model
      */
     protected $casts = [];
 
-//todo fill the values in from the horde type or originating, and set this type from the type in the horde row used
+//todo fill the values when element goes into a set and there is some bounds for one or more subtypes or the type itself
+// when the e leaves the set, and there are no more types there, then remove the row
 }

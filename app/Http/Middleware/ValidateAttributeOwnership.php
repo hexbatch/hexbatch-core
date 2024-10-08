@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use App\Models\Attribute;
 use App\Models\ElementType;
-use App\Models\UserNamespace;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

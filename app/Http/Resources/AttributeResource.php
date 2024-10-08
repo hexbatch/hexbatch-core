@@ -55,7 +55,7 @@ class AttributeResource extends JsonResource
                 'is_final' => $this->is_final,
                 'is_final_parent' => $this->is_final_parent,
             ],
-            'value'=> $this->attribute_value,
+            'value'=> $this->original_element_value?->element_value,
             'server_access_type'=> $this->server_access_type->value,
             'attribute_access_type'=> $this->attribute_access_type->value,
 

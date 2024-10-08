@@ -28,7 +28,7 @@ return new class extends Migration
 
 
             $table->foreignId('event_server_id')
-                ->nullable(true)->default(null)
+                ->nullable()->default(null)
                 ->comment("null for this server, otherwise send out this event to that server")
                 ->index()
                 ->constrained('element_types')

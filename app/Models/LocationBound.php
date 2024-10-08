@@ -33,6 +33,7 @@ use Illuminate\Validation\ValidationException;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int location_bound_namespace_id
  * @property string ref_uuid
  * @property string bound_name
  * @property TypeOfLocation location_type
@@ -77,7 +78,8 @@ class LocationBound extends Model
      public static function buildLocationBound(?int $id = null,?int $type_id = null,?int $attribute_id = null) : Builder {
 
         $build =  LocationBound::select('location_bounds.*')
-            ->selectRaw(" extract(epoch from  created_at) as created_at_ts,  extract(epoch from  updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json")
+            ->selectRaw(" extract(epoch from  location_bounds.created_at) as created_at_ts,".
+                "  extract(epoch from  location_bounds.updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json")
             /** @uses LocationBound::location_attributes() */
             ->with('location_attributes');
 
@@ -88,31 +90,20 @@ class LocationBound extends Model
                   */
                  function (JoinClause $join)  {
                      $join
-                         ->on('time_bounds.id','=','bounded_attr.attribute_location_bound_id');
+                         ->on('time_bounds.id','=','bounded_attr.attribute_location_shape_bound_id');
                  }
              );
          }
 
         if ($type_id) {
 
-            $build->join('attributes as tounded_attr',
+            $build->join('element_types as bounded_type',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('location_bounds.id','=','tounded_attr.attribute_location_bound_id');
-                }
-            );
-
-            $build->join('element_type_hordes as bounded_horde',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  use($type_id) {
-                    $join
-                        ->on('bounded_horde.horde_attribute_id','=','tounded_attr.id')
-                        ->where('bounded_horde.horde_type_id',$type_id);
+                        ->on('time_bounds.id','=','bounded_type.type_location_map_bound_id');
                 }
             );
 
@@ -285,6 +276,30 @@ class LocationBound extends Model
             } else {
                 if (Utilities::is_uuid($value)) {
                     $build = $this->where('ref_uuid', $value);
+                } else {
+                    if (is_string($value)) {
+                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+                        if (count($parts) === 2) {
+                            $owner_hint = $parts[0];
+                            $maybe_name = $parts[1];
+                            /**
+                             * @var UserNamespace $owner
+                             */
+                            $owner = (new UserNamespace())->resolveRouteBinding($owner_hint);
+                            $build = $this->where('location_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
+                        }
+
+                        if (count($parts) === 3) {
+                            $server_hint = $parts[0];
+                            $namespace_hint = $parts[1];
+                            $maybe_name = $parts[2];
+                            /**
+                             * @var UserNamespace $owner
+                             */
+                            $owner = (new UserNamespace())->resolveRouteBinding($server_hint.UserNamespace::NAMESPACE_SEPERATOR.$namespace_hint);
+                            $build = $this->where('location_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
+                        }
+                    }
                 }
             }
 
@@ -314,7 +329,7 @@ class LocationBound extends Model
     /**
      * @throws \Exception
      */
-    public static function collectLocationBound(Collection|string $collect) : LocationBound {
+    public static function collectLocationBound(Collection|string $collect, UserNamespace $namespace) : LocationBound {
         try {
             DB::beginTransaction();
 
@@ -322,6 +337,7 @@ class LocationBound extends Model
                 $bound = (new TimeBound())->resolveRouteBinding($collect);
             } else {
                 $bound = new LocationBound();
+                $bound->location_bound_namespace_id = $namespace->id;
                 if ($collect->has('bound_name')) {
                     $name  = $collect->get('bound_name');
                     if (is_string($name) && Str::trim($name)) {

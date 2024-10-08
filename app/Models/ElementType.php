@@ -186,13 +186,24 @@ class ElementType extends Model
                 } else {
                     if (is_string($value)) {
                         $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-                        if (count($parts) >= 2) {
+                        if (count($parts) === 2) {
                             $owner_hint = $parts[0];
                             $maybe_name = $parts[1];
                             /**
                              * @var UserNamespace $owner
                              */
                             $owner = (new UserNamespace())->resolveRouteBinding($owner_hint);
+                            $build = $this->where('owner_namespace_id', $owner?->id)->where('type_name', $maybe_name);
+                        }
+
+                        if (count($parts) === 3) {
+                            $server_hint = $parts[0];
+                            $namespace_hint = $parts[1];
+                            $maybe_name = $parts[2];
+                            /**
+                             * @var UserNamespace $owner
+                             */
+                            $owner = (new UserNamespace())->resolveRouteBinding($server_hint.UserNamespace::NAMESPACE_SEPERATOR.$namespace_hint);
                             $build = $this->where('owner_namespace_id', $owner?->id)->where('type_name', $maybe_name);
                         }
                     }
@@ -400,11 +411,13 @@ class ElementType extends Model
                         RefCodes::TYPE_INVALID_NAME);
                 }
 
+                $owner_namespace = $this->owner_namespace;
+                if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(id: $this->owner_namespace_id)->first();}
 
                 if ($collect->has('time_bound')) {
                     $hint_time_bound = $collect->get('time_bound');
                     if (is_string($hint_time_bound) || $hint_time_bound instanceof Collection) {
-                        $time_bound = TimeBound::collectTimeBound($hint_time_bound);
+                        $time_bound = TimeBound::collectTimeBound(collect: $hint_time_bound,namespace: $owner_namespace);
                         $this->type_time_bound_id = $time_bound->id;
                     }
                 }
@@ -412,7 +425,7 @@ class ElementType extends Model
                 if ($collect->has('map_bound')) {
                     $hint_location_bound = $collect->get('map_bound');
                     if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
-                        $bound = LocationBound::collectLocationBound($hint_location_bound);
+                        $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);
                         if ($bound->location_type === TypeOfLocation::SHAPE) {
                             throw new HexbatchNotPossibleException(__('msg.type_must_have_map_bound'),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

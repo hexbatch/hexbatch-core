@@ -15,6 +15,14 @@ return new class extends Migration
         Schema::create('location_bounds', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('location_bound_namespace_id')
+                ->nullable(false)
+                ->comment("The namespace this entry is for")
+                ->index()
+                ->constrained('user_namespaces')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
         });
 
         DB::statement("CREATE TYPE type_of_location AS ENUM ('map', 'shape');");
@@ -41,6 +49,8 @@ return new class extends Migration
 
             $table->string('bound_name',128)->nullable(false)->index()
                 ->comment("The unique name of the location bound, using the naming rules");
+
+            $table->unique(['location_bound_namespace_id','bound_name']);
         });
 
         DB::statement('ALTER TABLE location_bounds ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

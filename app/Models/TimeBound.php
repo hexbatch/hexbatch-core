@@ -28,6 +28,7 @@ use InvalidArgumentException;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int time_bound_namespace_id
  * @property string ref_uuid
 
  * @property string bound_name
@@ -90,12 +91,12 @@ class TimeBound extends Model
 
      */
     public static function generateSpans(array $only_ids = []) : void {
-        //todo fixup with new span range
+
         $now_ts = time();
         $unix_timestamp = $now_ts + static::MAKE_PERIOD_SECONDS;
         $query = TimeBound::select('*')
-            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts")
-            ->whereRaw('bound_stop > NOW()')
+            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts, extract(epoch from upper(time_slice_range)) as bound_stop_ts")
+            ->whereRaw('upper(time_slice_range) >= NOW()')
             ->join('time_bound_spans',
                 /**
                  * @param JoinClause $join
@@ -149,14 +150,14 @@ class TimeBound extends Model
     }
 
     protected function insertSpan(int $from_ts,int $to_ts) {
-        //todo change to range
+
         DB::affectingStatement("
-                INSERT INTO time_bound_spans(time_bound_id,span_start,span_stop)
-                SELECT :bounds_id,:start_at,:stop_at
+                INSERT INTO time_bound_spans(time_bound_id,time_slice_range)
+                SELECT :bounds_id,tstzrange( to_timestamp(:start_at),to_timestamp(:stop_at) )
                 WHERE
                 NOT EXISTS (
                     SELECT id FROM time_bound_spans
-                    WHERE time_bound_id = :bounds_id AND span_start = :start_at and span_stop = :stop_at
+                    WHERE time_bound_id = :bounds_id AND tstzrange( to_timestamp(:start_at),to_timestamp(:stop_at) )  <@ time_slice_range
                 )",
             ['bounds_id'=>$this->id,'start_at'=>$from_ts,'stop_at'=>$to_ts]
         );
@@ -169,7 +170,7 @@ class TimeBound extends Model
 
     public static function buildTimeBound(?int $id = null,?int $type_id = null,?int $attribute_id = null) : Builder {
         $build =  TimeBound::select('time_bounds.*')
-            ->selectRaw(" extract(epoch from  bound_start) as bound_start_ts,  extract(epoch from  bound_stop) as bound_stop_ts")
+            ->selectRaw(" extract(epoch from  time_bounds.bound_start) as bound_start_ts,  extract(epoch from  time_bounds.bound_stop) as bound_stop_ts")
             /** @uses TimeBound::time_spans(),TimeBound::time_attributes() */
             ->with('time_spans','time_attributes');
 
@@ -189,26 +190,16 @@ class TimeBound extends Model
 
         if ($type_id) {
 
-            $build->join('attributes as tounded_attr',
+            $build->join('element_types as bounded_type',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('time_bounds.id','=','tounded_attr.attribute_time_bound_id');
+                        ->on('time_bounds.id','=','bounded_type.type_time_bound_id');
                 }
             );
 
-            $build->join('element_type_hordes as bounded_horde',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  use($type_id) {
-                    $join
-                        ->on('bounded_horde.horde_attribute_id','=','tounded_attr.id')
-                        ->where('bounded_horde.horde_type_id',$type_id);
-                }
-            );
 
         }
 
@@ -319,6 +310,30 @@ class TimeBound extends Model
             } else {
                 if (Utilities::is_uuid($value)) {
                     $build = $this->where('ref_uuid', $value);
+                } else {
+                    if (is_string($value)) {
+                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+                        if (count($parts) === 2) {
+                            $owner_hint = $parts[0];
+                            $maybe_name = $parts[1];
+                            /**
+                             * @var UserNamespace $owner
+                             */
+                            $owner = (new UserNamespace())->resolveRouteBinding($owner_hint);
+                            $build = $this->where('time_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
+                        }
+
+                        if (count($parts) === 3) {
+                            $server_hint = $parts[0];
+                            $namespace_hint = $parts[1];
+                            $maybe_name = $parts[2];
+                            /**
+                             * @var UserNamespace $owner
+                             */
+                            $owner = (new UserNamespace())->resolveRouteBinding($server_hint.UserNamespace::NAMESPACE_SEPERATOR.$namespace_hint);
+                            $build = $this->where('time_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
+                        }
+                    }
                 }
             }
 
@@ -348,14 +363,14 @@ class TimeBound extends Model
     /**
      * @throws \Exception
      */
-    public static function collectTimeBound(Collection|string $collect) : TimeBound {
+    public static function collectTimeBound(Collection|string $collect, UserNamespace $namespace) : TimeBound {
         try {
             DB::beginTransaction();
             if (is_string($collect) && Utilities::is_uuid($collect)) {
                 $bound = (new TimeBound())->resolveRouteBinding($collect);
             } else {
                 $bound = new TimeBound();
-
+                $bound->time_bound_namespace_id = $namespace->id;
                 if ($collect->has('bound_name')) {
                     $name = $collect->get('bound_name');
                     if (is_string($name) && Str::trim($name)) {

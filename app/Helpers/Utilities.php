@@ -193,7 +193,7 @@ class Utilities {
 
             }
             if (!$namespace instanceof UserNamespace) {
-                throw new \LogicException("getCurrentNamespace does not see a Namespace in the parameter");
+                throw new LogicException("getCurrentNamespace does not see a Namespace in the parameter");
             }
         }
         return $namespace;

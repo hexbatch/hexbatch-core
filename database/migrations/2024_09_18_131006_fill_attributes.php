@@ -13,12 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-
+        //min info: owner_element_type_id, and set attribute_name to null
         Schema::table('attributes', function (Blueprint $table) {
 
             $table->foreignId('owner_element_type_id')
-                ->nullable()
-                ->default(null)
+                ->nullable(false)
                 ->comment("The type that owns this attribute")
                 ->index('idx_attribute_owner_element_type_id')
                 ->constrained('element_types')
@@ -159,17 +158,12 @@ return new class extends Migration
 
 
         Schema::table('attributes', function (Blueprint $table) {
-            $table->jsonb('attribute_value')
-                ->nullable()->default(null)->comment("The value of the attribute");
-
-            $table->jsonb('attribute_shape_setting')
-                ->nullable()->default(null)->comment("The value of the attribute");
 
 
             $table->text('value_json_path')->nullable()->default(null)
                 ->comment("if set the value json has to match this, pointer whitelist can apply");
 
-            $table->string('attribute_name',128)->nullable(false)->index()
+            $table->string('attribute_name',128)->nullable()->index()
                 ->comment("The unique name of the attribute, using the naming rules");
         });
 
@@ -201,7 +195,6 @@ return new class extends Migration
             $table->dropColumn('is_system');
             $table->dropColumn('is_final_parent');
             $table->dropColumn('value_json_path');
-            $table->dropColumn('attribute_value');
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
@@ -210,7 +203,6 @@ return new class extends Migration
             $table->dropColumn('popped_writing_method');
             $table->dropColumn('reentry_merge_method');
             $table->dropColumn('live_merge_method');
-            $table->dropColumn('attribute_shape_setting');
             $table->dropColumn('encryption_policy');
             $table->dropColumn('set_value_policy');
             $table->dropColumn('attribute_approval');

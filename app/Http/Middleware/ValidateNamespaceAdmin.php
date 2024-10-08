@@ -6,8 +6,6 @@ use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\UserNamespace;
-use Closure;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ValidateNamespaceAdmin extends ValidateNamespaceOwner

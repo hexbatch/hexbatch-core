@@ -70,7 +70,7 @@ abstract class BaseSystemNamespace implements ISystemNamespace
 
     public function onNextStep(): void
     {
-        //namespaces added in the homeset , attribute and elements and user
+        //namespaces added in the home set , attribute and elements and user
         $user = $this->getNamespaceUser();
         if (!$user) {
             throw new HexbatchInitException('namespace next step cannot get u');

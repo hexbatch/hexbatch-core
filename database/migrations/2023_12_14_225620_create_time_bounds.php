@@ -16,6 +16,13 @@ return new class extends Migration
         Schema::create('time_bounds', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('time_bound_namespace_id')
+                ->nullable(false)
+                ->comment("The namespace this entry is for")
+                ->index()
+                ->constrained('user_namespaces')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
             $table->timestamps();
 
@@ -43,6 +50,8 @@ return new class extends Migration
 
             $table->string('bound_name',128)->nullable(false)->index()
                 ->comment("The unique name of the time bound, using the naming rules");
+
+            $table->unique(['time_bound_namespace_id','bound_name']);
 
         });
 

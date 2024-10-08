@@ -31,8 +31,7 @@ class TimeBoundSpan extends Model
     ];
 
     public static function cleanUpOld() {
-        //todo fix up with new span range
-        static::whereRaw("extract(epoch from  NOW()) > span_stop")->delete();
+        static::whereRaw("tstzrange( null,now() - interval '1 hour') &&  time_slice_range ")->delete();
     }
 }
 

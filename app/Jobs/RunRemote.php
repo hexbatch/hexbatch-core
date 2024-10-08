@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Models\RemoteActivity;
+
 
 class RunRemote implements ShouldQueue
 {
@@ -25,10 +25,6 @@ class RunRemote implements ShouldQueue
      */
     public function handle(): void
     {
-        /**
-         * @var RemoteActivity $activity
-         */
-        $activity = RemoteActivity::buildActivity(id:$this->activity_id)->first();
-        $activity->doCallRemote(); //this is blocking
+        //todo call remote here
     }
 }

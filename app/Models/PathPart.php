@@ -374,9 +374,11 @@ class PathPart extends Model
 
 
                 if ($collect->has('location_bound')) {
+                    $owner_namespace = $owner->namespace_owner;
+                    if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(id: $owner->path_owning_namespace_id)->first();}
                     $hint_location_bound = $collect->get('location_bound');
                     if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
-                        $bound = LocationBound::collectLocationBound($hint_location_bound);
+                        $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);
                         $this->path_location_bound_id = $bound->id;
                     }
                 }

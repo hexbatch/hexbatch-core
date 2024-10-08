@@ -15,9 +15,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
-use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -54,8 +52,6 @@ use Illuminate\Validation\ValidationException;
  * @property TypeOfEncryptionPolicy encryption_policy
  * @property TypeOfSetValuePolicy set_value_policy
  * @property TypeOfApproval attribute_approval
- * @property ArrayObject attribute_value
- * @property ArrayObject attribute_shape_setting
  *
  * @property string created_at
  * @property string updated_at
@@ -69,6 +65,7 @@ use Illuminate\Validation\ValidationException;
  * @property TimeBound attribute_time_bound
  * @property LocationBound attribute_shape_bound
  * @property ServerEvent attached_event
+ * @property ElementValue original_element_value
  */
 class Attribute extends Model
 {
@@ -96,8 +93,6 @@ class Attribute extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'attribute_value' => AsArrayObject::class,
-        'attribute_shape_setting' => AsArrayObject::class,
         'server_access_type' => TypeOfAttributeServerAccess::class,
         'attribute_access_type' => TypeOfAttributeAccess::class,
         'popped_writing_method' => TypeMergeJson::class,
@@ -128,6 +123,13 @@ class Attribute extends Model
         return $this->hasOne(ServerEvent::class,'owning_attribute_id')
             /** @uses ServerEvent::top_rule() */
             ->with('top_rule');
+    }
+
+    public function original_element_value() : HasOne {
+        return $this->hasOne(ElementValue::class,'horde_attribute_id')
+            ->where('horde_type_id',$this->owner_element_type_id)
+            ->where('horde_originating_type_id',$this->owner_element_type_id)
+            ->whereNull('element_set_member_id');
     }
 
 
@@ -365,10 +367,6 @@ class Attribute extends Model
     }
 
 
-    public function getValue() {
-        return $this->attribute_value;
-    }
-
     /**
      * @param int $skip_first_number_ancestors set to 1 to also show direct parent, 2 to not show the grandparent
      * @return array
@@ -434,7 +432,17 @@ class Attribute extends Model
                         }
                     }
                 } else {
+
                     $attribute = new Attribute();
+                    $attribute->owner_element_type_id = $owner->id;
+                    $attribute->attribute_name = null;
+                    $attribute->save();
+                    $element_value = new ElementValue();
+                    $element_value->horde_attribute_id = $attribute->id;
+                    $element_value->horde_type_id = $attribute->owner_element_type_id;
+                    $element_value->horde_originating_type_id = $attribute->owner_element_type_id;
+                    $element_value->save();
+                    //put in element value row, so save this first
                 }
 
                 $attribute->editAttribute($collect,$owner);
@@ -464,14 +472,7 @@ class Attribute extends Model
         try {
 
             DB::beginTransaction();
-
-
-            if ($collect->has('shape_setting')) {
-                $this->attribute_shape_setting = $collect->get('shape_settings');
-                if (empty($this->attribute_shape_setting)) { $this->attribute_shape_setting = null;}
-            }
-
-
+            $element_value = null;
 
             if ($collect->has('is_retired')) {
                 $this->is_retired = Utilities::boolishToBool($collect->get('is_retired',false));
@@ -488,7 +489,7 @@ class Attribute extends Model
 
             if (!$owner->isInUse()) {
 
-                $this->owner_element_type_id = $owner->id;
+
 
                 if ($collect->has('attribute_name')) {
                     $this->attribute_name = $collect->get('attribute_name');
@@ -541,9 +542,11 @@ class Attribute extends Model
 
 
                 if ($collect->has('shape')) {
+                    $owner_namespace = $owner->owner_namespace;
+                    if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(id: $owner->owner_namespace_id)->first();}
                     $hint_location_bound = $collect->get('shape');
                     if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
-                        $bound = LocationBound::collectLocationBound($hint_location_bound);
+                        $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);
                         if ($bound->location_type === TypeOfLocation::MAP) {
                             throw new HexbatchNotPossibleException(__('msg.attribute_cannot_use_map',['ref'=>$this->getName()]),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
@@ -573,8 +576,18 @@ class Attribute extends Model
                     Utilities::testValidJsonPath($this->value_json_path);
                 }
 
+
+                /**
+                 * @var ElementValue $element_value
+                 */
+                $element_value = $this->original_element_value()->first();
+                if ($collect->has('shape_setting')) {
+                    $element_value->element_shape_appearance = $collect->get('shape_settings');
+                    if (empty($element_value->element_shape_appearance)) { $element_value->element_shape_appearance = null;}
+                }
+
                 if ($collect->has('attribute_value')) {
-                    $this->attribute_value = $collect->get('attribute_value');
+                    $element_value->element_value = $collect->get('attribute_value');
                 }
 
 
@@ -612,6 +625,7 @@ class Attribute extends Model
 
             try {
                 $this->save();
+                $element_value?->save(); //saved second for future triggers perhaps
             } catch (\Exception $f) {
                 throw new HexbatchNotPossibleException(
                     __('msg.attribute_cannot_be_edited',['ref'=>$this->getName(),'error'=>$f->getMessage()]),

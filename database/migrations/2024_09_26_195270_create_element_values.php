@@ -15,8 +15,36 @@ return new class extends Migration
         Schema::create('element_values', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('element_set_member_id')
+
+            $table->foreignId('horde_type_id')
                 ->nullable(false)
+                ->comment("The type this is all about")
+                ->index()
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('horde_originating_type_id')
+                ->nullable(false)
+                ->comment("The type where the attribute came from. This can from be a design child, the type itself, or a live type added onto the element")
+                ->index()
+                ->constrained('element_types')
+                ->restrictOnDelete()
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('horde_attribute_id')
+                ->nullable(false)
+                ->comment("The attribute that belongs to the type")
+                ->index()
+                ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
+
+            $table->foreignId('element_set_member_id')
+                ->nullable()->default(null)
                 ->comment("The element/set these values are about")
                 ->index()
                 ->constrained('element_set_members')
@@ -24,15 +52,6 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-
-
-            $table->foreignId('element_horde_id')
-                ->nullable(false)
-                ->comment("The attribute this value is about")
-                ->index()
-                ->constrained('element_type_hordes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('type_set_visibility_id')
                 ->nullable()->default(null)
@@ -76,6 +95,8 @@ return new class extends Migration
 
             $table->jsonb('element_shape_appearance')
                 ->nullable()->default(null)->comment("How the shape is changed here per set");
+
+            $table->unique(['horde_type_id','horde_originating_type_id','horde_attribute_id']);
 
         });
 

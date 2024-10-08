@@ -10,7 +10,6 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 
@@ -106,13 +105,8 @@ class ElementTypeParent extends Model
                 'approval' => $approval_type,
             ], ['parent_type_id', 'child_type_id']);
 
-            //add attributes of parent to the horde
-            Attribute::where('owner_element_type_id', $child->id)->chunk(200, function (Collection $attributes) use ($child) {
-                foreach ($attributes as $attr) {
-                    ElementTypeHorde::addAttribute($attr, $child);
-                }
-            });
-            //todo if the approval is not automatic, then send this to things
+
+            //todo write to thing to add the attribute to the type if the approval is not automatic, then send this to things
             // type construction (except user tokens) takes place in the owning namespace's home set,
 
             DB::commit();

@@ -152,7 +152,7 @@ class AttributeRule extends Model
     }
 
     public function owning_event() : BelongsTo {
-        return $this->belongsTo(ServerEvent::class,'owning_server_event_id'); //todo fixup
+        return $this->belongsTo(ServerEvent::class,'owning_server_event_id');
     }
 
 
