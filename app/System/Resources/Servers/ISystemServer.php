@@ -13,7 +13,7 @@ interface ISystemServer extends ISystemResource
     public function getServerDomain() :string;
     public function getServerName() :string;
     public function getServerStatus() :TypeOfServerStatus;
-    public function getServerNamespace() :ISystemNamespace;
+    public function getServerNamespace() :?ISystemNamespace;
 
 
 }

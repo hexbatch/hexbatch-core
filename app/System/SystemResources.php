@@ -18,7 +18,7 @@ class SystemResources
         SystemUsers::generateObjects();
         SystemNamespaces::generateObjects();
         SystemTypes::generateObjects();
-        SystemAttributes::generateObjects();
+        //do not generate the attributes here, the types will call them
         SystemElements::generateObjects();
         SystemServers::generateObjects();
         SystemSets::generateObjects();
@@ -28,10 +28,12 @@ class SystemResources
         SystemUsers::doNextStep();
         SystemNamespaces::doNextStep();
         SystemTypes::doNextStep();
-        SystemAttributes::doNextStep();
-        SystemServers::doNextStep();
+        SystemAttributes::doNextStep(); //do after the types
+
         SystemElements::doNextStep();
         SystemSets::doNextStep();
+
+        SystemServers::doNextStep(); //do last
 
     }
 }

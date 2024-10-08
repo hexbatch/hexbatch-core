@@ -15,15 +15,16 @@ use App\System\Resources\Elements\ISystemElement;
 use App\System\Resources\ISystemResource;
 use App\System\Resources\Namespaces\ISystemNamespace;
 use App\System\Resources\Servers\ISystemServer;
+use App\System\Resources\Servers\Stock\ThisServer;
 
-abstract class BaseSystemType implements ISystemType
+abstract class BaseType implements ISystemType
 {
     protected ?ElementType $type;
 
     const UUID = '';
     const NAMESPACE_UUID = '';
     const DESCRIPTION_ELEMENT_UUID = '';
-    const SERVER_UUID = '';
+    const SERVER_UUID = ThisServer::UUID;
 
     const TYPE_NAME = '';
 
@@ -32,6 +33,10 @@ abstract class BaseSystemType implements ISystemType
     const PARENT_UUIDS = [];
 
     public function getTypeUuid() :string { return static::UUID;}
+
+    public function getServer() : ?ISystemServer {
+        return SystemServers::getServerByUuid(static::SERVER_UUID);
+    }
 
     public function makeType() :ElementType
    {
@@ -47,7 +52,7 @@ abstract class BaseSystemType implements ISystemType
     public function getAttributes() :array {
         $ret = [];
         foreach (static::ATTRIBUTE_UUIDS as $uuid) {
-            $ret[] = SystemAttributes::getSystemAttributeByUuid($uuid);
+            $ret[] = SystemAttributes::getAttributeByUuid($uuid);
         }
         return $ret;
     }
@@ -56,7 +61,7 @@ abstract class BaseSystemType implements ISystemType
     public function getParentTypes() :array {
         $ret = [];
         foreach (static::ATTRIBUTE_UUIDS as $uuid) {
-            $ret[] = SystemTypes::getSystemTypeByUuid($uuid);
+            $ret[] = SystemTypes::getTypeByUuid($uuid);
         }
         return $ret;
     }
@@ -64,11 +69,6 @@ abstract class BaseSystemType implements ISystemType
     public function getDescriptionElement(): ?ISystemElement
     {
         return SystemElements::getSystemElementByUuid(static::DESCRIPTION_ELEMENT_UUID);
-    }
-
-    public function getServer() : ?ISystemServer
-    {
-        return SystemServers::getSystemServerByUuid(static::SERVER_UUID);
     }
 
 
@@ -82,6 +82,10 @@ abstract class BaseSystemType implements ISystemType
     public function getTypeNamespace() :?ISystemNamespace {
         return SystemNamespaces::getSystemNamespaceByUuid(static::NAMESPACE_UUID);
     }
+
+    public function getTypeName(): string { return static::TYPE_NAME;}
+
+    public function isFinal(): bool { return false; }
 
     public function onCall(): ISystemResource
     {
