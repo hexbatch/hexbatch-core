@@ -1,18 +1,18 @@
 <?php
 
-namespace App\System\Resources\Types\Stock\System;
+namespace App\System\Resources\Types\Stock\System\Meta\MetaLanguage;
 
 use App\System\Resources\Namespaces\Stock\SystemUserNamespace;
 use App\System\Resources\Types\BaseType;
-use App\System\Resources\Types\Stock\SystemType;
+use App\System\Resources\Types\Stock\System\Meta\MetaRegion;
 
 /**
  * all descendants have the same uuid across all servers but have a different parent (this)
  */
-class Container extends BaseType
+class En extends BaseType
 {
-    const UUID = '51e2fe0a-0087-4315-8324-fc9070a7d41d';
-    const TYPE_NAME = 'container';
+    const UUID = '89f28e67-46bd-4bd2-a3c3-2671d7efecaf';
+    const TYPE_NAME = 'english';
     const NAMESPACE_UUID = SystemUserNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -22,7 +22,7 @@ class Container extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        SystemType::UUID
+        MetaRegion::UUID
     ];
 
 }

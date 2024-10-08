@@ -3,9 +3,15 @@
 
 /*
  * Attributes:
-* size_px number
-* size_cm number
-* weight_kg number
+  height_px
+  width_px
+  depth_px
+  height_cm
+  width_cm
+  depth_cm
+
+  weight_kg
+ * color
  * primary_color
  * secondary_color
  * bg_color

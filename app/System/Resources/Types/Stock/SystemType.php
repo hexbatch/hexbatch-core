@@ -15,7 +15,7 @@ use App\System\Resources\Types\BaseType;
 class SystemType extends BaseType
 {
     const UUID = '79a56b04-c36e-430f-bad4-5f53fb29ad4e';
-    const TYPE_NAME = 'root';
+    const TYPE_NAME = 'system';
     const NAMESPACE_UUID = SystemUserNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -28,3 +28,12 @@ class SystemType extends BaseType
     const PARENT_UUIDS = [];
 
 }
+/*
+ * todo base attributes
+ *  metadata
+ *  metadata -> personal_data -> ns attributes
+ *  metadata -> media_meta
+ *  metadata -> display_meta
+ *  metadata -> content_meta
+
+ */

@@ -1,2 +1,2 @@
 <?php
-// todo placeholder  current type
+// todo placeholder  current type attribute current_attribute
