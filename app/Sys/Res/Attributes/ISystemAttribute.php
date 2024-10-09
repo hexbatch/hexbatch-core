@@ -15,5 +15,5 @@ interface ISystemAttribute extends ISystemResource
     public function getParent() : ?ISystemAttribute;
 
     public function isFinal() : bool;
-    public function isFinalParent() : bool;
+    public function isSeenChildrenTypes() : bool;
 }

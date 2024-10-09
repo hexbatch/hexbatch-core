@@ -3,8 +3,9 @@
 This code is implenting the ideas in core-docs/core-overview.md
 
 ## todo for the next release
-* implement the type publish, the type constraint the attribute constraint
+* implement the publish event in the things, with limited path, test for missing other type, test for combo of attributes
 * generate all the standard resources
+* make full namespaces for new users and on demand
 * be able to create types using subtypes with attributes using parents
 * fill in all todos
 

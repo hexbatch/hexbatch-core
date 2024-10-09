@@ -12,11 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attribute_shape_event_blockers', function (Blueprint $table) {
+        Schema::create('attribute_shape_event_filters', function (Blueprint $table) {
             $table->id();
 
 
-            $table->foreignId('blocking_attribute_id')
+            $table->foreignId('filtering_attribute_id')
                 ->nullable(false)
                 ->comment("Attribute that will block this event to the other, if they intersect their shapes")
                 ->index()
@@ -24,15 +24,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('blocked_attribute_id')
+            $table->foreignId('filtered_attribute_id')
                 ->nullable(false)
-                ->comment("Attribute that will have the event be blocked if they intersect their shapes")
+                ->comment("Attribute that will have the event be filtered if they intersect their shapes")
                 ->index()
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('block_logic_attribute_id')
+            $table->foreignId('filtering_logic_attribute_id')
                 ->nullable()->default(null)
                 ->comment("Attribute whose intersection with the others determines what A and B are in the logic")
                 ->index()
@@ -40,24 +40,30 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('blocking_event_id')
+            $table->foreignId('filtered_event_id')
                 ->nullable()
-                ->comment("The set scoped event that will be blocked, null for all")
+                ->comment("The set scoped event that will be filtered")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->integer('non_blocking_priority')->default(null)->nullable()
+                ->comment('if null, the event will not be passed at all to the filtered attribute.if used, this is not a block, but sets priority on how the rules are organized in the thing tree.');
+//
 
             $table->timestamps();
 
+            $table->unique(['filtering_attribute_id','filtered_attribute_id','filtered_event_id']);
+
         });
 
-        DB::statement("ALTER TABLE attribute_shape_event_blockers Add COLUMN blocking_logic type_of_logic NOT NULL default 'and';");
-        DB::statement("ALTER TABLE attribute_shape_event_blockers ALTER COLUMN created_at SET DEFAULT NOW();");
+
+        DB::statement("ALTER TABLE attribute_shape_event_filters Add COLUMN blocking_logic type_of_logic NOT NULL default 'and';");
+        DB::statement("ALTER TABLE attribute_shape_event_filters ALTER COLUMN created_at SET DEFAULT NOW();");
 
         DB::statement("
-            CREATE TRIGGER update_modified_time BEFORE UPDATE ON attribute_shape_event_blockers FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+            CREATE TRIGGER update_modified_time BEFORE UPDATE ON attribute_shape_event_filters FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
     }
 
@@ -67,6 +73,6 @@ return new class extends Migration
     public function down(): void
     {
 
-        Schema::dropIfExists('attribute_shape_event_blockers');
+        Schema::dropIfExists('attribute_shape_event_filters');
     }
 };

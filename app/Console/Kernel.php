@@ -30,8 +30,6 @@ class Kernel extends ConsoleKernel
 
 //todo get token for the server user so that can be updated
 
-//todo write command to trim pending things if they are done and too old
+//todo write command to trim pending things if they are done and past a time
 
-//todo write command to clear attribute_rules_debugs
-
-//todo command to trim unsaved paths
+//todo command to trim  paths not in the todo, not a constraint, not in the rules,and without a handle element

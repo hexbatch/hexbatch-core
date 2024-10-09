@@ -70,10 +70,10 @@ use App\Sys\Res\Types\ISystemType;
 
     public function isFinal(): bool
     {
-        return true;
+        return false;
     }
 
-    public function isFinalParent(): bool
+    public function isSeenChildrenTypes(): bool
     {
         return false;
     }
