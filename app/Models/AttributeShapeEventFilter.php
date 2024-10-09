@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /*
-can be set if namespace has admin privileges on the blocked, and can read the attribute on the blocker, and if both have shapes
+can be set if namespace has admin privileges on the filtered and filtering, and can read the attribute on the logic, and if both have shapes
 
 filter set-scoped events for one attribute to another if intersect
 
