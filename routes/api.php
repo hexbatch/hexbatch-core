@@ -37,8 +37,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/get/{server}', [ServerController::class, 'get_server'])->name('core.servers.get');
     });
 
-    //todo add single route to receive incoming remotes, put the guid of the thing row in the route definition, process only if remote_wait_pending
+    //todo add single route to receive incoming remotes, put the type guid, and the guid of the thing row in the route definition,
+    // process only if remote_wait_pending for that thing with matching type
     // do not need to be logged in to do this
+    // see if https://kevinhighwater.com/2012/01/basic-authentication-with-jsonp still works on all browsers (safari, chrome, firefox)
+    //    if so, then can keep the authentication for the type in the incoming remote handler, and allow middleware to make sure only ns admins do it
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('users')->group(function () {

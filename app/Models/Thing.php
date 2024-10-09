@@ -31,6 +31,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property int thing_namespace_id
  * @property int thing_pagination_id
  * @property string thing_start_after
+ * @property string thing_invalid_at
  * @property string ref_uuid
  * @property ArrayObject thing_value
  * @property TypeOfThingStatus thing_status

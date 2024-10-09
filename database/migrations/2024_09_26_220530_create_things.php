@@ -130,6 +130,9 @@ return new class extends Migration
             $table->timestamp('thing_start_after')->nullable()->default(null)
                 ->comment('if set, then this will be done after the time, and not before');
 
+            $table->timestamp('thing_invalid_at')->nullable()->default(null)
+                ->comment('if set, then this thing will return false to its parent if the time its processed is after');
+
 
             $table->bigInteger('thing_pagination_id')->nullable()->default(null)
                 ->comment('if set, then the path will use this for paginition');
