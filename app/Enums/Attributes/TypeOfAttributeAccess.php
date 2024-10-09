@@ -1,5 +1,8 @@
 <?php
 namespace App\Enums\Attributes;
+/**
+ * postgres enum type_of_attribute_access
+ */
 enum TypeOfAttributeAccess : string {
 
     case NORMAL = 'normal';

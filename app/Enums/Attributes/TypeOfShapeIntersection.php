@@ -1,9 +1,12 @@
 <?php
 namespace App\Enums\Attributes;
+/**
+ * postgres enum type_of_shape_intersection
+ */
 enum TypeOfShapeIntersection : string {
 
-    case DESIGN = 'design';
-    case LIVE = 'live';
+    case DESIGN = 'designed_shape';
+    case LIVE = 'live_shape';
 
 
 

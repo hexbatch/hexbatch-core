@@ -2,6 +2,11 @@
 
 This code is implenting the ideas in core-docs/core-overview.md
 
+## todo for the next release
+* implement the type publish, the type constraint the attribute constraint
+* generate all the standard resources
+* be able to create types using subtypes with attributes using parents
+* fill in all todos
 
 # Notes
 

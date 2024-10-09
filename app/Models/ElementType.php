@@ -38,7 +38,7 @@ use Illuminate\Validation\ValidationException;
  * @property int type_bound_path_id
  * @property int type_description_element_id
  * @property bool is_system
- * @property bool is_final
+ * @property bool is_final_type
  * @property string ref_uuid
  * @property string type_sum_geom_shape
  * @property string type_name
@@ -376,17 +376,27 @@ class ElementType extends Model
         {
             DB::beginTransaction();
 
-            if ($collect->has('is_final')) {
-                $this->is_final = Utilities::boolishToBool($collect->get('is_final',false));
+            if ($collect->has('is_final_type')) {
+                $this->is_final_type = Utilities::boolishToBool($collect->get('is_final_type',false));
             }
 
             if ($collect->has('lifecycle')) {
                 $maybe_valid_lifecycle = TypeOfLifecycle::tryFromInput($collect->get('lifecycle'));
-                if (in_array($maybe_valid_lifecycle,[TypeOfLifecycle::RETIRED,TypeOfLifecycle::SUSPENDED])) {
-                    $this->lifecycle = $maybe_valid_lifecycle;
-                }
+                 if ($this->lifecycle === TypeOfLifecycle::PUBLISHED) {
+                     if ($maybe_valid_lifecycle == TypeOfLifecycle::RETIRED) {
+                         $this->lifecycle = $maybe_valid_lifecycle;
+                     }
+                } else if ($this->lifecycle === TypeOfLifecycle::DEVELOPING || $this->lifecycle === TypeOfLifecycle::RETIRED) {
+                     if ($maybe_valid_lifecycle === TypeOfLifecycle::PUBLISHED) {
+                         //todo if publish, then check for permission for both parent attributes and child types, send to things for any listeners
+                         // in the things, those listeners get tied as child things to the publish approval. here, both attributes and types are checked
+                         // that means its possible to design stuff using items without permissions (as long as in the proper ns memberships and admins)
+                         // the lifecycle will be set to published after all is cleared
+                         // bringing back retired types will start a new publish check
+                     }
+                 }
             }
-            //todo if publish, then check for permission, send to things
+
 
             if ($collect->has('description_element')) {
                 $describe_hint_here = $collect->get('description_element');

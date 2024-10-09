@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Enums\Rules;
-/**
- * postgres enum rule_target_action_type
- */
+namespace App\Enums\Sys;
+
 enum TypeOfAction: string
 {
 //todo these are made into types for mini-api

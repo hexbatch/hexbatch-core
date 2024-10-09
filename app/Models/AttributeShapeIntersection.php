@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int shape_set_member_id
  * @property int shape_entry_attribute_id
  * @property int shape_exist_attribute_id
- * @property int shape_z_order_for_events
  * @property TypeOfShapeIntersection kind_shape_intersection
  */
 class AttributeShapeIntersection extends Model

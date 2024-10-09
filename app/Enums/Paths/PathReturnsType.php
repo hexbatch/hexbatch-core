@@ -1,7 +1,7 @@
 <?php
 namespace App\Enums\Paths;
 /**
- * postgres enum time_comparison_type
+ * postgres enum path_returns_type
  */
 enum PathReturnsType : string {
 

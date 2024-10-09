@@ -9,6 +9,7 @@ use App\Enums\Attributes\TypeOfSetValuePolicy;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Rules\TypeMergeJson;
 use App\Enums\Types\TypeOfApproval;
+use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -36,11 +37,9 @@ use Illuminate\Validation\ValidationException;
  * @property int parent_attribute_id
  * @property int design_attribute_id
  * @property int attribute_location_shape_bound_id
- * @property int attribute_shape_z_order_for_events
- * @property bool is_retired
- * @property bool is_final_parent
+ * @property bool is_seen_in_child_elements
  * @property bool is_system
- * @property bool is_final
+ * @property bool is_final_attribute
  * @property TypeOfAttributeServerAccess server_access_type
  * @property TypeOfAttributeAccess attribute_access_type
  * @property string ref_uuid
@@ -482,24 +481,15 @@ class Attribute extends Model
             DB::beginTransaction();
 
 
-            if ($collect->has('is_retired')) {
-                $this->is_retired = Utilities::boolishToBool($collect->get('is_retired',false));
-            }
-
-            if ($collect->has('is_final_parent')) {
-                $this->is_final_parent = Utilities::boolishToBool($collect->get('is_final_parent',false));
-            }
-
-            if ($collect->has('is_final')) {
-                $this->is_final = Utilities::boolishToBool($collect->get('is_final',false));
-            }
-
-
-
-
             if (!$owner->isInUse()) {
 
+                if ($collect->has('is_seen_in_child_elements')) {
+                    $this->is_seen_in_child_elements = Utilities::boolishToBool($collect->get('is_seen_in_child_elements',false));
+                }
 
+                if ($collect->has('is_final_attribute')) {
+                    $this->is_final_attribute = Utilities::boolishToBool($collect->get('is_final_attribute',false));
+                }
 
                 if ($collect->has('attribute_name')) {
                     $this->attribute_name = $collect->get('attribute_name');
@@ -534,14 +524,13 @@ class Attribute extends Model
                                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                         }
 
-                        if ($parent_attribute->is_retired || $parent_attribute->is_final_parent) {
+                        if ($parent_attribute->type_owner->lifecycle !== TypeOfLifecycle::PUBLISHED || $parent_attribute->is_final_attribute) {
                             throw new HexbatchNotPossibleException(
                                 __('msg.attribute_cannot_be_used_at_parent_final', ['ref' => $parent_attribute->getName()]),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                         }
                         $this->parent_attribute_id = $parent_attribute->id;
-                        //todo check for constraint on the parent or ancestors, if any send to things, type cannot publish until all answer back
 
                     } else {
                         throw new HexbatchNotPossibleException(
@@ -569,16 +558,15 @@ class Attribute extends Model
                 }
 
 
-                if ($collect->has('z_order_for_shape_events')) {
-                    $this->attribute_shape_z_order_for_events = intval($collect->get('z_order_for_shape_events',false));
-                }
 
                 if ($collect->has('design')) {
                     $hint_design = $collect->get('design');
                     if (is_string($hint_design) || Utilities::is_uuid($hint_design)) {
                         /** @var Attribute $design */
                         $design = (new Attribute())->resolveRouteBinding($hint_design);
-                        if (!$design->type_owner->owner_namespace->isNamespaceMember(Utilities::getCurrentNamespace()) || $design->is_retired) {
+                        if (!$design->type_owner->owner_namespace->isNamespaceMember(Utilities::getCurrentNamespace()) ||
+                            $design->type_owner->lifecycle !== TypeOfLifecycle::PUBLISHED
+                        ) {
 
                             throw new HexbatchNotPossibleException(__('msg.attribute_cannot_use_design',['ref'=>$design->getName(),'me'=>$this->attribute_name]),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

@@ -62,13 +62,9 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-            $table->boolean('is_retired')->default(false)->nullable(false)
-                ->index('idx_is_retired')
-                ->comment('if true then cannot be added as parent or added to anything');
 
-
-            $table->boolean('is_final_parent')->default(false)->nullable(false)
-                ->comment('if true then cannot be used as a parent');
+            $table->boolean('is_seen_in_child_elements')->default(true)->nullable(false)
+                ->comment('if false then child types do not inherit this attribute, and their elements do not contain the attribute');
 
 
             $table->boolean('is_system')->default(false)->nullable(false)
@@ -77,14 +73,8 @@ return new class extends Migration
 
 
 
-            $table->boolean('is_final')->default(false)->nullable(false)
-                ->comment('if true then child types do not inherit this attribute. But this can be used as a parent in an attribute in the child');
-
-
-            $table->integer('attribute_shape_z_order_for_events')
-                ->nullable(false)->default(0)
-                ->comment("Higher z levels have set wide events, scoped to the shape, called first. Affects only other attributes scoped to their shape");
-
+            $table->boolean('is_final_attribute')->default(false)->nullable(false)
+                ->comment('if true then cannot be used as a parent');
 
 
 
@@ -105,14 +95,14 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_server_access AS ENUM (
-            'public',
-            'private_to_home_server',
-            'whitelisted_servers',
+            'public_to_all_servers',
+            'only_home_server',
+            'public_to_whitelisted_servers',
             'whitelisted_servers_read_only',
             'other_servers_read_only'
             );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'private_to_home_server';");
+        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'only_home_server';");
 
 
 
@@ -151,9 +141,8 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_approval AS ENUM (
             'approval_not_set',
-            'automatic',
-            'pending',
-            'denied',
+            'pending_approval',
+            'approval_denied',
             'approved'
             );");
 
@@ -199,11 +188,9 @@ return new class extends Migration
             $table->dropColumn('owner_element_type_id');
             $table->dropColumn('attribute_location_shape_bound_id');
             $table->dropColumn('ref_uuid');
-            $table->dropColumn('is_retired');
-            $table->dropColumn('is_final');
+            $table->dropColumn('is_final_attribute');
             $table->dropColumn('is_system');
-            $table->dropColumn('is_final_parent');
-            $table->dropColumn('attribute_shape_z_order_for_events');
+            $table->dropColumn('is_seen_in_child_elements');
             $table->dropColumn('value_json_path');
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');

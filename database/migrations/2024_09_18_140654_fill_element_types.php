@@ -92,7 +92,7 @@ return new class extends Migration
                 ->index('idx_type_is_system')
                 ->comment('if true then this attribute is a standard attribute');
 
-            $table->boolean('is_final')->default(false)->nullable(false)
+            $table->boolean('is_final_type')->default(false)->nullable(false)
                 ->comment('if true then cannot be added as parent');
 
 
@@ -150,7 +150,7 @@ return new class extends Migration
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
             $table->dropColumn('is_system');
-            $table->dropColumn('is_final');
+            $table->dropColumn('is_final_type');
             $table->dropColumn('type_sum_geom_shape');
             $table->dropColumn('lifecycle');
 

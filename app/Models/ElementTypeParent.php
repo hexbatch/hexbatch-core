@@ -81,7 +81,7 @@ class ElementTypeParent extends Model
         try {
             DB::beginTransaction();
             $user_namespace = Utilities::getCurrentNamespace();
-            if ( $parent->is_final || !$parent->canNamespaceInherit($user_namespace)) {
+            if ( $parent->is_final_type || !$parent->canNamespaceInherit($user_namespace)) {
                 throw new HexbatchNotPossibleException(__('msg.parent_type_is_not_inheritable'),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::TYPE_CANNOT_INHERIT);
@@ -104,8 +104,7 @@ class ElementTypeParent extends Model
             ], ['parent_type_id', 'child_type_id']);
 
 
-            //todo write to thing to add the attribute to the type if the approval is not automatic, then send this to things
-            // type construction (except user tokens) takes place in the owning namespace's home set,
+
 
             DB::commit();
             return $par;

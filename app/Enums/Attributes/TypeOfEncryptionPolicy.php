@@ -1,7 +1,7 @@
 <?php
 namespace App\Enums\Attributes;
 /**
- * postgres enum type_merge_json
+ * postgres enum type_of_encryption_policy
  */
 enum TypeOfEncryptionPolicy : string {
     case NO_ENCRYPTION = 'no_encryption';

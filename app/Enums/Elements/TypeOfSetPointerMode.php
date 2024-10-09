@@ -1,7 +1,7 @@
 <?php
 namespace App\Enums\Elements;
 /**
- * postgres enum type_of_server_status
+ * postgres enum type_of_set_pointer_mode
  */
 enum TypeOfSetPointerMode : string {
 

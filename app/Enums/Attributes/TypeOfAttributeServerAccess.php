@@ -1,10 +1,13 @@
 <?php
 namespace App\Enums\Attributes;
+/**
+ * postgres enum type_of_server_access
+ */
 enum TypeOfAttributeServerAccess : string {
 
-    case PUBLIC = 'public';
-    case PRIVATE_TO_HOME_SERVER = 'private_to_home_server';
-    case WHITELISTED_SERVERS = 'whitelisted_servers';
+    case PUBLIC_TO_ALL = 'public_to_all_servers';
+    case ONLY_HOME_SERVER = 'only_home_server';
+    case WHITELISTED_SERVERS = 'public_to_whitelisted_servers';
     case WHITELISTED_SERVERS_READ_ONLY = 'whitelisted_servers_read_only';
     case OTHER_SERVERS_READ_ONLY = 'other_servers_read_only';
 

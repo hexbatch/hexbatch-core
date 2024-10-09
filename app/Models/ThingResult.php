@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Enums\Things\TypeUserFollowup;
+use App\Enums\Things\TypeApiFollowup;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int result_to_namespace_id
  * @property int result_hex_error_id
  * @property int result_callback_status
- * @property TypeUserFollowup user_followup
+ * @property TypeApiFollowup user_followup
  * @property string result_callback_url
  * @property ArrayObject result_response
  *
@@ -53,7 +53,7 @@ class ThingResult extends Model
      */
     protected $casts = [
         'result_response' => AsArrayObject::class,
-        'user_followup' => TypeUserFollowup::class,
+        'user_followup' => TypeApiFollowup::class,
     ];
 
 }

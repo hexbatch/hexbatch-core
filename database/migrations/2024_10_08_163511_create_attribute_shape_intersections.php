@@ -39,15 +39,12 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->integer('shape_z_order_for_events')
-                ->nullable(false)->default(0)
-                ->comment("Higher z levels have set wide events, scoped to the shape, called first");
 
         });
 
-        DB::statement("CREATE TYPE type_of_shape_intersection AS ENUM ('design', 'live');");
+        DB::statement("CREATE TYPE type_of_shape_intersection AS ENUM ('designed_shape', 'live_shape');");
 
-        DB::statement("ALTER TABLE attribute_shape_intersections Add COLUMN kind_shape_intersection type_of_shape_intersection NOT NULL default 'design';");
+        DB::statement("ALTER TABLE attribute_shape_intersections Add COLUMN kind_shape_intersection type_of_shape_intersection NOT NULL default 'designed_shape';");
     }
 
     /**

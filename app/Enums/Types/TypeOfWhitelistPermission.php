@@ -1,7 +1,7 @@
 <?php
 namespace App\Enums\Types;
 /**
- * postgres enum type_of_server_status
+ * postgres enum type_of_whitelist_permission
  */
 enum TypeOfWhitelistPermission : string {
 

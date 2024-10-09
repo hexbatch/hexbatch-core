@@ -50,15 +50,15 @@ return new class extends Migration
 
         });
 
-        DB::statement("CREATE TYPE type_user_followup AS ENUM (
-            'nothing',
-            'direct',
-            'polled',
-            'callback_successful',
-            'callback_error'
+        DB::statement("CREATE TYPE type_api_followup AS ENUM (
+            'no_followup',
+            'direct_followup',
+            'polled_followup',
+            'followup_callback_successful',
+            'followup_callback_error'
             );");
 
-        DB::statement("ALTER TABLE thing_results Add COLUMN user_followup type_user_followup NOT NULL default 'nothing';");
+        DB::statement("ALTER TABLE thing_results Add COLUMN user_followup type_api_followup NOT NULL default 'no_followup';");
 
 
         Schema::table('thing_results', function (Blueprint $table) {
@@ -86,6 +86,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('thing_results');
-        DB::statement("DROP TYPE type_user_followup;");
+        DB::statement("DROP TYPE type_api_followup;");
     }
 };

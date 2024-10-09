@@ -50,10 +50,9 @@ class AttributeResource extends JsonResource
             'value_json_path' => $this->value_json_path,
             'attached_event' => $this->attached_event? new ServerEventResource($this->attached_event,null,$this->n_display_level - 1) : null ,
             'options'=> [
-                'is_retired' => $this->is_retired,
                 'is_system' => $this->is_system,
-                'is_final' => $this->is_final,
-                'is_final_parent' => $this->is_final_parent,
+                'is_final_attribute' => $this->is_final_attribute,
+                'is_seen_in_child_elements' => $this->is_seen_in_child_elements,
             ],
             'value'=> $this->original_element_value?->element_value,
             'server_access_type'=> $this->server_access_type->value,

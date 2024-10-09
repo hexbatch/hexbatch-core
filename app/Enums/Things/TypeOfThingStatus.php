@@ -5,8 +5,8 @@ namespace App\Enums\Things;
  */
 enum TypeOfThingStatus : string {
 
-  case PENDING = 'pending';
   case THING_PENDING = 'thing_pending';
+  case THING_SUCCESS = 'thing_success';
   case THING_ERROR = 'thing_error';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfThingStatus {

@@ -45,7 +45,7 @@ class ThisServer extends BaseServer {
 
     public function getServerStatus(): TypeOfServerStatus
     {
-        return TypeOfServerStatus::ALLOWED;
+        return TypeOfServerStatus::ALLOWED_SERVER;
     }
 
     public function onNextStep(): void

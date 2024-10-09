@@ -1,5 +1,8 @@
 <?php
 namespace App\Enums\Bounds;
+/**
+ * postgres enum type_of_location
+ */
 enum TypeOfLocation : string {
     case MAP = 'map';
     case SHAPE = 'shape';

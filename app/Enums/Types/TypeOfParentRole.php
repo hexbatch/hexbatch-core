@@ -1,12 +1,12 @@
 <?php
 namespace App\Enums\Types;
 /**
- * postgres enum type_of_server_status
+ * postgres enum type_of_parent_role
  */
 enum TypeOfParentRole : string {
 
-  case DESIGNED = 'designed';
-  case LIVE = 'live';
+  case DESIGNED_PARENT = 'designed_parent';
+  case LIVE_PARENT = 'live_parent';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfParentRole {
         $maybe  = TypeOfParentRole::tryFrom($test);

@@ -5,10 +5,11 @@ namespace App\Enums\Server;
  */
 enum TypeOfServerStatus : string {
 
-  case PENDING = 'pending';
-  case ALLOWED = 'allowed';
-  case PAUSED = 'paused';
-  case BLOCKED = 'blocked';
+  case UNKNOWN_SERVER = 'unknown_server';
+  case PENDING_SERVER = 'pending_server';
+  case ALLOWED_SERVER = 'allowed_server';
+  case PAUSED_SERVER = 'paused_server';
+  case BLOCKED_SERVER = 'blocked_server';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfServerStatus {
         $maybe  = TypeOfServerStatus::tryFrom($test);

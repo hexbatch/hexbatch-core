@@ -1,14 +1,14 @@
 <?php
 namespace App\Enums\Types;
 /**
- * postgres enum type_of_server_status
+ * postgres enum type_of_lifecycle
  */
 enum TypeOfLifecycle : string {
 
   case DEVELOPING = 'developing';
   case PUBLISHED = 'published';
   case RETIRED = 'retired';
-  case SUSPENDED = 'suspended';
+  case SUSPENDED = 'suspended'; //todo suspended only done in the console, suspended types cannot make new elements but work the same otherwise
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfLifecycle {
         $maybe  = TypeOfLifecycle::tryFrom($test);

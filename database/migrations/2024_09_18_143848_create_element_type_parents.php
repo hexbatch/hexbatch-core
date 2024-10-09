@@ -57,11 +57,11 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_parent_role AS ENUM (
-            'designed',
-            'live'
+            'designed_parent',
+            'live_parent'
             );");
 
-        DB::statement("ALTER TABLE element_type_parents Add COLUMN parent_role type_of_parent_role NOT NULL default 'designed';");
+        DB::statement("ALTER TABLE element_type_parents Add COLUMN parent_role type_of_parent_role NOT NULL default 'designed_parent';");
 
 
 

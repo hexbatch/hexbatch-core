@@ -48,6 +48,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+
             $table->timestamps();
 
         });

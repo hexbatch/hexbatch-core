@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums\Things;
+namespace App\Enums\Sys;
 
 /*
  * Events can run before or after a successful event

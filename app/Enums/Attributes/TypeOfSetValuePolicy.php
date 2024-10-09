@@ -1,7 +1,7 @@
 <?php
 namespace App\Enums\Attributes;
 /**
- * postgres enum type_merge_json
+ * postgres enum type_of_set_value_policy
  */
 enum TypeOfSetValuePolicy : string {
     case static = 'static';

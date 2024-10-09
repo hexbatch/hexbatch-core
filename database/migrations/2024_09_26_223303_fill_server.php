@@ -45,13 +45,14 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_of_server_status AS ENUM (
-            'pending',
-            'allowed',
-            'paused',
-            'blocked'
+            'unknown_server',
+            'pending_server',
+            'allowed_server',
+            'paused_server',
+            'blocked_server'
             );");
 
-        DB::statement("ALTER TABLE servers Add COLUMN server_status type_of_server_status NOT NULL default 'pending';");
+        DB::statement("ALTER TABLE servers Add COLUMN server_status type_of_server_status NOT NULL default 'unknown_server';");
 
         Schema::table('servers', function (Blueprint $table) {
 

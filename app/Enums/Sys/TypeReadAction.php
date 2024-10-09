@@ -1,8 +1,6 @@
 <?php
-namespace App\Enums\Rules;
-/**
- * postgres enum rule_data_action_type
- */
+namespace App\Enums\Sys;
+
 enum TypeReadAction : string {
 //todo this is a mini api standard type
 
