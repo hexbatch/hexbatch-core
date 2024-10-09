@@ -17,8 +17,10 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ResourceNameReq;
+use ArrayObject;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -43,7 +45,9 @@ use Illuminate\Validation\ValidationException;
  * @property int path_element_set_id
  * @property int path_element_id
  * @property int path_namespace_id
- * @property int path_location_bound_id
+ * @property int path_map_bound_id
+ * @property int path_shape_bound_id
+ * @property int path_time_bound_id
  * @property int path_min_gap
  * @property int path_max_gap
  * @property int path_min_count
@@ -58,6 +62,9 @@ use Illuminate\Validation\ValidationException;
  * @property string filter_json_path
  * @property string sort_json_path
  * @property string path_part_compiled_sql
+ *
+ * @property ArrayObject path_shape_geo_json
+ * @property ArrayObject path_map_geo_json
  *
  * @property TypeOfLogic path_child_logic
  * @property TypeOfLogic path_logic
@@ -106,6 +113,8 @@ class PathPart extends Model
         'path_child_logic' => TypeOfLogic::class,
         'path_logic' => TypeOfLogic::class,
         'path_lifecycle' => TypeOfLifecycle::class,
+        'path_shape_geo_json' => AsArrayObject::class,
+        'path_map_geo_json' => AsArrayObject::class,
     ];
 
 
@@ -372,16 +381,38 @@ class PathPart extends Model
                     }
                 }
 
-
-                if ($collect->has('location_bound')) {
+                if ($collect->has('map_bound') || $collect->has('shape_bound') || $collect->has('time_bound') ) {
                     $owner_namespace = $owner->namespace_owner;
                     if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(id: $owner->path_owning_namespace_id)->first();}
-                    $hint_location_bound = $collect->get('location_bound');
-                    if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
-                        $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);
-                        $this->path_location_bound_id = $bound->id;
+
+                    if ($collect->has('map_bound')) {
+
+                        $hint_location_bound = $collect->get('location_bound');
+                        if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
+                            $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);
+                            $this->path_map_bound_id = $bound->id;
+                        }
                     }
+
+                    if ($collect->has('shape_bound')) {
+
+                        $hint_location_bound = $collect->get('location_bound');
+                        if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
+                            $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);
+                            $this->path_shape_bound_id = $bound->id;
+                        }
+                    }
+
+                    if ($collect->has('time_bound')) {
+                        $hint_time_bound = $collect->get('time_bound');
+                        if (is_string($hint_time_bound) || $hint_time_bound instanceof Collection) {
+                            $bound = TimeBound::collectTimeBound(collect: $hint_time_bound,namespace: $owner_namespace);
+                            $this->path_time_bound_id = $bound->id;
+                        }
+                    }
+
                 }
+
 
                 if ($collect->has('namespace')) {
                     $hint_namespace = $collect->get('namespace');
@@ -480,6 +511,22 @@ class PathPart extends Model
                 if ($collect->has('sort_json_path')) {
                     $this->sort_json_path = $collect->get('sort_json_path');
                     Utilities::testValidJsonPath($this->sort_json_path);
+                }
+
+                if ($collect->has('shape_geo_json')) {
+                    $what_geo = $collect->get('shape_geo_json');
+                    if (is_array($what_geo)) {
+                        $this->path_shape_geo_json = $what_geo;
+                    }
+                    if (empty($this->path_shape_geo_json)) {$this->path_shape_geo_json = null;}
+                }
+
+                if ($collect->has('map_geo_json')) {
+                    $what_geo = $collect->get('map_geo_json');
+                    if (is_array($what_geo)) {
+                        $this->path_map_geo_json = $what_geo;
+                    }
+                    if (empty($this->path_map_geo_json)) {$this->path_map_geo_json = null;}
                 }
 
 

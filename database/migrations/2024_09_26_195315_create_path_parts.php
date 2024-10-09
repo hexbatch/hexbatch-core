@@ -104,12 +104,30 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('path_location_bound_id')
+            $table->foreignId('path_map_bound_id')
                 ->nullable()
                 ->default(null)
-                ->comment("If set contrain sets to this bound")
+                ->comment("If type contrained to this bound")
                 ->index()
                 ->constrained('location_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('path_shape_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("If attribute contraint is this shape")
+                ->index()
+                ->constrained('location_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('path_time_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("If constraint contraint is this time")
+                ->index()
+                ->constrained('time_bounds')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -267,6 +285,9 @@ return new class extends Migration
             $table->text('path_part_compiled_sql')
                 ->nullable()->default(null)
                 ->comment("Stores sql this part of path was converted to, the parents will include the children sql");
+
+            $table->jsonb('path_shape_geo_json')->comment("To search shape intersections inside the sets");
+            $table->jsonb('path_map_geo_json')->comment("To search map intersections");
 
         });
 
