@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\System\SystemResources;
+use App\Sys\SystemResources;
 use Illuminate\Database\Seeder;
 
 class SystemSeeder extends Seeder

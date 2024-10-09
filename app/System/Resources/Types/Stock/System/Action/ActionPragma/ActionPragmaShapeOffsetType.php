@@ -1,2 +1,0 @@
-<?php
-//todo pragma offset

@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Sys\Res\Attributes\Stock\System\MetaData\Meta;
+
+
+
+use App\Sys\Res\Attributes\BaseAttribute;
+
+class Terms extends BaseAttribute
+{
+    const UUID = '0316226a-52ea-4394-bcb8-f609317947d4';
+    const ATTRIBUTE_NAME = 'terms';
+    const PARENT_UUID = Url::UUID;
+
+
+}
+
+
