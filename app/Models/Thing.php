@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 
-
+/*
+ * thing is marked as done when all children done, and there is no pagination id
+ */
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
@@ -27,6 +29,8 @@ use Illuminate\Database\Query\JoinClause;
  * @property int thing_element_id
  * @property int thing_path_id
  * @property int thing_namespace_id
+ * @property int thing_pagination_id
+ * @property string thing_start_after
  * @property string ref_uuid
  * @property ArrayObject thing_value
  * @property TypeOfThingStatus thing_status

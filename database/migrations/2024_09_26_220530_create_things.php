@@ -127,6 +127,13 @@ return new class extends Migration
 
             $table->timestamps();
 
+            $table->timestamp('thing_start_after')->nullable()->default(null)
+                ->comment('if set, then this will be done after the time, and not before');
+
+
+            $table->bigInteger('thing_pagination_id')->nullable()->default(null)
+                ->comment('if set, then the path will use this for paginition');
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
@@ -148,7 +155,7 @@ return new class extends Migration
         DB::statement("ALTER TABLE things Add COLUMN thing_merge_method type_merge_json NOT NULL default 'overwrite';");
 
         Schema::table('things', function (Blueprint $table) {
-
+            $table->index(['thing_status','thing_start_after']);
 
             $table->jsonb('thing_value')
                 ->nullable()->default(null)->comment("When something needs a value");

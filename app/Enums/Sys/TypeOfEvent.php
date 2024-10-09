@@ -5,6 +5,15 @@ namespace App\Enums\Sys;
 /*
  * Events can run before or after a successful event
  * if running after, then member of ns of type
+ *
+ * rule handlers can listen to a huge number of events at one time
+ * if event rules are sent large amount of stuff happening,
+ *    then will paginate the things, once a page is done, will do another, but in increasing the wait time between each page
+ * the page size can be set in the server events for that type and event
+ *
+ * events handling large data will not complete until all the pagination is done, but
+ *  because there is an exponential backoff strategy for each new page, events that wait on many things may not complete for a long time (minutes, hours, days)
+ *  this will inspire more targeted rules
  */
 
 enum TypeOfEvent: string

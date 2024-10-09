@@ -2,6 +2,17 @@
 
 namespace App\Enums\Sys;
 
+/*
+ * reading multiple matches will use its merge method to merge the multiple targets
+ * writing or commanding multiple will do that for each found
+ *
+
+ * if writing/commanding/targeting large amounts, then will paginate the things, once a page is done, will do another, but in increasing the wait time between each page
+ *  the result uses a cursor in things
+ *  The page amount is in rule_target_page_size for the server events table for the event this rule is triggered by (all rules fired by events)
+ *
+ *  if reading very large results, then the same pagination happens, and each page has merged data from that page sent through the rule
+ */
 enum TypeOfAction: string
 {
 //todo these are made into types for mini-api
