@@ -219,15 +219,17 @@ class Attribute extends Model
     public static function buildAttribute(
         ?int $id = null,
         ?int $namespace_id = null,
-        ?int $element_type_id = null
+        ?int $type_id = null,
+        ?int $shape_id = null,
     )
     : Builder
     {
 
         $build =  Attribute::select('attributes.*')
             ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
-            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound(),Attribute::attached_event() */
-            ->with('attribute_parent', 'type_owner','attribute_shape_bound','attached_event')
+            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound() */
+            /** @uses Attribute::attached_event(),Attribute::original_element_value() */
+            ->with('attribute_parent', 'type_owner','attribute_shape_bound','attached_event','original_element_value')
 
 
        ;
@@ -236,8 +238,12 @@ class Attribute extends Model
             $build->where('attributes.id',$id);
         }
 
-        if ($element_type_id) {
-            $build->where('attributes.owner_element_type_id',$element_type_id);
+        if ($type_id) {
+            $build->where('attributes.owner_element_type_id',$type_id);
+        }
+
+        if ($shape_id) {
+            $build->where('attributes.attribute_location_shape_bound_id',$shape_id);
         }
 
         if ($namespace_id) {
@@ -443,6 +449,7 @@ class Attribute extends Model
                     $element_value->horde_type_id = $attribute->owner_element_type_id;
                     $element_value->horde_originating_type_id = $attribute->owner_element_type_id;
                     $element_value->save();
+                    $attribute = Attribute::buildAttribute(id:$attribute->id)->first();
                     //put in element value row, so save this first
                 }
 
@@ -473,7 +480,7 @@ class Attribute extends Model
         try {
 
             DB::beginTransaction();
-            $element_value = null;
+
 
             if ($collect->has('is_retired')) {
                 $this->is_retired = Utilities::boolishToBool($collect->get('is_retired',false));
@@ -534,6 +541,7 @@ class Attribute extends Model
                                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                         }
                         $this->parent_attribute_id = $parent_attribute->id;
+                        //todo check for constraint on the parent or ancestors, if any send to things, type cannot publish until all answer back
 
                     } else {
                         throw new HexbatchNotPossibleException(
@@ -589,7 +597,7 @@ class Attribute extends Model
 
 
                 if ($collect->has('attribute_value')) {
-                    $element_value->element_value = $collect->get('attribute_value');
+                    $this->original_element_value->element_value = $collect->get('attribute_value');
                 }
 
 
@@ -627,7 +635,7 @@ class Attribute extends Model
 
             try {
                 $this->save();
-                $element_value?->save(); //saved second for future triggers perhaps
+                $this->original_element_value->save(); //saved second for future triggers perhaps
             } catch (\Exception $f) {
                 throw new HexbatchNotPossibleException(
                     __('msg.attribute_cannot_be_edited',['ref'=>$this->getName(),'error'=>$f->getMessage()]),

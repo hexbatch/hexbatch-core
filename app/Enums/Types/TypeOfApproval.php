@@ -5,8 +5,10 @@ namespace App\Enums\Types;
  */
 enum TypeOfApproval : string {
 
+  case APPROVAL_NOT_SET = 'approval_not_set';
   case AUTOMATIC = 'automatic';
   case PENDING = 'pending';
+  case DENIED = 'denied';
   case APPROVED = 'approved';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfApproval {

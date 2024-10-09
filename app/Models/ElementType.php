@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -140,8 +141,12 @@ class ElementType extends Model
     }
 
     public static function buildElementType(
-        ?int $id = null,
-        ?int $owner_namespace_id = null
+        ?int             $id = null,
+        ?int             $owner_namespace_id = null,
+        ?int             $map_bound_id = null,
+        ?int             $shape_bound_id = null,
+        ?int             $time_bound_id = null,
+        ?TypeOfLifecycle $lifecycle = null,
     )
     : Builder
     {
@@ -159,6 +164,32 @@ class ElementType extends Model
         }
         if ($owner_namespace_id) {
             $build->where('element_types.owner_namespace_id', $owner_namespace_id);
+        }
+
+        if ($map_bound_id) {
+            $build->where('element_types.type_location_map_bound_id', $map_bound_id);
+        }
+
+        if ($time_bound_id) {
+            $build->where('element_types.type_time_bound_id', $map_bound_id);
+        }
+
+        if ($lifecycle) {
+            $build->where('element_types.lifecycle', $lifecycle);
+        }
+
+        if ($shape_bound_id) {
+
+            $build->join('attributes',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($shape_bound_id) {
+                    $join
+                        ->on('element_types.id','=','attributes.owner_element_type_id')
+                        ->where('attributes.attribute_location_shape_bound_id',$shape_bound_id);
+                }
+            );
         }
 
         return $build;
@@ -237,6 +268,8 @@ class ElementType extends Model
     }
 
     public function isInUse() : bool {
+        if (!$this->id) {return false;}
+        if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return true;}
         if (Element::where('element_parent_type_id',$this->id)->count() ) {return true;}
         if (ElementTypeParent::where('parent_type_id',$this->id)->count() ) {return true;}
         if (Thing::where('thing_type_id',$this->id)->where('thing_status',TypeOfThingStatus::THING_PENDING)->count() ) {return true;}
@@ -353,6 +386,7 @@ class ElementType extends Model
                     $this->lifecycle = $maybe_valid_lifecycle;
                 }
             }
+            //todo if publish, then check for permission, send to things
 
             if ($collect->has('description_element')) {
                 $describe_hint_here = $collect->get('description_element');

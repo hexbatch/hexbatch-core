@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Bounds\TypeOfLocation;
+use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -336,7 +337,7 @@ class LocationBound extends Model
             DB::beginTransaction();
 
             if (is_string($collect) && Utilities::is_uuid($collect)) {
-                $bound = (new TimeBound())->resolveRouteBinding($collect);
+                $bound = (new LocationBound())->resolveRouteBinding($collect);
             } else {
                 $bound = new LocationBound();
                 $bound->location_bound_namespace_id = $namespace->id;
@@ -355,27 +356,29 @@ class LocationBound extends Model
                         $bound->bound_name = Str::trim($name);
                     }
                 }
-
-                if ( $collect->has('location_type')) {
-                    $test_string = $collect->get('location_type');
-                    $bound->location_type  = TypeOfLocation::tryFromInput($test_string);
-                }
-
-                if ($collect->has('geo_json')) {
-                    $what_geo =  $collect->get('geo_json');
-                    if (is_array($what_geo) && !empty($what_geo)) {
-                        $bound->geo_json = $what_geo;
+                if (!$bound->isInUse()) {
+                    if ($collect->has('location_type')) {
+                        $test_string = $collect->get('location_type');
+                        $bound->location_type = TypeOfLocation::tryFromInput($test_string);
                     }
-                }
 
-                if ((!$bound->bound_name || !$bound->geo_json || !$bound->location_type) ) {
-                    throw new HexbatchCoreException(__("msg.location_bounds_needs_minimum_info"),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::BOUND_NEEDS_MIN_INFO);
-                }
 
-                if ($bound->location_type && $bound->geo_json) {
-                    $bound->setShape(json_encode($bound->geo_json),$bound->location_type);
+                    if ($collect->has('geo_json')) {
+                        $what_geo = $collect->get('geo_json');
+                        if (is_array($what_geo) && !empty($what_geo)) {
+                            $bound->geo_json = $what_geo;
+                        }
+                    }
+
+                    if ((!$bound->bound_name || !$bound->geo_json || !$bound->location_type)) {
+                        throw new HexbatchCoreException(__("msg.location_bounds_needs_minimum_info"),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::BOUND_NEEDS_MIN_INFO);
+                    }
+
+                    if ($bound->location_type && $bound->geo_json) {
+                        $bound->setShape(json_encode($bound->geo_json), $bound->location_type);
+                    }
                 }
 
                 $bound->save();
@@ -387,6 +390,17 @@ class LocationBound extends Model
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
+        }
+    }
+
+    public function isInUse() : bool {
+        if (!$this->id) {return false;}
+        if ($this->location_type === TypeOfLocation::SHAPE) {
+            return ElementType::buildElementType(shape_bound_id: $this->id)
+                ->where('lifecycle','<>',TypeOfLifecycle::DEVELOPING)->exists();
+        } else {
+            return ElementType::buildElementType(map_bound_id: $this->id)
+                ->where('lifecycle','<>',TypeOfLifecycle::DEVELOPING)->exists();
         }
     }
 

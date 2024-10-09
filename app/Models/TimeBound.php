@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNameConflictException;
 use App\Exceptions\HexbatchNotFound;
@@ -388,52 +389,54 @@ class TimeBound extends Model
                         $bound->bound_name = Str::trim($name);
                     }
                 }
-
-                if ($collect->has('bound_start')) {
-                    $test = $collect->get('bound_start');
-                    if (is_string($test) && Str::trim($test)) {
-                        $bound->bound_start = Str::trim($test);
+                if (!$bound->isInUse()) {
+                    if ($collect->has('bound_start')) {
+                        $test = $collect->get('bound_start');
+                        if (is_string($test) && Str::trim($test)) {
+                            $bound->bound_start = Str::trim($test);
+                        }
                     }
-                }
 
-                if ($collect->has('bound_stop')) {
-                    $test = $collect->get('bound_stop');
-                    if (is_string($test) && Str::trim($test)) {
-                        $bound->bound_stop = Str::trim($test);
+                    if ($collect->has('bound_stop')) {
+                        $test = $collect->get('bound_stop');
+                        if (is_string($test) && Str::trim($test)) {
+                            $bound->bound_stop = Str::trim($test);
+                        }
                     }
-                }
 
-                if ($collect->has('bound_cron')) {
-                    $test = $collect->get('bound_cron');
-                    if (is_string($test) && Str::trim($test)) {
-                        $bound->bound_cron = Str::trim($test);
+                    if ($collect->has('bound_cron')) {
+                        $test = $collect->get('bound_cron');
+                        if (is_string($test) && Str::trim($test)) {
+                            $bound->bound_cron = Str::trim($test);
+                        }
                     }
-                }
 
-                if ($collect->has('bound_cron_timezone')) {
-                    $test = $collect->get('bound_cron_timezone');
-                    if (is_string($test) && Str::trim($test)) {
-                        $bound->bound_cron_timezone = Str::trim($test);
+                    if ($collect->has('bound_cron_timezone')) {
+                        $test = $collect->get('bound_cron_timezone');
+                        if (is_string($test) && Str::trim($test)) {
+                            $bound->bound_cron_timezone = Str::trim($test);
+                        }
                     }
-                }
 
-                if ($collect->has('bound_period_length')) {
-                    $test = $collect->get('bound_period_length');
-                    if (intval($test) && intval($test) > 0) {
-                        $bound->bound_period_length = intval($test);
+                    if ($collect->has('bound_period_length')) {
+                        $test = $collect->get('bound_period_length');
+                        if (intval($test) && intval($test) > 0) {
+                            $bound->bound_period_length = intval($test);
+                        }
                     }
+
+                    if (!$bound->bound_name || !$bound->bound_stop || !$bound->bound_start) {
+                        throw new HexbatchCoreException(__("msg.time_bounds_needs_minimum_info"),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                            RefCodes::BOUND_NEEDS_MIN_INFO);
+                    }
+
+                    //this saves too
+                    $bound->setTimes(start: $bound->bound_start, stop: $bound->bound_stop,
+                        bound_cron: $bound->bound_cron, period_length: $bound->bound_period_length,
+                        bound_cron_timezone: $bound->bound_cron_timezone); //saves and processes
                 }
 
-                if (!$bound->bound_name || !$bound->bound_stop || !$bound->bound_start) {
-                    throw new HexbatchCoreException(__("msg.time_bounds_needs_minimum_info"),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::BOUND_NEEDS_MIN_INFO);
-                }
-
-                //this saves too
-                $bound->setTimes(start: $bound->bound_start,stop:$bound->bound_stop,
-                    bound_cron: $bound->bound_cron,period_length: $bound->bound_period_length,
-                    bound_cron_timezone: $bound->bound_cron_timezone); //saves and processes
                 $bound->refresh();
 
                 $bound = TimeBound::buildTimeBound(id: $bound->id)->first();
@@ -448,6 +451,12 @@ class TimeBound extends Model
             DB::rollBack();
             throw $e;
         }
+    }
+
+    public function isInUse() : bool {
+        if (!$this->id) {return false;}
+        return ElementType::buildElementType(time_bound_id: $this->id)
+            ->where('lifecycle','<>',TypeOfLifecycle::DEVELOPING)->exists();
     }
 
 }

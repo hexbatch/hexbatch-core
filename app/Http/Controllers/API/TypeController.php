@@ -130,7 +130,7 @@ class TypeController extends Controller
 
     public function attributes_list(ElementType $element_type,?string $filter = null): JsonResponse {
         Utilities::ignoreVar($filter);
-        $laravel_list = Attribute::buildAttribute(element_type_id: $element_type->id);
+        $laravel_list = Attribute::buildAttribute(type_id: $element_type->id);
         $ret = $laravel_list->cursorPaginate();
         return (new AttributeCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);

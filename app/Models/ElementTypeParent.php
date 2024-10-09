@@ -96,13 +96,11 @@ class ElementTypeParent extends Model
             if (!$current_step) {
                 $current_step = ElementTypeParent::where('child_type_id', $child->id)->max('parent_rank') ?? 0;
             }
-            $approval_type = TypeOfApproval::AUTOMATIC;
-            //todo check the parent type, and its ancestors for having a rule for TYPE_CONSTRAINT event
+            //will check when the type is published
             $par->upsert([
                 'child_type_id' => $child->id,
                 'parent_type_id' => $parent->id,
                 'parent_rank' => $current_step + 1,
-                'approval' => $approval_type,
             ], ['parent_type_id', 'child_type_id']);
 
 
