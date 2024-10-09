@@ -28,6 +28,12 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
+/*
+ * if an attribute has a shape, then its value can contain a key for how the shape looks for opacity|border color|fill color|skin url\z-ordering
+ * this is not enforced by the code here, but is a well known key for browsers and apps rendering the shape
+ * the shape appearance can be adjusted by rules writing to this key
+ * if no key for appearance, the browser will use some defaults
+ */
 
 /**
  * @mixin Builder

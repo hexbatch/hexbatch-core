@@ -4,6 +4,7 @@ namespace App\Enums\Sys;
 
 /*
  * Events can run before or after a successful event
+ * if running after, then member of ns of type
  */
 
 enum TypeOfEvent: string
@@ -31,7 +32,7 @@ enum TypeOfEvent: string
     //scoped same element
 
     //in path element
-    case SEARCH_RESULTS = 'search_results';
+    case SEARCH_RESULTS = 'search_results'; //ns member of element
 
 
 
@@ -57,7 +58,7 @@ enum TypeOfEvent: string
     case ATTRIBUTE_TURNED_ON = 'attribute_turned_on';
     case ATTRIBUTES_TURNED_OFF = 'attributes_turned_off';
 
-    case ELEMENT_DESTRUCTION = 'element_destruction';
+
 
     case SET_CONTENTS_SHAPE_CHANGED = 'set_contents_shape_changed';
 
@@ -88,9 +89,9 @@ enum TypeOfEvent: string
      */
     //scoped to the ancestor chain of sets
 
-    case REMOTE_SUCCESS = 'remote_success';
-    case REMOTE_FAIL = 'remote_fail';
-    case REMOTE_ALWAYS = 'remote_always';
+    case REMOTE_SUCCESS = 'remote_success'; //type ns members
+    case REMOTE_FAIL = 'remote_fail'; //type ns members
+    case REMOTE_ALWAYS = 'remote_always'; //type ns members
 
 
 
@@ -101,18 +102,18 @@ enum TypeOfEvent: string
    */
     //scoped to changes in the type or attribute definition
 
-    case ATTRIBUTE_CONSTRAINT = 'attribute_constraint';
 
-    case ELEMENT_CREATION = 'element_creation';
-    case ELEMENT_BATCH_CREATION = 'element_batch_creation';
+    case ELEMENT_CREATION = 'element_creation'; //type or type ancestor ns admin
+    case ELEMENT_BATCH_CREATION = 'element_batch_creation'; //type or type ancestor ns admin
+
+    case ELEMENT_DESTRUCTION = 'element_destruction'; //type or type ancestor ns admin
 
     case ELEMENT_REENTERED = 'element_reentered'; //element with same uuid come back after copied out
 
-    case TYPE_PUBLISHED = 'type_published';
-    case TYPE_RETIRED = 'type_retired';
-    case TYPE_SUSPENDED = 'type_suspended';
-    case TYPE_DELETED = 'type_deleted';
-    case TYPE_CONSTRAINT = 'type_constraint';
+    case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
+    case TYPE_RETIRED = 'type_retired'; //type or type ancestor ns admin
+    case TYPE_SUSPENDED = 'type_suspended'; //only system admin group
+    case TYPE_DELETED = 'type_deleted'; //only system admin group
 
 
 
@@ -122,7 +123,7 @@ enum TypeOfEvent: string
     "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
      */
     //system wide
-    case REMOTE_RUNNING = 'remote_running'; //a remote is about to be called
+    case RUN_REMOTE = 'run_remote'; //a remote is about to be called
 
     case SET_TOP_LEVEL_DESTROYED = 'set_top_level_destroyed';
     case SET_TOP_LEVEL_CREATED = 'set_top_level_created';
@@ -148,7 +149,6 @@ enum TypeOfEvent: string
     case SERVER_CREATED = 'server_created';
     case SERVER_ALLOWED = 'server_allowed';
     case SERVER_REMOVED = 'server_removed';
-    case SERVER_AFTER_REMOVED = 'server_after_removed';
     case SERVER_PAUSED = 'server_paused';
     case SERVER_REGENERATE_KEY = 'server_regenerate_key';
     case SERVER_REGENERATE_NAMESPACE_KEY = 'server_regenerate_namespace_key';
