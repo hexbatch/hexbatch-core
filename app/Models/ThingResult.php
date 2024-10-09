@@ -9,7 +9,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
-
+/*
+ * this stores the user getting back the api info, as well as the outgoing and incoming remotes
+ * remote pending can mark this as a failed remote by sending some well known data (depends on data format)
+ * if the data is not in json, then the result will convert it to json. The incoming or outgoing remote will have its raw text stored
+ *  The raw text is converted by handler here (xml ->json) (plain text -- json) (headers -> json) (response code -> json)
+ *  and that json will be sent to the thing id as the data, and then the child will hand that to its parent
+ */
 
 /**
  * @mixin Builder
@@ -21,6 +27,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int result_callback_status
  * @property TypeApiFollowup user_followup
  * @property string result_callback_url
+ * @property string raw_result
  * @property ArrayObject result_response
  *
  *  @property string created_at

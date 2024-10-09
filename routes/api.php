@@ -37,6 +37,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/get/{server}', [ServerController::class, 'get_server'])->name('core.servers.get');
     });
 
+    //todo add single route to receive incoming remotes, put the guid of the thing row in the route definition, process only if remote_wait_pending
+    // do not need to be logged in to do this
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('users')->group(function () {
             Route::get('/me', [AuthenticationController::class, 'me']);

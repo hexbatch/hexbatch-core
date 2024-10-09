@@ -133,6 +133,7 @@ enum TypeOfEvent: string
      */
     //system wide
     case RUN_REMOTE = 'run_remote'; //a remote is about to be called
+    case LISTEN_REMOTE = 'listen_remote'; //waiting for incoming call to the server
 
     case SET_TOP_LEVEL_DESTROYED = 'set_top_level_destroyed';
     case SET_TOP_LEVEL_CREATED = 'set_top_level_created';

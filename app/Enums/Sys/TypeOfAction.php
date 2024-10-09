@@ -41,7 +41,8 @@ enum TypeOfAction: string
 
 
 
-    case COMMAND_RUN_REMOTE = 'command_run_remote'; //if admin of type ns
+    case COMMAND_RUN_REMOTE = 'command_run_remote'; //if admin of type ns, makes outgoing remote
+    case COMMAND_LISTEN_REMOTE = 'command_listen_remote'; //if admin of type ns, this will wait until the server is contacted with information from the remote incoming
     case COMMAND_MAKE_SET = 'command_make_set'; //child set or top level set
     case COMMAND_DESTROY_SET = 'command_destroy_set'; //if admin of definer element of set ns
     case COMMAND_ADD_TO_SET = 'command_add_to_set';  //if admin of definer element of set ns
