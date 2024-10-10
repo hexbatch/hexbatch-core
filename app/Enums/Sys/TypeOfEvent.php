@@ -14,6 +14,9 @@ namespace App\Enums\Sys;
  * events handling large data will not complete until all the pagination is done, but
  *  because there is an exponential backoff strategy for each new page, events that wait on many things may not complete for a long time (minutes, hours, days)
  *  this will inspire more targeted rules
+ *
+ * Also use backoff rate if too many rule commands from same namespace, this is configured , other than default, as a
+ *
  */
 
 enum TypeOfEvent: string
