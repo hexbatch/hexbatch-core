@@ -4,11 +4,13 @@ namespace App\Sys\Res\Types\Stock\System;
 
 
 
+use App\Sys\Res\Attributes\Stock\System\Remote\RemoteData;
 use App\Sys\Res\Attributes\Stock\System\Remote\RemoteDataFormat;
+use App\Sys\Res\Attributes\Stock\System\Remote\RemoteDomain;
 use App\Sys\Res\Attributes\Stock\System\Remote\RemoteHeader;
 use App\Sys\Res\Attributes\Stock\System\Remote\RemoteMethod;
+use App\Sys\Res\Attributes\Stock\System\Remote\RemotePort;
 use App\Sys\Res\Attributes\Stock\System\Remote\RemoteProtocol;
-use App\Sys\Res\Attributes\Stock\System\Remote\RemoteUri;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stock\SystemType;
@@ -29,7 +31,9 @@ class Remote extends BaseType
         RemoteHeader::UUID,
         RemoteMethod::UUID,
         RemoteProtocol::UUID,
-        RemoteUri::UUID,
+        RemoteDomain::UUID,
+        RemotePort::UUID,
+        RemoteData::UUID,
     ];
 
     const PARENT_UUIDS = [

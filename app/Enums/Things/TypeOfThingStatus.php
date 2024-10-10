@@ -6,6 +6,7 @@ namespace App\Enums\Things;
 enum TypeOfThingStatus : string {
 
   case THING_PENDING = 'thing_pending';
+  case THING_WAITING = 'thing_waiting'; //when waiting for incoming remote or outside happening
   case THING_SUCCESS = 'thing_success';
   case THING_ERROR = 'thing_error';
 
