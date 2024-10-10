@@ -43,7 +43,7 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("Set has a set")
                 ->index()
-                ->constrained('element_types')
+                ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

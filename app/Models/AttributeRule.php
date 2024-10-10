@@ -88,7 +88,7 @@ the rules can react there when creation events to things in the set, the paths i
  * @property int id
  * @property int owning_server_event_id
  * @property int parent_rule_id
- * @property int rule_event_type_id
+ * @property int rule_action_or_event_type_id
  * @property int rule_path_id
  * @property string ref_uuid
  * @property string rule_name
@@ -361,7 +361,7 @@ class AttributeRule extends Model
                      */
                     $event_type = (new ElementType())->resolveRouteBinding($hint_event);
                     //todo see if the event type is a valid event
-                    $this->rule_event_type_id = $event_type->id;
+                    $this->rule_action_or_event_type_id = $event_type->id;
                 }
             }
 

@@ -36,9 +36,9 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('rule_event_type_id')
+            $table->foreignId('rule_action_or_event_type_id')
                 ->nullable()->default(null)
-                ->comment("The event that is being listened")
+                ->comment("The event that is being listened, or the action being done")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()

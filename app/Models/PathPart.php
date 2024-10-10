@@ -63,8 +63,7 @@ use Illuminate\Validation\ValidationException;
  * @property string sort_json_path
  * @property string path_part_compiled_sql
  *
- * @property ArrayObject path_shape_geo_json
- * @property ArrayObject path_map_geo_json
+ * @property ArrayObject path_geo_json
  *
  * @property TypeOfLogic path_child_logic
  * @property TypeOfLogic path_logic
@@ -113,8 +112,7 @@ class PathPart extends Model
         'path_child_logic' => TypeOfLogic::class,
         'path_logic' => TypeOfLogic::class,
         'path_lifecycle' => TypeOfLifecycle::class,
-        'path_shape_geo_json' => AsArrayObject::class,
-        'path_map_geo_json' => AsArrayObject::class,
+        'path_geo_json' => AsArrayObject::class,
     ];
 
 
@@ -516,18 +514,12 @@ class PathPart extends Model
                 if ($collect->has('shape_geo_json')) {
                     $what_geo = $collect->get('shape_geo_json');
                     if (is_array($what_geo)) {
-                        $this->path_shape_geo_json = $what_geo;
+                        $this->path_geo_json = $what_geo;
                     }
-                    if (empty($this->path_shape_geo_json)) {$this->path_shape_geo_json = null;}
+                    if (empty($this->path_geo_json)) {$this->path_geo_json = null;}
                 }
 
-                if ($collect->has('map_geo_json')) {
-                    $what_geo = $collect->get('map_geo_json');
-                    if (is_array($what_geo)) {
-                        $this->path_map_geo_json = $what_geo;
-                    }
-                    if (empty($this->path_map_geo_json)) {$this->path_map_geo_json = null;}
-                }
+
 
 
                 if ($collect->has('path_relationship')) {

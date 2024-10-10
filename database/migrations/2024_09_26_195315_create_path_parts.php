@@ -286,8 +286,7 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("Stores sql this part of path was converted to, the parents will include the children sql");
 
-            $table->jsonb('path_shape_geo_json')->comment("To search shape intersections inside the sets");
-            $table->jsonb('path_map_geo_json')->comment("To search map intersections");
+            $table->jsonb('path_geo_json')->comment("To search shape intersections inside the sets");
 
         });
 
