@@ -50,6 +50,11 @@ enum TypeOfAction: string
     case COMMAND_DESTROY_NAMESPACE = 'command_destroy_namespace'; //the owner, and if not default
     case COMMAND_DESTROY_USER = 'command_destroy_user'; //only system
     case COMMAND_ASSIGN_USER_TO_NAMESPACE = 'command_assign_user_to_namespace'; //only system and if the ns is not a default for current users
+    case COMMAND_CHANGE_NAMESPACE_RATE_LIMIT = 'command_change_namespace_rate_limit'; //only system, sets the limit before backoff starts in chunks
+    case COMMAND_CHANGE_NAMESPACE_PAGE_SIZE = 'command_change_namespace_page_size'; //only system
+                                            // will update the page size in the server events for all
+    case COMMAND_CHANGE_TYPE_PAGE_SIZE = 'command_change_type_page_size'; //only system, can limit to one event or all,
+                                            // one event goes to the server_events, all goes to the type page size and updates the server events rate
 
     case COMMAND_CREATE_ELEMENT = 'command_create_element';
     case COMMAND_DESTROY_ELEMENT = 'command_destroy_element';

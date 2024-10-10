@@ -37,6 +37,7 @@ use Illuminate\Validation\ValidationException;
  * @property int type_location_map_bound_id
  * @property int type_bound_path_id
  * @property int type_description_element_id
+ * @property int type_page_size
  * @property bool is_system
  * @property bool is_final_type
  * @property string ref_uuid

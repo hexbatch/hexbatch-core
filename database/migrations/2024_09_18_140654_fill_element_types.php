@@ -96,7 +96,9 @@ return new class extends Migration
                 ->comment('if true then cannot be added as parent');
 
 
-
+            $table->integer('type_page_size')
+                ->nullable()->default(null)
+                ->comment("If set for a type, then default size for events is this");
         });
 
         DB::statement("ALTER TABLE element_types
@@ -153,6 +155,7 @@ return new class extends Migration
             $table->dropColumn('is_final_type');
             $table->dropColumn('type_sum_geom_shape');
             $table->dropColumn('lifecycle');
+            $table->dropColumn('type_page_size');
 
 
 
