@@ -172,4 +172,98 @@
   todo: need event when setting attribute value (called when published)
   todo: add file attribute somewhere in the standards (do I put remote_url as a system attr at the top? and inherit the others from that?)
   note: never store html or xml in the json values, plain text can be in a key
+  
+  
+  //////////////////////////////////
+server communications:
+
+	note: servers can remove imported elements, tokens, ns without notice to others, its their own business
+	note: elsewhere do not ask for elements
+	note: server_namespace_tokens only applies to ns for other servers,  the elsewhere never runs stuff in the ns name, rules stay on home server, rename user_server_token
+	note: when a server recieves a type, it can put its own event hooks that run at the same time the events are sent to the elewhere.
+
+
+    pushing, this is when the server pushes stuff to the elsewhere
+
+	push_element_elsewhere  : pushes single element to the homeset of this server in the elsewhere, or some other set ref that is known  
+				    (server or type event handler can deny before this is done)	
+				    This can be used to refresh the element if info is changed
+				    
+	push_set_elsewhere      : pushes the contents of a set, including the set defining element, same destination
+				(server or type event handler can deny before this is done)	
+				
+	push_type_elsewhere     : this is only in reponse to the elsewhere finding a type it does not have, and asking for it, after we push an element or set
+	
+	push_ns_elsewhere       : this is only because the elsewhere is asking about a ns because we pushed an element or set 
+
+	run_event_elsewhere     : types will tell which event it has, elsewhere will call those events to here, and this is the event recieved before its put on the things
+		                  (allows server here to deny, or types to deny if server puts additional listeners)
+		    
+
+     recieved                           
+	these are when elsewhere sends the elements, types and events and ns here
+		            (allows server here to deny or listener for type)  
+		            
+	element_received: we were pushed an element, hooks can deny this, otherwise we lookup the type and owner and ask if missing
+	
+	set_received: we were pushed a set, for each element here do the above and call this event to allow blocking
+	
+	event_received: we have notice an event should be run, it is only from a registered server, and only for events allowed in the public or protected list for the type
+	
+	type_recieved:  we got a type after element received 
+	
+	ns_recieved:   we got a namespace after element recieved
+	
+	
+	
+    third party verification:
+    	
+    	push_to_next_server  : elsewhere wants to share this element, calls this with the other server info, if server info missing then need to register and allow server
+    	                        (this can be automatic in rules or manual)	
+
+		              
+     server handshake
+	server_registered	   : when a new server is added via api , or server asks (when A has type sent to B, which sends to C)	
+	server_unregistered
+	server_status_allowed
+	server_status_denied
+	server_status_paused
+	server_regenerate_server_key : drop key for server_namespace_tokens, add new one
+	
+	------------------------------------------------------------
+	
+	
+  todo rm table element_type_server_whitelist
+  
+  (server, type, access_level) 
+  todo adjust element_type_server_whitelist to  (server, type, access_level) -> public, protected, package
+     if server is null, then this applies to all servers  (add unique key to include nulls for server and type). Ancestor types cannot increase access, only lessen it
+     
+  	
+  todo add package to type_of_server_access, remove the read only and just set for the public, protected, package, and private        
+     
+  note: the reported events to send, and the denied events, are discovered by the element_type_server_whitelist and the server events combined with the attribute access level
+        so if the type has a hook for element creation, but that or those attributes are not including in the elsewhere access level
+         (the attr are protected and the server is package example)	
+	 This will be reported as type that an event set, or no event set for that
+  todo add event_off bool flag to server_events to show that event is disabled and will return false and block. 	 
+
+ note: if one does not want an attribute readable, then keep its access out of the elswhere
+ note: if an element is only readable or writable by a ns, then an event listener is added by the server and the attribute must be marked as private	 
+ note: elements recieved from elsewhere can be sent to other servers, but this is done through the original server by the push_to_next_server
+ 
+ todo: any element creation from types exported to elsewhere must call the originating server for this took, 
+      and the element created on the original server and exported to the elswhere, otherwise this is an invalid element 
+      (when the element is sent back or events called on it, the uuid is missing so invalid)	 
+      
+note: there is nothing stopping a server from creating invalid elements or doing illegal value changes; this does not matter unless somehow this element or values is needed on the original server, either directly or through rule verification when something references it  
+
+element owners cannot control server migration, only the type can, but the type can have rules to allow or disallow based on element ns
+
+note: when ns is transferred to elsewhere, the public set from the ns is sent too, minus any attributes or types not fitting into the access level
+      if something needs to be updated, then rules can be made to push that element again     
+      
+      
+      
+      
     
