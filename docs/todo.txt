@@ -152,6 +152,11 @@
    type and attribute creating, editing and deletion and publishing are also done by actions
   todo: add TypeTemplate, AttributeTemplate with attributes that describe the settings for each
   todo: add Actions that create, edit and edit using the templates above, and delete using the found attr or types in the path
-  	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way	
+  	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way.
+  	To edit, make new element of template, set the proper attributes, put in any set, and then call the action 	
   todo: add path being able to find attributes and types based on their settings  
   todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
+  todo: the api for types and attributes use the new actions here, through the things, to do the work. What they do is gather data from the incoming json or route, and push to things
+  todo: the rules also have their own template, and actions, and the api is restructured there like above
+  note: the listing and showing of the types and attributes, rules are still using resources with the models
+  todo: add action for changing the type ownership (to a different ns),and changing element ownership, add events for these, if not exist yet. Add api for this.
