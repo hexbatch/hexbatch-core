@@ -122,6 +122,8 @@
   todo: new system set for remote cache and remote rules  
   todo: when remote called, its at the closest parent thing that has children that does not call the remote again, as a set containing the remote, its possible return, the data to send, its cache and rules. These are all read only to the remotes, except for the data to send. 
   todo: add attributes for remote response for headers, code and body
+  todo: remote can have localhost or ip or server domain if the owner of the remote is member of server ns
+  todo: thing_results can have callback localhost, ip, or server domain also if the caller is member of server
     
     
   todo: make new standard_alias table, for having the names of the standard types and attributes in different languages (type_id, attribute_id, iso lang, name)
@@ -169,4 +171,5 @@
     
   todo: need event when setting attribute value (called when published)
   todo: add file attribute somewhere in the standards (do I put remote_url as a system attr at the top? and inherit the others from that?)
+  note: never store html or xml in the json values, plain text can be in a key
     
