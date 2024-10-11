@@ -1,3 +1,5 @@
+  Each group action is put under actions, and not the base group op type
+  
   A,B,C is set
   P Q is path that selects attr or types, or ns (must be actual ns not their elements or types for filtering ownership of element or type)
   M mutual
@@ -36,6 +38,7 @@
    when either the pipe or restrict is used on the child logic, then the parent will use the child data with its own operation
    when the pipe is used on the node logic, then the child will send its data to the parent.
    Filtered in node logic is a nop (does not contribute to the parent data or the logic of the parent)
+  todo add run_after parent to the logic behavior, this makes the child a nop to the parent's behavior and runs the child immediately after the parent is finished 
 
   todo add prepared_once, prepared_repeat to thing state, this allows many api or actions to be declared ahead of time before running, and be reused.
     Only the top level api calls are joined logically together, when run this acts as a template, to be removed if the prepared_once is used. 
@@ -73,13 +76,25 @@
    todo new api for setting next step, making and clearing debug points, running from the paused, and removing the thing running (branch or top thing) if branch removed, its logic to parent is false and it pipes nothing
 
 
-
+  todo when a rule targets multiple elements, regardless of action, they all get put into the thing set, If the action for any element results in an event. 
+    Then that thing is queued to run, and its thing id is put into the same row in the thing set. The thing set has a new column for is_ready
+    when all is ready (all things return from this or there was no event to begin with), then all the thing set is applied at once. Or none is, and that rule fails.
+    Do exponential backoff times to the new things added via thing-set if there is too much depth.
+  todo put in thing_id to thing_set, and the enum above  
+    
+  The parent thing can add the child results (types,elements, attr, ns,sets) if there is a pipe, or filter to remove items in the parent thing set.
+  Rules can only search in the parent thing set by paths, the children are popped.  Rules can only read the thing set, not modify its contents.
+  
+  todo rm now unneeded columns in the things: thing_set_id,thing_type_id,thing_attribute_id,thing_element_id,thing_namespace_id. These are in the thing-sets
+  
 
   todo element set members need to have rank applied, unique member + rank per set
 
   todo ns membership can take an optional set or have a set of ns user tokens chained to it
   
   todo live types have api call join and split, this can have a list of types and a list of elements from piping|filtering
+  
+  
   
   todo add new standard types for rendering rule_parts and path_parts: these have a standard attribute controlling the shape of the part. 
    Each rule and path part have standard attributes that match each internal db column   
@@ -95,10 +110,42 @@
   todo new column on the element values, parent child set relations, and links, can have a descriptive element added, make new element id column for the linkage
   
   note: for remote types, they can be described by elements, for any remote type, just adjust their description visual. The remote_return type, that is made with the remote can be adjusted too. 
+  
+  
   todo for the remote return type, the http code has an always attribute to hold that, and then either success or fail attributes will be filled out in the type's descriptive element 
     and this is used for rendering the visual, and for doing stuff using that in the rules (remote results are put in the top level thing set for rules to find) 
+  todo add new type for the remote cache, with standard attr for behavior of cache
+  todo add new type for the remote rules, with standard attr for each rule setting
+  todo add new type for the remote to send data, the base has no attributes, except required and optional body, required and optional headers,  but derived have attributes for each field inheriting this.
+     if not all required are filled in by remotes, then this remote call ends in failure before sent. 
+  note: when remote type is created, it has the cache and rules elements for it put in a standard set for remotes.
+  todo: new system set for remote cache and remote rules  
+  todo: when remote called, its at the closest parent thing that has children that does not call the remote again, as a set containing the remote, its possible return, the data to send, its cache and rules. These are all read only to the remotes, except for the data to send. 
+  todo: add attributes for remote response for headers, code and body
     
     
   todo: make new standard_alias table, for having the names of the standard types and attributes in different languages (type_id, attribute_id, iso lang, name)
     the names for all types here are unique, same for attributes, put the english here too to enforce uniqueness. When a name is used, look up the thing it refers to.
-    when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console     
+    when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console    
+    
+    
+  todo add to paths relationship link_element, and add member_of_set , attribute_of_type. 
+  note: relationship owns_rule means that the rule references the type of the api or action 
+  todo: add user and set to path_returns_type enum, but only server member can set the user return type 
+  
+  
+  todo when an element is removed from its last set, it is automatically destroyed
+  
+  todo new placeholder for current namespace, current element, current thing-set
+  
+  todo all shape filters need admin priv for both attr
+  
+  todo: add max mb_length of json allowed in writes limit, use default if not set, add this to the server events too to override the ns
+  todo : the thing depth for an api call, as mentioned above in the new thing-sets derived things
+  todo: for  ns settings that set limits for backoff rules, and for all server events, also set the backoff rule exponent
+  
+  todo when doing z-index on the shapes, the different api calls are attached to the same root (the event called) with the specified logic, 
+    but the higher z-index are children of the lower z-index
+  
+  note: rest of api mirror the actions and events
+  
