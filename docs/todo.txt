@@ -154,7 +154,9 @@
   todo: add Actions that create, edit and edit using the templates above, and delete using the found attr or types in the path
   	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way.
   	To edit, make new element of template, set the proper attributes, put in any set, and then call the action 	
-  todo: add path being able to find attributes and types based on their settings  
+  todo: add path being able to find attributes and types based on their settings, 
+  todo: also path should find rules that use stuff in sub path parts, and select based on that
+         but this is only for those able to read the rules.  
   todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
   todo: the api for types and attributes use the new actions here, through the things, to do the work. What they do is gather data from the incoming json or route, and push to things
   todo: the rules also have their own template, and actions, and the api is restructured there like above
