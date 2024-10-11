@@ -31,7 +31,7 @@
 ------------------------------------
 
 
-  todo Add two hours for thusdays, two and half hours for friday
+  todo Add two hours for thusdays, 2.75 hours for friday
 
   todo add pipe to logic enum, this allows the results to be combined (if compatible). Paths by themselves can be the source.
   todo add filted to logic enum, the allows child results to be removed from the parent operation (if compatible)
@@ -159,6 +159,6 @@
          but this is only for those able to read the rules.  
   todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
   todo: the api for types and attributes use the new actions here, through the things, to do the work. What they do is gather data from the incoming json or route, and push to things
-  todo: the rules also have their own template, and actions, and the api is restructured there like above
+  
   note: the listing and showing of the types and attributes, rules are still using resources with the models
   todo: add action for changing the type ownership (to a different ns),and changing element ownership, add events for these, if not exist yet. Add api for this.
