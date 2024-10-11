@@ -1,0 +1,104 @@
+  A,B,C is set
+  P Q is path that selects attr or types, or ns (must be actual ns not their elements or types for filtering ownership of element or type)
+  M mutual
+  e element
+
+ * combine
+  add A  B
+     (p)A op (q)B => C
+     OR, XOR, AND
+     to remove also can chain to filter of some other thing that gets elements
+
+ * pop
+    (p)A => e + A(-e)
+     where is the last to be added, with p doing different ordering
+
+ * shift
+    like pop but e is the first to be added
+    (p)A
+
+ * push is the regular add element to set, push can have something to organize order
+    (p)A
+
+ * unshift is adding element to set like normal, but put at the front
+   (p)A
+
+ * mutual A (B)
+   (p) => M
+    finds all the sets that share elements, (with path restricting the set/element chosen)
+------------------------------------
+
+
+  todo Add two hours for thusdays, two hours for friday
+
+  todo add pipe to logic enum, this allows the results to be combined (if compatible). Paths by themselves can be the source.
+  todo add filted to logic enum, the allows child results to be removed from the parent operation (if compatible)
+   when either the pipe or restrict is used on the child logic, then the parent will use the child data with its own operation
+   when the pipe is used on the node logic, then the child will send its data to the parent.
+   Filtered in node logic is a nop (does not contribute to the parent data or the logic of the parent)
+
+  todo add prepared_once, prepared_repeat to thing state, this allows many api or actions to be declared ahead of time before running, and be reused.
+    Only the top level api calls are joined logically together, when run this acts as a template, to be removed if the prepared_once is used. 
+    just use the thing id, all api calls can be called with many api calls being chained. 
+    the individual api calls still in routes, but cannot be chained, except for set operations, they can accept one or more chained ops
+    (each op is its own api). When a prepared is set in the rules, it does not make the chain until its called (the run_prepared action)
+    the once prepared will remove the prepared after the run
+
+  todo add to routes the ability to list prepared_repeat things, and to remove them, and to add them, and to run them, and to create and run at the same time,
+     and if this is prepared_once, prepared_repeat when running
+  
+  todo add new table to allow prepared to have notes (ns,root thing_id, description element,name (optional) ), all thing roots here, and their children are marked prepared_repeat
+  todo new group for prepared descriptions
+
+
+
+  todo add run_prepared to rules
+
+  todo add thing_id to path_part (predecare thing in mig.), this allows rules to processed already defined api chains
+
+  todo add debug_things to .env: when calling any api, optional debuggging (break_on_first means pause before any node of thing is run here) and url for callback can be made, if member of server group,
+      all data seen, and the url provided gets updated with each completed or failed thing
+      this is done by adding a new thing result row, in addition to the user calling the api, a debug row is set for the thing,
+      when a thing row is debugged, all decendants of the thing has its final status sent to the url
+      when debugging, send all the thing tree, and any attatched rule tree, and any attached path tree,before any run, at once, to the url. 
+       Then, the debugger can set up break points and or start single step, or allow to run.
+
+  todo in thing_results add debugging|single_step|breakpoint to type_api_followup, all send the thing results to the api or let be polled
+    single step means that the next thing ready to run will wait for the debugger to call an api for the thing to continue
+    breakpoint means the things will continue until reaching that breakpoint
+    
+  
+  todo in thing states add paused, to stop auto running of things
+
+   todo new api for setting next step, making and clearing debug points, running from the paused, and removing the thing running (branch or top thing) if branch removed, its logic to parent is false and it pipes nothing
+
+
+
+
+  todo element set members need to have rank applied, unique member + rank per set
+
+  todo ns membership can take an optional set or have a set of ns user tokens chained to it
+  
+  todo live types have api call join and split, this can have a list of types and a list of elements from piping|filtering
+  
+  todo add new standard types for rendering rule_parts and path_parts: these have a standard attribute controlling the shape of the part. 
+   Each rule and path part have standard attributes that match each internal db column   
+   As elements, these can represent the rules and paths as chains of parent child sets, with each part sibling being in the same set.
+   Make new standard set for holding an element for each action, and a single element for the path part.
+   Adjust the color here in the set for rendering. When the debugger mode is used, this set->element rendering of the rule chains and paths are sent with the rest above
+   
+  todo same for api calls as above, each of the api call types, defined already, has an element in the same standard set, where the color of shape of the api call is done
+  
+  todo there are new standard types for each of the logic , in the same way as above, and these elements are put into the set to adjust as needed. 
+    the linkages in the tree use this logic element to help render
+    
+  todo new column on the element values, parent child set relations, and links, can have a descriptive element added, make new element id column for the linkage
+  
+  note: for remote types, they can be described by elements, for any remote type, just adjust their description visual. The remote_return type, that is made with the remote can be adjusted too. 
+  todo for the remote return type, the http code has an always attribute to hold that, and then either success or fail attributes will be filled out in the type's descriptive element 
+    and this is used for rendering the visual, and for doing stuff using that in the rules (remote results are put in the top level thing set for rules to find) 
+    
+    
+  todo: make new standard_alias table, for having the names of the standard types and attributes in different languages (type_id, attribute_id, iso lang, name)
+    the names for all types here are unique, same for attributes, put the english here too to enforce uniqueness. When a name is used, look up the thing it refers to.
+    when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console     
