@@ -31,7 +31,7 @@
 ------------------------------------
 
 
-  todo Add two hours for thusdays, two hours for friday
+  todo Add two hours for thusdays, two and half hours for friday
 
   todo add pipe to logic enum, this allows the results to be combined (if compatible). Paths by themselves can be the source.
   todo add filted to logic enum, the allows child results to be removed from the parent operation (if compatible)
@@ -149,3 +149,9 @@
   
   note: rest of api mirror the actions and events
   
+   type and attribute creating, editing and deletion and publishing are also done by actions
+  todo: add TypeTemplate, AttributeTemplate with attributes that describe the settings for each
+  todo: add Actions that create, edit and edit using the templates above, and delete using the found attr or types in the path
+  	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way	
+  todo: add path being able to find attributes and types based on their settings  
+  todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
