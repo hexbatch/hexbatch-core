@@ -31,7 +31,7 @@
 ------------------------------------
 
 
-  todo Add two hours for thusdays, 3 hours for friday
+  todo Add two hours for thusdays,5 hours for friday
 
   todo add pipe to logic enum, this allows the results to be combined (if compatible). Paths by themselves can be the source.
   todo add filted to logic enum, the allows child results to be removed from the parent operation (if compatible)
@@ -264,6 +264,8 @@ note: when ns is transferred to elsewhere, the public set from the ns is sent to
       if something needs to be updated, then rules can be made to push that element again     
       
       
-      
+todo: add token to ns for the server to store its token they trade
+note: can verify with the public key on rule that listens to incoming elsewhere and gets the public key attribute from the namespace token
+todo: (make sure that attribute is there in the ns type)      
       
     
