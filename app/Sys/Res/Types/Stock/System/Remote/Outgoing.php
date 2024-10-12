@@ -10,7 +10,7 @@ use App\Sys\Res\Types\Stock\System\Remote;
 class Outgoing extends BaseType
 {
     const UUID = 'ef367400-78fc-4460-a71c-3cf34c8e339d';
-    const TYPE_NAME = 'outgoing_remote';
+    const TYPE_NAME = 'remote_outgoing';
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\API\AuthenticationController;
-use App\Http\Controllers\API\ElementController;
 use App\Http\Controllers\API\PathController;
 use App\Http\Controllers\API\ServerController;
 use App\Http\Controllers\API\TypeController;
@@ -27,13 +26,12 @@ Route::prefix('v1')->group(function () {
     Route::prefix('users')->group(function () {
         Route::post('/login', [AuthenticationController::class, 'login'])->name('core.users.login');
         Route::post('/register', [AuthenticationController::class, 'register'])->name('core.users.register');
-        Route::get('/get/{user}', [ElementController::class, 'get_user'])->name('core.users.read');
         Route::get('/avialable', [AuthenticationController::class, 'available']);
     });
 
     Route::prefix('servers')->group(function () {
-        Route::post('/this', [ServerController::class, 'me'])->name('core.servers.this');
-        Route::post('/list', [ServerController::class, 'list_servers'])->name('core.servers.list');
+        Route::post('/this', [ServerController::class, 'me'])->name('core.servers.this'); //todo not as much detail as the server get for this below
+        Route::post('/list', [ServerController::class, 'list_servers'])->name('core.servers.list'); //todo put under namespace required for this and below
         Route::get('/get/{server}', [ServerController::class, 'get_server'])->name('core.servers.get');
     });
 

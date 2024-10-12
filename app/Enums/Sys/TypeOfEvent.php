@@ -91,7 +91,7 @@ enum TypeOfEvent: string
     case SHAPE_INTERSECTION_ENTER = 'shape_intersection_enter';
     case SHAPE_INTERSECTION_LEAVE = 'shape_intersection_leave';
 
-    case TYPE_LIVE_ADDED = 'type_live_added';
+    case TYPE_LIVE_ADDED = 'type_live_added'; //these two live events go to both types
     case TYPE_LIVE_REMOVED = 'type_live_removed';
 
 

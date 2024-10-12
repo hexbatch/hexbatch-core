@@ -1,5 +1,5 @@
   Each group action is put under actions, and not the base group op type
-  
+
   A,B,C is set
   P Q is path that selects attr or types, or ns (must be actual ns not their elements or types for filtering ownership of element or type)
   M mutual
@@ -31,153 +31,171 @@
 ------------------------------------
 
 
-  todo Add two hours for thusdays,5 hours for friday
+  todo Add two hours for thusdays,5 hours for friday, .75 saturday
 
   todo add pipe to logic enum, this allows the results to be combined (if compatible). Paths by themselves can be the source.
   todo add filted to logic enum, the allows child results to be removed from the parent operation (if compatible)
    when either the pipe or restrict is used on the child logic, then the parent will use the child data with its own operation
    when the pipe is used on the node logic, then the child will send its data to the parent.
    Filtered in node logic is a nop (does not contribute to the parent data or the logic of the parent)
-  todo add run_after parent to the logic behavior, this makes the child a nop to the parent's behavior and runs the child immediately after the parent is finished 
+  todo add run_after parent to the logic behavior, this makes the child a nop to the parent's behavior and runs the child immediately after the parent is finished
 
   todo add prepared_once, prepared_repeat to thing state, this allows many api or actions to be declared ahead of time before running, and be reused.
-    Only the top level api calls are joined logically together, when run this acts as a template, to be removed if the prepared_once is used. 
-    just use the thing id, all api calls can be called with many api calls being chained. 
+    Only the top level api calls are joined logically together, when run this acts as a template, to be removed if the prepared_once is used.
+    just use the thing id, all api calls can be called with many api calls being chained.
     the individual api calls still in routes, but cannot be chained, except for set operations, they can accept one or more chained ops
-    (each op is its own api). When a prepared is set in the rules, it does not make the chain until its called (the run_prepared action)
+    (each op is its own api). When a prepared is set in the rules, it does not make the chain until it is called (the run_prepared action)
     the once prepared will remove the prepared after the run
 
   todo add to routes the ability to list prepared_repeat things, and to remove them, and to add them, and to run them, and to create and run at the same time,
      and if this is prepared_once, prepared_repeat when running
-  
+
   todo add new table to allow prepared to have notes (ns,root thing_id, description element,name (optional) ), all thing roots here, and their children are marked prepared_repeat
   todo new group for prepared descriptions
 
 
 
-  todo add run_prepared to rules
+  todo add run_prepared to the rules
 
-  todo add thing_id to path_part (predecare thing in mig.), this allows rules to processed already defined api chains
+  todo add thing_id to path_part (predecare thing in mig.), this allows rules to process already defined api chains
 
   todo add debug_things to .env: when calling any api, optional debuggging (break_on_first means pause before any node of thing is run here) and url for callback can be made, if member of server group,
       all data seen, and the url provided gets updated with each completed or failed thing
       this is done by adding a new thing result row, in addition to the user calling the api, a debug row is set for the thing,
       when a thing row is debugged, all decendants of the thing has its final status sent to the url
-      when debugging, send all the thing tree, and any attatched rule tree, and any attached path tree,before any run, at once, to the url. 
+      when debugging, send all the thing tree, and any attatched rule tree, and any attached path tree,before any run, at once, to the url.
        Then, the debugger can set up break points and or start single step, or allow to run.
 
   todo in thing_results add debugging|single_step|breakpoint to type_api_followup, all send the thing results to the api or let be polled
     single step means that the next thing ready to run will wait for the debugger to call an api for the thing to continue
     breakpoint means the things will continue until reaching that breakpoint
-    
-  
+
+
   todo in thing states add paused, to stop auto running of things
 
-   todo new api for setting next step, making and clearing debug points, running from the paused, and removing the thing running (branch or top thing) if branch removed, its logic to parent is false and it pipes nothing
+   todo new api for setting next step, making and clearing debug points, running from the paused, and removing the thing running (branch or top thing) if branch removed,
+    its logic to parent is false, and it pipes nothing
+   todo new api for server admin getting any thing tree, and to search things
 
-
-  todo when a rule targets multiple elements, regardless of action, they all get put into the thing set, If the action for any element results in an event. 
+  todo when a rule targets multiple elements, regardless of action, they all get put into the thing set, If the action for any element results in an event.
     Then that thing is queued to run, and its thing id is put into the same row in the thing set. The thing set has a new column for is_ready
     when all is ready (all things return from this or there was no event to begin with), then all the thing set is applied at once. Or none is, and that rule fails.
     Do exponential backoff times to the new things added via thing-set if there is too much depth.
-  todo put in thing_id to thing_set, and the enum above  
-    
+  todo put in thing_id to thing_set, and the enum above
+
   The parent thing can add the child results (types,elements, attr, ns,sets) if there is a pipe, or filter to remove items in the parent thing set.
   Rules can only search in the parent thing set by paths, the children are popped.  Rules can only read the thing set, not modify its contents.
-  
+
   todo rm now unneeded columns in the things: thing_set_id,thing_type_id,thing_attribute_id,thing_element_id,thing_namespace_id. These are in the thing-sets
-  
+
 
   todo element set members need to have rank applied, unique member + rank per set
 
   todo ns membership can take an optional set or have a set of ns user tokens chained to it
-  
+
   todo live types have api call join and split, this can have a list of types and a list of elements from piping|filtering
-  
-  
-  
-  todo add new standard types for rendering rule_parts and path_parts: these have a standard attribute controlling the shape of the part. 
-   Each rule and path part have standard attributes that match each internal db column   
+
+
+
+  todo add new standard types for rendering rule_parts and path_parts: these have a standard attribute controlling the shape of the part.
+   Each rule and path part have standard attributes that match each internal db column
    As elements, these can represent the rules and paths as chains of parent child sets, with each part sibling being in the same set.
    Make new standard set for holding an element for each action, and a single element for the path part.
    Adjust the color here in the set for rendering. When the debugger mode is used, this set->element rendering of the rule chains and paths are sent with the rest above
-   
+
   todo same for api calls as above, each of the api call types, defined already, has an element in the same standard set, where the color of shape of the api call is done
-  
-  todo there are new standard types for each of the logic , in the same way as above, and these elements are put into the set to adjust as needed. 
+
+  todo there are new standard types for each of the logic , in the same way as above, and these elements are put into the set to adjust as needed.
     the linkages in the tree use this logic element to help render
-    
+
   todo new column on the element values, parent child set relations, and links, can have a descriptive element added, make new element id column for the linkage
-  
-  note: for remote types, they can be described by elements, for any remote type, just adjust their description visual. The remote_return type, that is made with the remote can be adjusted too. 
-  
-  
-  todo for the remote return type, the http code has an always attribute to hold that, and then either success or fail attributes will be filled out in the type's descriptive element 
-    and this is used for rendering the visual, and for doing stuff using that in the rules (remote results are put in the top level thing set for rules to find) 
+
+  note: for remote types, they can be described by elements, for any remote type, just adjust their description visual. The remote_return type, that is made with the remote can be adjusted too.
+
+
+  todo for the remote return type, the http code has an "always" attribute to hold that, and then either success or fail attributes will be filled out in the type's descriptive element
+    and this is used for rendering the visual, and for doing stuff using that in the rules (remote results are put in the top level thing set for rules to find)
   todo add new type for the remote cache, with standard attr for behavior of cache
   todo add new type for the remote rules, with standard attr for each rule setting
   todo add new type for the remote to send data, the base has no attributes, except required and optional body, required and optional headers,  but derived have attributes for each field inheriting this.
-     if not all required are filled in by remotes, then this remote call ends in failure before sent. 
+     if not all required are filled in by remotes, then this remote call ends in failure before sent.
   note: when remote type is created, it has the cache and rules elements for it put in a standard set for remotes.
-  todo: new system set for remote cache and remote rules  
-  todo: when remote called, its at the closest parent thing that has children that does not call the remote again, as a set containing the remote, its possible return, the data to send, its cache and rules. These are all read only to the remotes, except for the data to send. 
+  todo: new system set for remote cache and remote rules
+  todo: when remote called, it is at the closest parent thing that has children that does not call the remote again, as a set containing the remote, its possible return, the data to send, its cache and rules. These are all read only to the remotes, except for the data to send.
   todo: add attributes for remote response for headers, code and body
   todo: remote can have localhost or ip or server domain if the owner of the remote is member of server ns
   todo: thing_results can have callback localhost, ip, or server domain also if the caller is member of server
-    
-    
+
+
   todo: make new standard_alias table, for having the names of the standard types and attributes in different languages (type_id, attribute_id, iso lang, name)
     the names for all types here are unique, same for attributes, put the english here too to enforce uniqueness. When a name is used, look up the thing it refers to.
-    when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console    
-    
-    
-  todo add to paths relationship link_element, and add member_of_set , attribute_of_type. 
-  note: relationship owns_rule means that the rule references the type of the api or action 
-  todo: add user and set to path_returns_type enum, but only server member can set the user return type 
-  
-  
+    when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console
+
+
+  todo add to paths relationship: link_element, member_of_set , attribute_of_type, parent of thing, child of thing, member thing set,
+   action of thing (to search actions and api).
+
+  note: relationship owns_rule means that the rule references the type of the api or action
+  todo: add user and set and thing to path_returns_type enum, but only server member can set the user and thing return type
+
+
   todo when an element is removed from its last set, it is automatically destroyed
-  
+
   todo new placeholder for current namespace, current element, current thing-set
-  
+
   todo all shape filters need admin priv for both attr
-  
+
   todo: add max mb_length of json allowed in writes limit, use default if not set, add this to the server events too to override the ns
   todo : the thing depth for an api call, as mentioned above in the new thing-sets derived things
   todo: for  ns settings that set limits for backoff rules, and for all server events, also set the backoff rule exponent
-  
-  todo when doing z-index on the shapes, the different api calls are attached to the same root (the event called) with the specified logic, 
+  todo: make rate-set type to put rate set in user home
+  todo: rate type add attribute to read e/ write t  rate allowed that are writable to server ns only, but readable to the element owner
+  note: rates for the ns is done by combining the ns type with the rate type, then make element from that and put in the home set rates type,
+      this is for user checking rates, rates still managed in db column, but if server admin writes to this, then updated in tables
+
+  note: once rate exceeded, throw special exception to catch at the api level and return proper response code in http
+
+  todo: make new table for rates
+     cols (type_id for rate, type_id for event (nullable) , type id for api (nullable) ns (nulalble) this is about,
+      type (nullable) this is about, time rates renew at, rate used in current, total rates (over all rate cycles)
+     remove other rate columns elsewhere
+
+  todo: on the attribute enum add element owner readable|type owner writable, even if the type is locked down
+
+  todo when doing z-index on the shapes, the different api calls are attached to the same root (the event called) with the specified logic,
     but the higher z-index are children of the lower z-index
-  
+
   note: rest of api mirror the actions and events
-  
+
    type and attribute creating, editing and deletion and publishing are also done by actions
   todo: add TypeTemplate, AttributeTemplate with attributes that describe the settings for each
   todo: add Actions that create, edit and edit using the templates above, and delete using the found attr or types in the path
   	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way.
-  	To edit, make new element of template, set the proper attributes, put in any set, and then call the action 	
-  todo: add path being able to find attributes and types based on their settings, 
+  	To edit, make new element of template, set the proper attributes, put in any set, and then call the action
+  todo: add path being able to find attributes and types based on their settings,
   todo: also path should find rules that use stuff in sub path parts, and select based on that
-         but this is only for those able to read the rules.  
+         but this is only for those able to read the rules.
   todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
   todo: the api for types and attributes use the new actions here, through the things, to do the work. What they do is gather data from the incoming json or route, and push to things
-  
+
   note: the listing and showing of the types and attributes, rules are still using resources with the models
   todo: add action for changing the type ownership (to a different ns),and changing element ownership, add events for these, if not exist yet. Add api for this.
-  
-  note: urls for image, svg, file checking will be done in the next layer, where it downloads and scans, accepting or rejecting it, 
+
+  note: urls for image, svg, file checking will be done in the next layer, where it downloads and scans, accepting or rejecting it,
     the system user can hook into the descendants of the url attributes to deny the value change or accept it.
-    	see 
-    
+    	see
+  todo: put base url attribute, and outside_url (to mark urls that need checking with url as parent) at system root, inherit all urls in the other types from one of these
+  todo: put downloadable_url as attribute in media
+
   todo: need event when setting attribute value (called when published)
   todo: add file attribute somewhere in the standards (do I put remote_url as a system attr at the top? and inherit the others from that?)
   note: never store html or xml in the json values, plain text can be in a key
-  
-  
+
+
   //////////////////////////////////
 server communications:
 
-	note: servers can remove imported elements, tokens, ns without notice to others, its their own business
+	note: servers can remove imported elements, tokens, ns without notice to others, it is their own business
 	note: elsewhere do not ask for elements
 	note: server_namespace_tokens only applies to ns for other servers,  the elsewhere never runs stuff in the ns name, rules stay on home server, rename user_server_token
 	note: when a server recieves a type, it can put its own event hooks that run at the same time the events are sent to the elewhere.
@@ -185,87 +203,98 @@ server communications:
 
     pushing, this is when the server pushes stuff to the elsewhere
 
-	push_element_elsewhere  : pushes single element to the homeset of this server in the elsewhere, or some other set ref that is known  
-				    (server or type event handler can deny before this is done)	
+	push_element_elsewhere  : pushes single element to the homeset of this server in the elsewhere, or some other set ref that is known
+				    (server or type event handler can deny before this is done)
 				    This can be used to refresh the element if info is changed
-				    
+
 	push_set_elsewhere      : pushes the contents of a set, including the set defining element, same destination
-				(server or type event handler can deny before this is done)	
-				
+				(server or type event handler can deny before this is done)
+
 	push_type_elsewhere     : this is only in reponse to the elsewhere finding a type it does not have, and asking for it, after we push an element or set
-	
-	push_ns_elsewhere       : this is only because the elsewhere is asking about a ns because we pushed an element or set 
+
+	push_ns_elsewhere       : this is only because the elsewhere is asking about a ns because we pushed an element or set
 
 	run_event_elsewhere     : types will tell which event it has, elsewhere will call those events to here, and this is the event recieved before its put on the things
 		                  (allows server here to deny, or types to deny if server puts additional listeners)
-		    
 
-     recieved                           
+
+     recieved
 	these are when elsewhere sends the elements, types and events and ns here
-		            (allows server here to deny or listener for type)  
-		            
-	element_received: we were pushed an element, hooks can deny this, otherwise we lookup the type and owner and ask if missing
-	
-	set_received: we were pushed a set, for each element here do the above and call this event to allow blocking
-	
-	event_received: we have notice an event should be run, it is only from a registered server, and only for events allowed in the public or protected list for the type
-	
-	type_recieved:  we got a type after element received 
-	
-	ns_recieved:   we got a namespace after element recieved
-	
-	
-	
-    third party verification:
-    	
-    	push_to_next_server  : elsewhere wants to share this element, calls this with the other server info, if server info missing then need to register and allow server
-    	                        (this can be automatic in rules or manual)	
+		            (allows server here to deny or listener for type)
 
-		              
+	element_received_elsewhere: we were pushed an element, hooks can deny this, otherwise we look up the type and owner and ask if missing
+
+	set_received_elsewhere: we were pushed a set, for each element here do the above and call this event to allow blocking
+
+	event_received_elsewhere: we have a notice an event should be run, it is only from a registered server, and only for events allowed in the public or protected list for the type
+
+	type_recieved_elsewhere:  we got a type after element received
+
+	type_suspended_elsewhere:  a type managed elsewhere was suspended (content violation or dispute)
+	element_request_destroy:  an element from elsewhere has an issue (content violation, dispute, data issue)
+
+	ns_recieved_elsewhere:   we got a namespace after element recieved
+
+
+
+    third party verification:
+
+    	push_to_next_server  : elsewhere wants to share this element, calls this with the other server info, if server info missing then need to register and allow server
+    	                        (this can be automatic in rules or manual)
+
+    moderation
+
+
+
      server handshake
-	server_registered	   : when a new server is added via api , or server asks (when A has type sent to B, which sends to C)	
+	server_registered	   : when a new server is added via api , or server asks (when A has type sent to B, which sends to C)
 	server_unregistered
 	server_status_allowed
 	server_status_denied
 	server_status_paused
 	server_regenerate_server_key : drop key for server_namespace_tokens, add new one
-	
+
 	------------------------------------------------------------
-	
-	
+
+
   todo rm table element_type_server_whitelist
-  
-  (server, type, access_level) 
+
+  (server, type, access_level)
   todo adjust element_type_server_whitelist to  (server, type, access_level) -> public, protected, package
      if server is null, then this applies to all servers  (add unique key to include nulls for server and type). Ancestor types cannot increase access, only lessen it
-     
-  	
-  todo add package to type_of_server_access, remove the read only and just set for the public, protected, package, and private        
-     
+
+
+  todo add package to type_of_server_access, remove the read only and just set for the public, protected, package, and private
+
   note: the reported events to send, and the denied events, are discovered by the element_type_server_whitelist and the server events combined with the attribute access level
-        so if the type has a hook for element creation, but that or those attributes are not including in the elsewhere access level
-         (the attr are protected and the server is package example)	
+        so if the type has a hook for element creation, but that or those attributes are not included in the elsewhere access level
+         (the attr are protected and the server is package example)
 	 This will be reported as type that an event set, or no event set for that
-  todo add event_off bool flag to server_events to show that event is disabled and will return false and block. 	 
+  todo add enum flag to server_events use_handler|always_true|always_false
 
  note: if one does not want an attribute readable, then keep its access out of the elswhere
- note: if an element is only readable or writable by a ns, then an event listener is added by the server and the attribute must be marked as private	 
+ note: if an element is only readable or writable by a ns, then an event listener is added by the server and the attribute must be marked as private
  note: elements recieved from elsewhere can be sent to other servers, but this is done through the original server by the push_to_next_server
- 
- todo: any element creation from types exported to elsewhere must call the originating server for this took, 
-      and the element created on the original server and exported to the elswhere, otherwise this is an invalid element 
-      (when the element is sent back or events called on it, the uuid is missing so invalid)	 
-      
-note: there is nothing stopping a server from creating invalid elements or doing illegal value changes; this does not matter unless somehow this element or values is needed on the original server, either directly or through rule verification when something references it  
+
+ todo: any element creation from types exported to elsewhere must call the originating server for this took,
+      and the element created on the original server and exported to the elswhere, otherwise this is an invalid element
+      (when the element is sent back or events called on it, the uuid is missing so invalid)
+
+note: there is nothing stopping a server from creating invalid elements or doing illegal value changes; this does not matter unless somehow this element or values is needed on the original server, either directly or through rule verification when something references it
 
 element owners cannot control server migration, only the type can, but the type can have rules to allow or disallow based on element ns
 
 note: when ns is transferred to elsewhere, the public set from the ns is sent too, minus any attributes or types not fitting into the access level
-      if something needs to be updated, then rules can be made to push that element again     
-      
-      
+      if something needs to be updated, then rules can be made to push that element again
+
+
 todo: add token to ns for the server to store its token they trade
 note: can verify with the public key on rule that listens to incoming elsewhere and gets the public key attribute from the namespace token
-todo: (make sure that attribute is there in the ns type)      
-      
-    
+todo: (make sure that attribute is there in the ns type)
+
+todo: when element destroyed have flag to ask its destroyed elsewhere
+
+todo: make table to show which elements were exported (element_id,server_id, from_set_id ,enum type (set_definer,set_member,solo)
+
+
+
