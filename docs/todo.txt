@@ -31,7 +31,7 @@
 ------------------------------------
 
 
-  todo Add two hours for thusdays,5 hours for friday, 2.5 saturday
+  todo Add two hours for thusdays,5 hours for friday, 3.5 saturday
 
   todo add pipe to logic enum, this allows the results to be combined (if compatible). Paths by themselves can be the source.
   todo add filted to logic enum, the allows child results to be removed from the parent operation (if compatible)
@@ -40,24 +40,11 @@
    Filtered in node logic is a nop (does not contribute to the parent data or the logic of the parent)
   todo add run_after parent to the logic behavior, this makes the child a nop to the parent's behavior and runs the child immediately after the parent is finished
 
-  todo add prepared_once, prepared_repeat to thing state, this allows many api or actions to be declared ahead of time before running, and be reused.
-    Only the top level api calls are joined logically together, when run this acts as a template, to be removed if the prepared_once is used.
-    just use the thing id, all api calls can be called with many api calls being chained.
-    the individual api calls still in routes, but cannot be chained, except for set operations, they can accept one or more chained ops
-    (each op is its own api). When a prepared is set in the rules, it does not make the chain until it is called (the run_prepared action)
-    the once prepared will remove the prepared after the run
+  note: api can be chained together in the things by linking them as child parent with and/or
+  
+  todo: route to use api chaining via json, the route chaining can have logical conditions using path api returning stuff, because that is an api too,
+        so basically any api result can be used for a logical condition to do other api at the same time or one after the other or both
 
-  todo add to routes the ability to list prepared_repeat things, and to remove them, and to add them, and to run them, and to create and run at the same time,
-     and if this is prepared_once, prepared_repeat when running
-
-  todo add new table to allow prepared to have notes (ns,root thing_id, description element,name (optional) ), all thing roots here, and their children are marked prepared_repeat
-  todo new group for prepared descriptions
-
-
-
-  todo add run_prepared to the rules
-
-  todo add thing_id to path_part (predecare thing in mig.), this allows rules to process already defined api chains
 
   todo add debug_things to .env: when calling any api, optional debuggging (break_on_first means pause before any node of thing is run here) and url for callback can be made, if member of server group,
       all data seen, and the url provided gets updated with each completed or failed thing
@@ -71,7 +58,7 @@
     breakpoint means the things will continue until reaching that breakpoint
 
 
-  todo in thing states add paused, to stop auto running of things
+  todo in thing states add paused, to stop auto running of things, when the debugger is single stepping
 
 
    todo new api for setting next step, making and clearing debug points, running from the paused, and removing the thing running (branch or top thing) if branch removed,
@@ -90,9 +77,9 @@
   todo rm now unneeded columns in the things: thing_set_id,thing_type_id,thing_attribute_id,thing_element_id,thing_namespace_id. These are in the thing-sets
 
 
-  todo element set members need to have rank applied, unique member + rank per set
+  todo new column in element set members, need rank, unique member + rank per set
 
-  todo ns membership can take an optional set or have a set of ns user tokens chained to it
+  todo ns membership can get membership ns from piped in ns 
 
   todo live types have api call join and split, this can have a list of types and a list of elements from piping|filtering
 
@@ -134,7 +121,8 @@
   todo: make new standard_alias table, for having the names of the standard types and attributes in different languages (type_id, attribute_id, iso lang, name)
     the names for all types here are unique, same for attributes, put the english here too to enforce uniqueness. When a name is used, look up the thing it refers to.
     when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console
-
+    
+  todo make sure path can sum up the values
 
   todo add to paths relationship: link_element, member_of_set , attribute_of_type, parent of thing, child of thing, member thing set,
    action of thing (to search actions and api).
@@ -149,20 +137,12 @@
 
   todo all shape filters need admin priv for both attr
 
-  todo: add max mb_length of json allowed in writes limit, use default if not set, add this to the server events too to override the ns
+  todo: add max mb_length of json allowed in writes set in .env
   todo : the thing depth for an api call, as mentioned above in the new thing-sets derived things
-  todo: for  ns settings that set limits for backoff rules, and for all server events, also set the backoff rule exponent
-  todo: make rate-set type to put rate set in user home
-  todo: rate type add attribute to read e/ write t  rate allowed that are writable to server ns only, but readable to the element owner
-  note: rates for the ns is done by combining the ns type with the rate type, then make element from that and put in the home set rates type,
-      this is for user checking rates, rates still managed in db column, but if server admin writes to this, then updated in tables
+  todo: backoff rule exponent for different things set in .env
+  
 
-  note: once rate exceeded, throw special exception to catch at the api level and return proper response code in http
-
-  todo: make new table for rates
-     cols (type_id for rate, type_id for event (nullable) , type id for api (nullable) ns (nulalble) this is about,
-      type (nullable) this is about, time rates renew at, rate used in current, total rates (over all rate cycles)
-     remove other rate columns elsewhere
+  todo: remove all rate columns
 
   todo: on the attribute enum add element owner readable|type owner writable, even if the type is locked down
 
@@ -226,18 +206,22 @@ server communications:
 	these are when elsewhere sends the elements, types and events and ns here
 		            (allows server here to deny or listener for type)
 
-	element_received_elsewhere: we were pushed an element, hooks can deny this, otherwise we look up the type and owner and ask if missing
+	new_elsewhere_element: we were pushed an element, hooks can deny this, otherwise we look up the type and owner and ask if missing.
+				
+        updated_elsewhere_element: we were pushed an element we have, it probably changed data. Hooks can stop this element from being updated.
+	
+	new_elsewhere_set: we were pushed a set, for each element here do the above and call this event to allow blocking
 
-	set_received_elsewhere: we were pushed a set, for each element here do the above and call this event to allow blocking
+	new_elsewhere_event: we have a notice an event should be run, it is only from a registered server, 
+				 and only for events allowed in the public or protected list for the type
 
-	event_received_elsewhere: we have a notice an event should be run, it is only from a registered server, and only for events allowed in the public or protected list for the type
+	new_elsewhere_type:  we got a type after element received
+	
+	new_elsewhere_ns: we got a namespace after element recieved
 
-	type_recieved_elsewhere:  we got a type after element received
-
-	type_suspended_elsewhere:  a type managed elsewhere was suspended (content violation or dispute)
-	element_request_destroy:  an element from elsewhere has an issue (content violation, dispute, data issue)
-
-	ns_recieved_elsewhere:   we got a namespace after element recieved
+	elsewhere_suspended_type:  a type managed elsewhere was suspended (content violation or dispute)
+	elsewhere_destroyed_element:  an element from elsewhere has an issue (content violation, dispute, data issue)
+ 
 
 
 
@@ -298,7 +282,8 @@ todo: (make sure that attribute is there in the ns type)
 
 todo: when element destroyed have flag to ask its destroyed elsewhere
 
-todo: make table to show which elements were exported (element_id,server_id, from_set_id ,enum type (set_definer,set_member,solo)
+todo: make table to show which elements were exported (type_id,element_id(nullable),server_id), and can show which types if all elements deleted .
+ set one row with type and null element for each type exported 
 
 
 °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
@@ -379,6 +364,8 @@ todo in thing sets remove the users column (ns covers that)
 
 todo when thing runs looking for the next batch of rows to run, do the check on the thing_waits every so often and make those expired rows return false to parent, and clean up resources for remote sets
 
+todo on the standard signal sets mentioned above, define the rules in the sys creation for the set-definer element on those
+
 note: how to use the thing sets for signals and remote
  for signals
  when the thing runs, fill in row thing_waits using the signal type and possible expiration
@@ -390,7 +377,7 @@ note: how to use the thing sets for signals and remote
 
 note: when a mutex element is destroyed, find any rows waiting for that type in the thing-set , and make them be false to the parent
 
-todo make sure path can sum up the values
+
 
 
 
