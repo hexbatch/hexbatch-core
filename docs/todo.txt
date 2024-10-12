@@ -123,7 +123,7 @@
     when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console
     
   todo make sure path can sum up the values
-
+  
   todo add to paths relationship: link_element, member_of_set , attribute_of_type, parent of thing, child of thing, member thing set,
    action of thing (to search actions and api).
 
