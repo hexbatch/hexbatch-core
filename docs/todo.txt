@@ -371,23 +371,22 @@ type semaphore inherits from signal
 
  note: if you need to wait for any mutex, make them a semaphore with only one element
 
- note: remotes with max connections can have a semaphore if rule must wait
 
-todo thing sets, add two new columns: waiting_on_type and waiting_on_element, remove the users column (ns covers that), add expires_at
-    the expires at means the thing-set item cannot be used after this time, it is used for timed signals
+todo new table thing_waits 
+      the thing_id, waiting_on_type, waiting_on_element, expires_at, enum thing_waiting_type wait_all|wait_one, timestamps
 
-todo when thing runs looking for the next batch of rows to run, do the check on the waiting_on every so often and make those rows return false to parent, and clean up resources
- for remote sets
+todo in thing sets remove the users column (ns covers that)
 
-note: how to use the thing sets for signals and remotes
+todo when thing runs looking for the next batch of rows to run, do the check on the thing_waits every so often and make those expired rows return false to parent, and clean up resources for remote sets
+
+note: how to use the thing sets for signals and remote
  for signals
- need to record which thing row is waiting for which signal type, when the thing runs, to find the waiting things
- use this to find the rows waiting for this event, for timed fill in the expires_at for the waiting_on_type
+ when the thing runs, fill in row thing_waits using the signal type and possible expiration
+ use this to find the rows waiting for this event, and to cancel events. If a mutex has all elements destroyed, then the things waiting on that will return false.
 
- for remotes, put in the remote result element that is being waited on to waiting_on_element, if the remote call should be abandoned, at a certain time, put expires_at
-   then get the remote set at the row or ancestor , and remove it if no other waiting on the same remote
+ for remotes, put in the remote result element that is being waited on. If waiting on that remote to finish up, and it goes past the optional time limit,
+ then the remote call should be abandoned, then get the remote set at the row or ancestor , and remove it if no other waiting on the same remote
 
-todo for remotes
 
 note: when a mutex element is destroyed, find any rows waiting for that type in the thing-set , and make them be false to the parent
 
