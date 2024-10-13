@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Enums\Things\TypeOfThingStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -29,17 +30,19 @@ use Illuminate\Validation\ValidationException;
  * @property int public_element_id
  * @property int private_element_id
  * @property int namespace_home_set_id
- * @property int actions_per_hour
- * @property int path_page_size
  * @property string namespace_name
  * @property string ref_uuid
  * @property string namespace_public_key
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * //calculated in select
  * @property int created_at_ts
  * @property int updated_at_ts
+ * @property bool is_owner
  *
+ * //links
  * @property User owner_user
  * @property ElementType user_base_type
  * @property Server namespace_home_server
@@ -124,14 +127,16 @@ class UserNamespace extends Model
     )
     : Builder
     {
-
+        $me_id = Utilities::getTypeCastedAuthUser()?->id;
         $build = UserNamespace::select('user_namespaces.*')
-            ->selectRaw(" extract(epoch from  user_namespaces.created_at) as created_at_ts,  extract(epoch from  user_namespaces.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  user_namespaces.created_at) as created_at_ts,
+                                    extract(epoch from  user_namespaces.updated_at) as updated_at_ts,
+                                    IF(namespace_user_id = $me_id,true,false) as is_owner
+                                    ")
             /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
              * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
              * @uses UserNamespace::user_home_set(),UserNamespace::namespace_admins() ,UserNamespace::namespace_members()
              */
-            /**  */
             ->with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
                  'user_home_set', 'user_admin_group');
 
@@ -318,7 +323,7 @@ class UserNamespace extends Model
         if( ElementType::where('owner_namespace_id',$this->id)->exists() ) {return true;}
         if( Server::where('owning_namespace_id',$this->id)->exists() ) {return true;}
         if( Element::where('element_namespace_id',$this->id)->exists() ) {return true;}
-        if( Thing::where('thing_namespace_id',$this->id)->orWhere('thing_namespace_id',$this->id)->exists() ) {return true;} //todo put thing status in first
+        if (ThingDatum::buildThingData(collection_namespace_id:$this->id,thing_status: TypeOfThingStatus::THING_PENDING)->exists() ) {return true;}
         return false;
     }
 

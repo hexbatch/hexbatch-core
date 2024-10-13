@@ -59,7 +59,9 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-
+            $table->integer('rule_rank')
+                ->nullable(false)->default(0)
+                ->comment("orders child rules");
 
 
             $table->timestamps();
@@ -79,6 +81,10 @@ return new class extends Migration
          *   impossible to run (no target found, no event fired)
          */
         DB::statement("CREATE TYPE type_of_logic AS ENUM (
+            'nop',
+            'nop_after',
+            'nor_all',
+            'or_all',
             'and',
             'or',
             'xor',

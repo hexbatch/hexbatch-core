@@ -31,7 +31,7 @@ return new class extends Migration
             // when no children (no events) or all children ready, then the call is made (switch statement with api type guid and what to call)
 
 
-            //intermediate results, like collections of attributes or types found, or elements being processed, are put into thing_sets by the row that finds them
+            //intermediate results, like collections of attributes or types found, or elements being processed, are put into thing_data by the row that finds them
             /*
              * in thing:
              *  parent thing
@@ -45,13 +45,20 @@ return new class extends Migration
              *  context namespace (when members or admin stuff, is the caller namespace at the very top, this also marks the outside servers that are talking)
              *  context json (the input at the top, or else is data found)
              *  type_of_thing_status
-
              */
 
 
             $table->foreignId('parent_thing_id')
                 ->nullable()->default(null)
                 ->comment("If this is a child")
+                ->index()
+                ->constrained('things')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('after_thing_id')
+                ->nullable()->default(null)
+                ->comment("runs after the parent, which is then a child to any leaf nodes of the after tree")
                 ->index()
                 ->constrained('things')
                 ->cascadeOnUpdate()
@@ -73,48 +80,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('thing_path_id')
-                ->nullable()
-                ->default(null)
-                ->comment("so searches can run here")
-                ->index()
-                ->constrained('paths')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
-            $table->foreignId('thing_set_id')
-                ->nullable()->default(null)
-                ->comment("each non trivial thing to do has a remote or stack reprented here")
-                ->index()
-                ->constrained('element_sets')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-
-            $table->foreignId('thing_type_id')
-                ->nullable()->default(null)
-                ->comment("When this is an event being processed")
-                ->index()
-                ->constrained('element_types')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-            $table->foreignId('thing_attribute_id')
-                ->nullable()->default(null)
-                ->comment("The attribute which represents the event")
-                ->index()
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-
-            $table->foreignId('thing_element_id')
-                ->nullable()->default(null)
-                ->comment("When something is being done to a single element ")
-                ->index()
-                ->constrained('elements')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('thing_namespace_id')
                 ->nullable()
@@ -134,8 +100,27 @@ return new class extends Migration
                 ->comment('if set, then this thing will return false to its parent if the time its processed is after');
 
 
-            $table->bigInteger('thing_pagination_id')->nullable()->default(null)
+            $table->smallInteger('thing_pagination_size')->nullable()->default(null)
                 ->comment('if set, then the path will use this for paginition');
+
+            $table->smallInteger('thing_pagination_limit')->nullable()->default(null)
+                ->comment('if set, then the count of pages in this tree will be calcuated, and if over then backoff applied to future pages');
+
+            $table->smallInteger('thing_depth_limit')->nullable()->default(null)
+                ->comment('if set, then the count of child levels in this tree will calculated, and if over, the backoff happens');
+
+            $table->smallInteger('thing_rate_limit')->nullable()->default(null)
+                ->comment('if set, then the count of actions this tree will calculated, and if over, the backoff happens');
+
+            $table->smallInteger('thing_backoff_policy')->nullable()->default(null)
+                ->comment('if set, then if over any limits here or in ancestors, then how long to backoff will be determined here');
+
+            $table->smallInteger('thing_rank')
+                ->nullable(false)->default(0)
+                ->comment("orders child rules");
+
+            $table->integer('thing_json_size_limit')->nullable()->default(null)
+                ->comment('if set, then if any write or read over this size in utf8mb4 will result in an error');
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -143,7 +128,12 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
         });
 
-
+        DB::statement('ALTER TABLE things ADD CONSTRAINT unsigned_thing_pagination_size CHECK (thing_pagination_size IS NULL OR  thing_pagination_size > 0)');
+        DB::statement('ALTER TABLE things ADD CONSTRAINT unsigned_thing_pagination_limit CHECK (thing_pagination_limit IS NULL OR  thing_pagination_limit > 0)');
+        DB::statement('ALTER TABLE things ADD CONSTRAINT unsigned_thing_depth_limit CHECK (thing_depth_limit IS NULL OR  thing_depth_limit > 0)');
+        DB::statement('ALTER TABLE things ADD CONSTRAINT unsigned_thing_rate_limit CHECK (thing_rate_limit IS NULL OR  thing_rate_limit > 0)');
+        DB::statement('ALTER TABLE things ADD CONSTRAINT unsigned_thing_backoff_policy CHECK (thing_backoff_policy IS NULL OR  thing_backoff_policy > 0)');
+        DB::statement('ALTER TABLE things ADD CONSTRAINT unsigned_thing_json_size_limit CHECK (thing_json_size_limit IS NULL OR  thing_json_size_limit > 0)');
 
         DB::statement("CREATE TYPE type_of_thing_status AS ENUM (
             'thing_pending',

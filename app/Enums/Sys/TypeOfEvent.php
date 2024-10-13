@@ -142,38 +142,47 @@ enum TypeOfEvent: string
     case SET_TOP_LEVEL_CREATED = 'set_top_level_created';
 
 
+    /*
+   _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
+   "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
+    */
+    //system wide server stuff
 
-    case SERVER_ADD_ELEMENT = 'server_add_element';
-    case SERVER_ELEMENT_RECIEVED = 'server_element_recieved'; //when the other server gave it to this server, it is fired on this server, and the element was created
-    case SERVER_NAMESPACE_RECIEVED = 'server_namespace_recieved'; //same as above, anyone can listen to these as long as element or ns can be found in a path
-    case SERVER_ADD_TYPE = 'server_add_type';
-    case SERVER_PROCESS_EVENT = 'server_process_event';
-    case SERVER_ADD_SET = 'server_add_set';
-    case SERVER_REMOVE_ELEMENT = 'server_remove_element';
-    case SERVER_REMOVE_TYPE = 'server_remove_type';
-    case SERVER_REMOVE_SET = 'server_remove_set';
-    case SERVER_RUN_RULES = 'server_run_rules';
-    case SERVER_READ = 'server_read'; //when another server is trying to read data here
-    case SERVER_WRITE = 'server_write';
-    case SERVER_GET_NAMESPACE_TOKEN = 'server_get_namespace_token';
-    case SERVER_ADDED_NAMESPACE = 'server_added_namespace';
-    case SERVER_NAMESPACE_REGENERATE_KEY = 'server_namespace_regenerate_key';
-    case SERVER_REMOVED_NAMESPACE = 'server_removed_namespace';
-    case SERVER_CREATED = 'server_created';
-    case SERVER_ALLOWED = 'server_allowed';
-    case SERVER_REMOVED = 'server_removed';
-    case SERVER_PAUSED = 'server_paused';
-    case SERVER_REGENERATE_KEY = 'server_regenerate_key';
-    case SERVER_REGENERATE_NAMESPACE_KEY = 'server_regenerate_namespace_key';
 
-    //event listeners on the server events can get the other server's response if they listen after
+    case PUSH_ELEMENT_ELSEWHERE = 'push_element_elsewhere';
+    case PUSH_SET_ELSEWHERE = 'push_set_elsewhere';
+    case PUSH_TYPE_ELSEWHERE = 'push_type_elsewhere';
+    case PUSH_NS_ELSEWHERE = 'push_ns_elsewhere';
+    case RUN_EVENT_ELSEWHERE = 'run_event_elsewhere';
+
+    case NEW_ELSEWHERE_ELEMENT = 'new_elsewhere_element';
+    case NEW_ELSEWHERE_SET = 'new_elsewhere_set';
+    case NEW_ELSEWHERE_EVENT = 'new_elsewhere_event';
+    case NEW_ELSEWHERE_TYPE = 'new_elsewhere_type';
+    case NEW_ELSEWHERE_NS = 'new_elsewhere_ns';
+    case NEW_ELSEWHERE_KEY = 'new_elsewhere_key';
+
+
+    case ELSEWHERE_SUSPENDED_TYPE = 'elsewhere_suspended_type';
+    case ELSEWHERE_DESTROYED_ELEMENT = 'elsewhere_destroyed_element';
+    case SHARING_ELSEWHERE_ELEMENT = 'sharing_elsewhere_element';
+    case PUSH_TO_NEXT_SERVER = 'push_to_next_server';
+
+
+    case SERVER_REGISTERED = 'server_registered';
+    case SERVER_UNREGISTERED = 'server_unregistered';
+    case SERVER_STATUS_ALLOWED = 'server_status_allowed';
+    case SERVER_STATUS_DENIED = 'server_status_denied';
+    case SERVER_STATUS_PAUSED = 'server_status_paused';
+    case SERVER_REGENERATE_SERVER_KEY = 'server_regenerate_server_key';
+
+
 
 
     case SERVER_ADD_NAMESPACE = 'server_add_namespace';
 
 
     case NAMESPACE_OWNER_CHANGE = 'namespace_owner_change';
-
 
 
 

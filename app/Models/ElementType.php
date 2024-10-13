@@ -37,7 +37,6 @@ use Illuminate\Validation\ValidationException;
  * @property int type_location_map_bound_id
  * @property int type_bound_path_id
  * @property int type_description_element_id
- * @property int type_page_size
  * @property bool is_system
  * @property bool is_final_type
  * @property string ref_uuid
@@ -271,9 +270,9 @@ class ElementType extends Model
     public function isInUse() : bool {
         if (!$this->id) {return false;}
         if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return true;}
-        if (Element::where('element_parent_type_id',$this->id)->count() ) {return true;}
-        if (ElementTypeParent::where('parent_type_id',$this->id)->count() ) {return true;}
-        if (Thing::where('thing_type_id',$this->id)->where('thing_status',TypeOfThingStatus::THING_PENDING)->count() ) {return true;}
+        if (Element::where('element_parent_type_id',$this->id)->exists() ) {return true;}
+        if (ElementTypeParent::where('parent_type_id',$this->id)->exists() ) {return true;}
+        if (ThingDatum::buildThingData(collection_type_id:$this->id,thing_status: TypeOfThingStatus::THING_PENDING)->exists() ) {return true;}
 
         //and cannot delete if in a path used by a thing
         if (PathPart::buildPathPart(pending_thing_type_id: $this->id)->exists() ) { return true;}

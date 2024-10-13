@@ -12,10 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('thing_sets', function (Blueprint $table) {
+        Schema::create('thing_data', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('set_thing_id')
+            $table->foreignId('owning_thing_id')
                 ->nullable()->default(null)
                 ->comment("Set belong to this thing")
                 ->index()
@@ -23,7 +23,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('set_attribute_id')
+            $table->foreignId('collection_attribute_id')
                 ->nullable()->default(null)
                 ->comment("Set has an attribute ")
                 ->index()
@@ -31,7 +31,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('set_type_id')
+            $table->foreignId('collection_type_id')
                 ->nullable()->default(null)
                 ->comment("Set has a type")
                 ->index()
@@ -39,7 +39,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('set_set_id')
+            $table->foreignId('collection_set_id')
                 ->nullable()->default(null)
                 ->comment("Set has a set")
                 ->index()
@@ -47,7 +47,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('set_element_id')
+            $table->foreignId('collection_element_id')
                 ->nullable()->default(null)
                 ->comment("Set has an element")
                 ->index()
@@ -55,7 +55,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('set_namespace_id')
+            $table->foreignId('collection_namespace_id')
                 ->nullable()
                 ->default(null)
                 ->comment("Set has a namespace")
@@ -64,20 +64,13 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('set_user_id')
-                ->nullable()
-                ->default(null)
-                ->comment("Set has a user")
-                ->index()
-                ->constrained('users')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+
 
 
         });
 
-        DB::statement("ALTER TABLE thing_sets ADD CONSTRAINT chk_one_thing_set CHECK (
-            num_nonnulls(set_attribute_id  ,set_type_id, set_namespace_id, set_user_id, set_element_id, set_set_id) = 1)
+        DB::statement("ALTER TABLE thing_data ADD CONSTRAINT chk_one_thing_set CHECK (
+            num_nonnulls(collection_attribute_id  ,collection_type_id, collection_namespace_id, collection_element_id, collection_set_id) = 1)
         ;");
     }
 
@@ -86,6 +79,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('thing_sets');
+        Schema::dropIfExists('thing_data');
     }
 };

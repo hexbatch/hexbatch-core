@@ -77,13 +77,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->integer('actions_per_hour')
-                ->nullable()->default(null)
-                ->comment("If non default rate needed, rule actions per hour, in types owned by this ns, before backoff strategy");
 
-            $table->integer('path_page_size')
-                ->nullable()->default(null)
-                ->comment("If non default page size needed, this is used in all events listened to by types owned by this ns");
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -141,8 +135,6 @@ return new class extends Migration
             $table->dropColumn('namespace_name');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('namespace_public_key');
-            $table->dropColumn('actions_per_hour');
-            $table->dropColumn('path_page_size');
         });
 
     }

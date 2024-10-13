@@ -90,6 +90,7 @@ the rules can react there when creation events to things in the set, the paths i
  * @property int parent_rule_id
  * @property int rule_action_or_event_type_id
  * @property int rule_path_id
+ * @property int rule_rank
  * @property string ref_uuid
  * @property string rule_name
  * @property string filter_json_path

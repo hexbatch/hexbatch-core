@@ -68,9 +68,6 @@ return new class extends Migration
                 ->nullable(false)->default(false)
                 ->comment("If true then for events scoped to the same set this only listens if the attribute bounds intersect");
 
-            $table->integer('rule_page_size')
-                ->nullable()->default(null)
-                ->comment("If set then use this size for pagination when multiple targets");
 
             $table->timestamps();
 

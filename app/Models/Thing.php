@@ -11,6 +11,7 @@ use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 
 /*
@@ -21,15 +22,19 @@ use Illuminate\Database\Query\JoinClause;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int parent_thing_id
+ * @property int after_thing_id
  * @property int api_call_type_id
- * @property int thing_type_id
- * @property int thing_attribute_id
  * @property int thing_server_event_id
- * @property int thing_set_id
- * @property int thing_element_id
- * @property int thing_path_id
- * @property int thing_namespace_id
- * @property int thing_pagination_id
+ *
+ * @property int thing_pagination_size
+ * @property int thing_pagination_limit
+ * @property int thing_depth_limit
+ * @property int thing_rate_limit
+ * @property int thing_backoff_policy
+ * @property int thing_json_size_limit
+ *
+ *
+ * @property int thing_rank
  * @property string thing_start_after
  * @property string thing_invalid_at
  * @property string ref_uuid
@@ -41,6 +46,8 @@ use Illuminate\Database\Query\JoinClause;
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * @property ThingDatum[] thing_collection
  */
 class Thing extends Model
 {
@@ -71,6 +78,11 @@ class Thing extends Model
         'thing_child_logic' => TypeOfLogic::class,
         'thing_merge_method' => TypeMergeJson::class,
     ];
+
+
+    public function thing_collection() : HasMany {
+        return $this->hasMany(ThingDatum::class,'owning_thing_id','id');
+    }
 
     /*
      * the response to each event from the api is determined here, because we have no way to know if this is immediate or delayed return
@@ -120,7 +132,10 @@ class Thing extends Model
             );
         }
 
-
+        /**
+         * @uses Thing::thing_collection()
+         */
+        $build->with('thing_collection');
 
         return $build;
     }

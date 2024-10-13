@@ -10,6 +10,7 @@ use App\Enums\Paths\TimeComparisonType;
 
 use App\Enums\Rules\TypeOfLogic;
 
+use App\Enums\Things\TypeOfThingStatus;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
@@ -187,7 +188,9 @@ class PathPart extends Model
         ?int $id = null,
         ?int $owner_path_id = null,
         ?int $type_id = null,
-        ?int $pending_thing_type_id = null
+        ?int $pending_thing_type_id = null,
+        ?bool $in_thing = null,
+        ?bool $is_in_pending_thing = null
     )
     : Builder
     {
@@ -204,7 +207,7 @@ class PathPart extends Model
             $build->where('path_parts.owning_path_id', $owner_path_id);
         }
 
-        if ($pending_thing_type_id) {
+        if ($pending_thing_type_id || !is_null($is_in_pending_thing) || !is_null($in_thing)) {
             $build->join('paths',
                 /**
                  * @param JoinClause $join
@@ -215,6 +218,16 @@ class PathPart extends Model
                 }
             );
 
+            $build->join('attribute_rules',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('paths.id','=','attribute_rules.rule_path_id');
+                }
+            );
+
             // join to the thing table that is pending, then find if using the type anywhere
             $build->join('things',
                 /**
@@ -222,13 +235,17 @@ class PathPart extends Model
                  */
                 function (JoinClause $join)  {
                     $join
-                        ->on('path_parts.id','=','things.thing_path_id');
+                        ->on('attribute_rules.id','=','things.thing_rule_id');
                 }
             );
         }
 
         if ($type_id || $pending_thing_type_id) {
             $build->where('path_parts.path_type_id', $type_id);
+        }
+
+        if ($pending_thing_type_id) {
+            $build->where('things.thing_status', TypeOfThingStatus::THING_PENDING);
         }
 
         /**

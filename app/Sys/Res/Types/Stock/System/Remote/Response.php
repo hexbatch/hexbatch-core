@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Sys\Res\Types\Stock\System\Remote\Outgoing;
+namespace App\Sys\Res\Types\Stock\System\Remote;
 
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stock\System\Remote;
 
-//this is the remote call made
-class Rules extends BaseType
+//this is the remote response
+class Response extends BaseType
 {
-    const UUID = '65f8a20b-6842-4486-957b-a1fa4c6d9bf8';
-    const TYPE_NAME = 'remote_outgoing_call';
+    const UUID = '574388c8-0bec-4e11-aa62-2008f8e179ef';
+    const TYPE_NAME = 'remote_response';
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -20,7 +20,7 @@ class Rules extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Remote\Outgoing::class
+        Remote::class
     ];
 
 }

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Sys\Res\Types\Stock\System\Op;
+namespace App\Sys\Res\Types\Stock\System\Remote;
 
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stock\System\GroupOperation;
+use App\Sys\Res\Types\Stock\System\Remote;
 
-
-class Add extends BaseType
+//this is the remote call made
+class Rules extends BaseType
 {
-    const UUID = 'c4f79042-3be1-4c9a-9342-235341d5f0d0';
-    const TYPE_NAME = 'group_operation_add';
+    const UUID = '65f8a20b-6842-4486-957b-a1fa4c6d9bf8';
+    const TYPE_NAME = 'remote_rules';
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -20,7 +20,7 @@ class Add extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        GroupOperation::UUID
+        Remote::class
     ];
 
 }

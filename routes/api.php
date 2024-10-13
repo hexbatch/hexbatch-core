@@ -37,9 +37,7 @@ Route::prefix('v1')->group(function () {
 
     //todo add single route to receive incoming remotes, put the type guid, and the guid of the thing row in the route definition,
     // process only if remote_wait_pending for that thing with matching type
-    // do not need to be logged in to do this
-    // see if https://kevinhighwater.com/2012/01/basic-authentication-with-jsonp still works on all browsers (safari, chrome, firefox)
-    //    if so, then can keep the authentication for the type in the incoming remote handler, and allow middleware to make sure only ns admins do it
+
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('users')->group(function () {
@@ -65,7 +63,7 @@ Route::prefix('v1')->group(function () {
 
             });
 
-            Route::get('/namespaces', [NamespaceController::class, 'list_my_namespaces'])->name('core.users.groups.list');
+
         });
 
         Route::prefix('namespaces')->group(function () {
@@ -89,6 +87,7 @@ Route::prefix('v1')->group(function () {
                 });
 
                 Route::middleware(ValidateNamespaceMember::class)->group( function () {
+                    Route::get('/my_namespaces', [NamespaceController::class, 'list_my_namespaces'])->name('core.namespaces.my_namespaces');
                     Route::get('/get/{levels?}', [NamespaceController::class, 'get_namespace'])->name('core.namespaces.get');
                     Route::get('/list_members/{levels?}', [NamespaceController::class, 'list_members'])->name('core.groups.list_members');
 

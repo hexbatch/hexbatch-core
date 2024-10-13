@@ -87,7 +87,13 @@ class NamespaceController extends Controller
 
 
     public function list_my_namespaces(): JsonResponse {
-        $ret = UserNamespace::buildNamespace(user_id: Utilities::getTypeCastedAuthUser()?->id)->cursorPaginate();
+        //list what I own, or where I am a member
+        $ret = UserNamespace::buildNamespace(id_is_member_of_namespace: Utilities::getTypeCastedAuthUser()?->id)
+            ->orderBy('is_owner','desc')
+            ->orderBy('is_admin','desc')
+            ->orderBy('namespace_server_id')
+            ->orderBy('namespace_name')
+            ->cursorPaginate();
         return (new UserNamespaceCollection($ret))
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
