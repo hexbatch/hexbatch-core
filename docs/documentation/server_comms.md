@@ -87,3 +87,19 @@ change status as needed
   
 
     //event listeners on the server ns here can do after event listeners on all server events for them
+
+# Notes
+
+note: there is nothing stopping a server from creating invalid elements or doing illegal value changes; or passing on the element in invalid ways
+this does not matter unless somehow this element or values is needed on the original server, either directly or through rule verification when something references it.
+
+Element data can be encrypted to make sure data is not changed on other server
+note: can verify with the public key on rule that listens to incoming elsewhere and gets the public key attribute from the namespace token
+
+element owners cannot control servers migrating the data, only the type can, but the type can have rules to allow or disallow based on element ns.
+
+any element creation from types exported to elsewhere must call the originating server for this new element.
+Then, the element is created on the original server and exported to the elswhere, otherwise this is an invalid element
+(when the element is sent back or events called on it, the uuid is missing so invalid)
+
+if one does not want an attribute readable, then keep its access out of the elswhere

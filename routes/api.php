@@ -30,9 +30,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::prefix('servers')->group(function () {
-        Route::post('/this', [ServerController::class, 'me'])->name('core.servers.this'); //todo not as much detail as the server get for this below
-        Route::post('/list', [ServerController::class, 'list_servers'])->name('core.servers.list'); //todo put under namespace required for this and below
-        Route::get('/get/{server}', [ServerController::class, 'get_server'])->name('core.servers.get');
+        Route::post('/this', [ServerController::class, 'me'])->name('core.servers.this');
     });
 
     //todo add single route to receive incoming remotes, put the type guid, and the guid of the thing row in the route definition,
@@ -64,6 +62,12 @@ Route::prefix('v1')->group(function () {
             });
 
 
+        });
+
+
+        Route::prefix('servers')->group(function () {
+            Route::post('/list', [ServerController::class, 'list_servers'])->name('core.servers.list');
+            Route::get('/get/{server}', [ServerController::class, 'get_server'])->name('core.servers.get');
         });
 
         Route::prefix('namespaces')->group(function () {

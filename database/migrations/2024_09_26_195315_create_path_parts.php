@@ -250,6 +250,8 @@ return new class extends Migration
         DB::statement("CREATE TYPE path_returns_type AS ENUM (
             'exists',
             'type',
+            'set',
+            'thing',
             'element',
             'attribute',
             'namespace',

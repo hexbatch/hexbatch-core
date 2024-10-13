@@ -8,7 +8,8 @@ enum TypeOfLifecycle : string {
   case DEVELOPING = 'developing';
   case PUBLISHED = 'published';
   case RETIRED = 'retired';
-  case SUSPENDED = 'suspended'; //todo suspended only done in the console, suspended types cannot make new elements but work the same otherwise
+  case SUSPENDED = 'suspended';
+  //note suspended only done by server admin, suspended types cannot make new elements , their existing elements are  force destroyed, elsewhere is told about suspension
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfLifecycle {
         $maybe  = TypeOfLifecycle::tryFrom($test);

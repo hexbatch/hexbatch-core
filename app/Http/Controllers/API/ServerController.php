@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 //todo implement these
 class ServerController extends Controller {
     public function me(): JsonResponse {
-        //todo make sure version always included, the user part should be included too
+        //todo this is public access, should just be public attributes on the server type element: about, domain, version, commit hash,home_url
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 

@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/*
+ * Element destruction has two different modes
+ * normal: an element can be requested to be destroyed, going through the event handlers, handlers can stop, elements in pending things keep from being destroyed
+ * force :
+ *      if in rules the branches are pruned to be false to parent
+ *      if in any path parts, that path is made invalid and the element is nulled out, but otherwise the path is unchanged
+ *      elements removed from all sets without event,
+ *      if it is defining a set, that set is destroyed and the contents are popped out, but no events raised
+ *      if defining a description, it is removed from resources,
+ */
 
 /**
  * @mixin Builder

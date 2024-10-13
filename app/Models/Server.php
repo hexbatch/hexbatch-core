@@ -28,7 +28,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Server extends Model
 {
-    //todo add this server to here when making the standard attributes
 
     /*
      * When transferring sets, element order (the entry order of the elements to the set table) is always preserved
@@ -56,6 +55,11 @@ class Server extends Model
 
     //copied elements are always copied inside a set, this set can be a type already known, or a container
     //when previously copied element is sent back to this server, that is updated via the attribute's merge policy for this re-import (different from live merge)
+
+    /*
+     note: when ns is transferred to elsewhere, the public set from the ns is sent too, minus any attributes or types not fitting into the access level
+      if something needs to be updated, then rules can be made to push that element again
+     */
 
     protected $table = 'servers';
     public $timestamps = false;

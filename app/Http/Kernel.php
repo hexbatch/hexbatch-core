@@ -24,7 +24,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
-    //todo put open api validation here after making the spec
+    //note: put open api validation here after making the spec
 
     /**
      * The application's route middleware groups.

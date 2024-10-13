@@ -15,7 +15,6 @@ namespace App\Enums\Sys;
  */
 enum TypeOfAction: string
 {
-//todo these are made into types for mini-api
 
     case PRAGMA_SHAPE_VISUAL = 'pragma_shape_visual'; //if the attribute has a shape, set the visual section to one or more opacity|color|border|texture
 

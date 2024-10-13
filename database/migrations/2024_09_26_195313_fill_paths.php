@@ -48,7 +48,7 @@ return new class extends Migration
                 ->comment("the name of the path, its unique to the namespace");
 
         });
-
+        //todo add path status : building, ready, invalid
         DB::statement('ALTER TABLE paths ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
 

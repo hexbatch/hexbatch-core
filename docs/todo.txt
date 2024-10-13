@@ -1,15 +1,17 @@
 
 
 
-  todo Add two hours for thusdays,5 hours for friday, 5 saturday
-
-
+  todo all shape filters need admin priv for both attr
 
   note: api can be chained together in the things by linking them as child parent with and/or
+
+  °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
 
   todo: route to use api chaining via json, the route chaining can have logical conditions using path api returning stuff, because that is an api too,
         so basically any api result can be used for a logical condition to do other api at the same time or one after the other or both
 
+
+°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
 
   todo add debug_things to .env: when calling any api, optional debuggging (break_on_first means pause before any node of thing is run here) and url for callback can be made, if member of server group,
       all data seen, and the url provided gets updated with each completed or failed thing
@@ -30,14 +32,17 @@
     its logic to parent is false, and it pipes nothing
    todo new api for server admin getting any thing tree, and to search things
 
-  todo when a rule targets multiple elements, regardless of action, they all get put into the thing set, If the action for any element results in an event.
-    Then that thing is queued to run, and its thing id is put into the same row in the thing set. The thing set has a new column for is_ready
-    when all is ready (all things return from this or there was no event to begin with), then all the thing set is applied at once. Or none is, and that rule fails.
+
+   °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
+
+  todo when a rule targets multiple elements, regardless of action, they all get put into the thing collection, If the action for any element results in an event.
+    Then that thing is queued to run, and its thing id is put into the same row in the thing collection. The thing collection has a new column for is_ready
+    when all is ready (all things return from this or there was no event to begin with), then all the thing collection is applied at once. Or none is, and that rule fails.
     Do exponential backoff times to the new things added via thing-set if there is too much depth.
   todo put in thing_id to thing_set, and the enum above
 
-  The parent thing can add the child results (types,elements, attr, ns,sets) if there is a pipe, or filter to remove items in the parent thing set.
-  Rules can only search in the parent thing set by paths, the children are popped.  Rules can only read the thing set, not modify its contents.
+  The parent thing can add the child results (types,elements, attr, ns,sets) if there is a pipe, or filter to remove items in the parent thing collection.
+  Rules can only search in the parent thing collection by paths, the children are popped.  Rules can only read the thing collection, not modify its contents.
 
 
 
@@ -66,7 +71,7 @@
 
 
   todo for the remote return type, the http code has an "always" attribute to hold that, and then either success or fail attributes will be filled out in the type's descriptive element
-    and this is used for rendering the visual, and for doing stuff using that in the rules (remote results are put in the top level thing set for rules to find)
+    and this is used for rendering the visual, and for doing stuff using that in the rules (remote results are put in the top level thing collection for rules to find)
   todo add new type for the remote cache, with standard attr for behavior of cache
   todo add new type for the remote rules, with standard attr for each rule setting
   todo add new type for the remote to send data, the base has no attributes, except required and optional body, required and optional headers,  but derived have attributes for each field inheriting this.
@@ -82,6 +87,8 @@
   using only attributes that exist there, but it is not covered for shapes, so use the blocking shape stuff for that
 
 
+°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
+
   todo: make new standard_alias table, for having the names of the standard types and attributes in different languages (type_id, attribute_id, iso lang, name)
     the names for all types here are unique, same for attributes, put the english here too to enforce uniqueness. When a name is used, look up the thing it refers to.
     when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console
@@ -91,22 +98,28 @@
   	 then use the min and max of that part
 
   todo path can sum using an attribute see https://dba.stackexchange.com/a/214504, add in to same enum the sum, and sum_compare.
-             the path also needs the key name for the attribute, so add that in somehow to the part, as a node of type json_key_name to the enum for the typem,
+             the path also needs the json key name for the attribute, so add that in somehow to the part, as a node of type json_key_name to the enum for the typem,
              and then the top part when it finishes and decides on the return can use that child type to figure out the json col
 
   todo same for average|min|max for the path
 
-  todo add to paths relationship: link_element, member_of_set , attribute_of_type, parent of thing, child of thing, member thing set,
+  todo add to paths relationship: link_element, member_of_set , attribute_of_type, parent of thing, child of thing, member thing collection,
    action of thing (to search actions and api).
 
-  note: relationship owns_rule means that the rule references the type of the api or action
-  todo: add user and set and thing to path_returns_type enum, but only server member can set the user and thing return type
+   things need a cursor for the next page, and how to know there is another page of results.
+   When there is a full page for a container, the parent makes a cursor
+   A new child thing is made to have its container use the parent cursor , the child may start later according to the backoff
+    the child results combined or_all to the parent. Empty data for the last cursor is child success too.
+   the thing parent cannot complete until all the new children return success.
+   The backoff page policy uses all the thing_path_states in the thing tree to decide if to delay getting next page
+  todo new table thing_path_states (thing, path,type,set,element, attribute,namespace) if there is a full page returned in a container,
+
 
 
 
   todo new placeholder for current namespace, current element, current thing-set
 
-  todo all shape filters need admin priv for both attr
+
 
   todo: put in .env and config the default thing_pagination_size,thing_pagination_limit,depth,rate,backoff,json size
 
@@ -117,6 +130,10 @@
     but the higher z-index are children of the lower z-index
 
   note: rest of api mirror the actions and events
+
+
+  °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
+
 
    type and attribute creating, editing and deletion and publishing are also done by actions
   todo: add TypeTemplate, AttributeTemplate with attributes that describe the settings for each
@@ -144,6 +161,10 @@
 
 
 
+°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
+
+
+ //todo what is package access vs public, how to define a package across servers?
   (server, type, access_level)
   todo adjust element_type_server_whitelist to  (server, type, access_level) -> public, protected, package
      if server is null, then this applies to all servers  (add unique key to include nulls for server and type). Ancestor types cannot increase access, only lessen it
@@ -159,31 +180,19 @@
 
   todo add enum flag to server_events use_handler|forbidden
 
- note: if one does not want an attribute readable, then keep its access out of the elswhere
- note: if an element is only readable or writable by a ns, then an event listener is added by the server and the attribute must be marked as private
- note: elements recieved from elsewhere can be sent to other servers, but this is done through the original server by the push_to_next_server
 
- todo: any element creation from types exported to elsewhere must call the originating server for this took,
-      and the element created on the original server and exported to the elswhere, otherwise this is an invalid element
-      (when the element is sent back or events called on it, the uuid is missing so invalid)
-
-note: there is nothing stopping a server from creating invalid elements or doing illegal value changes; this does not matter unless somehow this element or values is needed on the original server, either directly or through rule verification when something references it
-
-element owners cannot control server migration, only the type can, but the type can have rules to allow or disallow based on element ns
-
-note: when ns is transferred to elsewhere, the public set from the ns is sent too, minus any attributes or types not fitting into the access level
-      if something needs to be updated, then rules can be made to push that element again
+ note: if an element is only readable or writable by a ns, then an event listener is added by the server and the attribute must be marked as private ??
 
 
-todo: add token to ns for the server to store its token they trade
-note: can verify with the public key on rule that listens to incoming elsewhere and gets the public key attribute from the namespace token
-todo: (make sure that attribute is there in the ns type)
+
+
+
+todo: ns has token, and public key, used by server comms and verifing stuff done in remotes
 
 
 todo: make table to show which elements were exported (type_id,element_id(nullable),server_id), and can show which types if all elements deleted .
  set one row with type and null element for each type exported
 
- note: when element destroyed and its exported then ask to destroy it on those other servers
 
 
 °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
@@ -214,7 +223,7 @@ each mutex type only has one element, other elements cannot be made,
 
 mutexs are only allowed to be in two set types. Each element can only be in one set at a time
 	global system set mutex_waiting is where mutexes that are not claimed are at. There is only one set of this per server.
-	set type local_signal_claimed is where a thing set root can put mutexes into when they are claimed by the rules.
+	set type local_signal_claimed is where a thing collection root can put mutexes into when they are claimed by the rules.
 	This is made when the rule is waiting, and deleted when the rule is done
     if is_one_time then the element for the mutex is destroyed and nothing can use it until another element is made
 A mutex for use inherits from the base mutex and the ns type,  a normal type creation
@@ -276,13 +285,12 @@ type semaphore inherits from signal
 todo new table thing_waits
       the thing_id, waiting_on_type, expires_at, enum thing_waiting_type wait_all|wait_one, timestamps
 
-todo in thing sets remove the users column (ns covers that)
 
 todo when thing runs looking for the next batch of rows to run, do the check on the thing_waits every so often and make those expired rows return false to parent, and clean up resources for remote sets
 
 todo on the standard signal sets mentioned above, define the rules in the sys creation for the set-definer element on those
 
-note: how to use the thing sets for signals and remote
+note: how to use the thing collections for signals and remote
  for signals
  when the thing runs, fill in row thing_waits using the signal type and possible expiration
  use this to find the rows waiting for this event, and to cancel events. If a mutex has all elements destroyed, then the things waiting on that will return false.

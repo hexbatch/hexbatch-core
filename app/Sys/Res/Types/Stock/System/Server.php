@@ -4,8 +4,7 @@ namespace App\Sys\Res\Types\Stock\System;
 
 
 
-use App\Sys\Res\Attributes\Stock\System\MetaData\Server\ServerData\CommitHash;
-use App\Sys\Res\Attributes\Stock\System\MetaData\Server\ServerData\Version;
+use App\Sys\Res\Attributes\Stock\System\MetaData\Server\ServerData;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stock\SystemType;
@@ -22,9 +21,11 @@ class Server extends BaseType
     const DESCRIPTION_ELEMENT_UUID = '';
 
     const ATTRIBUTE_UUIDS = [
-        CommitHash::UUID,
-        Version::UUID,
-        CommitHash::UUID,
+        ServerData\CommitHash::UUID,
+        ServerData\Version::UUID,
+        ServerData\Domain::UUID,
+        ServerData\About::UUID,
+        ServerData\HomeUrl::UUID,
     ];
 
     const PARENT_UUIDS = [

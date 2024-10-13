@@ -25,6 +25,6 @@ class RunRemote implements ShouldQueue
      */
     public function handle(): void
     {
-        //todo call remote here
+        //note call remote here
     }
 }

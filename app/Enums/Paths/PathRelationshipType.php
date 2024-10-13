@@ -11,7 +11,7 @@ enum PathRelationshipType : string {
   case RULE_ACTION = 'rule_action';
   case RULE_PARENT = 'rule_parent';
   case RULE_CHILD = 'rule_child';
-  case OWNS_RULE = 'owns_rule';
+  case OWNS_RULE = 'owns_rule'; //note: relationship owns_rule means that the rule references the type of the api or action
   case SHAPE_INTERSECTING = 'shape_intersecting';
   case SHAPE_BORDERING = 'shape_bordering';
   case SHAPE_SEPERATED = 'shape_seperated';

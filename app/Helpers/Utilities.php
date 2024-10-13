@@ -180,7 +180,7 @@ class Utilities {
     }
 
     public static function getCurrentNamespace() : ?UserNamespace {
-        //todo use the system namespace is the param is not set
+        //todo use the system namespace is the param is not set?
         $namespace = null;
         $what_route = Route::current();
         if ($what_route->hasParameter('user_namespace')) {
