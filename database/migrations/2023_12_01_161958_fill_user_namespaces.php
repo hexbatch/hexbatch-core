@@ -86,7 +86,7 @@ return new class extends Migration
 
             $table->text('namespace_public_key')
                 ->nullable()->default(null)
-                ->comment("optional public key used to encrypt the data, instead of token");
+                ->comment("optional public key used for next layer");
 
             $table->string('namespace_name',61)
                 ->nullable(false)

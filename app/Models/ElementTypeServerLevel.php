@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Enums\Types\TypeOfServerWhitelist;
+use App\Enums\Attributes\TypeOfServerAccess;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,18 +13,18 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int server_whitelist_type_id
+ * @property int server_access_type_id
  * @property int to_server_id
  *
- * @property TypeOfServerWhitelist server_whitelist
+ * @property TypeOfServerAccess access_type
  *
  * @property string created_at
  * @property string updated_at
  */
-class ElementTypeServerWhitelist extends Model
+class ElementTypeServerLevel extends Model
 {
 
-    protected $table = 'element_type_server_whitelist';
+    protected $table = 'element_type_server_levels';
     public $timestamps = false;
 
     /**
@@ -47,7 +47,7 @@ class ElementTypeServerWhitelist extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'server_whitelist' => TypeOfServerWhitelist::class,
+        'access_type' => TypeOfServerAccess::class,
     ];
 
 }

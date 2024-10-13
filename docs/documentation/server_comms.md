@@ -33,8 +33,8 @@
 
 
   if the server is not registered, then register and then exchange keys (
-  * CMD_ELSEWHERE_DO_REGISTRATION (here SERVER_REGISTERED, there SERVER_REGISTERED)
-  * CMD_ELSEWHERE_REGENERATE_KEY (here SERVER_REGENERATE_SERVER_KEY ,there NEW_ELSEWHERE_KEY
+  * servers are users, so the make users and server namespaces for each other, log the other in, and exchange the tokens.
+  * when needing to update the tokens use regular user api
 
 
 change status as needed
@@ -51,9 +51,13 @@ change status as needed
   CMD_ELSEWHERE_GIVE_NS
   CMD_ELSEWHERE_GIVE_SET
   CMD_ELSEWHERE_DO_REGISTRATION
-  CMD_ELSEWHERE_REGENERATE_KEY
   CMD_ELSEWHERE_CHANGE_STATUS
   CMD_ELSEWHERE_UNREGISTER
+
+# CMD_ELSEWHERE_DO_REGISTRATION
+  The server is registered as its own user, and namespace, as well as a server,the server is sent back a login token it uses to send stuff here .
+if the server name is already taken in the default user table, then a random username chosen, but the default ns for this is one associated with the server id for it
+so the server ns name is the same as the server's
 
 
 ## server events
@@ -83,7 +87,19 @@ change status as needed
 * SERVER_STATUS_ALLOWED 
 * SERVER_STATUS_DENIED 
 * SERVER_STATUS_PAUSED 
-* SERVER_REGENERATE_SERVER_KEY 
+
+## API the elsewhere calls here
+
+This is protected to be in the server ns or its admin group
+
+* import_element -- when given one or more elements
+* nudge_element -- the caller already has the element (or list of elements), and wants those given to another server
+* import_set    -- when given one or more sets
+* export_type  -- must be given an element first, when this called the type (or list of types) is exported
+* export_namespace -- must be given an element with owner or type with owner first, can be list of ns in one call
+* import_event -- when calling the event from outside, can be multiple events
+* update_type_status -- update the status of the type lifestyle
+* update_element_status -- let them know if destroyed
   
 
     //event listeners on the server ns here can do after event listeners on all server events for them

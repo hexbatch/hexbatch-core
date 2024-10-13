@@ -52,14 +52,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('type_bound_path_id')
-                ->nullable()
-                ->default(null)
-                ->comment("Only can join sets found in path. Is not evicted due to path result change")
-                ->index('idx_type_bound_path_id')
-                ->constrained('paths')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('type_description_element_id')
                 ->nullable()
@@ -133,14 +125,12 @@ return new class extends Migration
             $table->dropForeign(['imported_from_server_id']);
             $table->dropForeign(['type_time_bound_id']);
             $table->dropForeign(['type_location_map_bound_id']);
-            $table->dropForeign(['type_bound_path_id']);
             $table->dropForeign(['type_description_element_id']);
 
             $table->dropColumn('owner_namespace_id');
             $table->dropColumn('imported_from_server_id');
             $table->dropColumn('type_time_bound_id');
             $table->dropColumn('type_location_map_bound_id');
-            $table->dropColumn('type_bound_path_id');
             $table->dropColumn('type_description_element_id');
 
             $table->dropColumn('type_name');

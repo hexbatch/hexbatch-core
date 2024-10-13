@@ -64,6 +64,9 @@ enum TypeOfAction: string
     case COMMAND_SHAPE_EVENT_BLOCKING_OFF = 'command_shape_event_blocking_off'; // unblocks  for event or all set scoped events
 
 
+    /*
+     ns things can get list of ns from path of this rule and piped in ns from children
+     */
     case COMMAND_NAMESPACE_ADD_MEMBER = 'command_namespace_add_member';
     case COMMAND_NAMESPACE_ADD_ADMIN = 'command_namespace_add_admin';
     case COMMAND_NAMESPACE_REMOVE_MEMBER = 'command_namespace_remove_member';
@@ -77,7 +80,6 @@ enum TypeOfAction: string
     case CMD_ELSEWHERE_GIVE_NS = 'cmd_elsewhere_give_ns';
     case CMD_ELSEWHERE_GIVE_SET = 'cmd_elsewhere_give_set';
     case CMD_ELSEWHERE_DO_REGISTRATION = 'cmd_elsewhere_do_registration';
-    case CMD_ELSEWHERE_REGENERATE_KEY = 'cmd_elsewhere_regenerate_key';
     case CMD_ELSEWHERE_CHANGE_STATUS = 'cmd_elsewhere_change_status';
     case CMD_ELSEWHERE_UNREGISTER = 'cmd_elsewhere_unregister';
 

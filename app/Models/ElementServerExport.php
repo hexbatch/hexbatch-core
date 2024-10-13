@@ -3,29 +3,27 @@
 namespace App\Models;
 
 
-use App\Enums\Types\TypeOfWhitelistPermission;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-
-
+/*
+ set one row with type and null element for each type exported, this way can remember type sent when all elements sent are deleted
+ */
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int whitelist_owning_type_id
- * @property int whitelist_namespace_id
- * @property int max_allowed
- * @property string ref_uuid
- * @property TypeOfWhitelistPermission whitelist_permission
+ * @property int export_server_id
+ * @property int export_type_id
+ * @property bool export_element_id
  *
- * @property string created_at
- * @property string updated_at
+ *
  */
-class ElementTypeWhitelist extends Model
+class ElementServerExport extends Model
 {
 
-    protected $table = 'element_type_whitelists';
+    protected $table = 'element_server_exports';
     public $timestamps = false;
 
     /**
@@ -47,8 +45,6 @@ class ElementTypeWhitelist extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'whitelist_permission' => TypeOfWhitelistPermission::class,
-    ];
+    protected $casts = [];
 
 }

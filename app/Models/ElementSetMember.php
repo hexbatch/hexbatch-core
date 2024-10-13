@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int holder_set_id
- * @property int held_element_id
+ * @property int member_element_id
+ * @property int member_rank
  */
 class ElementSetMember extends Model
 {

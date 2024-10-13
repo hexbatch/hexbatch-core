@@ -5,6 +5,7 @@ namespace App\Models;
 
 
 use App\Enums\Things\TypeOfThingStatus;
+use App\Enums\Types\TypeOfServerEventAccess;
 use App\Exceptions\HexbatchCoreException;
 
 use App\Exceptions\HexbatchNotPossibleException;
@@ -20,6 +21,14 @@ use Illuminate\Support\Facades\DB;
 
 /*
  * cannot listen to a system type or system attribute
+ *
+ *   note: when propagating the type to another server: the reported events to send, and the denied events,
+            are discovered by the server_events combined with the attribute access level with the entry for the server on the element_type_server_levels
+	 This will be reported as type that has such an event, and either callable for that server or  that it exists but is forbidden
+	 types from other servers that do not have a forbidden event, or a defined event, will not have an entry in the server_events
+	 Example:
+	    so if the type has a hook for element creation, but that or those attributes are not included in the elsewhere access level
+                (the attr are protected and the server is public for example)
  */
 
 /**
@@ -33,6 +42,7 @@ use Illuminate\Support\Facades\DB;
  * @property int owning_attribute_id
  * @property bool is_listening_before
  * @property bool is_clipped_shape
+ * @property TypeOfServerEventAccess event_access
  *
  * @property string created_at
  * @property string updated_at
@@ -66,7 +76,9 @@ class ServerEvent extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'event_access' => TypeOfServerEventAccess::class
+    ];
 
 
     public function rule_root() : HasOne {

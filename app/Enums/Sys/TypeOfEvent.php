@@ -53,6 +53,7 @@ enum TypeOfEvent: string
     case NAMESPACE_ADDING_ADMIN = 'namespace_adding_admin';
     case NAMESPACE_REMOVING_MEMBER = 'namespace_removing_member';
     case NAMESPACE_REMOVING_ADMIN = 'namespace_removing_admin';
+    case NAMESPACE_LOGIN = 'namespace_login'; //the user did a login and this is fired on the default namespace private element
 
 
 
@@ -115,12 +116,14 @@ enum TypeOfEvent: string
     //scoped to changes in the type or attribute definition
 
 
-    case ELEMENT_CREATION = 'element_creation'; //type or type ancestor ns admin
-    case ELEMENT_BATCH_CREATION = 'element_batch_creation'; //type or type ancestor ns admin
+    case ELEMENT_CREATION = 'element_creation'; //type or type ancestor ns admin, this event has the ns of the element owner, and can reject based on that.
+                                                //can access the placeholder for the new element owner ns
+    case ELEMENT_BATCH_CREATION = 'element_batch_creation'; //type or type ancestor ns admin, these elements do not have owners yet
 
     case ELEMENT_DESTRUCTION = 'element_destruction'; //type or type ancestor ns admin
 
     case ELEMENT_REENTERED = 'element_reentered'; //element with same uuid come back after copied out
+    case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
 
     case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
     case TYPE_RETIRED = 'type_retired'; //type or type ancestor ns admin
@@ -174,13 +177,11 @@ enum TypeOfEvent: string
     case SERVER_STATUS_ALLOWED = 'server_status_allowed';
     case SERVER_STATUS_DENIED = 'server_status_denied';
     case SERVER_STATUS_PAUSED = 'server_status_paused';
-    case SERVER_REGENERATE_SERVER_KEY = 'server_regenerate_server_key';
 
 
 
 
-    case SERVER_ADD_NAMESPACE = 'server_add_namespace';
-
+    case NAMESPACE_CREATED = 'namespace_created';
 
     case NAMESPACE_OWNER_CHANGE = 'namespace_owner_change';
 

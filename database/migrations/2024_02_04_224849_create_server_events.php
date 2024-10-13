@@ -78,6 +78,13 @@ return new class extends Migration
         DB::statement("
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON server_events FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
+
+        DB::statement("CREATE TYPE type_of_server_event_access AS ENUM (
+            'use_handler',
+            'forbidden_event'
+            );");
+
+        DB::statement("ALTER TABLE server_events Add COLUMN event_access type_of_server_event_access NOT NULL default 'use_handler';");
     }
 
     /**
@@ -85,6 +92,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        DB::statement("DROP TYPE type_of_server_event_access;");
+
         Schema::dropIfExists('server_events');
     }
 };

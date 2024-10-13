@@ -13,6 +13,8 @@ use App\Sys\Collections\SystemUsers;
 class SystemResources
 {
 
+    const MAX_SYSTEM_RESOURCE_NAME_LENGTH = 16;
+    const MAX_SYSTEM_RESOURCE_NESTING = 16;
     public static function generateObjects() : void
     {
         SystemUsers::generateObjects();

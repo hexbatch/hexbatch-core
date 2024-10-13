@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Things\TypeOfThingStatus;
 use App\Enums\Types\TypeOfLifecycle;
-use App\Enums\Types\TypeOfWhitelistPermission;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -25,7 +24,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 
-
+/*
+ * can put a path restriction on it be listening to events for set entry
+ */
 
 /**
  * @mixin Builder
@@ -35,7 +36,6 @@ use Illuminate\Validation\ValidationException;
  * @property int imported_from_server_id
  * @property int type_time_bound_id
  * @property int type_location_map_bound_id
- * @property int type_bound_path_id
  * @property int type_description_element_id
  * @property bool is_system
  * @property bool is_final_type
@@ -47,7 +47,7 @@ use Illuminate\Validation\ValidationException;
  * @property UserNamespace owner_namespace
  * @property Attribute[] type_attributes
  * @property ElementType[] type_parents
- * @property ElementTypeWhitelist[] type_whitelists
+ * @property ElementTypeServerLevel[] type_server_levels
  * @property LocationBound type_map
  * @property TimeBound type_time
  *
@@ -128,8 +128,8 @@ class ElementType extends Model
         return $this->hasMany(Attribute::class,'owner_element_type_id','id');
     }
 
-    public function type_whitelists() : HasMany {
-        return $this->hasMany(ElementTypeWhitelist::class,'whitelist_owning_type_id','id');
+    public function type_server_levels() : HasMany {
+        return $this->hasMany(ElementTypeServerLevel::class,'server_access_type_id','id');
     }
 
     public function type_children() : HasMany {
@@ -154,9 +154,9 @@ class ElementType extends Model
         $build = ElementType::select('element_types.*')
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
-            /** @uses ElementType::type_owner(), ElementType::type_attributes(), ElementType::type_whitelists() */
+            /** @uses ElementType::type_owner(), ElementType::type_attributes(), ElementType::type_server_levels() */
             /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_map(),ElementType::type_time() */
-            ->with('type_owner', 'type_attributes', 'type_children', 'type_parents','type_whitelists','type_map','type_time')
+            ->with('type_owner', 'type_attributes', 'type_children', 'type_parents','type_server_levels','type_map','type_time')
             ;
 
         if ($id) {
@@ -290,13 +290,6 @@ class ElementType extends Model
         }
     }
 
-    public function canNamespaceInherit(UserNamespace $namespace) : bool {
-        if (empty($this->type_whitelists)) {return true;}
-        if ($this->type_owner->isNamespaceAdmin($namespace)) {return true;}
-        return ElementTypeWhitelist::where('whitelist_owning_type_id',$this->id)
-            ->where('whitelist_namespace_id',$namespace->id)
-            ->where('whitelist_permission',TypeOfWhitelistPermission::INHERITING)->exists();
-    }
 
 
 
@@ -479,14 +472,6 @@ class ElementType extends Model
                     }
                 }
 
-
-                if ($collect->has('path_bound')) {
-                    $hint_path_bound = $collect->get('path_bound');
-                    if (is_string($hint_path_bound) || $hint_path_bound instanceof Collection) {
-                        $path = Path::collectPath($hint_path_bound);
-                        $this->type_bound_path_id = $path->id;
-                    }
-                }
 
                 try {
                     $this->save();

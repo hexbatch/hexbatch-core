@@ -1,15 +1,21 @@
 
 
 
-  todo all shape filters need admin priv for both attr
 
-  note: api can be chained together in the things by linking them as child parent with and/or
+
 
   °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
+
+
+  note: rest of api mirror the actions and events
+  note: api can be chained together in the things by linking them as child parent with logic type
+
+
 
   todo: route to use api chaining via json, the route chaining can have logical conditions using path api returning stuff, because that is an api too,
         so basically any api result can be used for a logical condition to do other api at the same time or one after the other or both
 
+ todo live types have api call join and split, this can have a list of types and a list of elements from piping|filtering
 
 °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
 
@@ -35,22 +41,6 @@
 
    °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
 
-  todo when a rule targets multiple elements, regardless of action, they all get put into the thing collection, If the action for any element results in an event.
-    Then that thing is queued to run, and its thing id is put into the same row in the thing collection. The thing collection has a new column for is_ready
-    when all is ready (all things return from this or there was no event to begin with), then all the thing collection is applied at once. Or none is, and that rule fails.
-    Do exponential backoff times to the new things added via thing-set if there is too much depth.
-  todo put in thing_id to thing_set, and the enum above
-
-  The parent thing can add the child results (types,elements, attr, ns,sets) if there is a pipe, or filter to remove items in the parent thing collection.
-  Rules can only search in the parent thing collection by paths, the children are popped.  Rules can only read the thing collection, not modify its contents.
-
-
-
-  todo new column in element set members, need rank, unique member + rank per set
-
-  todo ns membership can get membership ns from piped in ns
-
-  todo live types have api call join and split, this can have a list of types and a list of elements from piping|filtering
 
 
 
@@ -86,13 +76,38 @@
   note: remotes cannot be called if out of the map, path or time bounds for the attribute holding the rule. This is already covered by how the thing rows are populated,
   using only attributes that exist there, but it is not covered for shapes, so use the blocking shape stuff for that
 
+todo new placeholder for current namespace, current element, current thing-set, ns_current_owner,ns_new_owner, current_set
+    these are used in the events when the ns needs to be checked, or the current element context is important
+
+
+       note: type and attribute creating, editing and deletion and publishing are also done by actions
+      todo: add TypeTemplate, AttributeTemplate with attributes that describe the settings for each
+      todo: add Actions that create, edit and edit using the templates above, and delete using the found attr or types in the path
+      	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way.
+      	To edit, make new element of template, set the proper attributes, put in any set, and then call the action
+      todo: add path being able to find attributes and types based on their settings,
+      todo: also path should find rules that use stuff in sub path parts, and select based on that
+             but this is only for those able to read the rules.
+      todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
+      todo: the api for types and attributes use the new actions here, through the things, to do the work. What they do is gather data from the incoming json or route, and push to things
+
+      note: the listing and showing of the types and attributes, rules are still using resources with the models
+      todo: add action for changing the type ownership (to a different ns),and changing element ownership, add events for these, if not exist yet. Add api for this.
+
+      note: urls for image, svg, file checking will be done in the next layer, where it downloads and scans, accepting or rejecting it,
+        the system user can hook into the descendants of the url attributes to deny the value change or accept it.
+        	see
+      todo: put base url attribute, and outside_url (to mark urls that need checking with url as parent) at system root, inherit all urls in the other types from one of these
+      todo: put downloadable_url as attribute in media
+
+      todo: add file attribute somewhere in the standards (do I put remote_url as a system attr at the top? and inherit the others from that?)
+      note: never store html or xml in the json values, plain text can be in a key
+
+
+
+
 
 °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
-
-  todo: make new standard_alias table, for having the names of the standard types and attributes in different languages (type_id, attribute_id, iso lang, name)
-    the names for all types here are unique, same for attributes, put the english here too to enforce uniqueness. When a name is used, look up the thing it refers to.
-    when the type or attribute is listed in the resources, list the alias . Use the lang resource to refresh the names for all languages at once in the standard console
-
 
   todo if path is doing a count, then add ability to compare to a number. add to enum where we specify count, to include count_compare,
   	 then use the min and max of that part
@@ -114,84 +129,9 @@
    The backoff page policy uses all the thing_path_states in the thing tree to decide if to delay getting next page
   todo new table thing_path_states (thing, path,type,set,element, attribute,namespace) if there is a full page returned in a container,
 
+    todo: put in .env and config the default thing_pagination_size,thing_pagination_limit,depth,rate,backoff,json size
 
 
-
-  todo new placeholder for current namespace, current element, current thing-set
-
-
-
-  todo: put in .env and config the default thing_pagination_size,thing_pagination_limit,depth,rate,backoff,json size
-
-
-  todo: on the attribute enum add element owner readable|type owner writable, even if the type is locked down
-
-  todo when doing z-index on the shapes, the different api calls are attached to the same root (the event called) with the specified logic,
-    but the higher z-index are children of the lower z-index
-
-  note: rest of api mirror the actions and events
-
-
-  °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
-
-
-   type and attribute creating, editing and deletion and publishing are also done by actions
-  todo: add TypeTemplate, AttributeTemplate with attributes that describe the settings for each
-  todo: add Actions that create, edit and edit using the templates above, and delete using the found attr or types in the path
-  	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way.
-  	To edit, make new element of template, set the proper attributes, put in any set, and then call the action
-  todo: add path being able to find attributes and types based on their settings,
-  todo: also path should find rules that use stuff in sub path parts, and select based on that
-         but this is only for those able to read the rules.
-  todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
-  todo: the api for types and attributes use the new actions here, through the things, to do the work. What they do is gather data from the incoming json or route, and push to things
-
-  note: the listing and showing of the types and attributes, rules are still using resources with the models
-  todo: add action for changing the type ownership (to a different ns),and changing element ownership, add events for these, if not exist yet. Add api for this.
-
-  note: urls for image, svg, file checking will be done in the next layer, where it downloads and scans, accepting or rejecting it,
-    the system user can hook into the descendants of the url attributes to deny the value change or accept it.
-    	see
-  todo: put base url attribute, and outside_url (to mark urls that need checking with url as parent) at system root, inherit all urls in the other types from one of these
-  todo: put downloadable_url as attribute in media
-
-  todo: need event when setting attribute value (called when published)
-  todo: add file attribute somewhere in the standards (do I put remote_url as a system attr at the top? and inherit the others from that?)
-  note: never store html or xml in the json values, plain text can be in a key
-
-
-
-°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
-
-
- //todo what is package access vs public, how to define a package across servers?
-  (server, type, access_level)
-  todo adjust element_type_server_whitelist to  (server, type, access_level) -> public, protected, package
-     if server is null, then this applies to all servers  (add unique key to include nulls for server and type). Ancestor types cannot increase access, only lessen it
-
-
-  todo add package to type_of_server_access, remove the read only and just set for the public, protected, package, and private
-
-  note: the reported events to send, and the denied events, are discovered by the server events combined with the attribute access level
-        so if the type has a hook for element creation, but that or those attributes are not included in the elsewhere access level
-         (the attr are protected and the server is package example)
-	 This will be reported as type that an event set, or that it exists but is forbidden
-	 types from other servers that do not have a forbidden event, or a defined event, will not have an entry in the server_events
-
-  todo add enum flag to server_events use_handler|forbidden
-
-
- note: if an element is only readable or writable by a ns, then an event listener is added by the server and the attribute must be marked as private ??
-
-
-
-
-
-todo: ns has token, and public key, used by server comms and verifing stuff done in remotes
-
-
-todo: make table to show which elements were exported (type_id,element_id(nullable),server_id), and can show which types if all elements deleted .
- set one row with type and null element for each type exported
 
 
 

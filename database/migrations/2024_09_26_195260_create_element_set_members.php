@@ -22,7 +22,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('held_element_id')
+            $table->foreignId('member_element_id')
                 ->nullable()->default(null)
                 ->comment("This element belongs to its set")
                 ->index()
@@ -30,9 +30,13 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->integer('member_rank')
+                ->nullable(false)->default(0)
+                ->comment("orders the elements");
 
 
-            $table->unique(['holder_set_id','held_element_id']);
+            $table->unique(['holder_set_id','member_element_id']);
+            $table->unique(['member_element_id','member_rank']);
         });
     }
 

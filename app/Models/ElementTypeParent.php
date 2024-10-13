@@ -7,7 +7,6 @@ use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfParentRole;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -77,11 +76,10 @@ class ElementTypeParent extends Model
     public static function addParent(ElementType $parent, ElementType $child) :ElementTypeParent {
 
 
-
+        //parent is not checked for validity until the publish event
         try {
             DB::beginTransaction();
-            $user_namespace = Utilities::getCurrentNamespace();
-            if ( $parent->is_final_type || !$parent->canNamespaceInherit($user_namespace)) {
+            if ( $parent->is_final_type) {
                 throw new HexbatchNotPossibleException(__('msg.parent_type_is_not_inheritable'),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::TYPE_CANNOT_INHERIT);

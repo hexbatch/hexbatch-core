@@ -16,6 +16,9 @@ logic is based on third attribute intersecting either, this is A B, if that attr
 
 Priority that goes first is a child branch of the event call, the priorities that go last are run when the first priority are finished.
 This can act like a filter using data from higher to lower with the lowest changing the data last, or action where the data is not changed
+
+note: when doing z-index on the shapes, the different api calls are attached to the same root (the event called) with the specified logic,
+    but the higher z-index are children of the lower z-index
  */
 
 /**

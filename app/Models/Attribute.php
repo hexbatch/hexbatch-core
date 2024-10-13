@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Attributes\TypeOfAttributeServerAccess;
-use App\Enums\Attributes\TypeOfAttributeAccess;
-use App\Enums\Attributes\TypeOfEncryptionPolicy;
+use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Attributes\TypeOfSetValuePolicy;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Rules\TypeMergeJson;
@@ -33,6 +31,8 @@ use Illuminate\Validation\ValidationException;
  * this is not enforced by the code here, but is a well known key for browsers and apps rendering the shape
  * the shape appearance can be adjusted by rules writing to this key
  * if no key for appearance, the browser will use some defaults
+ *
+ * if attribute needs some protection from read or write using namespaces or other, use rules
  */
 
 /**
@@ -46,8 +46,7 @@ use Illuminate\Validation\ValidationException;
  * @property bool is_seen_in_child_elements
  * @property bool is_system
  * @property bool is_final_attribute
- * @property TypeOfAttributeServerAccess server_access_type
- * @property TypeOfAttributeAccess attribute_access_type
+ * @property TypeOfServerAccess server_access_type
  * @property string ref_uuid
  * @property string value_json_path
  * @property string attribute_name
@@ -55,7 +54,6 @@ use Illuminate\Validation\ValidationException;
  * @property TypeMergeJson popped_writing_method
  * @property TypeMergeJson live_merge_method
  * @property TypeMergeJson reentry_merge_method
- * @property TypeOfEncryptionPolicy encryption_policy
  * @property TypeOfSetValuePolicy set_value_policy
  * @property TypeOfApproval attribute_approval
  *
@@ -99,12 +97,10 @@ class Attribute extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'server_access_type' => TypeOfAttributeServerAccess::class,
-        'attribute_access_type' => TypeOfAttributeAccess::class,
+        'server_access_type' => TypeOfServerAccess::class,
         'popped_writing_method' => TypeMergeJson::class,
         'live_merge_method' => TypeMergeJson::class,
         'reentry_merge_method' => TypeMergeJson::class,
-        'encryption_policy' => TypeOfEncryptionPolicy::class,
         'set_value_policy' => TypeOfSetValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,
     ];
@@ -595,16 +591,10 @@ class Attribute extends Model
                 }
 
 
-                if ($collect->has('encryption_policy')) {
-                    $this->encryption_policy = TypeOfEncryptionPolicy::tryFromInput($collect->get('encryption_policy'));
-                }
 
-                if ($collect->has('attribute_access_type')) {
-                    $this->attribute_access_type = TypeOfAttributeAccess::tryFromInput($collect->get('attribute_access_type'));
-                }
 
                 if ($collect->has('server_access_type')) {
-                    $this->server_access_type = TypeOfAttributeServerAccess::tryFromInput($collect->get('server_access_type'));
+                    $this->server_access_type = TypeOfServerAccess::tryFromInput($collect->get('server_access_type'));
                 }
 
 

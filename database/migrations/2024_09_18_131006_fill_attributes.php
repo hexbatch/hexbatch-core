@@ -95,37 +95,14 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_server_access AS ENUM (
-            'public_to_all_servers',
-            'only_home_server',
-            'public_to_whitelisted_servers',
-            'whitelisted_servers_read_only',
-            'other_servers_read_only'
+            'private_attribute',
+            'public_attribute',
+            'protected_attribute'
             );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'only_home_server';");
+        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'private_attribute';");
 
 
-
-        DB::statement("CREATE TYPE type_of_attribute_access AS ENUM (
-            'normal',
-            'element_private', -- membership of the element owner can read
-            'element_private_admin',  -- only the admin in  ns that owns this element can read
-            'type_private', -- membership group of ns that owns this type can read
-            'type_private_admin' -- only the admin in  ns that owns this type can read
-            );");
-
-        DB::statement("ALTER TABLE attributes Add COLUMN attribute_access_type type_of_attribute_access NOT NULL default 'normal';");
-
-
-
-
-        DB::statement("CREATE TYPE type_of_encryption_policy AS ENUM (
-            'no_encryption',
-            'namespace_encrypts', -- the namespace is responsible
-            'server_encrypts'  -- the server is responsible
-            );");
-
-        DB::statement("ALTER TABLE attributes Add COLUMN encryption_policy type_of_encryption_policy NOT NULL default 'no_encryption';");
 
 
 
@@ -196,7 +173,6 @@ return new class extends Migration
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
             $table->dropColumn('server_access_type');
-            $table->dropColumn('attribute_access_type');
             $table->dropColumn('popped_writing_method');
             $table->dropColumn('reentry_merge_method');
             $table->dropColumn('live_merge_method');
@@ -207,8 +183,6 @@ return new class extends Migration
         });
 
         DB::statement("DROP TYPE type_of_server_access;");
-        DB::statement("DROP TYPE type_of_attribute_access;");
-        DB::statement("DROP TYPE type_of_encryption_policy;");
         DB::statement("DROP TYPE type_of_set_value_policy;");
         DB::statement("DROP TYPE type_of_approval;");
 

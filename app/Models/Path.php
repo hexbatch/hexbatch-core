@@ -175,8 +175,6 @@ class Path extends Model
         //if it is used in a rule
         if (AttributeRule::where('rule_path_id',$this->id)->count() ) {return true;}
 
-        //if it is used as a bounds
-        if (ElementType::where('type_bound_path_id',$this->id)->count() ) {return true;}
 
         //and cannot delete if in a path used by a thing
         if (PathPart::buildPathPart(pending_thing_type_id: $this->id)->exists() ) { return true;}

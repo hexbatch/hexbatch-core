@@ -55,8 +55,7 @@ class AttributeResource extends JsonResource
                 'is_seen_in_child_elements' => $this->is_seen_in_child_elements,
             ],
             'value'=> $this->original_element_value?->element_value,
-            'server_access_type'=> $this->server_access_type->value,
-            'attribute_access_type'=> $this->attribute_access_type->value,
+            'server_access_type'=> $this->server_access_type->value
 
 
         ];
