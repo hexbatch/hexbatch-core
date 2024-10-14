@@ -25,7 +25,7 @@ return new class extends Migration
 
             $table->foreignId('collection_attribute_id')
                 ->nullable()->default(null)
-                ->comment("Set has an attribute ")
+                ->comment("Data has an attribute ")
                 ->index()
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
@@ -33,7 +33,7 @@ return new class extends Migration
 
             $table->foreignId('collection_type_id')
                 ->nullable()->default(null)
-                ->comment("Set has a type")
+                ->comment("Data has a type")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
@@ -41,7 +41,7 @@ return new class extends Migration
 
             $table->foreignId('collection_set_id')
                 ->nullable()->default(null)
-                ->comment("Set has a set")
+                ->comment("Data has a set")
                 ->index()
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
@@ -49,7 +49,7 @@ return new class extends Migration
 
             $table->foreignId('collection_element_id')
                 ->nullable()->default(null)
-                ->comment("Set has an element")
+                ->comment("Data has an element")
                 ->index()
                 ->constrained('elements')
                 ->cascadeOnUpdate()
@@ -58,7 +58,7 @@ return new class extends Migration
             $table->foreignId('collection_namespace_id')
                 ->nullable()
                 ->default(null)
-                ->comment("Set has a namespace")
+                ->comment("Data has a namespace")
                 ->index()
                 ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
@@ -68,7 +68,8 @@ return new class extends Migration
                 ->nullable(false)->default(false)
                 ->comment("If true what is in this row is the cursor for the path of the thing for the next page");
 
-
+            $table->jsonb('collection_json')
+                ->nullable()->default(null)->comment("Data has json");
         });
 
         DB::statement("ALTER TABLE thing_data ADD CONSTRAINT chk_one_thing_set CHECK (

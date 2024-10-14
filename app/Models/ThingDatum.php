@@ -4,7 +4,9 @@ namespace App\Models;
 
 
 use App\Enums\Things\TypeOfThingStatus;
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\JoinClause;
 
@@ -20,6 +22,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property int collection_set_id
  * @property int collection_namespace_id
  * @property bool is_cursor
+ * @property ArrayObject collection_json
  *
  */
 class ThingDatum extends Model
@@ -47,7 +50,9 @@ class ThingDatum extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'collection_json' => AsArrayObject::class,
+    ];
 
 
     public static function buildThingData(
