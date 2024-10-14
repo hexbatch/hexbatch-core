@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Sets\Stock\Remotes;
 
 
-use App\Sys\Res\Elements\Stock\Remotes\RemoteCacheSetElement;
+use App\Sys\Res\Ele\Stk\Remotes\RemoteCacheSetElement;
 use App\Sys\Res\Sets\BaseSet;
 
 class RemoteCacheSet extends BaseSet

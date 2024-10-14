@@ -235,7 +235,7 @@ return new class extends Migration
 
 
 
-        // and a second postgres type and column for if this applies to the age of the element, how long its been in the set, the age of the type, or when the value in the set was changed
+        // and a second postgres type and column for if this applies to the age of the element, how long been in the set, the age of the type, or when the value in the set was changed
         // can use a second node for same stuff to do multiple matching for ages (example match age when element joined set and when value changed there)
 
         DB::statement("CREATE TYPE time_comparison_type AS ENUM (

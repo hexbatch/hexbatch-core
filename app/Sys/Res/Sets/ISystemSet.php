@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Sets;
 
 use App\Models\ElementSet;
-use App\Sys\Res\Elements\ISystemElement;
+use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 
 interface ISystemSet extends ISystemResource

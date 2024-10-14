@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Sets\Stock\Placeholders;
 
 
-use App\Sys\Res\Elements\Stock\Placeholders\Other;
+use App\Sys\Res\Ele\Stk\Placeholders\Other;
 use App\Sys\Res\Sets\BaseSet;
 
 class OtherHomeSet extends BaseSet

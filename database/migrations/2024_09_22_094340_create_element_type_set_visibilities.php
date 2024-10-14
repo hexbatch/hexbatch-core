@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
              *  when element leaves remove from new table.
              *  element_type_set_visibilities
              * set_id, type_id, bool visible_map, bool visible_time, bool time sensitive
-             * when looking to update time visibilites, this will help update that.
+             * when looking to update time visibility, this will help update that.
              * Need to limit time change window to X minutes (in config) to allow proper updating, with promise of +- a minute or so
              */
 return new class extends Migration

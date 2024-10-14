@@ -10,7 +10,7 @@ use App\Sys\Collections\SystemServers;
 use App\Sys\Collections\SystemSets;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Collections\SystemUsers;
-use App\Sys\Res\Elements\ISystemElement;
+use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Sets\ISystemSet;

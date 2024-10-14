@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Sets\Stock\Placeholders;
 
 
-use App\Sys\Res\Elements\Stock\Placeholders\Owner\OwnerHomeSetElement;
+use App\Sys\Res\Ele\Stk\Placeholders\Owner\OwnerHomeSetElement;
 use App\Sys\Res\Sets\BaseSet;
 
 class OwnerHomeSet extends BaseSet

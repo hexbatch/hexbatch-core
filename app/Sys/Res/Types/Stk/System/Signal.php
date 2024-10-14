@@ -1,0 +1,35 @@
+<?php
+
+
+namespace App\Sys\Res\Types\Stk\System;
+
+use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
+use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stk\SystemType;
+
+/*
+ * rules should have old-fashioned events, signals, mutexes and semaphores
+ *
+ type signal base type
+ rules can wait on signals, if a parent completes, the child rule will not wait more
+  (if the parent logic decides enough children ran) the parent thing can short circuit
+  example: two or children both waiting, if one captures signal, the other signal wait will be cancelled
+ */
+
+class Signal extends BaseType
+{
+    const UUID = '712aae22-0e42-4a3d-917f-b0ec9bd8fa78';
+    const TYPE_NAME = 'signal';
+    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+
+    const DESCRIPTION_ELEMENT_UUID = '';
+
+    const ATTRIBUTE_UUIDS = [
+
+    ];
+
+    const PARENT_UUIDS = [
+        SystemType::UUID
+    ];
+
+}

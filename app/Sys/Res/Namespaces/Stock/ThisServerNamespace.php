@@ -4,12 +4,12 @@ namespace App\Sys\Res\Namespaces\Stock;
 
 
 use App\Exceptions\HexbatchInitException;
-use App\Sys\Res\Elements\Stock\SystemNSElements\SystemPrivateElement;
-use App\Sys\Res\Elements\Stock\SystemNSElements\SystemPublicElement;
+use App\Sys\Res\Ele\Stk\SystemNSElements\SystemPrivateElement;
+use App\Sys\Res\Ele\Stk\SystemNSElements\SystemPublicElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
 use App\Sys\Res\Servers\Stock\ThisServer;
 use App\Sys\Res\Sets\Stock\SystemHomeSet;
-use App\Sys\Res\Types\Stock\System\SystemNamespaceTypes\System\ThisServer\ThisServerNS;
+use App\Sys\Res\Types\Stk\System\SystemNamespaceTypes\System\ThisServer\ThisServerNS;
 use App\Sys\Res\Users\Stock\SystemUser;
 
 class ThisServerNamespace extends BaseNamespace

@@ -53,7 +53,7 @@ use Illuminate\Validation\ValidationException;
  * required goes to the to-do , and can use type ancestors and the children can listen for remotes
  *
  * event handlers are ignored in rule chains
- * * unless the top rule (with an attribute owning id) has an event its listening to
+ * * unless the top rule (with an attribute owning id) has an event listening to
  * * a command is executed by a child, and the parent (not necessarily the top level one) can listen to events caused by the child command
  *
  * All rules are passed information from the api call or event
@@ -64,7 +64,7 @@ use Illuminate\Validation\ValidationException;
  *   set id of the context
  *   server type
  *   thing uuid
- * This is sent via a standard element that always has the same id and uuid, but has different reads. No writes, its just a special system hook
+ * This is sent via a standard element that always has the same id and uuid, but has different reads. No writes,  just a special system hook
  *
  * Short circuit,
  *  rule chain A parent of B, B returns true or false and A logic makes it true or false no matter what A does, A will not do any target stuff,

@@ -3,13 +3,13 @@
 namespace App\Sys\Res\Namespaces\Stock\Placeholders;
 
 
-use App\Sys\Res\Elements\Stock\Placeholders\Other\OtherPrivateElement;
-use App\Sys\Res\Elements\Stock\Placeholders\Other\OtherPublicElement;
+use App\Sys\Res\Ele\Stk\Placeholders\Other\OtherPrivateElement;
+use App\Sys\Res\Ele\Stk\Placeholders\Other\OtherPublicElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
 use App\Sys\Res\Servers\Stock\ThisServer;
 
 use App\Sys\Res\Sets\Stock\Placeholders\OtherHomeSet;
-use App\Sys\Res\Types\Stock\System\Placeholder\Namespace\Other;
+use App\Sys\Res\Types\Stk\System\Placeholder\Namespace\Other;
 
 
 use App\Sys\Res\Users\Stock\SystemUser;

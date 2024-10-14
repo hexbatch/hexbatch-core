@@ -4,7 +4,7 @@ namespace App\Sys\Res\Namespaces;
 
 
 use App\Models\UserNamespace;
-use App\Sys\Res\Elements\ISystemElement;
+use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Sets\ISystemSet;

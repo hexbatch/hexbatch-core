@@ -3,8 +3,8 @@
 namespace App\Sys\Res\Types;
 
 use App\Models\ElementType;
-use App\Sys\Res\Attributes\ISystemAttribute;
-use App\Sys\Res\Elements\ISystemElement;
+use App\Sys\Res\Atr\ISystemAttribute;
+use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Servers\ISystemServer;

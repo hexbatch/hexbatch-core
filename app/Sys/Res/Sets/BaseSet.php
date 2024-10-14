@@ -6,7 +6,7 @@ namespace App\Sys\Res\Sets;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementSet;
 use App\Sys\Collections\SystemElements;
-use App\Sys\Res\Elements\ISystemElement;
+use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 
 

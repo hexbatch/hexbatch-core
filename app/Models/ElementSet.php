@@ -29,7 +29,7 @@ class ElementSet extends Model
 When a parent is destroyed, its children, leafs first, are destroyed in a way that the children are done first.
 Elements are updated here when the set is destroyed, unless the operation prevents this
 
-Its possible to destroy a child set without this data merge.
+It is possible to destroy a child set without this data merge.
 
 Parent children can do unlimited nesting, but a child can never be a parent to the parents above it.
      */

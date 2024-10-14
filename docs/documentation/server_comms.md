@@ -22,9 +22,9 @@
    (here SHARING_ELSEWHERE_ELEMENT ,there PUSH_TO_NEXT_SERVER) then starts the giving of the element again and its flow
 
  elements, on the elsewhere, can have events called that has to be resolved here
-   events here NEW_ELSEWHERE_EVENT, events there RUN_EVENT_ELSEWHERE)
+ (events here NEW_ELSEWHERE_EVENT, events there RUN_EVENT_ELSEWHERE)
 
- when we destroy elements, and its given to anther server, we can ask them to destroy it
+ when we destroy elements, and its given to another server, we can ask them to destroy it
  (there  ELSEWHERE_DESTROYED_ELEMENT)
 
  when we suspend a type, we ask the types registered elsewhere to do something

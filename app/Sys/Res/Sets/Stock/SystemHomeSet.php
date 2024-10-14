@@ -3,8 +3,8 @@
 namespace App\Sys\Res\Sets\Stock;
 
 
-use App\Sys\Res\Elements\Stock\SystemNSElements\SystemDescriptionElement;
-use App\Sys\Res\Elements\Stock\SystemNSElements\SystemHomeSetElement;
+use App\Sys\Res\Ele\Stk\SystemNSElements\SystemDescriptionElement;
+use App\Sys\Res\Ele\Stk\SystemNSElements\SystemHomeSetElement;
 use App\Sys\Res\Sets\BaseSet;
 
 class SystemHomeSet extends BaseSet
