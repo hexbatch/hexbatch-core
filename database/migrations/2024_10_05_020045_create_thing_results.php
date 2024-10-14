@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('result_thing_id')
-                ->nullable()->default(null)
+                ->nullable(false)
                 ->comment("Results belong to this thing")
                 ->index()
                 ->constrained('things')
@@ -55,13 +55,7 @@ return new class extends Migration
             'direct_followup',
             'polled_followup',
             'followup_callback_successful',
-            'followup_callback_error',
-            'remote_in_pending',
-            'remote_in_completed',
-            'remote_in_error',
-            'remote_out_pending',
-            'remote_out_success',
-            'remote_out_error'
+            'followup_callback_error'
             );");
 
         DB::statement("ALTER TABLE thing_results Add COLUMN user_followup type_api_followup NOT NULL default 'no_followup';");
@@ -73,13 +67,8 @@ return new class extends Migration
                 ->comment('If set, this will be called with the result or error');
 
             //(determined by class that gathers this thing and makes response)
-            //if this is a remote call, the header info is included too
             $table->jsonb('result_response')
                 ->nullable()->default(null)->comment("When something needs a value");
-
-            $table->text('raw_result')
-                ->nullable()->default(null)->comment("callback or remote will fill unprocessed text. For remotes this is converted to the result_response");
-
 
         });
 

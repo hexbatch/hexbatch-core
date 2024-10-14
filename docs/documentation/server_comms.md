@@ -2,7 +2,6 @@
 
 * servers can remove imported elements, tokens, ns without notice to others, it is their own business
 * elsewhere do not ask for elements
-* server_namespace_tokens only applies to ns for other servers,  the elsewhere never runs stuff in the ns name, rules stay on home server, rename user_server_token
 * when a server recieves a type, it can put its own event hooks that run at the same time the events are sent to the elewhere.
 
 

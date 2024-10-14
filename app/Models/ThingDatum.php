@@ -19,6 +19,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property int collection_element_id
  * @property int collection_set_id
  * @property int collection_namespace_id
+ * @property bool is_cursor
  *
  */
 class ThingDatum extends Model

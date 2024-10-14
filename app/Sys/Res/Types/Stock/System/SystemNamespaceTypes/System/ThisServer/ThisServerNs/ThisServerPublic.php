@@ -15,8 +15,8 @@ class ThisServerPublic extends BaseType
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const PARENT_UUIDS = [
-        ThisServerNS::class,
-        PublicType::class
+        ThisServerNS::UUID,
+        PublicType::UUID
     ];
 
 }

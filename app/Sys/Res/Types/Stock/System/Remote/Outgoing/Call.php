@@ -20,7 +20,7 @@ class Call extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Remote\Outgoing::class
+        Remote\Outgoing::UUID
     ];
 
 }

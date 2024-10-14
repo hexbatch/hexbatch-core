@@ -213,7 +213,19 @@ Route::prefix('v1')->group(function () {
             });
         });
 
+/*
+   todo: rest of api mirror the actions and events
 
+
+
+
+  todo: route to use api chaining via json, the route chaining can have any type of logic , because that is an api too,
+        so basically any api result can be used for a logical condition to do other api at the same time or one after the other or both
+
+   note: api can be chained together in the things by linking them as child parent with logic type
+
+ todo live types have api call join and split (use api chaining to do more than one at a time)
+ */
 
 
     }); //end auth protected

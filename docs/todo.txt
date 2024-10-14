@@ -1,49 +1,5 @@
 
 
-
-
-
-
-  °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
-
-
-  note: rest of api mirror the actions and events
-  note: api can be chained together in the things by linking them as child parent with logic type
-
-
-
-  todo: route to use api chaining via json, the route chaining can have logical conditions using path api returning stuff, because that is an api too,
-        so basically any api result can be used for a logical condition to do other api at the same time or one after the other or both
-
- todo live types have api call join and split, this can have a list of types and a list of elements from piping|filtering
-
-°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
-
-  todo add debug_things to .env: when calling any api, optional debuggging (break_on_first means pause before any node of thing is run here) and url for callback can be made, if member of server group,
-      all data seen, and the url provided gets updated with each completed or failed thing
-      this is done by adding a new thing result row, in addition to the user calling the api, a debug row is set for the thing,
-      when a thing row is debugged, all decendants of the thing has its final status sent to the url
-      when debugging, send all the thing tree, and any attatched rule tree, and any attached path tree,before any run, at once, to the url.
-       Then, the debugger can set up break points and or start single step, or allow to run.
-
-  todo in thing_results add debugging|single_step|breakpoint to type_api_followup, all send the thing results to the api or let be polled
-    single step means that the next thing ready to run will wait for the debugger to call an api for the thing to continue
-    breakpoint means the things will continue until reaching that breakpoint
-
-
-  todo in thing states add paused, to stop auto running of things, when the debugger is single stepping
-
-
-   todo new api for setting next step, making and clearing debug points, running from the paused, and removing the thing running (branch or top thing) if branch removed,
-    its logic to parent is false, and it pipes nothing
-   todo new api for server admin getting any thing tree, and to search things
-
-
-   °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
-
-
-
-
   todo add new standard types for rendering rule_parts and path_parts: these have a standard attribute controlling the shape of the part.
    Each rule and path part have standard attributes that match each internal db column
    As elements, these can represent the rules and paths as chains of parent child sets, with each part sibling being in the same set.
@@ -55,82 +11,13 @@
   todo for visual debugging, there are new standard types for each of the logic , in the same way as above, and these elements are put into the set to adjust as needed.
     the linkages in the tree use this logic element to help render
 
-  todo new column on the element values, parent child set relations, and links, can have a descriptive element added, make new element id column for the linkage
-
-  note: for remote types, they can be described by elements, for any remote type, just adjust their description visual. The remote_return type, that is made with the remote can be adjusted too.
-
-
-  todo for the remote return type, the http code has an "always" attribute to hold that, and then either success or fail attributes will be filled out in the type's descriptive element
-    and this is used for rendering the visual, and for doing stuff using that in the rules (remote results are put in the top level thing collection for rules to find)
-  todo add new type for the remote cache, with standard attr for behavior of cache
-  todo add new type for the remote rules, with standard attr for each rule setting
-  todo add new type for the remote to send data, the base has no attributes, except required and optional body, required and optional headers,  but derived have attributes for each field inheriting this.
-     if not all required are filled in by remotes, then this remote call ends in failure before sent.
-  note: when remote type is created, it has the cache and rules elements for it put in a standard set for remotes.
-  todo: new system set for remote cache and remote rules
-  todo: when remote called, it is at the closest parent thing that has children that does not call the remote again, as a set containing the remote, its possible return, the data to send, its cache and rules. These are all read only to the remotes, except for the data to send.
-  todo: add attributes for remote response for headers, code and body
-  todo: remote can have localhost or ip or server domain if the owner of the remote is member of server ns
-  todo: thing_results can have callback localhost, ip, or server domain also if the caller is member of server
-  todo: new attribute for remote rules, max time to wait, where the thing row will not wait on it after N seconds
-  note: remotes cannot be called if out of the map, path or time bounds for the attribute holding the rule. This is already covered by how the thing rows are populated,
-  using only attributes that exist there, but it is not covered for shapes, so use the blocking shape stuff for that
-
-todo new placeholder for current namespace, current element, current thing-set, ns_current_owner,ns_new_owner, current_set
-    these are used in the events when the ns needs to be checked, or the current element context is important
-
 
        note: type and attribute creating, editing and deletion and publishing are also done by actions
       todo: add TypeTemplate, AttributeTemplate with attributes that describe the settings for each
       todo: add Actions that create, edit and edit using the templates above, and delete using the found attr or types in the path
       	if type in use the editing and deleting are going to fail. Editing type can change the lifecycle, can publish this way.
       	To edit, make new element of template, set the proper attributes, put in any set, and then call the action
-      todo: add path being able to find attributes and types based on their settings,
-      todo: also path should find rules that use stuff in sub path parts, and select based on that
-             but this is only for those able to read the rules.
-      todo: if other server tries to talk to type here, and its deleted or suspended, then let them know by http error code
-      todo: the api for types and attributes use the new actions here, through the things, to do the work. What they do is gather data from the incoming json or route, and push to things
-
-      note: the listing and showing of the types and attributes, rules are still using resources with the models
-      todo: add action for changing the type ownership (to a different ns),and changing element ownership, add events for these, if not exist yet. Add api for this.
-
-      note: urls for image, svg, file checking will be done in the next layer, where it downloads and scans, accepting or rejecting it,
-        the system user can hook into the descendants of the url attributes to deny the value change or accept it.
-        	see
-      todo: put base url attribute, and outside_url (to mark urls that need checking with url as parent) at system root, inherit all urls in the other types from one of these
-      todo: put downloadable_url as attribute in media
-
-      todo: add file attribute somewhere in the standards (do I put remote_url as a system attr at the top? and inherit the others from that?)
-      note: never store html or xml in the json values, plain text can be in a key
-
-
-
-
-
-°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
-
-  todo if path is doing a count, then add ability to compare to a number. add to enum where we specify count, to include count_compare,
-  	 then use the min and max of that part
-
-  todo path can sum using an attribute see https://dba.stackexchange.com/a/214504, add in to same enum the sum, and sum_compare.
-             the path also needs the json key name for the attribute, so add that in somehow to the part, as a node of type json_key_name to the enum for the typem,
-             and then the top part when it finishes and decides on the return can use that child type to figure out the json col
-
-  todo same for average|min|max for the path
-
-  todo add to paths relationship: link_element, member_of_set , attribute_of_type, parent of thing, child of thing, member thing collection,
-   action of thing (to search actions and api).
-
-   things need a cursor for the next page, and how to know there is another page of results.
-   When there is a full page for a container, the parent makes a cursor
-   A new child thing is made to have its container use the parent cursor , the child may start later according to the backoff
-    the child results combined or_all to the parent. Empty data for the last cursor is child success too.
-   the thing parent cannot complete until all the new children return success.
-   The backoff page policy uses all the thing_path_states in the thing tree to decide if to delay getting next page
-  todo new table thing_path_states (thing, path,type,set,element, attribute,namespace) if there is a full page returned in a container,
-
-    todo: put in .env and config the default thing_pagination_size,thing_pagination_limit,depth,rate,backoff,json size
-
+      todo: each attribute and type setting should be an attribute in the TypeDesign and AttributeDesign
 
 
 
@@ -138,10 +25,6 @@ todo new placeholder for current namespace, current element, current thing-set, 
 °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
 
 rules should have old fashoned events, signals, mutexes and semaphores
-
-
-custom events inherit from Event and the NS type, they can be fired and can be listended to all at the same time (scoped or no)
-todo new action fire_custom_event, rule just puts event type in the rule_action_or_event_type_id to listenm, the custom event creation is just a normal type creation
 
 
 -----------
@@ -185,12 +68,13 @@ new rule actions
 
 note: mutex_or_bust can make sure only one event handler will process for any fired event
 
-todo new event, thing_destroyed (to let sets do actions and/or delete themselves when a thing row set is destroyed)
 
 type semaphore inherits from signal
     it has attributes child can make own from:
          max_time_to_wait_seconds default null
          is_automatically_waiting : default false
+         seconds_in_wait_idle : default null
+         when_put_in_wait : default null
 
  this has N elements for however many semaphores can be used at once
  elements start in the global set semaphore_idle unless the automatic flag is set, then they go into semaphore_waiting.
@@ -199,7 +83,9 @@ type semaphore inherits from signal
   and anything waiting on those elements will signal false to the parent thing
 
  when waiting to be used, the semaphores are in the global set semaphore_waiting,
-   this set allows all elements of the semaphore type to be there, but nothing else
+   this set allows all elements of the semaphore type to be there, but nothing else.
+
+   if seconds_in_wait_idle is used, then the semaphore cannot be claimed until its wait time is up, this allows for minimum pauses between events
 
    if the type defines the max_time_to_wait, then the wait will be cancelled, and the thing row sends false to its parent
 
@@ -217,32 +103,3 @@ type semaphore inherits from signal
  	This way things can be done when elements are written to in some combination.
  	The other option is to use a remote to count the changes, then toggle a manual remote.
  	This way, everything is defined in the rules and less tampering
-
-
-
-
-
-todo new table thing_waits
-      the thing_id, waiting_on_type, expires_at, enum thing_waiting_type wait_all|wait_one, timestamps
-
-
-todo when thing runs looking for the next batch of rows to run, do the check on the thing_waits every so often and make those expired rows return false to parent, and clean up resources for remote sets
-
-todo on the standard signal sets mentioned above, define the rules in the sys creation for the set-definer element on those
-
-note: how to use the thing collections for signals and remote
- for signals
- when the thing runs, fill in row thing_waits using the signal type and possible expiration
- use this to find the rows waiting for this event, and to cancel events. If a mutex has all elements destroyed, then the things waiting on that will return false.
-
- for remotes, put in the remote result type that is being waited on. If waiting on that remote to finish up, and it goes past the optional time limit,
- then the remote call should be abandoned, then get the remote set at the row or ancestor , and remove it if no other waiting on the same remote
-
-
-note: when a mutex element is destroyed, find any rows waiting for that type in the thing-set , and make them be false to the parent
-
-
-
-
-
-

@@ -64,13 +64,7 @@ return new class extends Migration
 
 
 
-            $table->foreignId('pointer_to_set_id')
-                ->nullable()->default(null)
-                ->comment("values can point to sets")
-                ->index()
-                ->constrained('element_sets')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
+
 
 
             $table->foreignId('parent_element_value_id')
@@ -100,11 +94,7 @@ return new class extends Migration
         });
 
 
-        DB::statement("CREATE TYPE type_of_set_pointer_mode AS ENUM (
-                'link_to_set'
-            );");
 
-        DB::statement("ALTER TABLE element_values Add COLUMN set_pointer_mode type_of_set_pointer_mode NOT NULL default 'link_to_set';");
     }
 
     /**
@@ -113,7 +103,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('element_values');
-        DB::statement("DROP TYPE type_of_set_pointer_mode;");
+
 
     }
 };

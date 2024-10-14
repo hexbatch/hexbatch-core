@@ -10,10 +10,16 @@ enum PathReturnsType : string {
 
   case SET = 'set';
   case THING = 'thing';
+  case RULE = 'rule';
   case ELEMENT = 'element';
   case ATTRIBUTE = 'attribute';
   case NAMESPACE = 'namespace' ;
+  case MAX = 'max' ;
+  case MIN = 'min' ;
+  case AVERAGE = 'average' ;
+  case COUNT_COMPARE = 'count_compare' ;
   case COUNT = 'count' ;
+
 
     public static function tryFromInput(string|int|bool|null $test ) : PathReturnsType {
         $maybe  = PathReturnsType::tryFrom($test);

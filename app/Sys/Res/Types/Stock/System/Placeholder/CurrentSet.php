@@ -20,7 +20,7 @@ class CurrentSet extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Placeholder::class
+        Placeholder::UUID
     ];
 
 }

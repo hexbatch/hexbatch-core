@@ -92,8 +92,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("DROP TYPE type_of_server_event_access;");
 
         Schema::dropIfExists('server_events');
+        DB::statement("DROP TYPE type_of_server_event_access;");
     }
 };

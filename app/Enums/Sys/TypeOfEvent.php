@@ -124,6 +124,7 @@ enum TypeOfEvent: string
 
     case ELEMENT_REENTERED = 'element_reentered'; //element with same uuid come back after copied out
     case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
+    case TYPE_OWNER_CHANGE = 'type_owner_change'; //type given different ownership from what it started as, parents can block
 
     case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
     case TYPE_RETIRED = 'type_retired'; //type or type ancestor ns admin
@@ -185,7 +186,13 @@ enum TypeOfEvent: string
 
     case NAMESPACE_OWNER_CHANGE = 'namespace_owner_change';
 
+    /*
+    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
+    "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
+     */
+    //mixed scope
 
+    case CUSTOM_EVENT = 'custom_event'; //scope depends on the custom event type parent
 
 
     public static function tryFromInput(string|int|bool|null $test): TypeOfEvent

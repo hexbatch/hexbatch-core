@@ -9,12 +9,6 @@ enum TypeApiFollowup : string {
     case POLLED_FOLLOWUP = 'polled_followup';
     case FOLLOWUP_CALLBACK_SUCCESSFUL = 'followup_callback_successful';
     case FOLLOWUP_CALLBACK_ERROR = 'followup_callback_error';
-    case REMOTE_IN_PENDING = 'remote_in_pending';
-    case REMOTE_IN_COMPLETED = 'remote_in_completed';
-    case REMOTE_IN_ERROR = 'remote_in_error';
-    case REMOTE_OUT_PENDING = 'remote_out_pending';
-    case REMOTE_OUT_SUCCESS = 'remote_out_success';
-    case REMOTE_OUT_ERROR = 'remote_out_error';
 
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeApiFollowup {

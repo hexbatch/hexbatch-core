@@ -24,6 +24,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * paths have cursors in full thing collections, this is stuck on at the end of the compiled sql
+ */
 
 /**
  * @mixin Builder

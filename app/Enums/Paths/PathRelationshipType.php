@@ -20,17 +20,19 @@ enum PathRelationshipType : string {
   case INTERSECTING_MAP = 'intersecting_map';
   case TIME_OVERLAPPING = 'time_overlapping';
   case TIME_DISTINCT = 'time_distinct';
-  case SET_CONTAINS = 'set_contains';
+  case SET_CONTAINS = 'member_of_set';
 
 
   case SHARES_TYPE = 'shares_type';
+  case LINK_ELEMENT = 'link_element';
   case CHILDISH = 'childish';
   case LINKISH = 'linkish';
   case ANCESTOR = 'ancestor';
   case DESCENDANT = 'descendant';
   case NAMESPACE_OWNS_ELEMENT = 'namespace_owns_element';
+  case ATTRIBUTE_OF_TYPE = 'attribute_of_type';
   case IN_SUBTYPE = 'in_subtype';
-  case THING_SET = 'thing_set';
+  case MEMBER_OF_THING_CONTAINER = 'member_of_thing_container';
   case NAMESPACE_OWNS_TYPE = 'namespace_owns_type';
 
   case MEMBER_OF_NAMESPACE = 'member_of_namespace';

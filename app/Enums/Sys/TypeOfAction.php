@@ -53,6 +53,8 @@ enum TypeOfAction: string
 
 
     case COMMAND_CREATE_ELEMENT = 'command_create_element';
+    case COMMAND_CHANGE_ELEMENT_OWNER = 'command_change_element_owner';
+    case COMMAND_CHANGE_TYPE_OWNER = 'command_change_type_owner';
     case COMMAND_DESTROY_ELEMENT = 'command_destroy_element';
     case COMMAND_ADD_LIVE_TYPE_ON_ELEMENT = 'command_add_live_type_on_element';
     case COMMAND_REMOVE_LIVE_TYPE_ON_ELEMENT = 'command_remove_live_type_on_element';
@@ -63,6 +65,10 @@ enum TypeOfAction: string
     case COMMAND_SHAPE_EVENT_BLOCKING_ON = 'command_shape_event_blocking_on'; // blocks set scope events based on z order of intersection
     case COMMAND_SHAPE_EVENT_BLOCKING_OFF = 'command_shape_event_blocking_off'; // unblocks  for event or all set scoped events
 
+    case COMMAND_FIRE_CUSTOM_EVENT_SCOPED_ELEMENT = 'command_fire_custom_event_scoped_element'; //any types based on
+    case COMMAND_FIRE_CUSTOM_EVENT_SCOPED_SET = 'command_fire_custom_event_scoped_set';
+    case COMMAND_FIRE_CUSTOM_EVENT_SCOPE_CHAINED = 'command_fire_custom_event_scope_chained';
+    case COMMAND_FIRE_CUSTOM_EVENT = 'command_fire_custom_event'; //scope depends on the base type of the custom event
 
     /*
      ns things can get list of ns from path of this rule and piped in ns from children

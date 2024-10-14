@@ -21,7 +21,7 @@ class ThisServerNS extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        BasePerNamespace::class
+        BasePerNamespace::UUID
     ];
 
 }

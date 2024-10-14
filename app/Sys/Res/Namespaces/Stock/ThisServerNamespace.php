@@ -33,7 +33,7 @@ class ThisServerNamespace extends BaseNamespace
         return $name;
     }
 
-    public function getNamespacePublicKey(): string
+    public function getNamespacePublicKey(): ?string
     {
         $name = config('hbc.system.namespace.system_public_key');
         if (!$name) {

@@ -6,6 +6,7 @@ namespace App\Sys\Res\Types\Stock;
 
 use App\Sys\Res\Attributes\Stock\System\Event\Scope;
 use App\Sys\Res\Attributes\Stock\System\System\Expiration;
+use App\Sys\Res\Attributes\Stock\System\System\OutsideUrl;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 
@@ -22,6 +23,7 @@ class SystemType extends BaseType
 
     const ATTRIBUTE_UUIDS = [
         Expiration::UUID,
+        OutsideUrl::UUID,
         Scope::UUID
     ];
 

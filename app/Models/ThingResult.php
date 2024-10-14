@@ -11,16 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /*
  * this stores the user getting back the api info, as well as the outgoing and incoming remotes
- * remote pending can mark this as a failed remote by sending some well known data (depends on data format)
- * if the data is not in json, then the result will convert it to json. The incoming or outgoing remote will have its raw text stored
- *  The raw text is converted by handler here (xml ->json) (plain text -- json) (headers -> json) (response code -> json)
- *  and that json will be sent to the thing id as the data, and then the child will hand that to its parent...
- *
- * only url domains that are not localhost can be made as remote calls, ip domains are not allowed.
- * remote attributes split up the different parts of the url,
- *   domain for example only allows periods for punctuation
- *   the port is numeric only
- *   and the schema is only http or https
+ * when an api call is made, a row is created here to handle the results being printed out, or the polling, or pushing to a url
+ * multiple results can be made for the same thing, in particular for debugging
  */
 
 /**

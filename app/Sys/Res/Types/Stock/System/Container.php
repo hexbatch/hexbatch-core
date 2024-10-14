@@ -6,9 +6,7 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stock\SystemType;
 
-/**
- * all descendants have the same uuid across all servers but have a different parent (this)
- */
+
 class Container extends BaseType
 {
     const UUID = '51e2fe0a-0087-4315-8324-fc9070a7d41d';

@@ -21,8 +21,8 @@ class ThisServerDescription extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        BasePerNamespace::class,
-        Description::class
+        BasePerNamespace::UUID,
+        Description::UUID
     ];
 
 }

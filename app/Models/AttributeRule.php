@@ -94,6 +94,8 @@ the rules can react there when creation events to things in the set, the paths i
  * @property string ref_uuid
  * @property string rule_name
  * @property string filter_json_path
+ * @property string top_json_key
+ *
  * @property TypeOfLogic rule_child_logic
  * @property TypeOfLogic rule_logic
  * @property TypeMergeJson rule_merge_method

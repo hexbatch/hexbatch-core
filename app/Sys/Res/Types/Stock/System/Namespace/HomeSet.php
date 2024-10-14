@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stock\System\Namespace;
 
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stock\System\Container;
 use App\Sys\Res\Types\Stock\System\NamespaceType;
 
 
@@ -20,7 +21,8 @@ class HomeSet extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        NamespaceType::class
+        NamespaceType::UUID,
+        Container::UUID
     ];
 
 }

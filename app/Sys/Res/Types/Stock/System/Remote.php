@@ -16,7 +16,21 @@ use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stock\SystemType;
 
 /**
- * all descendants have the same uuid across all servers but have a different parent (this)
+ * note: when remote type is created, it has the cache and rules elements for it put in their standard respective set for remotes.
+ * when remote called, it is at the closest parent thing that has children that does not call the remote again,
+ * And is represented by  a set containing:
+ *  the remote element,
+ *  its response element, if it responds,
+ *  the element of the data to send or sent (multiple rules can build it up),
+ *  the element of the cache (shared for common divisions of the cache, if  divided by ns, element, type. Or just one cache element for all remotes of this type)
+ *  the element of the rules (one element for all remote calls for this type)
+ * These are all read only to the remotes, except for the data to send.
+ *
+ *
+
+ *
+ *
+
  */
 class Remote extends BaseType
 {

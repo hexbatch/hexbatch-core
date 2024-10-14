@@ -6,6 +6,8 @@ namespace App\Enums\Elements;
 enum TypeOfSetPointerMode : string {
 
   case LINK_TO_SET = 'link_to_set';
+  case LINK_TO_CHILD = 'link_to_child';
+  case LINK_TO_PARENT = 'link_to_parent';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfSetPointerMode {
         $maybe  = TypeOfSetPointerMode::tryFrom($test);

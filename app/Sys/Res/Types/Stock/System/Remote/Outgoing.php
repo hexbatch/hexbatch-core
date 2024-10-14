@@ -6,7 +6,13 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stock\System\Remote;
 
-
+/*
+  *  only url domains that are not localhost can be made as remote calls, ip domains are not allowed.
+ *  remote attributes split up the different parts of the url,
+ *    domain for example only allows periods for punctuation
+ *    the port is numeric only
+ *    and the schema is only http or https
+ */
 class Outgoing extends BaseType
 {
     const UUID = 'ef367400-78fc-4460-a71c-3cf34c8e339d';
@@ -20,7 +26,7 @@ class Outgoing extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Remote::class
+        Remote::UUID
     ];
 
 }

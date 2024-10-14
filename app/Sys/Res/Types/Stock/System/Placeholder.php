@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stock\System;
 
+use App\Sys\Res\Attributes\Stock\System\Placeholder\PlaceholderAttribute;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stock\SystemType;
@@ -16,7 +17,7 @@ class Placeholder extends BaseType
     const DESCRIPTION_ELEMENT_UUID = '';
 
     const ATTRIBUTE_UUIDS = [
-        Placeholder::UUID
+        PlaceholderAttribute::UUID
     ];
 
     const PARENT_UUIDS = [

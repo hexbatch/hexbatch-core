@@ -16,6 +16,11 @@ use Illuminate\Database\Query\JoinClause;
 
 /*
  * thing is marked as done when all children done, and there is no pagination id
+ *
+ * When there is a full page for a container, the parent makes a cursor row in the data
+   A new child thing is made for using that next page of data , the child may start later according to the backoff
+    the child results combined or_all to the parent. Empty data for the last cursor is child success too.
+   the thing parent cannot complete until all the new children return success.
  */
 /**
  * @mixin Builder
@@ -23,22 +28,18 @@ use Illuminate\Database\Query\JoinClause;
  * @property int id
  * @property int parent_thing_id
  * @property int after_thing_id
- * @property int api_call_type_id
- * @property int thing_server_event_id
+ * @property int api_or_action_type_id
+ * @property int thing_rule_id
+ * @property int thing_debugger_id
  *
- * @property int thing_pagination_size
- * @property int thing_pagination_limit
- * @property int thing_depth_limit
- * @property int thing_rate_limit
- * @property int thing_backoff_policy
- * @property int thing_json_size_limit
  *
  *
  * @property int thing_rank
+ * @property int debugging_breakpoint
+ *
  * @property string thing_start_after
  * @property string thing_invalid_at
  * @property string ref_uuid
- * @property ArrayObject thing_value
  * @property TypeOfThingStatus thing_status
  * @property TypeOfLogic thing_child_logic
  * @property TypeOfLogic thing_logic
@@ -72,7 +73,6 @@ class Thing extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'thing_value' => AsArrayObject::class,
         'thing_status' => TypeOfThingStatus::class,
         'thing_logic' => TypeOfLogic::class,
         'thing_child_logic' => TypeOfLogic::class,

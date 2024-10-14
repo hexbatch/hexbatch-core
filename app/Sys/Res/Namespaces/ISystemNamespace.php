@@ -15,7 +15,7 @@ interface ISystemNamespace extends ISystemResource
 {
     public function getNamespaceUuid() :string;
     public function getNamespaceName() :string;
-    public function getNamespacePublicKey() :string;
+    public function getNamespacePublicKey() :?string;
     public function getNamespaceServer() :?ISystemServer;
     public function getNamespaceUser() :?ISystemUser;
 

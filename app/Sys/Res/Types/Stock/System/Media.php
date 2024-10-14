@@ -3,6 +3,7 @@
 
 namespace App\Sys\Res\Types\Stock\System;
 
+use App\Sys\Res\Attributes\Stock\System\Media\DownloadableUrl;
 use App\Sys\Res\Attributes\Stock\System\Media\MediaUrl;
 use App\Sys\Res\Attributes\Stock\System\MetaData\Media\MediaData;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
@@ -21,6 +22,7 @@ class Media extends BaseType
     const ATTRIBUTE_UUIDS = [
         MediaData::UUID,
         MediaUrl::UUID,
+        DownloadableUrl::UUID,
         MediaData::UUID,
     ];
 

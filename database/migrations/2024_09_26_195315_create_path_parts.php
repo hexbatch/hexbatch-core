@@ -217,14 +217,16 @@ return new class extends Migration
             'shares_type',
             'ancestor',
             'descendant',
+            'attribute_of_type',
             'in_subtype',
-            'thing_set',
+            'member_of_thing_container',
             'namespace_owns_element',
             'namespace_owns_type',
             'member_of_namespace',
             'admin_of_namespace',
             'owner_of_namespace',
-            'set_contains',
+            'member_of_set',
+            'link_element',
             'childish',
             'linkish'
             );");
@@ -252,11 +254,17 @@ return new class extends Migration
             'type',
             'set',
             'thing',
+            'rule',
             'element',
             'attribute',
             'namespace',
+            'max',
+            'min',
+            'average',
+            'count_compare',  -- uses min and max to see if exist or not
             'count'
             );");
+        //see  https://dba.stackexchange.com/a/214504 for the scalar stuff
 
         DB::statement("ALTER TABLE path_parts Add COLUMN path_returns path_returns_type NOT NULL default 'exists';");
 
@@ -275,6 +283,9 @@ return new class extends Migration
                 ->comment("the name of the attr or the type or the ns or the server,  for attr can use server.ns.type.attribute");
 
 
+            $table->string('top_json_key')
+                ->nullable()->default(null)
+                ->comment("used to make scalar out of json data");
 
             $table->string('filter_json_path')
                 ->nullable()->default(null)

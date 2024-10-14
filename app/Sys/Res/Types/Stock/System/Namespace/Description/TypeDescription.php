@@ -20,7 +20,7 @@ class TypeDescription extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Description::class
+        Description::UUID
     ];
 
 }

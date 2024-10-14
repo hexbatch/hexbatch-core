@@ -176,7 +176,6 @@ return new class extends Migration
             $table->dropColumn('popped_writing_method');
             $table->dropColumn('reentry_merge_method');
             $table->dropColumn('live_merge_method');
-            $table->dropColumn('encryption_policy');
             $table->dropColumn('set_value_policy');
             $table->dropColumn('attribute_approval');
 

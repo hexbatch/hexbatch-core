@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Elements\TypeOfSetPointerMode;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -26,7 +27,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int id
  * @property int element_parent_type_id
  * @property int element_namespace_id
+ * @property int pointer_to_child_or_link_set_id
+ * @property int pointer_to_parent_set_id
  * @property string ref_uuid
+ * @property TypeOfSetPointerMode set_pointer_mode
  *
  * @property string created_at
  * @property string updated_at
@@ -65,7 +69,9 @@ class Element extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'set_pointer_mode' => TypeOfSetPointerMode::class,
+    ];
 
 
     public function element_namespace() : BelongsTo {

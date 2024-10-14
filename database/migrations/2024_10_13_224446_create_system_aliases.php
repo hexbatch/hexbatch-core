@@ -24,9 +24,9 @@ return new class extends Migration
 
             $table->foreignId('system_alias_attribute_id')
                 ->nullable()->default(null)
-                ->comment("The target attribute which includes descendants, must be specified")
+                ->comment("if this alias is about an attribute")
                 ->index()
-                ->constrained('if this alias is about an attribute')
+                ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

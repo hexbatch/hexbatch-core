@@ -20,7 +20,7 @@ class PrivateType extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        NamespaceType::class
+        NamespaceType::UUID
     ];
 
 }

@@ -20,7 +20,7 @@ class Incoming extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Remote::class
+        Remote::UUID
     ];
 
 }

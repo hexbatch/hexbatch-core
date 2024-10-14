@@ -22,7 +22,10 @@ use App\Models\ServerEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-
+/*
+  todo: the api for types and attributes use the new actions here, through the things, to do the work.
+       What they do is gather data from the incoming json or route, and push to things
+ */
 class TypeController extends Controller
 {
 
