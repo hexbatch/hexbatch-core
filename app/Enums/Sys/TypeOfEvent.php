@@ -102,7 +102,7 @@ enum TypeOfEvent: string
      */
     //scoped to the ancestor chain of sets
 
-    case REMOTE_SUCCESS = 'remote_success'; //type ns members
+    case REMOTE_SUCCESS = 'remote_success'; //type ns members todo I think this is redone
     case REMOTE_FAIL = 'remote_fail'; //type ns members
     case REMOTE_ALWAYS = 'remote_always'; //type ns members
 

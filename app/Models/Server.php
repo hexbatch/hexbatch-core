@@ -6,8 +6,11 @@ use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Sys\Res\Namespaces\INamespace;
+use App\Sys\Res\Servers\IServer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
@@ -22,11 +25,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property string server_name
  * @property string status_change_at
  *
+ * @property UserNamespace owning_namespace
+ *
  *  @property string created_at
  *  @property string updated_at
  *
  */
-class Server extends Model
+class Server extends Model implements IServer
 {
 
     /*
@@ -87,6 +92,10 @@ class Server extends Model
         'server_status' => TypeOfServerStatus::class,
     ];
 
+    public function owning_namespace() : BelongsTo {
+        return $this->belongsTo(UserNamespace::class,'owning_namespace_id');
+    }
+
 
     public static function buildServer(
         ?int $id = null)
@@ -101,6 +110,11 @@ class Server extends Model
         if ($id) {
             $build->where('servers.id', $id);
         }
+
+        /**
+         * @uses Server::owning_namespace()
+         */
+        $build->with('owning_namespace');
 
         return $build;
     }
@@ -154,5 +168,30 @@ class Server extends Model
 
     public function getName() :string {
         return $this->id;
+    }
+
+    public function getServerUuid(): string
+    {
+        return $this->ref_uuid;
+    }
+
+    public function getServerDomain(): string
+    {
+       return $this->server_domain;
+    }
+
+    public function getServerName(): string
+    {
+        return $this->getName();
+    }
+
+    public function getServerNamespaceInterface(): ?INamespace
+    {
+        return $this->owning_namespace;
+    }
+
+    public function getServerObject(): ?Server
+    {
+        return $this;
     }
 }

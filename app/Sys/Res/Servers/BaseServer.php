@@ -7,6 +7,7 @@ use App\Exceptions\HexbatchInitException;
 use App\Models\Server;
 use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Res\ISystemResource;
+use App\Sys\Res\Namespaces\INamespace;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 
 
@@ -16,7 +17,7 @@ abstract class BaseServer implements ISystemServer
 
 
 
-  public function getServerNamespace(): ISystemNamespace
+  public function getServerSystemNamespace(): ISystemNamespace
   {
       return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
   }
@@ -53,6 +54,10 @@ abstract class BaseServer implements ISystemServer
     public function onNextStep(): void
     {
 
+    }
+
+    public function getServerNamespaceInterface() :?INamespace {
+      return $this->getServerObject()?->owning_namespace;
     }
 
 

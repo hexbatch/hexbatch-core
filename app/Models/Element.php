@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string updated_at
  *
  * @property UserNamespace element_namespace
+ * @property ElementType element_parent_type
  */
 class Element extends Model
 {
@@ -77,6 +78,9 @@ class Element extends Model
     public function element_namespace() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'element_namespace_id');
     }
+    public function element_parent_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'element_parent_type_id');
+    }
 
 
     public static function buildElement(
@@ -95,8 +99,8 @@ class Element extends Model
             $build->where('elements.id', $id);
         }
 
-        /** @uses Element::element_namespace() */
-        $build->with('element_namespace');
+        /** @uses Element::element_namespace(),Element::element_parent_type() */
+        $build->with('element_namespace','element_parent_type');
 
         return $build;
     }
@@ -144,4 +148,9 @@ class Element extends Model
     public function getName() :string {
         return $this->ref_uuid;
     }
+
+    public function getValueBySet(?ElementSet $set) : ?ElementValue {
+        return ElementSetMember::buildSetMember(set_id: $set->getSetObject()->id, element_id: $this->id)->first();
+    }
+
 }

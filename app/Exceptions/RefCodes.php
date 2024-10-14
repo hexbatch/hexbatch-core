@@ -95,6 +95,7 @@ class RefCodes {
     const ELEMENT_NOT_FOUND =  8001;
 
     //sets start at 9000
+    const SET_NOT_FOUND =  9001;
 
     // paths start at 10000
     const PATH_NOT_FOUND =  10001;
@@ -165,6 +166,8 @@ class RefCodes {
         self::TYPE_CANNOT_EDIT => '',
 
         self::ELEMENT_NOT_FOUND => '',
+
+        self::SET_NOT_FOUND => '',
 
         self::PATH_NOT_FOUND => '',
         self::PATH_CANNOT_EDIT => '',

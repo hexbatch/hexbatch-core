@@ -4,7 +4,7 @@ namespace App\Sys\Res\Types\Stk\System\Evt;
 
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stk\System\Event;
+
 
 
 /*
@@ -25,7 +25,7 @@ class CustomEvent extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Event::UUID
+        BaseEvent::UUID
     ];
 
 }

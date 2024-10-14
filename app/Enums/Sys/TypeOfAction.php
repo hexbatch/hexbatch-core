@@ -34,6 +34,12 @@ enum TypeOfAction: string
     case PRAGMA_ELEMENT_TYPE_ON = 'pragma_element_type_on';
     case PRAGMA_ELEMENT_TYPE_TOGGLE = 'pragma_element_type_toggle';
     case PRAGMA_ELEMENT_TYPE_OFF = 'pragma_element_type_off';
+    case OP_COMBINE = 'op_combine';
+    case OP_MUTUAL = 'op_mutual';
+    case OP_POP = 'op_pop';
+    case OP_PUSH = 'op_push';
+    case OP_SHIFT = 'op_shift';
+    case OP_UNSHIFT = 'op_unshift';
 
 
 

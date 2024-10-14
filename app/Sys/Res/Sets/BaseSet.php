@@ -32,12 +32,12 @@ use App\Sys\Res\ISystemResource;
          return true;
      }
 
-     public function getDefiningElement(): ?ISystemElement
+     public function getDefiningSystemElement(): ?ISystemElement
      {
          return SystemElements::getElementByUuid(static::ELEMENT_UUID);
      }
 
-     public function getElements(): array
+     public function getSystemElements(): array
      {
          $ret = [];
          foreach (static::CONTAINING_ELEMENT_UUIDS as $el_uuid) {

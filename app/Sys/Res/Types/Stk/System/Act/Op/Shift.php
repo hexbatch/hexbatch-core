@@ -2,9 +2,9 @@
 
 namespace App\Sys\Res\Types\Stk\System\Act\Op;
 
+use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
-use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stk\System\Act\Op;
+use App\Sys\Res\Types\Stk\System\Act;
 
 /*
   * shift
@@ -13,10 +13,11 @@ use App\Sys\Res\Types\Stk\System\Act\Op;
     (p)A -> B(+e) + A(-e)
  */
 
-class Shift extends BaseType
+class Shift extends Act\Op
 {
     const UUID = '917a84ec-c17c-40d3-b218-da35edc62ac6';
-    const TYPE_NAME = 'op_shift';
+    const TYPE_NAME = TypeOfAction::OP_SHIFT;
+    const ACTION_NAME = TypeOfAction::OP_SHIFT;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -26,7 +27,7 @@ class Shift extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Op::UUID
+        Act\Op::UUID
     ];
 
 }

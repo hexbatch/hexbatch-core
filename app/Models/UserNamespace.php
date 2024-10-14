@@ -9,6 +9,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\NamespaceNameReq;
+use App\Sys\Res\Namespaces\INamespace;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -52,7 +53,7 @@ use Illuminate\Validation\ValidationException;
  * @property UserNamespace[] namespace_members
  * @property UserNamespace[] namespace_admins
  */
-class UserNamespace extends Model
+class UserNamespace extends Model implements INamespace
 {
 
     protected $table = 'user_namespaces';
@@ -356,4 +357,18 @@ class UserNamespace extends Model
         return static::buildNamespace(id:$node->id)->first();
     }
 
+    public function getNamespaceUuid(): string
+    {
+        return $this->ref_uuid;
+    }
+
+    public function getNamespaceName(): string
+    {
+        return $this->getName();
+    }
+
+    public function getNamespaceObject(): UserNamespace
+    {
+        return $this;
+    }
 }

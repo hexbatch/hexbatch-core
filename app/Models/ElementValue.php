@@ -69,4 +69,26 @@ class ElementValue extends Model
         'element_value' => AsArrayObject::class,
     ];
 
+    public static function buildElementValue(
+        ?int $id = null
+    )
+    : Builder
+    {
+
+        /**
+         * @var Builder $build
+         */
+        $build = Element::select('element_values.*')
+            ->selectRaw(" extract(epoch from  element_values.created_at) as created_at_ts,  extract(epoch from  element_values.updated_at) as updated_at_ts")
+        ;
+
+        if ($id) {
+            $build->where('element_values.id', $id);
+        }
+
+
+
+        return $build;
+    }
+
 }

@@ -2,9 +2,9 @@
 
 namespace App\Sys\Res\Types\Stk\System\Act\Op;
 
+use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
-use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stk\System\Act\Op;
+use App\Sys\Res\Types\Stk\System\Act;
 
 /*
  (p) => M
@@ -12,10 +12,11 @@ use App\Sys\Res\Types\Stk\System\Act\Op;
      M is a set without events
  */
 
-class Mutual extends BaseType
+class Mutual extends Act\Op
 {
     const UUID = '7d52ebfa-079c-4a2d-9bef-874a473c5220';
-    const TYPE_NAME = 'op_mutual';
+    const TYPE_NAME = TypeOfAction::OP_MUTUAL;
+    const ACTION_NAME = TypeOfAction::OP_MUTUAL;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -25,7 +26,7 @@ class Mutual extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Op::UUID
+        Act\Op::UUID
     ];
 
 }

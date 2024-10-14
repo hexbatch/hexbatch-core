@@ -2,19 +2,18 @@
 
 namespace App\Sys\Res\Sets;
 
-use App\Models\ElementSet;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 
-interface ISystemSet extends ISystemResource
+interface ISystemSet extends ISystemResource, ISet
 {
     public function getSetUuid() :string;
     public function hasEvents() :bool;
-    public function getDefiningElement() :?ISystemElement;
-    public function getSetObject() :?ElementSet;
+    public function getDefiningSystemElement() :?ISystemElement;
+
 
 
     /** @return ISystemElement[] */
-    public function getElements() : array ;
+    public function getSystemElements() : array ;
 
 }

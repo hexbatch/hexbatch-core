@@ -121,6 +121,9 @@ return [
     //elements
     'element_not_found' => 'Element not found using :ref',
 
+    //sets
+    'set_not_found' => 'Set not found using :ref',
+
     //servers
     'server_not_found' => "Server not found using :ref",
 

@@ -7,13 +7,10 @@ use App\Enums\Server\TypeOfServerStatus;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 
-interface ISystemServer extends ISystemResource
+interface ISystemServer extends ISystemResource,IServer
 {
-    public function getServerUuid() :string;
-    public function getServerDomain() :string;
-    public function getServerName() :string;
     public function getServerStatus() :TypeOfServerStatus;
-    public function getServerNamespace() :?ISystemNamespace;
+    public function getServerSystemNamespace() :?ISystemNamespace;
 
 
 }

@@ -45,7 +45,7 @@ return new class extends Migration
             $table->foreignId('element_set_member_id')
                 ->nullable()->default(null)
                 ->comment("The element/set these values are about")
-                ->index()
+                ->unique()
                 ->constrained('element_set_members')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();

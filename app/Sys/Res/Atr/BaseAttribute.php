@@ -5,6 +5,8 @@ namespace App\Sys\Res\Atr;
 
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
+use App\Models\ElementType;
+use App\Models\ElementValue;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
@@ -46,12 +48,12 @@ use App\Sys\Res\Types\ISystemType;
 
 
 
-    public function getParent(): ISystemAttribute
+    public function getSystemParent(): ISystemAttribute
     {
         return SystemAttributes::getAttributeByUuid(static::PARENT_UUID);
     }
 
-    public function getOwningType(): ISystemType
+    public function getOwningSystemType(): ISystemType
     {
         return SystemTypes::getTypeByUuid(static::TYPE_UUID);
     }
@@ -81,6 +83,14 @@ use App\Sys\Res\Types\ISystemType;
 
      public function getAttributeData(): ?array
      {
-         return null;
+         return $this->getStartingElementValue()?->element_value?->getArrayCopy();
+     }
+
+     public function getStartingElementValue() :?ElementValue {
+         return $this->getAttributeObject()?->original_element_value;
+     }
+
+     public function getOwningType() : ?ElementType {
+         return $this->getAttributeObject()->type_owner;
      }
  }

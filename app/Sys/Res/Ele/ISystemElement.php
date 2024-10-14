@@ -2,20 +2,18 @@
 
 namespace App\Sys\Res\Ele;
 
-use App\Models\Element;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Types\ISystemType;
 
-interface ISystemElement extends ISystemResource
+interface ISystemElement extends ISystemResource,IElement
 {
-    public function getElementUuid() :string;
 
     /** @return ISystemElementValue[] */
-    public function getElementValues() :array;
+    public function getSystemElementValues() :array;
 
-    public function getElementType() :?ISystemType;
-    public function getElementOwner() :?ISystemNamespace;
+    public function getSystemType() :?ISystemType;
+    public function getSystemNamespaceOwner() :?ISystemNamespace;
 
-    public function getElementObject() : ?Element;
+
 }

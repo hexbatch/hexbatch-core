@@ -2,17 +2,15 @@
 
 namespace App\Sys\Res\Types;
 
-use App\Models\ElementType;
 use App\Sys\Res\Atr\ISystemAttribute;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Servers\ISystemServer;
 
-interface ISystemType extends ISystemResource
+interface ISystemType extends ISystemResource, IType
 {
-    public function getTypeUuid() :string;
-    public function getTypeName() :string;
+
 
     public function isFinal() : bool;
 
@@ -26,5 +24,4 @@ interface ISystemType extends ISystemResource
     public function getDescriptionElement() : ?ISystemElement;
     public function getServer() : ?ISystemServer;
 
-    public function getTypeObject() : ?ElementType;
 }

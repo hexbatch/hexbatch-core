@@ -14,6 +14,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
+use App\Sys\Res\Atr\IAttribute;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,7 +72,7 @@ use Illuminate\Validation\ValidationException;
  * @property ServerEvent attached_event
  * @property ElementValue original_element_value
  */
-class Attribute extends Model
+class Attribute extends Model implements IAttribute
 {
 
     protected $table = 'attributes';
@@ -646,5 +647,34 @@ class Attribute extends Model
                 RefCodes::RULE_NOT_FOUND
             );
         }
+    }
+
+    public function getAttributeUuid(): string
+    {
+        return $this->ref_uuid;
+    }
+
+    public function getOwningType(): ?ElementType
+    {
+        return $this->type_owner;
+    }
+
+    public function getAttributeName(): string
+    {
+        return $this->attribute_name;
+    }
+
+    public function getStartingElementValue(): ?ElementValue
+    {
+        return $this->original_element_value;
+    }
+
+    public function getAttributeData(): ?array
+    {
+        return $this->original_element_value?->element_value->getArrayCopy();
+    }
+
+    public function getAttributeObject() : ?Attribute {
+        return $this;
     }
 }

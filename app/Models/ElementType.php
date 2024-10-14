@@ -12,6 +12,7 @@ use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
+use App\Sys\Res\Types\IType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,7 +57,7 @@ use Illuminate\Validation\ValidationException;
  *
  * @property UserNamespace type_owner
  */
-class ElementType extends Model
+class ElementType extends Model implements IType
 {
 
     protected $table = 'element_types';
@@ -508,4 +509,18 @@ class ElementType extends Model
         }
     }
 
+    public function getTypeUuid(): string
+    {
+        return $this->ref_uuid;
+    }
+
+    public function getTypeName(): string
+    {
+       return $this->type_name;
+    }
+
+    public function getTypeObject(): ?ElementType
+    {
+        return $this;
+    }
 }
