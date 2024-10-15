@@ -214,7 +214,7 @@ Route::prefix('v1')->group(function () {
         });
 
 /*
-   todo: rest of api mirror the actions and events
+   todo: rest of api mirror the actions
 
 
 
@@ -224,7 +224,6 @@ Route::prefix('v1')->group(function () {
 
    note: api can be chained together in the things by linking them as child parent with logic type
 
- todo live types have api call join and split (use api chaining to do more than one at a time)
  */
 
 

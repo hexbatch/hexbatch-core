@@ -141,6 +141,14 @@ enum TypeOfEvent: string
     case NAMESPACE_CREATED = 'namespace_created';
     case NAMESPACE_DESTROYED = 'namespace_destroyed';
 
+    case WAIT_SEMAPHORE = 'wait_semaphore';
+
+    case WAIT_MUTEX = 'wait_mutex';
+
+    case WAIT_ANY = 'wait_any';
+    case WAIT_ALL = 'wait_all';
+
+    case WAIT_AVAILABLE = 'wait_available';
 
 
     case SERVER_REGISTERED = 'server_registered';

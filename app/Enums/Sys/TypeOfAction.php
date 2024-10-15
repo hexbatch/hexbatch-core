@@ -130,7 +130,8 @@ enum TypeOfAction: string
 
     case CMD_NAMESPACE_USER_ASSIGN = 'cmd_namespace_user_assign'; //only system and if the ns is not a default for current users
 
-
+    case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
+    case CMD_SEMAPHORE_RESET = 'cmd_semaphore_reset';
 
     case CMD_RUN_REMOTE = 'cmd_run_remote'; //if admin of type ns, makes outgoing remote
 
