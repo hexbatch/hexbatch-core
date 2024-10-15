@@ -5,7 +5,7 @@ namespace App\Sys\Res\Ele\Stk\Placeholders\Owner;
 
 use App\Sys\Res\Ele\BaseElement;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
-use App\Sys\Res\Types\Stk\System\Placeholder\Namespace\Owner\PrivateType;
+use App\Sys\Res\Types\Stk\Root\Placeholder\Namespace\Owner\PrivateType;
 
 class OwnerPrivateElement extends BaseElement
 {

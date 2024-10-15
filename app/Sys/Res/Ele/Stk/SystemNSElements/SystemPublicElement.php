@@ -5,7 +5,7 @@ namespace App\Sys\Res\Ele\Stk\SystemNSElements;
 
 use App\Sys\Res\Ele\BaseElement;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
-use App\Sys\Res\Types\Stk\System\SystemNamespaceTypes\System\ThisServer\ThisServerNs\ThisServerPrivate;
+use App\Sys\Res\Types\Stk\Root\SystemNamespaceTypes\System\ThisServer\ThisServerNs\ThisServerPrivate;
 
 class SystemPublicElement extends BaseElement
 {

@@ -10,7 +10,7 @@ use App\Sys\Res\Namespaces\BaseNamespace;
 use App\Sys\Res\Servers\Stock\ThisServer;
 
 use App\Sys\Res\Sets\Stock\Placeholders\LoggedInHomeSet;
-use App\Sys\Res\Types\Stk\System\Placeholder\Namespace\LoggedIn;
+use App\Sys\Res\Types\Stk\Root\Placeholder\Namespace\LoggedIn;
 
 use App\Sys\Res\Users\Stock\SystemUser;
 

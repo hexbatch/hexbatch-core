@@ -5,7 +5,7 @@ namespace App\Sys\Res\Ele\Stk\Remotes;
 
 use App\Sys\Res\Ele\BaseElement;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
-use App\Sys\Res\Types\Stk\System\Remote\Outgoing\RemoteCacheSetType;
+use App\Sys\Res\Types\Stk\Root\Remote\Outgoing\RemoteCacheSetType;
 
 class RemoteCacheSetElement extends BaseElement
 {

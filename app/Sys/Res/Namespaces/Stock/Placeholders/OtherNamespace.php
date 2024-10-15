@@ -9,7 +9,7 @@ use App\Sys\Res\Namespaces\BaseNamespace;
 use App\Sys\Res\Servers\Stock\ThisServer;
 
 use App\Sys\Res\Sets\Stock\Placeholders\OtherHomeSet;
-use App\Sys\Res\Types\Stk\System\Placeholder\Namespace\Other;
+use App\Sys\Res\Types\Stk\Root\Placeholder\Namespace\Other;
 
 
 use App\Sys\Res\Users\Stock\SystemUser;
