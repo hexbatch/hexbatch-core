@@ -57,6 +57,7 @@ return new class extends Migration
 
         Schema::table('location_bounds', function (Blueprint $table) {
             $table->jsonb('geo_json')->comment("the original json that is used to make this geom");
+            $table->jsonb('display_json')->comment("keys used by outside to render map or shape");
             $table->timestamps();
 
             $table->string('bound_name',128)->nullable(false)->index()

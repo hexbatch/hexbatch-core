@@ -16,14 +16,15 @@ namespace App\Enums\Sys;
 enum TypeOfAction: string
 {
 
-    case PRAGMA_WRITE_VISUAL_SHAPE = 'pragma_visual_shape'; //if the attribute has a shape, set the visual section to one or more opacity|color|border|texture
+    case PRAGMA_WRITE_VISUAL_SHAPE = 'pragma_write_visual_shape'; //if the attribute has a shape, set the visual section to one or more opacity|color|border|texture
+    case PRAGMA_WRITE_VISUAL_MAP = 'pragma_write_visual_map'; //if the type has a map set display properties
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
 
     case PRAGMA_READ_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
-    case PRAGMA_READ_SHAPE = 'pragma_read_bounds_shape'; //the shape of the attribute being read
-    case PRAGMA_READ_MAP = 'pragma_read_bounds_map'; //the map of the type that owns the element
+    case PRAGMA_READ_SHAPE = 'pragma_read_bounds_shape'; //the shape of the attribute being read, includes display
+    case PRAGMA_READ_MAP = 'pragma_read_bounds_map'; //the map of the type that owns the element, includes display
 
 
 

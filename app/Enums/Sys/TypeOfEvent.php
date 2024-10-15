@@ -54,6 +54,8 @@ enum TypeOfEvent: string
 
     case ATTRIBUTE_READ = 'attribute_read';
     case ATTRIBUTE_WRITE = 'attribute_write';
+    case MAP_DISPLAY = 'MAP_DISPLAY';
+    case SHAPE_DISPLAY = 'SHAPE_DISPLAY';
 
     case ELEMENT_ATTRIBUTE_OFF = 'element_attribute_off';
     case ELEMENT_ATTRIBUTE_ON = 'element_attribute_on';

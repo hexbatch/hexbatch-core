@@ -38,6 +38,7 @@ use Illuminate\Validation\ValidationException;
  * @property string ref_uuid
  * @property string bound_name
  * @property TypeOfLocation location_type
+ * @property ArrayObject display_json
  * @property ArrayObject geo_json
  * @property string geom
  * @property string shape_bounding_box
@@ -66,6 +67,7 @@ class LocationBound extends Model
     protected $fillable = [
     ];
     protected $casts = [
+        'display_json' => AsArrayObject::class,
         'geo_json' => AsArrayObject::class,
         'location_type' => TypeOfLocation::class,
     ];
@@ -367,6 +369,13 @@ class LocationBound extends Model
                         $what_geo = $collect->get('geo_json');
                         if (is_array($what_geo) && !empty($what_geo)) {
                             $bound->geo_json = $what_geo;
+                        }
+                    }
+
+                    if ($collect->has('display')) {
+                        $what_display = $collect->get('display');
+                        if (is_array($what_display) && !empty($what_display)) {
+                            $bound->display_json = $what_display;
                         }
                     }
 
