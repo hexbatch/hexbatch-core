@@ -30,35 +30,34 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
-        if ($request->wantsJson() )
-        {
-            if ($e instanceof HexbatchCoreException) {
-                // Default response of 400
-                $status = $e->getCode();
-                if (empty($status)) {
-                    $status = 400;
-                }
-                $response = [
-                    'type' => $e->getRefCodeUrl(),
-                    'title' => $e->getMessage(),
-                    'instance' => $e->getRefCode(),
-                    'status' => $status,
-                    'errors' => [],
-                ];
-                $other = $e->getPrevious();
-                while ($other) {
-                    $response['errors'][get_class($other)] = $other->getMessage();
-                    $other = $other->getPrevious();
-                }
-                if (empty($response['errors'])) {
-                    unset($response['errors']);
-                }
 
-
-                // Return a JSON response with the response array and status code
-                return response()->json($response, $status);
+        if ($e instanceof HexbatchCoreException) {
+            // Default response of 400
+            $status = $e->getCode();
+            if (empty($status)) {
+                $status = 400;
             }
+            $response = [
+                'type' => $e->getRefCodeUrl(),
+                'title' => $e->getMessage(),
+                'instance' => $e->getRefCode(),
+                'status' => $status,
+                'errors' => [],
+            ];
+            $other = $e->getPrevious();
+            while ($other) {
+                $response['errors'][get_class($other)] = $other->getMessage();
+                $other = $other->getPrevious();
+            }
+            if (empty($response['errors'])) {
+                unset($response['errors']);
+            }
+
+
+            // Return a JSON response with the response array and status code
+            return response()->json($response, $status);
         }
+
         if ($e instanceof \Illuminate\Validation\ValidationException) {
 
             $status = $e->status;

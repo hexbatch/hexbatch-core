@@ -3,20 +3,14 @@
 namespace App\Http\Resources;
 
 use App\Helpers\Utilities;
-use App\Models\Enums\Attributes\AttributeRuleType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses \App\Models\Attribute::getPermissionGroupsForResource()
- * @uses \App\Models\Attribute::getRuleGroup()
- * @uses \App\Models\Attribute::getMeta()
- * @method getPermissionGroupsForResource(int $n_display)
- * @method getRuleGroup(AttributeRuleType $rule_type,int $n_display)
- * @method getMeta(int $n_display)
- * @method getName()
- * @method getValue()
+ * @uses \App\Models\Attribute::getAncestorChain(),\App\Models\Attribute::getName()
+ * @method getName(bool $b_redo = false,bool $b_strip_system_prefix = true,bool $short_name = false)
+ * @method getAncestorChain(int $level = 0)
  */
 class AttributeResource extends JsonResource
 {
@@ -49,48 +43,33 @@ class AttributeResource extends JsonResource
         $ret =  [
             'uuid' => $this->ref_uuid,
             'name' => $this->getName(),
-            'is_retired' => $this->is_retired,
-            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
-            'bounds'=> [
-                "read_bounds"=> [
-                    "read_time" => $this->n_display_level <=1? ($this->read_time_bound?->getName() ) : ($this->read_time_bound ? new TimeBoundResource($this->read_time_bound,null,$this->n_display_level -1) : null),
-                    "read_map"=> $this->n_display_level <=1? ($this->read_map_bound?->getName() ) : ($this->read_map_bound ? new LocationBoundResource($this->read_map_bound,null,$this->n_display_level -1) : null),
-                    "read_shape"=> $this->n_display_level <=1? ($this->read_shape_bound?->getName() ) : ($this->read_shape_bound ? new LocationBoundResource($this->read_shape_bound,null,$this->n_display_level -1) : null),
-                ],
-                "write_bounds"=> [
-                    "write_time" => $this->n_display_level <=1? ($this->write_time_bound?->getName() ) : ($this->write_time_bound ? new TimeBoundResource($this->write_time_bound,null,$this->n_display_level -1) : null),
-                    "write_map" => $this->n_display_level <=1? ($this->write_map_bound?->getName() ) : ($this->write_map_bound ? new LocationBoundResource($this->write_map_bound,null,$this->n_display_level -1) : null),
-                    "write_shape" => $this->n_display_level <=1? ($this->write_shape_bound?->getName() ) : ($this->write_shape_bound ? new LocationBoundResource($this->write_shape_bound,null,$this->n_display_level -1) : null),
-                ]
-            ],
-            'requirements'=> [
-               'elements'=> [
-                   'required_siblings'=> $this->getRuleGroup(AttributeRuleType::REQUIRED,$this->n_display_level -1),
-                   'forbidden_siblings'=> $this->getRuleGroup(AttributeRuleType::FORBIDDEN,$this->n_display_level -1)
-               ],
-                'sets'=> [
-                    'allergies'=> $this->getRuleGroup(AttributeRuleType::ALLERGY,$this->n_display_level -1),
-                    'affinities'=> $this->getRuleGroup(AttributeRuleType::AFFINITY,$this->n_display_level -1)
-                ]
-            ],
-            'permissions' => [
-                'user_groups' => $this->getPermissionGroupsForResource($this->n_display_level -1),
-                'set_requirements' => [
-                    'is_read_policy_all'=> $this->is_read_policy_all,
-                    'is_write_policy_all'=> $this->is_write_policy_all,
-                    'read'=> $this->getRuleGroup(AttributeRuleType::READ,$this->n_display_level -1),
-                    'write'=> $this->getRuleGroup(AttributeRuleType::WRITE,$this->n_display_level -1)
-                ],
-            ],
-            'options'=> [
-                'is_final' => $this->is_final,
-                'is_human' => $this->is_human,
-            ],
-            'value'=> new AttributeValueResource($this->attribute_value),
+            'short_name' => $this->getName(short_name: true ),
 
-            'meta' => $this->getMeta($this->n_display_level - 1)
+            'owner' => new ElementTypeResource($this->type_owner),
+            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
+            'value_json_path' => $this->value_json_path,
+            'attached_event' => $this->attached_event? new ServerEventResource($this->attached_event,null,$this->n_display_level - 1) : null ,
+            'options'=> [
+                'is_system' => $this->is_system,
+                'is_final_attribute' => $this->is_final_attribute,
+                'is_seen_in_child_elements' => $this->is_seen_in_child_elements,
+            ],
+            'value'=> $this->original_element_value?->element_value,
+            'server_access_type'=> $this->server_access_type->value
+
 
         ];
+
+        if ($this->attribute_parent) {
+            $ret['parent'] = new AttributeResource($this->attribute_parent,null,$this->n_display_level - 1 );
+        }
+        $ancestors = $this->getAncestorChain(1); //do not show parent, that is above
+        if (count($ancestors) ) {
+            $ret['ancestors'] = [];
+            foreach ($ancestors as $ancestor) {
+                $ret['ancestors'][] = new AttributeResource($ancestor,null,$this->n_display_level - 1 );
+            }
+        }
 
 
         return $ret;

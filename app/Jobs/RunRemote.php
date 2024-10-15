@@ -2,13 +2,12 @@
 
 namespace App\Jobs;
 
-use App\Models\RemoteActivity;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+
 
 class RunRemote implements ShouldQueue
 {
@@ -18,7 +17,7 @@ class RunRemote implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        public RemoteActivity $activity,
+        public int $activity_id,
     ) {}
 
     /**
@@ -26,7 +25,6 @@ class RunRemote implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->activity->doCallRemote(); //this is blocking
-        $this->activity->announceDaFinishing();
+        //note call remote here
     }
 }

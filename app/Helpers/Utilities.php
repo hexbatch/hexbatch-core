@@ -3,11 +3,16 @@
 namespace App\Helpers;
 
 use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
+use App\Models\UserNamespace;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use JsonException;
+use JsonPath\InvalidJsonPathException;
+use JsonPath\JsonPath;
 use LogicException;
 
 class Utilities {
@@ -30,7 +35,7 @@ class Utilities {
     }
 
     public static function boolishToBool($val) : bool {
-        if (is_string($val)) {return false;}
+        if (empty($val)) {return false;}
         $boolval = ( is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val );
         return ( $boolval===null  ? false : $boolval );
     }
@@ -41,6 +46,22 @@ class Utilities {
             'off', '0', 'no', 'false', '' =>true,
             default => false
         };
+    }
+
+    public static function cleanMaybeIntArrayToUniqueAndSorted(array $vals) : array {
+        $ret = [];
+        foreach ($vals as $val) {
+            if (is_array($val) || is_object($val)) {
+                throw new LogicException("This is not the int you were looking for");
+            }
+            $ret[] = intval($val);
+
+        }
+        $ret = array_unique($ret,SORT_NUMERIC);
+        usort($ret,function(int $a,int $b) {
+            return $a <=> $b;
+        });
+        return $ret;
     }
 
     public static function positiveBoolWords($val) : bool {
@@ -75,6 +96,20 @@ class Utilities {
             return json_last_error_msg();
         }
         return null;
+    }
+
+    public static function testValidJsonPath(?string $maybe_json_path): void {
+        if (empty($maybe_json_path)) {return;}
+        try {
+            $test = [1,2,3,"apples"=>"two"];//this is just to test, and is ok to keep, this can be any array
+            JsonPath::get($test,$maybe_json_path);
+        } /** @noinspection PhpRedundantCatchClauseInspection */
+        catch (InvalidJsonPathException) {
+            throw new HexbatchNotPossibleException(__("msg.invalid_json_path",['ref'=>$maybe_json_path]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::JSON_PATH_ISSUE);
+
+        }
     }
 
 
@@ -136,6 +171,32 @@ class Utilities {
          */
         $user = auth()->user();
         return $user;
+    }
+
+    public static function getDefaultNamespace() : ?UserNamespace {
+
+        $user = static::getTypeCastedAuthUser();
+        return $user->default_namespace;
+    }
+
+    public static function getCurrentNamespace() : ?UserNamespace {
+        //todo use the system namespace is the param is not set?
+        $namespace = null;
+        $what_route = Route::current();
+        if ($what_route->hasParameter('user_namespace')) {
+            $namespace = $what_route->parameter('user_namespace');
+            if (!$namespace) {
+                $user_namespace_name = $what_route->originalParameter('user_namespace');
+                if ($user_namespace_name) {
+                    $namespace = (new UserNamespace())->resolveRouteBinding($user_namespace_name);
+                }
+
+            }
+            if (!$namespace instanceof UserNamespace) {
+                throw new LogicException("getCurrentNamespace does not see a Namespace in the parameter");
+            }
+        }
+        return $namespace;
     }
 
     public static function runDbFile(?string $start_path) :bool {
@@ -206,6 +267,48 @@ class Utilities {
     public static function strip_tags_convert_entities(?string $what) : ?string  {
         if (empty($what)) {return $what; }
         return strip_tags(htmlspecialchars($what,ENT_QUOTES| ENT_HTML401,'UTF-8',false));
+    }
+
+    public  static function cleanAnsiFromString(string $what) : string {
+        $step_a = preg_replace(/** @lang text */ '#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $what);
+        $step_b = preg_replace('#\\.[.]+#','-->',$step_a,1);
+        $step_c = preg_replace('#\\.[.]+#','',$step_b);
+        $step_d = htmlspecialchars_decode($step_c);
+        $step_e = str_replace('&gt;','>',$step_d);
+        return $step_e;
+    }
+
+    public static function getVersionString() : ?string {
+        return file_get_contents(base_path() . DIRECTORY_SEPARATOR . 'version') ? : null;
+    }
+
+    /**
+     * To compare a version string as a number
+     * @author https://stackoverflow.com/questions/1142496/regex-replace-for-decimals (the heart of it,The regex and the if statement)
+     * @example converts something like '0.1.2' to 0.12
+     * @param string|null $version_string
+     *
+     * @return float|null
+     */
+    public static function convertVersionToFloat(?string $version_string) : ?float {
+        if (empty($version_string)) {return null;}
+        $dashes_and_underscores_to_points = str_replace('-','.',$version_string);
+        $dashes_and_underscores_to_points = str_replace('_','.',$dashes_and_underscores_to_points);
+        $only_numbers_and_points = preg_replace('/[^\d.]+/', '', $dashes_and_underscores_to_points);
+        if (($pos = strpos($only_numbers_and_points, '.')) !== false) {
+            $no_extra_points = substr($only_numbers_and_points, 0, $pos+1).str_replace('.', '', substr($only_numbers_and_points, $pos+1));
+        } else {
+            $no_extra_points = $only_numbers_and_points;
+        }
+        $val = floatval($no_extra_points);
+        return $val;
+    }
+
+    /** @noinspection PhpUnused */
+    public static function getVersionFloat() : float {
+
+        $string_version = static::getVersionString();
+        return static::convertVersionToFloat($string_version);
     }
 
 }

@@ -36,7 +36,6 @@ class TimeBoundResource extends JsonResource
             'name' => $this->getName(),
             'start' => Carbon::createFromTimestamp($this->bound_start_ts)->toIso8601String(),
             'stop' => Carbon::createFromTimestamp($this->bound_stop_ts)->toIso8601String(),
-            'is_retired' => $this->is_retired,
             'period_length' => $this->bound_period_length,
             'cron' => $this->bound_cron,
             'cron_timezone' => $this->bound_cron_timezone,

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Elements\TypeOfSetPointerMode;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -9,23 +10,41 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/*
+ * Element destruction has two different modes
+ * normal: an element can be requested to be destroyed, going through the event handlers, handlers can stop, elements in pending things keep from being destroyed
+ * force :
+ *      if in rules the branches are pruned to be false to parent
+ *      if in any path parts, that path is made invalid and the element is nulled out, but otherwise the path is unchanged
+ *      elements removed from all sets without event,
+ *      if it is defining a set, that set is destroyed and the contents are popped out, but no events raised
+ *      if defining a description, it is removed from resources,
+ */
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int element_parent_type_id
+ * @property int element_namespace_id
+ * @property int pointer_to_child_or_link_set_id
+ * @property int pointer_to_parent_set_id
  * @property string ref_uuid
- * @property int element_type_id
- * @property int user_id
+ * @property TypeOfSetPointerMode set_pointer_mode
+ *
  * @property string created_at
  * @property string updated_at
  *
- * @property User element_owner
- *
+ * @property UserNamespace element_namespace
+ * @property ElementType element_parent_type
  */
 class Element extends Model
 {
 
+    /*
+     * elements always stay on the originating server, but they can be copied
+     * only published types can make elements
+     */
     protected $table = 'elements';
     public $timestamps = false;
 
@@ -35,8 +54,8 @@ class Element extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'element_type_id',
-        'user_id'
+        'element_parent_type_id',
+        'element_owner_user_id'
     ];
 
     /**
@@ -51,11 +70,18 @@ class Element extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
-    public function element_owner(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\User', 'user_id');
+    protected $casts = [
+        'set_pointer_mode' => TypeOfSetPointerMode::class,
+    ];
+
+
+    public function element_namespace() : BelongsTo {
+        return $this->belongsTo(UserNamespace::class,'element_namespace_id');
     }
+    public function element_parent_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'element_parent_type_id');
+    }
+
 
     public static function buildElement(
         ?int $id = null)
@@ -72,6 +98,9 @@ class Element extends Model
         if ($id) {
             $build->where('elements.id', $id);
         }
+
+        /** @uses Element::element_namespace(),Element::element_parent_type() */
+        $build->with('element_namespace','element_parent_type');
 
         return $build;
     }
@@ -119,4 +148,9 @@ class Element extends Model
     public function getName() :string {
         return $this->ref_uuid;
     }
+
+    public function getValueBySet(?ElementSet $set) : ?ElementValue {
+        return ElementSetMember::buildSetMember(set_id: $set->getSetObject()->id, element_id: $this->id)->first();
+    }
+
 }

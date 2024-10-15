@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Rules\UserNameReq;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -20,10 +21,10 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
+
         Validator::make($input, [
             'name' => [ 'string', 'max:255'],
-            'username'=>['required','string','max:30',Rule::unique(User::class)
-            ],
+            'username'=>['required','string','min:3',Rule::unique(User::class,'username')->ignore($user->id),new UserNameReq],
         ])->validateWithBag('updateProfileInformation');
 
         if ($input['email'] !== $user->email &&
@@ -47,7 +48,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
     {
         $user->forceFill([
             'username' => $input['name'],
-            'email' => $input['email'],
+            'email' => $input['email']??null,
             'email_verified_at' => null,
         ])->save();
 

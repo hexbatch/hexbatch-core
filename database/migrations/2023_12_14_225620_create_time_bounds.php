@@ -16,20 +16,16 @@ return new class extends Migration
         Schema::create('time_bounds', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The owner of the bound")
-                ->index('idx_time_bound_user_id')
-                ->constrained('users')
+            $table->foreignId('time_bound_namespace_id')
+                ->nullable(false)
+                ->comment("The namespace this entry is for")
+                ->index()
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-
             $table->timestamps();
 
-            $table->boolean('is_retired')->default(false)->nullable(false)
-                ->comment('if true then cannot be added to token types or make new tokens');
 
             $table->dateTime('bound_start')->nullable(false)
                 ->comment('When this time bound starts (inclusive)');
@@ -55,9 +51,8 @@ return new class extends Migration
             $table->string('bound_name',128)->nullable(false)->index()
                 ->comment("The unique name of the time bound, using the naming rules");
 
+            $table->unique(['time_bound_namespace_id','bound_name']);
 
-
-            $table->unique(['user_id','bound_name']);
         });
 
         DB::statement('ALTER TABLE time_bounds ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

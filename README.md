@@ -2,6 +2,12 @@
 
 This code is implenting the ideas in core-docs/core-overview.md
 
+## todo for the next release
+* implement the publish event in the things, with limited path, test for missing other type, test for combo of attributes
+* generate all the standard resources
+* make full namespaces for new users and on demand
+* be able to create types using subtypes with attributes using parents
+* fill in all todos
 
 # Notes
 
@@ -31,12 +37,9 @@ https://github.com/mateusjunges/laravel-kafka
 
 can clear out just part of the redis cache `php artisan cache:clear --tags=tests`
 
-## Kafka stuff
 
-https://hub.docker.com/r/bitnami/kafka
-https://kafka.apache.org/intro
-https://laravel-news.com/laravel-kafka-package
-https://github.com/mateusjunges/laravel-kafka
-https://junges.dev/documentation/laravel-kafka/v1.13/1-introduction
-https://medium.com/simform-engineering/integrating-apache-kafka-in-laravel-real-time-database-synchronization-with-debezium-connector-2506bc8f37a7
-https://www.golinuxcloud.com/laravel-kafka-tutorial/ //ads
+
+## Future links
+
+https://github.com/xolvionl/laravel-data-openapi-generator
+

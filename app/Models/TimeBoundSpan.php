@@ -10,8 +10,10 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int time_bound_id
- * @property int span_start
- * @property int span_stop
+ * @property string time_slice_range
+ *
+ * @property int bound_start_ts
+ * @property int bound_stop_ts
  *
  */
 class TimeBoundSpan extends Model
@@ -23,13 +25,14 @@ class TimeBoundSpan extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'span_start',
-        'span_stop',
-        'time_bound_id'
-    ];
+    protected $fillable = [];
+
+    protected $casts = [];
 
     public static function cleanUpOld() {
-        static::whereRaw("extract(epoch from  NOW()) > span_stop")->delete();
+        static::whereRaw("tstzrange( null,now() - interval '1 hour') &&  time_slice_range ")->delete();
     }
 }
+
+//https://www.postgresql.org/docs/current/rangetypes.html
+// https://blog.meetbrackets.com/ranges-in-laravel-7-using-postgresql-c4bc69b91758

@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @uses User::user_element()
  * @method getName()
  */
 class UserResource extends JsonResource
@@ -32,14 +31,10 @@ class UserResource extends JsonResource
         }
         $ret =  [
             'uuid' => $this->ref_uuid,
-            'username' => $this->username,
-            'group' => new UserGroupResource($this->user_group,null,$this->n_display_level - 1),
-            'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String()
+            'username' => $this->getName(),
+            'created_at' => $this->created_at_ts? Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String() : null,
         ];
 
-        if ($this->n_display_level === 1) {
-            unset($ret['group']);
-        }
         return $ret;
     }
 }

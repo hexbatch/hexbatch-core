@@ -8,7 +8,7 @@ class HexbatchCoreException extends \RuntimeException {
 
 
     protected ?int $ref_code = null;
-    public function __construct(string $message,int $http_code,string|null|int $ref_code,?Throwable $prev = null)
+    public function __construct(string $message,int $http_code = 0,string|null|int $ref_code = null,?Throwable $prev = null)
     {
         parent::__construct($message,$http_code,$prev);
         $this->ref_code = $ref_code;

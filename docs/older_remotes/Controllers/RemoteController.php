@@ -1,0 +1,289 @@
+<?php
+
+
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\HexbatchPermissionException;
+use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\RemoteActivityCollection;
+use App\Http\Resources\RemoteActivityResource;
+use App\Http\Resources\RemoteCollection;
+use App\Http\Resources\RemoteResource;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Models\Remote;
+use Models\RemoteActivity;
+use Models\RemoteStack;
+use Remotes\Build\DataGathering;
+use Remotes\Build\GroupTypeGathering;
+use Remotes\Build\RemoteAlwaysCanSetOptions;
+use Remotes\Build\RemoteUriGathering;
+use Remotes\RemoteActivityStatusType;
+use Remotes\RemoteStackCategoryType;
+use Remotes\RemoteUriType;
+
+
+class RemoteController extends Controller
+{
+    /**
+     * @uses Remote::remote_owner()
+     */
+    protected function adminCheck(Remote $att) {
+        $user = Utilities::getTypeCastedAuthUser();
+        $att->remote_owner->checkAdminGroup($user->id);
+    }
+
+    protected function usageCheck(Remote $remote) {
+        $user = Utilities::getTypeCastedAuthUser();
+        if ($remote->remote_owner->user_group->isMember($user->id) || $remote->usage_group->isMember($user->id)) {
+            return;
+        }
+
+        throw new HexbatchPermissionException(__("msg.remote_not_in_usage_group",['ref'=>$remote->getName()]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+            RefCodes::USER_NOT_PRIV);
+    }
+
+    protected function elementCheck(RemoteActivity $activity) {
+
+        if ($activity->caller_element_id) {
+            $user = Utilities::getTypeCastedAuthUser();
+            if ($activity->caller_element->element_owner->user_group->isAdmin($user->id) ) {
+                return;
+            }
+        }
+
+        throw new HexbatchPermissionException(__("msg.remote_activity_not_owned_by_your_element",['ref'=>$activity->caller_element->getName()]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
+            RefCodes::USER_NOT_PRIV);
+    }
+
+    public function remote_get(Remote $remote,?string $full = null) {
+        $this->usageCheck($remote);
+        $n_level = (int)$full;
+        if ($n_level <= 0) { $n_level =0;}
+        return response()->json(new RemoteResource($remote,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+
+   protected function createActivityInternal(Request $request, Remote $remote) :RemoteActivity  {
+       $inputs = $request->collect();
+       $user = null;$type = null;$element = null; $attribute = null;
+       if ($inputs->has('callers')) {
+
+           $inputs->forget('callers');
+       }
+
+       $debugging = null;
+       if ($inputs->has('debugging')) {
+           $debugging = (new Collection($inputs->get('debugging')) )->toArray();
+           $inputs->forget('debugging');
+       }
+
+       return  $remote->createActivity(collection: $inputs, user: $user,
+           type: $type, element: $element, attribute: $attribute, pass_through: $debugging);
+   }
+
+    public function restack_activity(RemoteActivity $activity,?RemoteStack $stack = null)
+    {
+        \App\Http\Controllers\API\StackController::stackUsageCheck($stack);
+        $this->usageCheck($activity->remote_parent);
+        $activity->remote_stack_id = $stack?->id;
+        $activity->save();
+        $activity->refresh();
+        return response()->json(new RemoteActivityResource($activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function create_activity(Request $request, Remote $remote) {
+        $this->usageCheck($remote);
+        $activity = $this->createActivityInternal($request,$remote);
+        $stack_id = $request->request->getInt('stack_id');
+
+        if ($stack_id) {
+            $stack = RemoteStack::findOrFail($stack_id);
+            \App\Http\Controllers\API\StackController::stackUsageCheck($stack);
+            $activity->remote_stack_id = $stack_id;
+            $activity->save();
+        }
+        $display_activity = RemoteActivity::buildActivity(id:$activity->id)->first();
+        return response()->json(new RemoteActivityResource($display_activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function remote_test(Request $request, Remote $remote,?RemoteStack $remote_stack = null) {
+        $this->usageCheck($remote);
+        $activity = $this->createActivityInternal($request,$remote);
+        if ($remote_stack) {
+            \App\Http\Controllers\API\StackController::stackUsageCheck($remote_stack);
+            $activity->remote_stack_id = $remote_stack->id;
+            $activity->save();
+        }
+        else
+        {
+            $remote_stack = new RemoteStack();
+            $remote_stack->remote_stack_category = RemoteStackCategoryType::MAIN;
+            $remote_stack->user_id = Auth::id();
+            $remote_stack->save();
+            $remote_stack->execute_stack(RemoteStackCategoryType::MAIN);
+        }
+
+
+        $display_activity = RemoteActivity::buildActivity(id:$activity->id)->first();
+        return response()->json(new RemoteActivityResource($display_activity,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function update_activity(Request $request, RemoteActivity $remote_activity) {
+        //see if valid activity
+        /** @var RemoteActivity $checked_activity */
+        $checked_activity = RemoteActivity::buildActivity(id:$remote_activity->id,remote_activity_status_type: RemoteActivityStatusType::PENDING)->first();
+        if ($checked_activity) {
+            throw new HexbatchNotPossibleException(__("msg.remote_activity_not_found"),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::REMOTE_NOT_FOUND);
+        }
+        if (!in_array($checked_activity->remote_parent->uri_type,RemoteUriType::MANUAL_TYPES)) {
+            throw new HexbatchNotPossibleException(__("msg.remote_activity_only_manual_updated",['ref'=>$checked_activity->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::REMOTE_NOT_FOUND);
+        }
+
+        if ($checked_activity->remote_parent->uri_type === RemoteUriType::MANUAL_ELEMENT) {
+            $this->elementCheck($checked_activity);
+        } elseif ($checked_activity->remote_parent->uri_type === RemoteUriType::MANUAL_OWNER) {
+            $this->adminCheck($checked_activity->remote_parent);
+        } else {
+            throw new \LogicException("Other manual types not implemented yet");
+        }
+
+        $data = $request->collect();
+        $checked_activity->doCallRemote($data);
+        $out = RemoteActivity::buildActivity(id:$checked_activity->id)->first();
+        return response()->json(new RemoteActivityResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+    public function list_activities(?RemoteActivityStatusType $remote_activity_status_type = null) {
+        //either this is an admin or this is a user getting the usage things
+        //just do usage now
+        $remotes = Remote::buildRemote(usage_user_id: Utilities::getTypeCastedAuthUser()->id)->pluck('id')->toArray();
+        $activities = RemoteActivity::buildActivity(remote_activity_status_type: $remote_activity_status_type,remote_id_array: $remotes)->cursorPaginate();
+        return response()->json(new RemoteActivityCollection($activities), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+    public function get_activity(RemoteActivity $remote_activity,?string $full = null) {
+        $n_level = (int)$full;
+        if ($n_level <= 0) { $n_level =0;}
+        $this->usageCheck($remote_activity->remote_parent);
+        $activity = RemoteActivity::buildActivity(id: $remote_activity->id)->first();
+        return response()->json(new RemoteActivityResource($activity,null,$n_level), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function remote_list(?User $user = null) {
+        $logged_user = auth()->user();
+        if (!$user) {$user = $logged_user;}
+        $out_laravel = Remote::buildRemote(usage_user_id: $user->id);
+        $out = $out_laravel->cursorPaginate();
+        return response()->json(new RemoteCollection($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    public function remote_delete(Remote $remote) {
+        $this->adminCheck($remote);
+        if ($remote->isInUse()) {throw new RuntimeException('code will be refactored');}
+        $out = Remote::buildRemote(id: $remote->id)->first();
+        $remote->delete();
+        return response()->json(new RemoteResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+
+    /**
+     * @param Remote $remote
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
+     * @throws \Exception
+     */
+    public function remote_edit_patch(Remote $remote, Request $request) {
+        $this->adminCheck($remote);
+
+        try {
+            DB::beginTransaction();
+            // if this is in use then can only edit retired, meta
+            // otherwise can edit all but the ownership
+            if ($remote->isInUse()) {
+                $this->updateInUseRemote($remote,$request);
+            } else {
+                $some_name = $request->request->getString('remote_name');
+
+                if ($some_name && $some_name !== $remote->remote_name) {
+                    $remote->setName($request->request->getString('remote_name'),Utilities::getTypeCastedAuthUser());
+                }
+
+                $this->updateAllRemote($remote,$request);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+
+
+        $out = Remote::buildRemote(id: $remote->id)->first();
+
+        return response()->json(new RemoteResource($out), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function updateAllRemote(Remote $remote, Request $request) {
+
+        (new RemoteUriGathering($request) )->assign($remote);
+        $remote->save();
+        $this->updateInUseRemote($remote,$request); //saved at this point
+
+        (new DataGathering($request) )->assign($remote);
+        (new GroupTypeGathering($request) )->assign($remote);
+
+    }
+
+    protected function updateInUseRemote(Remote $remote, Request $request) {
+        (new RemoteAlwaysCanSetOptions($request) )->assign($remote);
+
+
+    }
+
+    /**
+     * @throws ValidationException
+     * @throws \Exception
+     */
+    public function remote_create(Request $request): JsonResponse {
+
+
+        try {
+            DB::beginTransaction();
+            // if this is in use then can only edit retired, meta
+            // otherwise can edit all but the ownership
+            $remote = new Remote();
+            $user = Utilities::getTypeCastedAuthUser();
+            $remote->setName($request->request->getString('remote_name'),$user);
+            $remote->user_id = $user->id;
+            $this->updateAllRemote($remote,$request);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        $out = Remote::buildRemote(id: $remote->id)->first();
+        return response()->json(new RemoteResource($out,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_CREATED);
+    }
+}
