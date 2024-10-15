@@ -16,14 +16,14 @@ namespace App\Enums\Sys;
 enum TypeOfAction: string
 {
 
-    case PRAGMA_SHAPE_VISUAL = 'pragma_shape_visual'; //if the attribute has a shape, set the visual section to one or more opacity|color|border|texture
+    case PRAGMA_WRITE_VISUAL_SHAPE = 'pragma_visual_shape'; //if the attribute has a shape, set the visual section to one or more opacity|color|border|texture
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
 
-    case PRAGMA_READ_BOUNDS_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
-    case PRAGMA_READ_BOUNDS_SHAPE = 'pragma_read_bounds_shape'; //the shape of the attribute being read
-    case PRAGMA_READ_BOUNDS_MAP = 'pragma_read_bounds_map'; //the map of the type that owns the element
+    case PRAGMA_READ_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
+    case PRAGMA_READ_SHAPE = 'pragma_read_bounds_shape'; //the shape of the attribute being read
+    case PRAGMA_READ_MAP = 'pragma_read_bounds_map'; //the map of the type that owns the element
 
 
 
@@ -31,9 +31,9 @@ enum TypeOfAction: string
     case PRAGMA_ELEMENT_ON = 'pragma_element_on';
     case PRAGMA_ELEMENT_TOGGLE = 'pragma_element_toggle';
     case PRAGMA_ELEMENT_OFF = 'pragma_element_off';
-    case PRAGMA_ELEMENT_TYPE_ON = 'pragma_element_type_on';
-    case PRAGMA_ELEMENT_TYPE_TOGGLE = 'pragma_element_type_toggle';
-    case PRAGMA_ELEMENT_TYPE_OFF = 'pragma_element_type_off';
+    case PRAGMA_TYPE_ON = 'pragma_element_type_on';
+    case PRAGMA_TYPE_TOGGLE = 'pragma_element_type_toggle';
+    case PRAGMA_TYPE_OFF = 'pragma_element_type_off';
     case OP_COMBINE = 'op_combine';
     case OP_MUTUAL = 'op_mutual';
     case OP_POP = 'op_pop';
@@ -46,45 +46,89 @@ enum TypeOfAction: string
 
 
 
-    case COMMAND_RUN_REMOTE = 'command_run_remote'; //if admin of type ns, makes outgoing remote
-    case COMMAND_LISTEN_REMOTE = 'command_listen_remote'; //if admin of type ns, this will wait until the server is contacted with information from the remote incoming
-    case COMMAND_MAKE_SET = 'command_make_set'; //child set or top level set
-    case COMMAND_DESTROY_SET = 'command_destroy_set'; //if admin of definer element of set ns
-    case COMMAND_ADD_TO_SET = 'command_add_to_set';  //if admin of definer element of set ns
-    case COMMAND_REMOVE_FROM_SET = 'command_remove_from_set'; //removes element from the target set
-    case COMMAND_DESTROY_NAMESPACE = 'command_destroy_namespace'; //the owner, and if not default
-    case COMMAND_DESTROY_USER = 'command_destroy_user'; //only system
-    case COMMAND_ASSIGN_USER_TO_NAMESPACE = 'command_assign_user_to_namespace'; //only system and if the ns is not a default for current users
+    case CMD_DESIGN_PARENT_ADD = 'cmd_design_parent_add';
+    case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
+    case CMD_DESIGN_TYPE_MAP = 'cmd_design_type_map';
+    case CMD_DESIGN_TYPE_TIME = 'cmd_design_type_time';
+    case CMD_DESIGN_TYPE_EDIT = 'cmd_design_type_edit';
+
+    case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
+    case CMD_DESIGN_ATTRIBUTE_REMOVE = 'cmd_design_attribute_remove';
+    case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
+    case CMD_DESIGN_ATTRIBUTE_SHAPE = 'cmd_design_attribute_shape';
+    case CMD_DESIGN_RULE_CREATE = 'cmd_design_rule_create';
+    case CMD_DESIGN_RULE_DESTROY = 'cmd_design_rule_destroy';
+    case CMD_DESIGN_RULE_EDIT = 'cmd_design_rule_edit';
+
+    case CMD_TYPE_CREATE = 'cmd_type_create';
+    case CMD_TYPE_PUBLISH = 'cmd_type_publish';
+    case CMD_TYPE_SUSPEND = 'cmd_type_suspend';
+    case CMD_TYPE_RETIRE = 'cmd_type_retire';
+    case CMD_TYPE_DESTROY = 'cmd_type_destroy';
+    case CMD_TYPE_DESTROY_NO_EVENTS = 'cmd_type_destroy_no_events'; //server admin
+    case CMD_TYPE_CHANGE_OWNER = 'cmd_type_change_owner';
+
+    case CMD_TYPE_DESCRIPTION_ADD = 'cmd_type_description_add';
+    case CMD_TYPE_DESCRIPTION_REMOVE = 'cmd_type_description_remove';
+
+    case CMD_ATTRIBUTE_DESCRIPTION_ADD = 'cmd_attribute_description_add';
+    case CMD_ATTRIBUTE_DESCRIPTION_REMOVE = 'cmd_attribute_description_remove';
+
+    case CMD_PATH_CREATE = 'cmd_path_create';
+    case CMD_PATH_EDIT = 'cmd_path_edit';
+    case CMD_PATH_DESTROY = 'cmd_path_destroy';
+    case CMD_PATH_HANDLE_ADD = 'cmd_path_handle_add';
+    case CMD_PATH_HANDLE_REMOVE = 'cmd_path_handle_remove';
+    case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
+    case CMD_SET_DESTROY = 'cmd_set_destroy'; //if admin of definer element of set ns
+    case CMD_SET_DESTROY_NO_EVENTS = 'cmd_set_destroy_no_events'; //server admin
+    case CMD_LINK_ADD = 'cmd_link_add';
+    case CMD_LINK_REMOVE = 'cmd_link_remove';
+
+    case CMD_LINK_DESCRIPTION_ADD = 'cmd_link_description_add';
+    case CMD_LINK_DESCRIPTION_REMOVE = 'cmd_link_description_remove';
 
 
+    case CMD_ELEMENT_CREATE = 'cmd_element_create';
+    case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
-    case COMMAND_CREATE_ELEMENT = 'command_create_element';
-    case COMMAND_CHANGE_ELEMENT_OWNER = 'command_change_element_owner';
-    case COMMAND_CHANGE_TYPE_OWNER = 'command_change_type_owner';
-    case COMMAND_DESTROY_ELEMENT = 'command_destroy_element';
-    case COMMAND_ADD_LIVE_TYPE_ON_ELEMENT = 'command_add_live_type_on_element';
-    case COMMAND_REMOVE_LIVE_TYPE_ON_ELEMENT = 'command_remove_live_type_on_element';
+    case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
+    case CMD_ELEMENT_DESTROY_NO_EVENTS = 'cmd_element_destroy_no_events'; //server admin
+    case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
+    case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
+    case CMD_LIVE_TYPE_TOGGLE = 'cmd_live_type_toggle';
 
-    case COMMAND_ADD_LIVE_SHAPE_ON_ELEMENT = 'command_add_live_shape_on_element';
-    case COMMAND_REMOVE_LIVE_SHAPE_ON_ELEMENT = 'command_remove_live_shape_on_element';
+    case CMD_LIVE_SHAPE_ADD = 'cmd_live_shape_add';
+    case CMD_LIVE_SHAPE_REMOVE = 'cmd_live_shape_remove';
+    case CMD_LIVE_SHAPE_TOGGLE = 'cmd_live_shape_toggle';
+    case CMD_FILTER_ADD = 'cmd_filter_add';
+    case CMD_FILTER_REMOVE = 'cmd_filter_remove';
 
-    case COMMAND_SHAPE_EVENT_BLOCKING_ON = 'command_shape_event_blocking_on'; // blocks set scope events based on z order of intersection
-    case COMMAND_SHAPE_EVENT_BLOCKING_OFF = 'command_shape_event_blocking_off'; // unblocks  for event or all set scoped events
+    case CMD_FILTER_GLOBAL_ADD = 'cmd_filter_global_add';
+    case CMD_FILTER_GLOBAL_REMOVE = 'cmd_filter_global_remove';
 
-    case COMMAND_FIRE_CUSTOM_EVENT_SCOPED_ELEMENT = 'command_fire_custom_event_scoped_element'; //any types based on
-    case COMMAND_FIRE_CUSTOM_EVENT_SCOPED_SET = 'command_fire_custom_event_scoped_set';
-    case COMMAND_FIRE_CUSTOM_EVENT_SCOPE_CHAINED = 'command_fire_custom_event_scope_chained';
-    case COMMAND_FIRE_CUSTOM_EVENT = 'command_fire_custom_event'; //scope depends on the base type of the custom event
+
+    case CMD_FIRE_CUSTOM_EVENT = 'cmd_fire_custom_event'; //scope depends on the base type of the custom event
 
     /*
      ns things can get list of ns from path of this rule and piped in ns from children
      */
-    case COMMAND_NAMESPACE_ADD_MEMBER = 'command_namespace_add_member';
-    case COMMAND_NAMESPACE_ADD_ADMIN = 'command_namespace_add_admin';
-    case COMMAND_NAMESPACE_REMOVE_MEMBER = 'command_namespace_remove_member';
-    case COMMAND_NAMESPACE_REMOVE_ADMIN = 'command_namespace_remove_admin';
+    case CMD_NAMESPACE_MEMBER_ADD = 'cmd_namespace_member_add';
+
+    case CMD_NAMESPACE_ADMIN_ADD = 'cmd_namespace_admin_add';
+    case CMD_NAMESPACE_ADMIN_REMOVE = 'cmd_namespace_admin_remove';
+    case CMD_NAMESPACE_MEMBER_REMOVE = 'cmd_namespace_remove_member';
 
 
+    case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
+    case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
+    case CMD_NAMESPACE_DESTROY_NO_EVENTS = 'cmd_namespace_destroy_no_events'; //server admin
+
+    case CMD_NAMESPACE_USER_ASSIGN = 'cmd_namespace_user_assign'; //only system and if the ns is not a default for current users
+
+
+
+    case CMD_RUN_REMOTE = 'cmd_run_remote'; //if admin of type ns, makes outgoing remote
 
     //server to server
     case CMD_ELSEWHERE_GIVE_ELEMENT = 'cmd_elsewhere_give_element';
@@ -93,16 +137,16 @@ enum TypeOfAction: string
     case CMD_ELSEWHERE_GIVE_SET = 'cmd_elsewhere_give_set';
     case CMD_ELSEWHERE_DO_REGISTRATION = 'cmd_elsewhere_do_registration';
     case CMD_ELSEWHERE_CHANGE_STATUS = 'cmd_elsewhere_change_status';
-    case CMD_ELSEWHERE_UNREGISTER = 'cmd_elsewhere_unregister';
+    case CMD_ELSEWHERE_PURGE = 'cmd_elsewhere_purge'; //removes all types,ns,ele,sets associated with server, no events
 
 
 
     //adjust thing limits, and back-offs, this can be run as part of a chain, only the system admin can run these
-    case CMD_THING_SET_RATE_LIMIT = 'cmd_thing_set_rate_limit';
-    case CMD_THING_SET_PAGE_SIZE = 'cmd_thing_set_page_size';
-    case CMD_THING_SET_DEPTH_LIMIT = 'cmd_thing_set_depth_limit';
-    case CMD_THING_SET_JSON_SIZE = 'cmd_thing_set_json_size';
-    case CMD_THING_SET_BACKOFF_RATE = 'cmd_thing_set_backoff_rate';
+    case CMD_THING_RATE_LIMIT = 'cmd_thing_rate_limit';
+    case CMD_THING_PAGE_SIZE = 'cmd_thing_page_size';
+    case CMD_THING_DEPTH_LIMIT = 'cmd_thing_depth_limit';
+    case CMD_THING_JSON_SIZE = 'cmd_thing_json_size';
+    case CMD_THING_BACKOFF_RATE = 'cmd_thing_backoff_rate';
 
 
 
@@ -120,12 +164,12 @@ enum TypeOfAction: string
 
 /*
 
-'command_destroy_namespace', -- server user or ns owner
-'command_destroy_user', -- server user
-'command_assign_user_to_namespace', -- server user
-'command_create_element', -- single only
-'command_add_live_type_element', -- type(s) found in the data path
-'command_namespace_add_member', -- namespace found by the type of the attribute chosen,server user or ns owner
+'cmd_destroy_namespace', -- server user or ns owner
+'cmd_destroy_user', -- server user
+'cmd_assign_user_to_namespace', -- server user
+'cmd_create_element', -- single only
+'cmd_add_live_type_element', -- type(s) found in the data path
+'cmd_namespace_add_member', -- namespace found by the type of the attribute chosen,server user or ns owner
 
  */
 

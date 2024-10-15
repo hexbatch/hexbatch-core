@@ -15,8 +15,8 @@ use App\Sys\Res\Types\Stk\System\Act;
 class Mutual extends Act\Op
 {
     const UUID = '7d52ebfa-079c-4a2d-9bef-874a473c5220';
-    const TYPE_NAME = TypeOfAction::OP_MUTUAL;
     const ACTION_NAME = TypeOfAction::OP_MUTUAL;
+    const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

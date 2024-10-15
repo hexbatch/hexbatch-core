@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\System\Evt\Chain;
+namespace App\Sys\Res\Types\Stk\System\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Evt;
 
 
-class RemoteSuccess extends Evt\ScopeChain
+class ElementDestructionBatch extends Evt\ScopeSet
 {
-    const UUID = 'c048b73e-16af-452e-a05d-ab022e4a8065';
-    const EVENT_NAME = TypeOfEvent::REMOTE_SUCCESS;
-    const TYPE_NAME = TypeOfEvent::REMOTE_SUCCESS;
+    const UUID = '60d62ad8-e20e-49f8-9e9c-0f05c416b43c';
+    const EVENT_NAME = TypeOfEvent::ELEMENT_DESTRUCTION_BATCH;
+    const TYPE_NAME =  self::EVENT_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -21,7 +21,7 @@ class RemoteSuccess extends Evt\ScopeChain
     ];
 
     const PARENT_UUIDS = [
-        Evt\ScopeChain::UUID
+        Evt\ScopeType::UUID
     ];
 
 }

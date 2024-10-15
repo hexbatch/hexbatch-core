@@ -16,8 +16,8 @@ use App\Sys\Res\Types\Stk\System\Act;
 class Shift extends Act\Op
 {
     const UUID = '917a84ec-c17c-40d3-b218-da35edc62ac6';
-    const TYPE_NAME = TypeOfAction::OP_SHIFT;
     const ACTION_NAME = TypeOfAction::OP_SHIFT;
+    const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

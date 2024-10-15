@@ -16,8 +16,8 @@ when an element is removed from its last set, it is automatically destroyed
 class Pop extends Act\Op
 {
     const UUID = '6c46ce70-59cc-4df5-84fc-2e281eb26ee4';
-    const TYPE_NAME = TypeOfAction::OP_POP;
     const ACTION_NAME = TypeOfAction::OP_POP;
+    const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

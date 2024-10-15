@@ -7,11 +7,11 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Act;
 
 
-class MakeSet extends Act\Cmd
+class DesignAttributeRemove extends Act\Cmd
 {
-    const UUID = '06c6d184-1230-4bd1-9ee4-80657a9e3620';
-    const TYPE_NAME = TypeOfAction::COMMAND_MAKE_SET;
-    const ACTION_NAME = TypeOfAction::COMMAND_MAKE_SET;
+    const UUID = '079cfc62-0fa2-47f1-84c0-df0fa90441c5';
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_ATTRIBUTE_REMOVE;
+    const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

@@ -16,21 +16,14 @@ return new class extends Migration
             $table->id();
 
 
-            $table->foreignId('filtering_attribute_id')
+            $table->foreignId('owner_shape_intersection_id')
                 ->nullable(false)
-                ->comment("Attribute that will block this event to the other, if they intersect their shapes")
+                ->comment("The intersection that is filtered")
                 ->index()
-                ->constrained('attributes')
+                ->constrained('attribute_shape_intersections')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('filtered_attribute_id')
-                ->nullable(false)
-                ->comment("Attribute that will have the event be filtered if they intersect their shapes")
-                ->index()
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('filtering_logic_attribute_id')
                 ->nullable()->default(null)
@@ -54,7 +47,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->unique(['filtering_attribute_id','filtered_attribute_id','filtered_event_id']);
+            $table->unique(['filtering_logic_attribute_id','filtered_event_id']);
 
         });
 

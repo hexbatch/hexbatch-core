@@ -14,8 +14,8 @@ use App\Sys\Res\Types\Stk\System\Act;
 class Push extends Act\Op
 {
     const UUID = 'ae5cf895-fee6-4042-93d2-ce83cfa77d05';
-    const TYPE_NAME = TypeOfAction::OP_PUSH;
     const ACTION_NAME = TypeOfAction::OP_PUSH;
+    const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

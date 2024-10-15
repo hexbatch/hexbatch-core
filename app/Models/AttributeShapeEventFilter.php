@@ -25,8 +25,7 @@ note: when doing z-index on the shapes, the different api calls are attached to 
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int filtering_attribute_id
- * @property int filtered_attribute_id
+ * @property int owner_shape_intersection_id
  * @property int filtering_logic_attribute_id
  * @property int filtered_event_id
  * @property int non_blocking_priority

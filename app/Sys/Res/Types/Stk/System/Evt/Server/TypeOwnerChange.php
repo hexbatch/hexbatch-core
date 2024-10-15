@@ -7,11 +7,11 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Evt;
 
 
-class RunRemote extends Evt\ScopeServer
+class TypeOwnerChange extends Evt\ScopeSet
 {
-    const UUID = '09e8b85d-4b1d-4500-ab32-f8ae03dd1af9';
-    const EVENT_NAME = TypeOfEvent::RUN_REMOTE;
-    const TYPE_NAME = TypeOfEvent::RUN_REMOTE;
+    const UUID = '6c6fb95e-b5cb-43d0-a6bd-1e2ad69593d8';
+    const EVENT_NAME = TypeOfEvent::TYPE_OWNER_CHANGE;
+    const TYPE_NAME =  self::EVENT_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

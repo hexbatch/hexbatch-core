@@ -9,7 +9,7 @@ enum TypeOfServerStatus : string {
   case PENDING_SERVER = 'pending_server';
   case ALLOWED_SERVER = 'allowed_server';
   case PAUSED_SERVER = 'paused_server';
-  case BLOCKED_SERVER = 'blocked_server';
+  case BLOCKED_SERVER = 'blocked_server'; //no data exchange
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfServerStatus {
         $maybe  = TypeOfServerStatus::tryFrom($test);

@@ -8,7 +8,8 @@ use App\Sys\Res\Types\BaseType;
 
 
 /*
- * custom events inherit from Event , the scope event, and the NS type, they can be fired and listened to any in the ns members
+ * custom events inherit from Event , the scope event, and the NS type, and a scope.
+ *  they can be fired and listened to any in the ns members
  * custom event will be fired with the data given to it in the thing container, sent up by the children, it can be any data
  */
 

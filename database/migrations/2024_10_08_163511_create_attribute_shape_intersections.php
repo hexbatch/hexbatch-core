@@ -16,8 +16,8 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('shape_set_member_id')
-                ->nullable(false)
-                ->comment("The element/set this intersecting bounds is about")
+                ->nullable()
+                ->comment("The element/set this intersecting bounds is about. Can be nullable if ns admin for both and type live")
                 ->index()
                 ->constrained('element_set_members')
                 ->cascadeOnUpdate()
@@ -45,6 +45,8 @@ return new class extends Migration
         DB::statement("CREATE TYPE type_of_shape_intersection AS ENUM ('designed_shape', 'live_shape');");
 
         DB::statement("ALTER TABLE attribute_shape_intersections Add COLUMN kind_shape_intersection type_of_shape_intersection NOT NULL default 'designed_shape';");
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_shape_x_per_combo ON attribute_shape_intersections (shape_set_member_id,shape_entry_attribute_id,shape_exist_attribute_id) NULLS DISTINCT;");
     }
 
     /**

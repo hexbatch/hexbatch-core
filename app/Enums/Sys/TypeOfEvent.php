@@ -24,18 +24,6 @@ enum TypeOfEvent: string
     case NOTHING = 'nothing';
 
 
-    /*
-    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
-    "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
-     */
-
-    //scoped to sets and elements participating in the group events
-
-    case GROUP_OPERATION = 'group_operation'; //add each set operation here?
-    case SET_OPERATION = 'set_operation';  //do I need both?
-
-
-
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
@@ -49,10 +37,10 @@ enum TypeOfEvent: string
 
 
     //fired only on the ns private element
-    case NAMESPACE_MEMBER_ADD = 'namespace_member_add';
-    case NAMESPACE_ADDING_ADMIN = 'namespace_adding_admin';
-    case NAMESPACE_REMOVING_MEMBER = 'namespace_removing_member';
-    case NAMESPACE_REMOVING_ADMIN = 'namespace_removing_admin';
+    case NAMESPACE_MEMBER_ADDING = 'namespace_member_adding';
+    case NAMESPACE_ADMIN_ADDING = 'namespace_admin_adding';
+    case NAMESPACE_MEMBER_REMOVING = 'namespace_member_removing';
+    case NAMESPACE_ADMIN_REMOVING = 'namespace_admin_removing';
     case NAMESPACE_LOGIN = 'namespace_login'; //the user did a login and this is fired on the default namespace private element
 
 
@@ -67,13 +55,13 @@ enum TypeOfEvent: string
     case ATTRIBUTE_READ = 'attribute_read';
     case ATTRIBUTE_WRITE = 'attribute_write';
 
-    case ATTRIBUTE_TURNED_OFF = 'attribute_turned_off';
-    case ATTRIBUTE_TURNED_ON = 'attribute_turned_on';
-    case ATTRIBUTES_TURNED_OFF = 'attributes_turned_off';
+    case ELEMENT_ATTRIBUTE_OFF = 'element_attribute_off';
+    case ELEMENT_ATTRIBUTE_ON = 'element_attribute_on';
+    case ELEMENT_TYPE_OFF = 'element_type_turned_off';
+    case ELEMENT_TYPE_ON = 'element_type_turned_on';
 
 
 
-    case SET_CONTENTS_SHAPE_CHANGED = 'set_contents_shape_changed';
 
     case SET_ENTER = 'set_enter';
     case SET_LEAVE = 'set_leave';
@@ -85,28 +73,17 @@ enum TypeOfEvent: string
 
     case SET_DESTROYED = 'set_destroyed';
 
-    case SET_LINK_CREATED = 'set_link_created';
-    case SET_LINK_DESTROYED = 'set_link_destroyed';
 
 
-    case SHAPE_INTERSECTION_ENTER = 'shape_intersection_enter';
-    case SHAPE_INTERSECTION_LEAVE = 'shape_intersection_leave';
 
-    case TYPE_LIVE_ADDED = 'type_live_added'; //these two live events go to both types
-    case TYPE_LIVE_REMOVED = 'type_live_removed';
+    case SHAPE_ENTER = 'shape_enter';
+    case SHAPE_LEAVE = 'shape_leave';
 
+    case LIVE_TYPE_ADDED = 'live_type_added'; //these go to both types
+    case LIVE_TYPE_REMOVED = 'live_type_removed';
 
-    /*
-    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
-    "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
-     */
-    //scoped to the ancestor chain of sets
-
-    case REMOTE_SUCCESS = 'remote_success'; //type ns members todo I think this is redone
-    case REMOTE_FAIL = 'remote_fail'; //type ns members
-    case REMOTE_ALWAYS = 'remote_always'; //type ns members
-
-
+    case SHAPE_ADDED = 'shape_added'; //these go to both types
+    case SHAPE_REMOVED = 'shape_removed';
 
 
     /*
@@ -118,12 +95,37 @@ enum TypeOfEvent: string
 
     case ELEMENT_CREATION = 'element_creation'; //type or type ancestor ns admin, this event has the ns of the element owner, and can reject based on that.
                                                 //can access the placeholder for the new element owner ns
-    case ELEMENT_BATCH_CREATION = 'element_batch_creation'; //type or type ancestor ns admin, these elements do not have owners yet
+    case ELEMENT_CREATION_BATCH = 'element_creation_batch'; //type or type ancestor ns admin, these elements do not have owners yet
 
     case ELEMENT_DESTRUCTION = 'element_destruction'; //type or type ancestor ns admin
+    case ELEMENT_DESTRUCTION_BATCH = 'element_destruction_batch'; //type or type ancestor ns admin
 
-    case ELEMENT_REENTERED = 'element_reentered'; //element with same uuid come back after copied out
+
     case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
+    case ELEMENT_OWNER_CHANGE_BATCH = 'element_owner_change_batch'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
+
+
+
+    /*
+    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
+    "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
+     */
+    //system wide
+
+    case LINK_CREATED = 'link_created';
+    case LINK_DESTROYED = 'link_destroyed';
+    case LINK_DESCRIPTION_ADDED = 'link_description_added';
+    case LINK_DESCRIPTION_REMOVED = 'link_description_removed';
+
+    case TYPE_DESCRIPTION_ADDED = 'type_description_added';
+    case TYPE_DESCRIPTION_REMOVED = 'type_description_removed';
+
+    case ATTRIBUTE_DESCRIPTION_ADDED = 'attribute_description_added';
+    case ATTRIBUTE_DESCRIPTION_REMOVED = 'attribute_description_removed';
+
+    case PATH_HANDLE_ADDED = 'path_handle_added';
+    case PATH_HANDLE_REMOVED = 'path_handle_removed';
+
     case TYPE_OWNER_CHANGE = 'type_owner_change'; //type given different ownership from what it started as, parents can block
 
     case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
@@ -134,17 +136,16 @@ enum TypeOfEvent: string
 
 
 
-    /*
-    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
-    "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
-     */
-    //system wide
-    case RUN_REMOTE = 'run_remote'; //a remote is about to be called
-    case LISTEN_REMOTE = 'listen_remote'; //waiting for incoming call to the server
+    case NAMESPACE_CREATED = 'namespace_created';
+    case NAMESPACE_DESTROYED = 'namespace_destroyed';
 
-    case SET_TOP_LEVEL_DESTROYED = 'set_top_level_destroyed';
-    case SET_TOP_LEVEL_CREATED = 'set_top_level_created';
 
+
+    case SERVER_REGISTERED = 'server_registered';
+    case SERVER_STATUS_ALLOWED = 'server_status_allowed';
+    case SERVER_STATUS_BLOCKED = 'server_status_blocked';
+    case SERVER_STATUS_PENDING = 'server_status_pending';
+    case SERVER_STATUS_PAUSED = 'server_status_paused';
 
     /*
    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
@@ -153,38 +154,31 @@ enum TypeOfEvent: string
     //system wide server stuff
 
 
-    case PUSH_ELEMENT_ELSEWHERE = 'push_element_elsewhere';
-    case PUSH_SET_ELSEWHERE = 'push_set_elsewhere';
-    case PUSH_TYPE_ELSEWHERE = 'push_type_elsewhere';
-    case PUSH_NS_ELSEWHERE = 'push_ns_elsewhere';
-    case RUN_EVENT_ELSEWHERE = 'run_event_elsewhere';
+    case ELSEWHERE_PUSH_ELEMENT = 'elsewhere_push_element';
+    case ELSEWHERE_PUSH_SET = 'elsewhere_push_set';
+    case ELSEWHERE_PUSH_TYPE = 'elsewhere_push_type';
+    case ELSEWHERE_PUSH_NAMESPACE = 'elsewhere_push_namespace';
+    case ELSEWHERE_PUSH_EVENT = 'elsewhere_push_event';
 
-    case NEW_ELSEWHERE_ELEMENT = 'new_elsewhere_element';
-    case NEW_ELSEWHERE_SET = 'new_elsewhere_set';
-    case NEW_ELSEWHERE_EVENT = 'new_elsewhere_event';
-    case NEW_ELSEWHERE_TYPE = 'new_elsewhere_type';
-    case NEW_ELSEWHERE_NS = 'new_elsewhere_ns';
-    case NEW_ELSEWHERE_KEY = 'new_elsewhere_key';
+    case ELSEWHERE_GIVES_ELEMENT = 'elsewhere_gives_element';
+    case ELSEWHERE_GIVES_SET = 'elsewhere_gives_set';
+    case ELSEWHERE_GIVES_EVENT = 'elsewhere_gives_event';
+    case ELSEWHERE_GIVES_TYPE = 'elsewhere_gives_type';
+    case ELSEWHERE_GIVES_NAMESPACE = 'elsewhere_gives_namespace';
+    case ELSEWHERE_NEW_KEY = 'elsewhere_new_key';
 
 
     case ELSEWHERE_SUSPENDED_TYPE = 'elsewhere_suspended_type';
     case ELSEWHERE_DESTROYED_ELEMENT = 'elsewhere_destroyed_element';
-    case SHARING_ELSEWHERE_ELEMENT = 'sharing_elsewhere_element';
-    case PUSH_TO_NEXT_SERVER = 'push_to_next_server';
-
-
-    case SERVER_REGISTERED = 'server_registered';
-    case SERVER_UNREGISTERED = 'server_unregistered';
-    case SERVER_STATUS_ALLOWED = 'server_status_allowed';
-    case SERVER_STATUS_DENIED = 'server_status_denied';
-    case SERVER_STATUS_PAUSED = 'server_status_paused';
+    case ELSEWHERE_SHARING_ELEMENT = 'elsewhere_sharing_element';
+    case ELSEWHERE_ELEMENT_REENTERED = 'elsewhere_element_reentered'; //element with same uuid come back after copied out
 
 
 
 
-    case NAMESPACE_CREATED = 'namespace_created';
 
-    case NAMESPACE_OWNER_CHANGE = 'namespace_owner_change';
+
+
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._

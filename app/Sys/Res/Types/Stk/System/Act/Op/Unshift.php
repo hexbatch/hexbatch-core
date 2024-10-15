@@ -15,8 +15,8 @@ when an element is removed from its last set, it is automatically destroyed
 class Unshift extends Act\Op
 {
     const UUID = 'c4f79042-3be1-4c9a-9342-235341d5f0d0';
-    const TYPE_NAME = TypeOfAction::OP_UNSHIFT;
     const ACTION_NAME = TypeOfAction::OP_UNSHIFT;
+    const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
