@@ -83,6 +83,7 @@ enum TypeOfEvent: string
 
     case LIVE_TYPE_ADDED = 'live_type_added'; //these go to both types
     case LIVE_TYPE_REMOVED = 'live_type_removed';
+    case LIVE_TYPE_PASTED = 'live_type_pasted';
 
     case SHAPE_ADDED = 'shape_added'; //these go to both types
     case SHAPE_REMOVED = 'shape_removed';

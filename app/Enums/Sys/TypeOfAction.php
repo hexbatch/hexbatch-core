@@ -99,6 +99,7 @@ enum TypeOfAction: string
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
     case CMD_ELEMENT_DESTROY_NO_EVENTS = 'cmd_element_destroy_no_events'; //server admin
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
+    case CMD_LIVE_TYPE_COPY = 'cmd_live_type_copy';
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
     case CMD_LIVE_TYPE_TOGGLE = 'cmd_live_type_toggle';
 
