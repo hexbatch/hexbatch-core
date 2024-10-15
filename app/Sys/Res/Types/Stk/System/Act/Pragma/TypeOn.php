@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\System\Act\Pragma;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Act;
+use App\Sys\Res\Types\Stk\System\Evt;
 
 
 class TypeOn extends Act\Pragma
@@ -22,6 +23,10 @@ class TypeOn extends Act\Pragma
 
     const PARENT_UUIDS = [
         Act\Pragma::UUID
+    ];
+
+    const EVENT_UUIDS = [
+        Evt\Set\ElementTypeOn::UUID,
     ];
 
 }

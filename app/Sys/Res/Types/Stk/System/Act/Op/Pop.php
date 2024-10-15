@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\System\Act\Op;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Act;
-
+use App\Sys\Res\Types\Stk\System\Evt;
 /*
   * pop
     (p)A => B(+e) + A(-e)
@@ -28,6 +28,10 @@ class Pop extends Act\Op
 
     const PARENT_UUIDS = [
         Act\Op::UUID
+    ];
+
+    const EVENT_UUIDS = [
+        Evt\Set\SetLeave::UUID,
     ];
 
 }

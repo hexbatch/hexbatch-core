@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\System\Act\Op;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Act;
-
+use App\Sys\Res\Types\Stk\System\Evt;
 /*
   * push adds e to the last of the set,the p min and max control how many elements should be processed.
     (p) -> A(+e)
@@ -26,6 +26,10 @@ class Push extends Act\Op
 
     const PARENT_UUIDS = [
         Act\Op::UUID
+    ];
+
+    const EVENT_UUIDS = [
+        Evt\Set\SetEnter::UUID,
     ];
 
 }

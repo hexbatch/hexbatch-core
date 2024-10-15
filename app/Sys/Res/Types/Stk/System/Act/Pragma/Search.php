@@ -7,11 +7,16 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Act;
 use App\Sys\Res\Types\Stk\System\Evt;
 
-
-class Write extends Act\Pragma
+/*
+ * Can either do search on a path,
+ *  or a collection of elements that are path handles
+ *    the collection will return multiple search results with logic
+ *
+ */
+class Search extends Act\Pragma
 {
-    const UUID = '51e9a358-c2b1-4876-a518-0ab65d1be224';
-    const ACTION_NAME = TypeOfAction::PRAGMA_WRITE;
+    const UUID = '5b8ff68a-8748-4323-8088-04a8e6fa73fc';
+    const ACTION_NAME = TypeOfAction::PRAGMA_SEARCH;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
@@ -26,7 +31,7 @@ class Write extends Act\Pragma
     ];
 
     const EVENT_UUIDS = [
-        Evt\Set\Write::UUID
+        Evt\Element\SearchResults::UUID,
     ];
 
 }

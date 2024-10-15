@@ -26,7 +26,8 @@ class Mutual extends Act\Op
     ];
 
     const PARENT_UUIDS = [
-        Act\Op::UUID
+        Act\Op::UUID,
+        Act\CmdNoSideEffects::UUID
     ];
 
 }

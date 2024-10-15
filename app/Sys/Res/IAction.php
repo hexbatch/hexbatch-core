@@ -7,6 +7,8 @@ use App\Models\Thing;
 interface IAction
 {
     const ACTION_NAME = '';
+
+    const EVENT_UUIDS = [];
     public function doAction(Thing $thing): IAction;
 
     /** @return IEvent[] */

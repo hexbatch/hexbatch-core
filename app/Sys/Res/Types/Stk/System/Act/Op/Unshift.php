@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\System\Act\Op;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Act;
+use App\Sys\Res\Types\Stk\System\Evt;
 
 /*
    * unshift adds e to the first of the set, the p min and max control how many elements should be processed.
@@ -27,6 +28,10 @@ class Unshift extends Act\Op
 
     const PARENT_UUIDS = [
         Act\Op::UUID
+    ];
+
+    const EVENT_UUIDS = [
+        Evt\Set\SetEnter::UUID,
     ];
 
 }

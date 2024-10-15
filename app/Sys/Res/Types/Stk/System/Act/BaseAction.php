@@ -25,6 +25,8 @@ class BaseAction extends BaseType implements IAction
         Action::UUID
     ];
 
+    const EVENT_UUIDS = [];
+
     public function doAction(Thing $thing): IAction
     {
         return $this;

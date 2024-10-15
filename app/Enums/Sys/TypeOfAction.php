@@ -35,6 +35,9 @@ enum TypeOfAction: string
     case PRAGMA_TYPE_ON = 'pragma_element_type_on';
     case PRAGMA_TYPE_TOGGLE = 'pragma_element_type_toggle';
     case PRAGMA_TYPE_OFF = 'pragma_element_type_off';
+
+    case PRAGMA_SEARCH = 'pragma_search';
+
     case OP_COMBINE = 'op_combine';
     case OP_MUTUAL = 'op_mutual';
     case OP_POP = 'op_pop';

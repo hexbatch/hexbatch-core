@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Evt;
 
 
-class ShapeDisplay extends Evt\ScopeElement
+class MapDisplayWrite extends Evt\ScopeElement
 {
-    const UUID = '336262b6-7c2d-46c4-82c7-3a9ef1720e31';
-    const EVENT_NAME = TypeOfEvent::SHAPE_DISPLAY;
+    const UUID = '4a070471-0924-4a27-8ea0-3dbaf2e32a8e';
+    const EVENT_NAME = TypeOfEvent::MAP_DISPLAY_WRITE;
     const TYPE_NAME =  self::EVENT_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

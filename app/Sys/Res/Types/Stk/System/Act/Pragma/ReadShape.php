@@ -21,7 +21,8 @@ class ReadShape extends Act\Pragma
     ];
 
     const PARENT_UUIDS = [
-        Act\Pragma::UUID
+        Act\Pragma::UUID,
+        Act\CmdNoSideEffects::UUID
     ];
 
 }

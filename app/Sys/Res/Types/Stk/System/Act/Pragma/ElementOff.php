@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\System\Act\Pragma;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\System\Act;
+use App\Sys\Res\Types\Stk\System\Evt;
 
 
 class ElementOff extends Act\Pragma
@@ -18,6 +19,10 @@ class ElementOff extends Act\Pragma
 
     const ATTRIBUTE_UUIDS = [
 
+    ];
+
+    const EVENT_UUIDS = [
+        Evt\Set\ElementAttributeOff::UUID
     ];
 
     const PARENT_UUIDS = [
