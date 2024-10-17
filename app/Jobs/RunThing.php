@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Thing;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -9,7 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 
-class RunRemote implements ShouldQueue
+class RunThing implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -21,10 +22,10 @@ class RunRemote implements ShouldQueue
     ) {}
 
     /**
-     * @see MasterSemaphore
+     * @see Thing
      */
     public function handle(): void
     {
-        //todo put in remote call here first draft of that code
+        //todo put in thing running here for the row
     }
 }

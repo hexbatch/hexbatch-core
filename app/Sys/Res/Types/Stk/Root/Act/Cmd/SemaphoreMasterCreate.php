@@ -6,12 +6,19 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
-
-class TypeDescriptionAdd extends Act\Cmd
+/**
+ * @see MasterSemaphore for the setup,
+ * it takes a type made for this, that is published,
+ * and makes the new types for the master group, but they are in developer mode
+ * need to publish them all @uses TypePublish
+ *
+ */
+class SemaphoreMasterCreate extends Act\Cmd
 {
-    const UUID = 'c79c2c70-f92e-4fdc-9cff-db756f8a1c8b';
-    const ACTION_NAME = TypeOfAction::CMD_TYPE_DESCRIPTION_ADD;
+    const UUID = 'e6bf1d5c-0bf3-440c-8e29-9f18cee4d409';
+    const ACTION_NAME = TypeOfAction::CMD_SEMAPHORE_MASTER_CREATE;
     const TYPE_NAME = self::ACTION_NAME;
+
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

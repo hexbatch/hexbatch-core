@@ -6,11 +6,14 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
-
-class SetChildDescriptionAdd extends Act\Cmd
+/**
+ * types which share the same handle are published and have other lifecycle changes, done  in a group,
+ * if any type fails to change, then none do
+ */
+class TypeHandleAdd extends Act\Cmd
 {
-    const UUID = '2761a348-249c-4d08-8fe3-a76936e32148';
-    const ACTION_NAME = TypeOfAction::CMD_SET_CHILD_HANDLE_ADD;
+    const UUID = 'c79c2c70-f92e-4fdc-9cff-db756f8a1c8b';
+    const ACTION_NAME = TypeOfAction::CMD_TYPE_HANDLE_ADD;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

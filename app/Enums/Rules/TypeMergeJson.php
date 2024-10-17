@@ -10,6 +10,9 @@ enum TypeMergeJson : string {
     case XOR_MERGE = 'xor_merge';
     case OLDEST = 'oldest';
     case NEWEST = 'newest';
+    case OVERWRITE_ADD = 'overwrite_add'; //overwrites unless matching keys have numeric, then will add them and put sum in destination
+
+    case OVERWRITE_SUBTRACT = 'overwrite_subtract';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeMergeJson {
         $maybe  = TypeMergeJson::tryFrom($test);

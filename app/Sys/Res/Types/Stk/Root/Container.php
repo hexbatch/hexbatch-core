@@ -6,6 +6,9 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
 
+/*
+ * This is used when a type is made for a set definer in the sys
+ */
 
 class Container extends BaseType
 {

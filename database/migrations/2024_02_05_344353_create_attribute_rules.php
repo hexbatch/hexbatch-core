@@ -105,7 +105,9 @@ return new class extends Migration
             'or_merge',
             'and_merge',
             'xor_merge'
-            'oldest'
+            'overwrite_add',
+            'overwrite_subtract',
+            'oldest',
             'newest'
             );");
 

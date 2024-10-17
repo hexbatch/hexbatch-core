@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Sys\Res\Atr\Stk\Remote\RemoteResponse;
+namespace App\Sys\Res\Atr\Stk\Remote;
 
 
 
 use App\Sys\Res\Atr\BaseAttribute;
-use App\Sys\Res\Atr\Stk\Remote\RemoteInformation;
 
 class RemoteResponse extends BaseAttribute
 {

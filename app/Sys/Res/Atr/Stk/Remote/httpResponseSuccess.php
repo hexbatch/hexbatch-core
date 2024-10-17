@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sys\Res\Atr\Stk\Remote\RemoteResponse;
+namespace App\Sys\Res\Atr\Stk\Remote;
 
 
 

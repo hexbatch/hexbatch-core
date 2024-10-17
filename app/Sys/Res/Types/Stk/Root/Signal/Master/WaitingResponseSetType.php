@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Remote;
+namespace App\Sys\Res\Types\Stk\Root\Signal\Master;
 
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Container;
-use App\Sys\Res\Types\Stk\Root\Remote;
+use App\Sys\Res\Types\Stk\Root\Signal\MasterSemaphore;
 
 
-class RemoteSetType extends BaseType
+class WaitingResponseSetType extends BaseType
 {
-    const UUID = '4cc78a36-2e1c-419c-bba9-4f96f78d607a';
-    const TYPE_NAME = 'remote_set';
+    const UUID = '351c20a0-233f-40e9-b2c3-d15c46b432a7';
+    const TYPE_NAME = 'waiting_response_set';
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';
@@ -21,8 +21,7 @@ class RemoteSetType extends BaseType
     ];
 
     const PARENT_UUIDS = [
-        Remote::UUID,
-        Container::UUID
+        OuterSetType::UUID,
     ];
 
 }

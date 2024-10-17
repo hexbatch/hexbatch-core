@@ -20,8 +20,6 @@ enum TypeOfAction: string
     case PRAGMA_WRITE_VISUAL_MAP = 'pragma_write_visual_map'; //if the type has a map set display properties
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
-    case PRAGMA_WRITE_INCREMENT = 'pragma_write_increment'; //+1 to the attribute value of the element in the set
-    case PRAGMA_WRITE_DECREMENT = 'pragma_write_decrement'; //minus to the attribute value of the element in the set
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
 
     case PRAGMA_READ_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
@@ -77,8 +75,8 @@ enum TypeOfAction: string
     case CMD_TYPE_DESTROY_NO_EVENTS = 'cmd_type_destroy_no_events'; //server admin
     case CMD_TYPE_CHANGE_OWNER = 'cmd_type_change_owner';
 
-    case CMD_TYPE_DESCRIPTION_ADD = 'cmd_type_description_add';
-    case CMD_TYPE_DESCRIPTION_REMOVE = 'cmd_type_description_remove';
+    case CMD_TYPE_HANDLE_ADD = 'cmd_type_handle_add';
+    case CMD_TYPE_HANDLE_REMOVE = 'cmd_type_handle_remove';
 
     case CMD_ATTRIBUTE_DESCRIPTION_ADD = 'cmd_attribute_description_add';
     case CMD_ATTRIBUTE_DESCRIPTION_REMOVE = 'cmd_attribute_description_remove';
@@ -102,8 +100,8 @@ enum TypeOfAction: string
     case CMD_SET_MEMBER_ADD_NO_EVENTS = 'cmd_set_member_add_no_events'; //add element to set
     case CMD_SET_MEMBER_REMOVE_NO_EVENTS = 'cmd_set_member_remove_no_events'; //add element to set
 
-    case CMD_SET_CHILD_DESCRIPTION_ADD = 'cmd_set_child_description_add';
-    case CMD_SET_CHILD_DESCRIPTION_REMOVE = 'cmd_set_child_description_remove';
+    case CMD_SET_CHILD_HANDLE_ADD = 'cmd_set_child_handle_add';
+    case CMD_SET_CHILD_HANDLE_REMOVE = 'cmd_set_child_handle_remove';
 
 
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
@@ -143,6 +141,8 @@ enum TypeOfAction: string
 
     case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
     case CMD_SEMAPHORE_RESET = 'cmd_semaphore_reset';
+    case CMD_SEMAPHORE_MASTER_CREATE = 'cmd_semaphore_master_create';
+    case CMD_SEMAPHORE_MASTER_RUN = 'cmd_semaphore_master_run';
 
     case CMD_RUN_REMOTE = 'cmd_run_remote'; //if admin of type ns, makes outgoing remote
 
