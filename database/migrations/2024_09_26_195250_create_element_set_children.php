@@ -30,7 +30,7 @@ return new class extends Migration
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-
+            //todo add new column for defining element
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)

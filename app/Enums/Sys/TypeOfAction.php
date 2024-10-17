@@ -20,6 +20,8 @@ enum TypeOfAction: string
     case PRAGMA_WRITE_VISUAL_MAP = 'pragma_write_visual_map'; //if the type has a map set display properties
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
+    case PRAGMA_WRITE_INCREMENT = 'pragma_write_increment'; //+1 to the attribute value of the element in the set
+    case PRAGMA_WRITE_DECREMENT = 'pragma_write_decrement'; //minus to the attribute value of the element in the set
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
 
     case PRAGMA_READ_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
@@ -59,10 +61,13 @@ enum TypeOfAction: string
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
     case CMD_DESIGN_ATTRIBUTE_REMOVE = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
-    case CMD_DESIGN_ATTRIBUTE_SHAPE = 'cmd_design_attribute_shape';
-    case CMD_DESIGN_RULE_CREATE = 'cmd_design_rule_create';
-    case CMD_DESIGN_RULE_DESTROY = 'cmd_design_rule_destroy';
+    case CMD_DESIGN_ATTRIBUTE_HANDLE = 'cmd_design_attribute_handle';
+    case CMD_DESIGN_LISTENER_CREATE = 'cmd_design_listener_create';
+    case CMD_DESIGN_LISTENER_DESTROY = 'cmd_design_listener_destroy';
+    case CMD_DESIGN_RULE_ADD = 'cmd_design_rule_add';
+    case CMD_DESIGN_RULE_REMOVE = 'cmd_design_rule_remove';
     case CMD_DESIGN_RULE_EDIT = 'cmd_design_rule_edit';
+    case CMD_DESIGN_RULE_TEST = 'cmd_design_rule_test';
 
     case CMD_TYPE_CREATE = 'cmd_type_create';
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
@@ -80,6 +85,7 @@ enum TypeOfAction: string
 
     case CMD_PATH_CREATE = 'cmd_path_create';
     case CMD_PATH_EDIT = 'cmd_path_edit';
+    case CMD_PATH_COPY = 'cmd_path_copy';
     case CMD_PATH_DESTROY = 'cmd_path_destroy';
     case CMD_PATH_HANDLE_ADD = 'cmd_path_handle_add';
     case CMD_PATH_HANDLE_REMOVE = 'cmd_path_handle_remove';
@@ -89,8 +95,15 @@ enum TypeOfAction: string
     case CMD_LINK_ADD = 'cmd_link_add';
     case CMD_LINK_REMOVE = 'cmd_link_remove';
 
-    case CMD_LINK_DESCRIPTION_ADD = 'cmd_link_description_add';
-    case CMD_LINK_DESCRIPTION_REMOVE = 'cmd_link_description_remove';
+
+    case CMD_SET_MEMBER_ADD = 'cmd_set_member_add'; //add element to set
+    case CMD_SET_MEMBER_REMOVE = 'cmd_set_member_remove'; //add element to set
+
+    case CMD_SET_MEMBER_ADD_NO_EVENTS = 'cmd_set_member_add_no_events'; //add element to set
+    case CMD_SET_MEMBER_REMOVE_NO_EVENTS = 'cmd_set_member_remove_no_events'; //add element to set
+
+    case CMD_SET_CHILD_DESCRIPTION_ADD = 'cmd_set_child_description_add';
+    case CMD_SET_CHILD_DESCRIPTION_REMOVE = 'cmd_set_child_description_remove';
 
 
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
@@ -103,9 +116,6 @@ enum TypeOfAction: string
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
     case CMD_LIVE_TYPE_TOGGLE = 'cmd_live_type_toggle';
 
-    case CMD_LIVE_SHAPE_ADD = 'cmd_live_shape_add';
-    case CMD_LIVE_SHAPE_REMOVE = 'cmd_live_shape_remove';
-    case CMD_LIVE_SHAPE_TOGGLE = 'cmd_live_shape_toggle';
     case CMD_FILTER_ADD = 'cmd_filter_add';
     case CMD_FILTER_REMOVE = 'cmd_filter_remove';
 
@@ -168,15 +178,5 @@ enum TypeOfAction: string
 
 }
 
-/*
-
-'cmd_destroy_namespace', -- server user or ns owner
-'cmd_destroy_user', -- server user
-'cmd_assign_user_to_namespace', -- server user
-'cmd_create_element', -- single only
-'cmd_add_live_type_element', -- type(s) found in the data path
-'cmd_namespace_add_member', -- namespace found by the type of the attribute chosen,server user or ns owner
-
- */
 
 

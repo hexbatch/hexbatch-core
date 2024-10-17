@@ -12,6 +12,8 @@ use App\Sys\Res\Types\Stk\Root\Evt;
  *  or a collection of elements that are path handles
  *    the collection will return multiple search results with logic
  *
+ * empty results, or 0 for integer returns, or not exist : is false to the parent, otherwise true for parent logic
+ *
  */
 class Search extends Act\Pragma
 {

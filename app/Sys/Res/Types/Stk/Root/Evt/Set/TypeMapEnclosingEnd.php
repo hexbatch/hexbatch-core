@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ShapeAdded extends Evt\ScopeSet
+class TypeMapEnclosingEnd extends Evt\ScopeSet
 {
-    const UUID = 'b2f7d7b0-c1b9-4e6b-abad-2176b7c2009a';
-    const EVENT_NAME = TypeOfEvent::SHAPE_ADDED;
+    const UUID = '672263d1-519a-4d5a-8359-0763e6fe5387';
+    const EVENT_NAME = TypeOfEvent::TYPE_MAP_ENCLOSING_END;
     const TYPE_NAME =  self::EVENT_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

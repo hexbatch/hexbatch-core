@@ -6,13 +6,11 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
-/**
- * see live type added, same-ish
- */
-class LiveTypeRemoved extends Evt\ScopeSet
+
+class TypeMapEnclosedEnd extends Evt\ScopeSet
 {
-    const UUID = 'e49b5441-4df9-462a-a0c1-b26cc0bcc93f';
-    const EVENT_NAME = TypeOfEvent::LIVE_TYPE_REMOVED;
+    const UUID = '67cf7008-790b-44cd-ac7f-b4a9a094cff1';
+    const EVENT_NAME = TypeOfEvent::TYPE_MAP_ENCLOSED_END;
     const TYPE_NAME =  self::EVENT_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

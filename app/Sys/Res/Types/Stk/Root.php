@@ -26,6 +26,7 @@ class Root extends BaseType
         OutsideUrl::UUID,
         Scope::UUID
     ];
+    //todo add root attribute as parent for all attributes, this root attribute has its own uuid from .env or make one
 
     const PARENT_UUIDS = [];
 

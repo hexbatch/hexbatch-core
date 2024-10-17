@@ -25,8 +25,11 @@ enum PathRelationshipType : string {
 
   case SHARES_TYPE = 'shares_type';
   case LINK_ELEMENT = 'link_element';
-  case CHILDISH = 'childish';
-  case LINKISH = 'linkish';
+  case HANDLE_ELEMENT = 'handle_element';
+  case DESCRIPTION_ELEMENT = 'description_element';
+  case DOWN_SET = 'down_set';
+  case UP_SET = 'up_set';
+  case LIVE_TYPE = 'live_type';
   case ANCESTOR = 'ancestor';
   case DESCENDANT = 'descendant';
   case NAMESPACE_OWNS_ELEMENT = 'namespace_owns_element';

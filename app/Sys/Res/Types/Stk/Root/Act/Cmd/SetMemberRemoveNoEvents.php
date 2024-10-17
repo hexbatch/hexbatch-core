@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class LinkDescriptionAdd extends Act\Cmd
+class SetMemberRemoveNoEvents extends Act\Cmd
 {
-    const UUID = '2761a348-249c-4d08-8fe3-a76936e32148';
-    const ACTION_NAME = TypeOfAction::CMD_LINK_DESCRIPTION_ADD;
+    const UUID = '92b452a7-e0a7-4449-af30-8220f68ab70e';
+    const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_REMOVE_NO_EVENTS;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

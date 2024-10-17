@@ -46,6 +46,7 @@ class Server extends Model implements IServer
      *
      * All elements transferred have the same uuid in the newly created elements
      * All ns transferred keep their uuid
+     * all incoming servers keep their uuid
      *
      * The server has a ns, any element stuff is in its public or private element
      */

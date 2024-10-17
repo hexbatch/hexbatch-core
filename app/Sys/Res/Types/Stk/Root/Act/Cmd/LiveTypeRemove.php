@@ -5,7 +5,13 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+/*
+ * when live type is being removed , this is a set operation,
+ * and the live is removed down-set
+ * if the down-set has changed live
+ * then this is removed before those changes (the changes are applied again after removal)
+ * even if up-set removed later
+ */
 
 class LiveTypeRemove extends Act\Cmd
 {

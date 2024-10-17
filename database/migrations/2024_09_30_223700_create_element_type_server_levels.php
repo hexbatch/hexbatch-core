@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->foreignId('server_access_type_id')
                 ->nullable(false)
-                ->comment("The type that has a whitelist entry")
+                ->comment("The type that has an access type, if missing then private ")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->foreignId('to_server_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The server added to the whitelist. If server is null, then this applies to all servers for the type")
+                ->comment("The server added to the access. If server is null, then this access applies to all servers for the type in the row")
                 ->index()
                 ->constrained('servers')
                 ->cascadeOnUpdate()

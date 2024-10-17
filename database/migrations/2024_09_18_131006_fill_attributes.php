@@ -34,6 +34,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo rename to handle_attribute_id
             $table->foreignId('design_attribute_id')
                 ->nullable()
                 ->default(null)
@@ -131,7 +132,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->text('value_json_path')->nullable()->default(null)
-                ->comment("if set the value json has to match this, pointer whitelist can apply");
+                ->comment("if set the value json has to match this");
 
             $table->string('attribute_name',128)->nullable()->index()
                 ->comment("The unique name of the attribute, using the naming rules");

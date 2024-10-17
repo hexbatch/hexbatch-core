@@ -46,7 +46,7 @@ return new class extends Migration
 
             $table->foreignId('rule_path_id')
                 ->nullable()->default(null)
-                ->comment("This rule follows a path for data,trigger and targets")
+                ->comment("This rule follows a path for data and targets")
                 ->index()
                 ->constrained('paths')
                 ->cascadeOnUpdate()

@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
+namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
-/*
- * will call add or remove based if live is there
- */
-class LiveTypeToggle extends Act\Cmd
+
+class WriteIncrement extends Act\Pragma
 {
-    const UUID = '3b3c0b0f-1ab0-4482-b103-207c3527bacd';
-    const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_TOGGLE;
+    const UUID = '1f571670-8aa9-42a8-a26c-5461f37f5178';
+    const ACTION_NAME = TypeOfAction::PRAGMA_WRITE_INCREMENT;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
@@ -23,7 +22,11 @@ class LiveTypeToggle extends Act\Cmd
     ];
 
     const PARENT_UUIDS = [
-        Act\Cmd::UUID
+        Act\Pragma::UUID
+    ];
+
+    const EVENT_UUIDS = [
+        Evt\Set\Write::UUID
     ];
 
 }

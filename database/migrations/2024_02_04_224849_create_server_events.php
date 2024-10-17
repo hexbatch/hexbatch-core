@@ -24,7 +24,7 @@ return new class extends Migration
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->cascadeOnDelete();//todo restrict to events
 
 
             $table->foreignId('event_server_id')
@@ -32,6 +32,14 @@ return new class extends Migration
                 ->comment("null for this server, otherwise send out this event to that server")
                 ->index()
                 ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('owning_attribute_id')
+                ->nullable(false)
+                ->comment("The attribute that owns this event, one attribute per event rule chain")
+                ->unique()
+                ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -52,21 +60,19 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('owning_attribute_id')
-                ->nullable(false)
-                ->comment("The attribute that owns this event, one attribute per event rule chain")
-                ->unique()
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+            //todo blocked and filtered in parent set applies to down-set , unless a set there applies something else that overrides
+            //todo add new columns: blocked_by (this table), filtered_by (this table), set (the set this is filtered or blocked by),
+            // and the live type that is doing this
+
 
             $table->boolean('is_listening_before')
                 ->nullable(false)->default(true)
                 ->comment("If true then the rules can block this event, if after then this is run after the event successfully completes");
 
+            //todo can be clipped to map or shape, so rename please to is_clipped_type_bounds
             $table->boolean('is_clipped_shape')
                 ->nullable(false)->default(false)
-                ->comment("If true then for events scoped to the same set this only listens if the attribute bounds intersect");
+                ->comment("If true then for events scoped to the same set this only listens if the element type bounds intersect in same set");
 
 
             $table->timestamps();

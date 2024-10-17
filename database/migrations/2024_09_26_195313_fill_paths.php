@@ -60,6 +60,10 @@ return new class extends Migration
 
         DB::statement(/** @lang text */
             "CREATE UNIQUE INDEX udx_path_name_on_namespace ON paths (path_owning_namespace_id,path_name) NULLS NOT DISTINCT;");
+
+        //todo add enum for status : design,ready,error, sabotaged
+        // design status can be run in tests with rules, when publishing rebuild paths
+        // paths with error or sabotaged will return false when run in things, making the thing row return false to its parent (or throw exception?)
     }
 
     /**

@@ -55,6 +55,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo add column for a set member element, if this is only about the element in a set
+
             $table->foreignId('collection_namespace_id')
                 ->nullable()
                 ->default(null)
@@ -67,6 +69,8 @@ return new class extends Migration
             $table->boolean('is_cursor')
                 ->nullable(false)->default(false)
                 ->comment("If true what is in this row is the cursor for the path of the thing for the next page");
+
+            //todo add enum about source of data: from children, from me, or setup
 
             $table->jsonb('collection_json')
                 ->nullable()->default(null)->comment("Data has json");

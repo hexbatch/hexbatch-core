@@ -468,7 +468,7 @@ class ElementType extends Model implements IType
                             throw new HexbatchNotPossibleException(__('msg.type_must_have_map_bound'),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                                 RefCodes::TYPE_BAD_SCHEMA);
-                        }
+                        }//todo allow either type of bound map or shape
                         $this->type_location_map_bound_id = $bound->id;
                     }
                 }

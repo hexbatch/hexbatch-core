@@ -24,16 +24,17 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('waiting_on_type_id')
-                ->nullable()->default(null)
+                ->nullable(false)
                 ->comment("Waiting on a type, can wait on more than one type at a time")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            //todo change to element
             $table->foreignId('waiting_with_set')
                 ->nullable()->default(null)
-                ->comment("The element of the type has to enter the set to wake this up")
+                ->comment("The type may have a specific element that is ready, and not just any element to be ready")
                 ->index()
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()

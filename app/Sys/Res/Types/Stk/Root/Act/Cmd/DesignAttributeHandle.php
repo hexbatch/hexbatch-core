@@ -6,14 +6,11 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
-/*
- * it is ok if this element is destroyed while things are working on it
- * it will just fail those things, or they will finish without it
- */
-class ElementDestroy extends Act\Cmd
+
+class DesignAttributeHandle extends Act\Cmd
 {
-    const UUID = '557bbc2e-f589-4874-91f0-5d5e96fe115f';
-    const ACTION_NAME = TypeOfAction::CMD_ELEMENT_DESTROY;
+    const UUID = 'e9266b57-d485-438f-befe-7f5cd226643c';
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_ATTRIBUTE_HANDLE;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

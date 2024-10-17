@@ -64,6 +64,9 @@ return new class extends Migration
             $table->string('server_domain')->unique()
                 ->nullable(false)
                 ->comment("the url to the server, example localhost, eggs.waffle_time.org");
+
+            //todo add column to store the token given to it by the other server, this is stored encrypted, but has to be plain text when sent
+            // add column of datetime when this expires
         });
 
         DB::statement('ALTER TABLE servers ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

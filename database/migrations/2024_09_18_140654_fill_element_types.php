@@ -89,6 +89,7 @@ return new class extends Migration
 
         });
 
+        //todo add type_sum_geom_map for attributes that have a map
         DB::statement("ALTER TABLE element_types
                               Add COLUMN type_sum_geom_shape
                               geometry

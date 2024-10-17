@@ -10,6 +10,7 @@ use App\Sys\Res\Servers\BaseServer;
 
 
 class ThisServer extends BaseServer {
+    //todo each server uuid is different, change this constant below to a method, and get the uuid from the .env or make a new one
     const UUID = '32998341-aa98-425e-b556-c342d029bb56';
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

@@ -31,9 +31,10 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnDelete();
 
+            //make this visibility_set_id nullable when its top level set visibility by type
             $table->foreignId('visibility_set_id')
-                ->nullable(false)
-                ->comment("The set this type is matched for")
+                ->nullable()
+                ->comment("The set this type is matched for, null for top level set")
                 ->index()
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()

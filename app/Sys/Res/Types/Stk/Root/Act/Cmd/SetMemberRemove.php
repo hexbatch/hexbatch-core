@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class DesignAttributeShape extends Act\Cmd
+class SetMemberRemove extends Act\Cmd
 {
-    const UUID = 'e9266b57-d485-438f-befe-7f5cd226643c';
-    const ACTION_NAME = TypeOfAction::CMD_DESIGN_ATTRIBUTE_SHAPE;
+    const UUID = '3cf263d1-3aef-4c96-aed4-01a3c2bd1f98';
+    const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_REMOVE;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

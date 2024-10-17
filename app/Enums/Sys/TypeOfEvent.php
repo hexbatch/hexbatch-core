@@ -81,12 +81,27 @@ enum TypeOfEvent: string
     case SHAPE_ENTER = 'shape_enter';
     case SHAPE_LEAVE = 'shape_leave';
 
-    case LIVE_TYPE_ADDED = 'live_type_added'; //these go to both types
+    case MAP_ENTER = 'map_enter';
+    case MAP_LEAVE = 'map_leave';
+
+    case TYPE_SHAPE_ENCLOSED_START = 'type_shape_enclosed_start';
+    case TYPE_SHAPE_ENCLOSED_END = 'type_shape_enclosed_end';
+
+    case TYPE_SHAPE_ENCLOSING_START = 'type_shape_enclosing_start';
+    case TYPE_SHAPE_ENCLOSING_END = 'type_shape_enclosing_end';
+
+    case TYPE_MAP_ENCLOSED_START = 'type_map_enclosed_start';
+    case TYPE_MAP_ENCLOSED_END = 'type_map_enclosed_end';
+
+    case TYPE_MAP_ENCLOSING_START = 'type_map_enclosing_start';
+    case TYPE_MAP_ENCLOSING_END = 'type_map_enclosing_end';
+
+
+
+    case LIVE_TYPE_ADDED = 'live_type_added'; //
     case LIVE_TYPE_REMOVED = 'live_type_removed';
     case LIVE_TYPE_PASTED = 'live_type_pasted';
 
-    case SHAPE_ADDED = 'shape_added'; //these go to both types
-    case SHAPE_REMOVED = 'shape_removed';
 
 
     /*
@@ -198,6 +213,11 @@ enum TypeOfEvent: string
     //mixed scope
 
     case CUSTOM_EVENT = 'custom_event'; //scope depends on the custom event type parent
+    case THING_TREE_SET_PERMISSIONS = 'thing_tree_set_permissions';
+    //all scopes system admin ns only, after the tree is created
+    //
+    case THING_TREE_SET_DEBUGGING = 'thing_tree_set_debugging';
+    //all scopes system admin ns only, after the tree is created
 
 
     public static function tryFromInput(string|int|bool|null $test): TypeOfEvent

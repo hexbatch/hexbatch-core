@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+
+
+    //todo there can be either location bounds, but each attribute can have a map or shape to it
     /**
      * Run the migrations.
      */
@@ -14,7 +17,8 @@ return new class extends Migration
     {
         Schema::create('attribute_shape_intersections', function (Blueprint $table) {
             $table->id();
-
+            // make note to pop the attribute intersection if live type is removed OR the attribute is hidden by live type
+            //todo new column for the parent type intersection which can be a design type or live type
             $table->foreignId('shape_set_member_id')
                 ->nullable()
                 ->comment("The element/set this intersecting bounds is about. Can be nullable if ns admin for both and type live")
@@ -39,7 +43,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-
+            //todo add new column for the type of intersection (shape or map), use location type
         });
 
         DB::statement("CREATE TYPE type_of_shape_intersection AS ENUM ('designed_shape', 'live_shape');");

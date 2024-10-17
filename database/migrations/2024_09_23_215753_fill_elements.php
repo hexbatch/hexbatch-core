@@ -32,6 +32,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+
+            //todo remove these pointers and make new table for elements pointing to sets (e|s), one el can point to many sets
             $table->foreignId('pointer_to_child_or_link_set_id')
                 ->nullable()->default(null)
                 ->comment("each element can point to a set (that is anywhere) as a link")

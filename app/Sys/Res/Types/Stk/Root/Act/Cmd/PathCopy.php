@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class LiveShapeAdd extends Act\Cmd
+class PathCopy extends Act\Cmd
 {
-    const UUID = '18e94c91-fe57-4169-bfae-c292bcb03744';
-    const ACTION_NAME = TypeOfAction::CMD_LIVE_SHAPE_ADD;
+    const UUID = 'a72706e2-ccb2-49a1-b890-5afecd51f219';
+    const ACTION_NAME = TypeOfAction::CMD_PATH_COPY;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

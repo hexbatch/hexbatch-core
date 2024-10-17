@@ -15,6 +15,7 @@ use App\Sys\Res\Users\Stock\SystemUser;
 class ThisServerNamespace extends BaseNamespace
 {
 
+    //todo each server's namespace uuid is different, change this constant below to a method, and get the uuid from the .env or make a new one
     const UUID = 'd5eb0c72-1db8-4658-9615-3502ef724e51';
 
     const TYPE_UUID = ThisServerNS::UUID;

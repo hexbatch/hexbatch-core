@@ -227,8 +227,11 @@ return new class extends Migration
             'owner_of_namespace',
             'member_of_set',
             'link_element',
-            'childish',
-            'linkish'
+            'handle_element',
+            'description_element',
+            'down_set',
+            'live_type',
+            'up_set'
             );");
 
         DB::statement("ALTER TABLE path_parts Add COLUMN path_relationship path_relationship_type NOT NULL default 'no_relationship';");
@@ -321,4 +324,5 @@ return new class extends Migration
         DB::statement("DROP TYPE time_comparison_type;");
         DB::statement("DROP TYPE path_returns_type;");
     }
+    //todo path part has trigger when deleted that will mark its parent as sabotaged unless in design mode, in which case is ok
 };

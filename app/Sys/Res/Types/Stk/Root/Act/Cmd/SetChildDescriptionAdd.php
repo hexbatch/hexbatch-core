@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class LiveShapeRemove extends Act\Cmd
+class SetChildDescriptionAdd extends Act\Cmd
 {
-    const UUID = '4e92b2d6-67fe-4038-b066-842f6e822649';
-    const ACTION_NAME = TypeOfAction::CMD_LIVE_SHAPE_REMOVE;
+    const UUID = '2761a348-249c-4d08-8fe3-a76936e32148';
+    const ACTION_NAME = TypeOfAction::CMD_SET_CHILD_DESCRIPTION_ADD;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
