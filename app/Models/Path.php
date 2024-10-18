@@ -6,6 +6,7 @@ namespace App\Models;
 
 
 
+use App\Enums\Paths\TypeOfPathStatus;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -26,6 +27,9 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * paths have cursors in full thing collections, this is stuck on at the end of the compiled sql
+ * // design status can be run in tests with rules, when publishing rebuild paths
+ * // paths with error or sabotaged will return false when run in things, making the thing row return false to its parent (or throw exception?)
+ * //todo path part has trigger when deleted that will mark its parent as sabotaged unless in design mode, in which case is ok
  */
 
 /**
@@ -38,6 +42,7 @@ use Illuminate\Validation\ValidationException;
 
  * @property string path_name
  * @property string path_compiled_sql
+ * @property TypeOfPathStatus path_status
  *
  *
  * @property string created_at
@@ -72,7 +77,9 @@ class Path extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'path_status' => TypeOfPathStatus::class,
+    ];
 
 
     public function namespace_owner() : BelongsTo {

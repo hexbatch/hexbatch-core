@@ -52,9 +52,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo rename this to handle ..
 
-            $table->foreignId('type_description_element_id')
+            $table->foreignId('type_handle_element_id')
                 ->nullable()
                 ->default(null)
                 ->comment("This is an optional description/hook element")
@@ -90,12 +89,50 @@ return new class extends Migration
 
         });
 
-        //todo add type_sum_geom_map for attributes that have a map
+
         DB::statement("ALTER TABLE element_types
-                              Add COLUMN type_sum_geom_shape
+                              Add COLUMN sum_shape_geom
                               geometry
                               ;
                     ");
+
+        DB::statement("ALTER TABLE element_types
+                              Add COLUMN sum_map_geom
+                              geometry
+                              ;
+                    ");
+
+        DB::statement("ALTER TABLE element_types
+                              Add COLUMN sum_shape_bounding_box
+                              box3d
+                              ;
+                    ");
+
+        DB::statement("ALTER TABLE element_types
+                              Add COLUMN sum_map_bounding_box
+                              box2d
+                              ;
+                    ");
+
+        DB::statement("
+            CREATE OR REPLACE FUNCTION update_type_geo_columns()
+                RETURNS TRIGGER AS $$
+            BEGIN
+
+                NEW.sum_shape_bounding_box = ST_3DExtent(NEW.sum_shape_geom);
+                NEW.sum_map_bounding_box = ST_Extent(NEW.sum_map_geom);
+                RETURN NEW;
+            END;
+            $$ language 'plpgsql';
+        ");
+
+        DB::statement("
+            CREATE TRIGGER set_type_geo_before_ins BEFORE INSERT ON element_types FOR EACH ROW EXECUTE PROCEDURE update_live_types_geo_columns();
+        ");
+
+        DB::statement("
+            CREATE TRIGGER set_type_geo_before_ups BEFORE UPDATE ON element_types FOR EACH ROW EXECUTE PROCEDURE update_live_types_geo_columns();
+        ");
 
 
         Schema::table('element_types', function (Blueprint $table) {
@@ -121,19 +158,21 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement("DROP TRIGGER update_modified_time ON element_types");
+        DB::statement("DROP TRIGGER set_type_geo_before_ins ON element_types");
+        DB::statement("DROP TRIGGER set_type_geo_before_ups ON element_types");
 
         Schema::table('element_types', function (Blueprint $table) {
             $table->dropForeign(['owner_namespace_id']);
             $table->dropForeign(['imported_from_server_id']);
             $table->dropForeign(['type_time_bound_id']);
             $table->dropForeign(['type_location_map_bound_id']);
-            $table->dropForeign(['type_description_element_id']);
+            $table->dropForeign(['type_handle_element_id']);
 
             $table->dropColumn('owner_namespace_id');
             $table->dropColumn('imported_from_server_id');
             $table->dropColumn('type_time_bound_id');
             $table->dropColumn('type_location_map_bound_id');
-            $table->dropColumn('type_description_element_id');
+            $table->dropColumn('type_handle_element_id');
 
             $table->dropColumn('type_name');
             $table->dropColumn('ref_uuid');
@@ -141,7 +180,10 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final_type');
-            $table->dropColumn('type_sum_geom_shape');
+            $table->dropColumn('sum_shape_geom');
+            $table->dropColumn('sum_map_geom');
+            $table->dropColumn('sum_shape_bounding_box');
+            $table->dropColumn('sum_map_bounding_box');
             $table->dropColumn('lifecycle');
 
 
@@ -149,5 +191,6 @@ return new class extends Migration
         });
 
         DB::statement("DROP TYPE type_of_lifecycle;");
+        DB::statement("DROP FUNCTION IF EXISTS update_type_geo_columns();");
     }
 };

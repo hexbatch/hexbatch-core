@@ -24,7 +24,7 @@ return new class extends Migration
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();//todo restrict to events
+                ->cascadeOnDelete();
 
 
             $table->foreignId('event_server_id')
@@ -60,19 +60,37 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo blocked and filtered in parent set applies to down-set , unless a set there applies something else that overrides
-            //todo add new columns: blocked_by (this table), filtered_by (this table), set (the set this is filtered or blocked by),
-            // and the live type that is doing this
+
+            $table->foreignId('blocked_by_server_event_id')
+                ->nullable()->default(null)
+                ->comment("This event is being blocked because of a live type")
+                ->index()
+                ->constrained('server_events')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+            $table->foreignId('filtered_by_server_event_id')
+                ->nullable()->default(null)
+                ->comment("This event is being filtered because of a  live type")
+                ->index()
+                ->constrained('server_events')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
+            $table->foreignId('source_live_attribute_id')
+                ->nullable()->default(null)
+                ->comment("This rule was provided by this live attribute id, when it goes away so does this row, and the earlier rows are at the top")
+                ->index()
+                ->constrained('live_attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
 
             $table->boolean('is_listening_before')
                 ->nullable(false)->default(true)
                 ->comment("If true then the rules can block this event, if after then this is run after the event successfully completes");
 
-            //todo can be clipped to map or shape, so rename please to is_clipped_type_bounds
-            $table->boolean('is_clipped_shape')
-                ->nullable(false)->default(false)
-                ->comment("If true then for events scoped to the same set this only listens if the element type bounds intersect in same set");
+
 
 
             $table->timestamps();

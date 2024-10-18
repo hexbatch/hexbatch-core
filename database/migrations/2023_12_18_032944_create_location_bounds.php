@@ -91,11 +91,11 @@ return new class extends Migration
         ");
 
         DB::statement("
-            CREATE TRIGGER set_geo_before_ins BEFORE INSERT ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
+            CREATE TRIGGER set_bound_geo_before_ins BEFORE INSERT ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
         ");
 
         DB::statement("
-            CREATE TRIGGER set_geo_before_ups BEFORE UPDATE ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
+            CREATE TRIGGER set_bound_geo_before_ups BEFORE UPDATE ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
         ");
 
     }

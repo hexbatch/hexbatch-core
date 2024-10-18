@@ -31,12 +31,12 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo change to element
-            $table->foreignId('waiting_with_set')
+
+            $table->foreignId('waiting_with_element_id')
                 ->nullable()->default(null)
                 ->comment("The type may have a specific element that is ready, and not just any element to be ready")
                 ->index()
-                ->constrained('element_sets')
+                ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

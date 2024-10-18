@@ -25,11 +25,12 @@ return new class extends Migration
 
             $table->foreignId('horde_originating_type_id')
                 ->nullable(false)
-                ->comment("The type where the attribute came from. This can from be a design child, the type itself, or a live type added onto the element")
+                ->comment("The type where the attribute came from. This can from be a design child or the type itself, or a live type added onto the element")
                 ->index()
                 ->constrained('element_types')
                 ->restrictOnDelete()
                 ->cascadeOnDelete();
+
 
 
             $table->foreignId('horde_attribute_id')
@@ -37,6 +38,14 @@ return new class extends Migration
                 ->comment("The attribute that belongs to the type")
                 ->index()
                 ->constrained('attributes')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('horde_live_attribute_id')
+                ->nullable()->default(null)
+                ->comment("If a live type added this attribute")
+                ->index()
+                ->constrained('live_attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

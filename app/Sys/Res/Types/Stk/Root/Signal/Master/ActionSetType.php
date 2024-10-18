@@ -4,8 +4,6 @@ namespace App\Sys\Res\Types\Stk\Root\Signal\Master;
 
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stk\Root\Container;
-use App\Sys\Res\Types\Stk\Root\Signal\MasterSemaphore;
 
 
 class ActionSetType extends BaseType

@@ -26,7 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property TypeOfServerStatus server_status
  * @property string server_domain
  * @property string server_name
+ * @property string server_access_token
  * @property string status_change_at
+ * @property string access_token_expires_at
  *
  * @property UserNamespace owning_namespace
  *

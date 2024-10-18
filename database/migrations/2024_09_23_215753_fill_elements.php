@@ -33,22 +33,8 @@ return new class extends Migration
                 ->restrictOnDelete();
 
 
-            //todo remove these pointers and make new table for elements pointing to sets (e|s), one el can point to many sets
-            $table->foreignId('pointer_to_child_or_link_set_id')
-                ->nullable()->default(null)
-                ->comment("each element can point to a set (that is anywhere) as a link")
-                ->index()
-                ->constrained('element_sets')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
 
-            $table->foreignId('pointer_to_parent_set_id')
-                ->nullable()->default(null)
-                ->comment("each element can also point to a second set, to describe the linkage between them or act as a reference point")
-                ->index()
-                ->constrained('element_sets')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
+
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -85,13 +71,9 @@ return new class extends Migration
         Schema::table('elements', function (Blueprint $table) {
             $table->dropForeign(['element_parent_type_id']);
             $table->dropForeign(['element_namespace_id']);
-            $table->dropForeign(['pointer_to_child_or_link_set_id']);
-            $table->dropForeign(['pointer_to_parent_set_id']);
 
             $table->dropColumn('element_parent_type_id');
             $table->dropColumn('element_namespace_id');
-            $table->dropColumn('pointer_to_child_or_link_set_id');
-            $table->dropColumn('pointer_to_parent_set_id');
 
             $table->dropColumn('ref_uuid');
             $table->dropColumn('created_at');

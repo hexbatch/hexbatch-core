@@ -55,7 +55,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo add column for a set member element, if this is only about the element in a set
+            $table->foreignId('collection_set_member_id')
+                ->nullable()->default(null)
+                ->comment("Data has an set member")
+                ->index()
+                ->constrained('element_set_members')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
 
             $table->foreignId('collection_namespace_id')
                 ->nullable()
@@ -70,11 +77,14 @@ return new class extends Migration
                 ->nullable(false)->default(false)
                 ->comment("If true what is in this row is the cursor for the path of the thing for the next page");
 
-            //todo add enum about source of data: from children, from me, or setup
 
             $table->jsonb('collection_json')
                 ->nullable()->default(null)->comment("Data has json");
         });
+
+        DB::statement("CREATE TYPE type_of_thing_data_source AS ENUM ('not_set','from_children', 'from_current','from_setup');");
+
+        DB::statement("ALTER TABLE thing_data Add COLUMN thing_data_source type_of_thing_data_source NOT NULL default 'not_set';");
 
         DB::statement("ALTER TABLE thing_data ADD CONSTRAINT chk_one_thing_set CHECK (
             num_nonnulls(collection_attribute_id  ,collection_type_id, collection_namespace_id, collection_element_id, collection_set_id) = 1)
@@ -87,5 +97,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('thing_data');
+        DB::statement("DROP TYPE type_of_thing_data_source;");
+
     }
 };

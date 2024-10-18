@@ -324,5 +324,5 @@ return new class extends Migration
         DB::statement("DROP TYPE time_comparison_type;");
         DB::statement("DROP TYPE path_returns_type;");
     }
-    //todo path part has trigger when deleted that will mark its parent as sabotaged unless in design mode, in which case is ok
+
 };

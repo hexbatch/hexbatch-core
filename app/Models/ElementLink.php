@@ -12,18 +12,17 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_set_id
- * @property int child_set_id
- * @property int handle_element_id
+ * @property int linker_element_id
+ * @property int link_to_set_id
  * @property string ref_uuid
  *
  * @property string created_at
  * @property string updated_at
  */
-class ElementSetChild extends Model
+class ElementLink extends Model
 {
 
-    protected $table = 'element_set_children';
+    protected $table = 'element_links';
     public $timestamps = false;
 
     /**

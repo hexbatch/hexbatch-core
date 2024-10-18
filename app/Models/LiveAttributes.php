@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Enums\Attributes\TypeOfLiveAttributeBehavior;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,18 +13,17 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_set_id
- * @property int child_set_id
- * @property int handle_element_id
- * @property string ref_uuid
+ * @property int parent_live_id
+ * @property int earlier_attribute_id
+ * @property int later_attribute_id
+ * @property int live_attribute_charge
+ * @property TypeOfLiveAttributeBehavior live_attribute_behavior
  *
- * @property string created_at
- * @property string updated_at
  */
-class ElementSetChild extends Model
+class LiveAttributes extends Model
 {
 
-    protected $table = 'element_set_children';
+    protected $table = 'live_attributes';
     public $timestamps = false;
 
     /**
@@ -45,6 +45,8 @@ class ElementSetChild extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'live_attribute_behavior' => TypeOfLiveAttributeBehavior::class,
+    ];
 
 }

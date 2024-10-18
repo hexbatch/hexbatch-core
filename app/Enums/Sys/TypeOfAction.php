@@ -35,6 +35,8 @@ enum TypeOfAction: string
     case PRAGMA_TYPE_ON = 'pragma_element_type_on';
     case PRAGMA_TYPE_TOGGLE = 'pragma_element_type_toggle';
     case PRAGMA_TYPE_OFF = 'pragma_element_type_off';
+    case PRAGMA_LIVE_CHARGE_DECREMENT = 'pragma_decrement_live_charge';
+    case PRAGMA_LIVE_CHARGE_INCREMENT = 'pragma_increment_live_charge';
 
     case PRAGMA_SEARCH = 'pragma_search';
 

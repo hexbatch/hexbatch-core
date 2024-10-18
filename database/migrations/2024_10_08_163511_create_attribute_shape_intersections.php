@@ -9,7 +9,6 @@ return new class extends Migration
 {
 
 
-    //todo there can be either location bounds, but each attribute can have a map or shape to it
     /**
      * Run the migrations.
      */
@@ -18,14 +17,14 @@ return new class extends Migration
         Schema::create('attribute_shape_intersections', function (Blueprint $table) {
             $table->id();
             // make note to pop the attribute intersection if live type is removed OR the attribute is hidden by live type
-            //todo new column for the parent type intersection which can be a design type or live type
-            $table->foreignId('shape_set_member_id')
-                ->nullable()
-                ->comment("The element/set this intersecting bounds is about. Can be nullable if ns admin for both and type live")
+            $table->foreignId('parent_type_intersection_id')
+                ->nullable(false)
+                ->comment("The set element and type this is about.")
                 ->index()
-                ->constrained('element_set_members')
+                ->constrained('element_type_intersections')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+
 
             $table->foreignId('shape_entry_attribute_id')
                 ->nullable(false)
@@ -43,14 +42,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo add new column for the type of intersection (shape or map), use location type
         });
 
-        DB::statement("CREATE TYPE type_of_shape_intersection AS ENUM ('designed_shape', 'live_shape');");
-
-        DB::statement("ALTER TABLE attribute_shape_intersections Add COLUMN kind_shape_intersection type_of_shape_intersection NOT NULL default 'designed_shape';");
-        DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_shape_x_per_combo ON attribute_shape_intersections (shape_set_member_id,shape_entry_attribute_id,shape_exist_attribute_id) NULLS DISTINCT;");
+               DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_shape_x_per_combo ON attribute_shape_intersections
+            (parent_type_intersection_id,shape_entry_attribute_id,parent_type_intersection_id) NULLS DISTINCT;");
     }
 
     /**
@@ -60,6 +56,5 @@ return new class extends Migration
     {
 
         Schema::dropIfExists('attribute_shape_intersections');
-        DB::statement("DROP TYPE type_of_shape_intersection;");
     }
 };

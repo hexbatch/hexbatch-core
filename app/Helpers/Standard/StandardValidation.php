@@ -9,7 +9,7 @@ use App\Helpers\Utilities;
 
 
 
-class StandardAttributes
+class StandardValidation
 {
 
 

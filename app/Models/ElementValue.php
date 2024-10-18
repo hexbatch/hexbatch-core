@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int horde_type_id
  * @property int horde_originating_type_id
  * @property int horde_attribute_id
+ * @property int horde_live_attribute_id
  * @property int element_set_member_id
  * @property int element_horde_id
  * @property int type_set_visibility_id

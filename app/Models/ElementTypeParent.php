@@ -4,7 +4,7 @@ namespace App\Models;
 
 
 use App\Enums\Types\TypeOfApproval;
-use App\Enums\Types\TypeOfParentRole;
+
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\DB;
  * @property int child_type_id
  * @property int parent_type_id
  * @property int parent_rank
- * @property TypeOfParentRole parent_role
  * @property TypeOfApproval parent_type_approval
  *
  * @property string created_at
@@ -44,7 +43,6 @@ class ElementTypeParent extends Model
         'parent_type_id',
         'parent_rank',
         'approval',
-        'parent_role',
     ];
 
     /**
@@ -60,7 +58,6 @@ class ElementTypeParent extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'parent_role' => TypeOfParentRole::class,
         'parent_type_approval' => TypeOfApproval::class
     ];
 

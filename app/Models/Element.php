@@ -27,8 +27,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int id
  * @property int element_parent_type_id
  * @property int element_namespace_id
- * @property int pointer_to_child_or_link_set_id
- * @property int pointer_to_parent_set_id
  * @property string ref_uuid
  * @property TypeOfSetPointerMode set_pointer_mode
  *

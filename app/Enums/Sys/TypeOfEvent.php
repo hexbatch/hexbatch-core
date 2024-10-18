@@ -98,9 +98,12 @@ enum TypeOfEvent: string
 
 
 
-    case LIVE_TYPE_ADDED = 'live_type_added'; //
+    case LIVE_TYPE_ADDED = 'live_type_added';
     case LIVE_TYPE_REMOVED = 'live_type_removed';
     case LIVE_TYPE_PASTED = 'live_type_pasted';
+    case TIME_IN_AFTER = 'time_in_after'; //notice after it happened
+    case TIME_OUT_AFTER = 'time_out_after';
+
 
 
 

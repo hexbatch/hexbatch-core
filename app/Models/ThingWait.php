@@ -55,7 +55,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int waiting_thing_id
  * @property int waiting_on_type_id
- * @property int waiting_with_set
+ * @property int waiting_with_element_id
  * @property string expires_at
 
  * @property TypeOfThingWaitPolicy thing_waiting_policy

@@ -59,14 +59,20 @@ return new class extends Migration
             $table->timestamp('status_change_at')->nullable()->default(null)
                 ->comment('When the last status was made at');
 
+            $table->timestamp('access_token_expires_at')->nullable()->default(null)
+                ->comment('When the access token expires, and needs to be renewed');
+
             $table->string('server_name',30)->unique();
 
             $table->string('server_domain')->unique()
                 ->nullable(false)
                 ->comment("the url to the server, example localhost, eggs.waffle_time.org");
 
-            //todo add column to store the token given to it by the other server, this is stored encrypted, but has to be plain text when sent
-            // add column of datetime when this expires
+
+            $table->string('server_access_token')
+                ->nullable()->default(null)
+                ->comment("the access token to the server, to log in as that user, encrypted");
+
         });
 
         DB::statement('ALTER TABLE servers ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

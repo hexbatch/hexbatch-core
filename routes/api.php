@@ -33,8 +33,6 @@ Route::prefix('v1')->group(function () {
         Route::post('/this', [ServerController::class, 'me'])->name('core.servers.this');
     });
 
-    //todo add single route to receive incoming remotes, put the type guid, and the guid of the thing row in the route definition,
-    // process only if remote_wait_pending for that thing with matching type
 
 
     Route::middleware('auth:sanctum')->group(function () {

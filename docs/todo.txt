@@ -16,6 +16,5 @@ todo talk about what triggers interesection events and what does not (attribute 
 
 
 
-todo find way to put file notes into open api parts or at least make docs
+todo find way to put my   notes into open api parts or at least make docs
 
-todo new events for things coming back and forth from a time bounds, time_in and time_out

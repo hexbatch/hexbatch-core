@@ -61,9 +61,12 @@ return new class extends Migration
         DB::statement(/** @lang text */
             "CREATE UNIQUE INDEX udx_path_name_on_namespace ON paths (path_owning_namespace_id,path_name) NULLS NOT DISTINCT;");
 
-        //todo add enum for status : design,ready,error, sabotaged
-        // design status can be run in tests with rules, when publishing rebuild paths
-        // paths with error or sabotaged will return false when run in things, making the thing row return false to its parent (or throw exception?)
+        DB::statement("CREATE TYPE type_of_path_status AS ENUM ('design', 'ready','error','sabotaged');");
+
+        DB::statement("ALTER TABLE paths Add COLUMN path_status type_of_path_status NOT NULL default 'design';");
+
+
+
     }
 
     /**
@@ -87,6 +90,9 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('path_name');
             $table->dropColumn('path_compiled_sql');
+            $table->dropColumn('path_status');
         });
+        DB::statement("DROP TYPE type_of_path_status;");
+
     }
 };

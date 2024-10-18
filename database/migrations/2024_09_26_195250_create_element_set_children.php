@@ -30,7 +30,15 @@ return new class extends Migration
                 ->constrained('element_sets')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-            //todo add new column for defining element call it handle..
+
+            $table->foreignId('handle_element_id')
+                ->nullable()->default(null)
+                ->comment("an element can help organize child parent relationships")
+                ->index()
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)

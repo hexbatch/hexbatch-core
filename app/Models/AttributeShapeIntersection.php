@@ -3,16 +3,14 @@
 namespace App\Models;
 
 
-use App\Enums\Attributes\TypeOfShapeIntersection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 /*
  * Records the intersections of shapes in the attributes when they enter/leave on/off in a set
  *
- * Shapes from other attributes in the set can be added to the original shape
- *  When the added attribute is turned off, or the element leaves the set, this live attribute is removed
- *  there is no event triggered when a live shape is added or removed
+ * Shapes from other attributes in the set can be added to the original shape by live types
+ *  When the added attribute is turned off, or the element leaves the set, intersection is removed
  */
 
 /**
@@ -22,7 +20,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int shape_set_member_id
  * @property int shape_entry_attribute_id
  * @property int shape_exist_attribute_id
- * @property TypeOfShapeIntersection kind_shape_intersection
  */
 class AttributeShapeIntersection extends Model
 {
@@ -43,8 +40,6 @@ class AttributeShapeIntersection extends Model
     /**
      * @var array<string, string>
      */
-    protected $casts = [
-        'kind_shape_intersection' => TypeOfShapeIntersection::class,
-    ];
+    protected $casts = [];
 
 }

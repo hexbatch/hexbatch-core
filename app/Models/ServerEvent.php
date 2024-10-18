@@ -39,11 +39,14 @@ use Illuminate\Support\Facades\DB;
  * @property int id
  * @property int event_trigger_type_id
  * @property int event_server_id
+ * @property int owning_attribute_id
  * @property int event_target_type_id
  * @property int event_target_attribute_id
- * @property int owning_attribute_id
+ * @property int blocked_by_server_event_id
+ * @property int filtered_by_server_event_id
+ * @property int source_live_attribute_id
+
  * @property bool is_listening_before
- * @property bool is_clipped_shape
  * @property TypeOfServerEventAccess event_access
  *
  * @property string created_at

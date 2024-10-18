@@ -37,11 +37,14 @@ use Illuminate\Validation\ValidationException;
  * @property int imported_from_server_id
  * @property int type_time_bound_id
  * @property int type_location_map_bound_id
- * @property int type_description_element_id
+ * @property int type_handle_element_id
  * @property bool is_system
  * @property bool is_final_type
  * @property string ref_uuid
- * @property string type_sum_geom_shape
+ * @property string sum_shape_geom
+ * @property string sum_map_geom
+ * @property string sum_map_bounding_box
+ * @property string sum_shape_bounding_box
  * @property string type_name
  * @property TypeOfLifecycle lifecycle
  *
@@ -294,18 +297,33 @@ class ElementType extends Model implements IType
 
 
 
-    public function sumShapeFromAttributes() {
-        //then for the attributes that have a shape, do a union of their geometries and store in type_sum_geom_shape
+    public function sumGeoFromAttributes() {
+        //then for the attributes that have a shape, do a union of their geometries and store in sum_shape_geom
         $id = $this->id;
         DB::statement("
             UPDATE element_types
-            SET type_sum_geom_shape=subquery.sum_geo
+            SET sum_shape_geom=subquery.sum_geo
 
             FROM (
                     SELECT t.id as element_type_id , ST_Union(b.geom) as sum_geo
                     FROM  element_types t
                     INNER JOIN attributes a  ON a.owner_element_type_id = t.id
                     INNER JOIN location_bounds b  ON a.attribute_location_bound_id = b.id AND b.location_type = 'shape'
+                    WHERE t.id = $id
+                    GROUP BY t.id
+                    ) AS subquery
+            WHERE element_types.id=subquery.element_type_id;
+        ");
+
+        DB::statement("
+            UPDATE element_types
+            SET sum_map_geom=subquery.sum_geo
+
+            FROM (
+                    SELECT t.id as element_type_id , ST_Union(b.geom) as sum_geo
+                    FROM  element_types t
+                    INNER JOIN attributes a  ON a.owner_element_type_id = t.id
+                    INNER JOIN location_bounds b  ON a.attribute_location_bound_id = b.id AND b.location_type = 'map'
                     WHERE t.id = $id
                     GROUP BY t.id
                     ) AS subquery
@@ -403,7 +421,7 @@ class ElementType extends Model implements IType
                  * @var Element|null $de_element
                  */
                 $de_element = (new Element())->resolveRouteBinding($describe_hint_here);
-                $this->type_description_element_id = $de_element;
+                $this->type_handle_element_id = $de_element;
             }
 
             if (!$this->isInUse()) {
@@ -490,7 +508,7 @@ class ElementType extends Model implements IType
                     }
                 });
 
-                $this->sumShapeFromAttributes();
+                $this->sumGeoFromAttributes();
             }
 
             DB::commit();

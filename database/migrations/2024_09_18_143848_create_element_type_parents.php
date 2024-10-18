@@ -56,15 +56,6 @@ return new class extends Migration
         ");
 
 
-        //todo drop enum, no more live parents here, its per element
-        DB::statement("CREATE TYPE type_of_parent_role AS ENUM (
-            'designed_parent',
-            'live_parent'
-            );");
-
-        DB::statement("ALTER TABLE element_type_parents Add COLUMN parent_role type_of_parent_role NOT NULL default 'designed_parent';");
-        //todo drop col
-
 
         DB::statement("ALTER TABLE element_type_parents Add COLUMN parent_type_approval type_of_approval NOT NULL default 'approval_not_set';");
 
@@ -77,7 +68,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('element_type_parents');
-        DB::statement("DROP TYPE type_of_parent_role;");
 
     }
 };

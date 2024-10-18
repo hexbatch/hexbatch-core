@@ -34,7 +34,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            //todo rename to handle_attribute_id
+
             $table->foreignId('design_attribute_id')
                 ->nullable()
                 ->default(null)
