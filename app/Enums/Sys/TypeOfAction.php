@@ -154,6 +154,8 @@ enum TypeOfAction: string
     case CMD_ELSEWHERE_GIVE_NS = 'cmd_elsewhere_give_ns';
     case CMD_ELSEWHERE_GIVE_SET = 'cmd_elsewhere_give_set';
     case CMD_ELSEWHERE_DO_REGISTRATION = 'cmd_elsewhere_do_registration';
+    case CMD_ELSEWHERE_RESEND_CREDENTIALS = 'cmd_elsewhere_resend_credentials';
+    case CMD_ELSEWHERE_ASK_CREDENTIALS = 'cmd_elsewhere_ask_credentials';
     case CMD_ELSEWHERE_CHANGE_STATUS = 'cmd_elsewhere_change_status';
     case CMD_ELSEWHERE_PURGE = 'cmd_elsewhere_purge'; //removes all types,ns,ele,sets associated with server, no events
 

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
+namespace App\Sys\Res\Types\Stk\Root\Evt\Elsewhere;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ServerStatusBlocked extends Evt\ScopeSet
+class ServerStatusPaused extends Evt\ScopeSet
 {
-    const UUID = '36b3b8c1-4f9e-4d57-a9de-64738fe97bdf';
-    const EVENT_NAME = TypeOfEvent::SERVER_STATUS_BLOCKED;
+    const UUID = 'f1eccb62-07f2-4290-8f76-f0898e35704f';
+    const EVENT_NAME = TypeOfEvent::SERVER_STATUS_PAUSED;
     const TYPE_NAME =  self::EVENT_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
@@ -21,7 +21,7 @@ class ServerStatusBlocked extends Evt\ScopeSet
     ];
 
     const PARENT_UUIDS = [
-        Evt\ScopeServer::UUID
+        Evt\ScopeElsewhere::UUID
     ];
 
 }

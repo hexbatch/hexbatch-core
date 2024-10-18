@@ -170,11 +170,7 @@ enum TypeOfEvent: string
     case WAIT_AVAILABLE = 'wait_available';
 
 
-    case SERVER_REGISTERED = 'server_registered';
-    case SERVER_STATUS_ALLOWED = 'server_status_allowed';
-    case SERVER_STATUS_BLOCKED = 'server_status_blocked';
-    case SERVER_STATUS_PENDING = 'server_status_pending';
-    case SERVER_STATUS_PAUSED = 'server_status_paused';
+
 
     /*
    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
@@ -182,6 +178,12 @@ enum TypeOfEvent: string
     */
     //system wide server stuff
 
+
+    case SERVER_REGISTERED = 'server_registered';
+    case SERVER_STATUS_ALLOWED = 'server_status_allowed';
+    case SERVER_STATUS_BLOCKED = 'server_status_blocked';
+    case SERVER_STATUS_PENDING = 'server_status_pending';
+    case SERVER_STATUS_PAUSED = 'server_status_paused';
 
     case ELSEWHERE_PUSH_ELEMENT = 'elsewhere_push_element';
     case ELSEWHERE_PUSH_SET = 'elsewhere_push_set';
@@ -194,7 +196,10 @@ enum TypeOfEvent: string
     case ELSEWHERE_GIVES_EVENT = 'elsewhere_gives_event';
     case ELSEWHERE_GIVES_TYPE = 'elsewhere_gives_type';
     case ELSEWHERE_GIVES_NAMESPACE = 'elsewhere_gives_namespace';
-    case ELSEWHERE_NEW_KEY = 'elsewhere_new_key';
+    case ELSEWHERE_CREDENTIALS_NEW = 'elsewhere_credentials_new';
+    case ELSEWHERE_CREDENTIALS_BAD = 'elsewhere_credentials_bad';
+    case ELSEWHERE_CREDENTIALS_SENDING = 'elsewhere_credentials_sending';
+    case ELSEWHERE_CREDENTIALS_ASKING = 'elsewhere_credentials_asking';
 
 
     case ELSEWHERE_SUSPENDED_TYPE = 'elsewhere_suspended_type';
