@@ -8,9 +8,13 @@ use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
  * @see MasterSemaphore for the setup,
- * it takes a type made for this, that is published,
- * and makes the new types for the master group, but they are in developer mode
- * need to publish them all @uses TypePublish
+ * it takes a type made for this, which is already published,
+ * and another optional published semaphore type to use in chained masters
+ *
+ * This makes the new types and rules for the master group,
+ * all the types are in a publishing group with a handle of an element of the type given
+ * The types are returned in developer mode so stuff can be added
+ * Master can be used after publishing @uses TypePublish
  *
  */
 class SemaphoreMasterCreate extends Act\Cmd

@@ -15,6 +15,9 @@ use App\Sys\Res\Types\BaseType;
  * and perhaps others,such as @uses \App\Sys\Res\Types\Stk\Root\Signal\Master\Remote
  *
  * That master type will have semaphores inheriting from it and @uses Semaphore
+ *  Unless its given another semaphore type to use instead, this would allow master semaphores to be chained
+ *   which can be used if a remote wants to be contacted, then give a response later
+ *   which will be handled without rules processing the middle part of the request chain
  *
  * it will have a response inheriting from that master type and
  * @uses \App\Sys\Res\Types\Stk\Root\Signal\Master\MasterResponse

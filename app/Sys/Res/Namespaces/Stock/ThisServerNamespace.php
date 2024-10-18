@@ -12,6 +12,9 @@ use App\Sys\Res\Sets\Stock\SystemHomeSet;
 use App\Sys\Res\Types\Stk\Root\SystemNamespaceTypes\System\ThisServer\ThisServerNS;
 use App\Sys\Res\Users\Stock\SystemUser;
 
+/**
+ * @see ThisServer
+ */
 class ThisServerNamespace extends BaseNamespace
 {
 
@@ -22,7 +25,7 @@ class ThisServerNamespace extends BaseNamespace
     const PUBLIC_ELEMENT_UUID = SystemPublicElement::UUID;
     const PRIVATE_ELEMENT_UUID = SystemPrivateElement::UUID;
     const HOMESET_UUID = SystemHomeSet::UUID;
-    const SERVER_UUID = ThisServer::UUID;
+    const SERVER_UUID = ThisServer::UUID; //todo example of what needs to be changed
     const USER_UUID = SystemUser::UUID;
 
     public function getNamespaceName(): string

@@ -44,7 +44,8 @@ enum TypeOfEvent: string
     case NAMESPACE_LOGIN = 'namespace_login'; //the user did a login and this is fired on the default namespace private element
 
 
-
+    case ELEMENT_RECIEVED = 'element_recieved';
+    case ELEMENT_RECIEVED_BATCH = 'element_recieved_batch';
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
