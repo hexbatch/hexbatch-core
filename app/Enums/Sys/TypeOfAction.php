@@ -70,6 +70,9 @@ enum TypeOfAction: string
     case CMD_DESIGN_RULE_EDIT = 'cmd_design_rule_edit';
     case CMD_DESIGN_RULE_TEST = 'cmd_design_rule_test';
 
+    case CMD_DESIGN_LIVE_RULE_ADD = 'cmd_design_live_rule_add';
+    case CMD_DESIGN_LIVE_RULE_REMOVE = 'cmd_design_live_rule_remove';
+
     case CMD_TYPE_CREATE = 'cmd_type_create';
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
     case CMD_TYPE_SUSPEND = 'cmd_type_suspend';
