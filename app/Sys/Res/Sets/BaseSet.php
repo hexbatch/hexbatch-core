@@ -13,7 +13,8 @@ use App\Sys\Res\ISystemResource;
 
  class BaseSet implements ISystemSet
 {
-    const UUID = '';
+     const UUID = '';
+
     const ELEMENT_UUID = '';
 
     const CONTAINING_ELEMENT_UUIDS = [
@@ -22,8 +23,9 @@ use App\Sys\Res\ISystemResource;
 
     protected ?ElementSet $set;
 
-
-     public function getSetUuid(): string { return static::UUID;}
+     public function getUuid() : string {
+         return static::UUID;
+     }
 
 
 

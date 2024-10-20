@@ -25,6 +25,7 @@ enum TypeOfAction: string
     case PRAGMA_READ_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
     case PRAGMA_READ_SHAPE = 'pragma_read_bounds_shape'; //the shape of the attribute being read, includes display
     case PRAGMA_READ_MAP = 'pragma_read_bounds_map'; //the map of the type that owns the element, includes display
+    case PRAGMA_WRITE_ENERGY = 'pragma_write_energy'; //writes the energy for the element, to read use path
 
 
 
@@ -104,6 +105,8 @@ enum TypeOfAction: string
 
     case CMD_SET_CHILD_HANDLE_ADD = 'cmd_set_child_handle_add';
     case CMD_SET_CHILD_HANDLE_REMOVE = 'cmd_set_child_handle_remove';
+
+    case CMD_ELEMENT_PING_TO_SET = 'cmd_element_ping_to_set';
 
 
     case CMD_ELEMENT_CREATE = 'cmd_element_create';

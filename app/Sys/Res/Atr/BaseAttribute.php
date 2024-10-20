@@ -21,6 +21,10 @@ use App\Sys\Res\Types\ISystemType;
     const TYPE_UUID = '';
     const PARENT_UUID = '';
 
+     public function getUuid() : string {
+         return static::UUID;
+     }
+
      public function getAttributeName(): string {
          return static::ATTRIBUTE_NAME;
      }

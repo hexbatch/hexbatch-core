@@ -9,7 +9,7 @@ use App\Sys\Res\Namespaces\ISystemNamespace;
 
 interface ISystemUser extends ISystemResource
 {
-    public function getUserUuid() :string;
+
     public function getUserName() :string;
     public function getUserPassword() :string;
     public function getUserNamespace() :?ISystemNamespace;

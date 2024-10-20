@@ -11,7 +11,6 @@ use App\Sys\Res\Types\IType;
 
 interface IElement
 {
-    public function getElementUuid() :string;
 
     public function getElementValue(ISet $set) :?ElementValue;
 

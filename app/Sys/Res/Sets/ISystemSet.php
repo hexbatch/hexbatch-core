@@ -7,7 +7,6 @@ use App\Sys\Res\ISystemResource;
 
 interface ISystemSet extends ISystemResource, ISet
 {
-    public function getSetUuid() :string;
     public function hasEvents() :bool;
     public function getDefiningSystemElement() :?ISystemElement;
 

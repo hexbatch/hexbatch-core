@@ -206,6 +206,8 @@ return new class extends Migration
             'rule_parent',
             'rule_child',
             'owns_rule',
+            'bound_distance',
+            'energy_level',
             'shape_intersecting',
             'shape_bordering',
             'shape_seperated',

@@ -3,28 +3,36 @@
 namespace App\Models;
 
 
-use App\Enums\Attributes\TypeOfLiveAttributeBehavior;
+use App\Enums\Types\TypeOfLiveRulePolicy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 
 
 /**
+ * Rules defined at type design time
+ * Approved in publish
+ * Applied in each set the type's element's make
+ *
+ *
+ *
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int parent_live_id
- * @property int earlier_attribute_id
- * @property int later_attribute_id
- * @property int charge_type_id
- * @property int live_attribute_charge
- * @property TypeOfLiveAttributeBehavior live_attribute_behavior
+ * @property int live_rule_owner_type_id
+ * @property int live_rule_trigger_type_id
+ * @property int live_rule_about_live_type_id
+ * @property string ref_uuid
+ * @property TypeOfLiveRulePolicy live_rule_policy
+ *
+ * @property string created_at
+ * @property string updated_at
  *
  */
-class LiveAttributes extends Model
+class LiveRule extends Model
 {
 
-    protected $table = 'live_attributes';
+    protected $table = 'live_rules';
     public $timestamps = false;
 
     /**
@@ -47,7 +55,7 @@ class LiveAttributes extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'live_attribute_behavior' => TypeOfLiveAttributeBehavior::class,
+        'live_rule_policy' => TypeOfLiveRulePolicy::class,
     ];
 
 }

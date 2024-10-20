@@ -32,6 +32,10 @@ abstract class BaseType implements ISystemType
 
     const PARENT_UUIDS = [];
 
+    public function getUuid() : string {
+        return static::UUID;
+    }
+
     public function getTypeUuid() :string { return static::UUID;}
 
     public function getServer() : ?ISystemServer {

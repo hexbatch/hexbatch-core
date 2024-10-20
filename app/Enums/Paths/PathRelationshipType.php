@@ -12,6 +12,22 @@ enum PathRelationshipType : string {
   case RULE_PARENT = 'rule_parent';
   case RULE_CHILD = 'rule_child';
   case OWNS_RULE = 'owns_rule'; //note: relationship owns_rule means that the rule references the type of the api or action
+
+    /*
+     * Bound distance is how opposite the integer value of two elements are when all live charges for each matching charge type are summed up and compared by charge type
+     * The weighted average for the sum of the charge types is compared,
+     *  the most distance is when both are same sign and more charge
+     *  the least distance is different signs and more charge
+     *  no charge is 0
+     *
+     * use max and min to select bound distance range
+     */
+    case BOUND_DISTANCE = 'bound_distance'; //distance between elements having live types bound weakly by charge
+
+    /*
+     * use max and min to select energy range of the elements
+     */
+  case ENERGY_LEVEL = 'energy_level'; //level of energy in element
   case SHAPE_INTERSECTING = 'shape_intersecting';
   case SHAPE_BORDERING = 'shape_bordering';
   case SHAPE_SEPERATED = 'shape_seperated';

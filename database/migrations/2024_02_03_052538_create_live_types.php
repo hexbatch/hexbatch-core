@@ -57,25 +57,25 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("ALTER TABLE element_types
+        DB::statement("ALTER TABLE live_types
                               Add COLUMN live_sum_shape_geom
                               geometry
                               ;
                     ");
 
-        DB::statement("ALTER TABLE element_types
+        DB::statement("ALTER TABLE live_types
                               Add COLUMN live_sum_map_geom
                               geometry
                               ;
                     ");
 
-        DB::statement("ALTER TABLE location_bounds
+        DB::statement("ALTER TABLE live_types
                               Add COLUMN live_sum_shape_bounding_box
                               box3d
                               ;
                     ");
 
-        DB::statement("ALTER TABLE location_bounds
+        DB::statement("ALTER TABLE live_types
                               Add COLUMN live_sum_map_bounding_box
                               box2d
                               ;

@@ -39,6 +39,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('charge_type_id')
+                ->nullable()
+                ->comment("the type of charge, default is no type")
+                ->index()
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+
             $table->integer('live_attribute_charge')
                 ->nullable(false)->default(0)
                 ->comment("starts at zero, this is remembered when copying a live type");

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Elements\TypeOfSetPointerMode;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -27,8 +26,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int id
  * @property int element_parent_type_id
  * @property int element_namespace_id
+ * @property int live_energy
  * @property string ref_uuid
- * @property TypeOfSetPointerMode set_pointer_mode
  *
  * @property string created_at
  * @property string updated_at
@@ -53,7 +52,6 @@ class Element extends Model
      */
     protected $fillable = [
         'element_parent_type_id',
-        'element_owner_user_id'
     ];
 
     /**
@@ -68,9 +66,7 @@ class Element extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [
-        'set_pointer_mode' => TypeOfSetPointerMode::class,
-    ];
+    protected $casts = [];
 
 
     public function element_namespace() : BelongsTo {

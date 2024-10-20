@@ -32,7 +32,8 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-
+            $table->smallInteger('live_energy')->nullable(false)->default(0)
+                ->comment("The energy used for live types being added for removed");
 
 
 
@@ -53,12 +54,6 @@ return new class extends Migration
             CREATE TRIGGER update_modified_time BEFORE UPDATE ON elements FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
         ");
 
-        DB::statement("CREATE TYPE type_of_set_pointer_mode AS ENUM (
-                'link_to_set',
-                'parent_child_link'
-            );");
-
-        DB::statement("ALTER TABLE elements Add COLUMN set_pointer_mode type_of_set_pointer_mode NOT NULL default 'link_to_set';");
     }
 
     /**
@@ -76,12 +71,11 @@ return new class extends Migration
             $table->dropColumn('element_namespace_id');
 
             $table->dropColumn('ref_uuid');
+            $table->dropColumn('live_energy');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
-            $table->dropColumn('set_pointer_mode');
         });
 
-        DB::statement("DROP TYPE type_of_set_pointer_mode;");
     }
 };
 

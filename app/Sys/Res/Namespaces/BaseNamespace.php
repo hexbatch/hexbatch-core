@@ -31,6 +31,10 @@ use App\Sys\Res\Users\ISystemUser;
 
     protected ?UserNamespace $namespace = null;
 
+     public function getUuid() : string {
+         return static::UUID;
+     }
+
 
     public function makeNamespace() :UserNamespace
    {

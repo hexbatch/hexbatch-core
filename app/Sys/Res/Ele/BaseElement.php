@@ -23,11 +23,15 @@ class BaseElement implements ISystemElement
 {
     protected ?Element $element;
 
+
+
     const UUID = '';
     const TYPE_UUID = '';
     const NAMESPACE_UUID = '';
 
-    public function getElementUuid() :string { return static::UUID;}
+    public function getUuid() : string {
+        return static::UUID;
+    }
 
     public function makeElement() :Element
    {
