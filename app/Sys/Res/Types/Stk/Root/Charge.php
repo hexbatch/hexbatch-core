@@ -12,7 +12,7 @@ use App\Sys\Res\Types\Stk\Root;
 class Charge extends BaseType
 {
     const UUID = '20df91e4-0ded-48a0-89d6-934bb8e6821c';
-    const TYPE_NAME = 'live_rules';
+    const TYPE_NAME = 'charge';
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

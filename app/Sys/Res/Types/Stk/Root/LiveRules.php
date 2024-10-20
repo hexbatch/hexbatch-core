@@ -8,6 +8,7 @@ use App\Sys\Res\Types\Stk\Root;
 
 /*
  * Type must have this in up-type for live rules to be used on it
+ * Elements can only be given energy if this is included up-type
  */
 class LiveRules extends BaseType
 {
