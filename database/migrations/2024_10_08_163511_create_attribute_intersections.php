@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attribute_shape_intersections', function (Blueprint $table) {
+        Schema::create('attribute_intersections', function (Blueprint $table) {
             $table->id();
             // make note to pop the attribute intersection if live type is removed OR the attribute is hidden by live type
             $table->foreignId('parent_type_intersection_id')
@@ -26,7 +26,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-            $table->foreignId('shape_entry_attribute_id')
+            $table->foreignId('intersection_earlier_attribute_id')
                 ->nullable(false)
                 ->comment("The first attribute of the pair. This is the new arrival in the set (or turned back on)")
                 ->index()
@@ -34,7 +34,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('shape_exist_attribute_id')
+            $table->foreignId('intersection_later_attribute_id')
                 ->nullable(false)
                 ->comment("The second attribute of the pair. This was already existing in the set")
                 ->index()
@@ -42,11 +42,10 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->unique(['parent_type_intersection_id','intersection_earlier_attribute_id','intersection_later_attribute_id']);
+
         });
 
-               DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_shape_x_per_combo ON attribute_shape_intersections
-            (parent_type_intersection_id,shape_entry_attribute_id,parent_type_intersection_id) NULLS DISTINCT;");
     }
 
     /**
@@ -55,6 +54,6 @@ return new class extends Migration
     public function down(): void
     {
 
-        Schema::dropIfExists('attribute_shape_intersections');
+        Schema::dropIfExists('attribute_intersections');
     }
 };

@@ -17,14 +17,14 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int shape_set_member_id
- * @property int shape_entry_attribute_id
- * @property int shape_exist_attribute_id
+ * @property int parent_type_intersection_id
+ * @property int intersection_earlier_attribute_id
+ * @property int intersection_later_attribute_id
  */
-class AttributeShapeIntersection extends Model
+class AttributeIntersection extends Model
 {
 
-    protected $table = 'attribute_shape_intersections';
+    protected $table = 'attribute_intersections';
     public $timestamps = false;
 
     /**
