@@ -8,10 +8,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class WriteVisualShape extends Act\Pragma
+class WriteVisual extends Act\Pragma
 {
     const UUID = '8d357b98-64e5-4e90-bcab-ae24d6bff07c';
-    const ACTION_NAME = TypeOfAction::PRAGMA_WRITE_VISUAL_SHAPE;
+    const ACTION_NAME = TypeOfAction::PRAGMA_WRITE_VISUAL;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

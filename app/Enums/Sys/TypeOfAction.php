@@ -16,24 +16,20 @@ namespace App\Enums\Sys;
 enum TypeOfAction: string
 {
 
-    case PRAGMA_WRITE_VISUAL_SHAPE = 'pragma_write_visual_shape'; //if the attribute has a shape, set the visual section to one or more opacity|color|border|texture
-    case PRAGMA_WRITE_VISUAL_MAP = 'pragma_write_visual_map'; //if the type has a map set display properties
+    case PRAGMA_WRITE_VISUAL = 'pragma_write_visual'; //if the attribute has a shape or map, set the visual section to one or more opacity|color|border|texture
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
 
-    case PRAGMA_READ_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
-    case PRAGMA_READ_SHAPE = 'pragma_read_bounds_shape'; //the shape of the attribute being read, includes display
-    case PRAGMA_READ_MAP = 'pragma_read_bounds_map'; //the map of the type that owns the element, includes display
+    case PRAGMA_READ_TIME_SPAN = 'pragma_read_time_span'; //the start and stop time of the type that owns the element (current time span)
+    case PRAGMA_READ_LOCATION = 'pragma_read_bounds_shape'; //the shape of the attribute being read, includes display
 
 
 
 
     case PRAGMA_ELEMENT_ON = 'pragma_element_on';
-    case PRAGMA_ELEMENT_TOGGLE = 'pragma_element_toggle';
     case PRAGMA_ELEMENT_OFF = 'pragma_element_off';
     case PRAGMA_TYPE_ON = 'pragma_element_type_on';
-    case PRAGMA_TYPE_TOGGLE = 'pragma_element_type_toggle';
     case PRAGMA_TYPE_OFF = 'pragma_element_type_off';
 
     case PRAGMA_SEARCH = 'pragma_search';
@@ -48,17 +44,18 @@ enum TypeOfAction: string
 
 
 
-
+    case CMD_DESIGN_CREATE = 'cmd_type_create';
 
     case CMD_DESIGN_PARENT_ADD = 'cmd_design_parent_add';
     case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
-    case CMD_DESIGN_TYPE_MAP = 'cmd_design_type_map';
+    case CMD_DESIGN_TYPE_LOCATION = 'cmd_design_type_map';
     case CMD_DESIGN_TYPE_TIME = 'cmd_design_type_time';
     case CMD_DESIGN_TYPE_EDIT = 'cmd_design_type_edit';
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
     case CMD_DESIGN_ATTRIBUTE_REMOVE = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
+    case CMD_DESIGN_ATTRIBUTE_LOCATION = 'cmd_design_attribute_location';
     case CMD_DESIGN_ATTRIBUTE_HANDLE = 'cmd_design_attribute_handle';
     case CMD_DESIGN_LISTENER_CREATE = 'cmd_design_listener_create';
     case CMD_DESIGN_LISTENER_DESTROY = 'cmd_design_listener_destroy';
@@ -70,7 +67,11 @@ enum TypeOfAction: string
     case CMD_DESIGN_LIVE_RULE_ADD = 'cmd_design_live_rule_add';
     case CMD_DESIGN_LIVE_RULE_REMOVE = 'cmd_design_live_rule_remove';
 
-    case CMD_TYPE_CREATE = 'cmd_type_create';
+
+    case CMD_DESIGN_LIVE_REQUIREMENT_ADD = 'cmd_design_live_requirement_add';
+    case CMD_DESIGN_LIVE_REQUIREMENT_REMOVE = 'cmd_design_live_requirement_remove';
+
+
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
     case CMD_TYPE_SUSPEND = 'cmd_type_suspend';
     case CMD_TYPE_RETIRE = 'cmd_type_retire';
@@ -117,7 +118,6 @@ enum TypeOfAction: string
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
     case CMD_LIVE_TYPE_COPY = 'cmd_live_type_copy';
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
-    case CMD_LIVE_TYPE_TOGGLE = 'cmd_live_type_toggle';
 
 
     case CMD_PHASE_CUT_TYPE_TREE = 'cmd_phase_cut_type_tree';
@@ -148,7 +148,6 @@ enum TypeOfAction: string
     case CMD_SEMAPHORE_MASTER_CREATE = 'cmd_semaphore_master_create';
     case CMD_SEMAPHORE_MASTER_RUN = 'cmd_semaphore_master_run';
 
-    case CMD_RUN_REMOTE = 'cmd_run_remote'; //if admin of type ns, makes outgoing remote
 
     //server to server
     case CMD_ELSEWHERE_GIVE_ELEMENT = 'cmd_elsewhere_give_element';

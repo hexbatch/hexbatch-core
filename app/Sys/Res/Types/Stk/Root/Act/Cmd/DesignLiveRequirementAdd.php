@@ -1,16 +1,19 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
+/*
+ * Add a single live rule to the type
+ */
 
-class ReadMap extends Act\Pragma
+class DesignLiveRequirementAdd extends Act\Cmd
 {
-    const UUID = 'a347cb93-e33d-40bf-bc94-e0a191c1188c';
-    const ACTION_NAME = TypeOfAction::PRAGMA_READ_MAP;
+    const UUID = '90733796-1184-4cac-9661-044f257eadd7';
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_LIVE_REQUIREMENT_ADD;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
@@ -21,10 +24,8 @@ class ReadMap extends Act\Pragma
     ];
 
     const PARENT_UUIDS = [
-        Act\Pragma::UUID,
-        Act\CmdNoSideEffects::UUID
+        Act\Cmd::UUID
     ];
-
 
 }
 

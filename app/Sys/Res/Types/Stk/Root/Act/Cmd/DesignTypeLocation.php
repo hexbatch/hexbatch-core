@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class RunRemote extends Act\Cmd
+class DesignTypeLocation extends Act\Cmd
 {
-    const UUID = 'd3f4a10a-e709-4b92-aeec-fdb14078d3cf';
-    const ACTION_NAME = TypeOfAction::CMD_RUN_REMOTE;
+    const UUID = '6d695135-cecb-4dc7-8868-0b68f31bb065';
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_TYPE_LOCATION;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
