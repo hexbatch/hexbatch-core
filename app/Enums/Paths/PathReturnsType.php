@@ -7,6 +7,7 @@ enum PathReturnsType : string {
 
   case EXISTS = 'exists';
   case TYPE = 'type';
+  case VALUES = 'values';
 
   case SET = 'set';
   case THING = 'thing';
