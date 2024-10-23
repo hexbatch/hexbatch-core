@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 
 
 /**
+ * An element can go into a set if its overall bounds fits (if it has bounds)
+ * but it can have subtypes which have bounds that do not intersect, if that is true,
+ * then that subtypes' values is turned off and cannot be on in the set or down-set
+ *
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id

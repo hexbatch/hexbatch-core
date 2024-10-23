@@ -136,7 +136,8 @@ Route::prefix('v1')->group(function () {
 
                 Route::middleware(ValidateNamespaceOwner::class)->group(function () {
                     Route::post('/create', [TypeController::class, 'create_type'])->name('core.types.create');
-                });//todo add parent, remove parent, and put in design guard for the edit stuff
+                });//todo add/remove live requirement, live rules, parents; edit time and bounds , ability to add those by ref (as long as owned by ns admin);
+                  //  and put in design guard for the edit stuff
 
                 Route::prefix('/{element_type}')->middleware([ValidateTypeNotInUse::class])->group(function () {
                     Route::middleware(ValidateNamespaceOwner::class)->group(function () {
@@ -165,6 +166,7 @@ Route::prefix('v1')->group(function () {
 
                         Route::prefix('{attribute}')->middleware(ValidateAttributeOwnership::class)->group(function () {
                             Route::patch('/edit', [TypeController::class, 'edit_attribute'])->name('coretypes..attributes.edit');
+                            //todo put in edit attribute location, ability to use ref of other owned by ns admin
                             Route::delete('/destroy', [TypeController::class, 'delete_attribute'])->name('core.types.attributes.destroy');
                         });
 

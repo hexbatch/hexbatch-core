@@ -27,6 +27,9 @@ after all permissions given, for each remaining removal,
   and cmd_set_member_add_no_events for those being added
   which are parents for the events above
 
+the combine does not look at subtypes fitting into the desired set, it simply adds or removes.
+However, once in, not related to this command, those subtype values can be turned off if not fit
+
  */
 class Combine extends Act\Op
 {

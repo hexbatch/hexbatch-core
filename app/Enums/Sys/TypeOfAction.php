@@ -141,7 +141,6 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
     case CMD_NAMESPACE_DESTROY_NO_EVENTS = 'cmd_namespace_destroy_no_events'; //server admin
 
-    case CMD_NAMESPACE_USER_ASSIGN = 'cmd_namespace_user_assign'; //only system and if the ns is not a default for current users
 
     case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
     case CMD_SEMAPHORE_RESET = 'cmd_semaphore_reset';

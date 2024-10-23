@@ -400,7 +400,8 @@ class ElementType extends Model implements IType
                      }
                 } else if ($this->lifecycle === TypeOfLifecycle::DEVELOPING || $this->lifecycle === TypeOfLifecycle::RETIRED) {
                      if ($maybe_valid_lifecycle === TypeOfLifecycle::PUBLISHED) {
-                         //todo if publish, then check for permission for both parent attributes and child types, send to things for any listeners
+                         //todo if publish, then check for permission for both parent attributes and child types,
+                         // required and rules for live, send to things for any listeners on each type used
                          // in the things, those listeners get tied as child things to the publish approval. here, both attributes and types are checked
                          // that means its possible to design stuff using items without permissions (as long as in the proper ns memberships and admins)
                          // the lifecycle will be set to published after all is cleared

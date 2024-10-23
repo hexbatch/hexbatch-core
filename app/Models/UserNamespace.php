@@ -337,7 +337,7 @@ class UserNamespace extends Model implements INamespace
     }
 
     public function purgeHome() :void {
-        //todo delete the contents of the home set
+        //todo delete the contents of the home set, including the set
     }
 
     /**
