@@ -17,6 +17,15 @@ return new class extends Migration
         Schema::create('live_types', function (Blueprint $table) {
             $table->id();
 
+
+            $table->foreignId('live_phase_id')
+                ->nullable(false)
+                ->comment("The phase this belongs to")
+                ->index()
+                ->constrained('phases')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->foreignId('live_target_element_id')
                 ->nullable(false)
                 ->comment("The element the live type is applied to")

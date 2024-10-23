@@ -3,30 +3,31 @@
 namespace App\Models;
 
 
-
-use App\Sys\Res\Types\Stk\Root\TrackingExported;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 
+
 /**
+The required type must be on (and not turned off) to satisfy
  *
- * set one row with type and null element for each type exported, this way can remember type sent when all elements sent are deleted
- * elements only put on this table if it inherits from @see TrackingExported
+ *
  *
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int export_server_id
- * @property int export_type_id
- * @property bool export_element_id
+ * @property int live_requirement_owner_type_id
+ * @property int live_requirement_needed_type_id
+ * @property string ref_uuid
  *
+ * @property string created_at
+ * @property string updated_at
  *
  */
-class ElementServerExport extends Model
+class LiveRequirement extends Model
 {
 
-    protected $table = 'element_server_exports';
+    protected $table = 'live_requirements';
     public $timestamps = false;
 
     /**

@@ -55,6 +55,8 @@ enum TypeOfEvent: string
 
     case ATTRIBUTE_READ = 'attribute_read';
     case ATTRIBUTE_WRITE = 'attribute_write';
+
+    case TYPE_WRITE = 'type_write'; //all the attributes of a type or subtype or live type is written to at once
     case MAP_DISPLAY_WRITE = 'map_display_write';
     case SHAPE_DISPLAY_WRITE = 'shape_display_write';
 
@@ -126,7 +128,9 @@ enum TypeOfEvent: string
     case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
     case ELEMENT_OWNER_CHANGE_BATCH = 'element_owner_change_batch'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
 
-
+    case TYPE_PHASE_REMOVED = 'type_phase_removed';
+    case TYPE_PHASE_ADDED = 'type_phase_added';
+    case ELEMENT_PHASE_CHANGE_BATCH = 'element_phase_change_batch';
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._

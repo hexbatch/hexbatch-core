@@ -26,7 +26,7 @@ class Write extends Act\Pragma
     ];
 
     const EVENT_UUIDS = [
-        Evt\Set\Write::UUID
+        Evt\Set\AttributeWrite::UUID
     ];
 
 }

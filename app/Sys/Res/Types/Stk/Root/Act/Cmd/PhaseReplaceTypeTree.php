@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class FilterGlobalRemove extends Act\Cmd
+class PhaseReplaceTypeTree extends Act\Cmd
 {
-    const UUID = '123ab097-3288-47f2-b270-37697d2b4e38';
-    const ACTION_NAME = TypeOfAction::CMD_FILTER_GLOBAL_REMOVE;
+    const UUID = '1b33ccfb-65ec-4856-9de0-cbae85eaa753';
+    const ACTION_NAME = TypeOfAction::CMD_PHASE_REPLACE_TYPE_TREE;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

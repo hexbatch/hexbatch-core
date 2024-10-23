@@ -66,6 +66,7 @@ the rules can react there when creation events to things in the set, the paths i
  * @property int id
  * @property int owning_server_event_id
  * @property int parent_rule_id
+ * @property int rule_phase_id
  * @property int rule_action_or_event_type_id
  * @property int rule_path_id
  * @property int rule_rank

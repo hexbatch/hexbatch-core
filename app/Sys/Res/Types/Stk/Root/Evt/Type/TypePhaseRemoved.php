@@ -1,16 +1,18 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Evt\Set;
+namespace App\Sys\Res\Types\Stk\Root\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
-
-class Write extends Evt\ScopeSet
+/**
+ * there was a phase edit action and the type was removed from one or more places
+ */
+class TypePhaseRemoved extends Evt\ScopeSet
 {
-    const UUID = 'a1b06d04-7ac4-43a1-8353-a3f9c7df1b94';
-    const EVENT_NAME = TypeOfEvent::ATTRIBUTE_WRITE;
+    const UUID = '27aff549-4d9f-47a9-b7f9-769743928b2e';
+    const EVENT_NAME = TypeOfEvent::TYPE_PHASE_REMOVED;
     const TYPE_NAME =  self::EVENT_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
@@ -21,7 +23,7 @@ class Write extends Evt\ScopeSet
     ];
 
     const PARENT_UUIDS = [
-        Evt\ScopeSet::UUID
+        Evt\ScopeType::UUID
     ];
 
 }

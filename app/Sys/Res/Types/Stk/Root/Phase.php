@@ -6,13 +6,14 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
 
-/*
- * Type must have this in up-type for live rules to be used on it
+/**
+ * When new type published, and new row is created in @see \App\Models\Phase
+ * When the type is destroyed, that corresponding row in the phase is destroyed
  */
-class LiveRules extends BaseType
+class Phase extends BaseType
 {
-    const UUID = '92c139b6-c99a-4213-b992-e8075517c785';
-    const TYPE_NAME = 'live_rules';
+    const UUID = '1bb5ff53-6874-4914-afd9-4dc8c9534c8f';
+    const TYPE_NAME = 'phase';
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
     const DESCRIPTION_ELEMENT_UUID = '';

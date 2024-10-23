@@ -14,9 +14,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int visible_type_id
  * @property int visibility_set_id
+ * @property bool is_visible
  * @property bool is_visible_for_map
  * @property bool is_visible_for_time
  * @property bool is_time_sensitive
+ * @property bool is_turned_on
  *
  *
  */

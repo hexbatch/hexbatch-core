@@ -38,9 +38,6 @@ use Illuminate\Validation\ValidationException;
  * @property int type_time_bound_id
  * @property int type_location_map_bound_id
  * @property int type_handle_element_id
- * @property int live_namespace_id
- * @property int energy_namespace_id
- * @property int starting_live_energy
  * @property bool is_system
  * @property bool is_final_type
  * @property string ref_uuid

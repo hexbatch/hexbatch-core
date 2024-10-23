@@ -21,9 +21,6 @@ todo find way to put my   notes into open api parts or at least make docs
 
 °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
 
-Concept introduction (how it works mechanically)
-
-This tries to put things into groups. The things are called elements, and the groups are called sets. An element is some json, with some things that power it to make it do actions based on what else is in the set. Elements are made from something called types. One type can make many elements. The logic of the element, how it behaves, is based on the type. 
 
 
 

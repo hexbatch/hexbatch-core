@@ -33,6 +33,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+            $table->foreignId('path_phase_id')
+                ->nullable()
+                ->comment("The phase this path will search, if null then default")
+                ->index()
+                ->constrained('phases')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->timestamps();
 
             $table->uuid('ref_uuid')
@@ -79,9 +87,11 @@ return new class extends Migration
         Schema::table('paths', function (Blueprint $table) {
             $table->dropForeign(['path_owning_namespace_id']);
             $table->dropForeign(['path_handle_element_id']);
+            $table->dropForeign(['path_phase_id']);
 
             $table->dropColumn('path_owning_namespace_id');
             $table->dropColumn('path_handle_element_id');
+            $table->dropColumn('path_phase_id');
 
 
             $table->dropColumn('ref_uuid');

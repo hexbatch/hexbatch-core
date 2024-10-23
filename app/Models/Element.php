@@ -25,8 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int element_parent_type_id
+ * @property int element_phase_id
  * @property int element_namespace_id
- * @property int live_energy
  * @property string ref_uuid
  *
  * @property string created_at

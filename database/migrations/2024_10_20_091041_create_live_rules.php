@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('live_rule_owner_type_id')
                 ->nullable(false)
                 ->comment("The type which owns this live rule")
+                ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->foreignId('live_rule_trigger_type_id')
                 ->nullable(false)
                 ->comment("When an element of this type enters this rule is triggered")
+                ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -32,6 +34,7 @@ return new class extends Migration
             $table->foreignId('live_rule_about_live_type_id')
                 ->nullable(false)
                 ->comment("The live type this rule is about")
+                ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();

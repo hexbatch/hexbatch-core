@@ -77,6 +77,9 @@ return new class extends Migration
             $table->boolean('is_final_attribute')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
 
+            $table->boolean('is_abstract')->default(false)->nullable(false)
+                ->comment('if true then child must have attribute that inherits from this');
+
 
 
 
@@ -167,6 +170,7 @@ return new class extends Migration
             $table->dropColumn('attribute_location_shape_bound_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_final_attribute');
+            $table->dropColumn('is_abstract');
             $table->dropColumn('is_system');
             $table->dropColumn('is_seen_in_child_elements');
             $table->dropColumn('value_json_path');

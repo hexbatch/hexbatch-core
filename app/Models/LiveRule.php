@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * Rules defined at type design time
  * Approved in publish
  * Applied in each set the type's element's make
- *
+ * the apply_live in the rules will attempt to apply anything missing when that type enters or has extra lives added to it
  *
  *
  * @mixin Builder

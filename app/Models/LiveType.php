@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int live_phase_id
  * @property int live_target_element_id
  * @property int live_applied_type_id
  * @property int live_applied_in_set_id

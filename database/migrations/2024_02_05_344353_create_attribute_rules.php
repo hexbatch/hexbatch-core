@@ -36,6 +36,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('rule_phase_id')
+                ->nullable()
+                ->comment("The phase the rule tree here and below use, if null then default")
+                ->index()
+                ->constrained('phases')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->foreignId('rule_action_or_event_type_id')
                 ->nullable()->default(null)
                 ->comment("The event that is being listened, or the action being done")

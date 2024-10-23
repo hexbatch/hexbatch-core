@@ -38,6 +38,7 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property int path_owning_namespace_id
  * @property int path_handle_element_id
+ * @property int path_phase_id
  * @property string ref_uuid
 
  * @property string path_name

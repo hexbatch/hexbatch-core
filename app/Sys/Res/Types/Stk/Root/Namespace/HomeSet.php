@@ -7,7 +7,9 @@ use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Container;
 use App\Sys\Res\Types\Stk\Root\NamespaceType;
 
-
+/**
+ * Home set always in default phase
+ */
 class HomeSet extends BaseType
 {
     const UUID = '3bf5302c-7ded-468a-af01-a19dc135c806';

@@ -3,11 +3,14 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Models\LocationBound;
 use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
-
+/**
+ * Writes to @see LocationBound::$display_json
+ */
 class WriteVisualMap extends Act\Pragma
 {
     const UUID = '11a1d97a-a389-4070-97d0-7fac49aac4dd';

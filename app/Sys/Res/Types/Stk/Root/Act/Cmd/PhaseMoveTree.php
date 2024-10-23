@@ -7,10 +7,10 @@ use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class FilterAdd extends Act\Cmd
+class PhaseMoveTree extends Act\Cmd
 {
-    const UUID = '4910ecbb-4020-44a0-817e-45c1226fa652';
-    const ACTION_NAME = TypeOfAction::CMD_FILTER_ADD;
+    const UUID = '417eb53e-1615-42c9-9bfc-4349bfb5daa9';
+    const ACTION_NAME = TypeOfAction::CMD_PHASE_MOVE_TREE;
     const TYPE_NAME = self::ACTION_NAME;
     const NAMESPACE_UUID = ThisServerNamespace::UUID;
 

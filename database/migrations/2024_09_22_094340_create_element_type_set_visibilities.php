@@ -40,6 +40,9 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->boolean('is_visible')->default(true)->nullable(false)
+                ->comment('if true all the other bools need to be true also, otherwise false, updated via trigger');
+
             $table->boolean('is_visible_for_map')->default(true)->nullable(false)
                 ->comment('if true this is visible because the set overlaps the type map');
 
@@ -48,6 +51,9 @@ return new class extends Migration
 
             $table->boolean('is_time_sensitive')->default(false)->nullable(false)
                 ->comment('if true this should be checked next tick');
+
+            $table->boolean('is_turned_on')->default(true)->nullable(false)
+                ->comment('if false this all the attributes are off for this type which are used in the child or descendant type');
 
 
             $table->timestamps();

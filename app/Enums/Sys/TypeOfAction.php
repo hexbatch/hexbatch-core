@@ -25,7 +25,6 @@ enum TypeOfAction: string
     case PRAGMA_READ_TIME = 'pragma_read_bounds_time'; //the start and stop time of the type that owns the element
     case PRAGMA_READ_SHAPE = 'pragma_read_bounds_shape'; //the shape of the attribute being read, includes display
     case PRAGMA_READ_MAP = 'pragma_read_bounds_map'; //the map of the type that owns the element, includes display
-    case PRAGMA_WRITE_ENERGY = 'pragma_write_energy'; //writes the energy for the element, to read use path
 
 
 
@@ -36,8 +35,6 @@ enum TypeOfAction: string
     case PRAGMA_TYPE_ON = 'pragma_element_type_on';
     case PRAGMA_TYPE_TOGGLE = 'pragma_element_type_toggle';
     case PRAGMA_TYPE_OFF = 'pragma_element_type_off';
-    case PRAGMA_LIVE_CHARGE_DECREMENT = 'pragma_decrement_live_charge';
-    case PRAGMA_LIVE_CHARGE_INCREMENT = 'pragma_increment_live_charge';
 
     case PRAGMA_SEARCH = 'pragma_search';
 
@@ -122,11 +119,10 @@ enum TypeOfAction: string
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
     case CMD_LIVE_TYPE_TOGGLE = 'cmd_live_type_toggle';
 
-    case CMD_FILTER_ADD = 'cmd_filter_add';
-    case CMD_FILTER_REMOVE = 'cmd_filter_remove';
 
-    case CMD_FILTER_GLOBAL_ADD = 'cmd_filter_global_add';
-    case CMD_FILTER_GLOBAL_REMOVE = 'cmd_filter_global_remove';
+    case CMD_PHASE_CUT_TYPE_TREE = 'cmd_phase_cut_type_tree';
+    case CMD_PHASE_REPLACE_TYPE_TREE = 'cmd_phase_replace_type_tree';
+    case CMD_PHASE_MOVE_TREE = 'cmd_phase_move_tree';
 
 
     case CMD_FIRE_CUSTOM_EVENT = 'cmd_fire_custom_event'; //scope depends on the base type of the custom event

@@ -88,6 +88,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('thing_phase_id')
+                ->nullable()
+                ->comment("The phase this data will have, if null then default")
+                ->index()
+                ->constrained('phases')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
 
 
             $table->timestamps();

@@ -16,8 +16,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int parent_live_id
  * @property int earlier_attribute_id
  * @property int later_attribute_id
- * @property int charge_type_id
- * @property int live_attribute_charge
  * @property TypeOfLiveAttributeBehavior live_attribute_behavior
  *
  */

@@ -222,6 +222,8 @@ Route::prefix('v1')->group(function () {
 
    note: api can be chained together in the things by linking them as child parent with logic type
 
+//todo routes to sets, elements, lives are prepended by the phase, which is the type name of the phase row
+
  */
 
 

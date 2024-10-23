@@ -29,6 +29,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property int api_or_action_type_id
  * @property int thing_rule_id
  * @property int thing_debugger_id
+ * @property int thing_phase_id
  *
  *
  *

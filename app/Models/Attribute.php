@@ -47,6 +47,7 @@ use Illuminate\Validation\ValidationException;
  * @property bool is_seen_in_child_elements
  * @property bool is_system
  * @property bool is_final_attribute
+ * @property bool is_abstract //todo make sure this is observed when publishing the type
  * @property TypeOfServerAccess server_access_type
  * @property string ref_uuid
  * @property string value_json_path
@@ -492,6 +493,10 @@ class Attribute extends Model implements IAttribute
 
                 if ($collect->has('is_final_attribute')) {
                     $this->is_final_attribute = Utilities::boolishToBool($collect->get('is_final_attribute',false));
+                }
+
+                if ($collect->has('is_abstract')) {
+                    $this->is_abstract = Utilities::boolishToBool($collect->get('is_abstract',false));
                 }
 
                 if ($collect->has('attribute_name')) {

@@ -62,32 +62,13 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
-            $table->foreignId('live_namespace_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The namespace whose members can add or remove live types, if null then only type owner namespace")
-                ->index()
-                ->constrained('user_namespaces')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
-            $table->foreignId('energy_namespace_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The namespace whose members can add or remove energy from elements, if null then only type owner namespace")
-                ->index()
-                ->constrained('user_namespaces')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
 
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
-            $table->smallInteger('starting_live_energy')->nullable(false)->default(0)
-                ->comment("When element created how much live energy it is given");
+
 
             $table->timestamps();
 
@@ -188,16 +169,12 @@ return new class extends Migration
             $table->dropForeign(['type_time_bound_id']);
             $table->dropForeign(['type_location_map_bound_id']);
             $table->dropForeign(['type_handle_element_id']);
-            $table->dropForeign(['live_namespace_id']);
-            $table->dropForeign(['energy_namespace_id']);
 
             $table->dropColumn('owner_namespace_id');
             $table->dropColumn('imported_from_server_id');
             $table->dropColumn('type_time_bound_id');
             $table->dropColumn('type_location_map_bound_id');
             $table->dropColumn('type_handle_element_id');
-            $table->dropColumn('live_namespace_id');
-            $table->dropColumn('energy_namespace_id');
 
             $table->dropColumn('type_name');
             $table->dropColumn('ref_uuid');
@@ -210,7 +187,6 @@ return new class extends Migration
             $table->dropColumn('sum_shape_bounding_box');
             $table->dropColumn('sum_map_bounding_box');
             $table->dropColumn('lifecycle');
-            $table->dropColumn('starting_live_energy');
 
 
 

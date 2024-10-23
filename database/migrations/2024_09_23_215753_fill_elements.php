@@ -23,6 +23,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('element_phase_id')
+                ->nullable(false)
+                ->comment("The phase this belongs to")
+                ->index()
+                ->constrained('phases')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->foreignId('element_namespace_id')
                 ->nullable()
                 ->default(null)
@@ -31,9 +39,6 @@ return new class extends Migration
                 ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
-
-            $table->smallInteger('live_energy')->nullable(false)->default(0)
-                ->comment("The energy used for live types being added for removed");
 
 
 
@@ -66,12 +71,13 @@ return new class extends Migration
         Schema::table('elements', function (Blueprint $table) {
             $table->dropForeign(['element_parent_type_id']);
             $table->dropForeign(['element_namespace_id']);
+            $table->dropForeign(['element_phase_id']);
 
             $table->dropColumn('element_parent_type_id');
             $table->dropColumn('element_namespace_id');
+            $table->dropColumn('element_phase_id');
 
             $table->dropColumn('ref_uuid');
-            $table->dropColumn('live_energy');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
         });
