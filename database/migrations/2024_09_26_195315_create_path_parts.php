@@ -201,36 +201,57 @@ return new class extends Migration
         //relationship with the path parent
         DB::statement("CREATE TYPE path_relationship_type AS ENUM (
             'no_relationship',
+
             'rule_event',
             'rule_action',
             'rule_parent',
             'rule_child',
             'owns_rule',
+
             'shape_intersecting',
             'shape_bordering',
             'shape_seperated',
+
             'intersecting_map',
             'bordering_map',
             'seperated_map',
+
             'time_overlapping',
             'time_distinct',
+
+            'down_type',
+            'up_type',
             'shares_type',
-            'ancestor',
-            'descendant',
+
+            'down_attribute',
+            'up_attribute',
             'attribute_of_type',
-            'in_subtype',
+            'shares_attribute',
+
             'member_of_thing_container',
+
             'namespace_owns_element',
             'namespace_owns_type',
+            'namespace_owns_attribute',
+            'namespace_owns_set',
+            'namespace_owns_live',
+
+
             'member_of_namespace',
             'admin_of_namespace',
             'owner_of_namespace',
-            'member_of_set',
+
+
             'link_element',
             'handle_element',
             'description_element',
-            'down_set',
+
             'live_type',
+            'live_requirement',
+            'live_rule',
+
+            'element_of_set',
+            'down_set',
             'up_set'
             );");
 
