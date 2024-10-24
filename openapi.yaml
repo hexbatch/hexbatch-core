@@ -1,0 +1,79 @@
+openapi: 3.1.0
+info:
+  title: 'Hexbatch Core'
+  version: '0.1'
+paths:
+  /api/v1/users/me:
+    get:
+      summary: 'when logged in, can see own details'
+      description: 'Long demo stuff, best to break apart into strings More demo stuff'
+      operationId: core.users.me
+      responses:
+        '200':
+          description: 'This is you'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/v1/users/login:
+    post:
+      operationId: core.users.login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginParams'
+      responses:
+        '200':
+          description: 'Login gets a token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+components:
+  schemas:
+    LoginParams:
+      properties:
+        username:
+          title: 'User Name'
+          type: string
+          example:
+            -
+              summary: 'user name example'
+              value: will_fart
+        password:
+          title: Password
+          type: password
+      type: object
+      example:
+        -
+          summary: 'logging in example'
+          value:
+            username: will
+            password: xamp
+        -
+          summary: 'logging 2 in example'
+          value:
+            username: will2
+            password: xamp22
+    LoginResponse:
+      properties:
+        message:
+          title: Message
+          type: string
+        auth_token:
+          title: 'Auth Token'
+          type: password
+      type: object
+    User:
+      properties:
+        uuid:
+          title: 'Unique reference'
+          type: string
+        username:
+          title: 'User name'
+          type: string
+        created_at:
+          title: 'User created'
+          type: string
+      type: object

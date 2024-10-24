@@ -16,14 +16,35 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\NewAccessToken;
+use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
 
 class AuthenticationController extends Controller
 {
 
+    #[OA\Get(
+        path: '/api/v1/users/me',
+        operationId: 'core.users.me',
+        description: "Long demo stuff, best to break apart into strings".
+        " More demo stuff",
+        summary: "when logged in, can see own details",
+        responses: [
+            new OA\Response( response: 200, description: 'This is you',content: new JsonContent(ref: '#/components/schemas/User'))
+        ]
+    )]
     public function me(Request $request) {
         $user = User::buildUser($request->user()->id)->first();
         return response()->json(new UserResource($user,null,2), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
+
+    #[OA\Post(
+        path: '/api/v1/users/login',
+        operationId: 'core.users.login',
+        requestBody: new OA\RequestBody( content: new JsonContent(ref: '#/components/schemas/LoginParams') ),
+        responses: [
+            new OA\Response( response: 200, description: 'Login gets a token',content: new JsonContent(ref: '#/components/schemas/LoginResponse'))
+        ]
+    )]
     public function login(Request $request): JsonResponse
     {
         $request->validate([

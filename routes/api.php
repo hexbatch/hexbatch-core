@@ -37,7 +37,7 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('users')->group(function () {
-            Route::get('/me', [AuthenticationController::class, 'me']);
+            Route::get('/me', [AuthenticationController::class, 'me'])->name('core.users.me');
 
             Route::post('/logout', [AuthenticationController::class, 'logout'])->name('core.users.logout');
 
