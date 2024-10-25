@@ -8,7 +8,6 @@ use App\Models\ElementValue;
 
 interface IAttribute
 {
-    public function getAttributeUuid() :string;
     public function getOwningType() : ?ElementType;
     public function getAttributeName() :string;
     public function getStartingElementValue() :?ElementValue;

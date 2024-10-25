@@ -16,9 +16,9 @@ abstract class BaseSystemUser implements ISystemUser
     protected ?User $user;
 
     const UUID = '';
-    const NAMESPACE_UUID = ThisServerNamespace::UUID; //todo call method to get this, use ::class
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
 
-    public function getUuid() : string {
+    public static function getUuid() : string {
         return static::UUID;
     }
 
@@ -31,7 +31,7 @@ abstract class BaseSystemUser implements ISystemUser
                "password" => $this->getUserPassword(),
                "password_confirmation" => $this->getUserPassword()
            ]);
-           $user->ref_uuid = $this->getUuid();
+           $user->ref_uuid = BaseSystemUser::getUuid();
            $user->save();
            $user->refresh();
            return $user;
@@ -47,7 +47,7 @@ abstract class BaseSystemUser implements ISystemUser
     }
 
     public function getUserNamespace() :?ISystemNamespace {
-        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
+        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
     }
 
     public function onCall(): ISystemResource

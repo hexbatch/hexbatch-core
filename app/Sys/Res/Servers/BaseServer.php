@@ -16,7 +16,8 @@ abstract class BaseServer implements ISystemServer
     protected ?Server $server;
 
     const UUID = '';
-    public function getUuid() : string {
+
+    public static function getUuid() : string {
         return static::UUID;
     }
 
@@ -25,7 +26,6 @@ abstract class BaseServer implements ISystemServer
       return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
   }
 
-    public function getServerUuid() :string { return static::UUID;}
 
     public function makeServer() :Server
    {

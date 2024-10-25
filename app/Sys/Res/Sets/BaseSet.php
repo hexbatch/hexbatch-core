@@ -15,15 +15,15 @@ use App\Sys\Res\ISystemResource;
 {
      const UUID = '';
 
-    const ELEMENT_UUID = '';
+    const ELEMENT_CLASS = '';
 
-    const CONTAINING_ELEMENT_UUIDS = [
+    const CONTAINING_ELEMENT_CLASSES = [
 
     ];
 
     protected ?ElementSet $set;
 
-     public function getUuid() : string {
+     public static function getUuid() : string {
          return static::UUID;
      }
 
@@ -36,13 +36,13 @@ use App\Sys\Res\ISystemResource;
 
      public function getDefiningSystemElement(): ?ISystemElement
      {
-         return SystemElements::getElementByUuid(static::ELEMENT_UUID);
+         return SystemElements::getElementByUuid(static::ELEMENT_CLASS);
      }
 
      public function getSystemElements(): array
      {
          $ret = [];
-         foreach (static::CONTAINING_ELEMENT_UUIDS as $el_uuid) {
+         foreach (static::CONTAINING_ELEMENT_CLASSES as $el_uuid) {
              $ret[] = SystemElements::getElementByUuid($el_uuid);
          }
          return $ret;

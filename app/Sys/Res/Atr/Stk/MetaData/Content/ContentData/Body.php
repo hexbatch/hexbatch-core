@@ -11,7 +11,7 @@ class Body extends BaseAttribute
 {
     const UUID = '186ea821-4c87-48c6-9343-17be402605de';
     const ATTRIBUTE_NAME = 'content_body';
-    const PARENT_UUID = ContentData::UUID;
+    const PARENT_ATTRIBUTE_CLASS = ContentData::class;
 
 
 }

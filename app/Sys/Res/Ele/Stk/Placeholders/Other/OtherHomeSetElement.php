@@ -10,8 +10,8 @@ use App\Sys\Res\Types\Stk\Root\Placeholder\Namespace\Other\HomeSetType;
 class OtherHomeSetElement extends BaseElement
 {
     const UUID = 'd3d7c6ec-7039-43a9-a5e5-c727f3a73533';
-    const TYPE_UUID = HomeSetType::UUID;
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+    const TYPE_CLASS = HomeSetType::class;
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
 
 }
 

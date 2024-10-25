@@ -11,7 +11,7 @@ class Opacity extends BaseAttribute
 {
     const UUID = 'c4ba6126-6f1b-4aac-a3d8-7fd1ffa2b5a6';
     const ATTRIBUTE_NAME = 'display_opacity';
-    const PARENT_UUID = DisplayData::UUID;
+    const PARENT_ATTRIBUTE_CLASS = DisplayData::class;
 
 
 }

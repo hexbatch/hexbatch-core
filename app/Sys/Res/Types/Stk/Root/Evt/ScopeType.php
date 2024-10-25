@@ -2,23 +2,23 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Evt;
 
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 
+use App\Enums\Sys\TypeOfEvent;
 
 class ScopeType extends BaseEvent
 {
     const UUID = '6d9ffce0-4922-4152-84c7-a9a5865b10bc';
-    const TYPE_NAME = 'scope_type';
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+    const EVENT_NAME = TypeOfEvent::EVENT_SCOPE_TYPE;
 
-    const DESCRIPTION_ELEMENT_UUID = '';
 
-    const ATTRIBUTE_UUIDS = [
+
+
+    const ATTRIBUTE_CLASSES = [
 
     ];
 
-    const PARENT_UUIDS = [
-        BaseEvent::UUID
+    const PARENT_CLASSES = [
+        BaseEvent::class
     ];
 
 }

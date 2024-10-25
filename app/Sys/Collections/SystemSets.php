@@ -7,11 +7,16 @@ use App\Sys\SystemBase;
 
 class SystemSets extends SystemBase
 {
-    const SOURCE_FOLDER = 'app/System/Sets/Stock';
+    public static array $class_name_array;
+    const SOURCE_FOLDER = 'app/Sys/Res/Sets/Stock';
 
 
-    public static function getSetByUuid(string $uuid) : ?ISystemSet {
-        /** @var ISystemSet */
-        return static::getResourceByUuid($uuid);
+    public static function getSetByUuid(string $class_name) : ?ISystemSet {
+
+        if (defined($class_name::UUID))  {
+            /** @var ISystemSet */
+            return static::getResourceByUuid($class_name::UUID);
+        }
+        return null;
     }
 }

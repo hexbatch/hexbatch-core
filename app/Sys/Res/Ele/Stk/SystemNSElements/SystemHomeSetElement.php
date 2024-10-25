@@ -10,8 +10,8 @@ use App\Sys\Res\Types\Stk\Root\SystemNamespaceTypes\System\ThisServer\ThisServer
 class SystemHomeSetElement extends BaseElement
 {
     const UUID = '42db7fa3-e3fd-4b9f-baf1-0aafc800b5b0';
-    const TYPE_UUID = ThisServerHomeset::UUID;
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+    const TYPE_CLASS = ThisServerHomeset::class;
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
 
 }
 

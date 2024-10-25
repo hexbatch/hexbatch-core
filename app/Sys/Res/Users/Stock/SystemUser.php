@@ -10,7 +10,7 @@ use App\Sys\Res\Users\BaseSystemUser;
 class SystemUser extends BaseSystemUser
 {
     const UUID = '2e3bfcdc-ac5b-4229-8919-b5a9a67f7701';
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
 
     public function getUserName() :string {
         $name = config('hbc.system.system_user_name');

@@ -6,25 +6,20 @@ namespace App\Sys\Res\Namespaces\Stock\Placeholders;
 use App\Sys\Res\Ele\Stk\Placeholders\Other\OtherPrivateElement;
 use App\Sys\Res\Ele\Stk\Placeholders\Other\OtherPublicElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
-use App\Sys\Res\Servers\Stock\ThisServer;
 
 use App\Sys\Res\Sets\Stock\Placeholders\OtherHomeSet;
 use App\Sys\Res\Types\Stk\Root\Placeholder\Namespace\Other;
 
-
-use App\Sys\Res\Users\Stock\SystemUser;
 
 class OtherNamespace extends BaseNamespace
 {
 
     const UUID = '5c87c57b-9a3f-4ba0-a31f-a5de9999ebec';
 
-    const TYPE_UUID = Other::UUID;
-    const PUBLIC_ELEMENT_UUID = OtherPublicElement::UUID;
-    const PRIVATE_ELEMENT_UUID = OtherPrivateElement::UUID;
-    const HOMESET_UUID = OtherHomeSet::UUID;
-    const SERVER_UUID = ThisServer::UUID;
-    const USER_UUID = SystemUser::UUID;
+    const TYPE_CLASS = Other::class;
+    const PUBLIC_ELEMENT_CLASS = OtherPublicElement::class;
+    const PRIVATE_ELEMENT_CLASS = OtherPrivateElement::class;
+    const HOMESET_CLASS = OtherHomeSet::class;
 
     public function getNamespaceName(): string
     {

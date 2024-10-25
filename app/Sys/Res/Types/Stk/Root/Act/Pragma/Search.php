@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -19,21 +18,17 @@ class Search extends Act\Pragma
 {
     const UUID = '5b8ff68a-8748-4323-8088-04a8e6fa73fc';
     const ACTION_NAME = TypeOfAction::PRAGMA_SEARCH;
-    const TYPE_NAME = self::ACTION_NAME;
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
-    const DESCRIPTION_ELEMENT_UUID = '';
-
-    const ATTRIBUTE_UUIDS = [
+    const ATTRIBUTE_CLASSES = [
 
     ];
 
-    const PARENT_UUIDS = [
-        Act\Pragma::UUID
+    const PARENT_CLASSES = [
+        Act\Pragma::class
     ];
 
-    const EVENT_UUIDS = [
-        Evt\Element\SearchResults::UUID,
+    const EVENT_CLASSES = [
+        Evt\Element\SearchResults::class,
     ];
 
 }

@@ -4,7 +4,6 @@ namespace App\Sys\Res\Types\Stk\Root\Signal;
 
 
 
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 
 
@@ -61,17 +60,16 @@ class MasterSemaphore extends BaseType
 {
     const UUID = '5f03b8f4-1e28-491a-bfad-3e941a8fb8b3';
     const TYPE_NAME = 'master_semaphore';
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
-    const DESCRIPTION_ELEMENT_UUID = '';
 
-    const ATTRIBUTE_UUIDS = [
+
+    const ATTRIBUTE_CLASSES = [
 //todo add attribute to set the number of semaphores
     //todo add attribute for if the action sets should be destroyed after the things waiting on it have completed
     ];
 
-    const PARENT_UUIDS = [
-        Semaphore::UUID
+    const PARENT_CLASSES = [
+        Semaphore::class
     ];
 
 }

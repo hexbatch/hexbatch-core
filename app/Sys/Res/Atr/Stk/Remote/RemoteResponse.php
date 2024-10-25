@@ -10,7 +10,7 @@ class RemoteResponse extends BaseAttribute
 {
     const UUID = 'db1fceed-ff8a-4340-bb39-15fd0c2d4118';
     const ATTRIBUTE_NAME = 'remote_response';
-    const PARENT_UUID = RemoteInformation::UUID;
+    const PARENT_ATTRIBUTE_CLASS = RemoteInformation::class;
 
 }
 

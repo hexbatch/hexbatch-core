@@ -11,7 +11,7 @@ class HomeUrl extends BaseAttribute
 {
     const UUID = '82f829f7-e19a-4b4a-a31f-9cbd99f21b48';
     const ATTRIBUTE_NAME = 'home_url';
-    const PARENT_UUID = ServerData::UUID;
+    const PARENT_ATTRIBUTE_CLASS = ServerData::class;
 }
 
 

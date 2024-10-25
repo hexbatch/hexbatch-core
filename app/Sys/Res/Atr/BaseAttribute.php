@@ -7,6 +7,7 @@ use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\ElementValue;
+use App\Models\UserNamespace;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
@@ -18,10 +19,11 @@ use App\Sys\Res\Types\ISystemType;
     protected ?Attribute $attribute;
 
     const UUID = '';
-    const TYPE_UUID = '';
-    const PARENT_UUID = '';
+    const TYPE_CLASS = '';
+    const PARENT_ATTRIBUTE_CLASS = '';
+    const ATTRIBUTE_NAME = '';
 
-     public function getUuid() : string {
+     public static function getUuid() : string {
          return static::UUID;
      }
 
@@ -29,7 +31,46 @@ use App\Sys\Res\Types\ISystemType;
          return static::ATTRIBUTE_NAME;
      }
 
-    public function getAttributeUuid() :string { return static::UUID;}
+     public static function getName() :string { return static::ATTRIBUTE_NAME; }
+
+     public static function getParentClasses() :array  {
+         $ret = [];
+         /**
+          * @type ISystemAttribute $me
+          */
+         $me = static::PARENT_ATTRIBUTE_CLASS;
+         $loop = 0;
+         while($me && $parent_class = $me::PARENT_ATTRIBUTE_CLASS) {
+             $interfaces = class_implements($parent_class);
+             if (isset($interfaces['App\Sys\Res\Atr\ISystemAttribute'])) {
+                 $me = $parent_class;
+                 if ($loop) {
+                     $ret[] = $me;
+                 }
+                 $loop++;
+             } else {
+                 throw new \LogicException("Parent $parent_class is not an attribute for ".static::class);
+             }
+
+         }
+         return $ret;
+     }
+     public static function getChainName() :string {
+        if (!static::PARENT_ATTRIBUTE_CLASS) {return static::getName();}
+
+        $names = [];
+
+         /**
+          * @var ISystemAttribute[] $rev
+          */
+        $rev = array_reverse(static::getParentClasses());
+        foreach ($rev as $parent_class) {
+            $names[] = $parent_class::getName();
+        }
+        $names[] = static::getName();
+        return implode(UserNamespace::NAMESPACE_SEPERATOR,$names);
+     }
+
 
     public function makeAttribute() :Attribute
    {
@@ -54,12 +95,12 @@ use App\Sys\Res\Types\ISystemType;
 
     public function getSystemParent(): ISystemAttribute
     {
-        return SystemAttributes::getAttributeByUuid(static::PARENT_UUID);
+        return SystemAttributes::getAttributeByUuid(static::PARENT_ATTRIBUTE_CLASS);
     }
 
     public function getOwningSystemType(): ISystemType
     {
-        return SystemTypes::getTypeByUuid(static::TYPE_UUID);
+        return SystemTypes::getTypeByUuid(static::TYPE_CLASS);
     }
 
     public function onCall(): ISystemResource

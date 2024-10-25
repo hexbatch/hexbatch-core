@@ -13,27 +13,29 @@ use App\Sys\Collections\SystemUsers;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Servers\ISystemServer;
+use App\Sys\Res\Servers\Stock\ThisServer;
 use App\Sys\Res\Sets\ISystemSet;
 use App\Sys\Res\Types\ISystemType;
 use App\Sys\Res\Users\ISystemUser;
+use App\Sys\Res\Users\Stock\SystemUser;
 
- abstract class BaseNamespace implements ISystemNamespace
+abstract class BaseNamespace implements ISystemNamespace
 {
 
 
     const UUID = '';
-    const TYPE_UUID = '';
-    const PUBLIC_ELEMENT_UUID = '';
-    const PRIVATE_ELEMENT_UUID = '';
-    const HOMESET_UUID = '';
-    const SERVER_UUID = '';
-    const USER_UUID = '';
+    const TYPE_CLASS = '';
+    const PUBLIC_ELEMENT_CLASS = '';
+    const PRIVATE_ELEMENT_CLASS = '';
+    const HOMESET_CLASS = '';
+    const SERVER_CLASS = ThisServer::class;
+    const USER_CLASS = SystemUser::class;
 
     protected ?UserNamespace $namespace = null;
 
-     public function getUuid() : string {
-         return static::UUID;
-     }
+    public static function getUuid() : string {
+        return static::UUID;
+    }
 
 
     public function makeNamespace() :UserNamespace
@@ -47,14 +49,13 @@ use App\Sys\Res\Users\ISystemUser;
        }
    }
 
-    public function getNamespaceUuid() :string {return static::UUID;}
-    public function getNamespaceServer() :?ISystemServer { return SystemServers::getServerByUuid(static::SERVER_UUID);}
-    public function getNamespaceUser() :?ISystemUser { return SystemUsers::getSystemUserByUuid(static::USER_UUID);}
+    public function getNamespaceServer() :?ISystemServer { return SystemServers::getServerByUuid(static::SERVER_CLASS);}
+    public function getNamespaceUser() :?ISystemUser { return SystemUsers::getSystemUserByUuid(static::USER_CLASS);}
 
-    public function getPublicElement() : ?ISystemElement { return SystemElements::getElementByUuid(static::PUBLIC_ELEMENT_UUID);}
-    public function getPrivateElement() : ?ISystemElement { return SystemElements::getElementByUuid(static::PRIVATE_ELEMENT_UUID);}
-    public function getNamespaceType() : ?ISystemType { return SystemTypes::getTypeByUuid(static::TYPE_UUID);}
-    public function getHomeSet() : ?ISystemSet { return SystemSets::getSetByUuid(static::TYPE_UUID);}
+    public function getPublicElement() : ?ISystemElement { return SystemElements::getElementByUuid(static::PUBLIC_ELEMENT_CLASS);}
+    public function getPrivateElement() : ?ISystemElement { return SystemElements::getElementByUuid(static::PRIVATE_ELEMENT_CLASS);}
+    public function getNamespaceType() : ?ISystemType { return SystemTypes::getTypeByUuid(static::TYPE_CLASS);}
+    public function getHomeSet() : ?ISystemSet { return SystemSets::getSetByUuid(static::TYPE_CLASS);}
 
     public function getNamespaceObject() : UserNamespace {
         if ($this->namespace) {return $this->namespace;}

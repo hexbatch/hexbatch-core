@@ -11,7 +11,7 @@ class LogicNorAll extends BaseAttribute
 {
     const UUID = '0cde94bd-9bf8-47e7-bc41-a3ad0c30f3ea';
     const ATTRIBUTE_NAME = 'logic_nor_all';
-    const PARENT_UUID = BaseLogic::UUID;
+    const PARENT_ATTRIBUTE_CLASS = BaseLogic::class;
 
 }
 

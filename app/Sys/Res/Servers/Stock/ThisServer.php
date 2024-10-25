@@ -13,7 +13,7 @@ class ThisServer extends BaseServer {
     //todo use the generated uuid, and not this constant, to fill in the parent uuid for all the others. Might need to use ::class instead of ::uuid
     // all uuid references should go through a method
     const UUID = '32998341-aa98-425e-b556-c342d029bb56';
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+    const NAMESPACE_UUID = ThisServerNamespace::class;
 
     public static function getThisServerUuid() : string {
         $name = config('hbc.system.server.server_uuid');
@@ -23,9 +23,6 @@ class ThisServer extends BaseServer {
         return $name;
     }
 
-    public function getServerUuid() :string {
-        return static::getThisServerUuid();
-    }
 
     public function getServerDomain(): string
     {
@@ -55,6 +52,6 @@ class ThisServer extends BaseServer {
         //set the uuid to the one in the config, and update the resource for the new uuid
         $this->server->ref_uuid = static::getThisServerUuid();
         $this->server->save();
-        SystemServers::updateResourceGuid(static::UUID,$this->server->ref_uuid);
+        SystemServers::updateResourceGuid(static::class,$this->server->ref_uuid);
     }
 }

@@ -13,6 +13,7 @@ abstract class SystemBase
     public static array $class_name_array; //sorted by nested folder: higher level php classes before those in folders below them
     protected static array $uuid_class_names = []; //keyed by UUID , value is the namespaced class name found in the values above
 
+    public static function getUuidClassNames() { return static::$uuid_class_names;}
     /**
      * @var ISystemResource[] $resource_array
      */
@@ -32,9 +33,13 @@ abstract class SystemBase
     }
 
 
+    public static function loadClasses() : array  {
+        if (empty(static::$class_name_array)) { static::$class_name_array = static::findClasses();}
+        return static::$class_name_array;
+    }
     public static function generateObjects() : array
     {
-        if (empty(static::$class_name_array)) {static::$class_name_array = static::findClasses();}
+        static::loadClasses();
         static::$resource_array = [];
         $ret = [];
         foreach (static::$class_name_array as $some_class_name) {
@@ -53,7 +58,7 @@ abstract class SystemBase
 
     public static function getResourceByUuid(?string $uuid) : ?ISystemResource {
         if (empty($uuid)) {return null;}
-        if (empty(static::$class_name_array)) {static::$class_name_array = static::findClasses();}
+        static::loadClasses();
         $class_name = static::$uuid_class_names[$uuid]??null;
         if (!$class_name) {return null;}
         if (isset(static::$resource_array[$uuid])) {return static::$resource_array[$uuid];}
@@ -81,13 +86,22 @@ abstract class SystemBase
             $full_class_name = $namespace . '\\' .$class;
             if (class_exists($full_class_name))
             {
-                $classes[$full_class_name] =  explode('\\',$full_class_name);
-                if (defined($full_class_name::UUID)) {
-                    static::$uuid_class_names[$full_class_name::UUID] = $full_class_name;
+                $interfaces = class_implements($full_class_name);
+
+                if (isset($interfaces['App\Sys\Res\ISystemResource'])) {
+
+                    $classes[$full_class_name] = explode('\\', $full_class_name);
+                    /**
+                     * @type ISystemResource $full_class_name
+                     */
+                    if ($full_class_name::getUuid()) {
+                        static::$uuid_class_names[$full_class_name::getUuid()] = $full_class_name;
+                    }
                 }
             }
 
         }
+
 
         usort($classes, function($a, $b) {
             for($i=0; $i < count($a) && $i < count($b); $i++) {
@@ -103,6 +117,7 @@ abstract class SystemBase
             $class_name_array[] = $some_class;
 
         }
+
         return $class_name_array;
 
     }

@@ -7,11 +7,16 @@ use App\Sys\SystemBase;
 
 class SystemUsers extends SystemBase
 {
-    const SOURCE_FOLDER = 'app/System/Users/Stock';
+    public static array $class_name_array;
+    const SOURCE_FOLDER = 'app/Sys/Res/Users/Stock';
 
 
-    public static function getSystemUserByUuid(string $uuid) : ?ISystemUser {
-        /** @var ISystemUser */
-        return static::getResourceByUuid($uuid);
+    public static function getSystemUserByUuid(string $class_name) : ?ISystemUser {
+
+        if (defined($class_name::UUID))  {
+            /** @var ISystemUser */
+            return static::getResourceByUuid($class_name::UUID);
+        }
+        return null;
     }
 }

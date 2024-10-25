@@ -9,9 +9,9 @@ use App\Sys\Res\Sets\BaseSet;
 class OtherHomeSet extends BaseSet
 {
     const UUID = 'df8dba38-bada-458b-af5d-77fe5035b497';
-    const ELEMENT_UUID = Other\OtherHomeSetElement::UUID;
+    const ELEMENT_CLASS = Other\OtherHomeSetElement::class;
 
-    const CONTAINING_ELEMENT_UUIDS = [
+    const CONTAINING_ELEMENT_CLASSES = [
 
     ];
 

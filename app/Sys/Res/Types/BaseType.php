@@ -14,6 +14,7 @@ use App\Sys\Res\Atr\ISystemAttribute;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
+use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Servers\Stock\ThisServer;
 
@@ -22,24 +23,23 @@ abstract class BaseType implements ISystemType
     protected ?ElementType $type;
 
     const UUID = '';
-    const NAMESPACE_UUID = '';
-    const DESCRIPTION_ELEMENT_UUID = '';
-    const SERVER_UUID = ThisServer::UUID;
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
+
+    const DESCRIPTION_ELEMENT_CLASS = '';
+    const SERVER_CLASS = ThisServer::class;
 
     const TYPE_NAME = '';
+    const ATTRIBUTE_CLASSES = [];
 
-    const ATTRIBUTE_UUIDS = [];
+    const PARENT_CLASSES = [];
 
-    const PARENT_UUIDS = [];
-
-    public function getUuid() : string {
+    public static function getUuid() : string {
         return static::UUID;
     }
 
-    public function getTypeUuid() :string { return static::UUID;}
 
     public function getServer() : ?ISystemServer {
-        return SystemServers::getServerByUuid(static::SERVER_UUID);
+        return SystemServers::getServerByUuid(static::SERVER_CLASS);
     }
 
     public function makeType() :ElementType
@@ -55,8 +55,8 @@ abstract class BaseType implements ISystemType
     /** @return ISystemAttribute[] */
     public function getAttributes() :array {
         $ret = [];
-        foreach (static::ATTRIBUTE_UUIDS as $uuid) {
-            $ret[] = SystemAttributes::getAttributeByUuid($uuid);
+        foreach (static::ATTRIBUTE_CLASSES as $class_name) {
+            $ret[] = SystemAttributes::getAttributeByUuid($class_name);
         }
         return $ret;
     }
@@ -64,11 +64,27 @@ abstract class BaseType implements ISystemType
     /** @return ISystemType[] */
     public function getParentTypes() :array {
         $ret = [];
-        foreach (static::ATTRIBUTE_UUIDS as $uuid) {
-            $ret[] = SystemTypes::getTypeByUuid($uuid);
+        foreach (static::PARENT_CLASSES as $class_name) {
+            $ret[] = SystemTypes::getTypeByUuid($class_name);
         }
         return $ret;
     }
+
+    public static function getParentClassTree() :array  {
+        $ret = [];
+        foreach (static::PARENT_CLASSES as $full_class_name) {
+            $interfaces = class_implements($full_class_name);
+            if (isset($interfaces['App\Sys\Res\Types\ISystemType'])) {
+                /**
+                 * @type ISystemType $full_class_name
+                 */
+                $ret[$full_class_name::getName()] = $full_class_name::getParentClassTree();
+            }
+        }
+        return $ret;
+    }
+
+
 
     public function getDescriptionElement(): ?ISystemElement
     {
@@ -84,12 +100,15 @@ abstract class BaseType implements ISystemType
     }
 
     public function getTypeNamespace() :?ISystemNamespace {
-        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
+        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
     }
 
     public function getTypeName(): string { return static::TYPE_NAME;}
-
+    public static function getName() :string { return static::TYPE_NAME; }
     public function isFinal(): bool { return false; }
+
+
+
 
     public function onCall(): ISystemResource
     {

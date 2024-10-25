@@ -11,7 +11,7 @@ class Keywords extends BaseAttribute
 {
     const UUID = 'c69f0c89-42a4-43cf-81a0-b666b562a242';
     const ATTRIBUTE_NAME = 'keywords';
-    const PARENT_UUID = Metadata::UUID;
+    const PARENT_ATTRIBUTE_CLASS = Metadata::class;
 
 
 }

@@ -22,6 +22,12 @@ namespace App\Enums\Sys;
 enum TypeOfEvent: string
 {
     case NOTHING = 'nothing';
+    case BASE_EVENT = 'base_event';
+    case EVENT_SCOPE_ELEMENT = 'event_scope_element';
+    case EVENT_SCOPE_ELSEWHERE = 'event_scope_elsewhere';
+    case EVENT_SCOPE_SET = 'event_scope_set';
+    case EVENT_SCOPE_TYPE = 'event_scope_type';
+    case EVENT_SCOPE_SERVER = 'event_scope_server';
 
 
 

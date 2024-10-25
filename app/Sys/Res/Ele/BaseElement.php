@@ -26,12 +26,14 @@ class BaseElement implements ISystemElement
 
 
     const UUID = '';
-    const TYPE_UUID = '';
-    const NAMESPACE_UUID = '';
+    const TYPE_CLASS = '';
+    const NAMESPACE_CLASS = '';
 
-    public function getUuid() : string {
+    public static function getUuid() : string {
         return static::UUID;
     }
+
+
 
     public function makeElement() :Element
    {
@@ -69,12 +71,12 @@ class BaseElement implements ISystemElement
 
     public function getSystemType(): ?ISystemType
     {
-        return SystemTypes::getTypeByUuid(static::TYPE_UUID);
+        return SystemTypes::getTypeByUuid(static::TYPE_CLASS);
     }
 
     public function getSystemNamespaceOwner(): ?ISystemNamespace
     {
-        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
+        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
     }
 
     public function getElementValue(\App\Sys\Res\Sets\ISet $set): ?ElementValue

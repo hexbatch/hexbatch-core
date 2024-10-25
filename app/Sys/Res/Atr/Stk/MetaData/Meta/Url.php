@@ -11,7 +11,7 @@ class Url extends BaseAttribute
 {
     const UUID = 'f522ecf8-2bb4-475a-b9df-0317c244bdf3';
     const ATTRIBUTE_NAME = 'url';
-    const PARENT_UUID = OutsideUrl::UUID;
+    const PARENT_ATTRIBUTE_CLASS = OutsideUrl::class;
 
 
 }

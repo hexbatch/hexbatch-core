@@ -8,7 +8,7 @@ interface IAction
 {
     const ACTION_NAME = '';
 
-    const EVENT_UUIDS = [];
+    const EVENT_CLASSES = [];
     public function doAction(Thing $thing): IAction;
 
     /** @return IEvent[] */

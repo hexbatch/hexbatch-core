@@ -11,7 +11,7 @@ class HeightPx extends BaseAttribute
 {
     const UUID = '884d30d6-4e7d-4384-9b96-8f6d22087cee';
     const ATTRIBUTE_NAME = 'display_height_px';
-    const PARENT_UUID = DisplayData::UUID;
+    const PARENT_ATTRIBUTE_CLASS = DisplayData::class;
 
 
 }

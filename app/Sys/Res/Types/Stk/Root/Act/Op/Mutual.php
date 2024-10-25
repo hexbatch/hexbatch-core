@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Op;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -16,18 +15,14 @@ class Mutual extends Act\Op
 {
     const UUID = '7d52ebfa-079c-4a2d-9bef-874a473c5220';
     const ACTION_NAME = TypeOfAction::OP_MUTUAL;
-    const TYPE_NAME = self::ACTION_NAME;
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
-    const DESCRIPTION_ELEMENT_UUID = '';
-
-    const ATTRIBUTE_UUIDS = [
+    const ATTRIBUTE_CLASSES = [
 
     ];
 
-    const PARENT_UUIDS = [
-        Act\Op::UUID,
-        Act\CmdNoSideEffects::UUID
+    const PARENT_CLASSES = [
+        Act\Op::class,
+        Act\CmdNoSideEffects::class
     ];
 
 }

@@ -5,7 +5,6 @@
 namespace App\Sys\Res\Types\Stk\Root;
 
 use App\Sys\Res\Atr\Stk\MetaData\Content\ContentData;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
 
@@ -16,21 +15,20 @@ class Content extends BaseType
 {
     const UUID = 'c9f9671e-905f-4198-9049-ef0e1ad4d268';
     const TYPE_NAME = 'content';
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
-    const DESCRIPTION_ELEMENT_UUID = '';
 
-    const ATTRIBUTE_UUIDS = [
-        ContentData::UUID,
-        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Subject::UUID,
-        ContentData\Title::UUID,
-        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Tags::UUID,
-        ContentData\Blurb::UUID,
-        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Body::UUID,
+
+    const ATTRIBUTE_CLASSES = [
+        ContentData::class,
+        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Subject::class,
+        ContentData\Title::class,
+        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Tags::class,
+        ContentData\Blurb::class,
+        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Body::class,
     ];
 
-    const PARENT_UUIDS = [
-        Root::UUID
+    const PARENT_CLASSES = [
+        Root::class
     ];
 
 }

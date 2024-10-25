@@ -10,8 +10,8 @@ use App\Sys\Res\Types\Stk\Root\Placeholder\Namespace\LoggedIn\PrivateType;
 class LoggedInPrivateElement extends BaseElement
 {
     const UUID = 'adc909c6-9279-488a-8158-c2189a2a70a1';
-    const TYPE_UUID = PrivateType::UUID;
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+    const TYPE_CLASS = PrivateType::class;
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
 
 }
 

@@ -9,9 +9,9 @@ use App\Sys\Res\Atr\Stk\MetaData\Server\ServerData;
 
 class Version extends BaseAttribute
 {
-    const UUID = '21749f7d-911d-4f42-8c26-8cdb6427b4ee';
+    const UUID = '76940eab-d129-4204-ae33-a6d8334fbdfa';
     const ATTRIBUTE_NAME = 'server_version';
-    const PARENT_UUID = ServerData::UUID;
+    const PARENT_ATTRIBUTE_CLASS = ServerData::class;
 
 }
 

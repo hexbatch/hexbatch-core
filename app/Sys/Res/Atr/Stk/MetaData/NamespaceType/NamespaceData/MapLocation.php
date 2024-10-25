@@ -11,7 +11,7 @@ class MapLocation extends BaseAttribute
 {
     const UUID = 'a7ac8df2-8ccf-42fa-a888-91db923ab037';
     const ATTRIBUTE_NAME = 'map_location';
-    const PARENT_UUID = NamespaceData::UUID;
+    const PARENT_ATTRIBUTE_CLASS = NamespaceData::class;
 }
 
 

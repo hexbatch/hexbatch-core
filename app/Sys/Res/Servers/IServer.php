@@ -8,7 +8,6 @@ use App\Sys\Res\Namespaces\INamespace;
 
 interface IServer
 {
-    public function getServerUuid() :string;
     public function getServerDomain() :string;
     public function getServerName() :string;
 

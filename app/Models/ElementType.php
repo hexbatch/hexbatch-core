@@ -528,10 +528,6 @@ class ElementType extends Model implements IType
         }
     }
 
-    public function getTypeUuid(): string
-    {
-        return $this->ref_uuid;
-    }
 
     public function getTypeName(): string
     {

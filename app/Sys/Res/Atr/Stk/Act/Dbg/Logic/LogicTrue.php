@@ -11,7 +11,7 @@ class LogicTrue extends BaseAttribute
 {
     const UUID = 'ec64e023-38eb-435f-8fc4-cf8560b2a551';
     const ATTRIBUTE_NAME = 'logic_true';
-    const PARENT_UUID = BaseLogic::UUID;
+    const PARENT_ATTRIBUTE_CLASS = BaseLogic::class;
 
 }
 

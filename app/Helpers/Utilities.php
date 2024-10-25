@@ -7,9 +7,12 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
 use App\Models\UserNamespace;
+use App\Rules\ResourceNameReq;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use JsonException;
 use JsonPath\InvalidJsonPathException;
 use JsonPath\JsonPath;
@@ -17,6 +20,17 @@ use LogicException;
 
 class Utilities {
     public static function ignoreVar(...$params) {}
+
+    public static function isValidResourceName(string $name) {
+        try {
+            Validator::make(['attribute_name' => $name], [
+                'attribute_name' => ['required', 'string', new ResourceNameReq],
+            ])->validate();
+            return true;
+        } catch (ValidationException) {
+            return false;
+        }
+    }
 
     public static function is_uuid(?string $guid) : bool{
         if (empty($guid)) {return false;}

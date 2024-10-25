@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Op;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 /*
@@ -15,21 +14,17 @@ class Push extends Act\Op
 {
     const UUID = 'ae5cf895-fee6-4042-93d2-ce83cfa77d05';
     const ACTION_NAME = TypeOfAction::OP_PUSH;
-    const TYPE_NAME = self::ACTION_NAME;
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
 
-    const DESCRIPTION_ELEMENT_UUID = '';
-
-    const ATTRIBUTE_UUIDS = [
+    const ATTRIBUTE_CLASSES = [
 
     ];
 
-    const PARENT_UUIDS = [
-        Act\Op::UUID
+    const PARENT_CLASSES = [
+        Act\Op::class
     ];
 
-    const EVENT_UUIDS = [
-        Evt\Set\SetEnter::UUID,
+    const EVENT_CLASSES = [
+        Evt\Set\SetEnter::class,
     ];
 
 }

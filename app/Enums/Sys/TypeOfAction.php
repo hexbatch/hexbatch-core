@@ -16,6 +16,12 @@ namespace App\Enums\Sys;
 enum TypeOfAction: string
 {
 
+    case NOP = 'NOP';
+    case BASE_ACTION = 'base_action';
+    case BASE_COMMAND = 'base_command';
+    case BASE_PRAGMA = 'base_pragma';
+    case BASE_OPERATION = 'base_op';
+
     case PRAGMA_WRITE_VISUAL = 'pragma_write_visual'; //if the attribute has a shape or map, set the visual section to one or more opacity|color|border|texture
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
@@ -68,22 +74,22 @@ enum TypeOfAction: string
     case CMD_DESIGN_LIVE_RULE_REMOVE = 'cmd_design_live_rule_remove';
 
 
-    case CMD_DESIGN_LIVE_REQUIREMENT_ADD = 'cmd_design_live_requirement_add';
-    case CMD_DESIGN_LIVE_REQUIREMENT_REMOVE = 'cmd_design_live_requirement_remove';
+    case CMD_DESIGN_REQUIREMENT_ADD = 'cmd_design_requirement_add';
+    case CMD_DESIGN_REQUIREMENT_REMOVE = 'cmd_design_requirement_remove';
 
 
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
     case CMD_TYPE_SUSPEND = 'cmd_type_suspend';
     case CMD_TYPE_RETIRE = 'cmd_type_retire';
     case CMD_TYPE_DESTROY = 'cmd_type_destroy';
-    case CMD_TYPE_DESTROY_NO_EVENTS = 'cmd_type_destroy_no_events'; //server admin
+    case CMD_TYPE_DESTROY_NO_EVENT = 'cmd_type_destroy_no_event'; //server admin
     case CMD_TYPE_CHANGE_OWNER = 'cmd_type_change_owner';
 
     case CMD_TYPE_HANDLE_ADD = 'cmd_type_handle_add';
     case CMD_TYPE_HANDLE_REMOVE = 'cmd_type_handle_remove';
 
-    case CMD_ATTRIBUTE_DESCRIPTION_ADD = 'cmd_attribute_description_add';
-    case CMD_ATTRIBUTE_DESCRIPTION_REMOVE = 'cmd_attribute_description_remove';
+    case CMD_ATTRIBUTE_HANDLE_ADD = 'cmd_attribute_handle_add';
+    case CMD_ATTRIBUTE_HANDLE_REMOVE = 'cmd_attribute_handle_remove';
 
     case CMD_PATH_CREATE = 'cmd_path_create';
     case CMD_PATH_EDIT = 'cmd_path_edit';
@@ -93,7 +99,7 @@ enum TypeOfAction: string
     case CMD_PATH_HANDLE_REMOVE = 'cmd_path_handle_remove';
     case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
     case CMD_SET_DESTROY = 'cmd_set_destroy'; //if admin of definer element of set ns
-    case CMD_SET_DESTROY_NO_EVENTS = 'cmd_set_destroy_no_events'; //server admin
+    case CMD_SET_DESTROY_NO_EVENT = 'cmd_set_destroy_no_event'; //server admin
     case CMD_LINK_ADD = 'cmd_link_add';
     case CMD_LINK_REMOVE = 'cmd_link_remove';
 
@@ -101,8 +107,8 @@ enum TypeOfAction: string
     case CMD_SET_MEMBER_ADD = 'cmd_set_member_add'; //add element to set
     case CMD_SET_MEMBER_REMOVE = 'cmd_set_member_remove'; //add element to set
 
-    case CMD_SET_MEMBER_ADD_NO_EVENTS = 'cmd_set_member_add_no_events'; //add element to set
-    case CMD_SET_MEMBER_REMOVE_NO_EVENTS = 'cmd_set_member_remove_no_events'; //add element to set
+    case CMD_SET_MEMBER_ADD_NO_EVENT = 'cmd_set_member_add_no_event'; //add element to set
+    case CMD_SET_MEMBER_REMOVE_NO_EVENT = 'cmd_set_member_remove_no_event'; //add element to set
 
     case CMD_SET_CHILD_HANDLE_ADD = 'cmd_set_child_handle_add';
     case CMD_SET_CHILD_HANDLE_REMOVE = 'cmd_set_child_handle_remove';
@@ -114,7 +120,7 @@ enum TypeOfAction: string
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
-    case CMD_ELEMENT_DESTROY_NO_EVENTS = 'cmd_element_destroy_no_events'; //server admin
+    case CMD_ELEMENT_DESTROY_NO_EVENT = 'cmd_element_destroy_no_event'; //server admin
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
     case CMD_LIVE_TYPE_COPY = 'cmd_live_type_copy';
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
@@ -139,7 +145,7 @@ enum TypeOfAction: string
 
     case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
-    case CMD_NAMESPACE_DESTROY_NO_EVENTS = 'cmd_namespace_destroy_no_events'; //server admin
+    case CMD_NAMESPACE_DESTROY_NO_EVENT = 'cmd_namespace_destroy_no_event'; //server admin
 
 
     case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
@@ -154,7 +160,7 @@ enum TypeOfAction: string
     case CMD_ELSEWHERE_GIVE_NS = 'cmd_elsewhere_give_ns';
     case CMD_ELSEWHERE_GIVE_SET = 'cmd_elsewhere_give_set';
     case CMD_ELSEWHERE_DO_REGISTRATION = 'cmd_elsewhere_do_registration';
-    case CMD_ELSEWHERE_RESEND_CREDENTIALS = 'cmd_elsewhere_resend_credentials';
+    case CMD_ELSEWHERE_NEW_CREDENTIALS = 'cmd_elsewhere_new_credentials';
     case CMD_ELSEWHERE_ASK_CREDENTIALS = 'cmd_elsewhere_ask_credentials';
     case CMD_ELSEWHERE_CHANGE_STATUS = 'cmd_elsewhere_change_status';
     case CMD_ELSEWHERE_PURGE = 'cmd_elsewhere_purge'; //removes all types,ns,ele,sets associated with server, no events

@@ -1,13 +1,11 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Act;
+namespace App\Sys\Res\Types\Stk\Root;
 
 use App\Sys\Res\Atr\Stk\Act\Dbg\BaseDebug;
 use App\Sys\Res\Atr\Stk\Act\Dbg\Logic;
 use App\Sys\Res\Atr\Stk\Act\Dbg\Merge;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
 use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stk\Root\Action;
 
 /*
 add new standard types for rendering rule_parts and path_parts: these have a standard attribute controlling the shape of the part.
@@ -27,36 +25,35 @@ each logic, and each combo enum needs its own attribute for shape
 class Debug extends BaseType
 {
     const UUID = '5f67d31d-acfa-4a20-87fe-427fd1a8d6bf';
-    const TYPE_NAME = 'action_debug';
-    const NAMESPACE_UUID = ThisServerNamespace::UUID;
+    const TYPE_NAME = 'debug';
 
-    const DESCRIPTION_ELEMENT_UUID = '';
 
-    const ATTRIBUTE_UUIDS = [
-        BaseDebug::UUID,
-        Logic\BaseLogic::UUID,
-        Logic\LogicAnd::UUID,
-        Logic\LogicFalse::UUID,
-        Logic\LogicNop::UUID,
-        Logic\LogicNor::UUID,
-        Logic\LogicNorAll::UUID,
-        Logic\LogicOr::UUID,
-        Logic\LogicOrAll::UUID,
-        Logic\LogicTrue::UUID,
-        Logic\LogicXNor::UUID,
-        Logic\LogicXor::UUID,
 
-        Merge\BaseMerge::UUID,
-        Merge\MergeAnd::UUID,
-        Merge\MergeNewest::UUID,
-        Merge\MergeOldest::UUID,
-        Merge\MergeOr::UUID,
-        Merge\MergeOverwrite::UUID,
-        Merge\MergeXor::UUID,
+    const ATTRIBUTE_CLASSES = [
+        BaseDebug::class,
+        Logic\BaseLogic::class,
+        Logic\LogicAnd::class,
+        Logic\LogicFalse::class,
+        Logic\LogicNop::class,
+        Logic\LogicNor::class,
+        Logic\LogicNorAll::class,
+        Logic\LogicOr::class,
+        Logic\LogicOrAll::class,
+        Logic\LogicTrue::class,
+        Logic\LogicXNor::class,
+        Logic\LogicXor::class,
+
+        Merge\BaseMerge::class,
+        Merge\MergeAnd::class,
+        Merge\MergeNewest::class,
+        Merge\MergeOldest::class,
+        Merge\MergeOr::class,
+        Merge\MergeOverwrite::class,
+        Merge\MergeXor::class,
     ];
 
-    const PARENT_UUIDS = [
-        Action::UUID
+    const PARENT_CLASSES = [
+        Action::class
     ];
 
     public function isFinal(): bool { return true; } //just to organize the attributes

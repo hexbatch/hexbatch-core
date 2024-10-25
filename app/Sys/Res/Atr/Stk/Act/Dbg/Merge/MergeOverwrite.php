@@ -10,7 +10,7 @@ class MergeOverwrite extends BaseAttribute
 {
     const UUID = 'edfc89f1-689f-40e1-91ff-9f1c4dbfd464';
     const ATTRIBUTE_NAME = 'merge_overwrite';
-    const PARENT_UUID = BaseMerge::UUID;
+    const PARENT_ATTRIBUTE_CLASS = BaseMerge::class;
 
 }
 

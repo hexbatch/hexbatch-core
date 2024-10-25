@@ -11,7 +11,7 @@ class Rating extends BaseAttribute
 {
     const UUID = '217172e4-3beb-49fb-8289-adeaff59441f';
     const ATTRIBUTE_NAME = 'ratings';
-    const PARENT_UUID = Metadata::UUID;
+    const PARENT_ATTRIBUTE_CLASS = Metadata::class;
 
 
 }
