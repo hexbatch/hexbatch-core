@@ -3,8 +3,8 @@
 namespace App\Sys\Res\Namespaces\Stock\Placeholders;
 
 
-use App\Sys\Res\Ele\Stk\Placeholders\Other\OtherPrivateElement;
-use App\Sys\Res\Ele\Stk\Placeholders\Other\OtherPublicElement;
+use App\Sys\Res\Ele\Stk\Holder\Other\OtherPrivateElement;
+use App\Sys\Res\Ele\Stk\Holder\Other\OtherPublicElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
 
 use App\Sys\Res\Sets\Stock\Placeholders\OtherHomeSet;
@@ -21,13 +21,9 @@ class OtherNamespace extends BaseNamespace
     const PRIVATE_ELEMENT_CLASS = OtherPrivateElement::class;
     const HOMESET_CLASS = OtherHomeSet::class;
 
-    public function getNamespaceName(): string
+    public static function getNamespaceName(): string
     {
         return 'other_namespace_placeholder';
     }
 
-    public function getNamespacePublicKey(): ?string
-    {
-       return null;
-    }
 }

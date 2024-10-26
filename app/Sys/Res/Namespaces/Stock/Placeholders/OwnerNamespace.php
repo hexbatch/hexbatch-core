@@ -3,8 +3,8 @@
 namespace App\Sys\Res\Namespaces\Stock\Placeholders;
 
 
-use App\Sys\Res\Ele\Stk\Placeholders\Owner\OwnerPrivateElement;
-use App\Sys\Res\Ele\Stk\Placeholders\Owner\OwnerPublicElement;
+use App\Sys\Res\Ele\Stk\Holder\Owner\OwnerPrivateElement;
+use App\Sys\Res\Ele\Stk\Holder\Owner\OwnerPublicElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
 
 use App\Sys\Res\Sets\Stock\Placeholders\OwnerHomeSet;
@@ -20,13 +20,9 @@ class OwnerNamespace extends BaseNamespace
     const PRIVATE_ELEMENT_CLASS = OwnerPrivateElement::class;
     const HOMESET_CLASS = OwnerHomeSet::class;
 
-    public function getNamespaceName(): string
+    public static function getNamespaceName(): string
     {
         return 'owner_namespace_placeholder';
     }
 
-    public function getNamespacePublicKey(): ?string
-    {
-       return null;
-    }
 }

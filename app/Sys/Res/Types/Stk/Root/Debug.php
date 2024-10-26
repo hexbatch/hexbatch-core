@@ -35,6 +35,7 @@ class Debug extends BaseType
         Logic\LogicAnd::class,
         Logic\LogicFalse::class,
         Logic\LogicNop::class,
+        Logic\LogicNand::class,
         Logic\LogicNor::class,
         Logic\LogicNorAll::class,
         Logic\LogicOr::class,

@@ -9,6 +9,7 @@ interface ISystemAttribute extends ISystemResource,IAttribute
 {
 
     public static function getName() :string;
+    public static function getTypeParentClass() :string;
     public static function getChainName() :string;
 
     public function getOwningSystemType() : ?ISystemType;

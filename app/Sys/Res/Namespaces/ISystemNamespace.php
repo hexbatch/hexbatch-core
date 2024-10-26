@@ -12,7 +12,16 @@ use App\Sys\Res\Users\ISystemUser;
 
 interface ISystemNamespace extends ISystemResource, INamespace
 {
-    public function getNamespacePublicKey() :?string;
+
+    public static function getSystemServerClass() :string|ISystemServer;
+    public static function getSystemUserClass() :string|ISystemUser;
+    public static function getSystemPublicClass() :string|ISystemElement;
+    public static function getSystemPrivateClass() :string|ISystemElement;
+    public static function getSystemHomeClass() :string|ISystemSet;
+    public static function getSystemTypeClass() :string|ISystemType;
+
+    public static function getNamespaceName() :string;
+    public static function getNamespacePublicKey() :?string;
     public function getNamespaceServer() :?ISystemServer;
     public function getNamespaceUser() :?ISystemUser;
 

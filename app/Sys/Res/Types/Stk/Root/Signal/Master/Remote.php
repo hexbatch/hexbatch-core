@@ -21,19 +21,20 @@ class Remote extends BaseType
 
 
     const ATTRIBUTE_CLASSES = [
-        \App\Sys\Res\Atr\Stk\Remote\RemoteDataFormat::class,
-        \App\Sys\Res\Atr\Stk\Remote\RemoteHeader::class,
-        \App\Sys\Res\Atr\Stk\Remote\RemoteMethod::class,
-        \App\Sys\Res\Atr\Stk\Remote\RemoteProtocol::class,
-        \App\Sys\Res\Atr\Stk\Remote\RemoteDomain::class,
-        \App\Sys\Res\Atr\Stk\Remote\RemotePort::class,
-        \App\Sys\Res\Atr\Stk\Remote\RemoteData::class,
-        \App\Sys\Res\Atr\Stk\Remote\RemoteResponse::class,
-        \App\Sys\Res\Atr\Stk\Remote\HttpResponseCode::class,
-        \App\Sys\Res\Atr\Stk\Remote\HttpResponseFail::class,
-        \App\Sys\Res\Atr\Stk\Remote\HttpResponseSuccess::class,
-        \App\Sys\Res\Atr\Stk\Remote\ResponseBody::class,
-        \App\Sys\Res\Atr\Stk\Remote\ResponseHeaders::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\RemoteInformation::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemoteDataFormat::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemoteHeader::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemoteMethod::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemoteProtocol::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemoteDomain::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemotePort::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemoteData::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\RemoteResponse::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\HttpResponseCode::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\HttpResponseFail::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\HttpResponseSuccess::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\ResponseBody::class,
+        \App\Sys\Res\Atr\Stk\Signal\Master\Remote\ResponseHeaders::class,
     ];
 
     const PARENT_CLASSES = [

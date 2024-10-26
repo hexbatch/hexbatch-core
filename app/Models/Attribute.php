@@ -14,7 +14,6 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
-use App\Rules\ResourceNameReq;
 use App\Sys\Res\Atr\IAttribute;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

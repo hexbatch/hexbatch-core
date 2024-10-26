@@ -17,6 +17,7 @@ use App\Sys\Res\Namespaces\ISystemNamespace;
 
 use App\Sys\Res\Types\ISystemType;
 use App\Sys\Res\Types\IType;
+use App\Sys\Res\Types\Stk\Root\NS\System\ThisServer\ThisServerNS;
 
 
 class BaseElement implements ISystemElement
@@ -27,7 +28,7 @@ class BaseElement implements ISystemElement
 
     const UUID = '';
     const TYPE_CLASS = '';
-    const NAMESPACE_CLASS = '';
+    const NAMESPACE_CLASS = ThisServerNS::class;
 
     public static function getUuid() : string {
         return static::UUID;
@@ -64,9 +65,12 @@ class BaseElement implements ISystemElement
     }
 
 
-    public function getSystemElementValues(): array
-    {
-        return [];
+    public static function getSystemTypeClass() :string|ISystemType {
+        return static::TYPE_CLASS;
+    }
+
+    public static function getSystemNamespaceClass() :string|ISystemNamespace {
+        return static::NAMESPACE_CLASS;
     }
 
     public function getSystemType(): ?ISystemType

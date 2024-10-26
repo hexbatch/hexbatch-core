@@ -10,10 +10,12 @@ use App\Sys\Res\Namespaces\ISystemNamespace;
 interface ISystemUser extends ISystemResource
 {
 
-    public function getUserName() :string;
-    public function getUserPassword() :string;
+    public static function getUserName() :string;
+    public static function getUserPassword() :string;
     public function getUserNamespace() :?ISystemNamespace;
 
     public function getUserObject() : ?User;
+
+    public static function getSystemNamespaceClass() :string|ISystemNamespace;
 
 }

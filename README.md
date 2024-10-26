@@ -41,7 +41,7 @@ can clear out just part of the redis cache `php artisan cache:clear --tags=tests
 
 ## Future links
 
-I think I will use this to make open api, need to see if can connect the act with the docs and how to put in examples
+I think I will use this to make open api, need to see if I can connect the act with the docs and how to put in examples
 https://github.com/zircote/swagger-php?tab=readme-ov-file
 
   https://github.com/DerManoMann/openapi-extras

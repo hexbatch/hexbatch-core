@@ -4,6 +4,7 @@
 namespace App\Sys\Res\Types\Stk\Root;
 
 use App\Sys\Res\Atr\Stk\Media\DownloadableUrl;
+use App\Sys\Res\Atr\Stk\Media\MediaType;
 use App\Sys\Res\Atr\Stk\Media\MediaUrl;
 use App\Sys\Res\Atr\Stk\MetaData\Media\MediaData;
 use App\Sys\Res\Types\BaseType;
@@ -21,7 +22,7 @@ class Media extends BaseType
         MediaData::class,
         MediaUrl::class,
         DownloadableUrl::class,
-        MediaData::class,
+        MediaType::class,
     ];
 
     const PARENT_CLASSES = [

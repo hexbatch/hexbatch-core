@@ -7,7 +7,7 @@ use App\Models\UserNamespace;
 
 interface INamespace
 {
-    public function getNamespaceName() :string;
+
 
     public function getNamespaceObject() : UserNamespace;
 

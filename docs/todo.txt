@@ -14,9 +14,6 @@ todo talk about what triggers intersection events and what does not (attribute o
 
 
 
-todo find way to put my   notes into open api parts or at least make docs
-
-
 °º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
 
 

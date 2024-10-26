@@ -9,9 +9,9 @@ use App\Sys\Res\Types\ISystemType;
 interface ISystemElement extends ISystemResource,IElement
 {
 
-    /** @return ISystemElementValue[] */
-    public function getSystemElementValues() :array;
 
+    public static function getSystemTypeClass() :string|ISystemType;
+    public static function getSystemNamespaceClass() :string|ISystemNamespace;
     public function getSystemType() :?ISystemType;
     public function getSystemNamespaceOwner() :?ISystemNamespace;
 

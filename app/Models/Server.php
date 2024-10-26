@@ -180,20 +180,6 @@ class Server extends Model implements IServer
         return $this->id;
     }
 
-    public function getServerUuid(): string
-    {
-        return $this->ref_uuid;
-    }
-
-    public function getServerDomain(): string
-    {
-       return $this->server_domain;
-    }
-
-    public function getServerName(): string
-    {
-        return $this->getName();
-    }
 
     public function getServerNamespaceInterface(): ?INamespace
     {

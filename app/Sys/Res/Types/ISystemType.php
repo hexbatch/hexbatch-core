@@ -13,12 +13,18 @@ interface ISystemType extends ISystemResource, IType
 
     public static function getName() :string;
 
-    public static function getParentClassTree() :array;
+    public static function getParentNameTree() :array;
+
+    public static function getFlatInheritance() : string;
 
     public function isFinal() : bool;
 
     /** @return ISystemType[] */
     public function getParentTypes() :array;
+
+
+    /** @return ISystemAttribute[]|string[] */
+    public static function getAttributeClasses() :array;
 
     /** @return ISystemAttribute[] */
     public function getAttributes() :array;

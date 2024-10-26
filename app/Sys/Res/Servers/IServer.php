@@ -8,8 +8,6 @@ use App\Sys\Res\Namespaces\INamespace;
 
 interface IServer
 {
-    public function getServerDomain() :string;
-    public function getServerName() :string;
 
     public function getServerNamespaceInterface() :?INamespace;
     public function getServerObject() :?Server;

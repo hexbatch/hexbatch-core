@@ -15,15 +15,17 @@ abstract class BaseServer implements ISystemServer
 {
     protected ?Server $server;
 
-    const UUID = '';
+    const NAMESPACE_CLASS = '';
 
-    public static function getUuid() : string {
-        return static::UUID;
+
+
+    public static function getSystemNamespaceClass(): string|ISystemNamespace {
+        return static::NAMESPACE_CLASS;
     }
 
   public function getServerSystemNamespace(): ISystemNamespace
   {
-      return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_UUID);
+      return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
   }
 
 

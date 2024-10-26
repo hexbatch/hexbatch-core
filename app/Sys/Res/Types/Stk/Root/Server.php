@@ -18,6 +18,7 @@ class Server extends BaseType
 
 
     const ATTRIBUTE_CLASSES = [
+        \App\Sys\Res\Atr\Stk\MetaData\Server\ServerData::class,
         \App\Sys\Res\Atr\Stk\MetaData\Server\ServerData\CommitHash::class,
         \App\Sys\Res\Atr\Stk\MetaData\Server\ServerData\Version::class,
         \App\Sys\Res\Atr\Stk\MetaData\Server\ServerData\Domain::class,

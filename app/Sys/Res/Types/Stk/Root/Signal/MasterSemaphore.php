@@ -4,6 +4,8 @@ namespace App\Sys\Res\Types\Stk\Root\Signal;
 
 
 
+use App\Sys\Res\Atr\Stk\Signal\Master\NumberSemaphores;
+use App\Sys\Res\Atr\Stk\Signal\Master\WaitingSetLifetime;
 use App\Sys\Res\Types\BaseType;
 
 
@@ -64,8 +66,8 @@ class MasterSemaphore extends BaseType
 
 
     const ATTRIBUTE_CLASSES = [
-//todo add attribute to set the number of semaphores
-    //todo add attribute for if the action sets should be destroyed after the things waiting on it have completed
+        NumberSemaphores::class,
+        WaitingSetLifetime::class,
     ];
 
     const PARENT_CLASSES = [

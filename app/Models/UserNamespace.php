@@ -357,16 +357,6 @@ class UserNamespace extends Model implements INamespace
         return static::buildNamespace(id:$node->id)->first();
     }
 
-    public function getNamespaceUuid(): string
-    {
-        return $this->ref_uuid;
-    }
-
-    public function getNamespaceName(): string
-    {
-        return $this->getName();
-    }
-
     public function getNamespaceObject(): UserNamespace
     {
         return $this;

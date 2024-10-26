@@ -10,32 +10,31 @@ use App\Sys\Res\Servers\BaseServer;
 
 
 class ThisServer extends BaseServer {
-    //todo use the generated uuid, and not this constant, to fill in the parent uuid for all the others. Might need to use ::class instead of ::uuid
-    // all uuid references should go through a method
-    const UUID = '32998341-aa98-425e-b556-c342d029bb56';
-    const NAMESPACE_UUID = ThisServerNamespace::class;
 
-    public static function getThisServerUuid() : string {
-        $name = config('hbc.system.server.server_uuid');
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
+
+    public static function getUuid() : string {
+        $name = config('hbc.system.server.uuid');
         if (!$name) {
-            throw new HexbatchInitException("Server uuid is not set in .env");
+            throw new HexbatchInitException("Server user uuid is not set in .env");
         }
         return $name;
     }
 
 
-    public function getServerDomain(): string
+
+    public static function getServerDomain(): string
     {
-        $name = config('hbc.system.server.server_domain');
+        $name = config('hbc.system.server.domain');
         if (!$name) {
             throw new HexbatchInitException("Server domain is not set in .env");
         }
         return $name;
     }
 
-    public function getServerName(): string
+    public static function getServerName(): string
     {
-        $name = config('hbc.system.server.server_name');
+        $name = config('hbc.system.server.name');
         if (!$name) {
             throw new HexbatchInitException("Server name is not set in .env");
         }
@@ -50,7 +49,7 @@ class ThisServer extends BaseServer {
     public function onNextStep(): void
     {
         //set the uuid to the one in the config, and update the resource for the new uuid
-        $this->server->ref_uuid = static::getThisServerUuid();
+        $this->server->ref_uuid = static::getUuid();
         $this->server->save();
         SystemServers::updateResourceGuid(static::class,$this->server->ref_uuid);
     }

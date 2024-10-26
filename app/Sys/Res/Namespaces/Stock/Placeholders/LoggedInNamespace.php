@@ -4,8 +4,8 @@ namespace App\Sys\Res\Namespaces\Stock\Placeholders;
 
 
 
-use App\Sys\Res\Ele\Stk\Placeholders\LoggedIn\LoggedInPrivateElement;
-use App\Sys\Res\Ele\Stk\Placeholders\LoggedIn\LoggedInPublicElement;
+use App\Sys\Res\Ele\Stk\Holder\LoggedIn\LoggedInPrivateElement;
+use App\Sys\Res\Ele\Stk\Holder\LoggedIn\LoggedInPublicElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
 
 use App\Sys\Res\Sets\Stock\Placeholders\LoggedInHomeSet;
@@ -21,13 +21,9 @@ class LoggedInNamespace extends BaseNamespace
     const PRIVATE_ELEMENT_CLASS = LoggedInPrivateElement::class;
     const HOMESET_CLASS = LoggedInHomeSet::class;
 
-    public function getNamespaceName(): string
+    public static function getNamespaceName(): string
     {
         return 'logged_in_namespace_placeholder';
     }
 
-    public function getNamespacePublicKey(): ?string
-    {
-       return null;
-    }
 }

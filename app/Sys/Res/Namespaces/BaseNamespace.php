@@ -37,6 +37,31 @@ abstract class BaseNamespace implements ISystemNamespace
         return static::UUID;
     }
 
+    public static function getNamespacePublicKey(): ?string
+    {
+        return null;
+    }
+
+
+    public static function getSystemServerClass() :string|ISystemServer {
+        return static::SERVER_CLASS;
+    }
+    public static function getSystemUserClass() :string|ISystemUser{
+        return static::USER_CLASS;
+    }
+    public static function getSystemPublicClass() :string|ISystemElement{
+        return static::PUBLIC_ELEMENT_CLASS;
+    }
+    public static function getSystemPrivateClass() :string|ISystemElement{
+        return static::PRIVATE_ELEMENT_CLASS;
+    }
+    public static function getSystemHomeClass() :string|ISystemSet{
+        return static::HOMESET_CLASS;
+    }
+    public static function getSystemTypeClass() :string|ISystemType{
+        return static::TYPE_CLASS;
+    }
+
 
     public function makeNamespace() :UserNamespace
    {

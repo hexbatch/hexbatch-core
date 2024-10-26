@@ -27,12 +27,18 @@ use App\Sys\Res\ISystemResource;
          return static::UUID;
      }
 
+     public static function hasEvents() :bool { return true;}
 
-
-     public function hasEvents(): bool
-     {
-         return true;
+     public static function getDefiningSystemElementClass() :string|ISystemElement {
+         return static::ELEMENT_CLASS;
      }
+
+     /** @return ISystemElement[]|string[] */
+     public static function getMemberSystemElementClasses() :array {
+         return static::CONTAINING_ELEMENT_CLASSES;
+     }
+
+
 
      public function getDefiningSystemElement(): ?ISystemElement
      {

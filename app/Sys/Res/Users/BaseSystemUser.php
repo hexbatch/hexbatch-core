@@ -15,11 +15,12 @@ abstract class BaseSystemUser implements ISystemUser
 {
     protected ?User $user;
 
-    const UUID = '';
-    const NAMESPACE_CLASS = ThisServerNamespace::class;
 
-    public static function getUuid() : string {
-        return static::UUID;
+    const NAMESPACE_CLASS = ThisServerNamespace::class;
+    
+
+    public static function getSystemNamespaceClass() :string|ISystemNamespace {
+        return static::NAMESPACE_CLASS;
     }
 
 
@@ -27,11 +28,11 @@ abstract class BaseSystemUser implements ISystemUser
    {
        try {
            $user = (new CreateNewUser)->create([
-               "username" => $this->getUserName(),
-               "password" => $this->getUserPassword(),
-               "password_confirmation" => $this->getUserPassword()
+               "username" => static::getUserName(),
+               "password" => static::getUserPassword(),
+               "password_confirmation" => static::getUserPassword()
            ]);
-           $user->ref_uuid = BaseSystemUser::getUuid();
+           $user->ref_uuid = static::getUuid();
            $user->save();
            $user->refresh();
            return $user;

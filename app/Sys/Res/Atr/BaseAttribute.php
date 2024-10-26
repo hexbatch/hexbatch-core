@@ -31,6 +31,10 @@ use App\Sys\Res\Types\ISystemType;
          return static::ATTRIBUTE_NAME;
      }
 
+     public static function getTypeParentClass() :string {
+         return static::TYPE_CLASS;
+     }
+
      public static function getName() :string { return static::ATTRIBUTE_NAME; }
 
      public static function getParentClasses() :array  {
@@ -38,16 +42,12 @@ use App\Sys\Res\Types\ISystemType;
          /**
           * @type ISystemAttribute $me
           */
-         $me = static::PARENT_ATTRIBUTE_CLASS;
-         $loop = 0;
+         $me = static::class;
          while($me && $parent_class = $me::PARENT_ATTRIBUTE_CLASS) {
              $interfaces = class_implements($parent_class);
              if (isset($interfaces['App\Sys\Res\Atr\ISystemAttribute'])) {
                  $me = $parent_class;
-                 if ($loop) {
-                     $ret[] = $me;
-                 }
-                 $loop++;
+                 $ret[] = $me;
              } else {
                  throw new \LogicException("Parent $parent_class is not an attribute for ".static::class);
              }
@@ -64,6 +64,7 @@ use App\Sys\Res\Types\ISystemType;
           * @var ISystemAttribute[] $rev
           */
         $rev = array_reverse(static::getParentClasses());
+
         foreach ($rev as $parent_class) {
             $names[] = $parent_class::getName();
         }

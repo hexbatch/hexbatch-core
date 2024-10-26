@@ -9,18 +9,27 @@ use App\Sys\Res\Users\BaseSystemUser;
 
 class SystemUser extends BaseSystemUser
 {
-    const UUID = '2e3bfcdc-ac5b-4229-8919-b5a9a67f7701';
+
     const NAMESPACE_CLASS = ThisServerNamespace::class;
 
-    public function getUserName() :string {
-        $name = config('hbc.system.system_user_name');
+
+    public static function getUuid() : string {
+        $name = config('hbc.system.user.uuid');
+        if (!$name) {
+            throw new HexbatchInitException("System user uuid is not set in .env");
+        }
+        return $name;
+    }
+
+    public static function getUserName() :string {
+        $name = config('hbc.system.user.username');
         if (!$name) {
             throw new HexbatchInitException("System user name is not set in .env");
         }
         return $name;
     }
-    public function getUserPassword() :string {
-        $pw = config('hbc.system.system_user_password');
+    public static function getUserPassword() :string {
+        $pw = config('hbc.system.user.password');
         if (!$pw) {
             throw new HexbatchInitException("System user pw is not set in .env");
         }

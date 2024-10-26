@@ -3,6 +3,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root;
 
+use App\Sys\Res\Atr\Stk\Signal\SignalBase;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
 
@@ -23,7 +24,7 @@ class Signal extends BaseType
 
 
     const ATTRIBUTE_CLASSES = [
-
+        SignalBase::class
     ];
 
     const PARENT_CLASSES = [

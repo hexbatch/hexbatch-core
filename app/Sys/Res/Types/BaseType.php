@@ -52,6 +52,10 @@ abstract class BaseType implements ISystemType
        }
    }
 
+    public static function getAttributeClasses() :array {
+        return static::ATTRIBUTE_CLASSES;
+    }
+
     /** @return ISystemAttribute[] */
     public function getAttributes() :array {
         $ret = [];
@@ -70,25 +74,59 @@ abstract class BaseType implements ISystemType
         return $ret;
     }
 
-    public static function getParentClassTree() :array  {
+    public static function getParentNameTree() :array  {
         $ret = [];
+        $ret[static::getName()] = [] ;
         foreach (static::PARENT_CLASSES as $full_class_name) {
             $interfaces = class_implements($full_class_name);
             if (isset($interfaces['App\Sys\Res\Types\ISystemType'])) {
                 /**
                  * @type ISystemType $full_class_name
                  */
-                $ret[$full_class_name::getName()] = $full_class_name::getParentClassTree();
+                $ret[static::getName()][] = $full_class_name::getParentNameTree();
             }
         }
         return $ret;
     }
 
+    public static function getFlatInheritance() : string  {
+        $raw = static::renderSubtree(static::getParentNameTree());
+        return preg_replace('/(\|~\|\d)/', "\n   ",$raw);
+    }
+
+    public static function renderSubtree(array $tree) : string  {
+        $ret = [];
+
+        $count = 0;
+        foreach ($tree as $k => $v) {
+            if ($count) {
+                $ret[] = '~';
+            }
+            if ($k) {
+                $ret[] = $k;
+            }
+
+            if (count($v) ) {
+                $what = static::renderSubtree($v);
+                $ret[] = $what;
+
+            }
+            $count++;
+
+        }
+
+
+        return implode('|',$ret);
+    }
+/*
+ *
+ */
+
 
 
     public function getDescriptionElement(): ?ISystemElement
     {
-        return SystemElements::getElementByUuid(static::DESCRIPTION_ELEMENT_UUID);
+        return SystemElements::getElementByUuid(static::DESCRIPTION_ELEMENT_CLASS);
     }
 
 
