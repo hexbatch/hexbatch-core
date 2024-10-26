@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Enums\Things\TypeThingHookMode;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * only one can be marked primary (turn others off)
  * if there is a primary, then each new thing is marked with this, and will not run automatically unless this is run to cursor or step over or off
  * if the debugging_callback_url is null, then results logged
- * there should be an api for server admin group to:
+ * todo there should be an api for server admin group to:
  *      create/remove/change debuggers
  *      apply debugger to node or branch (will set to the debugger chosen if already set)
  *      get thing node
@@ -28,8 +29,9 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int debugging_mode
- * @property bool is_primary
+ * @property int owning_hook_cluster_id
+ * @property bool is_on
+ * @property TypeThingHookMode thing_hook_mode
  * @property string debugging_callback_url
 
  * @property ArrayObject extra_data
@@ -37,11 +39,11 @@ use Illuminate\Database\Eloquent\Model;
  *
  *
  */
-class ThingDebug extends Model
+class ThingHook extends Model
 {
 
 
-    protected $table = 'thing_debugging';
+    protected $table = 'thing_hooks';
     public $timestamps = false;
 
     /**
@@ -65,6 +67,7 @@ class ThingDebug extends Model
      */
     protected $casts = [
         'extra_data' => AsArrayObject::class,
+        'thing_hook_mode' => TypeThingHookMode::class,
     ];
 
 }

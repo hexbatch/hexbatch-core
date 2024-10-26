@@ -2,8 +2,6 @@
 
 namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 
-
-
 use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 

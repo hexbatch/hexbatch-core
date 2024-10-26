@@ -232,11 +232,6 @@ enum TypeOfEvent: string
     //mixed scope
 
     case CUSTOM_EVENT = 'custom_event'; //scope depends on the custom event type parent
-    case THING_TREE_SET_PERMISSIONS = 'thing_tree_set_permissions';
-    //all scopes system admin ns only, after the tree is created
-    //
-    case THING_TREE_SET_DEBUGGING = 'thing_tree_set_debugging';
-    //all scopes system admin ns only, after the tree is created
 
 
     public static function tryFromInput(string|int|bool|null $test): TypeOfEvent

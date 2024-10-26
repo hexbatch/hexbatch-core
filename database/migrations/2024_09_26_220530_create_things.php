@@ -80,13 +80,13 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('thing_debugger_id')
+            $table->foreignId('thing_hook_cluster_id')
                 ->nullable()->default(null)
-                ->comment("when debugging this goes to the output")
+                ->comment("when there is some hook(s) to run here")
                 ->index()
-                ->constrained('thing_debugging')
+                ->constrained('thing_hook_clusters')
                 ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+                ->nullOnDelete();
 
             $table->foreignId('thing_phase_id')
                 ->nullable()
