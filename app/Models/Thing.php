@@ -28,13 +28,13 @@ use Illuminate\Database\Query\JoinClause;
  * @property int after_thing_id
  * @property int api_or_action_type_id
  * @property int thing_rule_id
- * @property int thing_hook_cluster_id
  * @property int thing_phase_id
  *
  *
  *
  * @property int thing_rank
  * @property int debugging_breakpoint
+ * @property bool is_waiting_on_hook
  *
  * @property string thing_start_after
  * @property string thing_invalid_at

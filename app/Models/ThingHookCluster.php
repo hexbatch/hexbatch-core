@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Enums\Things\TypeThingHookMode;
+use App\Enums\Things\TypeHookedThingStatus;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -15,16 +15,14 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int hook_on_action_id
- * @property int hook_on_api_id
- * @property int hook_on_base_rule_type_id
- * @property int hook_on_base_set_type_id
- * @property int hook_on_member_namespace_id
- * @property int hook_on_admin_namespace_id
- * @property bool is_on
- * @property string thing_cluster_name
- * @property string thing_cluster_notes
+ * @property int hooked_thing_id
+ * @property int owning_thing_hook_id
+ *
+ * @property int hook_http_status
+ *
  * @property string ref_uuid
+ * @property TypeHookedThingStatus hooked_thing_status
+ * @property ArrayObject hook_data
 
 
  *
@@ -56,6 +54,9 @@ class ThingHookCluster extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'hook_data' => AsArrayObject::class,
+        'hooked_thing_status' => TypeHookedThingStatus::class,
+    ];
 
 }

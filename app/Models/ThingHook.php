@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  *   if step over, then just stops at each parent and not siblings
  * only one can be marked primary (turn others off)
  * if there is a primary, then each new thing is marked with this, and will not run automatically unless this is run to cursor or step over or off
- * if the debugging_callback_url is null, then results logged
+ * if the hooked_thing_callback_url is null, then results logged
  * todo there should be an api for server admin group to:
  *      create/remove/change debuggers
  *      apply debugger to node or branch (will set to the debugger chosen if already set)
@@ -25,18 +25,26 @@ use Illuminate\Database\Eloquent\Model;
  *      search things
  */
 
+
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int owning_hook_cluster_id
+ * @property int hook_on_action_id
+ * @property int hook_on_api_id
+ * @property int hook_on_base_rule_type_id
+ * @property int hook_on_base_set_type_id
+ * @property int hook_on_member_namespace_id
+ * @property int hook_on_admin_namespace_id
  * @property bool is_on
- * @property TypeThingHookMode thing_hook_mode
- * @property string debugging_callback_url
-
- * @property ArrayObject extra_data
-
+ * @property bool is_blocking
  *
+ * @property string hooked_thing_callback_url
+ * @property string ref_uuid
+ * @property string thing_cluster_name
+ * @property string thing_cluster_notes
+ * @property ArrayObject extra_data
+ * @property TypeThingHookMode thing_hook_mode
  *
  */
 class ThingHook extends Model

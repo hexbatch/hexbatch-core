@@ -104,6 +104,8 @@ return new class extends Migration
             $table->dropColumn('ref_uuid');
             $table->dropColumn('server_domain');
             $table->dropColumn('status_change_at');
+            $table->dropColumn('access_token_expires_at');
+            $table->dropColumn('server_access_token');
             $table->dropColumn('server_status');
             $table->dropColumn('server_name');
 

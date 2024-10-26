@@ -80,13 +80,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('thing_hook_cluster_id')
-                ->nullable()->default(null)
-                ->comment("when there is some hook(s) to run here")
-                ->index()
-                ->constrained('thing_hook_clusters')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
+
 
             $table->foreignId('thing_phase_id')
                 ->nullable()
@@ -106,10 +100,12 @@ return new class extends Migration
             $table->timestamp('thing_invalid_at')->nullable()->default(null)
                 ->comment('if set, then this thing will return false to its parent if the time its processed is after');
 
+            $table->boolean('is_waiting_on_hook')->default(false)->nullable(false)
+                ->comment('if true then look at the hook cluster table for pending hook returns');
 
             $table->smallInteger('debugging_breakpoint')
                 ->nullable(false)->default(0)
-                ->comment("when breakpoint set for the debugger in the row");
+                ->comment("when breakpoint set for the debugger in the row. Do not need a hook to pause here");
 
 
             $table->smallInteger('thing_rank')
