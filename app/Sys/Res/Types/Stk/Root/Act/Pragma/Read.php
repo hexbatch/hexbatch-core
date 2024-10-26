@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ReadMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -12,7 +13,7 @@ class Read extends Act\Pragma
     const ACTION_NAME = TypeOfAction::PRAGMA_READ;
 
     const ATTRIBUTE_CLASSES = [
-
+        ReadMetric::class
     ];
 
     const PARENT_CLASSES = [

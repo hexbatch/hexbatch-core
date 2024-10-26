@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Op;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\OpShiftMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -19,7 +20,7 @@ class Shift extends Act\Op
     const ACTION_NAME = TypeOfAction::OP_SHIFT;
 
     const ATTRIBUTE_CLASSES = [
-
+        OpShiftMetric::class
     ];
 
     const PARENT_CLASSES = [

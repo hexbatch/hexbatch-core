@@ -268,30 +268,45 @@ class BuildSystem extends Command
             $data = [];
             foreach ($load->namespaces as $some_namespace) {
 
-                $data[] = [
-                    $some_namespace::getNamespaceName()
+                $dets =  $some_namespace::getNamespaceName()
                     . " NS    ". $some_namespace::getUuid()
                     . " \n ".
                     $some_namespace::getSystemServerClass()::getServerName()
                     . " Server    ". $some_namespace::getSystemServerClass()::getUuid()
-
                     . " \n ".
                     $some_namespace::getSystemUserClass()::getUserName()
-                    . " User    ". $some_namespace::getSystemUserClass()::getUuid()
+                    . " User    ". $some_namespace::getSystemUserClass()::getUuid();
+
+
+                if($some_namespace::getSystemTypeClass()::getSystemHandleElementClass()) {
+                    $handle =
+                      "\n   Handle Element " . $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getUuid()
+
+                    . "\n   Handle Type    ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getUuid()
+                      ."\n   ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getName()
+
+                    . "\n   ".$some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getFlatInheritance();
+
+                    $dets .= $handle;
+                }
+
+                $data[] = [
+                    $dets
                     ,
 
-                    " Type    ". $some_namespace::getSystemTypeClass()::getUuid()
+                    " Type    ". $some_namespace::getSystemTypeClass()::getUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getName()
                     . "\n   ".$some_namespace::getSystemTypeClass()::getFlatInheritance()
-                    ." Home    ". $some_namespace::getSystemHomeClass()::getUuid()
+                    ." Home Set   ". $some_namespace::getSystemHomeClass()::getUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getName()
                     . "\n   ".$some_namespace::getSystemHomeClass()::getDefiningSystemElementClass()::getSystemTypeClass()::getFlatInheritance()
+
                     ,
 
 
-                     " Public    ". $some_namespace::getSystemPublicClass()::getUuid()
+                     " Public    ". $some_namespace::getSystemPublicClass()::getUuid() ."\n   ". $some_namespace::getSystemPublicClass()::getSystemTypeClass()::getName()
                     . "\n   ".$some_namespace::getSystemPublicClass()::getSystemTypeClass()::getFlatInheritance()
 
                     . " \n "
-                    ." Private    ". $some_namespace::getSystemPrivateClass()::getUuid()
+                    ." Private    ". $some_namespace::getSystemPrivateClass()::getUuid() ."\n   ". $some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getName()
                     . "\n   ".$some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getFlatInheritance()
                     ."\n   "
                     ,
@@ -299,7 +314,7 @@ class BuildSystem extends Command
 
             }
 
-            $this->table(['Name|Server','Type','Home|Public|Private'],$data);
+            $this->table(['Name|Server|User|Handle','Type|Home','Public|Private'],$data);
         }
 
         /*

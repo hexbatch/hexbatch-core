@@ -20,7 +20,5 @@ class Cmd extends BaseAction
         BaseAction::class
     ];
 
-    //todo add in 3 phases to sys
-
 }
 

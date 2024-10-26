@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\TypeOnMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +14,7 @@ class TypeOn extends Act\Pragma
     const ACTION_NAME = TypeOfAction::PRAGMA_TYPE_ON;
 
     const ATTRIBUTE_CLASSES = [
-
+        TypeOnMetric::class
     ];
 
     const PARENT_CLASSES = [

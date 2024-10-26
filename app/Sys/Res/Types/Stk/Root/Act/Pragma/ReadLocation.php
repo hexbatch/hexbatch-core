@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ReadLocationMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class ReadLocation extends Act\Pragma
     const ACTION_NAME = TypeOfAction::PRAGMA_READ_LOCATION;
 
     const ATTRIBUTE_CLASSES = [
-
+        ReadLocationMetric::class
     ];
 
     const PARENT_CLASSES = [

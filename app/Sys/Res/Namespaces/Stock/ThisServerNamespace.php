@@ -9,7 +9,7 @@ use App\Sys\Res\Ele\Stk\SystemNS\SystemPrivateElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
 use App\Sys\Res\Servers\Stock\ThisServer;
 use App\Sys\Res\Sets\Stock\SystemHomeSet;
-use App\Sys\Res\Types\Stk\Root\NS\System\ThisServer\ThisServerNS;
+use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
 
 /**
  * @see ThisServer

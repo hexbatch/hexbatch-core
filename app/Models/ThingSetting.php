@@ -58,6 +58,14 @@ class ThingSetting extends Model
 
     ];
 
+    const DEFAULT_PAGINATION_SIZE = 100;
+    const DEFAULT_PAGINATION_LIMIT = 100;
+    const DEFAULT_DEPTH_LIMIT = 100;
+    const DEFAULT_BACKOFF_PAGE_POLICY = 100;
+    const DEFAULT_BACKOFF_RATE_POLICY = 100;
+    const DEFAULT_RATE_LIMIT = 10000;
+    const DEFAULT_JSON_SIZE_LIMIT = 10000;
+
 
 
 }

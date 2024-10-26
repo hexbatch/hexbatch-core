@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Op;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\OpCombineMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -36,7 +37,7 @@ class Combine extends Act\Op
     const ACTION_NAME = TypeOfAction::OP_COMBINE;
 
     const ATTRIBUTE_CLASSES = [
-
+        OpCombineMetric::class
     ];
 
     const PARENT_CLASSES = [

@@ -26,6 +26,8 @@ interface ISystemType extends ISystemResource, IType
     /** @return ISystemAttribute[]|string[] */
     public static function getAttributeClasses() :array;
 
+    public static function getSystemHandleElementClass() :string|ISystemElement;
+
     /** @return ISystemAttribute[] */
     public function getAttributes() :array;
 

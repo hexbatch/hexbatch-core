@@ -2,9 +2,9 @@
 
 namespace App\Sys\Res\Types\Stk\Root;
 
-use App\Sys\Res\Atr\Stk\Act\Dbg\BaseDebug;
-use App\Sys\Res\Atr\Stk\Act\Dbg\Logic;
-use App\Sys\Res\Atr\Stk\Act\Dbg\Merge;
+use App\Sys\Res\Atr\Stk\Dbg\Logic;
+use App\Sys\Res\Atr\Stk\Dbg\Merge;
+use App\Sys\Res\Atr\Stk\Dbg\BaseDebug;
 use App\Sys\Res\Types\BaseType;
 
 /*

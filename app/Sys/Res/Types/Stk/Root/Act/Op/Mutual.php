@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Op;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\OpMutalMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -17,7 +18,7 @@ class Mutual extends Act\Op
     const ACTION_NAME = TypeOfAction::OP_MUTUAL;
 
     const ATTRIBUTE_CLASSES = [
-
+        OpMutalMetric::class
     ];
 
     const PARENT_CLASSES = [

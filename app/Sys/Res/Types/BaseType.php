@@ -25,7 +25,7 @@ abstract class BaseType implements ISystemType
     const UUID = '';
     const NAMESPACE_CLASS = ThisServerNamespace::class;
 
-    const DESCRIPTION_ELEMENT_CLASS = '';
+    const HANDLE_ELEMENT_CLASS = '';
     const SERVER_CLASS = ThisServer::class;
 
     const TYPE_NAME = '';
@@ -54,6 +54,10 @@ abstract class BaseType implements ISystemType
 
     public static function getAttributeClasses() :array {
         return static::ATTRIBUTE_CLASSES;
+    }
+
+    public static function getSystemHandleElementClass() :string|ISystemElement {
+        return static::HANDLE_ELEMENT_CLASS;
     }
 
     /** @return ISystemAttribute[] */
@@ -126,7 +130,7 @@ abstract class BaseType implements ISystemType
 
     public function getDescriptionElement(): ?ISystemElement
     {
-        return SystemElements::getElementByUuid(static::DESCRIPTION_ELEMENT_CLASS);
+        return SystemElements::getElementByUuid(static::HANDLE_ELEMENT_CLASS);
     }
 
 

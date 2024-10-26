@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ReadTimeSpanMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class ReadTimeSpan extends Act\Pragma
     const ACTION_NAME = TypeOfAction::PRAGMA_READ_TIME_SPAN;
 
     const ATTRIBUTE_CLASSES = [
-
+        ReadTimeSpanMetric::class
     ];
 
     const PARENT_CLASSES = [

@@ -9,15 +9,15 @@ use Illuminate\Database\Eloquent\Model;
 
 
 /**
-The required type must be on (and not turned off) to satisfy
  *
- *
+ * todo add trigger to make only one phase the default in all the rows, all others must be false
  *
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int phase_type_id
  * @property int edited_by_phase_id
+ * @property bool is_default_phase
  * @property string ref_uuid
  *
  * @property string created_at

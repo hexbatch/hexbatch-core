@@ -31,6 +31,10 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->boolean('is_default_phase')
+                ->nullable(false)->default(false)
+                ->comment("If true then only that row can be true, and the others set as false");
+
             $table->timestamps();
 
             $table->uuid('ref_uuid')

@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Pragma;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\WriteMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +14,7 @@ class Write extends Act\Pragma
     const ACTION_NAME = TypeOfAction::PRAGMA_WRITE;
 
     const ATTRIBUTE_CLASSES = [
-
+        WriteMetric::class
     ];
 
     const PARENT_CLASSES = [

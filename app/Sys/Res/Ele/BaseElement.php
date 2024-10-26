@@ -6,7 +6,6 @@ namespace App\Sys\Res\Ele;
 
 use App\Exceptions\HexbatchInitException;
 use App\Models\Element;
-
 use App\Models\ElementType;
 use App\Models\ElementValue;
 use App\Sys\Collections\SystemNamespaces;
@@ -14,10 +13,9 @@ use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\INamespace;
 use App\Sys\Res\Namespaces\ISystemNamespace;
-
 use App\Sys\Res\Types\ISystemType;
 use App\Sys\Res\Types\IType;
-use App\Sys\Res\Types\Stk\Root\NS\System\ThisServer\ThisServerNS;
+use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
 
 
 class BaseElement implements ISystemElement
@@ -28,6 +26,7 @@ class BaseElement implements ISystemElement
 
     const UUID = '';
     const TYPE_CLASS = '';
+    const PHASE_CLASS = '';
     const NAMESPACE_CLASS = ThisServerNS::class;
 
     public static function getUuid() : string {
@@ -61,12 +60,16 @@ class BaseElement implements ISystemElement
 
     public function onNextStep(): void
     {
-
+        //todo make sure that all the elements have their phase  set , if missing use the default
     }
 
 
     public static function getSystemTypeClass() :string|ISystemType {
         return static::TYPE_CLASS;
+    }
+
+    public static function getPhaseSystemTypeClass() :string|ISystemType {
+        return static::PHASE_CLASS;
     }
 
     public static function getSystemNamespaceClass() :string|ISystemNamespace {

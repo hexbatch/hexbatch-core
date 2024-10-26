@@ -62,7 +62,6 @@ enum TypeOfAction: string
     case CMD_DESIGN_ATTRIBUTE_REMOVE = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
     case CMD_DESIGN_ATTRIBUTE_LOCATION = 'cmd_design_attribute_location';
-    case CMD_DESIGN_ATTRIBUTE_HANDLE = 'cmd_design_attribute_handle';
     case CMD_DESIGN_LISTENER_CREATE = 'cmd_design_listener_create';
     case CMD_DESIGN_LISTENER_DESTROY = 'cmd_design_listener_destroy';
     case CMD_DESIGN_RULE_ADD = 'cmd_design_rule_add';

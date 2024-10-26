@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act;
 
 use App\Enums\Sys\TypeOfAction;
 use App\Models\Thing;
+use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 use App\Sys\Res\IAction;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Action;
@@ -18,7 +19,7 @@ class BaseAction extends BaseType implements IAction
 
 
     const ATTRIBUTE_CLASSES = [
-
+        ActionMetric::class
     ];
 
     const PARENT_CLASSES = [
