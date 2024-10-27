@@ -55,7 +55,7 @@ class DesignController extends Controller
                 \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
                 RefCodes::ATTRIBUTE_CANNOT_DELETE);
         }
-        //todo put the type delete into the thing
+
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_IMPLEMENTED);
 
     }
@@ -119,7 +119,6 @@ class DesignController extends Controller
                 RefCodes::ATTRIBUTE_CANNOT_DELETE);
         }
 
-        //todo put the delete attribute into the thing
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_IMPLEMENTED);
     }
 

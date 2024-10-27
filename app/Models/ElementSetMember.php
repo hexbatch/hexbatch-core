@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int holder_set_id
  * @property int member_element_id
  * @property int member_rank
+ * @property bool is_sticky
  *
  * @property ElementValue of_value
  * @property Element of_element

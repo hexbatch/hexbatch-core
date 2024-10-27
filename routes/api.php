@@ -392,6 +392,10 @@ Route::prefix('v1')->group(function () {
                 ShowPublic.php -- not logged in
                 Purge.php
                 PurgeMember.php
+                UnstickElement
+                StickElement.php
+                EmptySet.php
+
              */
 
             /*
@@ -446,16 +450,22 @@ Route::prefix('v1')->group(function () {
 /*
 
 
-
-
-
-  todo: route to use api chaining via json, the route chaining can have any type of logic , because that is an api too,
-        so basically any api result can be used for a logical condition to do other api at the same time or one after the other or both
-        use paths logic and actions, no api calls
-
-   note: api can be chained together in the things by linking them as child parent with logic type
-
 //todo routes to sets, elements, lives are prepended by the phase, which is the type name of the phase row
+
+  .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
+ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
+`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
+todo Route optional parameters
+
+  many api calls (not design, not user, many debugging thing) can take as an optional param a path or array of paths!
+    * a path returning compatible things to the api call (a path returning elements for set operations, or ns tokens for ns operations or things for that...)
+    * an array of paths connected by logic (0 if no matches, 1 if match(s) )
+       * This allows rate limiting later by the other layers
+       * only the last path (the one executing last on the left) will return its results to the api call parameters
+       * the path on the right will search first, the next path to its left only goes if there is a match on the right neighbor
+       * no fucking trees
+
+  all thing routes (most api calls) also take an optional thing setting (or its json), to set the limits on the thing for that call
 
  */
 

@@ -30,6 +30,7 @@ after all permissions given, for each remaining removal,
 the combine does not look at subtypes fitting into the desired set, it simply adds or removes.
 However, once in, not related to this command, those subtype values can be turned off if not fit
 
+group operations do not remove sticky from sets, but the cmd_set_member_remove command will
  */
 class Combine extends Act\Op
 {

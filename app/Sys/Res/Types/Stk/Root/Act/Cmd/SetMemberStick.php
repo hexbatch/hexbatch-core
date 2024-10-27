@@ -3,17 +3,17 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ThingDepthLimitMetric;
+use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberStickMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class ThingDepthLimit extends Act\Cmd
+class SetMemberStick extends Act\Cmd
 {
     const UUID = '3f6b9034-ecdf-4c13-af07-605cd1d8cca2';
-    const ACTION_NAME = TypeOfAction::CMD_THING_DEPTH_LIMIT;
+    const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_STICK;
 
     const ATTRIBUTE_CLASSES = [
-        ThingDepthLimitMetric::class
+        SetMemberStickMetric::class
     ];
 
     const PARENT_CLASSES = [

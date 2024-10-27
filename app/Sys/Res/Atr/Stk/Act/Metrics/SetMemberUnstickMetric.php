@@ -7,10 +7,10 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class ThingJsonSizeMetric extends BaseAttribute
+class SetMemberUnstickMetric extends BaseAttribute
 {
-    const UUID = 'c1ea3c7b-d168-42a7-a052-c8ee0d4a3b97';
-    const ATTRIBUTE_NAME = 'thing_json_size_metric';
+    const UUID = 'bddcfc32-e4f1-453f-90b9-b12d019a6623';
+    const ATTRIBUTE_NAME = 'set_member_unstick_metric';
     const PARENT_ATTRIBUTE_CLASS = ActionMetric::class;
 
 }

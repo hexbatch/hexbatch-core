@@ -7,10 +7,10 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class ThingRateLimitMetric extends BaseAttribute
+class SetMemberStickMetric extends BaseAttribute
 {
-    const UUID = 'cbe89e09-e5a3-4e1b-b009-e4e57797c664';
-    const ATTRIBUTE_NAME = 'thing_rate_limit_metric';
+    const UUID = '7360e23f-d6a4-4a74-9636-18a8c299194e';
+    const ATTRIBUTE_NAME = 'set_member_stick_metric';
     const PARENT_ATTRIBUTE_CLASS = ActionMetric::class;
 
 }

@@ -7,10 +7,10 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class ThingDepthLimitMetric extends BaseAttribute
+class SetEmptyMetric extends BaseAttribute
 {
-    const UUID = '7360e23f-d6a4-4a74-9636-18a8c299194e';
-    const ATTRIBUTE_NAME = 'thing_depth_limit_metric';
+    const UUID = 'c1f4a661-e39f-4f19-a5f7-3c2b373bdccc';
+    const ATTRIBUTE_NAME = 'set_empty_metric';
     const PARENT_ATTRIBUTE_CLASS = ActionMetric::class;
 
 }
