@@ -7,10 +7,10 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class DesignRuleRemoveMetric extends BaseAttribute
+class DesignRuleCreateMetric extends BaseAttribute
 {
-    const UUID = '2fbc3074-b2e5-465a-a822-3c9d4009cc80';
-    const ATTRIBUTE_NAME = 'design_rule_remove_metric';
+    const UUID = '98de6d38-3b31-43f3-ba6f-b6503818f9b4';
+    const ATTRIBUTE_NAME = 'design_rule_create_metric';
     const PARENT_ATTRIBUTE_CLASS = ActionMetric::class;
 
 }

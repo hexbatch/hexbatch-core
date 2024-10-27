@@ -6,10 +6,10 @@ use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class TypeApi extends BaseType
+class SemaphoreApi extends BaseType
 {
-    const UUID = '0c44a7dc-be18-4de4-a2b0-0a330f3efd43';
-    const TYPE_NAME = 'type_api';
+    const UUID = '1ca8ca28-2b0b-4a00-b08e-75c78eda2c99';
+    const TYPE_NAME = 'semaphore_api';
 
 
 

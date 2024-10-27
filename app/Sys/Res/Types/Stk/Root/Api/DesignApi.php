@@ -6,10 +6,10 @@ use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class TypeApi extends BaseType
+class DesignApi extends BaseType
 {
-    const UUID = '0c44a7dc-be18-4de4-a2b0-0a330f3efd43';
-    const TYPE_NAME = 'type_api';
+    const UUID = 'b074b886-562d-414f-8881-53ee760a2478';
+    const TYPE_NAME = 'design_api';
 
 
 

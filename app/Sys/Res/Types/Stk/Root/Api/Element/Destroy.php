@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Api\Element;
+
+use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Api;
+
+
+class Destroy extends BaseType
+{
+    const UUID = 'bd9d7481-5f47-4bd6-8ec0-90f4df0c91be';
+    const TYPE_NAME = 'api_element_destroy';
+
+
+
+    const ATTRIBUTE_CLASSES = [
+
+    ];
+
+    const PARENT_CLASSES = [
+        Api\ElementApi::class,
+        Act\Pragma\Search::class,
+        Act\Cmd\ElementDestroy::class,
+    ];
+
+}
+

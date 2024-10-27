@@ -7,10 +7,10 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class ElsewhereNewCredentialsMetric extends BaseAttribute
+class DesignRuleDestroyMetric extends BaseAttribute
 {
-    const UUID = 'fe3b9a61-8062-4d9b-b405-9005ff345439';
-    const ATTRIBUTE_NAME = 'elsewhere_new_credentials_metric';
+    const UUID = '2fbc3074-b2e5-465a-a822-3c9d4009cc80';
+    const ATTRIBUTE_NAME = 'design_rule_destroy_metric';
     const PARENT_ATTRIBUTE_CLASS = ActionMetric::class;
 
 }

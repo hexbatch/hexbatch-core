@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Publish extends BaseType
+class FireEvent extends BaseType
 {
-    const UUID = '81c04881-39a5-4903-aaf2-34633b6f4f69';
-    const TYPE_NAME = 'api_type_publish';
+    const UUID = 'f9d46900-c62e-489c-b487-cbea34b27a5a';
+    const TYPE_NAME = 'api_type_fire_event';
 
 
 
@@ -21,7 +21,7 @@ class Publish extends BaseType
     const PARENT_CLASSES = [
         Api\TypeApi::class,
         Act\Pragma\Search::class,
-        Act\Cmd\TypePublish::class
+        Act\Cmd\FireCustomEvent::class
     ];
 
 }

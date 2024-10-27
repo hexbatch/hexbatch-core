@@ -3,19 +3,19 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereNewCredentialsMetric;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereGiveCredentialsMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
  *
  */
-class ElsewhereNewCredentials extends Act\Cmd
+class ElsewhereGiveCredentials extends Act\Cmd
 {
     const UUID = '53ec6380-8528-4daf-8375-51858083299e';
-    const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_NEW_CREDENTIALS;
+    const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_GIVE_CREDENTIALS;
 
     const ATTRIBUTE_CLASSES = [
-        ElsewhereNewCredentialsMetric::class
+        ElsewhereGiveCredentialsMetric::class
     ];
 
     const PARENT_CLASSES = [

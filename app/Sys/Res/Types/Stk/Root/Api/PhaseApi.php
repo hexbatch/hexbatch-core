@@ -6,10 +6,10 @@ use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class TypeApi extends BaseType
+class PhaseApi extends BaseType
 {
-    const UUID = '0c44a7dc-be18-4de4-a2b0-0a330f3efd43';
-    const TYPE_NAME = 'type_api';
+    const UUID = '97b5bc27-8499-4222-a911-253882977af1';
+    const TYPE_NAME = 'phase_api';
 
 
 
