@@ -417,7 +417,7 @@ Route::prefix('v1')->group(function () {
              */
 
             /*
-               thing hooks (admin only), not like the rest in a way, because these never go through the thing queue, so are not actions or api registered in the types
+               thing api calls (admin only), these never go through the thing queue, so there are no actions or api registered in the types, like the users
              *   create/remove/change/view hook
                   thing_hook_list
                   thing_hook_create
@@ -442,6 +442,12 @@ Route::prefix('v1')->group(function () {
                 thing_pause|unpause for making sure the thing will wait for the debugging, or when not needed anymore
 
              * trim thing tree (if child will return false to parent when it runs, if root then its just gone)
+
+             * apply rate rules
+             * Apply|Remove|List rates to set|type|action|namespace|thing
+             *
+             *
+
              */
 
 

@@ -16,7 +16,11 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int setting_thing_id
+ * @property int setting_about_type_id
+ * @property int setting_about_namespace_id
+ * @property int setting_about_set_id
+ * @property int setting_about_thing_id
+ * @property int setting_about_action_type_id
 
  * @property int thing_pagination_size
  * @property int thing_pagination_limit

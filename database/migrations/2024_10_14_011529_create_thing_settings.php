@@ -15,10 +15,48 @@ return new class extends Migration
         Schema::create('thing_settings', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('setting_thing_id')
-                ->nullable(false)
-                ->comment("Settings belong to this thing, parents and children have their own setting, but the parent is the max limits that the child cannot exceed")
+
+
+            $table->foreignId('setting_about_type_id')
+                ->nullable()
+                ->default(null)
+                ->comment("This setting is about the type and its descendants, and when the source of a thing tree, will be applied ")
                 ->unique()
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('setting_about_namespace_id')
+                ->nullable()
+                ->default(null)
+                ->comment("This setting is about the namespace (but not admins), and when the source of a thing tree, will be applied ")
+                ->unique()
+                ->constrained('user_namespaces')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('setting_about_set_id')
+                ->nullable()
+                ->default(null)
+                ->comment("This setting is about this set, and when something in it is source of a thing tree, will be applied ")
+                ->unique()
+                ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('setting_about_action_type_id')
+                ->nullable()
+                ->default(null)
+                ->comment("This setting is about one action, and when this action matches the other rules here, it will be applied  ")
+                ->unique()
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('setting_about_thing_id')
+                ->nullable()->default(null)
+                ->comment("This was made for a thing and its descendants, when the thing goes away, so does this row")
+                ->index()
                 ->constrained('things')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
