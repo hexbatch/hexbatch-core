@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Sys\Res\Atr\Stk\Act\Metrics;
+
+
+
+use App\Sys\Res\Atr\BaseAttribute;
+use App\Sys\Res\Atr\Stk\Act\ActionMetric;
+
+class TypeChangeOwnerMetric extends BaseAttribute
+{
+    const UUID = '69133a60-df48-4268-9156-5eb4db0f669e';
+    const ATTRIBUTE_NAME = 'type_change_owner_metric';
+    const PARENT_ATTRIBUTE_CLASS = ActionMetric::class;
+
+}
+
+

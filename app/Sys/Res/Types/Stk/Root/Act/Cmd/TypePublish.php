@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\TypePublishMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Server\TypePublished;
 
@@ -19,7 +20,7 @@ class TypePublish extends Act\Cmd
 
 
     const ATTRIBUTE_CLASSES = [
-
+        TypePublishMetric::class
     ];
 
     const PARENT_CLASSES = [

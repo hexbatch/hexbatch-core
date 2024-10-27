@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\LiveTypeAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -28,7 +29,7 @@ class LiveTypeAdd extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_ADD;
 
     const ATTRIBUTE_CLASSES = [
-
+        LiveTypeAddMetric::class
     ];
 
     const PARENT_CLASSES = [

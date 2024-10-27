@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ElementPingMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Set\AttributeWrite;
 
@@ -21,13 +22,13 @@ use App\Sys\Res\Types\Stk\Root\Evt\Set\AttributeWrite;
  * After ping, either the element is destroyed or goes back into a ping set to be used again (if set inheriting from the ping type is existing its set, otherwise destroy)
  */
 
-class ElementPingToSet extends Act\Cmd
+class ElementPing extends Act\Cmd
 {
     const UUID = '54e60992-c545-4280-9469-b1c02e0f6fc5';
-    const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PING_TO_SET;
+    const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PING;
 
     const ATTRIBUTE_CLASSES = [
-
+        ElementPingMetric::class
     ];
 
     const PARENT_CLASSES = [

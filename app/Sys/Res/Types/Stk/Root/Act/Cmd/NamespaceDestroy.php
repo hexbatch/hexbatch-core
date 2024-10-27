@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class NamespaceDestroy extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_DESTROY;
 
     const ATTRIBUTE_CLASSES = [
-
+        NamespaceDestroyMetric::class
     ];
 
     const PARENT_CLASSES = [

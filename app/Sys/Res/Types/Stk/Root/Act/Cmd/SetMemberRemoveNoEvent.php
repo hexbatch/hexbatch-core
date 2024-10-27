@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberRemoveNoEventMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class SetMemberRemoveNoEvent extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_REMOVE_NO_EVENT;
 
     const ATTRIBUTE_CLASSES = [
-
+        SetMemberRemoveNoEventMetric::class
     ];
 
     const PARENT_CLASSES = [

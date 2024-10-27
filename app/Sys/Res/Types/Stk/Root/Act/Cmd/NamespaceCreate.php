@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class NamespaceCreate extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_CREATE;
 
     const ATTRIBUTE_CLASSES = [
-
+        NamespaceCreateMetric::class
     ];
 
     const PARENT_CLASSES = [

@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ElementDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -15,7 +16,7 @@ class ElementDestroy extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_DESTROY;
 
     const ATTRIBUTE_CLASSES = [
-
+        ElementDestroyMetric::class
     ];
 
     const PARENT_CLASSES = [

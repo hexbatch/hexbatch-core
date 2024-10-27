@@ -51,6 +51,7 @@ enum TypeOfAction: string
 
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
+    case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
 
     case CMD_DESIGN_PARENT_ADD = 'cmd_design_parent_add';
     case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
@@ -59,7 +60,7 @@ enum TypeOfAction: string
     case CMD_DESIGN_TYPE_EDIT = 'cmd_design_type_edit';
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
-    case CMD_DESIGN_ATTRIBUTE_REMOVE = 'cmd_design_attribute_remove';
+    case CMD_DESIGN_ATTRIBUTE_DESTROY = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
     case CMD_DESIGN_ATTRIBUTE_LOCATION = 'cmd_design_attribute_location';
     case CMD_DESIGN_LISTENER_CREATE = 'cmd_design_listener_create';
@@ -112,7 +113,7 @@ enum TypeOfAction: string
     case CMD_SET_CHILD_HANDLE_ADD = 'cmd_set_child_handle_add';
     case CMD_SET_CHILD_HANDLE_REMOVE = 'cmd_set_child_handle_remove';
 
-    case CMD_ELEMENT_PING_TO_SET = 'cmd_element_ping_to_set';
+    case CMD_ELEMENT_PING = 'cmd_element_ping';
 
 
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
@@ -125,8 +126,8 @@ enum TypeOfAction: string
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
 
 
-    case CMD_PHASE_CUT_TYPE_TREE = 'cmd_phase_cut_type_tree';
-    case CMD_PHASE_REPLACE_TYPE_TREE = 'cmd_phase_replace_type_tree';
+    case CMD_PHASE_CUT_TREE = 'cmd_phase_cut_tree';
+    case CMD_PHASE_REPLACE_TREE = 'cmd_phase_replace_tree';
     case CMD_PHASE_MOVE_TREE = 'cmd_phase_move_tree';
 
 

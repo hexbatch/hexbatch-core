@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ThingRateLimitMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class ThingRateLimit extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_THING_RATE_LIMIT;
 
     const ATTRIBUTE_CLASSES = [
-
+        ThingRateLimitMetric::class
     ];
 
     const PARENT_CLASSES = [

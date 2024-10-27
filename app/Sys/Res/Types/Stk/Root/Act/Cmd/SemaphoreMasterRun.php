@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreMasterRunMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -17,7 +18,7 @@ class SemaphoreMasterRun extends Act\Cmd
 
 
     const ATTRIBUTE_CLASSES = [
-
+        SemaphoreMasterRunMetric::class
     ];
 
     const PARENT_CLASSES = [

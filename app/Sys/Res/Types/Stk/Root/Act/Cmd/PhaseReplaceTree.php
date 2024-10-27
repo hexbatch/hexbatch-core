@@ -3,16 +3,17 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\PhaseReplaceTreeMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class PhaseReplaceTypeTree extends Act\Cmd
+class PhaseReplaceTree extends Act\Cmd
 {
     const UUID = '1b33ccfb-65ec-4856-9de0-cbae85eaa753';
-    const ACTION_NAME = TypeOfAction::CMD_PHASE_REPLACE_TYPE_TREE;
+    const ACTION_NAME = TypeOfAction::CMD_PHASE_REPLACE_TREE;
 
     const ATTRIBUTE_CLASSES = [
-
+        PhaseReplaceTreeMetric::class
     ];
 
     const PARENT_CLASSES = [

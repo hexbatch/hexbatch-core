@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceMemberAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class NamespaceMemberAdd extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_MEMBER_ADD;
 
     const ATTRIBUTE_CLASSES = [
-
+        NamespaceMemberAddMetric::class
     ];
 
     const PARENT_CLASSES = [

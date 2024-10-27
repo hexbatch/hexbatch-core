@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\DesignRuleAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -15,7 +16,7 @@ class DesignRuleAdd extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_RULE_ADD;
 
     const ATTRIBUTE_CLASSES = [
-
+        DesignRuleAddMetric::class
     ];
 
     const PARENT_CLASSES = [

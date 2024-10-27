@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereGiveElementMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class ElsewhereGiveElement extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_GIVE_ELEMENT;
 
     const ATTRIBUTE_CLASSES = [
-
+        ElsewhereGiveElementMetric::class
     ];
 
     const PARENT_CLASSES = [

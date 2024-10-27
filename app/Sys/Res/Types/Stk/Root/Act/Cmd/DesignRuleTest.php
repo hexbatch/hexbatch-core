@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\DesignRuleTestMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -18,7 +19,7 @@ class DesignRuleTest extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_RULE_TEST;
 
     const ATTRIBUTE_CLASSES = [
-
+        DesignRuleTestMetric::class
     ];
 
     const PARENT_CLASSES = [

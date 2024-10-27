@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\DesignParentAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class DesignParentAdd extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_ADD;
 
     const ATTRIBUTE_CLASSES = [
-
+        DesignParentAddMetric::class
     ];
 
     const PARENT_CLASSES = [

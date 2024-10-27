@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class SetMemberRemove extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_REMOVE;
 
     const ATTRIBUTE_CLASSES = [
-
+        SetMemberRemoveMetric::class
     ];
 
     const PARENT_CLASSES = [

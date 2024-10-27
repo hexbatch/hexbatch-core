@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ThingBackoffRateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class ThingBackoffRate extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_THING_BACKOFF_RATE;
 
     const ATTRIBUTE_CLASSES = [
-
+        ThingBackoffRateMetric::class
     ];
 
     const PARENT_CLASSES = [

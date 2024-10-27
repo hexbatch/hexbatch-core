@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereAskCredentialsMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -14,7 +15,7 @@ class ElsewhereAskCredentials extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_ASK_CREDENTIALS;
 
     const ATTRIBUTE_CLASSES = [
-
+        ElsewhereAskCredentialsMetric::class
     ];
 
     const PARENT_CLASSES = [

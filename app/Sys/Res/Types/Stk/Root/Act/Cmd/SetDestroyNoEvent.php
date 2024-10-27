@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\SetDestroyNoEventMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -12,7 +13,7 @@ class SetDestroyNoEvent extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_SET_DESTROY_NO_EVENT;
 
     const ATTRIBUTE_CLASSES = [
-
+        SetDestroyNoEventMetric::class
     ];
 
     const PARENT_CLASSES = [

@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\DesignListenerDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -14,7 +15,7 @@ class DesignListenerDestroy extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LISTENER_DESTROY;
 
     const ATTRIBUTE_CLASSES = [
-
+        DesignListenerDestroyMetric::class
     ];
 
     const PARENT_CLASSES = [

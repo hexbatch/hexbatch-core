@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\ElementCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Element\ElementRecieved;
 use App\Sys\Res\Types\Stk\Root\Evt\Element\ElementRecievedBatch;
@@ -33,7 +34,7 @@ class ElementCreate extends Act\Cmd
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CREATE;
 
     const ATTRIBUTE_CLASSES = [
-
+        ElementCreateMetric::class
     ];
 
     const PARENT_CLASSES = [
