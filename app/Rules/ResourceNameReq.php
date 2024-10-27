@@ -8,7 +8,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class ResourceNameReq implements ValidationRule
 {
-    const MAX_NAME_LENGTH = 35;
+    const MAX_NAME_LENGTH = 40;
     /**
      * Run the validation rule.
      *

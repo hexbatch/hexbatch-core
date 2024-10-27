@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\DesignRuleCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
- * Add a single rule or a tree to the attribute
+ * Add a single rule or a tree to the attribute, can be inserted into existing tree location or at top
  */
 
 class DesignRuleCreate extends Act\Cmd

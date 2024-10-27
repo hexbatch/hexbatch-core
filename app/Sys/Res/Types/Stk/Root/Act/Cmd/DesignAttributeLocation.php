@@ -7,6 +7,10 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\DesignAttributeLocationMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
+/**
+ * Can be given another attribute to copy the location from
+ *
+ */
 class DesignAttributeLocation extends Act\Cmd
 {
     const UUID = 'f5fb2d65-4f47-4976-803d-8edda67ed43f';

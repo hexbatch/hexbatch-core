@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\DesignRuleDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
- * Remove a single rule or subtree tree from the attribute
+ * Remove a single rule or subtree tree from the attribute, rule if a leaf, subtree if this is a root of more
  */
 
 class DesignRuleDestroy extends Act\Cmd

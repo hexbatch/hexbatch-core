@@ -6,7 +6,9 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\DesignRuleEditMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
-
+/**
+ * Edits a single rule, not a tree
+ */
 class DesignRuleEdit extends Act\Cmd
 {
     const UUID = 'eab47a5b-a43a-442b-954f-2f621733b48e';

@@ -53,11 +53,15 @@ enum TypeOfAction: string
     case CMD_DESIGN_CREATE = 'cmd_type_create';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
 
+    case CMD_DESIGN_TIME = 'cmd_design_time';
+
+    case CMD_DESIGN_LOCATION = 'cmd_design_location';
+    case CMD_DESIGN_EDIT = 'cmd_design_edit';
+
     case CMD_DESIGN_PARENT_ADD = 'cmd_design_parent_add';
     case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
-    case CMD_DESIGN_TYPE_LOCATION = 'cmd_design_type_map';
-    case CMD_DESIGN_TYPE_TIME = 'cmd_design_type_time';
-    case CMD_DESIGN_TYPE_EDIT = 'cmd_design_type_edit';
+
+
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
     case CMD_DESIGN_ATTRIBUTE_DESTROY = 'cmd_design_attribute_remove';
@@ -76,14 +80,20 @@ enum TypeOfAction: string
 
     case CMD_DESIGN_REQUIREMENT_ADD = 'cmd_design_requirement_add';
     case CMD_DESIGN_REQUIREMENT_REMOVE = 'cmd_design_requirement_remove';
+    case CMD_DESIGN_LOCATION_TEST = 'cmd_design_location_test';
+    case CMD_DESIGN_TIME_TEST = 'cmd_design_time_test';
+    case CMD_DESIGN_ATTRIBUTE_LOCATION_TEST = 'cmd_design_attribute_location_test';
+    case CMD_DESIGN_OWNER_CHANGE = 'cmd_design_owner_change';
+    case CMD_DESIGN_OWNER_PROMOTE = 'cmd_design_owner_promote';
 
 
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
     case CMD_TYPE_SUSPEND = 'cmd_type_suspend';
     case CMD_TYPE_RETIRE = 'cmd_type_retire';
     case CMD_TYPE_DESTROY = 'cmd_type_destroy';
-    case CMD_TYPE_DESTROY_NO_EVENT = 'cmd_type_destroy_no_event'; //server admin
-    case CMD_TYPE_CHANGE_OWNER = 'cmd_type_change_owner';
+    case CMD_TYPE_PURGE = 'cmd_type_purge'; //server admin
+    case CMD_TYPE_OWNER_CHANGE = 'cmd_type_owner_change';
+    case CMD_TYPE_OWNER_PROMOTE = 'cmd_type_owner_promote';
 
     case CMD_TYPE_HANDLE_ADD = 'cmd_type_handle_add';
     case CMD_TYPE_HANDLE_REMOVE = 'cmd_type_handle_remove';
@@ -95,11 +105,22 @@ enum TypeOfAction: string
     case CMD_PATH_EDIT = 'cmd_path_edit';
     case CMD_PATH_COPY = 'cmd_path_copy';
     case CMD_PATH_DESTROY = 'cmd_path_destroy';
+    case CMD_PATH_TEST = 'cmd_path_test';
+    case CMD_PATH_PUBLISH = 'cmd_path_publish';
     case CMD_PATH_HANDLE_ADD = 'cmd_path_handle_add';
     case CMD_PATH_HANDLE_REMOVE = 'cmd_path_handle_remove';
+
+    case CMD_PATH_PART_CREATE = 'cmd_path_part_create';
+    case CMD_PATH_PART_DESTROY = 'cmd_path_part_destroy';
+    case CMD_PATH_PART_EDIT = 'cmd_path_part_edit';
+    case CMD_PATH_PART_TEST = 'cmd_path_part_test';
+
+
+
+
     case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
     case CMD_SET_DESTROY = 'cmd_set_destroy'; //if admin of definer element of set ns
-    case CMD_SET_DESTROY_NO_EVENT = 'cmd_set_destroy_no_event'; //server admin
+    case CMD_SET_PURGE = 'cmd_set_purge'; //server admin
     case CMD_LINK_ADD = 'cmd_link_add';
     case CMD_LINK_REMOVE = 'cmd_link_remove';
 
@@ -107,8 +128,8 @@ enum TypeOfAction: string
     case CMD_SET_MEMBER_ADD = 'cmd_set_member_add'; //add element to set
     case CMD_SET_MEMBER_REMOVE = 'cmd_set_member_remove'; //add element to set
 
-    case CMD_SET_MEMBER_ADD_NO_EVENT = 'cmd_set_member_add_no_event'; //add element to set
-    case CMD_SET_MEMBER_REMOVE_NO_EVENT = 'cmd_set_member_remove_no_event'; //add element to set
+    case CMD_SET_MEMBER_PROMOTE = 'cmd_set_member_promote'; //add element to set, no events. Used in operations and standalone admin
+    case CMD_SET_MEMBER_PURGE = 'cmd_set_member_purge'; //remove element from set, no events. Used in operations and standalone admin
 
     case CMD_SET_CHILD_HANDLE_ADD = 'cmd_set_child_handle_add';
     case CMD_SET_CHILD_HANDLE_REMOVE = 'cmd_set_child_handle_remove';
@@ -120,7 +141,7 @@ enum TypeOfAction: string
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
-    case CMD_ELEMENT_DESTROY_NO_EVENT = 'cmd_element_destroy_no_event'; //server admin
+    case CMD_ELEMENT_PURGE = 'cmd_element_purge'; //server admin
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
     case CMD_LIVE_TYPE_COPY = 'cmd_live_type_copy';
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
@@ -130,6 +151,7 @@ enum TypeOfAction: string
     case CMD_PHASE_REPLACE_TREE = 'cmd_phase_replace_tree';
     case CMD_PHASE_MOVE_TREE = 'cmd_phase_move_tree';
 
+    case CMD_PHASE_PURGE = 'cmd_phase_purge';
 
     case CMD_FIRE_CUSTOM_EVENT = 'cmd_fire_custom_event'; //scope depends on the base type of the custom event
 
@@ -143,15 +165,23 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_MEMBER_REMOVE = 'cmd_namespace_remove_member';
 
 
+    case CMD_NAMESPACE_MEMBER_PROMOTE = 'cmd_namespace_member_promote';
+    case CMD_NAMESPACE_ADMIN_PROMOTE = 'cmd_namespace_admin_promote';
+    case CMD_NAMESPACE_ADMIN_PURGE = 'cmd_namespace_admin_purge';
+    case CMD_NAMESPACE_MEMBER_PURGE = 'cmd_namespace_member_purge';
+
+
+
     case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
-    case CMD_NAMESPACE_DESTROY_NO_EVENT = 'cmd_namespace_destroy_no_event'; //server admin
+    case CMD_NAMESPACE_PURGE = 'cmd_namespace_purge'; //server admin
 
 
     case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
     case CMD_SEMAPHORE_RESET = 'cmd_semaphore_reset';
     case CMD_SEMAPHORE_MASTER_CREATE = 'cmd_semaphore_master_create';
     case CMD_SEMAPHORE_MASTER_RUN = 'cmd_semaphore_master_run';
+    case CMD_SEMAPHORE_MASTER_UPDATE = 'cmd_semaphore_master_update';
 
 
     //server to server

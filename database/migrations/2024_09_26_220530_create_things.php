@@ -124,8 +124,8 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_thing_status AS ENUM (
             'thing_pending',
-            'thing_waiting', -- on mutex or semaphore
-            'thing_paused', -- to stop auto running of things, when the debugger is single stepping or breakpoint
+            'thing_waiting',
+            'thing_paused',
             'thing_success',
             'thing_error'
             );");

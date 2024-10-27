@@ -13,6 +13,6 @@ class DesignCreateLogic implements IActionLogic
 
     public static function doWork(IParamsSystem|IParamsJson|IParamsThing $params): IDataOutput
     {
-        // TODO: Implement doWork() method.
+        return new DesignCreateDataOutput();
     }
 }

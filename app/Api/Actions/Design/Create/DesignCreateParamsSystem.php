@@ -10,6 +10,6 @@ class DesignCreateParamsSystem implements IParamsSystem
 
     public function getInputData(): IDataInput
     {
-        // TODO: Implement getInputData() method.
+        return new DesignCreateDataInput();
     }
 }

@@ -16,13 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * only one can be marked primary (turn others off)
  * if there is a primary, then each new thing is marked with this, and will not run automatically unless this is run to cursor or step over or off
  * if the hooked_thing_callback_url is null, then results logged
- * todo there should be an api for server admin group to:
- *      create/remove/change debuggers
- *      apply debugger to node or branch (will set to the debugger chosen if already set)
- *      get thing node
- *      trim thing node (if child will return false to parent)
- *      toggle breakpoint on any thing node
- *      search things
+
  */
 
 
