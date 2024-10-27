@@ -3,7 +3,6 @@
 namespace App\Sys\Collections;
 
 use App\Sys\Res\Servers\ISystemServer;
-use App\Sys\SystemBase;
 
 class SystemServers extends SystemBase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\Users;
+namespace App\Api\Users\Login;
 
 use OpenApi\Attributes as OA;
 

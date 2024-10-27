@@ -10,7 +10,6 @@ use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Sets\ISystemSet;
 use App\Sys\Res\Types\ISystemType;
 use App\Sys\Res\Users\ISystemUser;
-use App\Sys\SystemResources;
 
 class LoadStatic
 {

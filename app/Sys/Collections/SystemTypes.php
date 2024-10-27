@@ -3,7 +3,6 @@
 namespace App\Sys\Collections;
 
 use App\Sys\Res\Types\ISystemType;
-use App\Sys\SystemBase;
 
 class SystemTypes extends SystemBase
 {

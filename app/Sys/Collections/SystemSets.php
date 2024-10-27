@@ -3,7 +3,6 @@
 namespace App\Sys\Collections;
 
 use App\Sys\Res\Sets\ISystemSet;
-use App\Sys\SystemBase;
 
 class SystemSets extends SystemBase
 {

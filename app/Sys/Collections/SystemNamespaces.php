@@ -3,7 +3,6 @@
 namespace App\Sys\Collections;
 
 use App\Sys\Res\Namespaces\ISystemNamespace;
-use App\Sys\SystemBase;
 
 class SystemNamespaces extends SystemBase
 {

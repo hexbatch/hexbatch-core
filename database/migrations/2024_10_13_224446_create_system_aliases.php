@@ -40,7 +40,7 @@ return new class extends Migration
             $table->string('system_alias_iso_language',10)->index();
 
             $table->string('system_alias_name',
-                (\App\Sys\SystemResources::MAX_SYSTEM_RESOURCE_NAME_LENGTH + 1) * \App\Sys\SystemResources::MAX_SYSTEM_RESOURCE_NESTING)
+                (\App\Sys\Build\SystemResources::MAX_SYSTEM_RESOURCE_NAME_LENGTH + 1) * \App\Sys\Build\SystemResources::MAX_SYSTEM_RESOURCE_NESTING)
                 ->index();
 
             $table->unique(['system_alias_type_id','system_alias_attribute_id','system_alias_iso_language','system_alias_name']);

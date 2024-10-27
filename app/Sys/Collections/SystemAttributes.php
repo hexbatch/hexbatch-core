@@ -3,7 +3,6 @@
 namespace App\Sys\Collections;
 
 use App\Sys\Res\Atr\ISystemAttribute;
-use App\Sys\SystemBase;
 
 class SystemAttributes extends SystemBase
 {

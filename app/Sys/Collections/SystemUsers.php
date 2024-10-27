@@ -3,7 +3,6 @@
 namespace App\Sys\Collections;
 
 use App\Sys\Res\Users\ISystemUser;
-use App\Sys\SystemBase;
 
 class SystemUsers extends SystemBase
 {

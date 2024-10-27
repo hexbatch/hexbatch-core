@@ -3,7 +3,6 @@
 namespace App\Sys\Collections;
 
 use App\Sys\Res\Ele\ISystemElement;
-use App\Sys\SystemBase;
 
 class SystemElements extends SystemBase
 {

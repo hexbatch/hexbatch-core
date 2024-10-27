@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sys;
+namespace App\Sys\Collections;
 
 use App\Sys\Res\ISystemResource;
 use RecursiveDirectoryIterator;
