@@ -106,17 +106,22 @@ return new class extends Migration
         DB::statement("CREATE TYPE type_thing_hook_mode AS ENUM (
             'none',
             'debug_breakpoint',
+
             'tree_creation_hook',
             'tree_starting_hook',
-            'tree_paused_hook',
-            'tree_unpaused_hook',
-            'tree_finished_hook',
-            'tree_success_hook',
-            'tree_failure_hook',
             'node_before_running_hook',
             'node_after_running_hook',
-            'node_failure_hook',
-            'node_success_hook'
+
+            'tree_paused_notice',
+            'tree_unpaused_notice',
+            'tree_finished_notice',
+            'tree_success_notice',
+            'tree_failure_notice',
+            'node_waiting_notice',
+            'node_resume_notice',
+
+            'node_failure_notice',
+            'node_success_notice'
 
             );");
 

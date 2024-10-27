@@ -8,15 +8,24 @@ enum TypeThingHookMode : string {
     case DEBUG_BREAKPOINT = 'debug_breakpoint';
     case TREE_CREATION_HOOK = 'tree_creation_hook';
     case TREE_STARTING_HOOK = 'tree_starting_hook';
-    case TREE_PAUSED_HOOK = 'tree_paused_hook';
-    case TREE_UNPAUSED_HOOK = 'tree_unpaused_hook';
-    case TREE_FINISHED_HOOK = 'tree_finished_hook';
-    case TREE_SUCCESS_HOOK = 'tree_success_hook';
-    case TREE_FAILURE_HOOK = 'tree_failure_hook';
     case NODE_BEFORE_RUNNING_HOOK = 'node_before_running_hook';
     case NODE_AFTER_RUNNING_HOOK = 'node_after_running_hook';
-    case NODE_FAILURE_HOOK = 'node_failure_hook';
-    case NODE_SUCCESS_HOOK = 'node_success_hook';
+
+
+    case TREE_PAUSED_NOTICE = 'tree_paused_notice';
+    case TREE_UNPAUSED_NOTICE = 'tree_unpaused_notice';
+
+    case NODE_WAITING_NOTICE = 'node_waiting_notice';
+    case NODE_RESUME_NOTICE = 'node_resume_notice';
+
+
+    case TREE_FINISHED_NOTICE = 'tree_finished_notice';
+    case TREE_SUCCESS_NOTICE = 'tree_success_notice';
+    case TREE_FAILURE_NOTICE = 'tree_failure_notice';
+
+
+    case NODE_FAILURE_NOTICE = 'node_failure_notice';
+    case NODE_SUCCESS_NOTICE = 'node_success_notice';
 
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeThingHookMode {
