@@ -18,7 +18,8 @@ class PhasePurge extends Act\Cmd
 
     const PARENT_CLASSES = [
         Act\Cmd\Ph::class,
-        Act\CmdNoEvents::class,
+        Act\SystemPrivilege::class,
+        Act\NoEventsTriggered::class,
     ];
 
 }

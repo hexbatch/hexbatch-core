@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int setting_about_thing_id
  * @property int setting_about_action_type_id
 
+ * @property int setting_rank
  * @property int thing_pagination_size
  * @property int thing_pagination_limit
  * @property int thing_depth_limit

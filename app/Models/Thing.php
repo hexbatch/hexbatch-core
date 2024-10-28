@@ -4,23 +4,36 @@ namespace App\Models;
 
 
 
+use App\Api\Actions\AInterfaces\IActionLogic;
+use App\Api\Actions\AInterfaces\IActionWorkReturn;
 use App\Enums\Rules\TypeMergeJson;
 use App\Enums\Rules\TypeOfLogic;
 use App\Enums\Things\TypeOfThingStatus;
+use App\Sys\Res\Types\Stk\Root\Act\NoEventsTriggered;
+use App\Sys\Res\Types\Stk\Root\Act\SystemPrivilege;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 
-/*
+/**
  * thing is marked as done when all children done, and there is no pagination id
  *
  * When there is a full page for a container, the parent makes a cursor row in the data
-   A new child thing is made for using that next page of data , the child may start later according to the backoff
-    the child results combined or_all to the parent. Empty data for the last cursor is child success too.
-   the thing parent cannot complete until all the new children return success.
- */
-/**
+   * A new child thing is made for using that next page of data , the child may start later according to the backoff
+    * the child results combined or_all to the parent. Empty data for the last cursor is child success too.
+   * the thing parent cannot complete until all the new children return success.
+ * todo when an action has @see NoEventsTriggered up-type, then its not going to add preconditions by event listeners
+ *   there is no permission check, if the action has it, regardless who is calling then no events
+ *
+ * todo the thing will have a list built and updated by the hbc:system that allows code (and not db) checks for action inheritance
+ *   for @see SystemPrivilege there is a permission check but events can be called
+ *
+ * todo the thing function that accepts the params @see IActionP of the action,
+ *      will call the @see IActionLogic and store
+ *      the response in @see IActionWorkReturn into
+ *       the @see ThingResult
+ *
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id

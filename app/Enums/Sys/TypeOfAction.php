@@ -62,6 +62,7 @@ enum TypeOfAction: string
 
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
+    case CMD_DESIGN_PROMOTION = 'cmd_design_promotion';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
     case CMD_DESIGN_PURGE = 'cmd_design_purge';
 
@@ -131,7 +132,7 @@ enum TypeOfAction: string
 
 
     case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
-    case CMD_SET_DESTROY = 'cmd_set_destroy'; //if admin of definer element of set ns
+    case CMD_SET_DESTROY = 'cmd_set_destroy'; //if ns-admin of definer element of set ns
 
     case CMD_SET_EMPTY = 'cmd_set_empty'; //non sticky stuff
     case CMD_SET_PURGE = 'cmd_set_purge'; //server admin
@@ -144,8 +145,8 @@ enum TypeOfAction: string
     case CMD_SET_MEMBER_UNSTICK = 'cmd_set_member_unstick';
     case CMD_SET_MEMBER_REMOVE = 'cmd_set_member_remove';
 
-    case CMD_SET_MEMBER_PROMOTE = 'cmd_set_member_promote'; //add element to set, no events. Used in operations and standalone admin
-    case CMD_SET_MEMBER_PURGE = 'cmd_set_member_purge'; //remove element from set, no events. Used in operations and standalone admin
+    case CMD_SET_MEMBER_PROMOTE = 'cmd_set_member_promote'; //add element to set, no events
+    case CMD_SET_MEMBER_PURGE = 'cmd_set_member_purge'; //remove element from set, no events
 
     case CMD_SET_CHILD_HANDLE_ADD = 'cmd_set_child_handle_add';
     case CMD_SET_CHILD_HANDLE_REMOVE = 'cmd_set_child_handle_remove';
@@ -201,12 +202,14 @@ enum TypeOfAction: string
 
 
     //server to server
-    case CMD_ELSEWHERE_GIVE_ELEMENT = 'cmd_elsewhere_give_element';
+    case CMD_ELSEWHERE_GIVE_ELEMENT = 'cmd_elsewhere_give_element'; //done in the ns of the server asking for this and below until admin area
     case CMD_ELSEWHERE_GIVE_TYPE = 'cmd_elsewhere_give_type';
     case CMD_ELSEWHERE_GIVE_NS = 'cmd_elsewhere_give_ns';
     case CMD_ELSEWHERE_GIVE_SET = 'cmd_elsewhere_give_set';
-    case CMD_ELSEWHERE_DO_REGISTRATION = 'cmd_elsewhere_do_registration';
-    case CMD_ELSEWHERE_GIVE_CREDENTIALS = 'cmd_elsewhere_give_credentials';
+
+    //admin area starts
+    case CMD_ELSEWHERE_DO_REGISTRATION = 'cmd_elsewhere_do_registration'; //system admin or group only for this or below
+    case CMD_ELSEWHERE_GIVE_CREDENTIALS = 'cmd_elsewhere_give_credentials'; //system admin only
     case CMD_ELSEWHERE_ASK_CREDENTIALS = 'cmd_elsewhere_ask_credentials';
     case CMD_ELSEWHERE_CHANGE_STATUS = 'cmd_elsewhere_change_status';
     case CMD_ELSEWHERE_PURGE = 'cmd_elsewhere_purge'; //removes all types,ns,ele,sets associated with server, no events

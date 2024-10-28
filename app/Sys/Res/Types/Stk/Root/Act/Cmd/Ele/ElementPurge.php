@@ -17,7 +17,8 @@ class ElementPurge extends Act\Cmd
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class,
-        Act\CmdNoEvents::class,
+        Act\SystemPrivilege::class,
+        Act\NoEventsTriggered::class
     ];
 
 }

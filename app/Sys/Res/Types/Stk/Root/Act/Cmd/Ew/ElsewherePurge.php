@@ -18,7 +18,8 @@ class ElsewherePurge extends Act\Cmd
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,
-        Act\CmdNoEvents::class
+        Act\SystemPrivilege::class,
+        Act\NoEventsTriggered::class,
     ];
 
 }

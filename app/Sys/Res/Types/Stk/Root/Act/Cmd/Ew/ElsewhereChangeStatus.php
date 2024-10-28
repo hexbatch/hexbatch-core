@@ -17,7 +17,8 @@ class ElsewhereChangeStatus extends Act\Cmd
     ];
 
     const PARENT_CLASSES = [
-        Act\Cmd\Ew::class
+        Act\Cmd\Ew::class,
+        Act\SystemPrivilege::class,
     ];
 
 }

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Api\Actions\Design\Create;
+namespace App\Api\Actions\Design\Promotion;
 
-use App\Api\Actions\AInterfaces\IDataInput;
-use App\Api\Actions\AInterfaces\IParamsSystem;
 use App\Enums\Types\TypeOfLifecycle;
+use App\Models\HexError;
+use App\Models\Server;
 use App\Models\UserNamespace;
 
-
-class ParamsSystem implements IParamsSystem
+class DesignPromotionParams implements IDesignPromotionParams
 {
     protected ?UserNamespace $namespace = null;
+    protected ?Server $server = null;
     protected ?string $uuid = null;
     protected ?string $type_name = null;
     protected bool $system = true;
@@ -18,10 +18,6 @@ class ParamsSystem implements IParamsSystem
 
     protected TypeOfLifecycle $lifecycle = TypeOfLifecycle::PUBLISHED;
 
-    public function getInputData(): IDataInput
-    {
-        return DataInput::createFromParamsSystem($this);
-    }
 
     public function setNamespace(?UserNamespace $namespace): void
     {
@@ -46,6 +42,10 @@ class ParamsSystem implements IParamsSystem
     public function getNamespace(): ?UserNamespace
     {
         return $this->namespace;
+    }
+
+    public function getServer(): ?Server {
+        return $this->server;
     }
 
     public function getUuid(): ?string
@@ -73,6 +73,10 @@ class ParamsSystem implements IParamsSystem
         return $this->lifecycle;
     }
 
+    public function getHexError(): ?HexError
+    {
+        return null;
+    }
 
 
 }

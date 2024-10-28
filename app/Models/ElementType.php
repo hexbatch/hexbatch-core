@@ -452,7 +452,7 @@ class ElementType extends Model implements IType
                     try {
                         if ($this->type_name = $collect->get('type_name')) {
                             Validator::make(['type_name' => $this->type_name], [
-                                'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type)],
+                                'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type,Utilities::getCurrentNamespace())],
                             ])->validate();
                         }
                     } catch (ValidationException $v) {

@@ -212,6 +212,7 @@ Route::prefix('v1')->group(function () {
                 ChangeOwner.php
                 PromoteOwner.php
                 Purge.php
+                Promotion
                  */
 
                 Route::middleware(ValidateNamespaceOwner::class)->group(function () {

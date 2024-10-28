@@ -18,7 +18,8 @@ class NamespaceAdminPromote extends Act\Cmd
 
     const PARENT_CLASSES = [
         Act\Cmd\Ns::class,
-        Act\CmdNoEvents::class
+        Act\SystemPrivilege::class,
+        Act\NoEventsTriggered::class,
     ];
 
 }

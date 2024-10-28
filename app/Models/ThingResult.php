@@ -3,19 +3,18 @@
 namespace App\Models;
 
 
+use App\Api\Actions\AInterfaces\IActionWorkReturn;
 use App\Enums\Things\TypeApiFollowup;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
-/*
+/**
  * this stores the user getting back the api info, as well as the outgoing and incoming remotes
  * when an api call is made, a row is created here to handle the results being printed out, or the polling, or pushing to a url
  * multiple results can be made for the same thing, in particular for debugging
- */
-
-/**
+ * todo @see IActionWorkReturn to have a reference here to read the action call result
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id

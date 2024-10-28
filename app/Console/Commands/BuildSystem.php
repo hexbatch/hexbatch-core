@@ -11,6 +11,9 @@ use Illuminate\Console\Command;
 class BuildSystem extends Command
 {
     /**
+     * todo need to make the map of the action classes before can run the build, decide on map location (bootstrap?)
+     *  ,optionally make all of the actions providers for laravel
+     *
      * The name and signature of the console command.
      *
      * @var string

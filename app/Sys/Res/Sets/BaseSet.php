@@ -55,9 +55,13 @@ use App\Sys\Res\ISystemResource;
      }
 
 
+     /**
+      * @return ElementSet
+      */
     public function makeSet() :ElementSet
    {
        try {
+           //todo use the normal action to create element and add to set (so make this, then pass this to the system element method to create)
            $set = new ElementSet();
            return $set;
        } catch (\Exception $e) {
