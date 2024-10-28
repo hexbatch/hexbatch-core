@@ -85,6 +85,7 @@ abstract class BaseNamespace implements ISystemNamespace
     public function getNamespaceObject() : UserNamespace {
         if ($this->namespace) {return $this->namespace;}
         $this->namespace = $this->makeNamespace();
+        // todo but need to make that system namespace first, even without any data except the uuid
         return $this->namespace;
     }
 
@@ -103,6 +104,7 @@ abstract class BaseNamespace implements ISystemNamespace
         }
 
         $this->getNamespaceObject()->namespace_user_id = $user->getUserObject()->id;
+        //todo fill in the other stuff for the sys ns
         $this->getNamespaceObject()->save();
     }
 

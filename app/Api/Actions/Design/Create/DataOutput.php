@@ -5,9 +5,17 @@ namespace App\Api\Actions\Design\Create;
 use App\Api\Actions\AInterfaces\IDataOutput;
 use App\Api\Actions\AInterfaces\IOutputJson;
 use App\Api\Actions\AInterfaces\IOutputThing;
+use App\Models\ElementType;
 
-class DesignCreateDataOutput implements IDataOutput
+class DataOutput implements IDataOutput
 {
+
+
+    public function __construct(protected ElementType $type)
+    {
+
+    }
+
 
     public function getOutputJson(): ?IOutputJson
     {

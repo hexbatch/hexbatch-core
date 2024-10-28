@@ -12,6 +12,8 @@ class SystemSeeder extends Seeder
      */
     public function run(): void
     {
+        SystemResources::loadClasses();
         SystemResources::generateObjects();
+        SystemResources::doNextSteps();
     }
 }
