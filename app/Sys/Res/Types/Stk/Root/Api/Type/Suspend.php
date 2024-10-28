@@ -20,8 +20,8 @@ class Suspend extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\TypeSuspend::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\TypeSuspend::class
     ];
 
 }

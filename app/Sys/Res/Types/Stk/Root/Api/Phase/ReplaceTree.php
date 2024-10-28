@@ -20,8 +20,8 @@ class ReplaceTree extends BaseType
 
     const PARENT_CLASSES = [
         Api\PhaseApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\PhaseReplaceTree::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ph\PhaseReplaceTree::class,
     ];
 
 }

@@ -20,8 +20,8 @@ class Publish extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\TypePublish::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\TypePublish::class
     ];
 
 }

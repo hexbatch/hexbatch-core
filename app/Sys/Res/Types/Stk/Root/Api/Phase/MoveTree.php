@@ -20,8 +20,8 @@ class MoveTree extends BaseType
 
     const PARENT_CLASSES = [
         Api\PhaseApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\PhaseMoveTree::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ph\PhaseMoveTree::class,
     ];
 
 }

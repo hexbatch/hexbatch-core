@@ -9,7 +9,7 @@ use App\Sys\Res\Types\Stk\Root\Signal\MasterSemaphore;
 
 /**
 * make new type with master to have the remote called when the
- * @uses \App\Sys\Res\Types\Stk\Root\Act\Cmd\SemaphoreMasterRun is called
+ * @uses \App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa\SemaphoreMasterRun is called
  * and have the
  * @uses MasterResponse derived type use the attributes here
  */

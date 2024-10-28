@@ -20,8 +20,8 @@ class GiveType extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\ElsewhereGiveType::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ew\ElsewhereGiveType::class,
     ];
 
 }

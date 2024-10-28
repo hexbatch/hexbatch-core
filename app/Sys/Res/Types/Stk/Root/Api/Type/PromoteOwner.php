@@ -20,8 +20,8 @@ class PromoteOwner extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\TypeOwnerPromote::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\TypeOwnerPromote::class
     ];
 
 }

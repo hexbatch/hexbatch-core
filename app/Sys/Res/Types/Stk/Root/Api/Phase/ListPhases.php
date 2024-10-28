@@ -20,7 +20,7 @@ class ListPhases extends BaseType
 
     const PARENT_CLASSES = [
         Api\PhaseApi::class,
-        Act\Pragma\Search::class
+        Act\Cmd\Ele\Search::class
     ];
 
 }

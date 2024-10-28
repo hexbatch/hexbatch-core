@@ -20,7 +20,7 @@ class DestroyPart extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Cmd\PathPartDestroy::class,
+        Act\Cmd\Pa\PathPartDestroy::class,
     ];
 
 }

@@ -20,8 +20,8 @@ class ChangeOwner extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\TypeOwnerChange::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\TypeOwnerChange::class,
     ];
 
 }

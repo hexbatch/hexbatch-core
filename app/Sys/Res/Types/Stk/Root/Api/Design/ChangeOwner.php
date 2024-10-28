@@ -20,7 +20,7 @@ class ChangeOwner extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignOwnerChange::class,
+        Act\Cmd\Ds\DesignOwnerChange::class,
     ];
 
 }

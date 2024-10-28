@@ -20,8 +20,8 @@ class RemoveMember extends BaseType
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\NamespaceMemberRemove::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ns\NamespaceMemberRemove::class,
     ];
 
 }

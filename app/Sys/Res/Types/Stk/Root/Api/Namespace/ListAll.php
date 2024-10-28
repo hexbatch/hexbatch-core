@@ -20,7 +20,7 @@ class ListAll extends BaseType
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Pragma\Search::class
+        Act\Cmd\Ele\Search::class
     ];
 
 }

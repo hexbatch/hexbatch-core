@@ -20,8 +20,8 @@ class RemoveHandleAttribute extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\AttributeHandleRemove::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\AttributeHandleRemove::class
     ];
 
 }

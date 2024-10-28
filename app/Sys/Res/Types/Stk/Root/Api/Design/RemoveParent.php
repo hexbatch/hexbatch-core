@@ -20,7 +20,7 @@ class RemoveParent extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignParentRemove::class,
+        Act\Cmd\Ds\DesignParentRemove::class,
     ];
 
 }

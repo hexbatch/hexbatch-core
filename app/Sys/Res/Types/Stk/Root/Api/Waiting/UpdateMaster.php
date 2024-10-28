@@ -20,7 +20,7 @@ class UpdateMaster extends BaseType
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,
-        Act\Cmd\SemaphoreMasterUpdate::class,
+        Act\Cmd\Wa\SemaphoreMasterUpdate::class,
     ];
 
 }

@@ -20,7 +20,7 @@ class ListWaits extends BaseType
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,
-        Act\Pragma\Search::class,
+        Act\Cmd\Ele\Search::class,
     ];
 
 }

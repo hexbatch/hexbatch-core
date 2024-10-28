@@ -20,7 +20,7 @@ class CreateMaster extends BaseType
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,
-        Act\Cmd\SemaphoreMasterCreate::class,
+        Act\Cmd\Wa\SemaphoreMasterCreate::class,
     ];
 
 }

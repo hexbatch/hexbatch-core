@@ -20,8 +20,8 @@ class Retire extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\TypeRetire::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\TypeRetire::class
     ];
 
 }

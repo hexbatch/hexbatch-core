@@ -20,8 +20,8 @@ class Location extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Pragma\ReadLocation::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\ReadLocation::class,
     ];
 
 }

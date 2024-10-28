@@ -20,7 +20,7 @@ class AddParent extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignParentAdd::class,
+        Act\Cmd\Ds\DesignParentAdd::class,
     ];
 
 }

@@ -20,7 +20,7 @@ class Copy extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Cmd\PathCopy::class,
+        Act\Cmd\Pa\PathCopy::class,
     ];
 
 }

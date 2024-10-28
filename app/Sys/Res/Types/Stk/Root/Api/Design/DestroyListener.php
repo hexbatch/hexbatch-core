@@ -20,7 +20,7 @@ class DestroyListener extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignListenerDestroy::class,
+        Act\Cmd\Ds\DesignListenerDestroy::class,
     ];
 
 }

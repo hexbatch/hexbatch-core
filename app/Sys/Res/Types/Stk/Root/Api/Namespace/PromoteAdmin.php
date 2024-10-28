@@ -20,8 +20,8 @@ class PromoteAdmin extends BaseType
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\NamespaceAdminPromote::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ns\NamespaceAdminPromote::class,
     ];
 
 }

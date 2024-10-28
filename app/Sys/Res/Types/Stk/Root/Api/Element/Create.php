@@ -20,8 +20,8 @@ class Create extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\ElementCreate::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\ElementCreate::class,
     ];
 
 }

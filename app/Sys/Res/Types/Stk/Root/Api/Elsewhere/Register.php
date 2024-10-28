@@ -20,7 +20,7 @@ class Register extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Cmd\ElsewhereDoRegistration::class,
+        Act\Cmd\Ew\ElsewhereDoRegistration::class,
     ];
 
 }

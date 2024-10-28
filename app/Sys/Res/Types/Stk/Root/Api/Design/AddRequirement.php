@@ -20,7 +20,7 @@ class AddRequirement extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignRequirementAdd::class,
+        Act\Cmd\Ds\DesignRequirementAdd::class,
     ];
 
 }

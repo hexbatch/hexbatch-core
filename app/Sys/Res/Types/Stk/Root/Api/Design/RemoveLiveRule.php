@@ -20,7 +20,7 @@ class RemoveLiveRule extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignLiveRuleRemove::class,
+        Act\Cmd\Ds\DesignLiveRuleRemove::class,
     ];
 
 }

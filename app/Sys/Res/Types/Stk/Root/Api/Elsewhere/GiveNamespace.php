@@ -20,8 +20,8 @@ class GiveNamespace extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\ElsewhereGiveNamespace::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ew\ElsewhereGiveNamespace::class,
     ];
 
 }

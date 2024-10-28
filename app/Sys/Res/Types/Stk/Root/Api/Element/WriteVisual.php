@@ -20,8 +20,8 @@ class WriteVisual extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Pragma\WriteVisual::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\WriteVisual::class,
     ];
 
 }

@@ -20,8 +20,8 @@ class Ping extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\ElementPing::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\ElementPing::class,
     ];
 
 }

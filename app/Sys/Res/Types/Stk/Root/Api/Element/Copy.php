@@ -20,8 +20,8 @@ class Copy extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\LiveTypeCopy::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\LiveTypeCopy::class,
     ];
 
 }

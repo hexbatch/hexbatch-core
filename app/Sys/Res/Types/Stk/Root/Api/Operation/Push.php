@@ -20,8 +20,8 @@ class Push extends BaseType
 
     const PARENT_CLASSES = [
         Api\OperationApi::class,
-        Act\Pragma\Search::class,
-        Act\Op\Push::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Op\Push::class,
     ];
 
 }

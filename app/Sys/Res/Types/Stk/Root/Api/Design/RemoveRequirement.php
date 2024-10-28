@@ -20,7 +20,7 @@ class RemoveRequirement extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignRequirementRemove::class,
+        Act\Cmd\Ds\DesignRequirementRemove::class,
     ];
 
 }

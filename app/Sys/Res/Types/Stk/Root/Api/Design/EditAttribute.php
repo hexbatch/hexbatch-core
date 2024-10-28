@@ -20,7 +20,7 @@ class EditAttribute extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignAttributeEdit::class,
+        Act\Cmd\Ds\DesignAttributeEdit::class,
     ];
 
 }

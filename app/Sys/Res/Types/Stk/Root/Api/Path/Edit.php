@@ -20,7 +20,7 @@ class Edit extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Cmd\PathEdit::class,
+        Act\Cmd\Pa\PathEdit::class,
     ];
 
 }

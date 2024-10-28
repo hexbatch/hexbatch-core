@@ -20,8 +20,8 @@ class On extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Pragma\ElementOn::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\ElementOn::class,
     ];
 
 }

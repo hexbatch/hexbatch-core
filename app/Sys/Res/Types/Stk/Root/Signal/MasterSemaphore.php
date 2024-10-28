@@ -7,6 +7,7 @@ namespace App\Sys\Res\Types\Stk\Root\Signal;
 use App\Sys\Res\Atr\Stk\Signal\Master\NumberSemaphores;
 use App\Sys\Res\Atr\Stk\Signal\Master\WaitingSetLifetime;
 use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa\SemaphoreReady;
 
 
 /**

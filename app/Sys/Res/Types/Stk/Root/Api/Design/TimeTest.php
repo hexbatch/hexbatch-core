@@ -20,7 +20,7 @@ class TimeTest extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignTimeTest::class,
+        Act\Cmd\Ds\DesignTimeTest::class,
     ];
 
 }

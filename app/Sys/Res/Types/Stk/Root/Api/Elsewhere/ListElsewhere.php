@@ -20,7 +20,7 @@ class ListElsewhere extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Pragma\Search::class
+        Act\Cmd\Ele\Search::class
     ];
 
 }

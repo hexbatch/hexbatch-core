@@ -20,8 +20,8 @@ class AddHandle extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\TypeHandleAdd::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\TypeHandleAdd::class
     ];
 
 }

@@ -20,8 +20,8 @@ class AddMember extends BaseType
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\NamespaceMemberAdd::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ns\NamespaceMemberAdd::class,
     ];
 
 }

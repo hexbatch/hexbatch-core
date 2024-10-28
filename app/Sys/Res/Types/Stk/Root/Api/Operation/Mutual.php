@@ -20,8 +20,8 @@ class Mutual extends BaseType
 
     const PARENT_CLASSES = [
         Api\OperationApi::class,
-        Act\Pragma\Search::class,
-        Act\Op\Mutual::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Op\Mutual::class,
     ];
 
 }

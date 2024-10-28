@@ -20,7 +20,7 @@ class Create extends BaseType
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Cmd\NamespaceCreate::class,
+        Act\Cmd\Ns\NamespaceCreate::class,
     ];
 
 }

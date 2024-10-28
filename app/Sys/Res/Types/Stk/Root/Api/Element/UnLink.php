@@ -20,8 +20,8 @@ class UnLink extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\LinkRemove::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\LinkRemove::class,
     ];
 
 }

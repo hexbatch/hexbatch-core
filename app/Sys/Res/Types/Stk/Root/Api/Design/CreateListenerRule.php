@@ -20,7 +20,7 @@ class CreateListenerRule extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignRuleCreate::class,
+        Act\Cmd\Ds\DesignRuleCreate::class,
     ];
 
 }

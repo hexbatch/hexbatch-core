@@ -20,7 +20,7 @@ class AskCredentials extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Cmd\ElsewhereAskCredentials::class,
+        Act\Cmd\Ew\ElsewhereAskCredentials::class,
     ];
 
 }

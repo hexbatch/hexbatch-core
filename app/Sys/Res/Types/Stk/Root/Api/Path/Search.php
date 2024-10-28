@@ -20,7 +20,7 @@ class Search extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Pragma\Search::class,
+        Act\Cmd\Ele\Search::class,
     ];
 
 }

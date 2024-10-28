@@ -20,7 +20,7 @@ class EditListenerRule extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignRuleEdit::class,
+        Act\Cmd\Ds\DesignRuleEdit::class,
     ];
 
 }

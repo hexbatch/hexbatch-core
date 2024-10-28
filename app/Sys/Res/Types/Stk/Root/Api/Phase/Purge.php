@@ -20,8 +20,8 @@ class Purge extends BaseType
 
     const PARENT_CLASSES = [
         Api\PhaseApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\PhasePurge::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ph\PhasePurge::class,
     ];
 
 }

@@ -20,7 +20,7 @@ class Publish extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Cmd\PathPublish::class,
+        Act\Cmd\Pa\PathPublish::class,
     ];
 
 }

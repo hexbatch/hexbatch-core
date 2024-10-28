@@ -20,8 +20,8 @@ class GiveSet extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\ElsewhereGiveSet::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ew\ElsewhereGiveSet::class,
     ];
 
 }

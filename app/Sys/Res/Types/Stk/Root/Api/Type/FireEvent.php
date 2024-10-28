@@ -20,8 +20,8 @@ class FireEvent extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\FireCustomEvent::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\FireCustomEvent::class
     ];
 
 }

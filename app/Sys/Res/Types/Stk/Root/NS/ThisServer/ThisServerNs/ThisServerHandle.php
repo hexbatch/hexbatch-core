@@ -6,7 +6,6 @@ use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\Stk\SystemNS\SystemHandleElement;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Handle;
-use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
 use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
 
 

@@ -20,8 +20,8 @@ class PurgeMember extends BaseType
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\NamespaceMemberPurge::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ns\NamespaceMemberPurge::class,
     ];
 
 }

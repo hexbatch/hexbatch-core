@@ -20,7 +20,7 @@ class AttributeLocationTest extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignAttributeLocationTest::class,
+        Act\Cmd\Ds\DesignAttributeLocationTest::class,
     ];
 
 }

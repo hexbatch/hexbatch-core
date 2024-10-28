@@ -20,7 +20,7 @@ class TestPart extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Cmd\PathPartTest::class,
+        Act\Cmd\Pa\PathPartTest::class,
     ];
 
 }

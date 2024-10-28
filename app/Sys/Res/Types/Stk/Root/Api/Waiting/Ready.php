@@ -20,8 +20,8 @@ class Ready extends BaseType
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\SemaphoreReady::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Wa\SemaphoreReady::class,
     ];
 
 }

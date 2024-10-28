@@ -20,8 +20,8 @@ class PromoteMember extends BaseType
 
     const PARENT_CLASSES = [
         Api\SetApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\SetMemberPromote::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\St\SetMemberPromote::class,
     ];
 
 }

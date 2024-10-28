@@ -20,7 +20,7 @@ class ChangeStatus extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Cmd\ElsewhereChangeStatus::class,
+        Act\Cmd\Ew\ElsewhereChangeStatus::class,
     ];
 
 }

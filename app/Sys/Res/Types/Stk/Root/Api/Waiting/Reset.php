@@ -20,8 +20,8 @@ class Reset extends BaseType
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\SemaphoreReset::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Wa\SemaphoreReset::class,
     ];
 
 }

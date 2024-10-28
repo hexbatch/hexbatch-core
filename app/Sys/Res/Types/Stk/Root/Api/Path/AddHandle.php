@@ -20,8 +20,8 @@ class AddHandle extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\PathHandleAdd::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\PathHandleAdd::class,
     ];
 
 }

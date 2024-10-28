@@ -20,8 +20,8 @@ class Link extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\LinkAdd::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\LinkAdd::class,
     ];
 
 }

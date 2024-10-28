@@ -20,8 +20,8 @@ class RemoveElement extends BaseType
 
     const PARENT_CLASSES = [
         Api\SetApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\SetMemberRemove::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\St\SetMemberRemove::class,
     ];
 
 }

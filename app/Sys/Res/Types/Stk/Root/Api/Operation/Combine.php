@@ -20,8 +20,8 @@ class Combine extends BaseType
 
     const PARENT_CLASSES = [
         Api\OperationApi::class,
-        Act\Pragma\Search::class,
-        Act\Op\Combine::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Op\Combine::class,
     ];
 
 }

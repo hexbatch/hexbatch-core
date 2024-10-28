@@ -20,7 +20,7 @@ class AddLiveRule extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignLiveRuleAdd::class,
+        Act\Cmd\Ds\DesignLiveRuleAdd::class,
     ];
 
 }

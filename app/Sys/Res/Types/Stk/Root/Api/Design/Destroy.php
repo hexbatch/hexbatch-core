@@ -20,7 +20,7 @@ class Destroy extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignDestroy::class,
+        Act\Cmd\Ds\DesignDestroy::class,
     ];
 
 }

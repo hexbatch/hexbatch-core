@@ -20,7 +20,7 @@ class CreateListener extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignListenerCreate::class,
+        Act\Cmd\Ds\DesignListenerCreate::class,
     ];
 
 }

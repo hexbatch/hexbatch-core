@@ -20,7 +20,7 @@ class CreateAttribute extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignAttributeCreate::class,
+        Act\Cmd\Ds\DesignAttributeCreate::class,
     ];
 
 }

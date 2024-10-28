@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
+
+use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Atr\Stk\Act\Metrics\LiveTypeCopyMetric;
+use App\Sys\Res\Types\Stk\Root\Act;
+
+/*
+ * The live type attached is also added to the target(s) with the live type's attribute values
+ */
+class LiveTypeCopy extends Act\Cmd
+{
+    const UUID = '49390d1b-5ed0-49ea-9867-9615c2a1235e';
+    const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_COPY;
+
+    const ATTRIBUTE_CLASSES = [
+        LiveTypeCopyMetric::class
+    ];
+
+    const PARENT_CLASSES = [
+        Act\Cmd\Ele::class
+    ];
+
+}
+

@@ -20,8 +20,8 @@ class EmptySet extends BaseType
 
     const PARENT_CLASSES = [
         Api\SetApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\SetEmpty::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\St\SetEmpty::class,
     ];
 
 }

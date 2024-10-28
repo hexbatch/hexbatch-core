@@ -20,8 +20,8 @@ class RemoveHandle extends BaseType
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Pragma\Search::class,
-        Act\Cmd\TypeHandleRemove::class
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ty\TypeHandleRemove::class
     ];
 
 }

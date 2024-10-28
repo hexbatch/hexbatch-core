@@ -20,8 +20,8 @@ class TypeOff extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Pragma\Search::class,
-        Act\Pragma\TypeOff::class,
+        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Ele\TypeOff::class,
     ];
 
 }

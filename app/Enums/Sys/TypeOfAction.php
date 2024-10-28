@@ -22,6 +22,17 @@ enum TypeOfAction: string
     case BASE_PRAGMA = 'base_pragma';
     case BASE_OPERATION = 'base_op';
 
+    case BASE_NAMESPACE = 'base_namespace';
+    case BASE_ELSEWHERE = 'base_elsewhere';
+    case BASE_ELEMENT = 'base_element';
+    case BASE_DESIGN = 'base_design';
+    case BASE_PATH = 'base_path';
+    case BASE_PHASE = 'base_phase';
+    case BASE_SET = 'base_set';
+    case BASE_TYPE = 'base_type';
+    case BASE_WAIT = 'base_wait';
+
+
     case PRAGMA_WRITE_VISUAL = 'pragma_write_visual'; //if the attribute has a shape or map, set the visual section to one or more opacity|color|border|texture
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
@@ -52,6 +63,7 @@ enum TypeOfAction: string
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
+    case CMD_DESIGN_PURGE = 'cmd_design_purge';
 
     case CMD_DESIGN_TIME = 'cmd_design_time';
 

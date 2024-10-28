@@ -20,7 +20,7 @@ class TestListenerRule extends BaseType
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\DesignRuleTest::class,
+        Act\Cmd\Ds\DesignRuleTest::class,
     ];
 
 }

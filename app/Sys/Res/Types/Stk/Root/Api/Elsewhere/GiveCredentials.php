@@ -20,7 +20,7 @@ class GiveCredentials extends BaseType
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Cmd\ElsewhereGiveCredentials::class,
+        Act\Cmd\Ew\ElsewhereGiveCredentials::class,
     ];
 
 }

@@ -20,7 +20,7 @@ class RunMaster extends BaseType
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,
-        Act\Cmd\SemaphoreMasterRun::class,
+        Act\Cmd\Wa\SemaphoreMasterRun::class,
     ];
 
 }

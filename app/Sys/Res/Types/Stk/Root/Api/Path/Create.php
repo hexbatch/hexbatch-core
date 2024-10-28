@@ -20,7 +20,7 @@ class Create extends BaseType
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Cmd\PathCreate::class,
+        Act\Cmd\Pa\PathCreate::class,
     ];
 
 }
