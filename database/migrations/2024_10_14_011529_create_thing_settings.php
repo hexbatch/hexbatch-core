@@ -68,8 +68,6 @@ return new class extends Migration
             $table->smallInteger('thing_pagination_size')->nullable()->default(null)
                 ->comment('if set, then the path will use this for paginition');
 
-            $table->smallInteger('setting_rank')->nullable(false)->default(0)
-                ->comment('higher rank settings will be used, equal ranks will use the lowest in each category, lower ranks will be ignored');
 
             $table->smallInteger('thing_pagination_limit')->nullable()->default(null)
                 ->comment('if set, then the count of pages in this tree will be calcuated, and if over then backoff applied to future pages');
