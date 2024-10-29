@@ -1,16 +1,18 @@
 <?php
+namespace App\Api\Cmd\Design\Promote;
 
-namespace App\Api\Actions\Design\Promotion;
-
+use App\Api\Cmd\IActionParams;
 use App\Enums\Types\TypeOfLifecycle;
-use App\Models\HexError;
 use App\Models\Server;
+use App\Models\Thing;
 use App\Models\UserNamespace;
 
-class DesignPromotionParams implements IDesignPromotionParams
+class DesignPromoteParams implements IActionParams
 {
+
     protected ?UserNamespace $namespace = null;
     protected ?Server $server = null;
+
     protected ?string $uuid = null;
     protected ?string $type_name = null;
     protected bool $system = true;
@@ -18,25 +20,9 @@ class DesignPromotionParams implements IDesignPromotionParams
 
     protected TypeOfLifecycle $lifecycle = TypeOfLifecycle::PUBLISHED;
 
-
-    public function setNamespace(?UserNamespace $namespace): void
+    public function pullData(Thing $thing): void
     {
-        $this->namespace = $namespace;
-    }
-
-    public function setUuid(?string $uuid): void
-    {
-        $this->uuid = $uuid;
-    }
-
-    public function setTypeName(?string $type_name): void
-    {
-        $this->type_name = $type_name;
-    }
-
-    public function setFinalType(bool $final_type): void
-    {
-        $this->final_type = $final_type;
+        // todo pull the data from the thing data action-setup rows
     }
 
     public function getNamespace(): ?UserNamespace
@@ -44,7 +30,8 @@ class DesignPromotionParams implements IDesignPromotionParams
         return $this->namespace;
     }
 
-    public function getServer(): ?Server {
+    public function getServer(): ?Server
+    {
         return $this->server;
     }
 
@@ -71,11 +58,6 @@ class DesignPromotionParams implements IDesignPromotionParams
     public function getLifecycle(): TypeOfLifecycle
     {
         return $this->lifecycle;
-    }
-
-    public function getHexError(): ?HexError
-    {
-        return null;
     }
 
 

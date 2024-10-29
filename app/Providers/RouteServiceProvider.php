@@ -41,6 +41,7 @@ class RouteServiceProvider extends ServiceProvider
 
         Route::model('user', User::class);
         Route::model('user_namespace', UserNamespace::class);
+        Route::model('target_namespace', UserNamespace::class);
         Route::model('time_bound', TimeBound::class);
         Route::model('location_bound', LocationBound::class);
         Route::model('attribute', Attribute::class);

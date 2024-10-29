@@ -23,6 +23,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property int collection_set_member_id
  * @property int collection_set_id
  * @property int collection_namespace_id
+ * @property int collection_path_id
  * @property bool is_cursor
  * @property ArrayObject collection_json
  * @property TypeOfThingDataSource thing_data_source

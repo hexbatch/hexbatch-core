@@ -73,6 +73,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('collection_path_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Data has a path in the setup")
+                ->index()
+                ->constrained('paths')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->boolean('is_cursor')
                 ->nullable(false)->default(false)
                 ->comment("If true what is in this row is the cursor for the path of the thing for the next page");
@@ -82,7 +91,7 @@ return new class extends Migration
                 ->nullable()->default(null)->comment("Data has json");
         });
 
-        DB::statement("CREATE TYPE type_of_thing_data_source AS ENUM ('not_set','from_children', 'from_current','from_setup');");
+        DB::statement("CREATE TYPE type_of_thing_data_source AS ENUM ('not_set','from_children', 'from_current','from_action_setup','from_api_setup');");
 
         DB::statement("ALTER TABLE thing_data Add COLUMN thing_data_source type_of_thing_data_source NOT NULL default 'not_set';");
 

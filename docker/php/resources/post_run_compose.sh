@@ -10,9 +10,9 @@ if [[ ! -e /var/www/html/public/uploads ]]; then
 fi
 
 # when docker-compose starts, some directors may not be readable to the php or web, Run this script in the container terminal
-chown -R root:www-data /var/www/html/storage/
-chown -R root:www-data /var/www/html/public/storage
-chown -R root:www-data /var/www/html/bootstrap/cache
+chown -R :www-data /var/www/html/storage/
+chown -R :www-data /var/www/html/public/storage
+chown -R :www-data /var/www/html/bootstrap/cache
 
 chmod -R g+rw /var/www/html/storage/
 chmod -R g+rw /var/www/html/public/storage

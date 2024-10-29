@@ -83,14 +83,14 @@ Route::prefix('v1')->group(function () {
                     Route::post('/transfer/{user}', [NamespaceController::class, 'transfer_namespace'])->name('core.namespaces.transfer');
                     Route::delete('/destroy', [NamespaceController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
 
-                    Route::put('/admin/add/{user_namespace}', [NamespaceController::class, 'group_admin_add'])->name('core.groups.admin.add');
-                    Route::patch('/admin/remove/{user_namespace}', [NamespaceController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
+                    Route::put('/admin/add/{target_namespace}', [NamespaceController::class, 'group_admin_add'])->name('core.groups.admin.add');
+                    Route::patch('/admin/remove/{target_namespace}', [NamespaceController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
 
                 });
 
                 Route::middleware(ValidateNamespaceAdmin::class)->group( function () {
-                    Route::put('/member/add/{user_namespace}', [NamespaceController::class, 'group_member_add'])->name('core.groups.member.add');
-                    Route::delete('/member/remove/{user_namespace}', [NamespaceController::class, 'group_member_remove'])->name('core.groups.member.remove');
+                    Route::put('/member/add/{target_namespace}', [NamespaceController::class, 'group_member_add'])->name('core.groups.member.add');
+                    Route::delete('/member/remove/{target_namespace}', [NamespaceController::class, 'group_member_remove'])->name('core.groups.member.remove');
 
                 });
 

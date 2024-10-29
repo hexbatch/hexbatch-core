@@ -12,7 +12,7 @@ class BuildSystem extends Command
 {
     /**
      * todo need to make the map of the action classes before can run the build, decide on map location (bootstrap?)
-     *  ,optionally make all of the actions providers for laravel
+     *  map entries has the uuid: then array for each role that has full class name, and bools for allow_events and system_only
      *
      * The name and signature of the console command.
      *

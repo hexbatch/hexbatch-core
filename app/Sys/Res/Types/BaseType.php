@@ -42,8 +42,13 @@ abstract class BaseType implements ISystemType
         return SystemServers::getServerByUuid(static::SERVER_CLASS);
     }
 
-    public function makeType() :ElementType
+    public function makeType() :?ElementType
    {
+       //do not allow recursion
+       $interfaces = class_implements(static::class);
+       if (isset($interfaces['App\Api\Cmd\IActionWorker'])) {
+           return null;
+       }
        try {
            $type = new ElementType();
            return $type;
