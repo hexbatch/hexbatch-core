@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Design\Promote;
 
-use App\Api\Ta\IApiOaResponse;
+use App\Api\IApiOaResponse;
 
 
 /**

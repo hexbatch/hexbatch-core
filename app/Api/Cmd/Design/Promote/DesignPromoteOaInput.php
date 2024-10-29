@@ -2,7 +2,7 @@
 namespace App\Api\Cmd\Design\Promote;
 
 
-use App\Api\Ta\IApiOaInput;
+use App\Api\IApiOaInput;
 
 /**
  * todo markup with OA type attribute for the expected input
