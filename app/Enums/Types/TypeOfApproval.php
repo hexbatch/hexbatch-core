@@ -5,10 +5,14 @@ namespace App\Enums\Types;
  */
 enum TypeOfApproval : string {
 
-  case APPROVAL_NOT_SET = 'approval_not_set';
-  case PENDING_APPROVAL = 'pending_approval';
-  case APPROVAL_DENIED = 'approval_denied';
-  case APPROVED = 'approved';
+    case APPROVAL_NOT_SET = 'approval_not_set';
+    case PENDING_DESIGN_APPROVAL = 'pending_design_approval';
+    case DESIGN_APPROVED = 'design_approved';
+    case DESIGN_DENIED = 'design_denied';
+    case PENDING_PUBLISHING_APPROVAL = 'pending_publishing_approval';
+    case PUBLISHING_APPROVED = 'publishing_approved';
+    case PUBLISHING_DENIED = 'publishing_denied';
+
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfApproval {
         $maybe  = TypeOfApproval::tryFrom($test);

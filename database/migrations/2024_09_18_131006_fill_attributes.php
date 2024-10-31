@@ -122,9 +122,12 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_approval AS ENUM (
             'approval_not_set',
-            'pending_approval',
-            'approval_denied',
-            'approved'
+            'pending_design_approval',
+            'design_approved',
+            'design_denied',
+            'pending_publishing_approval',
+            'publishing_approved',
+            'publishing_denied'
             );");
 
         DB::statement("ALTER TABLE attributes Add COLUMN attribute_approval type_of_approval NOT NULL default 'approval_not_set';");

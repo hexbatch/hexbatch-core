@@ -7,10 +7,10 @@ namespace App\Sys\Res\Atr\Stk\MetaData\Meta;
 use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\MetaData\Metadata;
 
-class Copywrite extends BaseAttribute
+class License extends BaseAttribute
 {
-    const UUID = '30341e87-cb17-4a00-b585-c61090bd99a5';
-    const ATTRIBUTE_NAME = 'copywrite';
+    const UUID = 'db6b0076-4de1-4241-9650-708875676a0d';
+    const ATTRIBUTE_NAME = 'license';
     const PARENT_ATTRIBUTE_CLASS = Metadata::class;
 
 

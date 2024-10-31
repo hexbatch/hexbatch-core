@@ -3,9 +3,8 @@
 namespace App\Sys\Res\Types\Stk;
 
 
-
-use App\Sys\Res\Atr\Stk\Event\Scope;
 use App\Sys\Res\Atr\Stk\System\Expiration;
+use App\Sys\Res\Atr\Stk\System\Markdown;
 use App\Sys\Res\Atr\Stk\System\OutsideUrl;
 use App\Sys\Res\Types\BaseType;
 
@@ -22,7 +21,7 @@ class Root extends BaseType
     const ATTRIBUTE_CLASSES = [
         Expiration::class,
         OutsideUrl::class,
-        Scope::class
+        Markdown::class,
     ];
 
     const PARENT_CLASSES = [];

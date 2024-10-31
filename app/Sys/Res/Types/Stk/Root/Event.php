@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root;
 
 
 
+use App\Sys\Res\Atr\Stk\Event\Scope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ChainScope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ElementScope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ServerScope;
@@ -22,6 +23,7 @@ class Event extends BaseType
 
 
     const ATTRIBUTE_CLASSES = [
+        Scope::class,
         ElementScope::class,
         SetScope::class,
         ChainScope::class,

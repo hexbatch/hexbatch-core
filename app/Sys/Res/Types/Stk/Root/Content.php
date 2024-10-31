@@ -20,11 +20,10 @@ class Content extends BaseType
 
     const ATTRIBUTE_CLASSES = [
         ContentData::class,
-        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Subject::class,
-        ContentData\Title::class,
-        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Tags::class,
+        ContentData\Subject::class,
+        ContentData\Tags::class,
         ContentData\Blurb::class,
-        \App\Sys\Res\Atr\Stk\MetaData\Content\ContentData\Body::class,
+        ContentData\Body::class,
     ];
 
     const PARENT_CLASSES = [
