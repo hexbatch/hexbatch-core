@@ -21,8 +21,6 @@ trait PasswordValidationRules
             ->letters()
             ->numbers()
             ->symbols()
-            ,
-            'confirmed'
         ];
     }
 }

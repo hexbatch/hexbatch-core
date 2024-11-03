@@ -2,12 +2,11 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Phase;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class CutTree extends BaseType
+class CutTree extends Api\PhaseApi
 {
     const UUID = '15fa891f-1085-4289-85d1-181f2e7416d6';
     const TYPE_NAME = 'api_phase_cut_tree';

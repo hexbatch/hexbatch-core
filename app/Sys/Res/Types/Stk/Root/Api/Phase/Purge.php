@@ -2,12 +2,11 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Phase;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Purge extends BaseType
+class Purge extends Api\PhaseApi
 {
     const UUID = '2ed3fc44-123d-45eb-be51-8cdf523aab02';
     const TYPE_NAME = 'api_phase_purge';

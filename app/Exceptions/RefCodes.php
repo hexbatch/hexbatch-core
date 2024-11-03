@@ -23,6 +23,7 @@ class RefCodes {
 
     //users start at 1000
     const BAD_LOGIN = 1000;
+    const BAD_REGISTRATION = 1001;
     const USER_NOT_FOUND = 1003;
     const USER_NOT_PRIV = 1004;
 
@@ -115,6 +116,7 @@ class RefCodes {
         self::RESOURCE_CANNOT_DELETE_IN_USE => '',
 
         self::BAD_LOGIN => '',
+        self::BAD_REGISTRATION => '',
         self::USER_NOT_FOUND => '',
         self::USER_NOT_PRIV => '',
 

@@ -77,6 +77,7 @@ enum TypeOfAction: string
 
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
+    case CMD_DESIGN_ATTRIBUTE_PROMOTION = 'cmd_design_attribute_promotion';
     case CMD_DESIGN_ATTRIBUTE_DESTROY = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
     case CMD_DESIGN_ATTRIBUTE_LOCATION = 'cmd_design_attribute_location';

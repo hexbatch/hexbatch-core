@@ -11,7 +11,7 @@ class ThisServerNS extends BaseType
 {
     const TYPE_NAME = 'system_namespace';
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.namespace.types.ns_uuid');
         if (!$name) {
             throw new HexbatchInitException("System namespace type uuid is not set in .env");

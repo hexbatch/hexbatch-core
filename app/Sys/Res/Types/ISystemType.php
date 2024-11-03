@@ -11,7 +11,7 @@ use App\Sys\Res\Servers\ISystemServer;
 interface ISystemType extends ISystemResource, IType
 {
 
-    public static function getName() :string;
+    public static function getClassTypeName() :string;
 
     public static function getParentNameTree() :array;
 
@@ -33,6 +33,6 @@ interface ISystemType extends ISystemResource, IType
 
     public function getTypeNamespace() : ?ISystemNamespace;
     public function getDescriptionElement() : ?ISystemElement;
-    public function getServer() : ?ISystemServer;
+    public function getClassServer() : ?ISystemServer;
 
 }

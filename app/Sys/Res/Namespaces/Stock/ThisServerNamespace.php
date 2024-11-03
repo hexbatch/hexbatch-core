@@ -31,7 +31,7 @@ class ThisServerNamespace extends BaseNamespace
         return $name;
     }
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.namespace.uuid');
         if (!$name) {
             throw new HexbatchInitException("System user uuid is not set in .env");

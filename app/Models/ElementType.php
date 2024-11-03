@@ -529,11 +529,6 @@ class ElementType extends Model implements IType
     }
 
 
-    public function getTypeName(): string
-    {
-       return $this->type_name;
-    }
-
     public function getTypeObject(): ?ElementType
     {
         return $this;

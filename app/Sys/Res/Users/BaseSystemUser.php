@@ -17,7 +17,7 @@ abstract class BaseSystemUser implements ISystemUser
 
 
     const NAMESPACE_CLASS = ThisServerNamespace::class;
-    
+
 
     public static function getSystemNamespaceClass() :string|ISystemNamespace {
         return static::NAMESPACE_CLASS;
@@ -32,7 +32,7 @@ abstract class BaseSystemUser implements ISystemUser
                "password" => static::getUserPassword(),
                "password_confirmation" => static::getUserPassword()
            ]);
-           $user->ref_uuid = static::getUuid();
+           $user->ref_uuid = static::getClassUuid();
            $user->save();
            $user->refresh();
            return $user;

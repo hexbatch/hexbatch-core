@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class RemoveAdmin extends BaseType
+class RemoveAdmin extends Api\NamespaceApi
 {
     const UUID = '1ad37810-9cf6-4d9e-a2ca-ea0488b2371a';
     const TYPE_NAME = 'api_namespace_remove_admin';

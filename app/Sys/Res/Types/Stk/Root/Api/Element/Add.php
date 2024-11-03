@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Add extends BaseType
+class Add extends Api\ElementApi
 {
     const UUID = 'e5c47fc2-e128-4912-b546-6d78b0420f90';
     const TYPE_NAME = 'api_element_add';

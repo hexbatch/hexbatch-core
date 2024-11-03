@@ -2,12 +2,11 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Set;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class ListMembers extends BaseType
+class ListMembers extends Api\SetApi
 {
     const UUID = 'cd570e6a-8a1f-4d96-9cfa-76708d501346';
     const TYPE_NAME = 'api_set_list_members';

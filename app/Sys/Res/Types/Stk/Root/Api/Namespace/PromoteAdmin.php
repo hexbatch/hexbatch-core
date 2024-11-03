@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class PromoteAdmin extends BaseType
+class PromoteAdmin extends Api\NamespaceApi
 {
     const UUID = '81a2092b-2bb0-4be7-a9c4-aacd608f6ea3';
     const TYPE_NAME = 'api_namespace_promote_admin';

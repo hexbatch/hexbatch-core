@@ -23,7 +23,7 @@ use App\Sys\Res\ISystemResource;
 
     protected ?ElementSet $set;
 
-     public static function getUuid() : string {
+     public static function getClassUuid() : string {
          return static::UUID;
      }
 

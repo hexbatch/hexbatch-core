@@ -12,7 +12,7 @@ use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
 class ThisServerHandle extends BaseType
 {
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.namespace.types.handle_type_uuid');
         if (!$name) {
             throw new HexbatchInitException("System namespace handle type uuid is not set in .env");

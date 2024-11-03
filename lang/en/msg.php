@@ -21,6 +21,8 @@ return [
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
     'user_not_found' => 'User not found using :ref',
     'user_not_priv' => 'Not in the admin group of this user',
+    'passthrough_data_too_big' => 'The passthrough data for this token is too big, the max is :max bytes',
+    'token_too_long_lived' => 'The token can only be created for up to :seconds seconds',
 
     //user types
     'namespace_not_found' => 'Namespace not found using :ref',

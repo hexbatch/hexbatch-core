@@ -7,5 +7,5 @@ namespace App\Api\Cmd;
  */
 interface IActionWorker
 {
-    public function doWork( $params): IActionReturn;
+    public static function doWork( $params): IActionWorkReturn;
 }

@@ -2,12 +2,11 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class DestroyType extends BaseType
+class DestroyType extends Api\TypeApi
 {
     const UUID = '8eee9671-d894-4eac-8cc2-dc0d26256a4d';
     const TYPE_NAME = 'api_type_destroy';

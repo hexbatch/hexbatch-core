@@ -29,7 +29,7 @@ class BaseElement implements ISystemElement
     const PHASE_CLASS = '';
     const NAMESPACE_CLASS = ThisServerNS::class;
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         return static::UUID;
     }
 

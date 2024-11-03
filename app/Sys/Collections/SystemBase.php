@@ -94,8 +94,8 @@ abstract class SystemBase
                     /**
                      * @type ISystemResource $full_class_name
                      */
-                    if ($full_class_name::getUuid()) {
-                        static::$uuid_class_names[$full_class_name::getUuid()] = $full_class_name;
+                    if ($full_class_name::getClassUuid()) {
+                        static::$uuid_class_names[$full_class_name::getClassUuid()] = $full_class_name;
                     }
                 }
             }
@@ -122,7 +122,7 @@ abstract class SystemBase
 
     }
 
-    protected static function extract_namespace($file) {
+    public static function extract_namespace($file) {
         $ns = NULL;
         $handle = fopen($file, "r");
         if ($handle) {

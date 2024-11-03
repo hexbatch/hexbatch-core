@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d844240c0011a59d27acebf499cf2e59",
+    "content-hash": "48b57f8a4550a03bb36a1215a4f7f300",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2221,6 +2221,44 @@
                 }
             ],
             "time": "2024-09-21T08:32:55+00:00"
+        },
+        {
+            "name": "mattyrad/openapi-serialize",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MattyRad/openapi-serialize.git",
+                "reference": "22e0cd39eb02ece2cb37ecc726a6a374e3f1a6b9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MattyRad/openapi-serialize/zipball/22e0cd39eb02ece2cb37ecc726a6a374e3f1a6b9",
+                "reference": "22e0cd39eb02ece2cb37ecc726a6a374e3f1a6b9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "zircote/swagger-php": "^4.7"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MattyRad\\OpenApi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Serialize an object directly from Swagger-PHP attributes",
+            "support": {
+                "issues": "https://github.com/MattyRad/openapi-serialize/issues",
+                "source": "https://github.com/MattyRad/openapi-serialize/tree/1.0.0"
+            },
+            "time": "2023-12-07T23:23:05+00:00"
         },
         {
             "name": "monolog/monolog",

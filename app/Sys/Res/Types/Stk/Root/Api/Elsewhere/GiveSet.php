@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Elsewhere;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class GiveSet extends BaseType
+class GiveSet extends Api\ElsewhereApi
 {
     const UUID = '246996d4-90cb-4fa5-aeff-9773d866292c';
     const TYPE_NAME = 'api_elsewhere_give_set';

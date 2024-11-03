@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class DestroyListener extends BaseType
+class DestroyListener extends Api\DesignApi
 {
     const UUID = '0d3019f1-34f2-4637-9016-8123696be0ea';
     const TYPE_NAME = 'api_design_destroy_listener';

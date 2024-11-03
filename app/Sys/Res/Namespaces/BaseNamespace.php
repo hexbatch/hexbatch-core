@@ -33,7 +33,7 @@ abstract class BaseNamespace implements ISystemNamespace
 
     protected ?UserNamespace $namespace = null;
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         return static::UUID;
     }
 

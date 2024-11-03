@@ -1,0 +1,59 @@
+<?php
+namespace App\Api\Cmd\Design\Promote;
+
+use App\Api\Cmd\IActionOaResponse;
+use App\Api\Cmd\IActionWorker;
+use App\Api\Cmd\IActionWorkReturn;
+use App\Exceptions\HexbatchInvalidException;
+use App\Models\ElementType;
+use App\Models\Thing;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromotion;
+
+class DesignPromoteResponse extends DesignPromotion implements IActionWorkReturn,IActionOaResponse,IActionWorker
+{
+
+    public function __construct(
+        protected ?ElementType $type = null
+    )
+    {
+    }
+
+    public function toThing(Thing $thing)
+    {
+        // todo implement writing to thing method
+    }
+
+    protected function run(DesignPromoteParams $params) {
+        $type = new ElementType();
+        $type->type->ref_uuid = $params->getClassUuid();
+        $type->type_name = $params->getTypeName();
+        $type->lifecycle = $params->getLifecycle();
+        $type->owner_namespace_id = $params->getNamespaceId() ;
+        $type->imported_from_server_id = $params->getServerId() ;
+        $type->is_system = $params->isSystem() ;
+        $type->is_final_type = $params->isFinalType() ;
+        $type->save();
+        $this->type = $type;
+    }
+
+    /**
+     * @param DesignPromoteParams $params
+     * @return DesignPromoteResponse
+     */
+    public static function doWork($params): IActionWorkReturn
+    {
+        if (!is_a($params,DesignPromoteParams::class)) {
+            throw new HexbatchInvalidException("Params is not IDesignPromotionParams");
+        }
+        $worker = new DesignPromoteResponse();
+        $worker->run($params);
+        return $worker;
+    }
+
+    public function getType(): ?ElementType
+    {
+        return $this->type;
+    }
+
+
+}

@@ -111,7 +111,7 @@ class LoadStatic
                 /**
                  * @type ISystemType $full_class_name
                  */
-                $name = $full_class_name::getName();
+                $name = $full_class_name::getClassTypeName();
                 if (!Utilities::isValidResourceName($name)) {
                     $this->bad_type_name[$uuid] = $name;
 
@@ -132,7 +132,7 @@ class LoadStatic
                 $attr = $full_class_name::getAttributeClasses();
                 foreach ($attr as $attr_class) {
                     if (isset($attribute_type_classes[$attr_class])) {
-                        $this->repeating_attribute_ownership[ $attr_class::getUuid()] = [
+                        $this->repeating_attribute_ownership[ $attr_class::getClassUuid()] = [
                             'attribute_class'=>$attr_class,
                             'type_class' => $full_class_name
                         ];
@@ -169,7 +169,7 @@ class LoadStatic
                  */
                 $element_type_class = $full_class_name::getSystemTypeClass();
 
-                $element_type_uuid = $element_type_class::getUuid();
+                $element_type_uuid = $element_type_class::getClassUuid();
                 if (!isset($this->type_elements[$element_type_uuid])) { $this->type_elements[$element_type_uuid] = [];}
                 $this->type_elements[$element_type_uuid][] = $full_class_name;
                 $this->elements[] = $full_class_name;
@@ -188,7 +188,7 @@ class LoadStatic
                 $element_type_class = $element_class::getSystemTypeClass();
 
 
-                $element_type_uuid = $element_type_class::getUuid();
+                $element_type_uuid = $element_type_class::getClassUuid();
                 if (!isset($this->type_sets[$element_type_uuid])) { $this->type_sets[$element_type_uuid] = [];}
                 $this->type_sets[$element_type_uuid][] = $full_class_name;
                 $this->sets[] = $full_class_name;

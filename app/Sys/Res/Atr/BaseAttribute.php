@@ -23,7 +23,7 @@ use App\Sys\Res\Types\ISystemType;
     const PARENT_ATTRIBUTE_CLASS = '';
     const ATTRIBUTE_NAME = '';
 
-     public static function getUuid() : string {
+     public static function getClassUuid() : string {
          return static::UUID;
      }
 

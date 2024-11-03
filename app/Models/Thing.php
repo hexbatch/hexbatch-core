@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Api\Ta\IApiSetup;
+use App\Api\ThingApi\IApiThingSetup;
 use App\Enums\Rules\TypeMergeJson;
 use App\Enums\Rules\TypeOfLogic;
 use App\Enums\Things\TypeOfThingStatus;
@@ -26,7 +26,7 @@ use Illuminate\Database\Query\JoinClause;
  * todo the thing will have a list built and updated by the hbc:system that allows code (and not db) checks for action inheritance
  *   for @see SystemPrivilege there is a permission check but events can be called
  *
- * todo the thing function that accepts the params @see IApiSetup for notes
+ * todo the thing function that accepts the params @see IApiThingSetup for notes
  *
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder

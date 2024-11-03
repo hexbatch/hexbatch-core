@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Create extends BaseType
+class Create extends Api\ElementApi
 {
     const UUID = 'bad981d1-f817-4f89-879c-3d2d9c6443b6';
     const TYPE_NAME = 'api_element_create';

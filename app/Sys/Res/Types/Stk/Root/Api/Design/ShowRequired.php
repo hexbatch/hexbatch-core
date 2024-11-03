@@ -2,11 +2,11 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class ShowRequired extends BaseType
+class ShowRequired extends Api\DesignApi
 {
     const UUID = 'f9686582-a179-4bd5-8a15-96d25f7f8965';
     const TYPE_NAME = 'api_design_show_required';

@@ -91,7 +91,8 @@ return new class extends Migration
                 ->nullable()->default(null)->comment("Data has json");
         });
 
-        DB::statement("CREATE TYPE type_of_thing_data_source AS ENUM ('not_set','from_children', 'from_current','from_action_setup','from_api_setup');");
+        DB::statement("CREATE TYPE type_of_thing_data_source AS ENUM (
+            'not_set','from_children', 'from_current', 'run_time_data','from_action_setup','from_api_setup');");
 
         DB::statement("ALTER TABLE thing_data Add COLUMN thing_data_source type_of_thing_data_source NOT NULL default 'not_set';");
 

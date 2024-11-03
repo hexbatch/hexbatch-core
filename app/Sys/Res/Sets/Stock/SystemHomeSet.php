@@ -11,7 +11,7 @@ use App\Sys\Res\Sets\BaseSet;
 
 class SystemHomeSet extends BaseSet
 {
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.namespace.elements_and_sets.set_uuid');
         if (!$name) {
             throw new HexbatchInitException("System namespace set uuid is not set in .env");

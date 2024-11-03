@@ -13,7 +13,7 @@ class ThisServer extends BaseServer {
 
     const NAMESPACE_CLASS = ThisServerNamespace::class;
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.server.uuid');
         if (!$name) {
             throw new HexbatchInitException("Server user uuid is not set in .env");
@@ -49,7 +49,7 @@ class ThisServer extends BaseServer {
     public function onNextStep(): void
     {
         //set the uuid to the one in the config, and update the resource for the new uuid
-        $this->server->ref_uuid = static::getUuid();
+        $this->server->ref_uuid = static::getClassUuid();
         $this->server->save();
         SystemServers::updateResourceGuid(static::class,$this->server->ref_uuid);
     }

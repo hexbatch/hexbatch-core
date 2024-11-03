@@ -5,8 +5,8 @@ info:
 paths:
   /api/v1/users/me:
     get:
-      summary: 'when logged in, can see own details'
-      description: 'Long demo stuff, best to break apart into strings More demo stuff'
+      summary: 'This will show the user and default namespace details'
+      description: 'Shows the logged in user'
       operationId: core.users.me
       responses:
         '200':
@@ -14,36 +14,159 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Me'
   /api/v1/users/login:
     post:
       operationId: core.users.login
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LoginParams'
       responses:
         '200':
-          description: 'Login gets a token'
+          description: 'Login returns a token'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
+  /api/v1/users/register:
+    post:
+      operationId: core.users.register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationParams'
+      responses:
+        '201':
+          description: 'Register with just a username and a password'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+  /api/v1/users/logout:
+    delete:
+      summary: 'Logs the user out of all tokens (destroys all tokens)'
+      operationId: core.users.logout
+      responses:
+        '200':
+          description: 'All the tokens owned by the user were destroyed'
+  /api/v1/users/auth/create:
+    post:
+      summary: 'Create a new token with optional lifetime set in seconds'
+      description: 'Any json set in the body is converted to passthrough data, which is data associated with the logged in token'
+      operationId: core.users.auth.create
+      parameters:
+        -
+          name: seconds
+          in: path
+          description: 'determines seconds to live, optional'
+          required: false
+          schema:
+            $ref: '#/components/schemas/hexbatch_seconds_to_live'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              description: 'Anything passed to the body is considered passthrough data'
+              type:
+                - object
+                - 'null'
+      responses:
+        '201':
+          description: 'Returns a new token set to that lifetime'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTokenResponse'
+  /api/v1/users/auth/passthrough:
+    get:
+      summary: 'Gets the passthrough data associated with this token used to authenticate this call'
+      operationId: core.users.auth.passthrough
+      responses:
+        '200':
+          description: 'Gets any immutable passthrough data stored when the token was created'
+          content:
+            application/json:
+              schema:
+                type:
+                  - object
+                  - 'null'
+  /api/v1/users/auth/remove_current_token:
+    delete:
+      summary: 'Deletes the current token, other tokens not deleted'
+      description: 'Allows for services to create extra tokens, use them, and then remove them'
+      operationId: core.users.auth.remove_current_token
+      responses:
+        '204':
+          description: 'Nothing returned'
 components:
   schemas:
+    hexbatch_token:
+      title: 'A token used to authenticate'
+      description: 'Defines a regular uuid'
+      type: string
+      maxLength: 60
+      minLength: 40
+      example:
+        -
+          summary: 'Tokens look like this, but not always'
+          value: 2|jY8m3acW2GdDZlgJOxX2hWCjlRJ6lcu4OA3q3XWcc4cbc545
+    hexbatch_username:
+      title: 'User Name'
+      description: 'Defines a user name'
+      type: string
+      maxLength: 30
+      minLength: 3
+      pattern: '^\p{L}[\p{L}0-9_]{2,}$'
+      example:
+        -
+          summary: 'No capital letters, no punctuation, underscores allowed, numbers allowed after first letter'
+          value: my_first_user221
+    hexbatch_uuid:
+      title: 'Unique reference'
+      description: 'Defines a regular uuid'
+      type: string
+      maxLength: 36
+      minLength: 36
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      example:
+        -
+          summary: 'Should be unique across the world'
+          value: 59714b32-a017-4300-afbc-f910886a2589
+    CreateTokenResponse:
+      description: 'Returns the token that is required other api calls'
+      properties:
+        auth_token:
+          $ref: '#/components/schemas/hexbatch_token'
+      type: object
+    hexbatch_seconds_to_live:
+      title: 'Seconds to live'
+      description: 'When needing to give a length in seconds up to a year'
+      type: integer
+      format: int32
+      maxLength: 31536000
+      minLength: 1
+      example:
+        -
+          summary: 'A lifetime of 6 months'
+          value: '15768000'
     LoginParams:
+      description: 'Login requires a username and password'
       properties:
         username:
-          title: 'User Name'
-          type: string
-          example:
-            -
-              summary: 'user name example'
-              value: will_fart
+          $ref: '#/components/schemas/hexbatch_username'
         password:
           title: Password
           type: password
+          example:
+            -
+              summary: 'password set up in the registration'
+              value: beans_r_88good
       type: object
       example:
         -
@@ -57,23 +180,43 @@ components:
             username: will2
             password: xamp22
     LoginResponse:
+      description: 'Returns the token that is required other api calls'
       properties:
         message:
           title: Message
           type: string
         auth_token:
-          title: 'Auth Token'
-          type: password
+          $ref: '#/components/schemas/hexbatch_token'
       type: object
-    User:
+    Me:
+      description: 'Show details about the logged-in user'
       properties:
         uuid:
-          title: 'Unique reference'
-          type: string
+          $ref: '#/components/schemas/hexbatch_uuid'
         username:
           title: 'User name'
           type: string
-        created_at:
-          title: 'User created'
+        registered_at:
+          title: 'When the user was registered'
           type: string
+          format: date-time
       type: object
+    RegistrationParams:
+      description: 'Login requires a username and password'
+      properties:
+        username:
+          $ref: '#/components/schemas/hexbatch_username'
+        password:
+          title: Password
+          type: password
+          example:
+            -
+              summary: 'password set up in the registration'
+              value: beans_r_88good
+      type: object
+      example:
+        -
+          summary: 'Registration Example'
+          value:
+            username: will
+            password: xamp

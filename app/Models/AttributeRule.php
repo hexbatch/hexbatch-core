@@ -274,8 +274,9 @@ class AttributeRule extends Model
             if ($collect->has('rule_name')) {
                 try {
                     if ($this->rule_name = $collect->get('rule_name')) {
-                        Validator::make(['rule_name' => $this->rule_name], [
-                            'rule_name' => ['required', 'string', 'max:255'],
+                        Validator::make(
+                            ['rule_name' => $this->rule_name],
+                            ['rule_name' => ['required', 'string', 'max:255'],
                         ])->validate();
                     }
                 } catch (ValidationException $v) {

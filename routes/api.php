@@ -41,7 +41,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('users')->group(function () {
             Route::get('/me', [AuthenticationController::class, 'me'])->name('core.users.me');
 
-            Route::post('/logout', [AuthenticationController::class, 'logout'])->name('core.users.logout');
+            Route::delete('/logout', [AuthenticationController::class, 'logout'])->name('core.users.logout');
 
             Route::delete('/delete', [AuthenticationController::class, 'delete_user'])
                 ->name('core.users.auth.delete');
@@ -54,7 +54,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('/passthrough', [AuthenticationController::class, 'get_token_passthrough'])
                     ->name('core.users.auth.passthrough');
 
-                Route::get('/remove_current_token', [AuthenticationController::class, 'remove_current_token'])
+                Route::delete('/remove_current_token', [AuthenticationController::class, 'remove_current_token'])
                     ->name('core.users.auth.remove_current_token');
 
 

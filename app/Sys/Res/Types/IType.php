@@ -6,7 +6,6 @@ use App\Models\ElementType;
 
 interface IType
 {
-    public function getTypeName() :string;
 
     public function getTypeObject() : ?ElementType;
 }

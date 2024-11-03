@@ -9,7 +9,7 @@ use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNs\ThisServerPublic;
 
 class SystemNSPublicElement extends BaseElement
 {
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.namespace.elements_and_sets.public_uuid');
         if (!$name) {
             throw new HexbatchInitException("System namespace public element uuid is not set in .env");

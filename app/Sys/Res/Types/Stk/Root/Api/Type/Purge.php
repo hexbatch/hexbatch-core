@@ -2,12 +2,11 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Purge extends BaseType
+class Purge extends Api\TypeApi
 {
     const UUID = 'e7beaf16-f329-4cc0-a6ab-1b18c76d8aac';
     const TYPE_NAME = 'api_type_purge';

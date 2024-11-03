@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
-use App\Sys\Res\Types\BaseType;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Ping extends BaseType
+class Ping extends Api\ElementApi
 {
     const UUID = 'b102b51c-862d-466f-8eb6-a8ec1bc421d0';
     const TYPE_NAME = 'api_element_ping';

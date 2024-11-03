@@ -13,7 +13,7 @@ class SystemUser extends BaseSystemUser
     const NAMESPACE_CLASS = ThisServerNamespace::class;
 
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.user.uuid');
         if (!$name) {
             throw new HexbatchInitException("System user uuid is not set in .env");

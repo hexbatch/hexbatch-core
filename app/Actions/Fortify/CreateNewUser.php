@@ -27,7 +27,7 @@ class CreateNewUser implements CreatesNewUsers
         //The server name is the server username here, so not using domain name in the table
         Validator::make($input, [
             'name' => [ 'string', 'max:255'],
-            'username'=>['required','string','min:3',Rule::unique(User::class,'userbane'),new UserNameReq],
+            'username'=>['required','string','min:3',Rule::unique(User::class,'username'),new UserNameReq],
             'password' => $this->passwordRules(),
         ])->validate();
 
@@ -36,5 +36,9 @@ class CreateNewUser implements CreatesNewUsers
             'username' => $input['username'],
             'password' => Hash::make($input['password']),
         ]);
+    }
+
+    public static function getPasswordRules() : array  {
+        return (new static)->passwordRules();
     }
 }

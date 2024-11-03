@@ -2,12 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class ChangeOwner extends BaseType
+
+class ChangeOwner extends Api\ElementApi
 {
     const UUID = '513a16a3-cbb5-4f6e-a6e4-4e7b90b0a1c6';
     const TYPE_NAME = 'api_element_change_owner';

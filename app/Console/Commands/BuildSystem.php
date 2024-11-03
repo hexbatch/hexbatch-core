@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Sys\Build\ActionMapper;
+use App\Sys\Build\ApiMapper;
 use App\Sys\Build\LoadStatic;
 use App\Sys\Res\Atr\ISystemAttribute;
 use App\Sys\Res\Sets\ISystemSet;
@@ -11,15 +13,14 @@ use Illuminate\Console\Command;
 class BuildSystem extends Command
 {
     /**
-     * todo need to make the map of the action classes before can run the build, decide on map location (bootstrap?)
-     *  map entries has the uuid: then array for each role that has full class name, and bools for allow_events and system_only
+     * todo mapping need bool marks for allow_events and system_only
      *
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'hbc:system {--check} {--list} {--list-attributes} {--list-types} {--list-elements} {--list-sets} '.
-                                        ' {--list-users} {--list-servers} {--list-namespaces} '
+    protected $signature = 'hbc:build {--check} {--list} {--list-attributes} {--list-types} {--list-elements} {--list-sets} '.
+                                        ' {--list-users} {--list-servers} {--list-namespaces} {--mapper} '
     ;
     /*
      *
@@ -77,7 +78,7 @@ class BuildSystem extends Command
              */
             $attr_class = $info['attribute_class'];
 
-            $this->warn("Attribute ".$attr_class::getName()." $uuid is duplicate claimed by type".$type_class::getName());
+            $this->warn("Attribute ".$attr_class::getName()." $uuid is duplicate claimed by type".$type_class::getClassTypeName());
         }
 
 
@@ -122,6 +123,15 @@ class BuildSystem extends Command
             return 1;
         }
 
+        if ($this->option('mapper')) {
+            $this->info("Writing actions to ". ActionMapper::getOutputPath());
+            ActionMapper::writeToStandardFile();
+            $this->info("Writing apis to ". ActionMapper::getOutputPath());
+            ApiMapper::writeToStandardFile();
+            $this->info("Done");
+            return 0;
+        }
+
         if ($this->option('check')) {
 
             $this->info('UUID '.count($load->uuid_classes));
@@ -133,6 +143,7 @@ class BuildSystem extends Command
             $this->info('NAMESPACES '.count($load->namespaces));
             $this->info('USERS '.count($load->system_users));
             $this->info('All '.count($load->loaded_classes));
+
 
         }
 
@@ -151,7 +162,7 @@ class BuildSystem extends Command
                     /** @type ISystemType $type_class */
                     $type_class = $load->attribute_type_classes[$attribute_class]??null;
                     if ($type_class) {
-                        $type_name = $type_class::getName();
+                        $type_name = $type_class::getClassTypeName();
                     }
                 }
                 $data[] = [$name, $uuid, $type_name];
@@ -212,13 +223,13 @@ class BuildSystem extends Command
                     $set_content_array = [];
                     foreach ($set_here::getMemberSystemElementClasses() as $element_in_set) {
                         $set_content_array[] =
-                            "\n  Element ". $element_in_set::getUuid() .
-                            "\n  Type    ". $element_in_set::getSystemTypeClass()::getUuid() .
+                            "\n  Element ". $element_in_set::getClassUuid() .
+                            "\n  Type    ". $element_in_set::getSystemTypeClass()::getClassUuid() .
                             "\n   ". $element_in_set::getSystemTypeClass()::getFlatInheritance();
                     }
                     $set_name =
-                         "\n Set     ".$set_here::getUuid()
-                        ."\n Type    ". $set_here::getDefiningSystemElementClass()::getSystemTypeClass()::getUuid()
+                         "\n Set     ".$set_here::getClassUuid()
+                        ."\n Type    ". $set_here::getDefiningSystemElementClass()::getSystemTypeClass()::getClassUuid()
                         . "\n   ". $name;
                     $events =  ' '. "\n ".($set_here::hasEvents()?'Yes':'No' );
                     $data[] = [$set_name,$events,implode("\n",$set_content_array)];
@@ -236,9 +247,9 @@ class BuildSystem extends Command
                 $type_class = $some_user::getSystemNamespaceClass()::getSystemTypeClass();
 
                 $data[] = [
-                    $some_user::getUserName(),$some_user::getUserPassword(),$some_user::getUuid()
+                    $some_user::getUserName(),$some_user::getUserPassword(),$some_user::getClassUuid()
                     ,
-                    " Type    ". $type_class::getUuid()
+                    " Type    ". $type_class::getClassUuid()
                     . "\n   ".$type_class::getFlatInheritance()
                 ];
 
@@ -256,9 +267,9 @@ class BuildSystem extends Command
                 $data[] = [
                     $some_server::getServerDomain(),
                     $some_server::getServerName(),
-                    $some_server::getUuid()
+                    $some_server::getClassUuid()
                     ,
-                    " Type    ". $type_class::getUuid()
+                    " Type    ". $type_class::getClassUuid()
                     . "\n   ".$type_class::getFlatInheritance()
                 ];
 
@@ -272,21 +283,21 @@ class BuildSystem extends Command
             foreach ($load->namespaces as $some_namespace) {
 
                 $dets =  $some_namespace::getNamespaceName()
-                    . " NS    ". $some_namespace::getUuid()
+                    . " NS    ". $some_namespace::getClassUuid()
                     . " \n ".
                     $some_namespace::getSystemServerClass()::getServerName()
-                    . " Server    ". $some_namespace::getSystemServerClass()::getUuid()
+                    . " Server    ". $some_namespace::getSystemServerClass()::getClassUuid()
                     . " \n ".
                     $some_namespace::getSystemUserClass()::getUserName()
-                    . " User    ". $some_namespace::getSystemUserClass()::getUuid();
+                    . " User    ". $some_namespace::getSystemUserClass()::getClassUuid();
 
 
                 if($some_namespace::getSystemTypeClass()::getSystemHandleElementClass()) {
                     $handle =
-                      "\n   Handle Element " . $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getUuid()
+                      "\n   Handle Element " . $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getClassUuid()
 
-                    . "\n   Handle Type    ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getUuid()
-                      ."\n   ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getName()
+                    . "\n   Handle Type    ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getClassUuid()
+                      ."\n   ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getClassTypeName()
 
                     . "\n   ".$some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getFlatInheritance();
 
@@ -297,19 +308,19 @@ class BuildSystem extends Command
                     $dets
                     ,
 
-                    " Type    ". $some_namespace::getSystemTypeClass()::getUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getName()
+                    " Type    ". $some_namespace::getSystemTypeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassTypeName()
                     . "\n   ".$some_namespace::getSystemTypeClass()::getFlatInheritance()
-                    ." Home Set   ". $some_namespace::getSystemHomeClass()::getUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getName()
+                    ." Home Set   ". $some_namespace::getSystemHomeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassTypeName()
                     . "\n   ".$some_namespace::getSystemHomeClass()::getDefiningSystemElementClass()::getSystemTypeClass()::getFlatInheritance()
 
                     ,
 
 
-                     " Public    ". $some_namespace::getSystemPublicClass()::getUuid() ."\n   ". $some_namespace::getSystemPublicClass()::getSystemTypeClass()::getName()
+                     " Public    ". $some_namespace::getSystemPublicClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPublicClass()::getSystemTypeClass()::getClassTypeName()
                     . "\n   ".$some_namespace::getSystemPublicClass()::getSystemTypeClass()::getFlatInheritance()
 
                     . " \n "
-                    ." Private    ". $some_namespace::getSystemPrivateClass()::getUuid() ."\n   ". $some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getName()
+                    ." Private    ". $some_namespace::getSystemPrivateClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getClassTypeName()
                     . "\n   ".$some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getFlatInheritance()
                     ."\n   "
                     ,

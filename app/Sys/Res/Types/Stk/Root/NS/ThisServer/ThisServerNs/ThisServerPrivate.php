@@ -12,7 +12,7 @@ use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
 class ThisServerPrivate extends BaseType
 {
 
-    public static function getUuid() : string {
+    public static function getClassUuid() : string {
         $name = config('hbc.system.namespace.types.private_type_uuid');
         if (!$name) {
             throw new HexbatchInitException("System namespace private type uuid is not set in .env");
