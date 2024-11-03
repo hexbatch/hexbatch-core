@@ -122,6 +122,8 @@ return [
 
     //elements
     'element_not_found' => 'Element not found using :ref',
+    'elements_must_have_owner' => 'When creating elements, an owner namespace must be defined',
+    'elements_must_have_type' => 'When creating elements, the type of element must be defined',
 
     //sets
     'set_not_found' => 'Set not found using :ref',

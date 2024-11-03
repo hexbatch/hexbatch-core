@@ -51,4 +51,8 @@ class Phase extends Model
      */
     protected $casts = [];
 
+    public static function getDefaultPhase() : ?Phase {
+        return null; //todo add in the default phase
+    }
+
 }

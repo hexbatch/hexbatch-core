@@ -155,6 +155,7 @@ enum TypeOfAction: string
     case CMD_ELEMENT_PING = 'cmd_element_ping';
 
 
+    case CMD_ELEMENT_PROMOTE = 'cmd_element_promote';
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 

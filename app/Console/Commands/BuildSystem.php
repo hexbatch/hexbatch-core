@@ -19,7 +19,7 @@ class BuildSystem extends Command
      *
      * @var string
      */
-    protected $signature = 'hbc:build {--check} {--list} {--list-attributes} {--list-types} {--list-elements} {--list-sets} '.
+    protected $signature = 'hex:build {--check} {--list} {--list-attributes} {--list-types} {--list-elements} {--list-sets} '.
                                         ' {--list-users} {--list-servers} {--list-namespaces} {--mapper} '
     ;
     /*

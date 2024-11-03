@@ -25,6 +25,7 @@ class SetupForSystem
             'type_name' => $this->type_name,
             'system' => $this->system,
             'final_type' => $this->final_type,
+            'lifecycle' => $this->lifecycle->value,
         ]);
     }
 

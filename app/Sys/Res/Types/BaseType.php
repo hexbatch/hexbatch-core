@@ -59,7 +59,9 @@ abstract class BaseType implements ISystemType
             $sys_params
                ->setUuid(static::getClassUuid())
                ->setTypeName(static::getClassTypeName())
+               ->setSystem(true)
                ->setFinalType(static::IS_FINAL);
+
 
             /**
             * @var DesignPromoteParams $promo_params
@@ -73,7 +75,7 @@ abstract class BaseType implements ISystemType
             $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,DesignPromotion::getClassUuid());
 
             $promo_results = $promo_work::doWork($promo_params);
-            return $promo_results->getType();
+            return $promo_results->getGeneratedType();
 
        } catch (\Exception $e) {
             throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
@@ -193,6 +195,8 @@ abstract class BaseType implements ISystemType
         $this->getTypeObject()->owner_namespace_id = $ns->getNamespaceObject()->id;
 
         $this->getTypeObject()->save();
+
+        //todo set the handle here
     }
 
 

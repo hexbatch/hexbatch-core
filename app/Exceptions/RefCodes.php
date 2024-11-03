@@ -94,6 +94,7 @@ class RefCodes {
     //elements start at 8000
 
     const ELEMENT_NOT_FOUND =  8001;
+    const ELEMENT_BAD_SCHEMA =  8002;
 
     //sets start at 9000
     const SET_NOT_FOUND =  9001;
@@ -168,6 +169,7 @@ class RefCodes {
         self::TYPE_CANNOT_EDIT => '',
 
         self::ELEMENT_NOT_FOUND => '',
+        self::ELEMENT_BAD_SCHEMA => '',
 
         self::SET_NOT_FOUND => '',
 

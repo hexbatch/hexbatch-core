@@ -13,7 +13,7 @@ class DesignPromoteResponse extends DesignPromotion implements IActionWorkReturn
 {
 
     public function __construct(
-        protected ?ElementType $type = null
+        protected ?ElementType $generated_type = null
     )
     {
     }
@@ -25,7 +25,7 @@ class DesignPromoteResponse extends DesignPromotion implements IActionWorkReturn
 
     protected function run(DesignPromoteParams $params) {
         $type = new ElementType();
-        $type->type->ref_uuid = $params->getClassUuid();
+        $type->ref_uuid = $params->getUuid();
         $type->type_name = $params->getTypeName();
         $type->lifecycle = $params->getLifecycle();
         $type->owner_namespace_id = $params->getNamespaceId() ;
@@ -33,7 +33,7 @@ class DesignPromoteResponse extends DesignPromotion implements IActionWorkReturn
         $type->is_system = $params->isSystem() ;
         $type->is_final_type = $params->isFinalType() ;
         $type->save();
-        $this->type = $type;
+        $this->generated_type = $type;
     }
 
     /**
@@ -42,17 +42,17 @@ class DesignPromoteResponse extends DesignPromotion implements IActionWorkReturn
      */
     public static function doWork($params): IActionWorkReturn
     {
-        if (!is_a($params,DesignPromoteParams::class)) {
-            throw new HexbatchInvalidException("Params is not IDesignPromotionParams");
+        if (!(is_a($params,DesignPromoteParams::class) || is_subclass_of($params,DesignPromoteParams::class))) {
+            throw new HexbatchInvalidException("Params is not DesignPromoteParams");
         }
         $worker = new DesignPromoteResponse();
         $worker->run($params);
         return $worker;
     }
 
-    public function getType(): ?ElementType
+    public function getGeneratedType(): ?ElementType
     {
-        return $this->type;
+        return $this->generated_type;
     }
 
 

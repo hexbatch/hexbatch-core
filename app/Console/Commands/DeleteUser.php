@@ -13,7 +13,7 @@ class DeleteUser extends Command
      *
      * @var string
      */
-    protected $signature = 'hbc:delete_user {username_or_id}';
+    protected $signature = 'hex:delete_user {username_or_id}';
 
     /**
      * The console command description.

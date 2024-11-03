@@ -54,8 +54,8 @@ class ActionMapper extends AaMapperBase
 
 
         usort($map_entries,
-            function(ApiMapEntry $a, ApiMapEntry $b) {
-                return $a->getApiName() <=> $b->getApiName();
+            function(ActionMapEntry $a, ActionMapEntry $b) {
+                return $a->getActionName() <=> $b->getActionName();
             });
 
 

@@ -13,7 +13,7 @@ class LogoutUser extends Command
      *
      * @var string
      */
-    protected $signature = 'hbc:logout_user {username_or_id}';
+    protected $signature = 'hex:logout_user {username_or_id}';
 
     /**
      * The console command description.

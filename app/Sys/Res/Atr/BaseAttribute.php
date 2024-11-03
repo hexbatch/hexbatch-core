@@ -3,31 +3,47 @@
 namespace App\Sys\Res\Atr;
 
 
+use App\Api\Cmd\Design\PromoteAction\APSetupForSystem;
+use App\Api\Cmd\Design\PromoteAction\AttributePromoteParams;
+use App\Api\Cmd\Design\PromoteAction\AttributePromoteResponse;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\ElementValue;
 use App\Models\UserNamespace;
+use App\Sys\Build\ActionMapper;
+use App\Sys\Build\BuildActionFacet;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\ISystemType;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromotion;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromotion;
 
 
- abstract class BaseAttribute implements ISystemAttribute
+abstract class BaseAttribute implements ISystemAttribute
 {
     protected ?Attribute $attribute;
 
     const UUID = '';
     const TYPE_CLASS = '';
     const PARENT_ATTRIBUTE_CLASS = '';
+    const HANDLE_ATTRIBUTE_CLASS = '';
     const ATTRIBUTE_NAME = '';
+
+    const IS_FINAL = false;
+    const IS_ABSTRACT = false;
+    const IS_SEEN_BY_CHILDREN_TYPES = false;
 
      public static function getClassUuid() : string {
          return static::UUID;
      }
 
      public function getAttributeName(): string {
+         return static::ATTRIBUTE_NAME;
+     }
+
+     public static function getClassAttributeName(): string {
          return static::ATTRIBUTE_NAME;
      }
 
@@ -76,8 +92,28 @@ use App\Sys\Res\Types\ISystemType;
     public function makeAttribute() :Attribute
    {
        try {
-           $attribute = new Attribute();
-           return $attribute;
+           $sys_params = new APSetupForSystem();
+           $sys_params
+               ->setUuid(static::getClassUuid())
+               ->setAttributeName(static::getClassAttributeName())
+               ->setFinal(static::IS_FINAL)
+               ->setAbstract(static::IS_ABSTRACT)
+               ->setSeenByChild(static::IS_SEEN_BY_CHILDREN_TYPES)
+               ->setSystem(true);
+
+           /**
+            * @var AttributePromoteParams $promo_params
+            */
+           $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,DesignAttributePromotion::getClassUuid());
+           $promo_params->fromCollection($sys_params->makeCollection());
+
+           /**
+            * @type AttributePromoteResponse $promo_work
+            */
+           $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,DesignPromotion::getClassUuid());
+
+           $promo_results = $promo_work::doWork($promo_params);
+           return $promo_results->getGeneratedAttribute();
        } catch (\Exception $e) {
             throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
        }
@@ -99,6 +135,11 @@ use App\Sys\Res\Types\ISystemType;
         return SystemAttributes::getAttributeByUuid(static::PARENT_ATTRIBUTE_CLASS);
     }
 
+    public function getSystemHandle() : ?ISystemAttribute
+    {
+        return SystemAttributes::getAttributeByUuid(static::HANDLE_ATTRIBUTE_CLASS);
+    }
+
     public function getOwningSystemType(): ISystemType
     {
         return SystemTypes::getTypeByUuid(static::TYPE_CLASS);
@@ -112,7 +153,7 @@ use App\Sys\Res\Types\ISystemType;
 
     public function onNextStep(): void
     {
-
+        //todo set the design here, if present
     }
 
 

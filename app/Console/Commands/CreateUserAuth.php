@@ -14,7 +14,7 @@ class CreateUserAuth extends Command
      *
      * @var string
      */
-    protected $signature = 'hbc:create_user_auth {username_or_id} {--S|seconds=} {--N|token_name=}';
+    protected $signature = 'hex:create_user_auth {username_or_id} {--S|seconds=} {--N|token_name=}';
 
     /**
      * The console command description.

@@ -18,7 +18,7 @@ class ChangeUserPw extends Command
      *
      * @var string
      */
-    protected $signature = 'hbc:change_user_pw {username_or_id} {new_password}';
+    protected $signature = 'hex:change_user_pw {username_or_id} {new_password}';
 
     /**
      * The console command description.

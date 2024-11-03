@@ -4,7 +4,7 @@ namespace App\Models;
 
 
 
-use App\Api\ThingApi\IApiThingResult;
+use App\Api\Thinger\IApiThingResult;
 use App\Enums\Things\TypeApiFollowup;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;

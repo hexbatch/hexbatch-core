@@ -3,7 +3,7 @@
 namespace App\Api\Cmd;
 
 /**
- * passed a param of the @see \App\Api\Cmd\IActionParams but a derived class
+ * passed a param of the @see IActionParams but a derived class
  */
 interface IActionWorker
 {

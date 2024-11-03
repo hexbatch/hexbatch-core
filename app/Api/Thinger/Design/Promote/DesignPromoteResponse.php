@@ -1,9 +1,9 @@
 <?php
-namespace App\Api\ThingApi\Design\Promote;
+namespace App\Api\Thinger\Design\Promote;
 
 
 use App\Api\IApiOaResponse;
-use App\Api\ThingApi\IApiThingResult;
+use App\Api\Thinger\IApiThingResult;
 use App\Models\ThingResult;
 use App\Sys\Res\Types\Stk\Root\Api\Design\Promotion;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\ThingApi;
+namespace App\Api\Thinger;
 
 use App\Models\ThingResult;
 
