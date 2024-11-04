@@ -24,8 +24,9 @@ return [
     'passthrough_data_too_big' => 'The passthrough data for this token is too big, the max is :max bytes',
     'token_too_long_lived' => 'The token can only be created for up to :seconds seconds',
 
-    //user types
+    //namespaces
     'namespace_not_found' => 'Namespace not found using :ref',
+    'namespace_invalid_name' => 'Namespace has invalid name :ref',
     'namespace_not_owner' => 'You are not the owner of the namespace :ref',
     'namespace_not_admin' => 'You are not an administor of the namespace :ref',
     'namespace_not_member' => 'You are not a member of the namespace :ref',
@@ -62,6 +63,7 @@ return [
     'attribute_cannot_be_used_as_parent' => 'This attribute :ref cannot be used as a parent, you are not an admin of its namespace',
     'attribute_cannot_be_used_at_parent_final' => 'This attribute :ref cannot be used as a parent, it is either retired or marked to not be used for parenting',
     'attribute_schema_must_have_name' => 'When making an attribute a name must be provided',
+    'attribute_schema_must_have_type' => 'When making an attribute it must have a type to belong',
     'attribute_cannot_be_deleted_if_in_use' => 'Can only delete an attribute :ref if nothing uses it',
     'attribute_owner_does_not_match_type_given' => 'The type given :type does not own the attribute :ref',
     'attribute_unique_name_per_type' => 'Attributes in each type must have unique names',

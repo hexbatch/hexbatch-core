@@ -192,6 +192,8 @@ enum TypeOfAction: string
 
 
     case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
+    case CMD_NAMESPACE_PROMOTE = 'cmd_namespace_promote';
+    case CMD_NAMESPACE_EDIT_PROMOTION = 'cmd_namespace_edit_promotion';
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
     case CMD_NAMESPACE_PURGE = 'cmd_namespace_purge'; //server admin
 

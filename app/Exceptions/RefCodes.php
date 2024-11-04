@@ -33,6 +33,7 @@ class RefCodes {
     const NAMESPACE_NOT_ADMIN = 2005;
     const NAMESPACE_MEMBER_MISSING_ISSUE = 2006;
     const NAMESPACE_CANNOT_DELETE_CORE_PARTS = 2007;
+    const NAMESPACE_SCHEMA_ISSUE = 2010;
 
 
     // bounds start at 3000
@@ -54,7 +55,6 @@ class RefCodes {
     const ATTRIBUTE_PING_DATA_MISSING = 4002;
     const ATTRIBUTE_CANNOT_BE_USED_AS_PARENT = 4003;
     const ATTRIBUTE_SCHEMA_ISSUE = 4004;
-    const ATTRIBUTE_BAD_NAME = 4005;
 
     const ATTRIBUTE_CANNOT_EDIT = 4010;
     const ATTRIBUTE_CANNOT_CLONE = 4011;
@@ -126,6 +126,7 @@ class RefCodes {
         self::NAMESPACE_NOT_ADMIN => '',
         self::NAMESPACE_MEMBER_MISSING_ISSUE => '',
         self::NAMESPACE_CANNOT_DELETE_CORE_PARTS => '',
+        self::NAMESPACE_SCHEMA_ISSUE => '',
 
 
 
@@ -144,7 +145,6 @@ class RefCodes {
         self::ATTRIBUTE_CANNOT_BE_USED_AS_PARENT => '',
         self::ATTRIBUTE_SCHEMA_ISSUE => '',
         self::ATTRIBUTE_CANNOT_EDIT => '',
-        self::ATTRIBUTE_BAD_NAME => '',
         self::ATTRIBUTE_CANNOT_CLONE => '',
         self::ATTRIBUTE_CANNOT_DELETE => '',
 

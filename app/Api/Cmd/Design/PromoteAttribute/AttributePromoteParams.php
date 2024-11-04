@@ -1,14 +1,19 @@
 <?php
-namespace App\Api\Cmd\Design\PromoteAction;
+namespace App\Api\Cmd\Design\PromoteAttribute;
 
 use App\Api\Cmd\IActionOaInput;
 use App\Api\Cmd\IActionParams;
 
 use App\Enums\Types\TypeOfApproval;
 
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Models\Thing;
+use App\Rules\AttributeNameReq;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromotion;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class AttributePromoteParams extends DesignAttributePromotion implements IActionParams,IActionOaInput
 {
@@ -32,6 +37,26 @@ class AttributePromoteParams extends DesignAttributePromotion implements IAction
     public function fromThing(Thing $thing): void
     {
         // todo pull the data from the thing and fill in the data here from the json stored there
+    }
+
+    protected function validate() {
+
+        if (!$this->owner_element_type_id) {
+            throw new HexbatchNotPossibleException(__('msg.attribute_schema_must_have_type'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+
+        }
+
+        try {
+            Validator::make(['attribute_name' => $this->attribute_name], [
+                'attribute_name' => ['required', 'string', new AttributeNameReq($this->owner_element_type_id,null)],
+            ])->validate();
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        }
     }
 
     public function fromCollection(Collection $collection)
@@ -70,6 +95,7 @@ class AttributePromoteParams extends DesignAttributePromotion implements IAction
             $this->attribute_approval = TypeOfApproval::tryFromInput($collection->get('attribute_approval'));
         }
 
+        $this->validate();
     }
 
     public function toArray() : array {

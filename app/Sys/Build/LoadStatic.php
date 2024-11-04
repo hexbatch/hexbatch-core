@@ -22,6 +22,7 @@ class LoadStatic
     public array $bad_type_name = [];
     public array $type_name_uuids = [];
     public array $type_tree_uuids = [];
+    public array $types = [];
 
 
     public array $bad_attribute_name = [];
@@ -126,6 +127,7 @@ class LoadStatic
                 $type_names[$name] = true;
 
                 $this->type_name_uuids[ $name] = $uuid;
+                $this->types[ $uuid] = $full_class_name;
                 $this->type_tree_uuids[$full_class_name::getFlatInheritance() ] = $uuid ;
 
                 /** @type ISystemAttribute[]|string[] $attr */

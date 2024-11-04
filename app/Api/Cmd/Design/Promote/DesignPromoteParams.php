@@ -6,9 +6,15 @@ use App\Api\Cmd\IActionParams;
 
 use App\Enums\Types\TypeOfLifecycle;
 
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Models\Thing;
+use App\Rules\ElementTypeNameReq;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromotion;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class DesignPromoteParams extends DesignPromotion implements IActionParams,IActionOaInput
 {
@@ -29,6 +35,26 @@ class DesignPromoteParams extends DesignPromotion implements IActionParams,IActi
     public function fromThing(Thing $thing): void
     {
         // todo pull the data from the thing and fill in the data here from the json stored there
+    }
+
+    protected function validate() {
+        try {
+            if ($this->type_name) {
+                Validator::make(['type_name' => $this->type_name], [
+                    'type_name' => ['required', 'string', new ElementTypeNameReq(null,Utilities::getCurrentNamespace())],
+                ])->validate();
+            }
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_INVALID_NAME);
+        }
+
+        if (!$this->type_name) {
+            throw new HexbatchNotPossibleException(__('msg.type_must_have_name'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_INVALID_NAME);
+        }
     }
 
     public function fromCollection(Collection $collection)
@@ -55,7 +81,7 @@ class DesignPromoteParams extends DesignPromotion implements IActionParams,IActi
         if ($collection->has('lifecycle')) {
             $this->lifecycle = TypeOfLifecycle::tryFromInput($collection->get('lifecycle'));
         }
-
+        $this->validate();
     }
 
     public function toArray() : array {

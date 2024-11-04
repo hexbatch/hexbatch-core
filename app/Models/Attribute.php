@@ -504,12 +504,12 @@ class Attribute extends Model implements IAttribute
                     $this->attribute_name = $collect->get('attribute_name');
                     try {
                         Validator::make(['attribute_name' => $this->attribute_name], [
-                            'attribute_name' => ['required', 'string', new AttributeNameReq($this->parent_type,$this->current_attribute)],
+                            'attribute_name' => ['required', 'string', new AttributeNameReq($this->owner_element_type_id,$this->current_attribute)],
                         ])->validate();
                     } catch (ValidationException $v) {
                         throw new HexbatchNotPossibleException($v->getMessage(),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::ATTRIBUTE_BAD_NAME);
+                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                     }
                 }
 
@@ -517,7 +517,7 @@ class Attribute extends Model implements IAttribute
 
                     throw new HexbatchNotPossibleException(__('msg.attribute_schema_must_have_name'),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::ATTRIBUTE_BAD_NAME);
+                        RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
                 }
 
 

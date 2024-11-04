@@ -120,6 +120,7 @@ Route::prefix('v1')->group(function () {
             PromoteAdmin.php
             PromoteMember.php
             Purge.php
+            Promote.php
              */
         });
 
@@ -213,6 +214,7 @@ Route::prefix('v1')->group(function () {
                 PromoteOwner.php
                 Purge.php
                 Promotion
+                AttributePromotion.php
                  */
 
                 Route::middleware(ValidateNamespaceOwner::class)->group(function () {
@@ -338,6 +340,8 @@ Route::prefix('v1')->group(function () {
                 Show.php
                 ShowPublic.php  -- not logged in
                 Purge.php
+            Promote.php
+            EditPromotion.php
 
              */
 

@@ -1,5 +1,5 @@
 <?php
-namespace App\Api\Cmd\Design\PromoteAction;
+namespace App\Api\Cmd\Design\PromoteAttribute;
 
 use App\Api\Cmd\IActionOaResponse;
 use App\Api\Cmd\IActionWorker;

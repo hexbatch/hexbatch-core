@@ -28,7 +28,9 @@ class ElementPromote extends Act\Cmd
     ];
 
     const PARENT_CLASSES = [
-        Act\Cmd\Ele::class
+        Act\Cmd\Ele::class,
+        Act\SystemPrivilege::class,
+        Act\NoEventsTriggered::class,
     ];
 
 }

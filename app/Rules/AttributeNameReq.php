@@ -4,7 +4,6 @@ namespace App\Rules;
 
 
 use App\Models\Attribute;
-use App\Models\ElementType;
 use Closure;
 
 
@@ -12,7 +11,7 @@ class AttributeNameReq extends ResourceNameReq
 {
     const MAX_NAME_LENGTH = 60;
 
-    public function __construct(protected ?ElementType $element_type,protected ?Attribute $attribute){}
+    public function __construct(protected ?int $element_type_id,protected ?Attribute $attribute){}
 
 
     /**
@@ -25,7 +24,7 @@ class AttributeNameReq extends ResourceNameReq
         parent::validate($attribute,$value,$fail);
 
         //see if type name is unique for the type
-        $laravel = Attribute::where('owner_element_type_id',$this->element_type->id)->where('attribute_name',$value);
+        $laravel = Attribute::where('owner_element_type_id',$this->element_type_id)->where('attribute_name',$value);
         if ($this->attribute?->id) {
             $laravel->whereNot('id',$this->attribute->id);
         }

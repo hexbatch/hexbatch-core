@@ -43,8 +43,8 @@ class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn
                         $ele->element_parent_type_id = $params->getParentTypeId();
                         $ele->element_phase_id = $params->getPhaseId();
                         $ele->element_namespace_id = $namespace_owner_id;
-                        if (count($params->getUuids())) {
-                            $ele->ref_uuid = $params->getUuids()[$uuid_index++]??null;
+                        if (count($params->getUuid())) {
+                            $ele->ref_uuid = $params->getUuid()[$uuid_index++]??null;
                         }
                         $this->generated_elements[] = $ele;
                         /** @type ElementSet $set */

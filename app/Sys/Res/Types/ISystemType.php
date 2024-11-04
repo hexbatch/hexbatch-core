@@ -14,6 +14,7 @@ interface ISystemType extends ISystemResource, IType
     public static function getClassTypeName() :string;
 
     public static function getParentNameTree() :array;
+    public static function hasInAncestors(string $target_full_class_name) :bool;
 
     public static function getFlatInheritance() : string;
 

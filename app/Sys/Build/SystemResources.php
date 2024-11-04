@@ -41,7 +41,7 @@ class SystemResources
         $ret =array_merge(SystemUsers::generateObjects(),$ret);
         $ret =array_merge(SystemNamespaces::generateObjects(),$ret);
         $ret =array_merge(SystemTypes::generateObjects(),$ret);
-        //do not generate the attributes here, the types will call them
+        $ret =array_merge(SystemAttributes::generateObjects(),$ret);
 
         $ret =array_merge(SystemElements::generateObjects(),$ret);
         $ret =array_merge(SystemServers::generateObjects(),$ret);

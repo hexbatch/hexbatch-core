@@ -133,9 +133,17 @@ class BuildSystem extends Command
         }
 
         if ($this->option('check')) {
-
+            $number_actions = 0;
+            $number_api = 0;
+            foreach ($load->types as  $val) {
+                $full_class_type_name = $val;
+                if (is_subclass_of($full_class_type_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) { $number_actions++;}
+                if (is_subclass_of($full_class_type_name, 'App\Sys\Res\Types\Stk\Root\Api') ) { $number_api++;}
+            }
             $this->info('UUID '.count($load->uuid_classes));
             $this->info('TYPES '.count($load->type_name_uuids));
+            $this->info('    Actions '.$number_actions);
+            $this->info('    Api '.$number_api);
             $this->info('ATTRIBUTES '.count($load->attribute_name_uuids));
             $this->info('SETS '.count($load->type_sets));
             $this->info('ELEMENTS '.count($load->type_elements));

@@ -3,9 +3,9 @@
 namespace App\Sys\Res\Atr;
 
 
-use App\Api\Cmd\Design\PromoteAction\APSetupForSystem;
-use App\Api\Cmd\Design\PromoteAction\AttributePromoteParams;
-use App\Api\Cmd\Design\PromoteAction\AttributePromoteResponse;
+use App\Api\Cmd\Design\PromoteAttribute\APSetupForSystem;
+use App\Api\Cmd\Design\PromoteAttribute\AttributePromoteParams;
+use App\Api\Cmd\Design\PromoteAttribute\AttributePromoteResponse;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
 use App\Models\ElementType;

@@ -108,6 +108,23 @@ abstract class BaseType implements ISystemType
         return $ret;
     }
 
+
+    public static function hasInAncestors(string $target_full_class_name) :bool  {
+        if (static::class === $target_full_class_name) {return true;}
+        foreach (static::PARENT_CLASSES as $full_class_name) {
+            if ($full_class_name === $target_full_class_name) {return true;}
+            $interfaces = class_implements($full_class_name);
+            if (isset($interfaces['App\Sys\Res\Types\ISystemType'])) {
+                /**
+                 * @type ISystemType $full_class_name
+                 */
+                $ret = $full_class_name::hasInAncestors($target_full_class_name);
+                if ($ret) {return true;}
+            }
+        }
+        return false;
+    }
+
     public static function getParentNameTree() :array  {
         $ret = [];
         $ret[static::getClassTypeName()] = [] ;

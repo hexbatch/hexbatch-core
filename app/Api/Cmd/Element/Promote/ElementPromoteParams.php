@@ -24,6 +24,36 @@ class ElementPromoteParams extends ElementPromote implements IActionParams,IActi
 
     const NO_SETS_MADE_YET_STUB_ID = -1;
 
+    protected function validate() {
+        if (empty($this->ns_owner_ids)) {
+            throw new HexbatchNotPossibleException(
+                __('msg.elements_must_have_owner'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ELEMENT_BAD_SCHEMA
+            );
+        }
+
+        if (empty($this->parent_type_id)) {
+            throw new HexbatchNotPossibleException(
+                __('msg.elements_must_have_type'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ELEMENT_BAD_SCHEMA
+            );
+        }
+
+        //test for the correct array sizes
+        if (count($this->uuids)) {
+            $total_uuids_expected =
+                count($this->destination_set_ids)
+                * count($this->ns_owner_ids)
+                * $this->number_per_set;
+
+            if (count($this->uuids) !== $total_uuids_expected ) {
+                throw new \LogicException("The count of the uuid is not the expected size");
+            }
+        }
+    }
+
     public function fromThing(Thing $thing): void
     {
         // todo pull the data from the thing and fill in the data here from the json stored there
@@ -34,13 +64,7 @@ class ElementPromoteParams extends ElementPromote implements IActionParams,IActi
         $this->ns_owner_ids = $meep = $collection->get('ns_owner_ids',[]);
         if (!is_array($meep)) { $this->ns_owner_ids = [$this->ns_owner_ids];}
         array_filter($this->ns_owner_ids, fn($value) => !empty(trim($value)) );
-        if (empty($this->ns_owner_ids)) {
-            throw new HexbatchNotPossibleException(
-                __('msg.elements_must_have_owner'),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::ELEMENT_BAD_SCHEMA
-            );
-        }
+
 
         $this->destination_set_ids = $meep = $collection->get('destination_set_ids',[]);
         if (!is_array($meep)) { $this->destination_set_ids = [$this->destination_set_ids];}
@@ -64,28 +88,8 @@ class ElementPromoteParams extends ElementPromote implements IActionParams,IActi
 
         $this->parent_type_id = (int)$collection->get('parent_type_id');
         if (!$this->parent_type_id)  {$this->parent_type_id = null;}
-        if (empty($this->parent_type_id)) {
-            throw new HexbatchNotPossibleException(
-                __('msg.elements_must_have_type'),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::ELEMENT_BAD_SCHEMA
-            );
-        }
 
-        //test for the correct array sizes
-        if (count($this->uuids)) {
-            $total_uuids_expected =
-                count($this->destination_set_ids)
-                * count($this->ns_owner_ids)
-                * $this->number_per_set;
-
-            if (count($this->uuids) !== $total_uuids_expected ) {
-                throw new \LogicException("The count of the uuid is not the expected size");
-            }
-        }
-
-
-
+        $this->validate();
     }
 
     public function toArray() : array {
@@ -107,7 +111,7 @@ class ElementPromoteParams extends ElementPromote implements IActionParams,IActi
         return $this->number_per_set;
     }
 
-    public function getUuids(): array
+    public function getUuid(): array
     {
         return $this->uuids;
     }

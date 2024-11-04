@@ -4,11 +4,11 @@ namespace App\Http\Controllers\API;
 
 
 
-use Illuminate\Support\Collection;
+use App\Sys\Build\ApiMapper;
 
 class TestController
 {
     public function test() {
-
+        ApiMapper::writeToStandardFile();
     }
 }

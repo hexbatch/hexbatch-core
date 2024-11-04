@@ -3,6 +3,9 @@
 namespace App\Sys\Build;
 
 
+use App\Sys\Res\Types\Stk\Root\Act\NoEventsTriggered;
+use App\Sys\Res\Types\Stk\Root\Act\SystemPrivilege;
+
 class ActionMapEntry
 {
     public ?string $action_uuid = null;
@@ -14,6 +17,9 @@ class ActionMapEntry
     public ?string $action_worker_class = null;
     public ?string $action_return_class = null;
 
+    public bool $is_protected = false;
+    public bool $has_events = true;
+
     public function isDataComplete() : bool {
         return $this->action_uuid && $this->action_name && $this->action_ouput_class &&
             $this->action_input_class && $this->action_param_class && $this->action_worker_class && $this->action_return_class;
@@ -23,6 +29,8 @@ class ActionMapEntry
         if (is_subclass_of($full_class_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) {
             $this->action_uuid = $full_class_name::getClassUuid();
             $this->action_name = $full_class_name::getClassTypeName();
+            $this->is_protected = $full_class_name::hasInAncestors(SystemPrivilege::class);
+            $this->has_events = !$full_class_name::hasInAncestors(NoEventsTriggered::class);
         } else {
             return;
         }
@@ -70,6 +78,8 @@ class ActionMapEntry
         return [
             'uuid'=> $this->getUuid(),
             'api_name'=> $this->getActionName(),
+            'is_protected'=> $this->isProtected(),
+            'has_events'=> $this->hasEvents(),
             BuildActionFacet::FACET_PARAMS->value => $this->getActionParamClass(),
             BuildActionFacet::FACET_INPUT->value => $this->getActionInputClass(),
             BuildActionFacet::FACET_OUTPUT->value => $this->getActionOuputClass(),
@@ -109,6 +119,16 @@ class ActionMapEntry
     }public function getActionReturnClass(): ?string
     {
         return $this->action_return_class;
+    }
+
+    public function isProtected(): bool
+    {
+        return $this->is_protected;
+    }
+
+    public function hasEvents(): bool
+    {
+        return $this->has_events;
     }
 
 }

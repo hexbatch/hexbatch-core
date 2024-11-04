@@ -3,6 +3,8 @@
 namespace App\Sys\Res\Namespaces;
 
 
+use App\Api\Cmd\Namespace\EditPromotion\NsEditForSystem;
+use App\Api\Cmd\Namespace\Promote\NsForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemElements;
@@ -66,9 +68,20 @@ abstract class BaseNamespace implements ISystemNamespace
     public function makeNamespace() :UserNamespace
    {
        try {
-           $ret = new UserNamespace();
+           $sys_params = new NsForSystem();
+           $sys_params
+               ->setUuid(static::getClassUuid())
+               ->setNamespaceUserId(static::getSystemUserClass()->getUserObject()?->id)
+               ->setNamespaceServerId(static::getSystemServerClass()->getServerObject()?->id)
+               ->setNamespaceTypeId(static::getSystemTypeClass()->getTypeObject()?->id)
+               ->setNamespaceHomeSetId(static::getSystemHomeClass()->getSetObject()?->id)
+               ->setNamespaceName(static::getNamespaceName())
+               ->setNamespacePublicKey(static::getNamespacePublicKey())
+               ->setPublicElementId(static::getSystemPublicClass()->getElementObject()?->id)
+               ->setPrivateElementId(static::getSystemPrivateClass()->getElementObject()?->id)
+               ;
 
-           return $ret;
+           return $sys_params->doParamsAndResponse();
        } catch (\Exception $e) {
             throw new HexbatchInitException('[makeNamespace] '.$e->getMessage(),$e->getCode(),null,$e);
        }
@@ -85,7 +98,6 @@ abstract class BaseNamespace implements ISystemNamespace
     public function getNamespaceObject() : UserNamespace {
         if ($this->namespace) {return $this->namespace;}
         $this->namespace = $this->makeNamespace();
-        // todo but need to make that system namespace first, even without any data except the uuid
         return $this->namespace;
     }
 
@@ -103,9 +115,25 @@ abstract class BaseNamespace implements ISystemNamespace
             throw new HexbatchInitException('namespace next step cannot get u');
         }
 
-        $this->getNamespaceObject()->namespace_user_id = $user->getUserObject()->id;
-        //todo fill in the other stuff for the sys ns
-        $this->getNamespaceObject()->save();
+        try {
+            $sys_params = new NsEditForSystem();
+            $sys_params
+                ->setUuid(static::getClassUuid())
+                ->setNamespaceUserId(static::getSystemUserClass()->getUserObject()?->id)
+                ->setNamespaceServerId(static::getSystemServerClass()->getServerObject()?->id)
+                ->setNamespaceTypeId(static::getSystemTypeClass()->getTypeObject()?->id)
+                ->setNamespaceHomeSetId(static::getSystemHomeClass()->getSetObject()?->id)
+                ->setNamespaceName(static::getNamespaceName())
+                ->setNamespacePublicKey(static::getNamespacePublicKey())
+                ->setPublicElementId(static::getSystemPublicClass()->getElementObject()?->id)
+                ->setPrivateElementId(static::getSystemPrivateClass()->getElementObject()?->id)
+            ;
+
+            $sys_params->doParamsAndResponse();
+        } catch (\Exception $e) {
+            throw new HexbatchInitException('[makeNamespace] '.$e->getMessage(),$e->getCode(),null,$e);
+        }
+
     }
 
 
