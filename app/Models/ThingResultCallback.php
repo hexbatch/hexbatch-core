@@ -12,26 +12,22 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * this stores the user getting back the api info, as well as the outgoing and incoming remotes
- * when an api call is made, a row is created here to handle the results being printed out, or the polling, or pushing to a url
- * multiple results can be made for the same thing, in particular for debugging
- * todo @see IApiThingResult to have a reference here to read the action call result
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int owner_thing_id
-
- * @property int result_hex_error_id
- * @property int result_http_status
- * @property ArrayObject result_response
+ * @property int thing_result_id
+ * @property int caller_namespace_id
+ * @property int http_code_callback
+ * @property TypeThingCallbackStatus thing_callback_status
+ * @property string result_callback_url
  *
  *  @property string created_at
  *  @property string updated_at
  */
-class ThingResult extends Model
+class ThingResultCallback extends Model
 {
 
-    protected $table = 'thing_results';
+    protected $table = 'thing_result_callbacks';
     public $timestamps = false;
 
     /**
@@ -54,7 +50,7 @@ class ThingResult extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'result_response' => AsArrayObject::class,
+        'thing_callback_status' => TypeThingCallbackStatus::class,
     ];
 
 }

@@ -11,6 +11,7 @@ enum TypeOfThingDataSource : string {
   case FROM_ACTION_SETUP = 'from_action_setup';
   case FROM_API_SETUP = 'from_api_setup';
   case RUN_TIME_DATA = 'run_time_data';
+  case CALLER_INFO = 'caller_info';
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfThingDataSource {
         $maybe  = TypeOfThingDataSource::tryFrom($test);

@@ -92,7 +92,13 @@ return new class extends Migration
         });
 
         DB::statement("CREATE TYPE type_of_thing_data_source AS ENUM (
-            'not_set','from_children', 'from_current', 'run_time_data','from_action_setup','from_api_setup');");
+                'not_set',
+                'caller_info',
+                'from_children',
+                'from_current',
+                'run_time_data',
+                'from_action_setup',
+                'from_api_setup');");
 
         DB::statement("ALTER TABLE thing_data Add COLUMN thing_data_source type_of_thing_data_source NOT NULL default 'not_set';");
 

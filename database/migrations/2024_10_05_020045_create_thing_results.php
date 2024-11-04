@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('thing_results', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('result_thing_id')
+            $table->foreignId('owner_thing_id')
                 ->nullable(false)
                 ->comment("Results belong to this thing")
                 ->index()
@@ -23,14 +23,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('result_to_namespace_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The namespace getting the result")
-                ->index()
-                ->constrained('user_namespaces')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
+
 
             $table->foreignId('result_hex_error_id')
                 ->nullable()
@@ -41,30 +34,21 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+
+            $table->integer('result_http_status')->nullable()->default(null)
+                ->comment('if not set, then incomplete, else the code for the finished work');
+
             $table->timestamps();
-
-            $table->integer('result_callback_status')->nullable()->default(null)
-                ->comment('When the callback was made, what was the code returned. ".
-                "Use http codes for polling that is done before or after the thing finishes');
-
 
         });
 
-        DB::statement("CREATE TYPE type_api_followup AS ENUM (
-            'no_followup',
-            'direct_followup',
-            'polled_followup',
-            'followup_callback_successful',
-            'followup_callback_error'
-            );");
 
-        DB::statement("ALTER TABLE thing_results Add COLUMN user_followup type_api_followup NOT NULL default 'no_followup';");
+
+
 
 
         Schema::table('thing_results', function (Blueprint $table) {
 
-            $table->string('result_callback_url')->nullable()->default(null)
-                ->comment('If set, this will be called with the result or error');
 
             //(determined by class that gathers this thing and makes response)
             $table->jsonb('result_response')
@@ -85,6 +69,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('thing_results');
-        DB::statement("DROP TYPE type_api_followup;");
+
     }
 };
