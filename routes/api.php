@@ -474,17 +474,9 @@ Route::prefix('v1')->group(function () {
   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
  / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
 `-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
-todo Route optional parameters
-
-  many api calls (not design, not user, many debugging thing) can take as an optional param a path or array of paths!
-    * a path returning compatible things to the api call (a path returning elements for set operations, or ns tokens for ns operations or things for that...)
-    * an array of paths connected by logic (0 if no matches, 1 if match(s) )
-       * This allows rate limiting later by the other layers
-       * only the last path (the one executing last on the left) will return its results to the api call parameters
-       * the path on the right will search first, the next path to its left only goes if there is a match on the right neighbor
-       * no fucking trees
-
-  all thing routes (most api calls) also take an optional thing setting (or its json), to set the limits on the thing for that call
+todo Route optional parameter: all thinger api calls can take as an optional path param
+    * the path if given must return exists for at least one result
+    * This allows rate limiting later by the other layers
 
  */
 
