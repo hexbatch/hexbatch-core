@@ -18,7 +18,7 @@ use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
  * Master can be used after publishing @uses TypePublish
  *
  */
-class SemaphoreMasterCreate extends Act\Cmd
+class SemaphoreMasterCreate extends Act\Cmd\Wa
 {
     const UUID = 'e6bf1d5c-0bf3-440c-8e29-9f18cee4d409';
     const ACTION_NAME = TypeOfAction::CMD_SEMAPHORE_MASTER_CREATE;

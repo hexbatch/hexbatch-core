@@ -13,7 +13,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * No data changed
  */
 
-class DesignRuleTest extends Act\Cmd
+class DesignRuleTest extends Act\Cmd\Ds
 {
     const UUID = 'b568c6ea-842c-4dfa-994f-2ebbc7608d49';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_RULE_TEST;

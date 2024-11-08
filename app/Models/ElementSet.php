@@ -138,6 +138,6 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
     }
 
     public function addElement(Element $ele,bool $events) : ElementSetMember {
-        return new ElementSetMember(); //todo make code to add in the element to the set
+        return new ElementSetMember(); //todo make code to add in the element to the set, include the element_values and related
     }
 }

@@ -11,11 +11,14 @@ class RefCodes {
     const TIMEZONE_ISSUE = 7;
     const JSON_PATH_ISSUE = 8;
     const GEO_JSON_ISSUE = 9;
+    const INVALID_UUID = 10;
+    const INVALID_TIME = 11;
 
     const SHAPE_COORDINATE_ISSUE = 12;
 
     //servers start at 500
     const SERVER_NOT_FOUND = 500;
+    const SERVER_SCHEMA_ISSUE = 502;
 
 
     const RESOURCE_CANNOT_DELETE_IN_USE = 510;
@@ -98,6 +101,7 @@ class RefCodes {
 
     //sets start at 9000
     const SET_NOT_FOUND =  9001;
+    const SET_SCHEMA_ISSUE =  9002;
 
     // paths start at 10000
     const PATH_NOT_FOUND =  10001;
@@ -112,6 +116,8 @@ class RefCodes {
         self::TIMEZONE_ISSUE => '',
         self::JSON_PATH_ISSUE => '',
         self::GEO_JSON_ISSUE => '',
+        self::INVALID_UUID => '',
+        self::INVALID_TIME => '',
 
         self::SERVER_NOT_FOUND => '',
         self::RESOURCE_CANNOT_DELETE_IN_USE => '',
@@ -172,6 +178,7 @@ class RefCodes {
         self::ELEMENT_BAD_SCHEMA => '',
 
         self::SET_NOT_FOUND => '',
+        self::SET_SCHEMA_ISSUE => '',
 
         self::PATH_NOT_FOUND => '',
         self::PATH_CANNOT_EDIT => '',

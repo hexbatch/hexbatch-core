@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\NS\ThisServer;
+namespace App\Sys\Res\Types\Stk\Root\NsSysTypes;
 
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\Stk\SystemNS\SystemHandleElement;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Namespace\BasePerNamespace;
 
-class ThisServerNS extends BaseType
+class ThisNsType extends BaseType
 {
     const TYPE_NAME = 'system_namespace';
 

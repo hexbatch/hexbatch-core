@@ -13,7 +13,7 @@ use App\Sys\Res\Types\Stk\Root\Evt\Server\TypePublished;
  * are given the event of @see TypePublished and all must agree
  *
  */
-class TypePublish extends Act\Cmd
+class TypePublish extends Act\Cmd\Ty
 {
     const UUID = 'af28da1b-b148-4cbf-a53f-ccaf641373ea';
     const ACTION_NAME = TypeOfAction::CMD_TYPE_PUBLISH;

@@ -9,15 +9,15 @@ use App\Sys\Res\Ele\Stk\SystemNS\SystemPrivateElement;
 use App\Sys\Res\Namespaces\BaseNamespace;
 use App\Sys\Res\Servers\Stock\ThisServer;
 use App\Sys\Res\Sets\Stock\SystemHomeSet;
-use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
+use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 
 /**
  * @see ThisServer
  */
-class ThisServerNamespace extends BaseNamespace
+class ThisNamespace extends BaseNamespace
 {
 
-    const TYPE_CLASS = ThisServerNS::class;
+    const TYPE_CLASS = ThisNsType::class;
     const PUBLIC_ELEMENT_CLASS = SystemNSPublicElement::class;
     const PRIVATE_ELEMENT_CLASS = SystemPrivateElement::class;
     const HOMESET_CLASS = SystemHomeSet::class;

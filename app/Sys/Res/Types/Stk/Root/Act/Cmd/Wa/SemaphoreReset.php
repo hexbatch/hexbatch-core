@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreResetMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class SemaphoreReset extends Act\Cmd
+class SemaphoreReset extends Act\Cmd\Wa
 {
     const UUID = '1b178a4d-885e-4dc0-a8f8-caff0d8cd572';
     const ACTION_NAME = TypeOfAction::CMD_SEMAPHORE_RESET;

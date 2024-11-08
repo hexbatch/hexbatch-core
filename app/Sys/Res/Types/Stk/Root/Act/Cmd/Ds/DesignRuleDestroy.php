@@ -10,7 +10,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * Remove a single rule or subtree tree from the attribute, rule if a leaf, subtree if this is a root of more
  */
 
-class DesignRuleDestroy extends Act\Cmd
+class DesignRuleDestroy extends Act\Cmd\Ds
 {
     const UUID = '49d036b2-9f53-4fad-afed-b7d628ac060c';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_RULE_DESTROY;

@@ -23,7 +23,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  *  if the live has a less derived attribute, then it will filter the attribute it is an ancestor of
  *   the filter chain order is the applied live order
  */
-class LiveTypeAdd extends Act\Cmd
+class LiveTypeAdd extends Act\Cmd\Ele
 {
     const UUID = '06ffa538-2d8d-460b-922e-e04efe73194e';
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_ADD;

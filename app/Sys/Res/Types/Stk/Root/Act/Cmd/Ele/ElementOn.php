@@ -8,7 +8,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ElementOn extends Act\Pragma
+class ElementOn extends Act\Cmd\Ele
 {
     const UUID = 'bdee0c46-7428-49ed-acc3-e20d96447ca1';
     const ACTION_NAME = TypeOfAction::PRAGMA_ELEMENT_ON;

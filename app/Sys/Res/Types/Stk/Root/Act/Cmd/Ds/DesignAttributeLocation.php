@@ -11,7 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * Can be given another attribute to copy the location from
  *
  */
-class DesignAttributeLocation extends Act\Cmd
+class DesignAttributeLocation extends Act\Cmd\Ds
 {
     const UUID = 'f5fb2d65-4f47-4976-803d-8edda67ed43f';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_ATTRIBUTE_LOCATION;

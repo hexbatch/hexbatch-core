@@ -46,6 +46,7 @@ class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn
                         if (count($params->getUuid())) {
                             $ele->ref_uuid = $params->getUuid()[$uuid_index++]??null;
                         }
+                        $ele->save();
                         $this->generated_elements[] = $ele;
                         /** @type ElementSet $set */
                         $set = ElementSet::buildSet(id:$set_id)->first();

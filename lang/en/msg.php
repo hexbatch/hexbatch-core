@@ -16,6 +16,10 @@ return [
     'not_timezone' => 'The value is not a timezone',
     'invalid_json_path' => 'The json path is not valid :ref',
     'invalid_enum' => 'Invalid enum: was given :ref but expect :enum_list',
+    'invalid_enum_type' => 'Invalid type of enum: was given :ref',
+    'invalid_uuid' => 'Invalid uuid: was given :ref',
+    'invalid_time' => 'Invalid time: was given :ref',
+
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
@@ -129,6 +133,7 @@ return [
 
     //sets
     'set_not_found' => 'Set not found using :ref',
+    'set_must_have_a_defining_element' => 'Set must have a defining element',
 
     //servers
     'server_not_found' => "Server not found using :ref",

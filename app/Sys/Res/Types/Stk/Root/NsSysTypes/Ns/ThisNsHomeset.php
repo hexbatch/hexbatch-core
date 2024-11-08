@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNs;
+namespace App\Sys\Res\Types\Stk\Root\NsSysTypes\Ns;
 
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\Stk\SystemNS\SystemHandleElement;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
-use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
+use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 
 
-class ThisServerHomeset extends BaseType
+class ThisNsHomeset extends BaseType
 {
 
     public static function getClassUuid() : string {
@@ -25,7 +25,7 @@ class ThisServerHomeset extends BaseType
     const HANDLE_ELEMENT_CLASS = SystemHandleElement::class;
 
     const PARENT_CLASSES = [
-        ThisServerNS::class,
+        ThisNsType::class,
         HomeSet::class
     ];
 

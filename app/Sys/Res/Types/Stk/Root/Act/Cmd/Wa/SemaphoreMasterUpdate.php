@@ -11,7 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * Updates a waiting master to complete it (manual remotes)
  *
  */
-class SemaphoreMasterUpdate extends Act\Cmd
+class SemaphoreMasterUpdate extends Act\Cmd\Wa
 {
     const UUID = '185796a2-b8e7-4041-84bd-33e4bca683b8';
     const ACTION_NAME = TypeOfAction::CMD_SEMAPHORE_MASTER_UPDATE;

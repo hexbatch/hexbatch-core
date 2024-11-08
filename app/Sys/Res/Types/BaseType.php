@@ -3,13 +3,10 @@
 namespace App\Sys\Res\Types;
 
 
-use App\Api\Cmd\Design\Promote\DesignPromoteParams;
-use App\Api\Cmd\Design\Promote\DesignPromoteResponse;
 use App\Api\Cmd\Design\Promote\SetupForSystem;
+use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementType;
-use App\Sys\Build\ActionMapper;
-use App\Sys\Build\BuildActionFacet;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemElements;
 use App\Sys\Collections\SystemNamespaces;
@@ -19,17 +16,16 @@ use App\Sys\Res\Atr\ISystemAttribute;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
+use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Servers\Stock\ThisServer;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromotion;
 
 abstract class BaseType implements ISystemType
 {
     protected ?ElementType $type;
 
     const UUID = '';
-    const NAMESPACE_CLASS = ThisServerNamespace::class;
+    const NAMESPACE_CLASS = ThisNamespace::class;
 
     const HANDLE_ELEMENT_CLASS = '';
     const SERVER_CLASS = ThisServer::class;
@@ -50,9 +46,9 @@ abstract class BaseType implements ISystemType
         return SystemServers::getServerByUuid(static::SERVER_CLASS);
     }
 
-    public function makeType() :?ElementType
+    public function makeType() :ElementType
    {
-
+        if ($this->type) {return $this->type;}
         try
         {
             $sys_params = new SetupForSystem;
@@ -60,22 +56,12 @@ abstract class BaseType implements ISystemType
                ->setUuid(static::getClassUuid())
                ->setTypeName(static::getClassTypeName())
                ->setSystem(true)
+                ->setNamespaceId(static::getTypeNamespaceClass()->getNamespaceObject()?->id)
+                ->setServerId(static::getTypeServerClass()->getServerObject()?->id)
+                ->setLifecycle(TypeOfLifecycle::PUBLISHED)
                ->setFinalType(static::IS_FINAL);
 
-
-            /**
-            * @var DesignPromoteParams $promo_params
-            */
-            $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,DesignPromotion::getClassUuid());
-            $promo_params->fromCollection($sys_params->makeCollection());
-
-            /**
-            * @type DesignPromoteResponse $promo_work
-            */
-            $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,DesignPromotion::getClassUuid());
-
-            $promo_results = $promo_work::doWork($promo_params);
-            return $promo_results->getGeneratedType();
+            return $sys_params->doParamsAndResponse();
 
        } catch (\Exception $e) {
             throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
@@ -190,6 +176,8 @@ abstract class BaseType implements ISystemType
     }
 
     public static function getClassTypeName() :string { return static::TYPE_NAME; }
+    public static function getTypeNamespaceClass() :string|ISystemNamespace { return static::NAMESPACE_CLASS; }
+    public static function getTypeServerClass() :string|ISystemServer { return static::SERVER_CLASS; }
     public function isFinal(): bool { return false; }
 
 

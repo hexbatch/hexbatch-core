@@ -6,22 +6,18 @@ namespace App\Sys\Res\Ele;
 
 use App\Api\Cmd\Element\Promote\EleForSystem;
 use App\Api\Cmd\Element\Promote\ElementPromoteParams;
-use App\Api\Cmd\Element\Promote\ElementPromoteResponse;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\ElementValue;
-use App\Sys\Build\ActionMapper;
-use App\Sys\Build\BuildActionFacet;
 use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\INamespace;
 use App\Sys\Res\Namespaces\ISystemNamespace;
+use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Types\ISystemType;
 use App\Sys\Res\Types\IType;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPromote;
-use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNS;
 
 
 class BaseElement implements ISystemElement
@@ -33,7 +29,7 @@ class BaseElement implements ISystemElement
     const UUID = '';
     const TYPE_CLASS = '';
     const PHASE_CLASS = '';
-    const NAMESPACE_CLASS = ThisServerNS::class;
+    const NAMESPACE_CLASS = ThisNamespace::class;
 
     public static function getClassUuid() : string {
         return static::UUID;
@@ -43,13 +39,14 @@ class BaseElement implements ISystemElement
 
     public function makeElement() :Element
    {
+       if ($this->element) {return $this->element;}
        try
        {
            $sys_params = new EleForSystem;
            $sys_params
                ->setDestinationSetIds([ElementPromoteParams::NO_SETS_MADE_YET_STUB_ID])
                ->setNsOwnerIds([static::getSystemNamespaceClass()->getNamespaceObject()->id])
-               ->setParentTypeId(static::getSystemType()->getTypeObject()->id)
+               ->setParentTypeId(static::getSystemTypeClass()->getTypeObject()->id)
                ->setPhaseId(null)
                ->setNumberPerSet(1)
                ->setUuids([static::getClassUuid()])
@@ -57,20 +54,7 @@ class BaseElement implements ISystemElement
            ;
 
 
-           /**
-            * @var ElementPromoteParams $promo_params
-            */
-           $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,ElementPromote::getClassUuid());
-           $promo_params->fromCollection($sys_params->makeCollection());
-
-           /**
-            * @type ElementPromoteResponse $promo_work
-            */
-           $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,ElementPromote::getClassUuid());
-
-           /** @var ElementPromoteResponse $promo_results */
-           $promo_results = $promo_work::doWork($promo_params);
-           return $promo_results->getGeneratedElements()[0];
+           return $sys_params->doParamsAndResponse();
 
        } catch (\Exception $e) {
            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);

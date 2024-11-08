@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\PhaseMoveTreeMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class PhaseMoveTree extends Act\Cmd
+class PhaseMoveTree extends Act\Cmd\Ph
 {
     const UUID = '417eb53e-1615-42c9-9bfc-4349bfb5daa9';
     const ACTION_NAME = TypeOfAction::CMD_PHASE_MOVE_TREE;

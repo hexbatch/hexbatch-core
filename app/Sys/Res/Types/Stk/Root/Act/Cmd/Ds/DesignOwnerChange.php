@@ -11,7 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * Change owner of a non-published type, no events raised
  *
  */
-class DesignOwnerChange extends Act\Cmd
+class DesignOwnerChange extends Act\Cmd\Ds
 {
     const UUID = '3baa3285-5dff-42b5-bd22-071ad39101db';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_OWNER_CHANGE;

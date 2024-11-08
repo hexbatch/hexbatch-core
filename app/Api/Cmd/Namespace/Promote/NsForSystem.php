@@ -2,25 +2,19 @@
 namespace App\Api\Cmd\Namespace\Promote;
 
 
+use App\Api\Cmd\Namespace\NamespaceParams;
 use App\Exceptions\HexbatchInitException;
 use App\Models\UserNamespace;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\BuildActionFacet;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespacePromote;
-use Illuminate\Support\Collection;
 
 class NsForSystem
 {
     use NamespaceParams;
 
 
-    public function makeCollection() : Collection {
-        $arr = [];
-        foreach ($this as $key => $val) {
-            $arr[$key] = $val;
-        }
-        return new Collection($arr);
-    }
+
 
     public function setNamespaceUserId(?int $namespace_user_id): NsForSystem
     {

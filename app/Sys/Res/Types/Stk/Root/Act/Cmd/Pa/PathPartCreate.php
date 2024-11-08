@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\PathPartCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class PathPartCreate extends Act\Cmd
+class PathPartCreate extends Act\Cmd\Pa
 {
     const UUID = 'e2fc566d-ba98-4852-9405-9482080b7efe';
     const ACTION_NAME = TypeOfAction::CMD_PATH_PART_CREATE;

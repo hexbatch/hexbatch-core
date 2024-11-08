@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\DesignOwnerPromoteMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class DesignOwnerPromote extends Act\Cmd
+class DesignOwnerPromote extends Act\Cmd\Ds
 {
     const UUID = '3feda9e3-e732-41b0-88c6-3d3f45e83bf4';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_OWNER_PROMOTE;

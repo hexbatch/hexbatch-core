@@ -30,7 +30,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->integer('member_rank')
+            $table->integer('member_rank') //todo add trigger to advance the rank in the new row
                 ->nullable(false)->default(0)
                 ->comment("orders the elements");
 

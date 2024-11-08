@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class NamespaceDestroy extends Act\Cmd
+class NamespaceDestroy extends Act\Cmd\Ns
 {
     const UUID = '0253a9c0-78db-4f8d-b648-7d2abd5ac47c';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_DESTROY;

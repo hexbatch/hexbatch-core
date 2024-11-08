@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\DesignEditMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class DesignEdit extends Act\Cmd
+class DesignEdit extends Act\Cmd\Ds
 {
     const UUID = '9f0285dc-0af5-4176-b82d-ac930d93b132';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_EDIT;

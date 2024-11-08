@@ -4,21 +4,16 @@ namespace App\Sys\Res\Atr;
 
 
 use App\Api\Cmd\Design\PromoteAttribute\APSetupForSystem;
-use App\Api\Cmd\Design\PromoteAttribute\AttributePromoteParams;
-use App\Api\Cmd\Design\PromoteAttribute\AttributePromoteResponse;
+use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\ElementValue;
 use App\Models\UserNamespace;
-use App\Sys\Build\ActionMapper;
-use App\Sys\Build\BuildActionFacet;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\ISystemType;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromotion;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromotion;
 
 
 abstract class BaseAttribute implements ISystemAttribute
@@ -47,8 +42,12 @@ abstract class BaseAttribute implements ISystemAttribute
          return static::ATTRIBUTE_NAME;
      }
 
-     public static function getTypeParentClass() :string {
+     public static function getClassOwningSystemType() :string|ISystemType {
          return static::TYPE_CLASS;
+     }
+
+    public static function getClassParentSystemAttribute() :string|ISystemAttribute {
+         return static::PARENT_ATTRIBUTE_CLASS;
      }
 
      public static function getName() :string { return static::ATTRIBUTE_NAME; }
@@ -91,29 +90,22 @@ abstract class BaseAttribute implements ISystemAttribute
 
     public function makeAttribute() :Attribute
    {
+       if ($this->attribute) {return $this->attribute;}
        try {
            $sys_params = new APSetupForSystem();
            $sys_params
                ->setUuid(static::getClassUuid())
                ->setAttributeName(static::getClassAttributeName())
+               ->setOwnerElementTypeId(static::getClassOwningSystemType())
+               ->setParentAttributeId(static::getClassParentSystemAttribute())
+               ->setDesignAttributeId(null)
                ->setFinal(static::IS_FINAL)
                ->setAbstract(static::IS_ABSTRACT)
                ->setSeenByChild(static::IS_SEEN_BY_CHILDREN_TYPES)
+               ->setAttributeApproval(TypeOfApproval::PUBLISHING_APPROVED)
                ->setSystem(true);
 
-           /**
-            * @var AttributePromoteParams $promo_params
-            */
-           $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,DesignAttributePromotion::getClassUuid());
-           $promo_params->fromCollection($sys_params->makeCollection());
-
-           /**
-            * @type AttributePromoteResponse $promo_work
-            */
-           $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,DesignPromotion::getClassUuid());
-
-           $promo_results = $promo_work::doWork($promo_params);
-           return $promo_results->getGeneratedAttribute();
+           return $sys_params->doParamsAndResponse();
        } catch (\Exception $e) {
             throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
        }

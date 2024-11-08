@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\AttributeHandleRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class AttributeHandleRemove extends Act\Cmd
+class AttributeHandleRemove extends Act\Cmd\Ty
 {
     const UUID = '3618e198-e428-45ac-94e7-7aac4d1e8f85';
     const ACTION_NAME = TypeOfAction::CMD_ATTRIBUTE_HANDLE_REMOVE;

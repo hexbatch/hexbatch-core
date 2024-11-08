@@ -7,9 +7,9 @@ use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\Attribute;
 use App\Models\Thing;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromotion;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromote;
 
-class AttributePromoteResponse extends DesignAttributePromotion implements IActionWorkReturn,IActionOaResponse,IActionWorker
+class AttributePromoteResponse extends DesignAttributePromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
 {
 
     public function __construct(

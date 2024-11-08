@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class SetMemberAdd extends Act\Cmd
+class SetMemberAdd extends Act\Cmd\St
 {
     const UUID = 'ebd1275e-ecc6-486e-89cb-69e14ae4a44c';
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_ADD;

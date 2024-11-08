@@ -1,6 +1,10 @@
 <?php
 namespace App\Api\Cmd\Element\Promote;
 
+use App\Models\Element;
+use App\Sys\Build\ActionMapper;
+use App\Sys\Build\BuildActionFacet;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPromote;
 use Illuminate\Support\Collection;
 
 class EleForSystem
@@ -61,6 +65,25 @@ class EleForSystem
         return $this;
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function doParamsAndResponse() :Element {
+        /**
+         * @var ElementPromoteParams $promo_params
+         */
+        $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,ElementPromote::getClassUuid());
+        $promo_params->fromCollection($this->makeCollection());
+
+        /**
+         * @type ElementPromoteResponse $promo_work
+         */
+        $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,ElementPromote::getClassUuid());
+
+        /** @var ElementPromoteResponse $promo_results */
+        $promo_results = $promo_work::doWork($promo_params);
+        return $promo_results->getGeneratedElements()[0];
+    }
 
 
 }

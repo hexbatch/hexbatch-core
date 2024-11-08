@@ -11,7 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  *
  * /
  */
-class DesignLocation extends Act\Cmd
+class DesignLocation extends Act\Cmd\Ds
 {
     const UUID = '6d695135-cecb-4dc7-8868-0b68f31bb065';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION;

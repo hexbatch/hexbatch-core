@@ -14,7 +14,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * even if up-set removed later
  */
 
-class LiveTypeRemove extends Act\Cmd
+class LiveTypeRemove extends Act\Cmd\Ele
 {
     const UUID = '17abdda3-294c-4e2b-8cfc-ece90178b097';
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_REMOVE;

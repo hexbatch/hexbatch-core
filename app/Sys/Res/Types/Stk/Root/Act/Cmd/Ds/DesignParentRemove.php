@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\DesignParentRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class DesignParentRemove extends Act\Cmd
+class DesignParentRemove extends Act\Cmd\Ds
 {
     const UUID = 'bf333396-fdcc-45ac-977c-2a9be8f9840c';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_REMOVE;

@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Sets;
 
 
+use App\Api\Cmd\Set\Promote\SetForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementSet;
 use App\Sys\Collections\SystemElements;
@@ -16,6 +17,7 @@ use App\Sys\Res\ISystemResource;
      const UUID = '';
 
     const ELEMENT_CLASS = '';
+    const HAS_EVENTS = true;
 
     const CONTAINING_ELEMENT_CLASSES = [
 
@@ -27,7 +29,7 @@ use App\Sys\Res\ISystemResource;
          return static::UUID;
      }
 
-     public static function hasEvents() :bool { return true;}
+     public static function hasEvents() :bool { return static::HAS_EVENTS;}
 
      public static function getDefiningSystemElementClass() :string|ISystemElement {
          return static::ELEMENT_CLASS;
@@ -60,12 +62,25 @@ use App\Sys\Res\ISystemResource;
       */
     public function makeSet() :ElementSet
    {
-       try {
-           //todo use the normal action to create element and add to set (so make this, then pass this to the system element method to create)
-           $set = new ElementSet();
-           return $set;
+       if ($this->set) {return $this->set;}
+       try
+       {
+           $element_ids = [];
+           foreach (static::getMemberSystemElementClasses() as $some_element_class) {
+               $element_ids[] = $some_element_class->getElementObject()?->id;
+           }
+           $sys_params = new SetForSystem();
+           $sys_params
+               ->setUuid(static::getClassUuid())
+               ->setParentSetElementId(static::getDefiningSystemElementClass()->getElementObject()?->id)
+               ->setHasEvents(static::hasEvents())
+               ->setContentElementIds($element_ids)
+              ;
+
+           return $sys_params->doParamsAndResponse();
+
        } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+           throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
        }
    }
 

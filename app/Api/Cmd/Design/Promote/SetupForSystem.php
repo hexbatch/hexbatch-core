@@ -1,33 +1,17 @@
 <?php
 namespace App\Api\Cmd\Design\Promote;
 
+use App\Api\Cmd\Design\DesignParams;
 use App\Enums\Types\TypeOfLifecycle;
-use Illuminate\Support\Collection;
+use App\Models\ElementType;
+use App\Sys\Build\ActionMapper;
+use App\Sys\Build\BuildActionFacet;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromote;
 
 class SetupForSystem
 {
-    protected ?int $namespace_id = null;
-    protected ?int $server_id = null;
+    use DesignParams;
 
-    protected ?string $uuid = null;
-
-    protected ?string $type_name = null;
-    protected bool $system = true;
-    protected bool $final_type = false;
-
-    protected TypeOfLifecycle $lifecycle = TypeOfLifecycle::PUBLISHED;
-
-    public function makeCollection() : Collection {
-        return new Collection([
-            'namespace_id' => $this->namespace_id,
-            'server_id' => $this->server_id,
-            'uuid' => $this->uuid,
-            'type_name' => $this->type_name,
-            'system' => $this->system,
-            'final_type' => $this->final_type,
-            'lifecycle' => $this->lifecycle->value,
-        ]);
-    }
 
     public function setNamespaceId(?int $namespace_id): SetupForSystem
     {
@@ -71,5 +55,20 @@ class SetupForSystem
         return $this;
     }
 
+    public function doParamsAndResponse()  :ElementType {
+        /**
+         * @var DesignPromoteParams $promo_params
+         */
+        $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,DesignPromote::getClassUuid());
+        $promo_params->fromCollection($this->makeCollection());
+
+        /**
+         * @type DesignPromoteResponse $promo_work
+         */
+        $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,DesignPromote::getClassUuid());
+
+        $promo_results = $promo_work::doWork($promo_params);
+        return $promo_results->getGeneratedType();
+    }
 
 }

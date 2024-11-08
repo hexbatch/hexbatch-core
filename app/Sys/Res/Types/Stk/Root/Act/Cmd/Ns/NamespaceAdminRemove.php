@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceAdminRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class NamespaceAdminRemove extends Act\Cmd
+class NamespaceAdminRemove extends Act\Cmd\Ns
 {
     const UUID = '4866a48c-c541-4f61-b38e-9c592f6da71b';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_ADMIN_REMOVE;

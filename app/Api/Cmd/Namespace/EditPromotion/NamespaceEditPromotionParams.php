@@ -3,7 +3,7 @@ namespace App\Api\Cmd\Namespace\EditPromotion;
 
 use App\Api\Cmd\IActionOaInput;
 use App\Api\Cmd\IActionParams;
-use App\Api\Cmd\Namespace\Promote\NamespaceParams;
+use App\Api\Cmd\Namespace\NamespaceParams;
 use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespaceEditPromotion;
 

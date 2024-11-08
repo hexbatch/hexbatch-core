@@ -11,7 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  *
  * /
  */
-class DesignLocationTest extends Act\Cmd
+class DesignLocationTest extends Act\Cmd\Ds
 {
     const UUID = 'f26dcdcb-09e4-41df-b435-3e7b106c6282';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION_TEST;

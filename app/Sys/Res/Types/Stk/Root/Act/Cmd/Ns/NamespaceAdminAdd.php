@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceAdminAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class NamespaceAdminAdd extends Act\Cmd
+class NamespaceAdminAdd extends Act\Cmd\Ns
 {
     const UUID = '14c0b718-0423-4fba-8d93-65a80eb184c5';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_ADMIN_ADD;

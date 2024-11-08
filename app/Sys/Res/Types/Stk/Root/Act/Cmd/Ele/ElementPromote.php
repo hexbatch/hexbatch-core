@@ -18,7 +18,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  *
  */
 
-class ElementPromote extends Act\Cmd
+class ElementPromote extends Act\Cmd\Ele
 {
     const UUID = 'e9a6494a-bae5-4fcb-9e4a-9aea86a3dfef';
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PROMOTE;

@@ -5,13 +5,15 @@ namespace App\Sys\Res\Servers\Stock;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Collections\SystemServers;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
+use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Servers\BaseServer;
+use App\Sys\Res\Types\Stk\Root\NsSysTypes\Server\ThisServerType;
 
 
 class ThisServer extends BaseServer {
 
-    const NAMESPACE_CLASS = ThisServerNamespace::class;
+    const NAMESPACE_CLASS = ThisNamespace::class;
+    const SERVER_TYPE_CLASS = ThisServerType::class;
 
     public static function getClassUuid() : string {
         $name = config('hbc.system.server.uuid');

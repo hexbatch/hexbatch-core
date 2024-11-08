@@ -15,7 +15,7 @@ use App\Sys\Res\Types\Stk\Root\Evt;
  * empty results, or 0 for integer returns, or not exist : is false to the parent, otherwise true for parent logic
  *
  */
-class Search extends Act\Pragma
+class Search extends Act\Cmd\Ele
 {
     const UUID = '5b8ff68a-8748-4323-8088-04a8e6fa73fc';
     const ACTION_NAME = TypeOfAction::PRAGMA_SEARCH;

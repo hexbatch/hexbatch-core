@@ -5,7 +5,7 @@ namespace App\Sys\Res\Ele\Stk\SystemNS;
 
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\BaseElement;
-use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNs\ThisServerHomeset;
+use App\Sys\Res\Types\Stk\Root\NsSysTypes\Ns\ThisNsHomeset;
 
 class SystemHomeSetElement extends BaseElement
 {
@@ -17,7 +17,7 @@ class SystemHomeSetElement extends BaseElement
         return $name;
     }
 
-    const TYPE_CLASS = ThisServerHomeset::class;
+    const TYPE_CLASS = ThisNsHomeset::class;
 
 }
 

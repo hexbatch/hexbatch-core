@@ -1,5 +1,7 @@
 <?php
 namespace App\Enums\Server;
+use Illuminate\Support\Collection;
+
 /**
  * postgres enum type_of_server_status
  */
@@ -18,6 +20,24 @@ enum TypeOfServerStatus : string {
             throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
         }
         return $maybe;
+    }
+
+    public static function getFromCollection(Collection $collection,string $param_name)
+    :?TypeOfServerStatus
+    {
+        if ($collection->has($param_name)) {
+            $testy = $collection->get($param_name);
+            if (empty($testy)) {return null;}
+
+            if (is_string($testy)) {
+                return TypeOfServerStatus::tryFromInput($testy);
+            } elseif ($testy instanceof TypeOfServerStatus) {
+                return  $testy;
+            } else {
+                throw new \InvalidArgumentException(__("msg.invalid_enum_type",['ref'=>$testy,'enum'=>self::class]));
+            }
+        }
+        return null;
     }
 
 }

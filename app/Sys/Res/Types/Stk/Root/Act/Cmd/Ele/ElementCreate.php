@@ -28,7 +28,7 @@ use App\Sys\Res\Types\Stk\Root\Evt\Type\ElementOwnerChangeBatch;
  *
  */
 
-class ElementCreate extends Act\Cmd
+class ElementCreate extends Act\Cmd\Ele
 {
     const UUID = 'c21c5d03-685f-467b-afce-3ec449197eda';
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CREATE;

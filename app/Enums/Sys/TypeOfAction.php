@@ -24,6 +24,7 @@ enum TypeOfAction: string
 
     case BASE_NAMESPACE = 'base_namespace';
     case BASE_ELSEWHERE = 'base_elsewhere';
+    case BASE_SERVER = 'base_server';
     case BASE_ELEMENT = 'base_element';
     case BASE_DESIGN = 'base_design';
     case BASE_PATH = 'base_path';
@@ -62,7 +63,7 @@ enum TypeOfAction: string
 
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
-    case CMD_DESIGN_PROMOTION = 'cmd_design_promotion';
+    case CMD_DESIGN_PROMOTE = 'cmd_design_promote';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
     case CMD_DESIGN_PURGE = 'cmd_design_purge';
 
@@ -77,7 +78,7 @@ enum TypeOfAction: string
 
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
-    case CMD_DESIGN_ATTRIBUTE_PROMOTION = 'cmd_design_attribute_promotion';
+    case CMD_DESIGN_ATTRIBUTE_PROMOTE = 'cmd_design_attribute_promote';
     case CMD_DESIGN_ATTRIBUTE_DESTROY = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
     case CMD_DESIGN_ATTRIBUTE_LOCATION = 'cmd_design_attribute_location';
@@ -130,9 +131,8 @@ enum TypeOfAction: string
     case CMD_PATH_PART_TEST = 'cmd_path_part_test';
 
 
-
-
     case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
+    case CMD_SET_PROMOTE = 'cmd_set_promote'; //child set or top level set
     case CMD_SET_DESTROY = 'cmd_set_destroy'; //if ns-admin of definer element of set ns
 
     case CMD_SET_EMPTY = 'cmd_set_empty'; //non sticky stuff
@@ -203,6 +203,10 @@ enum TypeOfAction: string
     case CMD_SEMAPHORE_MASTER_CREATE = 'cmd_semaphore_master_create';
     case CMD_SEMAPHORE_MASTER_RUN = 'cmd_semaphore_master_run';
     case CMD_SEMAPHORE_MASTER_UPDATE = 'cmd_semaphore_master_update';
+
+    case CMD_SERVER_PROMOTE = 'cmd_server_promote';
+    case CMD_SERVER_EDIT = 'cmd_server_edit';
+    case CMD_SERVER_SHOW = 'cmd_server_show';
 
 
     //server to server

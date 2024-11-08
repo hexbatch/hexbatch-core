@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\ReadMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
-class Read extends Act\Pragma
+class Read extends Act\Cmd\Ele
 {
     const UUID = '6280f4c3-f2de-49c1-8b4e-5f3e7aab008c';
     const ACTION_NAME = TypeOfAction::PRAGMA_READ;

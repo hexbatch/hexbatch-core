@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\LinkRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class LinkRemove extends Act\Cmd
+class LinkRemove extends Act\Cmd\Ele
 {
     const UUID = 'c0f2f5b9-3030-4e60-9bd0-742299a6b83b';
     const ACTION_NAME = TypeOfAction::CMD_LINK_REMOVE;

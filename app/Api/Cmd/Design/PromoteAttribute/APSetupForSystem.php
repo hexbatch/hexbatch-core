@@ -2,6 +2,11 @@
 namespace App\Api\Cmd\Design\PromoteAttribute;
 
 use App\Enums\Types\TypeOfApproval;
+use App\Models\Attribute;
+use App\Sys\Build\ActionMapper;
+use App\Sys\Build\BuildActionFacet;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromote;
 use Illuminate\Support\Collection;
 
 class APSetupForSystem
@@ -96,6 +101,20 @@ class APSetupForSystem
     }
 
 
+    public function doParamsAndResponse() :Attribute {
+        /**
+         * @var AttributePromoteParams $promo_params
+         */
+        $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,DesignAttributePromote::getClassUuid());
+        $promo_params->fromCollection($this->makeCollection());
 
+        /**
+         * @type AttributePromoteResponse $promo_work
+         */
+        $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,DesignPromote::getClassUuid());
+
+        $promo_results = $promo_work::doWork($promo_params);
+        return $promo_results->getGeneratedAttribute();
+    }
 
 }

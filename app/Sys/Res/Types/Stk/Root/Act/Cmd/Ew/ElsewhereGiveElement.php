@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereGiveElementMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class ElsewhereGiveElement extends Act\Cmd
+class ElsewhereGiveElement extends Act\Cmd\Ew
 {
     const UUID = 'b916d43d-6573-4d94-84e7-f634c227af91';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_GIVE_ELEMENT;

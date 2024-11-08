@@ -11,7 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * Runs a published master
  *
  */
-class SemaphoreMasterRun extends Act\Cmd
+class SemaphoreMasterRun extends Act\Cmd\Wa
 {
     const UUID = 'd5895d42-9383-4d4d-9e45-ce7d5c0c5580';
     const ACTION_NAME = TypeOfAction::CMD_SEMAPHORE_MASTER_RUN;

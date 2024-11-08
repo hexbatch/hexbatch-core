@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\PathPartTestMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class PathPartTest extends Act\Cmd
+class PathPartTest extends Act\Cmd\Pa
 {
     const UUID = '6fe4e299-be8c-4d45-b19a-31ffaebf21ad';
     const ACTION_NAME = TypeOfAction::CMD_PATH_PART_TEST;

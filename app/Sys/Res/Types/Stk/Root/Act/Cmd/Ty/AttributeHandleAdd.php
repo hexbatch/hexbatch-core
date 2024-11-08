@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\AttributeHandleAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class AttributeHandleAdd extends Act\Cmd
+class AttributeHandleAdd extends Act\Cmd\Ty
 {
     const UUID = '8a3fbc96-6772-493e-937d-e0306fa46fbc';
     const ACTION_NAME = TypeOfAction::CMD_ATTRIBUTE_HANDLE_ADD;

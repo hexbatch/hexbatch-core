@@ -10,12 +10,12 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\Thing;
 use App\Rules\AttributeNameReq;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromotion;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromote;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-class AttributePromoteParams extends DesignAttributePromotion implements IActionParams,IActionOaInput
+class AttributePromoteParams extends DesignAttributePromote implements IActionParams,IActionOaInput
 {
 
     protected ?int $owner_element_type_id = null;

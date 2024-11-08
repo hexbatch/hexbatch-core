@@ -10,7 +10,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * Add a single live rule to the type
  */
 
-class DesignRequirementAdd extends Act\Cmd
+class DesignRequirementAdd extends Act\Cmd\Ds
 {
     const UUID = '90733796-1184-4cac-9661-044f257eadd7';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_REQUIREMENT_ADD;

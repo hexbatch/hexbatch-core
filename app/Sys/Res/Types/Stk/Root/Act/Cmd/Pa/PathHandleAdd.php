@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\PathHandleAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class PathHandleAdd extends Act\Cmd
+class PathHandleAdd extends Act\Cmd\Pa
 {
     const UUID = 'e39d9974-0cba-4366-aace-0e06bbcf629e';
     const ACTION_NAME = TypeOfAction::CMD_PATH_HANDLE_ADD;

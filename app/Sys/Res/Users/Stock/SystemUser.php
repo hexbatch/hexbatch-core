@@ -4,13 +4,13 @@ namespace App\Sys\Res\Users\Stock;
 
 
 use App\Exceptions\HexbatchInitException;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
+use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Users\BaseSystemUser;
 
 class SystemUser extends BaseSystemUser
 {
 
-    const NAMESPACE_CLASS = ThisServerNamespace::class;
+    const NAMESPACE_CLASS = ThisNamespace::class;
 
 
     public static function getClassUuid() : string {

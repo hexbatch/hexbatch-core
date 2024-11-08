@@ -10,7 +10,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * Remove a single live rule for the type
  */
 
-class DesignLiveRuleRemove extends Act\Cmd
+class DesignLiveRuleRemove extends Act\Cmd\Ds
 {
     const UUID = 'b3681a21-fa89-4bcb-9811-ee1f4cfd998a';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LIVE_RULE_REMOVE;

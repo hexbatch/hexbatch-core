@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\SetChildHandleRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class SetChildHandleRemove extends Act\Cmd
+class SetChildHandleRemove extends Act\Cmd\St
 {
     const UUID = 'd3ad6661-a811-4df0-8050-f0882e438cfa';
     const ACTION_NAME = TypeOfAction::CMD_SET_CHILD_HANDLE_REMOVE;

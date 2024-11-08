@@ -400,6 +400,7 @@ Route::prefix('v1')->group(function () {
                 UnstickElement
                 StickElement.php
                 EmptySet.php
+            PromoteSet.php
 
              */
 
@@ -418,7 +419,14 @@ Route::prefix('v1')->group(function () {
                 ShowMe.php      -- not logged in
                 ListElsewhere.php
                 Purge.php
+            EditThisServer
 
+             */
+
+            /*
+             * Server
+             *  Edit
+             *  Show (not logged in)
              */
 
             /*

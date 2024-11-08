@@ -5,7 +5,7 @@ namespace App\Sys\Res\Ele\Stk\SystemNS;
 
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\BaseElement;
-use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNs\ThisServerHandle;
+use App\Sys\Res\Types\Stk\Root\NsSysTypes\Ns\ThisNsHandle;
 
 class SystemHandleElement extends BaseElement
 {
@@ -17,7 +17,7 @@ class SystemHandleElement extends BaseElement
         return $name;
     }
 
-    const TYPE_CLASS = ThisServerHandle::class;
+    const TYPE_CLASS = ThisNsHandle::class;
 
 }
 

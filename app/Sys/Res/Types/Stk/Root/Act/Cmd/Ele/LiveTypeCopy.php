@@ -9,7 +9,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
 /*
  * The live type attached is also added to the target(s) with the live type's attribute values
  */
-class LiveTypeCopy extends Act\Cmd
+class LiveTypeCopy extends Act\Cmd\Ele
 {
     const UUID = '49390d1b-5ed0-49ea-9867-9615c2a1235e';
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_COPY;

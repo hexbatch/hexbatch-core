@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\ElementChangeOwnerMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class ElementChangeOwner extends Act\Cmd
+class ElementChangeOwner extends Act\Cmd\Ele
 {
     const UUID = '829b1a2d-8ed9-4950-8883-570c3517cfeb';
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CHANGE_OWNER;

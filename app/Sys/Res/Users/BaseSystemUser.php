@@ -9,14 +9,14 @@ use App\Models\User;
 use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
-use App\Sys\Res\Namespaces\Stock\ThisServerNamespace;
+use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 
 abstract class BaseSystemUser implements ISystemUser
 {
     protected ?User $user;
 
 
-    const NAMESPACE_CLASS = ThisServerNamespace::class;
+    const NAMESPACE_CLASS = ThisNamespace::class;
 
 
     public static function getSystemNamespaceClass() :string|ISystemNamespace {

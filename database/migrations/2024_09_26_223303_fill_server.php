@@ -57,7 +57,7 @@ return new class extends Migration
         Schema::table('servers', function (Blueprint $table) {
 
             $table->timestamp('status_change_at')->nullable()->default(null)
-                ->comment('When the last status was made at');
+                ->comment('When the last status was made at'); //todo add trigger to set this when status changes
 
             $table->timestamp('access_token_expires_at')->nullable()->default(null)
                 ->comment('When the access token expires, and needs to be renewed');

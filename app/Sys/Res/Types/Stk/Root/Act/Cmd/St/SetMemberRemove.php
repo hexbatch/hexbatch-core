@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class SetMemberRemove extends Act\Cmd
+class SetMemberRemove extends Act\Cmd\St
 {
     const UUID = '3cf263d1-3aef-4c96-aed4-01a3c2bd1f98';
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_REMOVE;

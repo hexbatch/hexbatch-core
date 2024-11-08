@@ -7,7 +7,7 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereGiveTypeMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-class ElsewhereGiveType extends Act\Cmd
+class ElsewhereGiveType extends Act\Cmd\Ew
 {
     const UUID = '7f676dcb-4cc5-44a3-b89e-90eaeef7056e';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_GIVE_TYPE;

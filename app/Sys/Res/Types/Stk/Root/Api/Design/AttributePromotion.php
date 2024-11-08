@@ -20,7 +20,7 @@ class AttributePromotion extends Api\DesignApi
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\Ds\DesignAttributePromotion::class,
+        Act\Cmd\Ds\DesignAttributePromote::class,
     ];
 
 }

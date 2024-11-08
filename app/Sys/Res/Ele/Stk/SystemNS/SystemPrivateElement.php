@@ -5,7 +5,7 @@ namespace App\Sys\Res\Ele\Stk\SystemNS;
 
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\BaseElement;
-use App\Sys\Res\Types\Stk\Root\NS\ThisServer\ThisServerNs\ThisServerPrivate;
+use App\Sys\Res\Types\Stk\Root\NsSysTypes\Ns\ThisNsPrivate;
 
 class SystemPrivateElement extends BaseElement
 {
@@ -16,7 +16,7 @@ class SystemPrivateElement extends BaseElement
         }
         return $name;
     }
-    const TYPE_CLASS = ThisServerPrivate::class;
+    const TYPE_CLASS = ThisNsPrivate::class;
 
 }
 

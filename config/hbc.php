@@ -59,6 +59,7 @@ return [
             ]
         ],
         'server' => [
+            'type_uuid' => env('HBC_SYSTEM_SERVER_TYPE_UUID',''),
             'uuid' => env('HBC_SYSTEM_SERVER_UUID',''),
             'domain' => env('HBC_SYSTEM_SERVER_DOMAIN',''),
             'name' => env('HBC_SYSTEM_SERVER_NAME',''),
