@@ -15,6 +15,12 @@ class NsForSystem
 
 
 
+    public function setSystem(bool $system): NsForSystem
+    {
+        $this->system = $system;
+        return $this;
+    }
+
 
     public function setNamespaceUserId(?int $namespace_user_id): NsForSystem
     {

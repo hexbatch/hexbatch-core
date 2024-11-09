@@ -17,7 +17,7 @@ class DesignPromoteParams extends DesignPromote implements IActionParams,IAction
 
     public function fromThing(Thing $thing): void
     {
-        // todo pull the data from the thing and fill in the data here from the json stored there
+
     }
 
 

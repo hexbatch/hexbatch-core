@@ -16,6 +16,7 @@ trait BaseParams
         if (!$what)  { return null;}
         return $what;
     }
+
     public static function stringFromCollection(Collection $collection,string $param_name) : ?string {
         $what  = (string)$collection->get($param_name);
         if (!empty($what))  { return null;}
@@ -47,6 +48,24 @@ trait BaseParams
         /** @var array  $ret_not_empty */
         $ret_not_empty = array_filter($meep, fn($value) => !empty(intval(trim($value) )) );
         return array_map(fn($value): int => intval($value), $ret_not_empty);
+    }
+
+
+    public static function uuidArrayFromCollection(Collection $collection,string $param_name) : array {
+        if (!$collection->has($param_name)) {return [];}
+        $meep = $collection->get($param_name,[]);
+        if (!is_array($meep)) { return [$meep];}
+        /** @var array  $ret_not_empty */
+        $ret_not_empty = array_filter($meep, fn($value) => !empty(intval(trim($value) )) );
+
+        foreach ($ret_not_empty as $tt) {
+            if (!Utilities::is_uuid($tt)) {
+                throw new HexbatchInvalidException(__('messages.invalid_uuid',['ref'=>$tt]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::INVALID_UUID);
+            }
+        }
+        return $ret_not_empty;
     }
 
     public static function uuidFromCollection(Collection $collection,string $param_name) : ?string {

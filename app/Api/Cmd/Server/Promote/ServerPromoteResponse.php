@@ -22,7 +22,7 @@ class ServerPromoteResponse extends ServerPromote implements IActionWorkReturn,I
 
     public function toThing(Thing $thing)
     {
-        // todo implement writing to thing method
+
     }
 
     protected function run(ServerPromoteParams $params) {
@@ -35,6 +35,7 @@ class ServerPromoteResponse extends ServerPromote implements IActionWorkReturn,I
         $server->server_access_token = $params->getServerAccessToken() ;
         $server->server_name = $params->getServerName() ;
         $server->server_domain = $params->getServerDomain() ;
+        $server->is_system = $params->isSystem() ;
         $server->save();
         $this->generated_server = $server;
     }

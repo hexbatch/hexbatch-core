@@ -19,9 +19,4 @@ interface IEvent
     /** @return IAction[] */
     public function getRelatedActions(): array;
 
-    public function PushEvent(
-        ISet|IElement|IType|INamespace|IAttribute|IServer|Collection|null $source,
-        ISet|IElement|IType|INamespace|IAttribute|IServer|null $destination = null
-    )
-    : Thing;
 }

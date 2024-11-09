@@ -13,18 +13,16 @@ use Illuminate\Console\Command;
 class BuildSystem extends Command
 {
     /**
-     * todo mapping need bool marks for allow_events and system_only
      *
      * The name and signature of the console command.
      *
      * @var string
      */
     protected $signature = 'hex:build {--check} {--list} {--list-attributes} {--list-types} {--list-elements} {--list-sets} '.
-                                        ' {--list-users} {--list-servers} {--list-namespaces} {--mapper} '
+                                        ' {--list-users} {--list-servers} {--list-namespaces} {--mapper} ' .
+                                        ' {--show-current } {--show-old} {--show-new} {--build-new} {--trim-old} {--show-diff} '
     ;
-    /*
-     *
-     */
+
 
     /**
      * The console command description.
@@ -339,13 +337,30 @@ class BuildSystem extends Command
             $this->table(['Name|Server|User|Handle','Type|Home','Public|Private'],$data);
         }
 
-        /*
-         * todo need tasks
-         *   :build
-         *   :list current
-         *   :list_new
-         *   :list_old
-         */
+        if ($this->option('show-new')) {
+            //todo show the system resources whose uuid are not in the db yet
+        }
+
+        if ($this->option('show-current')) {
+            //todo show the system resources whose uuid are in the db (not in the old or new)
+        }
+
+        if ($this->option('show-old')) {
+            //todo show the db rows for the system that are no longer in the resources
+        }
+
+        if ($this->option('show-diff')) {
+            //todo show changes between the db and the resources (briefer covers old or new)
+        }
+
+        if ($this->option('build-new')) {
+            //todo add to the db rows the resources not included
+        }
+
+        if ($this->option('trim-old')) {
+            //todo remove from the db the rows no longer linked by the resources
+        }
+
 
         return 0;
     }

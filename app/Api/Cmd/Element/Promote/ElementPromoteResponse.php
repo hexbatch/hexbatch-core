@@ -7,6 +7,7 @@ use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\Element;
 use App\Models\ElementSet;
+use App\Models\Phase;
 use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPromote;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn
 
     public function toThing(Thing $thing)
     {
-        // todo implement writing to thing method
+
     }
 
     /**
@@ -31,6 +32,7 @@ class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn
      */
     protected function run(ElementPromoteParams $params) {
 
+        $phase_id = $params->getPhaseId() ? : Phase::getDefaultPhase()?->id;
 
         try {
             $this->generated_elements = [];
@@ -41,7 +43,8 @@ class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn
                     for ($set_index = 0; $set_index < $params->getNumberPerSet(); $set_index++) {
                         $ele = new Element();
                         $ele->element_parent_type_id = $params->getParentTypeId();
-                        $ele->element_phase_id = $params->getPhaseId();
+                        $ele->element_phase_id = $phase_id;
+
                         $ele->element_namespace_id = $namespace_owner_id;
                         if (count($params->getUuid())) {
                             $ele->ref_uuid = $params->getUuid()[$uuid_index++]??null;

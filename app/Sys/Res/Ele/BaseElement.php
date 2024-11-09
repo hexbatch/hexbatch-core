@@ -6,10 +6,12 @@ namespace App\Sys\Res\Ele;
 
 use App\Api\Cmd\Element\Promote\EleForSystem;
 use App\Api\Cmd\Element\Promote\ElementPromoteParams;
+use App\Api\Cmd\Element\PromoteEdit\EditEleForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\ElementValue;
+use App\Models\Phase;
 use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
@@ -76,7 +78,20 @@ class BaseElement implements ISystemElement
 
     public function onNextStep(): void
     {
-        //todo make sure that all the elements have their phase, and destination set
+        try
+        {
+            $sys_params = new EditEleForSystem();
+            $sys_params
+                ->setElementIds([$this->getElementObject()->id])
+                ->setPhaseId(Phase::getDefaultPhase()->id)
+            ;
+
+
+            $sys_params->doParamsAndResponse();
+
+        } catch (\Exception $e) {
+            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+        }
     }
 
 

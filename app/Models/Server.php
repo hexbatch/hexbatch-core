@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int id
  * @property int server_type_id
  * @property int owning_namespace_id
+ * @property bool is_system
  * @property string ref_uuid
  * @property TypeOfServerStatus server_status
  * @property string server_domain

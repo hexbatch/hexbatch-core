@@ -72,6 +72,7 @@ abstract class BaseNamespace implements ISystemNamespace
            $sys_params
                ->setUuid(static::getClassUuid())
                ->setNamespaceUserId(static::getSystemUserClass()->getUserObject()?->id)
+               ->setSystem(true)
                ->setNamespaceServerId(static::getSystemServerClass()->getServerObject()?->id)
                ->setNamespaceTypeId(static::getSystemTypeClass()->getTypeObject()?->id)
                ->setNamespaceHomeSetId(static::getSystemHomeClass()->getSetObject()?->id)

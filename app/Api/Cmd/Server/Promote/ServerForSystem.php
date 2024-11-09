@@ -15,6 +15,11 @@ class ServerForSystem
     use ServerParams;
 
 
+    public function setSystem(bool $system): ServerForSystem
+    {
+        $this->system = $system;
+        return $this;
+    }
     public function setOwningNamespaceId(?int $owning_namespace_id): ServerForSystem
     {
         $this->owning_namespace_id = $owning_namespace_id;

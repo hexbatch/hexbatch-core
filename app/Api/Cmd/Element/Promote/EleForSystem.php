@@ -1,33 +1,17 @@
 <?php
 namespace App\Api\Cmd\Element\Promote;
 
+use App\Api\Cmd\Element\BulkElementParams;
 use App\Models\Element;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\BuildActionFacet;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPromote;
-use Illuminate\Support\Collection;
 
 class EleForSystem
 {
-    protected array $ns_owner_ids = [];
-    protected array $destination_set_ids = [];
-    protected ?int $number_per_set = null;
-    protected array $uuids = [];
-
-    protected ?int $phase_id = null;
-    protected ?int $parent_type_id = null;
+    use BulkElementParams;
 
 
-    public function makeCollection() : Collection {
-        return new Collection([
-            'ns_owner_ids' => $this->ns_owner_ids,
-            'destination_set_ids' => $this->destination_set_ids,
-            'uuids' => $this->uuids,
-            'number_per_set' => $this->number_per_set,
-            'phase_id' => $this->phase_id,
-            'parent_type_id' => $this->parent_type_id,
-        ]);
-    }
 
     public function setNsOwnerIds(array $ns_owner_ids): EleForSystem
     {

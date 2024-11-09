@@ -26,7 +26,7 @@ class NamespaceEditPromotionResponse extends NamespaceEditPromotion implements I
 
     public function toThing(Thing $thing)
     {
-        // todo implement writing to thing method
+
     }
 
     /**

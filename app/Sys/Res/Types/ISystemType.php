@@ -35,7 +35,7 @@ interface ISystemType extends ISystemResource, IType
     public function getAttributes() :array;
 
     public function getTypeNamespace() : ?ISystemNamespace;
-    public function getDescriptionElement() : ?ISystemElement;
+    public function getHandleElement() : ?ISystemElement;
     public function getClassServer() : ?ISystemServer;
 
 }

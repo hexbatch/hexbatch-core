@@ -24,14 +24,14 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('edited_by_phase_id')
-                ->nullable(false)
+                ->nullable()->default(null)
                 ->comment("The phase that can edit this")
                 ->index()
                 ->constrained('phases')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->boolean('is_default_phase')
+            $table->boolean('is_default_phase') //todo flip the others off if this is set
                 ->nullable(false)->default(false)
                 ->comment("If true then only that row can be true, and the others set as false");
 

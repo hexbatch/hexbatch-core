@@ -31,6 +31,7 @@ use Illuminate\Validation\ValidationException;
  * @property int public_element_id
  * @property int private_element_id
  * @property int namespace_home_set_id
+ * @property bool is_system
  * @property string namespace_name
  * @property string ref_uuid
  * @property string namespace_public_key

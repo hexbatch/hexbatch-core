@@ -73,7 +73,9 @@ return new class extends Migration
 
 
 
-
+            $table->boolean('is_system')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true then this namespace is from system boot');
 
             $table->timestamps();
 
@@ -135,6 +137,7 @@ return new class extends Migration
             $table->dropColumn('namespace_name');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('namespace_public_key');
+            $table->dropColumn('is_system');
         });
 
     }

@@ -33,7 +33,9 @@ return new class extends Migration
                 ->restrictOnDelete();
 
 
-
+            $table->boolean('is_system')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true then this server is from system boot');
 
             $table->timestamps();
 
@@ -108,6 +110,7 @@ return new class extends Migration
             $table->dropColumn('server_access_token');
             $table->dropColumn('server_status');
             $table->dropColumn('server_name');
+            $table->dropColumn('is_system');
 
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');

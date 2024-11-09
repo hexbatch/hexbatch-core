@@ -4,6 +4,7 @@ namespace App\Sys\Res\Atr;
 
 
 use App\Api\Cmd\Design\PromoteAttribute\APSetupForSystem;
+use App\Api\Cmd\Type\AttributeAddHandle\AttributeHandleForSystem;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
@@ -145,7 +146,19 @@ abstract class BaseAttribute implements ISystemAttribute
 
     public function onNextStep(): void
     {
-        //todo set the design here, if present
+        if (!static::getSystemHandle()) {return;}
+
+        try
+        {
+            $sys_params = new AttributeHandleForSystem();
+            $sys_params
+                ->setAttributeIds([$this->getAttributeObject()->id])
+                ->setHandleAttributeId(static::getSystemHandle()->getAttributeObject()->id);
+            $sys_params->doParamsAndResponse();
+
+        } catch (\Exception $e) {
+            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+        }
     }
 
 

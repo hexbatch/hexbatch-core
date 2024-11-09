@@ -36,11 +36,6 @@ class BaseEvent extends BaseType implements IEvent
         return [];
     }
 
-    public function PushEvent(IElement|IType|ISet|IServer|INamespace|IAttribute|null|\Illuminate\Support\Collection $source,
-                              IElement|IType|ISet|IServer|INamespace|IAttribute|null                                $destination = null): Thing
-    {
-        //todo implement pushEvent
-        return new Thing();
-    }
+
 }
 

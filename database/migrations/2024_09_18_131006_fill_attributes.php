@@ -69,7 +69,7 @@ return new class extends Migration
 
 
             $table->boolean('is_system')->default(false)->nullable(false)
-                ->index('idx_attr_is_system')
+                ->index()
                 ->comment('if true then this attribute is a standard attribute');
 
 

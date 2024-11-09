@@ -23,7 +23,7 @@ trait ServerParams
     protected ?string $server_domain = null;
     protected ?string $server_access_token = null;
 
-
+    protected bool $system = false;
 
     protected function validate() {
         try {
@@ -53,6 +53,11 @@ trait ServerParams
     public function getOwningNamespaceId(): ?int
     {
         return $this->owning_namespace_id;
+    }
+
+    public function isSystem(): bool
+    {
+        return $this->system;
     }
 
     public function getServerTypeId(): ?int

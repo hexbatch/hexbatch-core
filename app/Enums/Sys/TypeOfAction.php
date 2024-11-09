@@ -156,6 +156,7 @@ enum TypeOfAction: string
 
 
     case CMD_ELEMENT_PROMOTE = 'cmd_element_promote';
+    case CMD_ELEMENT_PROMOTE_EDIT = 'cmd_element_promote_edit';
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
@@ -171,6 +172,7 @@ enum TypeOfAction: string
     case CMD_PHASE_MOVE_TREE = 'cmd_phase_move_tree';
 
     case CMD_PHASE_PURGE = 'cmd_phase_purge';
+    case CMD_PHASE_PROMOTE = 'cmd_phase_promote';
 
     case CMD_FIRE_CUSTOM_EVENT = 'cmd_fire_custom_event'; //scope depends on the base type of the custom event
 

@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types;
 
 
 use App\Api\Cmd\Design\Promote\SetupForSystem;
+use App\Api\Cmd\Type\AddHandle\HandleForSystem;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementType;
@@ -158,7 +159,7 @@ abstract class BaseType implements ISystemType
 
 
 
-    public function getDescriptionElement(): ?ISystemElement
+    public function getHandleElement(): ?ISystemElement
     {
         return SystemElements::getElementByUuid(static::HANDLE_ELEMENT_CLASS);
     }
@@ -191,17 +192,19 @@ abstract class BaseType implements ISystemType
 
     public function onNextStep(): void
     {
-        //users add in the default namespace using the uuid of the now generated ns
-        $ns = $this->getTypeNamespace();
-        if (!$ns) {
-            throw new HexbatchInitException('type next step cannot get ns');
+        if (!static::getHandleElement()) {return;}
+
+        try
+        {
+            $sys_params = new HandleForSystem();
+            $sys_params
+                ->setTypeIds([$this->getTypeObject()->id])
+                ->setHandleElementId(static::getHandleElement()->getElementObject()->id);
+            $sys_params->doParamsAndResponse();
+
+        } catch (\Exception $e) {
+            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
         }
-
-        $this->getTypeObject()->owner_namespace_id = $ns->getNamespaceObject()->id;
-
-        $this->getTypeObject()->save();
-
-        //todo set the handle here
     }
 
 

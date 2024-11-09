@@ -22,7 +22,7 @@ trait NamespaceParams
     protected ?string $namespace_public_key = null;
     protected ?string $namespace_name = null;
     protected ?string $uuid = null;
-
+    protected bool $system = false;
 
 
     protected function validate() {
@@ -97,6 +97,11 @@ trait NamespaceParams
     public function getUuid(): ?string
     {
         return $this->uuid;
+    }
+
+    public function isSystem(): bool
+    {
+        return $this->system;
     }
 
 

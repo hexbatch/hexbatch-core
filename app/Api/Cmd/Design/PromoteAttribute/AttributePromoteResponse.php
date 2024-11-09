@@ -20,7 +20,7 @@ class AttributePromoteResponse extends DesignAttributePromote implements IAction
 
     public function toThing(Thing $thing)
     {
-        // todo implement writing to thing method
+
     }
 
     protected function run(AttributePromoteParams $params) {

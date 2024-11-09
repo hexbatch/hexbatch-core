@@ -20,7 +20,7 @@ class DesignPromoteResponse extends DesignPromote implements IActionWorkReturn,I
 
     public function toThing(Thing $thing)
     {
-        // todo implement writing to thing method
+
     }
 
     protected function run(DesignPromoteParams $params) {

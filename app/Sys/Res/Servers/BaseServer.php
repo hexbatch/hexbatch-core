@@ -43,6 +43,7 @@ abstract class BaseServer implements ISystemServer
            $sys_params = new ServerForSystem();
            $sys_params
                ->setUuid(static::getClassUuid())
+               ->setSystem(true)
                ->setServerName(static::getServerName())
                ->setServerDomain(static::getServerDomain())
                ->setServerAccessToken(null)

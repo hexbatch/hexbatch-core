@@ -10,9 +10,9 @@ use App\Exceptions\HexbatchInvalidException;
 use App\Models\ElementSet;
 use App\Models\ElementSetMember;
 use App\Models\Thing;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Server\ServerPromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\St\SetPromote;
 
-class SetPromoteResponse extends ServerPromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
+class SetPromoteResponse extends SetPromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
 {
 
     public function __construct(
@@ -23,14 +23,17 @@ class SetPromoteResponse extends ServerPromote implements IActionWorkReturn,IAct
 
     public function toThing(Thing $thing)
     {
-        // todo implement writing to thing method
+
     }
 
     protected function run(SetPromoteParams $params) {
         $set = new ElementSet();
         $set->ref_uuid = $params->getUuid();
         $set->parent_set_element_id = $params->getParentSetElementId();
-        $set->has_events = $params->getHasEvents();
+        if (!is_null($params->getHasEvents())) {
+            $set->has_events = $params->getHasEvents();
+        }
+
         $set->save();
         foreach ($params->getContentElementIds() as $element_id) {
            $node = new ElementSetMember();

@@ -23,7 +23,7 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
 
     public function toThing(Thing $thing)
     {
-        // todo implement writing to thing method
+
     }
 
     /**
@@ -42,6 +42,7 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
         $ns->namespace_home_set_id = $params->getNamespaceHomeSetId();
         $ns->namespace_public_key = $params->getNamespacePublicKey();
         $ns->namespace_name = $params->getNamespaceName();
+        $ns->is_system = $params->isSystem();
 
         $ns->save();
         $this->generated_namespace = $ns;

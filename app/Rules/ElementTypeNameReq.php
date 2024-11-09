@@ -28,7 +28,7 @@ class ElementTypeNameReq extends ResourceNameReq
         if (!$working_namespace) {
             throw new \LogicException("Need a namespace passed in here");
         }
-        //see if type name is unique for the namespace todo change to namespace, and how to validate this in the actions?
+        //see if type name is unique for the namespace
         $laravel = ElementType::where('owner_namespace_id',$working_namespace->id)->where('type_name',$value);
         if ($this->element_type) {
             $laravel->whereNot('id',$this->element_type->id);

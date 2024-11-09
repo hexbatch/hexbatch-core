@@ -33,4 +33,26 @@ trait SetParams
         $this->validate();
     }
 
+
+    /** @return int[] */
+    public function getContentElementIds(): array
+    {
+        return $this->content_element_ids;
+    }
+
+    public function getParentSetElementId(): ?int
+    {
+        return $this->parent_set_element_id;
+    }
+
+    public function getUuid(): ?string
+    {
+        return $this->uuid;
+    }
+
+    public function getHasEvents(): ?bool
+    {
+        return $this->has_events;
+    }
+
 }
