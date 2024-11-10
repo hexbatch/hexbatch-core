@@ -34,6 +34,10 @@ class SetPromoteResponse extends SetPromote implements IActionWorkReturn,IAction
             $set->has_events = $params->getHasEvents();
         }
 
+        if (!is_null($params->isSystem())) {
+            $set->is_system = $params->isSystem();
+        }
+
         $set->save();
         foreach ($params->getContentElementIds() as $element_id) {
            $node = new ElementSetMember();

@@ -64,7 +64,16 @@ abstract class BaseNamespace implements ISystemNamespace
         return static::TYPE_CLASS;
     }
 
-
+    public function getNamespace() : UserNamespace {
+        if ($this->namespace) {return $this->namespace;}
+        $maybe = UserNamespace::whereRaw('ref_uuid = ?',static::getClassUuid())->first();
+        if ($maybe) {
+            $this->namespace = $maybe;
+        } else {
+            $this->namespace = $this->makeNamespace();
+        }
+        return $this->namespace;
+    }
     public function makeNamespace() :UserNamespace
    {
        try {
@@ -97,9 +106,7 @@ abstract class BaseNamespace implements ISystemNamespace
     public function getHomeSet() : ?ISystemSet { return SystemSets::getSetByUuid(static::TYPE_CLASS);}
 
     public function getNamespaceObject() : UserNamespace {
-        if ($this->namespace) {return $this->namespace;}
-        $this->namespace = $this->makeNamespace();
-        return $this->namespace;
+        return $this->getNamespace();
     }
 
     public function onCall(): ISystemResource

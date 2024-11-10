@@ -47,6 +47,10 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
+            $table->boolean('is_system')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true then this element is from system boot');
+
             $table->timestamps();
         });
 
@@ -80,6 +84,7 @@ return new class extends Migration
             $table->dropColumn('ref_uuid');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
+            $table->dropColumn('is_system');
         });
 
     }

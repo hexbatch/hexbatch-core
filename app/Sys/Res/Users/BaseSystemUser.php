@@ -13,7 +13,7 @@ use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 
 abstract class BaseSystemUser implements ISystemUser
 {
-    protected ?User $user;
+    protected ?User $user = null;
 
 
     const NAMESPACE_CLASS = ThisNamespace::class;
@@ -24,6 +24,16 @@ abstract class BaseSystemUser implements ISystemUser
     }
 
 
+    public function getUser() : User {
+        if ($this->user) {return $this->user;}
+        $maybe_user = User::whereRaw('users.ref_uuid = ?',static::getClassUuid())->first();
+        if ($maybe_user) {
+            $this->user = $maybe_user;
+        } else {
+            $this->user = $this->makeUser();
+        }
+        return $this->user;
+    }
     public function makeUser() :User
    {
        try {
@@ -33,6 +43,7 @@ abstract class BaseSystemUser implements ISystemUser
                "password_confirmation" => static::getUserPassword()
            ]);
            $user->ref_uuid = static::getClassUuid();
+           $user->is_system = true;
            $user->save();
            $user->refresh();
            return $user;
@@ -42,9 +53,7 @@ abstract class BaseSystemUser implements ISystemUser
    }
 
     public function getUserObject() : ?User {
-        if ($this->user) {return $this->user;}
-        $this->user = $this->makeUser();
-        return $this->user;
+        return $this->getUser();
     }
 
     public function getUserNamespace() :?ISystemNamespace {

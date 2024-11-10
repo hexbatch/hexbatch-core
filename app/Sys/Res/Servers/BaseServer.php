@@ -29,11 +29,21 @@ abstract class BaseServer implements ISystemServer
         return static::SERVER_TYPE_CLASS;
     }
 
-  public function getServerSystemNamespace(): ISystemNamespace
-  {
+    public function getServerSystemNamespace(): ISystemNamespace
+    {
       return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
-  }
+    }
 
+    public function getServer() : Server {
+        if ($this->server) {return $this->server;}
+        $maybe = Server::whereRaw('ref_uuid = ?',static::getClassUuid())->first();
+        if ($maybe) {
+            $this->server = $maybe;
+        } else {
+            $this->server = $this->makeServer();
+        }
+        return $this->server;
+    }
 
     public function makeServer() :Server
    {
@@ -64,9 +74,7 @@ abstract class BaseServer implements ISystemServer
 
 
     public function getServerObject() : ?Server {
-        if ($this->server) {return $this->server;}
-        $this->server = $this->makeServer();
-        return $this->server;
+        return $this->getServer();
     }
 
 

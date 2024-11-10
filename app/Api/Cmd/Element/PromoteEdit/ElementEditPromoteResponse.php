@@ -55,6 +55,10 @@ class ElementEditPromoteResponse extends ElementPromoteEdit implements IActionWo
                 if ($params->getOwningNamespaceId()) {
                     $el->element_namespace_id = $params->getOwningNamespaceId();
                 }
+
+                if (!is_null($params->isSystem())) {
+                    $el->is_system = $params->isSystem();
+                }
                 $el->save();
                 $new_set?->addElement($el, false);
             }

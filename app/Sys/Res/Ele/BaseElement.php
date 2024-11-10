@@ -37,7 +37,16 @@ class BaseElement implements ISystemElement
         return static::UUID;
     }
 
-
+    public function getElement() : Element {
+        if ($this->element) {return $this->element;}
+        $maybe = Element::whereRaw('ref_uuid = ?',static::getClassUuid())->first();
+        if ($maybe) {
+            $this->element = $maybe;
+        } else {
+            $this->element = $this->makeElement();
+        }
+        return $this->element;
+    }
 
     public function makeElement() :Element
    {
@@ -50,6 +59,7 @@ class BaseElement implements ISystemElement
                ->setNsOwnerIds([static::getSystemNamespaceClass()->getNamespaceObject()->id])
                ->setParentTypeId(static::getSystemTypeClass()->getTypeObject()->id)
                ->setPhaseId(null)
+               ->setSystem(true)
                ->setNumberPerSet(1)
                ->setUuids([static::getClassUuid()])
 
@@ -64,9 +74,7 @@ class BaseElement implements ISystemElement
    }
 
     public function getElementObject() : ?Element {
-        if ($this->element) {return $this->element;}
-        $this->element = $this->makeElement();
-        return $this->element;
+        return $this->getElement();
     }
 
 

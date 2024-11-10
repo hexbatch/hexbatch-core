@@ -14,7 +14,7 @@ trait EditElementParams
     protected ?int $set_id = null;
     protected ?int $owning_namespace_id = null;
 
-
+    protected ?bool $system = true;
 
     protected function validate() {
 
@@ -51,7 +51,10 @@ trait EditElementParams
     {
         return $this->owning_namespace_id;
     }
-
+    public function isSystem(): ?bool
+    {
+        return $this->system;
+    }
 
 
 }

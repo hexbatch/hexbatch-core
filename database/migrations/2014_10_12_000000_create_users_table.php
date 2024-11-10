@@ -23,6 +23,10 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+            $table->boolean('is_system')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true then this user is from system boot');
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable()

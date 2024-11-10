@@ -49,6 +49,12 @@ class EleForSystem
         return $this;
     }
 
+    public function setSystem(?bool $system): EleForSystem
+    {
+        $this->system = $system;
+        return $this;
+    }
+
     /**
      * @throws \Exception
      */

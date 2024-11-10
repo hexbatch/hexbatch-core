@@ -16,6 +16,11 @@ class SetForSystem
     use SetParams;
 
 
+    public function setSystem(?bool $system): SetForSystem
+    {
+        $this->system = $system;
+        return $this;
+    }
 
     public function setContentElementIds(array $content_element_ids): SetForSystem
     {

@@ -34,6 +34,10 @@ return new class extends Migration
                 ->nullable(false)->default(true)
                 ->comment("If false then no events raised, and no rules fired entering, leaving set, or inside. Children sets not affected");
 
+            $table->boolean('is_system')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true then this set is from system boot');
+
         });
 
         DB::statement('ALTER TABLE element_sets ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -62,6 +66,7 @@ return new class extends Migration
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
             $table->dropColumn('has_events');
+            $table->dropColumn('is_system');
         });
     }
 };

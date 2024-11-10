@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int element_parent_type_id
  * @property int element_phase_id
  * @property int element_namespace_id
+ * @property bool is_system
  * @property string ref_uuid
  *
  * @property string created_at

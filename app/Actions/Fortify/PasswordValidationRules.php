@@ -17,10 +17,8 @@ trait PasswordValidationRules
             'required',
             'string',
             (new Password(10))
-            ->max(20)
-            ->letters()
-            ->numbers()
-            ->symbols()
+            ->max(40)
+
         ];
     }
 }

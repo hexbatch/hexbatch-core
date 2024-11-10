@@ -20,6 +20,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int default_namespace_id
+ * @property bool is_system
  * @property string ref_uuid
  * @property string name
  * @property string username

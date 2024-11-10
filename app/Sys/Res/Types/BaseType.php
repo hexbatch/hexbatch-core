@@ -47,6 +47,16 @@ abstract class BaseType implements ISystemType
         return SystemServers::getServerByUuid(static::SERVER_CLASS);
     }
 
+    public function getType() : ElementType {
+        if ($this->type) {return $this->type;}
+        $maybe = ElementType::whereRaw('ref_uuid = ?',static::getClassUuid())->first();
+        if ($maybe) {
+            $this->type = $maybe;
+        } else {
+            $this->type = $this->makeType();
+        }
+        return $this->type;
+    }
     public function makeType() :ElementType
    {
         if ($this->type) {return $this->type;}
@@ -167,9 +177,7 @@ abstract class BaseType implements ISystemType
 
 
     public function getTypeObject() : ?ElementType {
-        if ($this->type) {return $this->type;}
-        $this->type = $this->makeType();
-        return $this->type;
+        return $this->getType();
     }
 
     public function getTypeNamespace() :?ISystemNamespace {

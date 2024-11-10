@@ -21,7 +21,7 @@ trait BulkElementParams
     protected ?int $phase_id = null;
     protected ?int $parent_type_id = null;
 
-
+    protected ?bool $system = true;
 
     protected function validate() {
         if (empty($this->ns_owner_ids)) {
@@ -72,7 +72,10 @@ trait BulkElementParams
 
     }
 
-
+    public function isSystem(): ?bool
+    {
+        return $this->system;
+    }
     public function getNsOwnerIds(): array
     {
         return $this->ns_owner_ids;

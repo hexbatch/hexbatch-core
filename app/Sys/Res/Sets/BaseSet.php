@@ -56,7 +56,16 @@ use App\Sys\Res\ISystemResource;
          return $ret;
      }
 
-
+     public function getSet() : ElementSet {
+         if ($this->set) {return $this->set;}
+         $maybe = ElementSet::whereRaw('ref_uuid = ?',static::getClassUuid())->first();
+         if ($maybe) {
+             $this->set = $maybe;
+         } else {
+             $this->set = $this->makeSet();
+         }
+         return $this->set;
+     }
      /**
       * @return ElementSet
       */
@@ -74,6 +83,7 @@ use App\Sys\Res\ISystemResource;
                ->setUuid(static::getClassUuid())
                ->setParentSetElementId(static::getDefiningSystemElementClass()->getElementObject()?->id)
                ->setHasEvents(static::hasEvents())
+               ->setSystem(true)
                ->setContentElementIds($element_ids)
               ;
 
@@ -86,9 +96,7 @@ use App\Sys\Res\ISystemResource;
 
 
     public function getSetObject() : ?ElementSet {
-        if ($this->set) {return $this->set;}
-        $this->set = $this->makeSet();
-        return $this->set;
+        return $this->getSet();
     }
 
     public function onCall(): ISystemResource

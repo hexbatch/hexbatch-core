@@ -50,9 +50,6 @@ class ThisServer extends BaseServer {
 
     public function onNextStep(): void
     {
-        //set the uuid to the one in the config, and update the resource for the new uuid
-        $this->server->ref_uuid = static::getClassUuid();
-        $this->server->save();
-        SystemServers::updateResourceGuid(static::class,$this->server->ref_uuid);
+
     }
 }

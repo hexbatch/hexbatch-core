@@ -88,6 +88,16 @@ abstract class BaseAttribute implements ISystemAttribute
         return implode(UserNamespace::NAMESPACE_SEPERATOR,$names);
      }
 
+    public function getAttribute() : Attribute {
+        if ($this->attribute) {return $this->attribute;}
+        $maybe = Attribute::whereRaw('ref_uuid = ?',static::getClassUuid())->first();
+        if ($maybe) {
+            $this->attribute = $maybe;
+        } else {
+            $this->attribute = $this->makeAttribute();
+        }
+        return $this->attribute;
+    }
 
     public function makeAttribute() :Attribute
    {
@@ -113,12 +123,8 @@ abstract class BaseAttribute implements ISystemAttribute
    }
 
 
-
-
     public function getAttributeObject() : ?Attribute {
-        if ($this->attribute) {return $this->attribute;}
-        $this->attribute = $this->makeAttribute();
-        return $this->attribute;
+        return $this->getAttribute();
     }
 
 

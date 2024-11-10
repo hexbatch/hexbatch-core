@@ -36,7 +36,7 @@ class NamespaceEditPromotionResponse extends NamespaceEditPromotion implements I
 
 
         $uuid = $params->getUuid();
-        $ns = $this->edited_namespace = UserNamespace::whereRaw("UNHEX($uuid) = user_namespaces.ref_uuid")->first();
+        $ns = $this->edited_namespace = UserNamespace::whereRaw("? = user_namespaces.ref_uuid",[$uuid])->first();
         if (!$ns) {
             throw new HexbatchNotFound(__("msg.namespace_not_found", ['ref' => $uuid]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int id
  * @property int parent_set_element_id
  * @property bool has_events
+ * @property bool is_system
  * @property string ref_uuid
  *
  * @property string created_at

@@ -17,8 +17,15 @@ class SystemResources
     const MAX_SYSTEM_RESOURCE_NAME_LENGTH = 16;
     const MAX_SYSTEM_RESOURCE_NESTING = 16;
 
+    /** @var array<string,SystemBase> $uuid_class_dictionary */
+    protected static array $uuid_class_dictionary = [];
+
+    public static function addToUuidDictionary(string $uuid, $sys) {
+        static::$uuid_class_dictionary[$uuid] = $sys;
+    }
+
     public static function getUuidDictionary() : array {
-        return SystemBase::getUuidClassNames();
+        return static::$uuid_class_dictionary;
     }
     public static function loadClasses() : array
     {

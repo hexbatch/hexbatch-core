@@ -13,6 +13,8 @@ trait SetParams
     protected ?int $parent_set_element_id = null;
     protected ?string $uuid = null;
     protected ?bool $has_events = null;
+
+    protected ?bool $system = true;
     protected array $content_element_ids = [];
     protected function validate() {
         if (!$this->parent_set_element_id) {
@@ -53,6 +55,11 @@ trait SetParams
     public function getHasEvents(): ?bool
     {
         return $this->has_events;
+    }
+
+    public function isSystem(): ?bool
+    {
+        return $this->system;
     }
 
 }
