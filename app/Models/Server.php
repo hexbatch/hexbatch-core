@@ -6,6 +6,7 @@ use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Namespaces\INamespace;
 use App\Sys\Res\Servers\IServer;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string ref_uuid
  * @property TypeOfServerStatus server_status
  * @property string server_domain
+ * @property string server_url
  * @property string server_name
  * @property string server_access_token
  * @property string status_change_at
@@ -37,7 +39,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *  @property string updated_at
  *
  */
-class Server extends Model implements IServer
+class Server extends Model implements IServer,ISystemModel
 {
 
     /*
@@ -178,7 +180,7 @@ class Server extends Model implements IServer
     }
 
     public function getName() :string {
-        return $this->id;
+        return $this->server_domain;
     }
 
 
@@ -189,6 +191,14 @@ class Server extends Model implements IServer
 
     public function getServerObject(): ?Server
     {
+        return $this;
+    }
+
+    public function getUuid(): string{
+        return $this->ref_uuid;
+    }
+
+    public function getObject(): Model {
         return $this;
     }
 }

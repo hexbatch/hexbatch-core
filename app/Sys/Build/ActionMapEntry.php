@@ -28,7 +28,7 @@ class ActionMapEntry
     public function setAction(string $full_class_name) {
         if (is_subclass_of($full_class_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) {
             $this->action_uuid = $full_class_name::getClassUuid();
-            $this->action_name = $full_class_name::getClassTypeName();
+            $this->action_name = $full_class_name::getClassName();
             $this->is_protected = $full_class_name::hasInAncestors(SystemPrivilege::class);
             $this->has_events = !$full_class_name::hasInAncestors(NoEventsTriggered::class);
         } else {

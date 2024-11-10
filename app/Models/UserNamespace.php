@@ -9,6 +9,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\NamespaceNameReq;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Namespaces\INamespace;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -54,7 +55,7 @@ use Illuminate\Validation\ValidationException;
  * @property UserNamespace[] namespace_members
  * @property UserNamespace[] namespace_admins
  */
-class UserNamespace extends Model implements INamespace
+class UserNamespace extends Model implements INamespace,ISystemModel
 {
 
     protected $table = 'user_namespaces';
@@ -234,9 +235,10 @@ class UserNamespace extends Model implements INamespace
     const NAMESPACE_SEPERATOR = '.';
     public function getName() : string {
         if ($this->namespace_server_id) {
-            return $this->namespace_home_server->getName() . static::NAMESPACE_SEPERATOR .$this->namespace;
+            //do not show the server part if belongs to this server
+            return $this->namespace_home_server->getName() . static::NAMESPACE_SEPERATOR .$this->namespace_name;
         } else {
-            return $this->namespace;
+            return $this->namespace_name;
         }
 
     }
@@ -358,8 +360,15 @@ class UserNamespace extends Model implements INamespace
         return static::buildNamespace(id:$node->id)->first();
     }
 
-    public function getNamespaceObject(): UserNamespace
-    {
+    public function getNamespaceObject(): UserNamespace {
+        return $this;
+    }
+
+    public function getUuid(): string {
+        return $this->ref_uuid;
+    }
+
+    public function getObject(): Model {
         return $this;
     }
 }

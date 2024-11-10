@@ -39,6 +39,9 @@ abstract class BaseType implements ISystemType
 
     const PARENT_CLASSES = [];
 
+    protected bool $b_did_create_model = false;
+    public function didCreateModel(): bool { return $this->b_did_create_model; }
+
     public static function getClassUuid() : string {
         return static::UUID;
     }
@@ -66,7 +69,7 @@ abstract class BaseType implements ISystemType
             $sys_params = new SetupForSystem;
             $sys_params
                ->setUuid(static::getClassUuid())
-               ->setTypeName(static::getClassTypeName())
+               ->setTypeName(static::getClassName())
                ->setSystem(true)
                 ->setLifecycle(TypeOfLifecycle::PUBLISHED)
                 ->setFinalType(static::IS_FINAL);
@@ -75,7 +78,9 @@ abstract class BaseType implements ISystemType
             $sys_params->setServerId(static::getTypeServerClass()::getDictionaryObject()->getServerObject()?->id);
 
 
-            return $sys_params->doParamsAndResponse();
+            $what =  $sys_params->doParamsAndResponse();
+            $this->b_did_create_model = true;
+            return $what;
 
        } catch (\Exception $e) {
             throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
@@ -130,14 +135,14 @@ abstract class BaseType implements ISystemType
 
     public static function getParentNameTree() :array  {
         $ret = [];
-        $ret[static::getClassTypeName()] = [] ;
+        $ret[static::getClassName()] = [] ;
         foreach (static::PARENT_CLASSES as $full_class_name) {
             $interfaces = class_implements($full_class_name);
             if (isset($interfaces['App\Sys\Res\Types\ISystemType'])) {
                 /**
                  * @type ISystemType $full_class_name
                  */
-                $ret[static::getClassTypeName()][] = $full_class_name::getParentNameTree();
+                $ret[static::getClassName()][] = $full_class_name::getParentNameTree();
             }
         }
         return $ret;
@@ -194,7 +199,7 @@ abstract class BaseType implements ISystemType
         return SystemTypes::getTypeByUuid(static::class);
     }
 
-    public static function getClassTypeName() :string { return static::TYPE_NAME; }
+    public static function getClassName() :string { return static::TYPE_NAME; }
     public static function getTypeNamespaceClass() :string|ISystemNamespace { return static::NAMESPACE_CLASS; }
     public static function getTypeServerClass() :string|ISystemServer { return static::SERVER_CLASS; }
     public function isFinal(): bool { return false; }
@@ -210,7 +215,7 @@ abstract class BaseType implements ISystemType
 
     public function onNextStep(): void
     {
-
+        if (!$this->b_did_create_model) {return;}
         try
         {
             if (static::HANDLE_ELEMENT_CLASS) {

@@ -33,11 +33,21 @@ class ThisServer extends BaseServer {
         return $name;
     }
 
+    public static function getClassName() : string { return static::getServerName();}
     public static function getServerName(): string
     {
         $name = config('hbc.system.server.name');
         if (!$name) {
             throw new HexbatchInitException("Server name is not set in .env");
+        }
+        return $name;
+    }
+
+    public static function getServerUrl(): string
+    {
+        $name = config('hbc.system.server.url');
+        if (!$name) {
+            throw new HexbatchInitException("Server url is not set in .env");
         }
         return $name;
     }

@@ -3,6 +3,7 @@
 namespace App\Sys\Collections;
 
 use App\Models\ElementType;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\ISystemType;
@@ -49,13 +50,16 @@ class SystemTypes extends SystemBase
 
     /**
      * returns array of models that are current between resources and db
-     * * @return ElementType[]
+     * * @return ISystemModel[]
      */
     public static function getCurrentModels() :array {
         $uuids = static::getUuids();
         $prepped_uuids = array_map(fn($value): string => "?", $uuids);
         $uuids_comma_delimited = implode(',',$prepped_uuids);
-        $models = ElementType::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)->get();
+        $models = ElementType::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)
+            /** @uses ElementType::owner_namespace(),\App\Models\UserNamespace::namespace_home_server() */
+            ->with('owner_namespace','owner_namespace.namespace_home_server')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;
@@ -65,10 +69,18 @@ class SystemTypes extends SystemBase
 
     /**
      * returns array of models that no longer fit with the resources
-     * @return ElementType[]
+     * @return ISystemModel[]
      */
     public static function getOldModels() :array  {
-        $models = ElementType::where('is_system',true)->get();
+        $uuids = static::getUuids();
+        $prepped_uuids = array_map(fn($value): string => "?", $uuids);
+        $uuids_comma_delimited = implode(',',$prepped_uuids);
+
+        $models = ElementType::where('is_system',true)
+            ->whereRaw("ref_uuid not in ($uuids_comma_delimited)",$uuids)
+            /** @uses ElementType::owner_namespace(),\App\Models\UserNamespace::namespace_home_server() */
+            ->with('owner_namespace','owner_namespace.namespace_home_server')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;

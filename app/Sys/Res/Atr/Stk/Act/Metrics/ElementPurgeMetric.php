@@ -4,10 +4,9 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 
 
 
-use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class ElementPurgeMetric extends BaseAttribute
+class ElementPurgeMetric extends ActionMetric
 {
     const UUID = '73e44eb0-d0c2-499a-9ab2-23ed10acc0cb';
     const ATTRIBUTE_NAME = 'element_purge_metric';

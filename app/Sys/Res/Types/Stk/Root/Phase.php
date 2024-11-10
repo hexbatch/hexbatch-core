@@ -36,6 +36,7 @@ class Phase extends BaseType
     public function onCall(): ISystemResource
     {
         $ret = parent::onCall();
+        if (!$this->b_did_create_model) {return $ret;}
         if (static::EDITED_BY_PHASE_SYSTEM_CLASS) {
             try {
                 $sys_params = new PhaseForSystem();
@@ -59,7 +60,7 @@ class Phase extends BaseType
     public function onNextStep(): void
     {
         parent::onNextStep();
-
+        if (!$this->b_did_create_model) {return;}
         if (!static::EDITED_BY_PHASE_SYSTEM_CLASS) {return;}
 
         try

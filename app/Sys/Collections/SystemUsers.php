@@ -3,6 +3,7 @@
 namespace App\Sys\Collections;
 
 use App\Models\User;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Users\ISystemUser;
 
@@ -30,7 +31,7 @@ class SystemUsers extends SystemBase
 
     /**
      * returns array of models that are current between resources and db
-     * * @return User[]
+     * * @return ISystemModel[]
      */
     public static function getCurrentModels() :array {
         $uuids = static::getUuids();
@@ -47,10 +48,16 @@ class SystemUsers extends SystemBase
 
     /**
      * returns array of models that no longer fit with the resources
-     * @return User[]
+     * @return ISystemModel[]
      */
     public static function getOldModels() :array {
-        $users = User::where('is_system',true)->get();
+        $uuids = static::getUuids();
+        $prepped_uuids = array_map(fn($value): string => "?", $uuids);
+        $uuids_comma_delimited = implode(',',$prepped_uuids);
+
+        $users = User::where('is_system',true)
+            ->whereRaw("ref_uuid not in ($uuids_comma_delimited)",$uuids)
+            ->get();
         $ret = [];
         foreach ($users as $user) {
             $ret[] = $user;

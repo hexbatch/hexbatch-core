@@ -68,6 +68,10 @@ return new class extends Migration
 
             $table->string('server_domain')->unique()
                 ->nullable(false)
+                ->comment("the domain of the server, no protocol or query string");
+
+            $table->string('server_url')->unique()
+                ->nullable(false)
                 ->comment("the url to the server, example localhost, eggs.waffle_time.org");
 
 
@@ -105,6 +109,7 @@ return new class extends Migration
 
             $table->dropColumn('ref_uuid');
             $table->dropColumn('server_domain');
+            $table->dropColumn('server_url');
             $table->dropColumn('status_change_at');
             $table->dropColumn('access_token_expires_at');
             $table->dropColumn('server_access_token');

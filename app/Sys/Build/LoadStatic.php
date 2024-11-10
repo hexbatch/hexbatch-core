@@ -29,6 +29,7 @@ class LoadStatic
     public array $repeat_attribute_names = [];
     public array $repeating_attribute_ownership = [];
     public array $attribute_name_uuids = [];
+    public array $attributes = [];
     public array $attribute_uuid_classes = [];
     public array $attribute_type_classes = [];
 
@@ -112,7 +113,7 @@ class LoadStatic
                 /**
                  * @type ISystemType $full_class_name
                  */
-                $name = $full_class_name::getClassTypeName();
+                $name = $full_class_name::getClassName();
                 if (!Utilities::isValidResourceName($name)) {
                     $this->bad_type_name[$uuid] = $name;
 
@@ -147,7 +148,7 @@ class LoadStatic
                 /**
                  * @type ISystemAttribute $full_class_name
                  */
-                $name = $full_class_name::getName();
+                $name = $full_class_name::getClassName();
                 if (!Utilities::isValidResourceName($name)) {
                     $this->bad_attribute_name[$uuid] = $name;
 
@@ -162,6 +163,7 @@ class LoadStatic
                 $attribute_names[$name] = true;
                 $this->attribute_uuid_classes[$uuid] = $full_class_name;
                 $this->attribute_name_uuids[$full_class_name::getChainName() ] =$uuid ;
+                $this->attributes[] = $full_class_name;
             }
 
             else if (isset($interfaces['App\Sys\Res\Ele\ISystemElement'])) {

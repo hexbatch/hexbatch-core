@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Sys\Res\ISystemModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,7 +40,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property UserNamespace[] my_namespaces
  *
  */
-class User extends Authenticatable
+class User extends Authenticatable implements ISystemModel
 {
     use HasApiTokens, HasFactory, Notifiable;
     public $timestamps = false;
@@ -158,5 +159,13 @@ class User extends Authenticatable
 
     public function getName() : string {
         return $this->username;
+    }
+
+    public function getUuid(): string {
+        return $this->ref_uuid;
+    }
+
+    public function getObject(): Model {
+        return $this;
     }
 }

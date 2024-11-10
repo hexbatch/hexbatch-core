@@ -31,6 +31,9 @@ abstract class BaseAttribute implements ISystemAttribute
     const IS_ABSTRACT = false;
     const IS_SEEN_BY_CHILDREN_TYPES = false;
 
+    protected bool $b_did_create_model = false;
+    public function didCreateModel(): bool { return $this->b_did_create_model; }
+
      public static function getClassUuid() : string {
          return static::UUID;
      }
@@ -51,7 +54,7 @@ abstract class BaseAttribute implements ISystemAttribute
          return static::PARENT_ATTRIBUTE_CLASS;
      }
 
-     public static function getName() :string { return static::ATTRIBUTE_NAME; }
+     public static function getClassName() :string { return static::ATTRIBUTE_NAME; }
 
     public static function getDictionaryObject() :ISystemAttribute {
         return SystemAttributes::getAttributeByUuid(static::class);
@@ -76,7 +79,7 @@ abstract class BaseAttribute implements ISystemAttribute
          return $ret;
      }
      public static function getChainName() :string {
-        if (!static::PARENT_ATTRIBUTE_CLASS) {return static::getName();}
+        if (!static::PARENT_ATTRIBUTE_CLASS) {return static::getClassName();}
 
         $names = [];
 
@@ -86,9 +89,9 @@ abstract class BaseAttribute implements ISystemAttribute
         $rev = array_reverse(static::getParentClasses());
 
         foreach ($rev as $parent_class) {
-            $names[] = $parent_class::getName();
+            $names[] = $parent_class::getClassName();
         }
-        $names[] = static::getName();
+        $names[] = static::getClassName();
         return implode(UserNamespace::NAMESPACE_SEPERATOR,$names);
      }
 
@@ -129,7 +132,9 @@ abstract class BaseAttribute implements ISystemAttribute
            }
 
 
-           return $sys_params->doParamsAndResponse();
+           $what =  $sys_params->doParamsAndResponse();
+           $this->b_did_create_model = true;
+           return $what;
        } catch (\Exception $e) {
             throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }
@@ -165,6 +170,7 @@ abstract class BaseAttribute implements ISystemAttribute
 
     public function onNextStep(): void
     {
+        if (!$this->b_did_create_model) {return;}
         if (!static::getSystemHandle()) {return;}
 
         try

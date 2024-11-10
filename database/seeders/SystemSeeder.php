@@ -9,11 +9,10 @@ class SystemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * @throws \Exception
      */
     public function run(): void
     {
-        SystemResources::loadClasses();
-        SystemResources::generateObjects();
-        SystemResources::doNextSteps();
+        SystemResources::build();
     }
 }

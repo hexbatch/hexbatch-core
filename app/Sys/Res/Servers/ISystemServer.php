@@ -17,6 +17,7 @@ interface ISystemServer extends ISystemResource,IServer
 
     public static function getServerDomain(): string;
     public static function getServerName(): string;
+    public static function getServerUrl(): string;
     public static function getSystemNamespaceClass(): string|ISystemNamespace;
     public static function getSystemTypeClass(): string|ISystemType;
 

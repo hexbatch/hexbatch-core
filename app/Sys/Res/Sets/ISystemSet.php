@@ -17,7 +17,7 @@ interface ISystemSet extends ISystemResource, ISet
 
 
 
-    public function getDefiningSystemElement() :?ISystemElement;
+    public static function getDefiningSystemElement() :?ISystemElement;
 
 
 

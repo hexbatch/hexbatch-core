@@ -12,6 +12,7 @@ use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Types\IType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -58,9 +59,8 @@ use Illuminate\Validation\ValidationException;
  * @property string created_at
  * @property string updated_at
  *
- * @property UserNamespace type_owner
  */
-class ElementType extends Model implements IType
+class ElementType extends Model implements IType,ISystemModel
 {
 
     protected $table = 'element_types';
@@ -113,7 +113,7 @@ class ElementType extends Model implements IType
         });
     }
 
-    public function type_owner() : BelongsTo {
+    public function owner_namespace() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'owner_namespace_id');
     }
 
@@ -158,9 +158,9 @@ class ElementType extends Model implements IType
         $build = ElementType::select('element_types.*')
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
-            /** @uses ElementType::type_owner(), ElementType::type_attributes(), ElementType::type_server_levels() */
+            /** @uses ElementType::owner_namespace(), ElementType::type_attributes(), ElementType::type_server_levels() */
             /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_map(),ElementType::type_time() */
-            ->with('type_owner', 'type_attributes', 'type_children', 'type_parents','type_server_levels','type_map','type_time')
+            ->with('owner_namespace', 'type_attributes', 'type_children', 'type_parents','type_server_levels','type_map','type_time')
             ;
 
         if ($id) {
@@ -268,7 +268,7 @@ class ElementType extends Model implements IType
     }
 
     public function getName() :string {
-        return $this->type_owner->getName().UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
+        return $this->owner_namespace->getName().UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
     }
 
     public function isInUse() : bool {
@@ -529,8 +529,15 @@ class ElementType extends Model implements IType
     }
 
 
-    public function getTypeObject(): ?ElementType
-    {
+    public function getTypeObject(): ?ElementType {
+        return $this;
+    }
+
+    public function getUuid(): string{
+        return $this->ref_uuid;
+    }
+
+    public function getObject(): Model {
         return $this;
     }
 }

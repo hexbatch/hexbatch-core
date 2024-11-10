@@ -4,10 +4,9 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 
 
 
-use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class PathHandleRemoveMetric extends BaseAttribute
+class PathHandleRemoveMetric extends ActionMetric
 {
     const UUID = '445394df-a861-4dc2-982e-e412fbf37c52';
     const ATTRIBUTE_NAME = 'path_handle_remove_metric';

@@ -18,7 +18,8 @@ abstract class BaseSystemUser implements ISystemUser
 
     const NAMESPACE_CLASS = ThisNamespace::class;
 
-
+    protected bool $b_did_create_model = false;
+    public function didCreateModel(): bool { return $this->b_did_create_model; }
     public static function getSystemNamespaceClass() :string|ISystemNamespace {
         return static::NAMESPACE_CLASS;
     }
@@ -46,6 +47,7 @@ abstract class BaseSystemUser implements ISystemUser
            $user->is_system = true;
            $user->save();
            $user->refresh();
+           $this->b_did_create_model = true;
            return $user;
        } catch (\Exception $e) {
             throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
@@ -68,6 +70,7 @@ abstract class BaseSystemUser implements ISystemUser
 
     public function onNextStep(): void
     {
+        if (!$this->b_did_create_model) {return;}
         //users add in the default namespace using the uuid of the now generated ns
         $ns = $this->getUserNamespace();
         if (!$ns) {

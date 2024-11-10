@@ -56,7 +56,7 @@ trait BaseParams
         $meep = $collection->get($param_name,[]);
         if (!is_array($meep)) { $meep =  [$meep];}
         /** @var array  $ret_not_empty */
-        $ret_not_empty = array_filter($meep, fn($value) => !empty(intval(trim($value) )) );
+        $ret_not_empty = array_filter($meep, fn($value) => !empty(trim($value) ) );
 
         foreach ($ret_not_empty as $tt) {
             if (!Utilities::is_uuid($tt)) {

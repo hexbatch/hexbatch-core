@@ -14,7 +14,7 @@ class BaseAction extends BaseType implements IAction
     const UUID = 'ebdcbddd-c746-44dc-84b0-cf1f8f174b2b';
     const ACTION_NAME = TypeOfAction::BASE_ACTION;
 
-    public static function getClassTypeName() :string { return static::ACTION_NAME->value; }
+    public static function getClassName() :string { return static::ACTION_NAME->value; }
 
 
     const ATTRIBUTE_CLASSES = [

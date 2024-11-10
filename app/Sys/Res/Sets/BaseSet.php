@@ -5,6 +5,7 @@ namespace App\Sys\Res\Sets;
 
 use App\Api\Cmd\Set\Promote\SetForSystem;
 use App\Exceptions\HexbatchInitException;
+use App\Helpers\Utilities;
 use App\Models\ElementSet;
 use App\Sys\Collections\SystemElements;
 use App\Sys\Collections\SystemSets;
@@ -24,10 +25,19 @@ use App\Sys\Res\ISystemResource;
 
     ];
 
+
+
     protected ?ElementSet $set = null;
+
+     protected bool $b_did_create_model = false;
+     public function didCreateModel(): bool { return $this->b_did_create_model; }
 
      public static function getClassUuid() : string {
          return static::UUID;
+     }
+
+     public static function getClassName() :string {
+         return 'Set defined by '. static::getDefiningSystemElementClass()::getClassName();
      }
 
      public static function getDictionaryObject() :ISystemSet {
@@ -47,7 +57,7 @@ use App\Sys\Res\ISystemResource;
 
 
 
-     public function getDefiningSystemElement(): ?ISystemElement
+     public static function getDefiningSystemElement(): ?ISystemElement
      {
          return SystemElements::getElementByUuid(static::ELEMENT_CLASS);
      }
@@ -92,7 +102,9 @@ use App\Sys\Res\ISystemResource;
                ->setContentElementIds($element_ids)
               ;
 
-           return $sys_params->doParamsAndResponse();
+           $what =  $sys_params->doParamsAndResponse();
+           $this->b_did_create_model = true;
+           return $what;
 
        } catch (\Exception $e) {
            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
@@ -112,7 +124,8 @@ use App\Sys\Res\ISystemResource;
 
     public function onNextStep(): void
     {
-
+        if (!$this->b_did_create_model) {return;}
+        Utilities::ignoreVar(); //for linting
     }
 
 

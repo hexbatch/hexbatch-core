@@ -20,6 +20,12 @@ class ServerForSystem
         $this->server_id = $server_id;
         return $this;
     }
+
+    public function setServerUrl(?string $server_url): ServerForSystem
+    {
+        $this->server_url = $server_url;
+        return $this;
+    }
     public function setSystem(?bool $system): ServerForSystem
     {
         $this->system = $system;

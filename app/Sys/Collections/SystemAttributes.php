@@ -4,6 +4,7 @@ namespace App\Sys\Collections;
 
 use App\Models\Attribute;
 use App\Sys\Res\Atr\ISystemAttribute;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 
 class SystemAttributes extends SystemBase
@@ -24,13 +25,18 @@ class SystemAttributes extends SystemBase
 
     /**
     * returns array of models that are current between resources and db
-    * * @return Attribute[]
+    * * @return ISystemModel[]
     */
     public static function getCurrentModels() :array {
         $uuids = static::getUuids();
         $prepped_uuids = array_map(fn($value): string => "?", $uuids);
         $uuids_comma_delimited = implode(',',$prepped_uuids);
-        $models = Attribute::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)->get();
+        $models = Attribute::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)
+            /** @uses Attribute::type_owner() */
+            ->with('type_owner')
+            /** @uses ElementType::owner_namespace(),\App\Models\UserNamespace::namespace_home_server() */
+            ->with('type_owner.owner_namespace','type_owner.owner_namespace.namespace_home_server')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;
@@ -40,10 +46,20 @@ class SystemAttributes extends SystemBase
 
     /**
      * returns array of models that no longer fit with the resources
-     * @return Attribute[]
+     * @return ISystemModel[]
      */
     public static function getOldModels() :array  {
-        $models = Attribute::where('is_system',true)->get();
+        $uuids = static::getUuids();
+        $prepped_uuids = array_map(fn($value): string => "?", $uuids);
+        $uuids_comma_delimited = implode(',',$prepped_uuids);
+
+        $models = Attribute::where('is_system',true)
+            ->whereRaw("ref_uuid not in ($uuids_comma_delimited)",$uuids)
+            /** @uses Attribute::type_owner() */
+            ->with('type_owner')
+            /** @uses ElementType::owner_namespace(),\App\Models\UserNamespace::namespace_home_server() */
+            ->with('type_owner.owner_namespace','type_owner.owner_namespace.namespace_home_server')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;

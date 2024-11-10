@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Sys\Res\ISystemModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property UserNamespace element_namespace
  * @property ElementType element_parent_type
  */
-class Element extends Model
+class Element extends Model implements ISystemModel
 {
 
     /*
@@ -141,7 +142,7 @@ class Element extends Model
     }
 
     public function getName() :string {
-        return $this->ref_uuid;
+        return 'Element '.$this->element_parent_type->getName();
     }
 
     public function getValueBySet(?ElementSet $set) : ?ElementValue {
@@ -149,4 +150,11 @@ class Element extends Model
     }
 
 
+    public function getUuid(): string{
+        return $this->ref_uuid;
+    }
+
+    public function getObject(): Model {
+        return $this;
+    }
 }

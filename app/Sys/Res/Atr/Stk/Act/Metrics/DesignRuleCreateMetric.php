@@ -4,10 +4,9 @@ namespace App\Sys\Res\Atr\Stk\Act\Metrics;
 
 
 
-use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 
-class DesignRuleCreateMetric extends BaseAttribute
+class DesignRuleCreateMetric extends ActionMetric
 {
     const UUID = '98de6d38-3b31-43f3-ba6f-b6503818f9b4';
     const ATTRIBUTE_NAME = 'design_rule_create_metric';

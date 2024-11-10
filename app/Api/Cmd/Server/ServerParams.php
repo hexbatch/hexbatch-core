@@ -22,6 +22,7 @@ trait ServerParams
     protected ?int $access_token_expires_at = null;
     protected ?string $server_name = null;
     protected ?string $server_domain = null;
+    protected ?string $server_url = null;
     protected ?string $server_access_token = null;
 
     protected ?bool $system = null;
@@ -46,12 +47,18 @@ trait ServerParams
         $this->uuid = static::uuidFromCollection($collection,'uuid');
         $this->server_status = TypeOfServerStatus::getFromCollection($collection,'server_status');
         $this->server_domain = static::stringFromCollection($collection,'server_domain');
+        $this->server_url = static::stringFromCollection($collection,'server_url');
         $this->system = static::boolFromCollection($collection,'system');
         $this->server_name = static::stringFromCollection($collection,'server_name');
         $this->server_access_token = static::stringFromCollection($collection,'server_access_token');
         $this->access_token_expires_at = static::unixTsFromCollection($collection,'access_token_expires_at');
 
         $this->validate();
+    }
+
+    public function getServerUrl(): ?string
+    {
+        return $this->server_url;
     }
 
     public function getServerId(): ?int

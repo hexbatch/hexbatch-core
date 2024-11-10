@@ -34,6 +34,13 @@ class BaseElement implements ISystemElement
     const PHASE_CLASS = '';
     const NAMESPACE_CLASS = ThisNamespace::class;
 
+    protected bool $b_did_create_model = false;
+    public function didCreateModel(): bool { return $this->b_did_create_model; }
+
+    public static function getClassName() :string {
+        return 'Element '. static::getSystemTypeClass()::getClassName();
+    }
+
     public static function getClassUuid() : string {
         return static::UUID;
     }
@@ -67,7 +74,9 @@ class BaseElement implements ISystemElement
            ;
 
 
-           return $sys_params->doParamsAndResponse();
+           $what =  $sys_params->doParamsAndResponse();
+           $this->b_did_create_model = true;
+           return $what;
 
        } catch (\Exception $e) {
            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
@@ -87,6 +96,7 @@ class BaseElement implements ISystemElement
 
     public function onNextStep(): void
     {
+        if (!$this->b_did_create_model) {return;}
         try
         {
             $sys_params = new EditEleForSystem();

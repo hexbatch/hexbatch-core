@@ -4,9 +4,9 @@ namespace App\Sys\Collections;
 
 use App\Helpers\Utilities;
 use App\Sys\Build\SystemResources;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 
-use Illuminate\Database\Eloquent\Model;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -32,8 +32,13 @@ abstract class SystemBase
 
     protected static function callClass($some_class_name) : ?ISystemResource {
         $ret = null;
+
         if (class_exists($some_class_name))
         {
+            $uuid_check = static::getUuid($some_class_name);
+            if (isset(static::$resource_array[$uuid_check])) {
+                return static::$resource_array[$uuid_check];
+            }
             /** @var ISystemResource $obj */
             $obj = new $some_class_name;
             $ret = $obj->OnCall();
@@ -48,14 +53,19 @@ abstract class SystemBase
         if (empty(static::$class_name_array)) { static::$class_name_array = static::findClasses(); static::postFindClasses();}
         return static::$class_name_array;
     }
+
+    /**
+     * @return ISystemResource[]
+     */
     public static function generateObjects() : array
     {
         static::loadClasses();
-        static::$resource_array = [];
         $ret = [];
         foreach (static::$class_name_array as $some_class_name) {
-            $ret[] = static::callClass($some_class_name);
-
+            $what = static::callClass($some_class_name);
+            if ($what?->didCreateModel()) {
+                $ret[] = $what;
+            }
         }
         return $ret;
     }
@@ -166,13 +176,20 @@ abstract class SystemBase
 
     /**
      * returns array of uuid that has not been added to the db yet
-     * @return string[]
+     * @return ISystemResource[]
      */
-    public static function getNewUuids() :array {
+    public static function getNew() :array {
         $all_uuids = static::getUuids();
         $current_uuids = static::getCurrentUuids();
-        return array_diff($all_uuids,$current_uuids);
-
+        $diff_uuids =  array_diff($all_uuids,$current_uuids);
+        $ret = [];
+        foreach ($diff_uuids as $some_uuid) {
+            $class_name = static::$uuid_class_names[$some_uuid]??null;
+            if ($class_name) {
+                $ret[] = $class_name;
+            }
+        }
+        return $ret;
     }
 
     /**
@@ -184,29 +201,16 @@ abstract class SystemBase
         $ret = [];
 
         foreach ($models_now as $mod) {
-            /** @noinspection PhpPossiblePolymorphicInvocationInspection */
             $ret[] = $mod->ref_uuid;
         }
         return $ret;
     }
 
-    /**
-     * returns array of newly added models
-     * @return Model[]
-     */
-    public static function addNew() :array {
-        $new_uuids = static::getNewUuids();
-        $ret = [];
-        foreach ($new_uuids as $nude) {
-            $class = static::$uuid_class_names[$nude];
-            $ret[] = SystemBase::callClass($class);
-        }
-        return $ret;
-    }
+
 
     /**
      * returns array of deleted models
-     * @return Model[]
+     * @return ISystemModel[]
      */
     public static function removeOld() :array {
         $olds = static::getOldModels();
@@ -216,27 +220,16 @@ abstract class SystemBase
         return $olds;
     }
 
-    /**
-     * returns array of deleted models
-     * @return Model[]
-     */
-    public static function removeCurrent() :array {
-        $olds = static::getOldModels();
-        foreach ($olds as $old) {
-            $old->delete();
-        }
-        return $olds;
-    }
 
     /**
      * returns array of models that are current between resources and db
-     * * @return Model[]
+     * * @return ISystemModel[]
      */
     abstract public static function getCurrentModels() :array ;
 
     /**
      * returns array of models that no longer fit with the resources
-     * @return Model[]
+     * @return ISystemModel[]
      */
     abstract public static function getOldModels() :array ;
 

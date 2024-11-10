@@ -3,6 +3,7 @@
 namespace App\Sys\Collections;
 
 use App\Models\UserNamespace;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 
@@ -23,13 +24,16 @@ class SystemNamespaces extends SystemBase
 
     /**
      * returns array of models that are current between resources and db
-     * * @return UserNamespace[]
+     * * @return ISystemModel[]
      */
     public static function getCurrentModels() :array {
         $uuids = static::getUuids();
         $prepped_uuids = array_map(fn($value): string => "?", $uuids);
         $uuids_comma_delimited = implode(',',$prepped_uuids);
-        $models = UserNamespace::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)->get();
+        $models = UserNamespace::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)
+            /** @uses UserNamespace::namespace_home_server() */
+            ->with('namespace_home_server')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;
@@ -39,10 +43,18 @@ class SystemNamespaces extends SystemBase
 
     /**
      * returns array of models that no longer fit with the resources
-     * @return UserNamespace[]
+     * @return ISystemModel[]
      */
     public static function getOldModels() :array  {
-        $models = UserNamespace::where('is_system',true)->get();
+        $uuids = static::getUuids();
+        $prepped_uuids = array_map(fn($value): string => "?", $uuids);
+        $uuids_comma_delimited = implode(',',$prepped_uuids);
+
+        $models = UserNamespace::where('is_system',true)
+            ->whereRaw("ref_uuid not in ($uuids_comma_delimited)",$uuids)
+            /** @uses UserNamespace::namespace_home_server() */
+            ->with('namespace_home_server')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;

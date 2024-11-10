@@ -71,6 +71,10 @@ class ServerPromoteResponse extends ServerPromote implements IActionWorkReturn,I
             $server->server_domain = $params->getServerDomain() ;
         }
 
+        if ($params->getServerUrl()) {
+            $server->server_url = $params->getServerUrl() ;
+        }
+
 
         if ($params->isSystem() !== null) {
             $server->is_system = $params->isSystem() ;

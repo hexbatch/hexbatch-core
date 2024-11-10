@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\ApiMapper;
 use App\Sys\Build\LoadStatic;
+use App\Sys\Build\SystemResources;
 use App\Sys\Res\Atr\ISystemAttribute;
 use App\Sys\Res\Sets\ISystemSet;
 use App\Sys\Res\Types\ISystemType;
@@ -20,7 +21,7 @@ class BuildSystem extends Command
      */
     protected $signature = 'hex:build {--check} {--list} {--list-attributes} {--list-types} {--list-elements} {--list-sets} '.
                                         ' {--list-users} {--list-servers} {--list-namespaces} {--mapper} ' .
-                                        ' {--show-current } {--show-old} {--show-new} {--build-new} {--trim-old} {--show-diff} '
+                                        ' {--show-current } {--show-old} {--show-new} {--build} {--trim-old}  '
     ;
 
 
@@ -76,7 +77,7 @@ class BuildSystem extends Command
              */
             $attr_class = $info['attribute_class'];
 
-            $this->warn("Attribute ".$attr_class::getName()." $uuid is duplicate claimed by type".$type_class::getClassTypeName());
+            $this->warn("Attribute ".$attr_class::getClassName()." $uuid is duplicate claimed by type".$type_class::getClassName());
         }
 
 
@@ -133,16 +134,32 @@ class BuildSystem extends Command
         if ($this->option('check')) {
             $number_actions = 0;
             $number_api = 0;
+            $number_events = 0;
+            $number_meta = 0;
+            $number_metrics = 0;
+            $number_metadata = 0;
             foreach ($load->types as  $val) {
                 $full_class_type_name = $val;
                 if (is_subclass_of($full_class_type_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) { $number_actions++;}
                 if (is_subclass_of($full_class_type_name, 'App\Sys\Res\Types\Stk\Root\Api') ) { $number_api++;}
+                if (is_subclass_of($full_class_type_name, 'App\Sys\Res\Types\Stk\Root\Event') ) { $number_events++;}
+                if (is_subclass_of($full_class_type_name, 'App\Sys\Res\Types\Stk\Root\Meta') ) { $number_meta++;}
+
+            }
+            foreach ($load->attributes as  $full_class_attribute) {
+                if (is_subclass_of($full_class_attribute, 'App\Sys\Res\Atr\Stk\Act\ActionMetric') ) { $number_metrics++;}
+                if (is_subclass_of($full_class_attribute, 'App\Sys\Res\Atr\Stk\MetaData\Metadata') ) { $number_metadata++;}
             }
             $this->info('UUID '.count($load->uuid_classes));
             $this->info('TYPES '.count($load->type_name_uuids));
             $this->info('    Actions '.$number_actions);
             $this->info('    Api '.$number_api);
+            $this->info('    Events '.$number_events);
+            $this->info('    Meta '.$number_meta);
+            $this->info('    Others '.count($load->type_name_uuids) - $number_actions - $number_api - $number_events - $number_meta);
             $this->info('ATTRIBUTES '.count($load->attribute_name_uuids));
+            $this->info('    Metrics '.$number_metrics);
+            $this->info('    Meta '.$number_metadata);
             $this->info('SETS '.count($load->type_sets));
             $this->info('ELEMENTS '.count($load->type_elements));
             $this->info('SERVERS '.count($load->system_servers));
@@ -168,7 +185,7 @@ class BuildSystem extends Command
                     /** @type ISystemType $type_class */
                     $type_class = $load->attribute_type_classes[$attribute_class]??null;
                     if ($type_class) {
-                        $type_name = $type_class::getClassTypeName();
+                        $type_name = $type_class::getClassName();
                     }
                 }
                 $data[] = [$name, $uuid, $type_name];
@@ -303,7 +320,7 @@ class BuildSystem extends Command
                       "\n   Handle Element " . $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getClassUuid()
 
                     . "\n   Handle Type    ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getClassUuid()
-                      ."\n   ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getClassTypeName()
+                      ."\n   ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getClassName()
 
                     . "\n   ".$some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getFlatInheritance();
 
@@ -314,19 +331,19 @@ class BuildSystem extends Command
                     $dets
                     ,
 
-                    " Type    ". $some_namespace::getSystemTypeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassTypeName()
+                    " Type    ". $some_namespace::getSystemTypeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassName()
                     . "\n   ".$some_namespace::getSystemTypeClass()::getFlatInheritance()
-                    ." Home Set   ". $some_namespace::getSystemHomeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassTypeName()
+                    ." Home Set   ". $some_namespace::getSystemHomeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassName()
                     . "\n   ".$some_namespace::getSystemHomeClass()::getDefiningSystemElementClass()::getSystemTypeClass()::getFlatInheritance()
 
                     ,
 
 
-                     " Public    ". $some_namespace::getSystemPublicClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPublicClass()::getSystemTypeClass()::getClassTypeName()
+                     " Public    ". $some_namespace::getSystemPublicClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPublicClass()::getSystemTypeClass()::getClassName()
                     . "\n   ".$some_namespace::getSystemPublicClass()::getSystemTypeClass()::getFlatInheritance()
 
                     . " \n "
-                    ." Private    ". $some_namespace::getSystemPrivateClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getClassTypeName()
+                    ." Private    ". $some_namespace::getSystemPrivateClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getClassName()
                     . "\n   ".$some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getFlatInheritance()
                     ."\n   "
                     ,
@@ -338,28 +355,107 @@ class BuildSystem extends Command
         }
 
         if ($this->option('show-new')) {
-            //todo show the system resources whose uuid are not in the db yet
+            $oldly = SystemResources::showNew();
+            $data = [];
+            foreach ($oldly as $build_type => $new_classes ) {
+                foreach ($new_classes as  $new_class) {
+                    $data[] = [
+                        $build_type,
+                        $new_class::getClassUuid(),
+                        $new_class::getClassName()
+                    ];
+                }
+            }
+            if (empty($data)) {
+                $this->info("No new");
+            } else {
+                $this->table(['Category','Uuid','Name'],$data);
+            }
         }
 
+
+
         if ($this->option('show-current')) {
-            //todo show the system resources whose uuid are in the db (not in the old or new)
+            $curry = SystemResources::showCurrent();
+            $data = [];
+            foreach ($curry as $build_type => $things_current ) {
+                foreach ($things_current as $currently) {
+                    $data[] = [
+                        $build_type,
+                        $currently->getUuid(),
+                        $currently->getName(),
+                    ];
+                }
+            }
+            if (empty($data)) {
+                $this->info("No Current");
+            } else {
+                $this->table(['Category','Uuid','Name'],$data);
+            }
         }
 
         if ($this->option('show-old')) {
-            //todo show the db rows for the system that are no longer in the resources
+            $oldly = SystemResources::showOld();
+            $data = [];
+            foreach ($oldly as $build_type => $things_old ) {
+                foreach ($things_old as $elderly) {
+                    $data[] = [
+                        $build_type,
+                        $elderly->getUuid(),
+                        $elderly->getName(),
+                    ];
+                }
+            }
+            if (empty($data)) {
+                $this->info("No old");
+            } else {
+                $this->table(['Category','Uuid','Name'],$data);
+            }
         }
 
-        if ($this->option('show-diff')) {
-            //todo show changes between the db and the resources (briefer covers old or new)
-        }
 
-        if ($this->option('build-new')) {
-            //todo add to the db rows the resources not included
+
+        if ($this->option('build')) {
+            $newly = SystemResources::build();
+            $data = [];
+            foreach ($newly as $build_type => $things_made ) {
+                foreach ($things_made as $something_made) {
+                    $data[] = [
+                       $build_type,
+                       $something_made::getClassUuid(),
+                       $something_made::getClassName(),
+                    ];
+                }
+            }
+            if (empty($data)) {
+                $this->info("Nothing created");
+            } else {
+                $this->table(['Category','Uuid','Name'],$data);
+            }
+
+
         }
 
         if ($this->option('trim-old')) {
-            //todo remove from the db the rows no longer linked by the resources
+            $oldly = SystemResources::removeOld();
+            $data = [];
+            foreach ($oldly as $build_type => $things_old ) {
+                foreach ($things_old as $elderly) {
+                    $data[] = [
+                        $build_type,
+                        $elderly->getUuid(),
+                        $elderly->getName(),
+                    ];
+                }
+            }
+            if (empty($data)) {
+                $this->info("Did not remove any old");
+            } else {
+                $this->table(['Category','Uuid','Name'],$data);
+            }
         }
+
+
 
 
         return 0;

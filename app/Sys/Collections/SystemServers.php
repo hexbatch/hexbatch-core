@@ -3,6 +3,7 @@
 namespace App\Sys\Collections;
 
 use App\Models\Server;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Servers\ISystemServer;
 
@@ -22,7 +23,7 @@ class SystemServers extends SystemBase
 
     /**
      * returns array of models that are current between resources and db
-     * * @return Server[]
+     * * @return ISystemModel[]
      */
     public static function getCurrentModels() :array {
         $uuids = static::getUuids();
@@ -38,10 +39,15 @@ class SystemServers extends SystemBase
 
     /**
      * returns array of models that no longer fit with the resources
-     * @return Server[]
+     * @return ISystemModel[]
      */
     public static function getOldModels() :array  {
-        $models = Server::where('is_system',true)->get();
+        $uuids = static::getUuids();
+        $prepped_uuids = array_map(fn($value): string => "?", $uuids);
+        $uuids_comma_delimited = implode(',',$prepped_uuids);
+        $models = Server::where('is_system',true)
+            ->whereRaw("ref_uuid not in ($uuids_comma_delimited)",$uuids)
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;

@@ -22,6 +22,9 @@ abstract class BaseServer implements ISystemServer
     const NAMESPACE_CLASS = '';
     const SERVER_TYPE_CLASS = '';
 
+    protected bool $b_did_create_model = false;
+    public function didCreateModel(): bool { return $this->b_did_create_model; }
+
     public static function getDictionaryObject() :ISystemServer {
         return SystemServers::getServerByUuid(static::class);
     }
@@ -60,6 +63,7 @@ abstract class BaseServer implements ISystemServer
                ->setUuid(static::getClassUuid())
                ->setSystem(true)
                ->setServerName(static::getServerName())
+               ->setServerUrl(static::getServerUrl())
                ->setServerDomain(static::getServerDomain())
                ->setServerAccessToken(null)
                ->setAccessTokenExpiresAt(null)
@@ -67,7 +71,9 @@ abstract class BaseServer implements ISystemServer
 
                ;
 
-           return $sys_params->doParamsAndResponse();
+           $what =  $sys_params->doParamsAndResponse();
+           $this->b_did_create_model = true;
+           return $what;
 
        } catch (\Exception $e) {
            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
@@ -91,6 +97,7 @@ abstract class BaseServer implements ISystemServer
 
     public function onNextStep(): void
     {
+        if (!$this->b_did_create_model) {return;}
         $sys_params = new ServerForSystem();
         $sys_params
             ->setServerId($this->server->id)

@@ -35,7 +35,12 @@ abstract class BaseNamespace implements ISystemNamespace
     const USER_CLASS = SystemUser::class;
 
     protected ?UserNamespace $namespace = null;
+    protected bool $b_did_create_model = false;
+    public function didCreateModel(): bool { return $this->b_did_create_model; }
 
+    public static function getClassName() :string {
+        return 'Home '. static::getSystemHomeClass()::getClassName();
+    }
 
     public static function getDictionaryObject() :ISystemNamespace {
         return SystemNamespaces::getNamespaceByUuid(static::class);
@@ -88,7 +93,9 @@ abstract class BaseNamespace implements ISystemNamespace
                ->setNamespacePublicKey(static::getNamespacePublicKey())
                ;
 
-           return $sys_params->doParamsAndResponse();
+           $what =  $sys_params->doParamsAndResponse();
+           $this->b_did_create_model = true;
+           return $what;
        } catch (\Exception $e) {
             throw new HexbatchInitException('[makeNamespace] '.$e->getMessage(),$e->getCode(),null,$e);
        }
@@ -114,6 +121,7 @@ abstract class BaseNamespace implements ISystemNamespace
 
     public function onNextStep(): void
     {
+        if (!$this->b_did_create_model) {return;}
         //namespaces added in the home set , attribute and elements and user
         $user = $this->getNamespaceUser();
         if (!$user) {

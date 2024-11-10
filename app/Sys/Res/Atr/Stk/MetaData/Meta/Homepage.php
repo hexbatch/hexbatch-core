@@ -4,10 +4,9 @@ namespace App\Sys\Res\Atr\Stk\MetaData\Meta;
 
 
 
-use App\Sys\Res\Atr\BaseAttribute;
 use App\Sys\Res\Atr\Stk\MetaData\Metadata;
 
-class Homepage extends BaseAttribute
+class Homepage extends Metadata
 {
     const UUID = '2b8a8c69-76c7-4d1d-acc4-87f81371af8b';
     const ATTRIBUTE_NAME = 'homepage';

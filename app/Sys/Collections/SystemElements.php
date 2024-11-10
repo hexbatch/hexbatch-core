@@ -4,6 +4,7 @@ namespace App\Sys\Collections;
 
 use App\Models\Element;
 use App\Sys\Res\Ele\ISystemElement;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 
 class SystemElements extends SystemBase
@@ -22,13 +23,16 @@ class SystemElements extends SystemBase
 
     /**
      * returns array of models that are current between resources and db
-     * * @return Element[]
+     * * @return ISystemModel[]
      */
     public static function getCurrentModels() :array {
         $uuids = static::getUuids();
         $prepped_uuids = array_map(fn($value): string => "?", $uuids);
         $uuids_comma_delimited = implode(',',$prepped_uuids);
-        $models = Element::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)->get();
+        $models = Element::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)
+            /** @uses Element::element_parent_type() */
+            ->with('element_parent_type')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;
@@ -38,10 +42,18 @@ class SystemElements extends SystemBase
 
     /**
      * returns array of models that no longer fit with the resources
-     * @return Element[]
+     * @return ISystemModel[]
      */
     public static function getOldModels() :array  {
-        $models = Element::where('is_system',true)->get();
+        $uuids = static::getUuids();
+        $prepped_uuids = array_map(fn($value): string => "?", $uuids);
+        $uuids_comma_delimited = implode(',',$prepped_uuids);
+
+        $models = Element::where('is_system',true)
+            ->whereRaw("ref_uuid not in ($uuids_comma_delimited)",$uuids)
+            /** @uses Element::element_parent_type() */
+            ->with('element_parent_type')
+            ->get();
         $ret = [];
         foreach ($models as $mod) {
             $ret[] = $mod;

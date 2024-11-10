@@ -15,6 +15,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
 use App\Sys\Res\Atr\IAttribute;
+use App\Sys\Res\ISystemModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,7 +74,7 @@ use Illuminate\Validation\ValidationException;
  * @property ServerEvent attached_event
  * @property ElementValue original_element_value
  */
-class Attribute extends Model implements IAttribute
+class Attribute extends Model implements IAttribute,ISystemModel
 {
 
     protected $table = 'attributes';
@@ -655,10 +656,6 @@ class Attribute extends Model implements IAttribute
         }
     }
 
-    public function getAttributeUuid(): string
-    {
-        return $this->ref_uuid;
-    }
 
     public function getOwningType(): ?ElementType
     {
@@ -681,6 +678,14 @@ class Attribute extends Model implements IAttribute
     }
 
     public function getAttributeObject() : ?Attribute {
+        return $this;
+    }
+
+    public function getUuid(): string {
+        return $this->ref_uuid;
+    }
+
+    public function getObject(): Model {
         return $this;
     }
 }

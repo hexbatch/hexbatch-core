@@ -6,9 +6,11 @@ namespace App\Models;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Sets\ISet;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
@@ -25,9 +27,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string updated_at
  *
  * @property ElementSetMember[] element_members
+ * @property Element defining_element
  *
  */
-class ElementSet extends Model implements ISet
+class ElementSet extends Model implements ISet,ISystemModel
 {
 
     /*
@@ -70,6 +73,10 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         return $this->hasMany(ElementSetMember::class,'holder_set_id');
     }
 
+    public function defining_element() : BelongsTo {
+        return $this->belongsTo(Element::class,'parent_set_element_id');
+    }
+
     public static function buildSet(
         ?int $id = null
     )
@@ -87,8 +94,8 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
             $build->where('element_sets.id', $id);
         }
 
-        /** @uses ElementSet::element_members(),ElementSetMember::of_element() */
-        $build->with('element_members','element_members.of_element');
+        /** @uses ElementSet::element_members(),ElementSet::defining_element(),ElementSetMember::of_element() */
+        $build->with('element_members','defining_element','element_members.of_element');
 
         return $build;
     }
@@ -133,12 +140,23 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
     }
 
 
-    public function getSetObject(): ?ElementSet
-    {
+    public function getSetObject(): ?ElementSet {
+        return $this;
+    }
+
+    public function getUuid(): string{
+        return $this->ref_uuid;
+    }
+
+    public function getObject(): Model {
         return $this;
     }
 
     public function addElement(Element $ele,bool $events) : ElementSetMember {
         return new ElementSetMember(); //todo make code to add in the element to the set, include the element_values and related
+    }
+
+    public function getName(): string {
+        return 'Set from '.$this->defining_element->getName();
     }
 }
