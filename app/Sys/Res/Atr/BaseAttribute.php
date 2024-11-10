@@ -19,7 +19,7 @@ use App\Sys\Res\Types\ISystemType;
 
 abstract class BaseAttribute implements ISystemAttribute
 {
-    protected ?Attribute $attribute;
+    protected ?Attribute $attribute = null;
 
     const UUID = '';
     const TYPE_CLASS = '';
@@ -43,8 +43,8 @@ abstract class BaseAttribute implements ISystemAttribute
          return static::ATTRIBUTE_NAME;
      }
 
-     public static function getClassOwningSystemType() :string|ISystemType {
-         return static::TYPE_CLASS;
+     public static function getClassOwningSystemType() :string|ISystemType|null {
+         return SystemTypes::getAttributeOwner(static::class);
      }
 
     public static function getClassParentSystemAttribute() :string|ISystemAttribute {
@@ -52,6 +52,10 @@ abstract class BaseAttribute implements ISystemAttribute
      }
 
      public static function getName() :string { return static::ATTRIBUTE_NAME; }
+
+    public static function getDictionaryObject() :ISystemAttribute {
+        return SystemAttributes::getAttributeByUuid(static::class);
+    }
 
      public static function getParentClasses() :array  {
          $ret = [];
@@ -107,8 +111,6 @@ abstract class BaseAttribute implements ISystemAttribute
            $sys_params
                ->setUuid(static::getClassUuid())
                ->setAttributeName(static::getClassAttributeName())
-               ->setOwnerElementTypeId(static::getClassOwningSystemType())
-               ->setParentAttributeId(static::getClassParentSystemAttribute())
                ->setDesignAttributeId(null)
                ->setFinal(static::IS_FINAL)
                ->setAbstract(static::IS_ABSTRACT)
@@ -116,9 +118,20 @@ abstract class BaseAttribute implements ISystemAttribute
                ->setAttributeApproval(TypeOfApproval::PUBLISHING_APPROVED)
                ->setSystem(true);
 
+           if(static::getClassOwningSystemType()) {
+               $sys_params->setOwnerElementTypeId(static::getClassOwningSystemType()::getDictionaryObject()->getTypeObject()->id);
+           } else {
+               throw new \LogicException("Attribute ". static::class . " Does not have a type");
+           }
+
+           if(static::getClassParentSystemAttribute()) {
+               $sys_params->setParentAttributeId(static::getClassParentSystemAttribute()::getDictionaryObject()->getAttributeObject()->id);
+           }
+
+
            return $sys_params->doParamsAndResponse();
        } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }
    }
 
@@ -163,7 +176,7 @@ abstract class BaseAttribute implements ISystemAttribute
             $sys_params->doParamsAndResponse();
 
         } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
         }
     }
 

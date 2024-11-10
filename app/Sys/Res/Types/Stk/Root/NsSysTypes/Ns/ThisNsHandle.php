@@ -20,7 +20,7 @@ class ThisNsHandle extends BaseType
         return $name;
     }
 
-    const TYPE_NAME = 'system_server';
+    const TYPE_NAME = 'system_namespace_handle';
 
     const HANDLE_ELEMENT_CLASS = SystemHandleElement::class;
 

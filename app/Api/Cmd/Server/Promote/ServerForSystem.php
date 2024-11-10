@@ -15,7 +15,12 @@ class ServerForSystem
     use ServerParams;
 
 
-    public function setSystem(bool $system): ServerForSystem
+    public function setServerId(?int $server_id): ServerForSystem
+    {
+        $this->server_id = $server_id;
+        return $this;
+    }
+    public function setSystem(?bool $system): ServerForSystem
     {
         $this->system = $system;
         return $this;

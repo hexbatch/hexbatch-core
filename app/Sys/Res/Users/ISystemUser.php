@@ -10,6 +10,7 @@ use App\Sys\Res\Namespaces\ISystemNamespace;
 interface ISystemUser extends ISystemResource
 {
 
+    public static function getDictionaryObject() :ISystemUser;
     public static function getUserName() :string;
     public static function getUserPassword() :string;
     public function getUserNamespace() :?ISystemNamespace;

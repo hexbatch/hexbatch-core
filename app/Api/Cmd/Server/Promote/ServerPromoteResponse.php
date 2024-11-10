@@ -26,16 +26,56 @@ class ServerPromoteResponse extends ServerPromote implements IActionWorkReturn,I
     }
 
     protected function run(ServerPromoteParams $params) {
-        $server = new Server();
-        $server->ref_uuid = $params->getUuid();
-        $server->owning_namespace_id = $params->getOwningNamespaceId();
-        $server->server_type_id = $params->getServerTypeId();
-        $server->server_status = $params->getServerStatus() ;
-        $server->access_token_expires_at = $params->getAccessTokenExpiresAt() ;
-        $server->server_access_token = $params->getServerAccessToken() ;
-        $server->server_name = $params->getServerName() ;
-        $server->server_domain = $params->getServerDomain() ;
-        $server->is_system = $params->isSystem() ;
+        if ($params->getServerId()) {
+            $server = Server::findOrFail($params->getServerId());
+        } else {
+            $server = new Server();
+        }
+
+        if ($params->getUuid()) {
+            $server->ref_uuid = $params->getUuid();
+        }
+
+
+        if ($params->getOwningNamespaceId()) {
+            $server->owning_namespace_id = $params->getOwningNamespaceId();
+        }
+
+
+        if ($params->getServerTypeId()) {
+            $server->server_type_id = $params->getServerTypeId();
+        }
+
+
+        if ($params->getServerStatus()) {
+            $server->server_status = $params->getServerStatus() ;
+        }
+
+
+        if ($params->getAccessTokenExpiresAt()) {
+            $server->access_token_expires_at = $params->getAccessTokenExpiresAt() ;
+        }
+
+
+        if ($params->getServerAccessToken()) {
+            $server->server_access_token = $params->getServerAccessToken() ;
+        }
+
+
+        if ($params->getServerName()) {
+            $server->server_name = $params->getServerName() ;
+        }
+
+
+        if ($params->getServerDomain()) {
+            $server->server_domain = $params->getServerDomain() ;
+        }
+
+
+        if ($params->isSystem() !== null) {
+            $server->is_system = $params->isSystem() ;
+        }
+
         $server->save();
         $this->generated_server = $server;
     }

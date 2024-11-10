@@ -4,7 +4,6 @@ namespace App\Sys\Res\Servers\Stock;
 
 use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchInitException;
-use App\Sys\Collections\SystemServers;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Servers\BaseServer;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\Server\ThisServerType;
@@ -48,8 +47,4 @@ class ThisServer extends BaseServer {
         return TypeOfServerStatus::ALLOWED_SERVER;
     }
 
-    public function onNextStep(): void
-    {
-
-    }
 }

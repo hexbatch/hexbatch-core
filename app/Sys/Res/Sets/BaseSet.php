@@ -7,6 +7,7 @@ use App\Api\Cmd\Set\Promote\SetForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementSet;
 use App\Sys\Collections\SystemElements;
+use App\Sys\Collections\SystemSets;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
 
@@ -23,10 +24,14 @@ use App\Sys\Res\ISystemResource;
 
     ];
 
-    protected ?ElementSet $set;
+    protected ?ElementSet $set = null;
 
      public static function getClassUuid() : string {
          return static::UUID;
+     }
+
+     public static function getDictionaryObject() :ISystemSet {
+         return SystemSets::getSetByUuid(static::class);
      }
 
      public static function hasEvents() :bool { return static::HAS_EVENTS;}
@@ -76,12 +81,12 @@ use App\Sys\Res\ISystemResource;
        {
            $element_ids = [];
            foreach (static::getMemberSystemElementClasses() as $some_element_class) {
-               $element_ids[] = $some_element_class->getElementObject()?->id;
+               $element_ids[] = $some_element_class::getDictionaryObject()->getElementObject()?->id;
            }
            $sys_params = new SetForSystem();
            $sys_params
                ->setUuid(static::getClassUuid())
-               ->setParentSetElementId(static::getDefiningSystemElementClass()->getElementObject()?->id)
+               ->setParentSetElementId(static::getDefiningSystemElementClass()::getDictionaryObject()->getElementObject()?->id)
                ->setHasEvents(static::hasEvents())
                ->setSystem(true)
                ->setContentElementIds($element_ids)
@@ -90,7 +95,7 @@ use App\Sys\Res\ISystemResource;
            return $sys_params->doParamsAndResponse();
 
        } catch (\Exception $e) {
-           throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+           throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }
    }
 

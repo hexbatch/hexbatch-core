@@ -7,9 +7,9 @@ use App\Sys\Res\Types\ISystemType;
 
 interface ISystemAttribute extends ISystemResource,IAttribute
 {
-
+    public static function getDictionaryObject() :ISystemAttribute;
     public static function getName() :string;
-    public static function getClassOwningSystemType() :string|ISystemType;
+    public static function getClassOwningSystemType() :string|ISystemType|null;
     public static function getClassParentSystemAttribute() :string|ISystemAttribute;
     public static function getChainName() :string;
 

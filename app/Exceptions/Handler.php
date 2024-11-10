@@ -44,6 +44,10 @@ class Handler extends ExceptionHandler
                 'status' => $status,
                 'errors' => [],
             ];
+            $reported_status = $status;
+            if ($status < 100 || $status >= 600) {
+                $reported_status = 400;
+            }
             $other = $e->getPrevious();
             while ($other) {
                 $response['errors'][get_class($other)] = $other->getMessage();
@@ -55,7 +59,7 @@ class Handler extends ExceptionHandler
 
 
             // Return a JSON response with the response array and status code
-            return response()->json($response, $status);
+            return response()->json($response, $reported_status);
         }
 
         if ($e instanceof \Illuminate\Validation\ValidationException) {

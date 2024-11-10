@@ -79,7 +79,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         /**
          * @var Builder $build
          */
-        $build = Element::select('element_sets.*')
+        $build = ElementSet::select('element_sets.*')
             ->selectRaw(" extract(epoch from  element_sets.created_at) as created_at_ts,  extract(epoch from  element_sets.updated_at) as updated_at_ts")
         ;
 

@@ -12,6 +12,7 @@ use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\ElementValue;
 use App\Models\Phase;
+use App\Sys\Collections\SystemElements;
 use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
@@ -24,7 +25,7 @@ use App\Sys\Res\Types\IType;
 
 class BaseElement implements ISystemElement
 {
-    protected ?Element $element;
+    protected ?Element $element = null;
 
 
 
@@ -56,8 +57,8 @@ class BaseElement implements ISystemElement
            $sys_params = new EleForSystem;
            $sys_params
                ->setDestinationSetIds([ElementPromoteParams::NO_SETS_MADE_YET_STUB_ID])
-               ->setNsOwnerIds([static::getSystemNamespaceClass()->getNamespaceObject()->id])
-               ->setParentTypeId(static::getSystemTypeClass()->getTypeObject()->id)
+               ->setNsOwnerIds([static::getSystemNamespaceClass()::getDictionaryObject()->getNamespaceObject()->id])
+               ->setParentTypeId(static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()->id)
                ->setPhaseId(null)
                ->setSystem(true)
                ->setNumberPerSet(1)
@@ -69,7 +70,7 @@ class BaseElement implements ISystemElement
            return $sys_params->doParamsAndResponse();
 
        } catch (\Exception $e) {
-           throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+           throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }
    }
 
@@ -98,10 +99,12 @@ class BaseElement implements ISystemElement
             $sys_params->doParamsAndResponse();
 
         } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
         }
     }
-
+    public static function getDictionaryObject() :ISystemElement {
+        return SystemElements::getElementByUuid(static::class);
+    }
 
     public static function getSystemTypeClass() :string|ISystemType {
         return static::TYPE_CLASS;

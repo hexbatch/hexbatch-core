@@ -7,6 +7,7 @@ use App\Sys\Res\ISystemResource;
 
 interface ISystemSet extends ISystemResource, ISet
 {
+    public static function getDictionaryObject() :ISystemSet;
     public static function hasEvents() :bool;
 
     public static function getDefiningSystemElementClass() :string|ISystemElement;

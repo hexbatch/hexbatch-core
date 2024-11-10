@@ -17,6 +17,12 @@ class PhaseForSystem
     use PhaseParams;
 
 
+    public function setSystem(?bool $system): PhaseForSystem
+    {
+        $this->system = $system;
+        return $this;
+    }
+
     public function setPhaseId(?int $phase_id): PhaseForSystem
     {
         $this->phase_id = $phase_id;

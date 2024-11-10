@@ -3,15 +3,8 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Models\Thing;
-use App\Sys\Res\Atr\IAttribute;
-use App\Sys\Res\Ele\IElement;
 use App\Sys\Res\IEvent;
-use App\Sys\Res\Namespaces\INamespace;
-use App\Sys\Res\Servers\IServer;
-use App\Sys\Res\Sets\ISet;
 use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\IType;
 use App\Sys\Res\Types\Stk\Root\Event;
 
 

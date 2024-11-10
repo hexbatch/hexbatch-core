@@ -17,6 +17,7 @@ trait PhaseParams
     protected ?string $uuid = null;
 
 
+    protected ?bool $system = null;
 
     protected function validate() {
     }
@@ -55,6 +56,11 @@ trait PhaseParams
     public function getUuid(): ?string
     {
         return $this->uuid;
+    }
+
+    public function isSystem(): ?bool
+    {
+        return $this->system;
     }
 
 

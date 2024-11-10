@@ -12,6 +12,8 @@ class SystemNamespaces extends SystemBase
     protected static array $uuid_class_names = [];
     const SOURCE_FOLDER = 'app/Sys/Res/Namespaces/Stock';
 
+    /** @var array<string,ISystemResource> $resource_array */
+    protected static array $resource_array = []; //keyed by uuid
 
     public static function getNamespaceByUuid(null|string|ISystemResource  $class_name_or_uuid) : ?ISystemNamespace {
 

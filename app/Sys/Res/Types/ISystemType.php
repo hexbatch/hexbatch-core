@@ -11,6 +11,7 @@ use App\Sys\Res\Servers\ISystemServer;
 interface ISystemType extends ISystemResource, IType
 {
 
+    public static function getDictionaryObject() :ISystemType;
     public static function getClassTypeName() :string;
     public static function getTypeNamespaceClass() :string|ISystemNamespace;
     public static function getTypeServerClass() :string|ISystemServer;

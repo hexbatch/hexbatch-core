@@ -416,7 +416,7 @@ class ElementType extends Model implements IType
                 if (!is_string($describe_hint_here) || !Utilities::is_uuid($describe_hint_here)) {
                     throw new HexbatchNotPossibleException(__('msg.type_descriptions_must_be_uuid'),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::TYPE_BAD_SCHEMA);
+                        RefCodes::TYPE_SCHEMA_ISSUE);
                 }
                 /**
                  * @var Element|null $de_element
@@ -437,7 +437,7 @@ class ElementType extends Model implements IType
                         if (!is_string($some_parent_hint)) {
                             throw new HexbatchNotPossibleException(__('msg.parent_types_must_be_string_names'),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                RefCodes::TYPE_BAD_SCHEMA);
+                                RefCodes::TYPE_SCHEMA_ISSUE);
                         }
                         /**
                          * @var ElementType|null $some_parent
@@ -486,7 +486,7 @@ class ElementType extends Model implements IType
                         if ($bound->location_type === TypeOfLocation::SHAPE) {
                             throw new HexbatchNotPossibleException(__('msg.type_must_have_map_bound'),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                RefCodes::TYPE_BAD_SCHEMA);
+                                RefCodes::TYPE_SCHEMA_ISSUE);
                         }//todo allow either type of bound map or shape
                         $this->type_location_map_bound_id = $bound->id;
                     }

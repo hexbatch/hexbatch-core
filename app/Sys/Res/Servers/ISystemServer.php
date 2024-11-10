@@ -10,6 +10,7 @@ use App\Sys\Res\Types\ISystemType;
 
 interface ISystemServer extends ISystemResource,IServer
 {
+    public static function getDictionaryObject() :ISystemServer;
     public function getServerStatus() :TypeOfServerStatus;
     public function getServerSystemNamespace() :?ISystemNamespace;
 

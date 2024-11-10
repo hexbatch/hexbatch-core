@@ -214,6 +214,7 @@ Route::prefix('v1')->group(function () {
                 PromoteOwner.php
                 Purge.php
                 Promotion
+                PromotePublish
                 AttributePromotion.php
                  */
 

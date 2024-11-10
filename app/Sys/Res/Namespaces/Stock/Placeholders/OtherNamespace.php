@@ -23,7 +23,9 @@ class OtherNamespace extends BaseNamespace
 
     public static function getNamespaceName(): string
     {
-        return 'other_namespace_placeholder';
+        return 'placeholder_other_namespace';
     }
+
+    public static function getClassUuid(): string { return static::UUID; }
 
 }

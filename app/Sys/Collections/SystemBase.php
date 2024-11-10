@@ -16,20 +16,19 @@ abstract class SystemBase
     const SOURCE_FOLDER = '';
 
     /** @var ISystemResource[] $class_name_array */
-    public static array $class_name_array; //sorted by nested folder: higher level php classes before those in folders below them
+    public static array $class_name_array = []; //sorted by nested folder: higher level php classes before those in folders below them
 
     /** @var array<string,SystemBase> $uuid_class_names */
     protected static array $uuid_class_names = []; //keyed by UUID , value is the namespaced class name found in the values above
 
 
+    /** @var array<string,ISystemResource> $resource_array */
+    protected static array $resource_array = []; //keyed by uuid
     /**
      * @return string[]
      */
     public static function getUuids() { return array_keys(static::$uuid_class_names);}
-    /**
-     * @var ISystemResource[] $resource_array
-     */
-    protected static array $resource_array = []; //keyed by uuid
+
 
     protected static function callClass($some_class_name) : ?ISystemResource {
         $ret = null;
@@ -46,7 +45,7 @@ abstract class SystemBase
 
 
     public static function loadClasses() : array  {
-        if (empty(static::$class_name_array)) { static::$class_name_array = static::findClasses();}
+        if (empty(static::$class_name_array)) { static::$class_name_array = static::findClasses(); static::postFindClasses();}
         return static::$class_name_array;
     }
     public static function generateObjects() : array
@@ -93,7 +92,9 @@ abstract class SystemBase
         return static::callClass($class_name);
     }
 
+    protected  static function postFindClasses() : void {
 
+    }
 
     public static function findClasses() : array
     {
@@ -141,6 +142,7 @@ abstract class SystemBase
             $class_name_array[] = $some_class;
 
         }
+
 
         return $class_name_array;
 

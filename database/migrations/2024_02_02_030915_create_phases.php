@@ -35,6 +35,10 @@ return new class extends Migration
                 ->nullable(false)->default(false)
                 ->comment("If true then only that row can be true, and the others set as false");
 
+            $table->boolean('is_system')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true then this phase is a system resource');
+
             $table->timestamps();
 
             $table->uuid('ref_uuid')

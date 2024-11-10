@@ -14,6 +14,7 @@ trait ServerParams
 {
     use BaseParams;
 
+    protected ?int $server_id = null;
     protected ?int $owning_namespace_id = null;
     protected ?int $server_type_id = null;
     protected ?string $uuid = null;
@@ -23,7 +24,7 @@ trait ServerParams
     protected ?string $server_domain = null;
     protected ?string $server_access_token = null;
 
-    protected bool $system = false;
+    protected ?bool $system = null;
 
     protected function validate() {
         try {
@@ -39,15 +40,23 @@ trait ServerParams
 
     public function fromCollection(Collection $collection)
     {
+        $this->server_id = static::intRefFromCollection($collection,'server_id');
         $this->owning_namespace_id = static::intRefFromCollection($collection,'owning_namespace_id');
         $this->server_type_id = static::intRefFromCollection($collection,'server_type_id');
         $this->uuid = static::uuidFromCollection($collection,'uuid');
         $this->server_status = TypeOfServerStatus::getFromCollection($collection,'server_status');
         $this->server_domain = static::stringFromCollection($collection,'server_domain');
+        $this->system = static::boolFromCollection($collection,'system');
+        $this->server_name = static::stringFromCollection($collection,'server_name');
         $this->server_access_token = static::stringFromCollection($collection,'server_access_token');
         $this->access_token_expires_at = static::unixTsFromCollection($collection,'access_token_expires_at');
 
         $this->validate();
+    }
+
+    public function getServerId(): ?int
+    {
+        return $this->server_id;
     }
 
     public function getOwningNamespaceId(): ?int
@@ -55,7 +64,7 @@ trait ServerParams
         return $this->owning_namespace_id;
     }
 
-    public function isSystem(): bool
+    public function isSystem(): ?bool
     {
         return $this->system;
     }

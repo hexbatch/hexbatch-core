@@ -36,20 +36,21 @@ class Phase extends BaseType
     public function onCall(): ISystemResource
     {
         $ret = parent::onCall();
-        try
-        {
-            $sys_params = new PhaseForSystem();
-            $sys_params
-                ->setUuid(static::getClassUuid())
-                ->setDefaultPhase(static::IS_DEFAULT_PHASE)
-                ->setPhaseTypeId($this->getTypeObject()->id)
-                ->setEditedByPhaseId(null)
-            ;
+        if (static::EDITED_BY_PHASE_SYSTEM_CLASS) {
+            try {
+                $sys_params = new PhaseForSystem();
+                $sys_params
+                    ->setSystem(true)
+                    ->setUuid(static::getClassUuid())
+                    ->setDefaultPhase(static::IS_DEFAULT_PHASE)
+                    ->setPhaseTypeId($this->getTypeObject()->id)
+                    ->setEditedByPhaseId(null);
 
-            $this->phase =  $sys_params->doParamsAndResponse();
+                $this->phase = $sys_params->doParamsAndResponse();
 
-        } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            } catch (\Exception $e) {
+                throw new HexbatchInitException(message: $e->getMessage() . ': code ' . $e->getCode(), prev: $e);
+            }
         }
         return $ret;
 
@@ -59,22 +60,28 @@ class Phase extends BaseType
     {
         parent::onNextStep();
 
+        if (!static::EDITED_BY_PHASE_SYSTEM_CLASS) {return;}
+
         try
         {
             /**
              * @var Phase $phase_type_object
              */
-            $phase_type_object = SystemTypes::getTypeByUuid(static::EDITED_BY_PHASE_SYSTEM_CLASS)->getTypeObject();
+            $editing_type_object = SystemTypes::getTypeByUuid(static::EDITED_BY_PHASE_SYSTEM_CLASS)->getTypeObject();
+            $editing_phase = \App\Models\Phase::where('phase_type_id',$editing_type_object?->id)->first();
+            if (!$editing_phase) {
+                throw new \LogicException("Cannot find phase from editor of ".static::EDITED_BY_PHASE_SYSTEM_CLASS);
+            }
             $sys_params = new PhaseForSystem();
             $sys_params
                 ->setPhaseId($this->phase->id)
-                ->setEditedByPhaseId($phase_type_object->phase->id)
+                ->setEditedByPhaseId($editing_phase->id)
                 ;
 
             $sys_params->doParamsAndResponse();
 
         } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
         }
 
     }

@@ -4,8 +4,10 @@ namespace App\Sys\Res\Users\Stock;
 
 
 use App\Exceptions\HexbatchInitException;
+use App\Sys\Collections\SystemUsers;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Users\BaseSystemUser;
+use App\Sys\Res\Users\ISystemUser;
 
 class SystemUser extends BaseSystemUser
 {
@@ -19,6 +21,10 @@ class SystemUser extends BaseSystemUser
             throw new HexbatchInitException("System user uuid is not set in .env");
         }
         return $name;
+    }
+
+    public static function getDictionaryObject() :ISystemUser {
+        return SystemUsers::getSystemUserByUuid(static::class);
     }
 
     public static function getUserName() :string {

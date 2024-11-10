@@ -20,7 +20,7 @@ class ThisServerType extends BaseType
         return $name;
     }
 
-    const TYPE_NAME = 'system_handle';
+    const TYPE_NAME = 'system_server';
 
     const HANDLE_ELEMENT_CLASS = SystemHandleElement::class;
 

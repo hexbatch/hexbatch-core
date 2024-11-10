@@ -22,7 +22,9 @@ class OwnerNamespace extends BaseNamespace
 
     public static function getNamespaceName(): string
     {
-        return 'owner_namespace_placeholder';
+        return 'placeholder_owner_namespace';
     }
+
+    public static function getClassUuid(): string { return static::UUID; }
 
 }

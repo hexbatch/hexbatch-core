@@ -31,6 +31,7 @@ trait SetParams
         $this->uuid = static::uuidFromCollection($collection,'uuid');
         $this->has_events = static::boolFromCollection($collection,'has_events');
         $this->content_element_ids = static::intArrayFromCollection($collection,'content_element_ids');
+        $this->system = static::boolFromCollection($collection,'system');
 
         $this->validate();
     }

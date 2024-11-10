@@ -13,6 +13,7 @@ use App\Sys\Res\Users\ISystemUser;
 interface ISystemNamespace extends ISystemResource, INamespace
 {
 
+    public static function getDictionaryObject() :ISystemNamespace;
     public static function getSystemServerClass() :string|ISystemServer;
     public static function getSystemUserClass() :string|ISystemUser;
     public static function getSystemPublicClass() :string|ISystemElement;

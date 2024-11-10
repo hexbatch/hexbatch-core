@@ -52,6 +52,10 @@ class PhasePromoteResponse extends PhasePromote implements IActionWorkReturn,IAc
             $phase->is_default_phase = $params->isDefaultPhase();
         }
 
+        if ($params->isSystem()!== null) {
+            $phase->is_system = $params->isSystem();
+        }
+
         $phase->save();
         $this->generated_phase = $phase;
     }

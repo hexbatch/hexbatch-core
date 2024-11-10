@@ -72,6 +72,7 @@ enum TypeOfAction: string
     case CMD_DESIGN_LOCATION = 'cmd_design_location';
     case CMD_DESIGN_EDIT = 'cmd_design_edit';
 
+    case CMD_DESIGN_PUBLISH_PROMOTE = 'cmd_design_publish_promote';
     case CMD_DESIGN_PARENT_ADD = 'cmd_design_parent_add';
     case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
 

@@ -3,7 +3,6 @@ namespace App\Api\Cmd\Namespace\Promote;
 
 
 use App\Api\Cmd\Namespace\NamespaceParams;
-use App\Exceptions\HexbatchInitException;
 use App\Models\UserNamespace;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\BuildActionFacet;
@@ -77,29 +76,26 @@ class NsForSystem
     }
 
     public function doParamsAndResponse() :UserNamespace {
-        try
-        {
 
-            /**
-             * @var NamespacePromoteParams $promo_params
-             */
-            $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,NamespacePromote::getClassUuid());
-            $promo_params->fromCollection($this->makeCollection());
 
-            /**
-             * @type NamespacePromoteResponse $promo_work
-             */
-            $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,NamespacePromote::getClassUuid());
+        /**
+         * @var NamespacePromoteParams $promo_params
+         */
+        $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,NamespacePromote::getClassUuid());
+        $promo_params->fromCollection($this->makeCollection());
 
-            /**
-             * @type NamespacePromoteResponse $promo_results
-             */
-            $promo_results = $promo_work::doWork($promo_params);
-            return $promo_results->getGeneratedNamespace();
+        /**
+         * @type NamespacePromoteResponse $promo_work
+         */
+        $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,NamespacePromote::getClassUuid());
 
-        } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
-        }
+        /**
+         * @type NamespacePromoteResponse $promo_results
+         */
+        $promo_results = $promo_work::doWork($promo_params);
+        return $promo_results->getGeneratedNamespace();
+
+
     }
 
 

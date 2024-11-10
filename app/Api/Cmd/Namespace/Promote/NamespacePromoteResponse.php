@@ -26,9 +26,6 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
 
     }
 
-    /**
-     * @throws \Exception
-     */
     protected function run(NamespacePromoteParams $params) {
 
 
@@ -48,9 +45,7 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
         $this->generated_namespace = $ns;
     }
 
-    /**
-     * @throws \Exception
-     */
+
     public static function doWork($params): IActionWorkReturn
     {
         if (!(is_a($params,NamespacePromoteParams::class) || is_subclass_of($params,NamespacePromoteParams::class))) {

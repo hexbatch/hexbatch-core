@@ -19,7 +19,7 @@ return new class extends Migration
                 ->default(null)
                 ->comment("The admin namespace for this server")
                 ->index('idx_server_owning_namespace_id')
-                ->constrained('element_types')
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 

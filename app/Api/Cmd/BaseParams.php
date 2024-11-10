@@ -19,13 +19,13 @@ trait BaseParams
 
     public static function stringFromCollection(Collection $collection,string $param_name) : ?string {
         $what  = (string)$collection->get($param_name);
-        if (!empty($what))  { return null;}
+        if (empty($what))  { return null;}
         return $what;
     }
 
     public static function unixTsFromCollection(Collection $collection,string $param_name) : ?int {
         $what  = (string)$collection->get($param_name);
-        if (!empty($what))  { return null;}
+        if (empty($what))  { return null;}
         try {
             return Carbon::create($what)->unix();
         } catch (InvalidFormatException $e) {
@@ -44,7 +44,7 @@ trait BaseParams
     public static function intArrayFromCollection(Collection $collection,string $param_name) : array {
         if (!$collection->has($param_name)) {return [];}
         $meep = $collection->get($param_name,[]);
-        if (!is_array($meep)) { return [$meep];}
+        if (!is_array($meep)) { $meep =  [$meep];}
         /** @var array  $ret_not_empty */
         $ret_not_empty = array_filter($meep, fn($value) => !empty(intval(trim($value) )) );
         return array_map(fn($value): int => intval($value), $ret_not_empty);
@@ -54,7 +54,7 @@ trait BaseParams
     public static function uuidArrayFromCollection(Collection $collection,string $param_name) : array {
         if (!$collection->has($param_name)) {return [];}
         $meep = $collection->get($param_name,[]);
-        if (!is_array($meep)) { return [$meep];}
+        if (!is_array($meep)) { $meep =  [$meep];}
         /** @var array  $ret_not_empty */
         $ret_not_empty = array_filter($meep, fn($value) => !empty(intval(trim($value) )) );
 
@@ -70,7 +70,7 @@ trait BaseParams
 
     public static function uuidFromCollection(Collection $collection,string $param_name) : ?string {
         $what  = (string)$collection->get($param_name);
-        if (!empty($what))  { return null;}
+        if (empty($what))  { return null;}
 
         if (!Utilities::is_uuid($what)) {
             throw new HexbatchInvalidException(__('messages.invalid_uuid',['ref'=>$what]),
@@ -84,6 +84,7 @@ trait BaseParams
     public function makeCollection() : Collection {
         $arr = [];
         foreach ($this as $key => $val) {
+            if (is_null($val)) {continue;}
             $arr[$key] = $val;
         }
         return new Collection($arr);

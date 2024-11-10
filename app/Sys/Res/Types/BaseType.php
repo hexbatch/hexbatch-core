@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types;
 
 
 use App\Api\Cmd\Design\Promote\SetupForSystem;
+use App\Api\Cmd\Design\PublishPromote\PublishForSystem;
 use App\Api\Cmd\Type\AddHandle\HandleForSystem;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchInitException;
@@ -23,7 +24,7 @@ use App\Sys\Res\Servers\Stock\ThisServer;
 
 abstract class BaseType implements ISystemType
 {
-    protected ?ElementType $type;
+    protected ?ElementType $type = null;
 
     const UUID = '';
     const NAMESPACE_CLASS = ThisNamespace::class;
@@ -67,18 +68,23 @@ abstract class BaseType implements ISystemType
                ->setUuid(static::getClassUuid())
                ->setTypeName(static::getClassTypeName())
                ->setSystem(true)
-                ->setNamespaceId(static::getTypeNamespaceClass()->getNamespaceObject()?->id)
-                ->setServerId(static::getTypeServerClass()->getServerObject()?->id)
                 ->setLifecycle(TypeOfLifecycle::PUBLISHED)
-               ->setFinalType(static::IS_FINAL);
+                ->setFinalType(static::IS_FINAL);
+
+            $sys_params->setNamespaceId(static::getTypeNamespaceClass()::getDictionaryObject()->getNamespaceObject()?->id);
+            $sys_params->setServerId(static::getTypeServerClass()::getDictionaryObject()->getServerObject()?->id);
+
 
             return $sys_params->doParamsAndResponse();
 
        } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }
    }
 
+    /**
+     * @return ISystemAttribute[]
+     */
     public static function getAttributeClasses() :array {
         return static::ATTRIBUTE_CLASSES;
     }
@@ -184,6 +190,10 @@ abstract class BaseType implements ISystemType
         return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
     }
 
+    public static function getDictionaryObject() :ISystemType {
+        return SystemTypes::getTypeByUuid(static::class);
+    }
+
     public static function getClassTypeName() :string { return static::TYPE_NAME; }
     public static function getTypeNamespaceClass() :string|ISystemNamespace { return static::NAMESPACE_CLASS; }
     public static function getTypeServerClass() :string|ISystemServer { return static::SERVER_CLASS; }
@@ -200,18 +210,32 @@ abstract class BaseType implements ISystemType
 
     public function onNextStep(): void
     {
-        if (!static::getHandleElement()) {return;}
 
         try
         {
-            $sys_params = new HandleForSystem();
+            if (static::HANDLE_ELEMENT_CLASS) {
+                $sys_params = new HandleForSystem();
+                $sys_params
+                    ->setTypeIds([$this->getTypeObject()->id])
+                    ->setHandleElementId(static::getHandleElement()->getElementObject()->id);
+                $sys_params->doParamsAndResponse();
+            }
+
+
+            $parent_ids = [];
+            foreach (static::getParentTypes() as $parent_system_object) {
+                $parent_ids[] = $parent_system_object->getTypeObject()->id;
+            }
+
+            $sys_params = new PublishForSystem();
             $sys_params
-                ->setTypeIds([$this->getTypeObject()->id])
-                ->setHandleElementId(static::getHandleElement()->getElementObject()->id);
+                ->setTypeId($this->getTypeObject()->id)
+                ->setParentIds($parent_ids)
+                ->setLifecycle(TypeOfLifecycle::PUBLISHED); //at the very least, with no parents, publish this
             $sys_params->doParamsAndResponse();
 
         } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
         }
     }
 

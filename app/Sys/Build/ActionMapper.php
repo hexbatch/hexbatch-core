@@ -18,12 +18,14 @@ class ActionMapper extends AaMapperBase
     const OUTPUT_FILE = 'bootstrap/cache/hbc_action_cache.php';
 
 
-    public static function getActionInterface(BuildActionFacet $facet,string $uuid) :?string {
+    public static function getActionInterface(BuildActionFacet $facet,string $uuid) {
         $what = include base_path(static::OUTPUT_FILE);
-        if (isset($what[$uuid]) ) {
-            return $what[$uuid][$facet->value]??null;
+
+        if (!isset($what[$uuid]) || !isset($what[$uuid][$facet->value]) ) {
+           throw new \LogicException("The facet $facet->value for $uuid is not in the bootstrap file ".static::OUTPUT_FILE);
         }
-        return null;
+        $class = $what[$uuid][$facet->value];
+        return new $class;
     }
 
     /**

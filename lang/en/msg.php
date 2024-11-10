@@ -116,10 +116,12 @@ return [
     //element types
     'type_not_found' => 'Type not found using :ref',
     'type_must_have_name' => 'Types need a name',
+    'type_must_have_ns' => 'Types need a namespace',
     'type_must_have_map_bound' => 'Types can only use a map bound',
     'parent_types_must_be_string_names' => 'A parent type must already exist and be refered to by the name or uuid, which is a string and not an object',
     'type_descriptions_must_be_uuid' => 'A description element has to be a UUID',
-    'parent_type_is_not_inheritable' => 'The child type must allow you to inherit, and also not be retired or final',
+    'parent_type_is_not_inheritable' => 'The parent type must allow you to inherit, and also not be retired or final',
+    'parent_type_must_be_published' => 'The parent type must be published',
     'type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
     'type_only_admin_can_edit' => 'Only the admins in :ns can edit the type :ref',
     'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements, no children',

@@ -1,7 +1,6 @@
 <?php
 namespace App\Api\Cmd\Element\PromoteEdit;
 
-use App\Api\Cmd\Element\BulkElementParams;
 use App\Api\Cmd\IActionOaInput;
 use App\Api\Cmd\IActionParams;
 use App\Models\Thing;

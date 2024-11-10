@@ -57,7 +57,7 @@ return new class extends Migration
                 ->nullable()
                 ->default(null)
                 ->comment("This is an optional description/hook element")
-                ->unique('udx_type_description_element_id')
+                ->index()
                 ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
@@ -129,11 +129,11 @@ return new class extends Migration
         ");
 
         DB::statement("
-            CREATE TRIGGER set_type_geo_before_ins BEFORE INSERT ON element_types FOR EACH ROW EXECUTE PROCEDURE update_live_types_geo_columns();
+            CREATE TRIGGER set_type_geo_before_ins BEFORE INSERT ON element_types FOR EACH ROW EXECUTE PROCEDURE update_type_geo_columns();
         ");
 
         DB::statement("
-            CREATE TRIGGER set_type_geo_before_ups BEFORE UPDATE ON element_types FOR EACH ROW EXECUTE PROCEDURE update_live_types_geo_columns();
+            CREATE TRIGGER set_type_geo_before_ups BEFORE UPDATE ON element_types FOR EACH ROW EXECUTE PROCEDURE update_type_geo_columns();
         ");
 
 

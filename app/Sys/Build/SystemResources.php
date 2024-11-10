@@ -49,11 +49,9 @@ class SystemResources
         $ret =array_merge(SystemNamespaces::generateObjects(),$ret);
         $ret =array_merge(SystemTypes::generateObjects(),$ret);
         $ret =array_merge(SystemAttributes::generateObjects(),$ret);
-
         $ret =array_merge(SystemElements::generateObjects(),$ret);
-        $ret =array_merge(SystemServers::generateObjects(),$ret);
         $ret =array_merge(SystemSets::generateObjects(),$ret);
-
+        $ret =array_merge(SystemServers::generateObjects(),$ret);
         return $ret;
 
     }

@@ -89,7 +89,7 @@ class RefCodes {
     const TYPE_CANNOT_DELETE = 7005;
 
     const TYPE_INVALID_NAME = 7006;
-    const TYPE_BAD_SCHEMA = 7007;
+    const TYPE_SCHEMA_ISSUE = 7007;
     const TYPE_CANNOT_INHERIT = 7008;
 
     const TYPE_CANNOT_EDIT = 7010;
@@ -170,7 +170,7 @@ class RefCodes {
         self::TYPE_ONLY_OWNER_CAN_DELETE => '',
         self::TYPE_CANNOT_DELETE => '',
         self::TYPE_INVALID_NAME => '',
-        self::TYPE_BAD_SCHEMA => '',
+        self::TYPE_SCHEMA_ISSUE => '',
         self::TYPE_CANNOT_INHERIT => '',
         self::TYPE_CANNOT_EDIT => '',
 

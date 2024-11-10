@@ -23,7 +23,8 @@ class LoggedInNamespace extends BaseNamespace
 
     public static function getNamespaceName(): string
     {
-        return 'logged_in_namespace_placeholder';
+        return 'placeholder_current_namespace';
     }
 
+    public static function getClassUuid(): string { return static::UUID; }
 }

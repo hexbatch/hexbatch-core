@@ -8,6 +8,7 @@ use App\Api\Cmd\Namespace\Promote\NsForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemElements;
+use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Collections\SystemServers;
 use App\Sys\Collections\SystemSets;
 use App\Sys\Collections\SystemTypes;
@@ -35,8 +36,9 @@ abstract class BaseNamespace implements ISystemNamespace
 
     protected ?UserNamespace $namespace = null;
 
-    public static function getClassUuid() : string {
-        return static::UUID;
+
+    public static function getDictionaryObject() :ISystemNamespace {
+        return SystemNamespaces::getNamespaceByUuid(static::class);
     }
 
     public static function getNamespacePublicKey(): ?string
@@ -80,15 +82,10 @@ abstract class BaseNamespace implements ISystemNamespace
            $sys_params = new NsForSystem();
            $sys_params
                ->setUuid(static::getClassUuid())
-               ->setNamespaceUserId(static::getSystemUserClass()->getUserObject()?->id)
+               ->setNamespaceUserId(static::getSystemUserClass()::getDictionaryObject()->getUserObject()?->id)
                ->setSystem(true)
-               ->setNamespaceServerId(static::getSystemServerClass()->getServerObject()?->id)
-               ->setNamespaceTypeId(static::getSystemTypeClass()->getTypeObject()?->id)
-               ->setNamespaceHomeSetId(static::getSystemHomeClass()->getSetObject()?->id)
                ->setNamespaceName(static::getNamespaceName())
                ->setNamespacePublicKey(static::getNamespacePublicKey())
-               ->setPublicElementId(static::getSystemPublicClass()->getElementObject()?->id)
-               ->setPrivateElementId(static::getSystemPrivateClass()->getElementObject()?->id)
                ;
 
            return $sys_params->doParamsAndResponse();
@@ -127,14 +124,12 @@ abstract class BaseNamespace implements ISystemNamespace
             $sys_params = new NsEditForSystem();
             $sys_params
                 ->setUuid(static::getClassUuid())
-                ->setNamespaceUserId(static::getSystemUserClass()->getUserObject()?->id)
-                ->setNamespaceServerId(static::getSystemServerClass()->getServerObject()?->id)
-                ->setNamespaceTypeId(static::getSystemTypeClass()->getTypeObject()?->id)
-                ->setNamespaceHomeSetId(static::getSystemHomeClass()->getSetObject()?->id)
                 ->setNamespaceName(static::getNamespaceName())
-                ->setNamespacePublicKey(static::getNamespacePublicKey())
-                ->setPublicElementId(static::getSystemPublicClass()->getElementObject()?->id)
-                ->setPrivateElementId(static::getSystemPrivateClass()->getElementObject()?->id)
+                ->setNamespaceServerId(static::getSystemServerClass()::getDictionaryObject()->getServerObject()?->id)
+                ->setNamespaceTypeId(static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()?->id)
+                ->setNamespaceHomeSetId(static::getSystemHomeClass()::getDictionaryObject()->getSetObject()?->id)
+                ->setPublicElementId(static::getSystemPublicClass()::getDictionaryObject()->getElementObject()?->id)
+                ->setPrivateElementId(static::getSystemPrivateClass()::getDictionaryObject()->getElementObject()?->id)
             ;
 
             $sys_params->doParamsAndResponse();

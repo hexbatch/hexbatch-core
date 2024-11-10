@@ -8,6 +8,7 @@ use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Server;
 use App\Sys\Collections\SystemNamespaces;
+use App\Sys\Collections\SystemServers;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\INamespace;
 use App\Sys\Res\Namespaces\ISystemNamespace;
@@ -16,16 +17,20 @@ use App\Sys\Res\Types\ISystemType;
 
 abstract class BaseServer implements ISystemServer
 {
-    protected ?Server $server;
+    protected ?Server $server = null;
 
     const NAMESPACE_CLASS = '';
     const SERVER_TYPE_CLASS = '';
 
-
+    public static function getDictionaryObject() :ISystemServer {
+        return SystemServers::getServerByUuid(static::class);
+    }
 
     public static function getSystemNamespaceClass(): string|ISystemNamespace {
         return static::NAMESPACE_CLASS;
-    } public static function getSystemTypeClass(): string|ISystemType {
+    }
+
+    public static function getSystemTypeClass(): string|ISystemType {
         return static::SERVER_TYPE_CLASS;
     }
 
@@ -59,14 +64,13 @@ abstract class BaseServer implements ISystemServer
                ->setServerAccessToken(null)
                ->setAccessTokenExpiresAt(null)
                ->setServerStatus(TypeOfServerStatus::ALLOWED_SERVER)
-               ->setServerTypeId(static::getSystemTypeClass()->getTypeObject()?->id)
-               ->setOwningNamespaceId(static::getSystemNamespaceClass()->getNamespaceObject()?->id)
+
                ;
 
            return $sys_params->doParamsAndResponse();
 
        } catch (\Exception $e) {
-           throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+           throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }
    }
 
@@ -87,7 +91,14 @@ abstract class BaseServer implements ISystemServer
 
     public function onNextStep(): void
     {
+        $sys_params = new ServerForSystem();
+        $sys_params
+            ->setServerId($this->server->id)
+            ->setServerName(static::getServerName())
+            ->setServerTypeId(static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()?->id)
+            ->setOwningNamespaceId(static::getSystemNamespaceClass()::getDictionaryObject()->getNamespaceObject()?->id);
 
+         $sys_params->doParamsAndResponse();
     }
 
     public function getServerNamespaceInterface() :?INamespace {

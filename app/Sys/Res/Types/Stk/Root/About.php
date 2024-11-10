@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root;
 
+use App\Sys\Res\Atr\Stk\About\AboutThis;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Atr\Stk\About\Abt;
 use App\Sys\Res\Types\Stk\Root;
@@ -14,6 +15,7 @@ class About extends BaseType
 
 
     const ATTRIBUTE_CLASSES = [
+        AboutThis::class,
         Abt\Description::class,
         Abt\Privacy::class,
         Abt\Readme::class,

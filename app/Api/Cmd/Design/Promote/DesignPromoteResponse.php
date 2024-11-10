@@ -27,7 +27,11 @@ class DesignPromoteResponse extends DesignPromote implements IActionWorkReturn,I
         $type = new ElementType();
         $type->ref_uuid = $params->getUuid();
         $type->type_name = $params->getTypeName();
-        $type->lifecycle = $params->getLifecycle();
+
+        if ($params->getLifecycle()) {
+            $type->lifecycle = $params->getLifecycle();
+        }
+
         $type->owner_namespace_id = $params->getNamespaceId() ;
         $type->imported_from_server_id = $params->getServerId() ;
         $type->is_system = $params->isSystem() ;

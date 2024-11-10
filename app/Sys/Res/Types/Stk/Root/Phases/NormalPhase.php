@@ -2,7 +2,6 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Phases;
 
-use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\Stk\Root\Phase;
 
 

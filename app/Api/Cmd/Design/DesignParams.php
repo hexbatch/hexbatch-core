@@ -5,7 +5,7 @@ use App\Api\Cmd\BaseParams;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Utilities;
+use App\Models\UserNamespace;
 use App\Rules\ElementTypeNameReq;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
@@ -22,15 +22,23 @@ trait DesignParams
     protected bool $system = true;
     protected bool $final_type = false;
 
-    protected TypeOfLifecycle $lifecycle = TypeOfLifecycle::PUBLISHED;
+    protected ?TypeOfLifecycle $lifecycle =null;
 
 
 
     protected function validate() {
+
+        if (!$this->namespace_id) {
+            throw new HexbatchNotPossibleException(__('msg.type_must_have_ns'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_SCHEMA_ISSUE);
+        }
+
         try {
+            $namespace = UserNamespace::findOrFail($this->namespace_id);
             if ($this->type_name) {
                 Validator::make(['type_name' => $this->type_name], [
-                    'type_name' => ['required', 'string', new ElementTypeNameReq(null,Utilities::getCurrentNamespace())],
+                    'type_name' => ['required', 'string', new ElementTypeNameReq(null,$namespace)],
                 ])->validate();
             }
         } catch (ValidationException $v) {
@@ -91,7 +99,7 @@ trait DesignParams
         return $this->final_type;
     }
 
-    public function getLifecycle(): TypeOfLifecycle
+    public function getLifecycle(): ?TypeOfLifecycle
     {
         return $this->lifecycle;
     }

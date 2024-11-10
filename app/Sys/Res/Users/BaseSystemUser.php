@@ -48,7 +48,7 @@ abstract class BaseSystemUser implements ISystemUser
            $user->refresh();
            return $user;
        } catch (\Exception $e) {
-            throw new HexbatchInitException($e->getMessage(),$e->getCode(),null,$e);
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }
    }
 

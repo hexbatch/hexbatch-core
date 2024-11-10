@@ -29,9 +29,7 @@ class NamespaceEditPromotionResponse extends NamespaceEditPromotion implements I
 
     }
 
-    /**
-     * @throws \Exception
-     */
+
     protected function run(NamespaceEditPromotionParams $params) {
 
 
@@ -78,9 +76,6 @@ class NamespaceEditPromotionResponse extends NamespaceEditPromotion implements I
 
     }
 
-    /**
-     * @throws \Exception
-     */
     public static function doWork($params): IActionWorkReturn
     {
         if (!(is_a($params,NamespaceEditPromotionParams::class) || is_subclass_of($params,NamespaceEditPromotionParams::class))) {

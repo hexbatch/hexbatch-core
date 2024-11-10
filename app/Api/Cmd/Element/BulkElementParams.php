@@ -66,7 +66,7 @@ trait BulkElementParams
 
         $this->phase_id = static::intRefFromCollection($collection,'phase_id');
         $this->parent_type_id = static::intRefFromCollection($collection,'parent_type_id');
-
+        $this->system = static::boolFromCollection($collection,'system');
 
         $this->validate();
 

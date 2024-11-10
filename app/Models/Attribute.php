@@ -559,7 +559,7 @@ class Attribute extends Model implements IAttribute
                         if ($bound->location_type === TypeOfLocation::MAP) {
                             throw new HexbatchNotPossibleException(__('msg.attribute_cannot_use_map',['ref'=>$this->getName()]),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                RefCodes::TYPE_BAD_SCHEMA);
+                                RefCodes::TYPE_SCHEMA_ISSUE);
                         } //todo allow either type of bounds map or shape
                         $this->attribute_location_shape_bound_id = $bound->id;
                     }
@@ -579,7 +579,7 @@ class Attribute extends Model implements IAttribute
 
                             throw new HexbatchNotPossibleException(__('msg.attribute_cannot_use_design',['ref'=>$design->getName(),'me'=>$this->attribute_name]),
                                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                RefCodes::TYPE_BAD_SCHEMA);
+                                RefCodes::TYPE_SCHEMA_ISSUE);
                         }
                         $this->design_attribute_id = $design->id;
                     }

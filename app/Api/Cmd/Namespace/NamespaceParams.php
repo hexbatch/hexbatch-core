@@ -47,6 +47,7 @@ trait NamespaceParams
         $this->namespace_home_set_id = static::intRefFromCollection($collection,'uuid');
         $this->namespace_home_set_id = static::intRefFromCollection($collection,'namespace_home_set_id');
         $this->uuid = static::uuidFromCollection($collection,'uuid');
+        $this->system = static::boolFromCollection($collection,'system');
         $this->namespace_public_key = static::stringFromCollection($collection,'namespace_public_key');
         $this->namespace_name = static::stringFromCollection($collection,'namespace_name');
 
