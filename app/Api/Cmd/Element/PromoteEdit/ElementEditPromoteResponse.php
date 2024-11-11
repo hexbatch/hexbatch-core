@@ -22,6 +22,7 @@ class ElementEditPromoteResponse extends ElementPromoteEdit implements IActionWo
         protected array $edited_elements = []
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

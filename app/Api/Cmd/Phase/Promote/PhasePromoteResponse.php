@@ -22,6 +22,7 @@ class PhasePromoteResponse extends PhasePromote implements IActionWorkReturn,IAc
         protected ?Phase $generated_phase = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Add extends Api\ElementApi
+class AttributeOn extends Api\ElementApi
 {
-    const UUID = 'e5c47fc2-e128-4912-b546-6d78b0420f90';
-    const TYPE_NAME = 'api_element_add';
+    const UUID = 'b98ced27-eced-4348-8266-3920e5796b77';
+    const TYPE_NAME = 'api_element_on';
 
 
 
@@ -21,7 +21,7 @@ class Add extends Api\ElementApi
     const PARENT_CLASSES = [
         Api\ElementApi::class,
         Act\Cmd\Ele\Search::class,
-        Act\Cmd\Ele\LiveTypeAdd::class,
+        Act\Cmd\Ele\ElementOn::class,
     ];
 
 }

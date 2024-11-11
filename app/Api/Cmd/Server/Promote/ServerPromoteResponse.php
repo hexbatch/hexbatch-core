@@ -18,6 +18,7 @@ class ServerPromoteResponse extends ServerPromote implements IActionWorkReturn,I
         protected ?Server $generated_server = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

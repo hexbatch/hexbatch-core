@@ -16,6 +16,7 @@ class DesignPromoteResponse extends DesignPromote implements IActionWorkReturn,I
         protected ?ElementType $generated_type = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

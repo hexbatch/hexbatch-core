@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Write extends Api\ElementApi
+class ReadAttribute extends Api\ElementApi
 {
-    const UUID = '26a090a2-708a-4c76-b387-08f537f0c2d5';
-    const TYPE_NAME = 'api_element_write';
+    const UUID = 'ae6b7b0e-8991-4443-9f00-3e9a637a52ce';
+    const TYPE_NAME = 'api_element_read';
 
 
 
@@ -21,7 +21,7 @@ class Write extends Api\ElementApi
     const PARENT_CLASSES = [
         Api\ElementApi::class,
         Act\Cmd\Ele\Search::class,
-        Act\Cmd\Ele\Write::class,
+        Act\Cmd\Ele\Read::class,
     ];
 
 }

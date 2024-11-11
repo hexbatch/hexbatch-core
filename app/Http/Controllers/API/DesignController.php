@@ -2,229 +2,218 @@
 
 namespace App\Http\Controllers\API;
 
-
-use App\Exceptions\HexbatchNotPossibleException;
-use App\Exceptions\HexbatchPermissionException;
-use App\Exceptions\RefCodes;
-use App\Helpers\Utilities;
+use App\Helpers\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\Sys\Res\Types\Stk\Root;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
-
-use App\Http\Resources\AttributeCollection;
-use App\Http\Resources\AttributeResource;
-use App\Http\Resources\AttributeRuleResource;
-use App\Http\Resources\ElementTypeCollection;
-use App\Http\Resources\ElementTypeResource;
-use App\Models\Attribute;
-use App\Models\AttributeRule;
-use App\Models\ElementType;
-use App\Models\ServerEvent;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-
-
-class DesignController extends Controller
-{
-
-
-    /**
-     * @throws \Exception
-     */
-    public function create_type(Request $request): JsonResponse {
-
-
-        $element_type = ElementType::collectType($request->collect());
-        $refreshed = ElementType::buildElementType(id: $element_type->id)?->first();
-        return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+class DesignController extends Controller {
+    #[ApiTypeMarker( Root\Api\Design\ChangeOwner::class)]
+    public function change_design_owner() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function edit_type(ElementType $element_type,Request $request): JsonResponse {
-        $element_type->editType($request->collect());
-        $refreshed = ElementType::buildElementType(id:$element_type->id)->first();
-        return response()->json(new ElementTypeResource($refreshed,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\PromoteOwner::class)]
+    public function promote_design_owner() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    public function destroy_type(ElementType $element_type): JsonResponse {
-
-        if ($element_type->isInUse()) {
-
-            throw new HexbatchPermissionException(__("msg.type_only_delete_if_unused",['ref'=>$element_type->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::ATTRIBUTE_CANNOT_DELETE);
-        }
-
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_IMPLEMENTED);
-
-    }
-    public function get_type(ElementType $element_type,?int $levels = 3): JsonResponse {
-        return response()->json(new ElementTypeResource($element_type,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\Promotion::class)]
+    public function promote_design() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    public function list_types(): JsonResponse {
-        $user = Utilities::getTypeCastedAuthUser();
-        $list = ElementType::buildElementType(owner_namespace_id:$user->id);
-        $ret = $list->cursorPaginate();
-        return (new ElementTypeCollection($ret))
-            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\Purge::class)]
+    public function purge_design() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    public function type_ping_map(Request $request,ElementType $element_type): JsonResponse {
-        $ret = $element_type->type_map->ping($request->get('location'));
-        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
-    }
-    public function type_ping_time(Request $request,ElementType $element_type): JsonResponse {
-        $ret = $element_type->type_time->ping($request->get('time'));
-        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
+    public function destroy_design() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    public function attribute_ping_shape(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
-        Utilities::ignoreVar($element_type); //checked in the middleware
-        $ret = $attribute->attribute_shape_bound->ping($request->get('location'));
-        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\Create::class)]
+    public function create_design() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
 
+    #[ApiTypeMarker( Root\Api\Design\Edit::class)]
+    public function edit_design() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\Show::class)]
+    public function show_design() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\ListDesigns::class)]
+    public function list_designs() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
-    /**
-     * @throws \Exception
-     */
-    public function new_attribute(Request $request,ElementType $element_type): JsonResponse {
-        $attribute = Attribute::collectAttribute(collect: $request->collect(),owner: $element_type);
-        $out = Attribute::buildAttribute(id:$attribute->id)->first();
-        return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\ShowAttribute::class)]
+    public function show_attribute() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function edit_attribute(Request $request,ElementType $element_type, Attribute $attribute): JsonResponse {
-        $attribute = Attribute::collectAttribute(collect: $request->collect(), owner: $element_type, attribute: $attribute);
-        $out = Attribute::buildAttribute(id:$attribute->id)->first();
-        return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\DestroyAttribute::class)]
+    public function destroy_attribute() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-
-    /**
-     * @throws \Exception
-     */
-    public function delete_attribute(ElementType $element_type, Attribute $doomed_attribute): JsonResponse {
-
-        if ($element_type->isInUse()) {
-
-            throw new HexbatchPermissionException(__("msg.attribute_cannot_be_deleted_if_in_use",['ref'=>$doomed_attribute->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN,
-                RefCodes::ATTRIBUTE_CANNOT_DELETE);
-        }
-
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_IMPLEMENTED);
+    #[ApiTypeMarker( Root\Api\Design\AttributePromotion::class)]
+    public function promote_attribute() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    public function attribute_get(ElementType $element_type, Attribute $attribute,?int $levels = 2): JsonResponse {
-        Utilities::ignoreVar($element_type);
-        return response()->json(new AttributeResource($attribute,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\CreateAttribute::class)]
+    public function create_attribute() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    public function attributes_list(ElementType $element_type,?string $filter = null): JsonResponse {
-        Utilities::ignoreVar($filter);
-        $laravel_list = Attribute::buildAttribute(type_id: $element_type->id);
-        $ret = $laravel_list->cursorPaginate();
-        return (new AttributeCollection($ret))
-            ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\ListAttributes::class)]
+    public function list_attributes() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\AttributeLocation::class)]
+    public function set_attribute_location() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\AttributeLocationTest::class)]
+    public function test_attribute_location() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\EditAttribute::class)]
+    public function edit_attribute() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
-    /*
-     * ******************************************************************************
-     *                           Rules                                              *
-     * ******************************************************************************
-     */
-
-    public function attribute_list_rules(ElementType $element_type,Attribute $attribute): JsonResponse {
-        Utilities::ignoreVar($element_type);
-        return response()->json(new AttributeRuleResource($attribute->attached_event->top_rule), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\CreateListener::class)]
+    public function create_listener() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-
-    /*
-     * create rule tree (can be all or add in a parent)
-     * edit rule tree (all in one go, can be a subtree)
-     * edit rule node (cannot change parents or children)
-     * delete rule tree (trims children)
-     */
-    public function create_rules(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
-        Utilities::ignoreVar($element_type); //checked in the middleware
-        if ($attribute->attached_event) {
-            throw new HexbatchNotPossibleException(
-                __('msg.rules_already_exist',['ref'=>$attribute->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::RULE_NOT_FOUND
-            );
-        }
-        $mod_rule = ServerEvent::collectEvent(collect: $request->collect(), owner: $attribute);
-        return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\DestroyListener::class)]
+    public function destroy_listener() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function update_rules(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
-        Utilities::ignoreVar($element_type); //checked in the middleware
-        $attribute->attached_event->top_rule->delete_subtree();
-        $mod_rule = ServerEvent::collectEvent(collect: $request->collect(), owner: $attribute);
-        return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\ListListeners::class)]
+    public function list_listeners() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-
-
-    public function add_rule_subtree(Request $request, ElementType $element_type, Attribute $attribute, AttributeRule $attribute_rule): JsonResponse {
-        Utilities::ignoreVar($element_type); //checked in the middleware
-        $mod_rule = AttributeRule::collectRule(collect: $request->collect(), parent_rule: $attribute_rule, owner_event: $attribute->attached_event);
-        return response()->json(new AttributeRuleResource($mod_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\ShowListener::class)]
+    public function show_listener() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-
-    /**
-     * @throws \Exception
-     */
-    public function edit_rule(Request $request, ElementType $element_type, Attribute $attribute, AttributeRule $attribute_rule): JsonResponse {
-        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
-        $attribute_rule->editRule(collect: $request->collect());
-        $out = AttributeRule::buildAttributeRule(id:$attribute_rule->id)->first();
-        return response()->json(new AttributeRuleResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\CreateListenerRule::class)]
+    public function create_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-
-    /**
-     * @throws \Exception
-     */
-    public function delete_rules(ElementType $element_type, Attribute $attribute): JsonResponse {
-        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
-        $attribute->attached_event->top_rule->delete_subtree();
-        return response()->json(new AttributeRuleResource($attribute->attached_event->top_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\DestroyListenerRule::class)]
+    public function destroy_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function delete_rule_subtree(ElementType $element_type, Attribute $attribute, AttributeRule $attribute_rule): JsonResponse {
-        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
-        $attribute_rule->delete_subtree();
-        return response()->json(new AttributeRuleResource($attribute_rule,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\EditListenerRule::class)]
+    public function edit_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-
-
-    public function attribute_get_rule(ElementType $element_type,Attribute $attribute,AttributeRule $attribute_rule,?string $levels = null): JsonResponse {
-        Utilities::ignoreVar($element_type,$attribute); //checked in the middleware
-        return response()->json(new AttributeRuleResource($attribute_rule,null,$levels), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+    #[ApiTypeMarker( Root\Api\Design\ShowListenerRuleTree::class)]
+    public function show_rule_tree() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    public function rule_test(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
-        Utilities::ignoreVar($request,$element_type,$attribute); //checked in the middleware
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_NOT_IMPLEMENTED);
+    #[ApiTypeMarker( Root\Api\Design\TestListenerRule::class)]
+    public function test_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
+
+    #[ApiTypeMarker( Root\Api\Design\RemoveParent::class)]
+    public function remove_parent() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\AddParent::class)]
+    public function add_parent() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\ListParents::class)]
+    public function list_parents() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\AddLiveRequirement::class)]
+    public function add_live_requirement() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\RemoveLiveRequirement::class)]
+    public function remove_live_requirement() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\ShowRequired::class)]
+    public function show_live_requirement() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\ListRequired::class)]
+    public function list_live_requirements() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\ListLiveRules::class)]
+    public function list_live_rules() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\ShowLiveRule::class)]
+    public function show_live_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\AddLiveRule::class)]
+    public function add_live_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\RemoveLiveRule::class)]
+    public function remove_live_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\LocationTest::class)]
+    public function test_location() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\Location::class)]
+    public function set_location() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\TimeTest::class)]
+    public function test_time() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Design\Time::class)]
+    public function set_time() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
 
 }

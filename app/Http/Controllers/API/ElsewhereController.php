@@ -2,24 +2,78 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Helpers\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
 use App\Models\Server;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
-//todo implement these
+use App\Sys\Res\Types\Stk\Root;
+
+
 class ElsewhereController extends Controller {
-    public function me(): JsonResponse {
-        //todo this is public access, should just be public attributes on the server type element: about, domain, version, commit hash,home_url
+
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\Register::class)]
+    public function register_elsewhere() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\AskCredentials::class)]
+    public function ask_credentials() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\GiveCredentials::class)]
+    public function give_credentials() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\ChangeStatus::class)]
+    public function change_status() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\GiveNamespace::class)]
+    public function give_namespace() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\GiveSet::class)]
+    public function give_set() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\GiveType::class)]
+    public function give_type() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\GiveElement::class)]
+    public function give_element() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\Purge::class)]
+    public function purge_elsewhere() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\ListElsewhere::class)]
+    public function list_servers() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+    #[ApiTypeMarker( Root\Api\Elsewhere\Show::class)]
+    public function show_server(Server $server): JsonResponse {
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 
-    public function list_servers(): JsonResponse {
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
-    }
 
-    public function get_server(Server $server): JsonResponse {
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
-    }
+
 
 
 }

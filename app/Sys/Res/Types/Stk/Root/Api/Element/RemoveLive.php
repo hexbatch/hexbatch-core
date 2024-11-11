@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Copy extends Api\ElementApi
+class RemoveLive extends Api\ElementApi
 {
-    const UUID = 'db0e2856-02f9-4b1b-9066-eb6651e72dfa';
-    const TYPE_NAME = 'api_element_copy';
+    const UUID = '18f455f3-39b0-4c84-92e1-21eb6af0236d';
+    const TYPE_NAME = 'api_element_subtract';
 
 
 
@@ -21,7 +21,7 @@ class Copy extends Api\ElementApi
     const PARENT_CLASSES = [
         Api\ElementApi::class,
         Act\Cmd\Ele\Search::class,
-        Act\Cmd\Ele\LiveTypeCopy::class,
+        Act\Cmd\Ele\LiveTypeRemove::class,
     ];
 
 }

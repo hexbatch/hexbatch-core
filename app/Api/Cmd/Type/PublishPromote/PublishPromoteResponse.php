@@ -1,5 +1,5 @@
 <?php
-namespace App\Api\Cmd\Design\PublishPromote;
+namespace App\Api\Cmd\Type\PublishPromote;
 
 
 use App\Api\Cmd\IActionOaResponse;
@@ -10,16 +10,17 @@ use App\Exceptions\HexbatchInvalidException;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
 use App\Models\Thing;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPublishPromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublishPromote;
 use Illuminate\Support\Facades\DB;
 
-class PublishPromoteResponse extends DesignPublishPromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
+class PublishPromoteResponse extends TypePublishPromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
 {
 
     public function __construct(
         protected ?ElementType $generated_type = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

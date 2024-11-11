@@ -4,8 +4,8 @@ namespace App\Sys\Res\Types;
 
 
 use App\Api\Cmd\Design\Promote\SetupForSystem;
-use App\Api\Cmd\Design\PublishPromote\PublishForSystem;
 use App\Api\Cmd\Type\AddHandle\HandleForSystem;
+use App\Api\Cmd\Type\PublishPromote\PublishForSystem;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementType;
@@ -71,6 +71,7 @@ abstract class BaseType implements ISystemType
                ->setUuid(static::getClassUuid())
                ->setTypeName(static::getClassName())
                ->setSystem(true)
+               ->setFinalType(static::isFinal())
                 ->setLifecycle(TypeOfLifecycle::PUBLISHED)
                 ->setFinalType(static::IS_FINAL);
 

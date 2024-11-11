@@ -20,6 +20,7 @@ class AttributeAddHandleResponse extends AttributeHandleAdd implements IActionWo
         protected array $edited_attributes = []
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

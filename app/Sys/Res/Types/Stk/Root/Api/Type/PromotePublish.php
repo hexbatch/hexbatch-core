@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Api\Design;
+namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
 
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -20,7 +20,7 @@ class PromotePublish extends Api\DesignApi
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\Ds\DesignOwnerPromote::class,
+        Act\Cmd\Ty\TypePublishPromote::class,
     ];
 
 }

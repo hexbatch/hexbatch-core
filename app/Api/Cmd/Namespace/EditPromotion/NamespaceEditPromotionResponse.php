@@ -22,6 +22,7 @@ class NamespaceEditPromotionResponse extends NamespaceEditPromotion implements I
         protected ?UserNamespace $edited_namespace = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

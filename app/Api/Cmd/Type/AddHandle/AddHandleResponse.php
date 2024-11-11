@@ -18,6 +18,7 @@ class AddHandleResponse extends TypeHandleAdd implements IActionWorkReturn,IActi
         protected array $edited_types = []
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Helpers\Utilities;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 use App\Sys\Res\IAction;
 use App\Sys\Res\Types\BaseType;
@@ -13,6 +14,11 @@ class BaseAction extends BaseType implements IAction
 {
     const UUID = 'ebdcbddd-c746-44dc-84b0-cf1f8f174b2b';
     const ACTION_NAME = TypeOfAction::BASE_ACTION;
+
+    public function __construct()
+    {
+        Utilities::ignoreVar(static::ACTION_NAME,static::getClassName());
+    }
 
     public static function getClassName() :string { return static::ACTION_NAME->value; }
 
@@ -30,6 +36,7 @@ class BaseAction extends BaseType implements IAction
 
     public function getRelatedEvents(): array
     {
+
         return [];
     }
 }

@@ -42,9 +42,6 @@ abstract class BaseAttribute implements ISystemAttribute
          return static::ATTRIBUTE_NAME;
      }
 
-     public static function getClassAttributeName(): string {
-         return static::ATTRIBUTE_NAME;
-     }
 
      public static function getClassOwningSystemType() :string|ISystemType|null {
          return SystemTypes::getAttributeOwner(static::class);
@@ -113,7 +110,7 @@ abstract class BaseAttribute implements ISystemAttribute
            $sys_params = new APSetupForSystem();
            $sys_params
                ->setUuid(static::getClassUuid())
-               ->setAttributeName(static::getClassAttributeName())
+               ->setAttributeName(static::getAttributeName())
                ->setDesignAttributeId(null)
                ->setFinal(static::IS_FINAL)
                ->setAbstract(static::IS_ABSTRACT)

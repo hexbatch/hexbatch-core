@@ -20,6 +20,7 @@ class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn
         protected array $generated_elements = []
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

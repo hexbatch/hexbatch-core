@@ -106,27 +106,6 @@ paths:
           description: 'Nothing returned'
 components:
   schemas:
-    hexbatch_token:
-      title: 'A token used to authenticate'
-      description: 'Defines a regular uuid'
-      type: string
-      maxLength: 60
-      minLength: 40
-      example:
-        -
-          summary: 'Tokens look like this, but not always'
-          value: 2|jY8m3acW2GdDZlgJOxX2hWCjlRJ6lcu4OA3q3XWcc4cbc545
-    hexbatch_username:
-      title: 'User Name'
-      description: 'Defines a user name'
-      type: string
-      maxLength: 30
-      minLength: 3
-      pattern: '^\p{L}[\p{L}0-9_]{2,}$'
-      example:
-        -
-          summary: 'No capital letters, no punctuation, underscores allowed, numbers allowed after first letter'
-          value: my_first_user221
     hexbatch_uuid:
       title: 'Unique reference'
       description: 'Defines a regular uuid'
@@ -155,6 +134,27 @@ components:
         -
           summary: 'A lifetime of 6 months'
           value: '15768000'
+    hexbatch_token:
+      title: 'A token used to authenticate'
+      description: 'Defines a regular uuid'
+      type: string
+      maxLength: 60
+      minLength: 40
+      example:
+        -
+          summary: 'Tokens look like this, but not always'
+          value: 2|jY8m3acW2GdDZlgJOxX2hWCjlRJ6lcu4OA3q3XWcc4cbc545
+    hexbatch_username:
+      title: 'User Name'
+      description: 'Defines a user name'
+      type: string
+      maxLength: 30
+      minLength: 3
+      pattern: '^\p{L}[\p{L}0-9_]{2,}$'
+      example:
+        -
+          summary: 'No capital letters, no punctuation, underscores allowed, numbers allowed after first letter'
+          value: my_first_user221
     LoginParams:
       description: 'Login requires a username and password'
       properties:

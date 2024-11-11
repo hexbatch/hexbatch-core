@@ -19,6 +19,7 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
         protected ?UserNamespace $generated_namespace = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

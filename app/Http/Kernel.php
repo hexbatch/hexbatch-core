@@ -44,6 +44,7 @@ class Kernel extends HttpKernel
         'api' => [
             //\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            //todo add in middleware for default phase and optional path
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             ForceUnicode::class,
         ],

@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class On extends Api\ElementApi
+class CopyLive extends Api\ElementApi
 {
-    const UUID = 'b98ced27-eced-4348-8266-3920e5796b77';
-    const TYPE_NAME = 'api_element_on';
+    const UUID = 'db0e2856-02f9-4b1b-9066-eb6651e72dfa';
+    const TYPE_NAME = 'api_element_copy';
 
 
 
@@ -21,7 +21,7 @@ class On extends Api\ElementApi
     const PARENT_CLASSES = [
         Api\ElementApi::class,
         Act\Cmd\Ele\Search::class,
-        Act\Cmd\Ele\ElementOn::class,
+        Act\Cmd\Ele\LiveTypeCopy::class,
     ];
 
 }

@@ -16,6 +16,7 @@ class AttributePromoteResponse extends DesignAttributePromote implements IAction
         protected ?Attribute $generated_attribute = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)

@@ -3,8 +3,8 @@
 use App\Http\Controllers\API\AuthenticationController;
 use App\Http\Controllers\API\PathController;
 use App\Http\Controllers\API\ElsewhereController;
-use App\Http\Controllers\API\DesignController;
-use App\Http\Controllers\API\NamespaceController;
+use App\Http\Controllers\API\DesignControllerX;
+use App\Http\Controllers\API\NamespaceControllerX;
 use App\Http\Middleware\ValidateAttributeOwnership;
 use App\Http\Middleware\ValidateNamespaceAdmin;
 use App\Http\Middleware\ValidateNamespaceMember;
@@ -56,18 +56,13 @@ Route::prefix('v1')->group(function () {
 
                 Route::delete('/remove_current_token', [AuthenticationController::class, 'remove_current_token'])
                     ->name('core.users.auth.remove_current_token');
-
-
-
             });
-
-
         });
 
 
         Route::prefix('servers')->group(function () {
             Route::post('/list', [ElsewhereController::class, 'list_servers'])->name('core.servers.list');
-            Route::get('/get/{server}', [ElsewhereController::class, 'get_server'])->name('core.servers.get');
+            Route::get('/get/{server}', [ElsewhereController::class, 'show_server'])->name('core.servers.get');
 
             /*
              * part of elsewhere
@@ -76,52 +71,32 @@ Route::prefix('v1')->group(function () {
 
         Route::prefix('namespaces')->group(function () {
 
-            Route::post('/create/{?server}', [NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
+            Route::post('/create/{?server}', [NamespaceControllerX::class, 'create_namespace'])->name('core.namespaces.create');
 
             Route::group(['prefix' => '{user_namespace}'], function () {
                 Route::middleware(ValidateNamespaceOwner::class)->group( function () {
-                    Route::post('/transfer/{user}', [NamespaceController::class, 'transfer_namespace'])->name('core.namespaces.transfer');
-                    Route::delete('/destroy', [NamespaceController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
+                    Route::post('/transfer/{user}', [NamespaceControllerX::class, 'transfer_namespace'])->name('core.namespaces.transfer');
+                    Route::delete('/destroy', [NamespaceControllerX::class, 'destroy_namespace'])->name('core.namespaces.destroy');
 
-                    Route::put('/admin/add/{target_namespace}', [NamespaceController::class, 'group_admin_add'])->name('core.groups.admin.add');
-                    Route::patch('/admin/remove/{target_namespace}', [NamespaceController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
+                    Route::put('/admin/add/{target_namespace}', [NamespaceControllerX::class, 'group_admin_add'])->name('core.groups.admin.add');
+                    Route::patch('/admin/remove/{target_namespace}', [NamespaceControllerX::class, 'group_admin_remove'])->name('core.groups.admin.remove');
 
                 });
 
                 Route::middleware(ValidateNamespaceAdmin::class)->group( function () {
-                    Route::put('/member/add/{target_namespace}', [NamespaceController::class, 'group_member_add'])->name('core.groups.member.add');
-                    Route::delete('/member/remove/{target_namespace}', [NamespaceController::class, 'group_member_remove'])->name('core.groups.member.remove');
+                    Route::put('/member/add/{target_namespace}', [NamespaceControllerX::class, 'group_member_add'])->name('core.groups.member.add');
+                    Route::delete('/member/remove/{target_namespace}', [NamespaceControllerX::class, 'group_member_remove'])->name('core.groups.member.remove');
 
                 });
 
                 Route::middleware(ValidateNamespaceMember::class)->group( function () {
-                    Route::get('/my_namespaces', [NamespaceController::class, 'list_my_namespaces'])->name('core.namespaces.my_namespaces');
-                    Route::get('/get/{levels?}', [NamespaceController::class, 'get_namespace'])->name('core.namespaces.get');
-                    Route::get('/list_members/{levels?}', [NamespaceController::class, 'list_members'])->name('core.groups.list_members');
+                    Route::get('/my_namespaces', [NamespaceControllerX::class, 'list_my_namespaces'])->name('core.namespaces.my_namespaces');
+                    Route::get('/get/{levels?}', [NamespaceControllerX::class, 'get_namespace'])->name('core.namespaces.get');
+                    Route::get('/list_members/{levels?}', [NamespaceControllerX::class, 'list_members'])->name('core.groups.list_members');
 
                 });
             });
 
-            /*
-             Namespace
-                AddAdmin.php
-                AddMember.php
-                Create.php
-                Destroy.php
-                RemoveAdmin.php
-                RemoveMember.php
-                ShowAdmins.php
-                ShowMembers.php
-                ListAll.php
-                Show.php
-                ShowPublic.php -- not logged in
-            PurgeMember.php
-            PurgeAdmin.php
-            PromoteAdmin.php
-            PromoteMember.php
-            Purge.php
-            Promote.php
-             */
         });
 
 
@@ -129,115 +104,59 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('paths')->group(function () {
                 Route::middleware(ValidateNamespaceOwner::class)->group(function () {
-                    Route::post('/create', [PathController::class, 'create_path'])->name('core.paths.create');
+                    Route::post('/create', [PathController::class, 'create_path_x'])->name('core.paths.create');
                     Route::prefix('{path}')->group(function () {
-                        Route::delete('/delete', [PathController::class, 'delete_path'])->name('core.paths.delete');
+                        Route::delete('/delete', [PathController::class, 'delete_path_x'])->name('core.paths.delete');
                     });
                 });
 
                 Route::prefix('{path}')->middleware([ValidateNamespaceAdmin::class])->group(function () {
-                    Route::patch('/update', [PathController::class, 'update_path'])->name('core.paths.update');
+                    Route::patch('/update', [PathController::class, 'update_path_x'])->name('core.paths.update');
 
                     Route::prefix('/{path_part}')->middleware(ValidatePartOwnership::class)->group(function () {
-                        Route::patch('/edit_part', [PathController::class, 'edit_part'])->name('core.paths.parts.edit');
-                        Route::patch('/add_subtree', [PathController::class, 'add_part_subtree'])->name('core.paths.parts.add_subtree');
-                        Route::delete('/remove_subtree', [PathController::class, 'delete_part_subtree'])->name('core.paths.parts.remove_subtree');
+                        Route::patch('/edit_part', [PathController::class, 'edit_part_x'])->name('core.paths.parts.edit');
+                        Route::patch('/add_subtree', [PathController::class, 'add_part_subtree_x'])->name('core.paths.parts.add_subtree');
+                        Route::delete('/remove_subtree', [PathController::class, 'delete_part_subtree_x'])->name('core.paths.parts.remove_subtree');
                     });
                 });
 
 
                 Route::middleware(ValidateNamespaceMember::class)->group(function (){
-                    Route::get('/list', [PathController::class, 'list_paths'])->name('core.paths.list');
-                    Route::get('/test', [PathController::class, 'path_test'])->name('core.paths.test');
+                    Route::get('/list', [PathController::class, 'list_paths_x'])->name('core.paths.list');
+                    Route::get('/test', [PathController::class, 'path_test_x'])->name('core.paths.test');
                     Route::prefix('/{path_part}')->middleware(ValidatePartOwnership::class)->group(function () {
-                        Route::get('/get/{levels?}', [PathController::class, 'get_part'])->name('core.paths.get');
+                        Route::get('/get/{levels?}', [PathController::class, 'get_part_x'])->name('core.paths.get');
                     });
 
                 });
 
-                /*
-                 AddHandle.php
-                Copy.php
-                Create.php
-                Destroy.php
-                Edit.php
-                RemoveHandle.php
-                Search.php
-                ShowPartTree.php
-                Show.php
-                ListAll.php
-                Test.php
-                Publish.php
-                CreatePart.php
-                DestroyPart.php
-                EditPart.php
-                TestPart.php
 
-                 */
 
             }); //end paths
 
             Route::prefix('design')->group(function () {
 
-                /* Design
-                 AddLiveRule.php
-                AddParent.php
-                AddRequirement.php
-                AttributeLocation.php
-                Create.php
-                CreateAttribute.php
-                CreateListener.php
-                CreateListenerRule.php
-                Destroy.php
-                DestroyAttribute.php
-                DestroyListener.php
-                DestroyListenerRule.php
-                Edit.php
-                EditAttribute.php
-                EditListenerRule.php
-                Location.php
-                RemoveLiveRule.php
-                RemoveParent.php
-                RemoveRequirement.php
-                TestListenerRule.php
-                Time.php
-                ListAll.php
-                Show.php
-                ShowAttribute.php
-                ShowLiveRules.php
-                ShowRequired.php
-                ShowListenerRuleTree.php
-                LocationTest.php
-                TimeTest.php
-                AttributeLocationTest.php
-                ChangeOwner.php
-                PromoteOwner.php
-                Purge.php
-                Promotion
-                PromotePublish
-                AttributePromotion.php
-                 */
 
                 Route::middleware(ValidateNamespaceOwner::class)->group(function () {
-                    Route::post('/create', [DesignController::class, 'create_type'])->name('core.design.create');
+                    Route::post('/create', [DesignControllerX::class, 'create_type'])->name('core.design.create');
                 });//todo put in design guard for the edit stuff
 
                 Route::prefix('/{element_type}')->middleware([ValidateTypeNotInUse::class])->group(function () {
                     Route::middleware(ValidateNamespaceOwner::class)->group(function () {
-                        Route::delete('/destroy', [DesignController::class, 'destroy_type'])->name('core.design.destroy');
+                        Route::delete('/destroy', [DesignControllerX::class, 'destroy_type'])->name('core.design.destroy');
                     });
 
                     Route::middleware(ValidateNamespaceAdmin::class)->group(function () {
-                        Route::patch('/edit', [DesignController::class, 'edit_type'])->name('core.design.edit');
+                        Route::patch('/edit', [DesignControllerX::class, 'edit_type'])->name('core.design.edit');
                     });
                 });
 
 
                 Route::middleware(ValidateNamespaceMember::class)->group(function (){
-                    Route::get('/{element_type}/get/{levels?}', [DesignController::class, 'get_type'])->name('core.design.get');
-                    Route::get('/list', [DesignController::class, 'list_types'])->name('core.design.list');
-                    Route::get('/ping_map', [DesignController::class, 'type_ping_map'])->name('core.design.ping_map');
-                    Route::get('/ping_time', [DesignController::class, 'type_ping_time'])->name('core.design.ping_time');
+                    Route::get('/{element_type}/get/{levels?}', [DesignControllerX::class, 'get_type'])->name('core.design.get');
+                    Route::get('/list', [DesignControllerX::class, 'list_types'])->name('core.design.list');
+                    Route::get('/ping_map', [DesignControllerX::class, 'type_ping_map'])->name('core.design.ping_map');
+                    Route::get('/ping_time', [DesignControllerX::class, 'type_ping_time'])->name('core.design.ping_time');
                 });
 
 
@@ -245,23 +164,23 @@ Route::prefix('v1')->group(function () {
 
 
                     Route::middleware([ValidateNamespaceAdmin::class,ValidateTypeNotInUse::class])->group(function (){
-                        Route::post('/create', [DesignController::class, 'new_attribute'])->name('core.design.attributes.create');
+                        Route::post('/create', [DesignControllerX::class, 'new_attribute'])->name('core.design.attributes.create');
 
                         Route::prefix('{attribute}')->middleware(ValidateAttributeOwnership::class)->group(function () {
-                            Route::patch('/edit', [DesignController::class, 'edit_attribute'])->name('coretypes..attributes.edit');
+                            Route::patch('/edit', [DesignControllerX::class, 'edit_attribute'])->name('coretypes..attributes.edit');
 
-                            Route::delete('/destroy', [DesignController::class, 'delete_attribute'])->name('core.design.attributes.destroy');
+                            Route::delete('/destroy', [DesignControllerX::class, 'delete_attribute'])->name('core.design.attributes.destroy');
                         });
 
                     });
 
                     Route::middleware(ValidateNamespaceMember::class)->group(function (){
                         Route::prefix('{attribute}')->middleware(ValidateAttributeOwnership::class)->group(function () {
-                            Route::get('/get/{levels?}', [DesignController::class, 'attribute_get'])->name('core.design.attributes.get');
-                            Route::get('/ping_shape', [DesignController::class, 'attribute_ping_shape'])->name('core.design.attributes.ping');
+                            Route::get('/get/{levels?}', [DesignControllerX::class, 'attribute_get'])->name('core.design.attributes.get');
+                            Route::get('/ping_shape', [DesignControllerX::class, 'attribute_ping_shape'])->name('core.design.attributes.ping');
                         });
 
-                        Route::get('/list/{filter?}', [DesignController::class, 'attributes_list'])->name('core.design.attributes.list');
+                        Route::get('/list/{filter?}', [DesignControllerX::class, 'attributes_list'])->name('core.design.attributes.list');
                     });
 
 
@@ -269,22 +188,22 @@ Route::prefix('v1')->group(function () {
                     Route::prefix('{attribute}/rules')->middleware([ValidateAttributeOwnership::class,ValidateTypeNotInUse::class])->group(function () {
 
                         Route::middleware(ValidateNamespaceAdmin::class)->group(function (){
-                            Route::post('/create', [DesignController::class, 'create_rules'])->name('core.design.attributes.rules.create');
-                            Route::patch('/update', [DesignController::class, 'update_rules'])->name('core.design.attributes.rules.update');
-                            Route::delete('/delete', [DesignController::class, 'delete_rules'])->name('core.design.attributes.rules.delete');
+                            Route::post('/create', [DesignControllerX::class, 'create_rules'])->name('core.design.attributes.rules.create');
+                            Route::patch('/update', [DesignControllerX::class, 'update_rules'])->name('core.design.attributes.rules.update');
+                            Route::delete('/delete', [DesignControllerX::class, 'delete_rules'])->name('core.design.attributes.rules.delete');
 
                             Route::prefix('/{attribute_rule}')->middleware(ValidateRuleOwnership::class)->group(function () {
-                                Route::patch('/edit_rule', [DesignController::class, 'edit_rule'])->name('core.design.attributes.rules.edit_rule');
-                                Route::patch('/add_subtree', [DesignController::class, 'add_rule_subtree'])->name('core.design.attributes.rules.add_subtree');
-                                Route::delete('/remove_subtree', [DesignController::class, 'delete_rule_subtree'])->name('core.design.attributes.rules.remove_subtree');
+                                Route::patch('/edit_rule', [DesignControllerX::class, 'edit_rule'])->name('core.design.attributes.rules.edit_rule');
+                                Route::patch('/add_subtree', [DesignControllerX::class, 'add_rule_subtree'])->name('core.design.attributes.rules.add_subtree');
+                                Route::delete('/remove_subtree', [DesignControllerX::class, 'delete_rule_subtree'])->name('core.design.attributes.rules.remove_subtree');
                             });
                         });
 
                         Route::middleware(ValidateNamespaceMember::class)->group(function (){
-                            Route::get('/list', [DesignController::class, 'attribute_list_rules'])->name('core.design.attributes.rules.list');
-                            Route::get('/test', [DesignController::class, 'rule_test'])->name('core.design.attributes.rules.test');
+                            Route::get('/list', [DesignControllerX::class, 'attribute_list_rules'])->name('core.design.attributes.rules.list');
+                            Route::get('/test', [DesignControllerX::class, 'rule_test'])->name('core.design.attributes.rules.test');
                             Route::prefix('/{attribute_rule}')->middleware(ValidateRuleOwnership::class)->group(function () {
-                                Route::get('/get/{levels?}', [DesignController::class, 'attribute_get_rule'])->name('core.design.attributes.rules.get');
+                                Route::get('/get/{levels?}', [DesignControllerX::class, 'attribute_get_rule'])->name('core.design.attributes.rules.get');
                             });
 
                         });
@@ -295,174 +214,6 @@ Route::prefix('v1')->group(function () {
 
             }); //end design
 
-            /*
-             * Type
-                AddHandle.php
-                AddHandleAttribute.php
-                ChangeOwner.php
-                DestroyType.php
-                FireEvent.php
-                Publish.php
-                RemoveHandle.php
-                RemoveHandleAttribute.php
-                Retire.php
-                Suspend.php
-                ListPublished.php
-                ListSuspended.php
-                Show.php
-                ShowPublic.php -- not logged in
-                Purge.php
-                PromoteOwner
-
-             */
-
-            /* Element
-                Add.php
-                ChangeOwner.php
-                Copy.php
-                Create.php
-                Destroy.php
-                Link.php
-                Location.php
-                Off.php
-                On.php
-                Ping.php
-                Read.php
-                Subtract.php
-                Time.php
-                TypeOff.php
-                TypeOn.php
-                UnLink.php
-                Write.php
-                WriteVisual.php
-                ListElements.php
-                ShowLink.php
-                ListLinks.php
-                Show.php
-                ShowPublic.php  -- not logged in
-                Purge.php
-            Promote.php
-            EditPromotion.php
-
-             */
-
-            /*
-             Operation
-                    Combine.php
-                    Mutual.php
-                    Pop.php
-                    Push.php
-                    Shift.php
-                    Unshift.php
-             */
-
-
-            /* Phase
-                CutTree.php
-                MoveTree.php
-                ReplaceTree.php
-                ListPhases.php
-                Show.php
-            Purge.php
-             */
-
-            /*
-             Semaphore
-                CreateMaster.php
-                Ready.php
-                Reset.php
-                RunMaster.php
-                ListMasters.php
-                ListMutexes.php
-                ListSemaphores.php
-                ListWaits.php
-                ShowMaster.php
-                ShowMasterPending.php
-                ShowMasterRun.php
-                ShowMutex.php
-                ShowSemaphore.php
-                UpdateMaster.php
-             */
-
-            /*
-             * Set
-                AddElement.php
-                AddHandle.php
-                CreateSet.php
-                DestroySet.php
-                RemoveElement.php
-                RemoveHandle.php
-                ListChildren.php
-                ListMembers.php
-                Show.php
-                ShowPublic.php -- not logged in
-                Purge.php
-                PurgeMember.php
-                UnstickElement
-                StickElement.php
-                EmptySet.php
-            PromoteSet.php
-
-             */
-
-            /*
-             * elsewhere
-                AskCredentials.php -- not logged in
-                ChangeStatus.php
-                GiveCredentials.php
-                GiveElement.php
-                GiveNamespace.php
-                GiveSet.php
-                GiveType.php
-                Purge.php
-                Register.php    -- not logged in
-                Show.php
-                ShowMe.php      -- not logged in
-                ListElsewhere.php
-                Purge.php
-            EditThisServer
-
-             */
-
-            /*
-             * Server
-             *  Edit
-             *  Show (not logged in)
-             */
-
-            /*
-               thing api calls (admin only), these never go through the thing queue, so there are no actions or api registered in the types, like the users
-             *   create/remove/change/view hook
-                  thing_hook_list
-                  thing_hook_create
-                  thing_hook_show
-                  thing_hook_edit
-                  thing_hook_remove
-
-             * manage single stepping children with parent hooked to debugging
-                 the breakpoints on are the things, and do not change status
-                    the parent nodes set to debugging will get the notice
-                    if nothing set, then the thing will just stop and wait
-                thing_add_breakpoint (to the exact thing)
-                thing_clear_breakpoint (clears on thing and all down-thing)
-                thing_run (on breaking  thing)
-                thing_single_step (on breaking thing)
-
-
-             * list/search/view thing nodes and trees
-                thing_list (top roots)
-                thing_show (a tree)
-                thing_inspect (a single thing)
-                thing_pause|unpause for making sure the thing will wait for the debugging, or when not needed anymore
-
-             * trim thing tree (if child will return false to parent when it runs, if root then its just gone)
-
-             * apply rate rules
-             * Apply|Remove|List rates to set|type|action|namespace|thing
-             *
-             *
-
-             */
 
 
         }); //end user namespace defined behavior

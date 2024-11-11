@@ -12,5 +12,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/test', [\App\Http\Controllers\API\TestController::class, 'test'])->name('core.test');
+Route::get('/test', [\App\Http\Controllers\Web\TestController::class, 'test'])->name('core.test');
 

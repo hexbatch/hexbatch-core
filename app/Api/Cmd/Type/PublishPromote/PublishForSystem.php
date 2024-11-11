@@ -1,12 +1,12 @@
 <?php
-namespace App\Api\Cmd\Design\PublishPromote;
+namespace App\Api\Cmd\Type\PublishPromote;
 
 
 use App\Enums\Types\TypeOfLifecycle;
 use App\Models\ElementType;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\BuildActionFacet;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPublishPromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublishPromote;
 
 class PublishForSystem
 {
@@ -40,13 +40,13 @@ class PublishForSystem
         /**
          * @var PublishPromoteParams $promo_params
          */
-        $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,DesignPublishPromote::getClassUuid());
+        $promo_params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,TypePublishPromote::getClassUuid());
         $promo_params->fromCollection($this->makeCollection());
 
         /**
          * @type PublishPromoteResponse $promo_work
          */
-        $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,DesignPublishPromote::getClassUuid());
+        $promo_work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,TypePublishPromote::getClassUuid());
 
         $promo_results = $promo_work::doWork($promo_params);
         return $promo_results->getGeneratedType();

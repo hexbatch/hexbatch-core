@@ -78,6 +78,8 @@ abstract class BaseSystemUser implements ISystemUser
         }
         $this->getUserObject()->default_namespace_id = $ns->getNamespaceObject()->id;
         $this->getUserObject()->save();
+
+        //todo make a list of namespaces the user will belong to and then add that here
     }
 
 

@@ -19,6 +19,7 @@ class SetPromoteResponse extends SetPromote implements IActionWorkReturn,IAction
         protected ?ElementSet $generated_set = null
     )
     {
+        parent::__construct();
     }
 
     public function toThing(Thing $thing)
