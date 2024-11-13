@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceMemberRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class NamespaceMemberRemove extends Act\Cmd\Ns
 {
@@ -18,6 +18,10 @@ class NamespaceMemberRemove extends Act\Cmd\Ns
 
     const PARENT_CLASSES = [
         Act\Cmd\Ns::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Element\NamespaceMemberRemoving::class
     ];
 
 }

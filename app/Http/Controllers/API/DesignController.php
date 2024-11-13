@@ -660,6 +660,18 @@ class DesignController extends Controller {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+    #[OA\Post(
+        path: '/api/v1/design/set_time',
+        operationId: 'core.design.set_time',
+        description: "Sets a schedule for the type before publishing ".
+        "\n There is only one schedule, which can be overridden by this, or emptied out by using this with no data",
+        summary: 'Sets the schedule for the type  ',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\Time::class)]
     public function set_time() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
