@@ -2,6 +2,7 @@
 namespace App\Api\Cmd\Design;
 
 use App\Api\Cmd\BaseParams;
+use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -23,6 +24,12 @@ trait DesignParams
     protected bool $final_type = false;
 
     protected ?TypeOfLifecycle $lifecycle =null;
+    protected ?TypeOfServerAccess $access =null;
+
+    public function getAccess(): ?TypeOfServerAccess
+    {
+        return $this->access;
+    }
 
 
 
@@ -63,6 +70,7 @@ trait DesignParams
         $this->system = static::boolFromCollection($collection,'system');
         $this->final_type = static::boolFromCollection($collection,'final_type');
         $this->lifecycle = TypeOfLifecycle::getFromCollection($collection,'lifecycle');
+        $this->access = TypeOfServerAccess::getFromCollection($collection,'access');
 
         $this->validate();
     }

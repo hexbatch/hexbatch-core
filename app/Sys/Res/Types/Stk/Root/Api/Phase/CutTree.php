@@ -13,9 +13,7 @@ class CutTree extends Api\PhaseApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\PhaseApi::class,

@@ -13,9 +13,7 @@ class Create extends Api\PathApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\PathApi::class,

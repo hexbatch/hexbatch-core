@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Helpers\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
-use App\Sys\Res\Types\Stk\Root;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class ThingController extends Controller {

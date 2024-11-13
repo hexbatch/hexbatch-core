@@ -25,9 +25,7 @@ class Phase extends BaseType
 
     protected \App\Models\Phase|null $phase = null;
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Root::class

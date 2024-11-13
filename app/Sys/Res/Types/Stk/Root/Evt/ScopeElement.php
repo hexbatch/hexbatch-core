@@ -12,9 +12,7 @@ class ScopeElement extends BaseEvent
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         BaseEvent::class

@@ -28,6 +28,27 @@ class TypeController extends Controller {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+    #[ApiTypeMarker( Root\Api\Type\ListLive::class)]
+    public function list_live() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Type\ListElements::class)]
+    public function list_elements() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Type\ListDescendants::class)]
+    public function list_descendants() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[ApiTypeMarker( Root\Api\Type\ListAttributeDescendants::class)]
+    public function list_attribute_descendants() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
     #[ApiTypeMarker( Root\Api\Type\AddHandle::class)]
     public function add_handle() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);

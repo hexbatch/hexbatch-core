@@ -12,9 +12,7 @@ class Pa extends Cmd
     const ACTION_NAME = TypeOfAction::BASE_PATH;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Cmd::class

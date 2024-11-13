@@ -16,9 +16,7 @@ class Api extends BaseType
     const TYPE_NAME = 'api';
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Root::class

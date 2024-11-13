@@ -12,9 +12,7 @@ class St extends Cmd
     const ACTION_NAME = TypeOfAction::BASE_SET;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Cmd::class

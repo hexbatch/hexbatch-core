@@ -12,9 +12,7 @@ class ShowPublic extends Api\SetApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\SetApi::class

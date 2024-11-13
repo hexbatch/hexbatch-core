@@ -18,9 +18,7 @@ class ElementRecieved extends Evt\ScopeElement
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Evt\ScopeElement::class

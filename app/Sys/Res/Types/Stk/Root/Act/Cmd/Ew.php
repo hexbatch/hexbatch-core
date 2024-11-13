@@ -12,9 +12,7 @@ class Ew extends Cmd
     const ACTION_NAME = TypeOfAction::BASE_ELSEWHERE;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Cmd::class

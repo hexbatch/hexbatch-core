@@ -16,9 +16,7 @@ class Container extends BaseType
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Root::class

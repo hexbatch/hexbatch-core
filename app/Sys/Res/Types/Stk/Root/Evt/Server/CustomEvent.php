@@ -12,9 +12,7 @@ class CustomEvent extends Evt\ScopeSet
     const EVENT_NAME = TypeOfEvent::CUSTOM_EVENT;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Evt\ScopeServer::class

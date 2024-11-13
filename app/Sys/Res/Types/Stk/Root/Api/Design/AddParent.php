@@ -14,12 +14,11 @@ class AddParent extends Api\DesignApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
+        Act\Cmd\Ele\Search::class,
         Act\Cmd\Ds\DesignParentAdd::class,
     ];
 

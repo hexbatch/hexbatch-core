@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignRuleTestMetric;
+use App\Sys\Res\Atr\Stk\Act\Metrics\DesignListenerTestMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -13,13 +13,13 @@ use App\Sys\Res\Types\Stk\Root\Act;
  * No data changed
  */
 
-class DesignRuleTest extends Act\Cmd\Ds
+class DesignListenerTest extends Act\Cmd\Ds
 {
     const UUID = 'b568c6ea-842c-4dfa-994f-2ebbc7608d49';
-    const ACTION_NAME = TypeOfAction::CMD_DESIGN_RULE_TEST;
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_LISTENER_TEST;
 
     const ATTRIBUTE_CLASSES = [
-        DesignRuleTestMetric::class
+        DesignListenerTestMetric::class
     ];
 
     const PARENT_CLASSES = [

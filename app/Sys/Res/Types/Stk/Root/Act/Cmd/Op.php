@@ -13,9 +13,7 @@ class Op extends Cmd
     const ACTION_NAME = TypeOfAction::BASE_OPERATION;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         BaseAction::class

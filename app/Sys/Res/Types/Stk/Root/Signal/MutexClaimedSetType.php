@@ -13,9 +13,7 @@ class MutexClaimedSetType extends BaseType
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Mutex::class,

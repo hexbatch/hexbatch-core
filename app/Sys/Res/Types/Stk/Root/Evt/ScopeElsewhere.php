@@ -11,9 +11,7 @@ class ScopeElsewhere extends BaseEvent
     const EVENT_NAME = TypeOfEvent::EVENT_SCOPE_ELSEWHERE;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         BaseEvent::class

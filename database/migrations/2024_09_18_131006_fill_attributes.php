@@ -99,12 +99,12 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_server_access AS ENUM (
-            'private_attribute',
-            'public_attribute',
-            'protected_attribute'
+            'is_private',
+            'is_public',
+            'is_protected'
             );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'private_attribute';");
+        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'is_private';");
 
 
 

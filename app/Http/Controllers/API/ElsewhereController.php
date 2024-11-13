@@ -69,7 +69,7 @@ class ElsewhereController extends Controller {
 
     #[ApiTypeMarker( Root\Api\Elsewhere\Show::class)]
     public function show_server(Server $server): JsonResponse {
-        return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
+        return response()->json([], CodeOf::HTTP_SERVICE_UNAVAILABLE);
     }
 
 

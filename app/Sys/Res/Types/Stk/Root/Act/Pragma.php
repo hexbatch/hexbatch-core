@@ -11,9 +11,7 @@ class Pragma extends BaseAction
     const ACTION_NAME = TypeOfAction::BASE_PRAGMA;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         BaseAction::class

@@ -150,17 +150,18 @@ enum TypeOfEvent: string
     case LINK_DESCRIPTION_ADDED = 'link_description_added';
     case LINK_DESCRIPTION_REMOVED = 'link_description_removed';
 
-    case TYPE_DESCRIPTION_ADDED = 'type_description_added';
-    case TYPE_DESCRIPTION_REMOVED = 'type_description_removed';
+    case TYPE_HANDLE_ADDED = 'type_handle_added';
+    case TYPE_HANDLE_REMOVED = 'type_handle_removed';
 
-    case ATTRIBUTE_DESCRIPTION_ADDED = 'attribute_description_added';
-    case ATTRIBUTE_DESCRIPTION_REMOVED = 'attribute_description_removed';
+    case ATTRIBUTE_HANDLE_ADDED = 'attribute_handle_added';
+    case ATTRIBUTE_HANDLE_REMOVED = 'attribute_handle_removed';
 
     case PATH_HANDLE_ADDED = 'path_handle_added';
     case PATH_HANDLE_REMOVED = 'path_handle_removed';
 
     case TYPE_OWNER_CHANGE = 'type_owner_change'; //type given different ownership from what it started as, parents can block
 
+    case DESIGN_PENDING = 'design_pending'; //when a design uses a base attribute or parent type. Goes to all listeners in the inheritance chain
     case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
     case TYPE_RETIRED = 'type_retired'; //type or type ancestor ns admin
     case TYPE_SUSPENDED = 'type_suspended'; //only system admin group

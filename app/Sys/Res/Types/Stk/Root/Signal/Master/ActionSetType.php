@@ -11,9 +11,7 @@ class ActionSetType extends BaseType
     const TYPE_NAME = 'remote_rules_set';
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         OuterSetType::class,

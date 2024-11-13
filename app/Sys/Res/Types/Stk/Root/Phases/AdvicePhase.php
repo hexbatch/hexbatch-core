@@ -12,9 +12,7 @@ class AdvicePhase extends Phase
     const EDITED_BY_PHASE_SYSTEM_CLASS = NormalPhase::class;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Phase::class

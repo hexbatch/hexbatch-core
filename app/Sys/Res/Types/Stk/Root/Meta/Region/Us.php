@@ -12,9 +12,7 @@ class Us extends Meta\Region
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Meta\Language::class

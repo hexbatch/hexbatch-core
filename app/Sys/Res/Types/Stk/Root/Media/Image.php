@@ -13,9 +13,7 @@ class Image extends BaseType
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Media::class

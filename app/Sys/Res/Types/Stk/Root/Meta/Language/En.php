@@ -12,9 +12,7 @@ class En extends Meta\Language
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Meta\Region::class

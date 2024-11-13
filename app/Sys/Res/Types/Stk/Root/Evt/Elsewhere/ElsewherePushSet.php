@@ -15,9 +15,7 @@ class ElsewherePushSet extends Evt\ScopeSet
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Evt\ScopeElsewhere::class

@@ -6,6 +6,7 @@ namespace App\Sys\Res\Types;
 use App\Api\Cmd\Design\Promote\SetupForSystem;
 use App\Api\Cmd\Type\AddHandle\HandleForSystem;
 use App\Api\Cmd\Type\PublishPromote\PublishForSystem;
+use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementType;
@@ -73,6 +74,7 @@ abstract class BaseType implements ISystemType
                ->setSystem(true)
                ->setFinalType(static::isFinal())
                 ->setLifecycle(TypeOfLifecycle::PUBLISHED)
+                ->setAccess(TypeOfServerAccess::IS_PUBLIC)
                 ->setFinalType(static::IS_FINAL);
 
             $sys_params->setNamespaceId(static::getTypeNamespaceClass()::getDictionaryObject()->getNamespaceObject()?->id);

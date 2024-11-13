@@ -13,9 +13,7 @@ class Retire extends Api\TypeApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,

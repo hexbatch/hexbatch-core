@@ -11,9 +11,7 @@ class Cmd extends BaseAction
 
     const ACTION_NAME = TypeOfAction::BASE_COMMAND;
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         BaseAction::class

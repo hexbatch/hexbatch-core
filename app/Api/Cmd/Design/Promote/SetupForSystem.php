@@ -2,6 +2,7 @@
 namespace App\Api\Cmd\Design\Promote;
 
 use App\Api\Cmd\Design\DesignParams;
+use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Models\ElementType;
 use App\Sys\Build\ActionMapper;
@@ -12,7 +13,11 @@ class SetupForSystem
 {
     use DesignParams;
 
-
+    public function setAccess(?TypeOfServerAccess $access): SetupForSystem
+    {
+        $this->access = $access;
+        return $this;
+    }
     public function setNamespaceId(?int $namespace_id): SetupForSystem
     {
         $this->namespace_id = $namespace_id;

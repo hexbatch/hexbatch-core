@@ -12,9 +12,7 @@ class AttributeWrite extends Evt\ScopeSet
     const EVENT_NAME = TypeOfEvent::ATTRIBUTE_WRITE;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Evt\ScopeSet::class

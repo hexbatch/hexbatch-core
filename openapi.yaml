@@ -104,6 +104,270 @@ paths:
       responses:
         '204':
           description: 'Nothing returned'
+  /api/v1/design/change_owner:
+    post:
+      summary: 'Changes the ownership of a type before its published.  '
+      description: 'The owner ns can transfer this unpublished design to be owned by another namespace. Owners of subtypes can deny this change by listening to the type_owner_change event raised by this action'
+      operationId: core.design.change_owner
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/promote_owner:
+    post:
+      summary: 'Changes the ownership of a type before its published. '
+      description: 'The system can transfer this design to be managed by another namespace. No events are raised that can deny the change.'
+      operationId: core.design.promote_owner
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/promote:
+    post:
+      summary: 'Makes a new design type with anyone as the owner '
+      description: 'The system can make a new design and assign this to any owner. No events are raised'
+      operationId: core.design.promote
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/purge:
+    delete:
+      summary: 'Deletes an unpublished type '
+      description: 'The system can delete any design, owned by anyone, before publishing, without raising any events'
+      operationId: core.design.purge
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/destroy:
+    delete:
+      summary: 'Deletes an unpublished type '
+      description: 'A namespace can delete a new design, before publishing, without raising any events'
+      operationId: core.design.destroy
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/create:
+    post:
+      summary: 'Makes a new design type '
+      description: 'A namespace can make a new design, they are the owner. No events are raised'
+      operationId: core.design.create
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/edit:
+    patch:
+      summary: 'Edits the name, final type, access '
+      description: "The owner or their admin group can change, before publishing, the name of the type, final status and access level \nNo events are raised"
+      operationId: core.design.edit
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/show:
+    get:
+      summary: 'Shows information about a type '
+      description: "See details about a type in any state. Lists the attributes, event listeners, live requirements and live rules \nIf the design type is set to public access, then any namespace can use this to see the information. Otherwise only the members of the owner namepace can \nTo see more detail about any one of these, use the show api for that reference"
+      operationId: core.design.show
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/list:
+    get:
+      summary: 'Lists all the designed owned or managed  '
+      description: "See a list of all the designs this namespace either owns or has admin rights to. Once a type is published, it is not seen here\nCan see the name, uuid, the status and how many attributes, listeners, requirements and rules there are"
+      operationId: core.design.list
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/show_attribute:
+    get:
+      summary: 'Information about a single attribute on a type  '
+      description: "See information about an attribute. Will list the settings and bounds, will show parent, and status \nShows stats about its descendants\nif the type is marked as public, and the attribute is marked as public then any namespace can use this,  \notherwise the members of the owning namesapce can "
+      operationId: core.design.show_attribute
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/destroy_attribute:
+    delete:
+      summary: 'Delete an attribute'
+      description: "Destroys an attribute. Attributes cannot be deleted after a type is published \nRemoving design attributes does not generate any event"
+      operationId: core.design.destroy_attribute
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/promote_attribute:
+    post:
+      summary: 'Creates a new attribute on a design for any design or namespace'
+      description: "System can create a new attribute using any parent chain for any design owned by anyone \nThis does not generate any events"
+      operationId: core.design.promote_attribute
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/create_attribute:
+    post:
+      summary: 'Creates a new attribute on a design'
+      description: "Namespace admin group can create a new attribute using any parent chain for any design owned by anyone \nBut the design can only be published if the inheritance chain does not block this using the design_pending event"
+      operationId: core.design.create_attribute
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/list_attributes:
+    get:
+      summary: 'Lists the attributes of a type  '
+      description: "See a list of all the attributes the type uses\nShows information about its ancestors\nif the type is marked as private or the attribute is marked as private,\n then that attribute is not shown except to the members of the owning namesapce"
+      operationId: core.design.list_attributes
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/set_attribute_location:
+    patch:
+      summary: 'Gives the attribute a shape or map  '
+      description: "Each attribute can have one map or shape, or none at all\nCall this with no boundary to clear\nThe bounds of the type as a whole is a union of the attribute maps"
+      operationId: core.design.set_attribute_location
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/test_attribute_location:
+    get:
+      summary: 'Allows testing and debugging of an attribute bounds  '
+      description: "Tests the attribute bounds with geojson points and shapes, or other types and attributes\nif the type is marked as private or the attribute is marked as private,\n then that attribute is not testable except to the members of the owning namesapce. \n If using other attributes to test with, must be able to see that attribute. "
+      operationId: core.design.test_attribute_location
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/edit_attribute:
+    patch:
+      summary: 'Edits the properites of an unpublished attribute  '
+      description: "Owner admin group can set the following properties to an attribute: \nparent, boolean properties, merge methods, access, value policy, value rules, initial value"
+      operationId: core.design.edit_attribute
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/create_listener:
+    post:
+      summary: 'Makes a new event listener for an attribute on the design '
+      description: "Each attribute can have zero or one listeners. If replacing, then earlier must be destroyed. \nOwner admin group can create a listener on each attribute, as long as the type is not published \nIf inheriting from a parent, and that has a listener, then the listener must be for the same event type "
+      operationId: core.design.create_listener
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/destroy_listener:
+    delete:
+      summary: 'Makes a new event listener for an attribute on the design '
+      description: 'Owner admin group can can remove the event listener from the attribute, before publishing '
+      operationId: core.design.destroy_listener
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/list_listeners:
+    get:
+      summary: 'Allows testing and debugging of an attribute bounds  '
+      description: "Lists all the listeners, and the attributes that hold them, and the events listened \n To see the rules then use the show listener\n if the type is marked as private or the attribute is marked as private,\n then the listener is not shown except to the members of the owning namesapce"
+      operationId: core.design.list_listeners
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/show_listener:
+    get:
+      summary: 'Shows information about a specific listener'
+      description: "Shows the information about the listener, including the rules it uses \n This is only shown to the owning namespace members"
+      operationId: core.design.show_listener
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/create_rule:
+    post:
+      summary: 'Creates a rule or rule tree attached to the root or existing rule '
+      description: "Each listener can have a tree of rules with a single top root, but can have any number of branches or leaves \nOwner admin group can add a single rule, or a tree of rules, and that can be attached to the unoccupied root, or to a leaf "
+      operationId: core.design.create_rule
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/destroy_rule:
+    delete:
+      summary: 'Removes a single rule and all its children '
+      description: "The listener tree can be edited by deleting parts of it. \nOwner admin group can prune the tree by branches or leaves "
+      operationId: core.design.destroy_rule
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/edit_rule:
+    post:
+      summary: 'Edits a single rule and all its children '
+      description: "The listener tree can be edited by changing one rule and its children \n For existing rules can change the phase,path,rank,logic, merge method and filter \n Owner admin group edit each leaf or branches or the entire tree "
+      operationId: core.design.edit_rule
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/test_listener:
+    get:
+      summary: 'Test a rule tree against  '
+      description: "A listener can be tested against a simulated event \n The tester provides the set, element, event, as long as the namespace using this can see the set and/or element, can test "
+      operationId: core.design.test_listener
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/remove_parent:
+    delete:
+      summary: 'Removes a parent'
+      description: "The owner or admin group can remove one or more parents from a design using a path. \nThis can be removed regardless of the approval status \nParents need approval to use, but do not notify the inheritance chain of design changes when dropping that parent"
+      operationId: core.design.remove_parent
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/add_parent:
+    post:
+      summary: 'Adds a parent'
+      description: "The owner or admin group can add one or more published parents using a path.\n Regardless who owns it, the event of design_pending can block it from the inheritance chaing\n If a parent is declared retired or suspended before publishing, then this type cannot be published until that is changed\nParents need approval to use in the design, and later to publish, to look over any conflicts after the design allowed"
+      operationId: core.design.add_parent
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/list_parents:
+    get:
+      summary: 'Lists the parents of a type  '
+      description: "Lists the parents the type (published or any other state) uses. \nLists the status of each parent, both their own lifecycle and the approval status being used here\n If the type has public access, then any namespace can see this. Otherwise its members of the owning namespace "
+      operationId: core.design.list_parents
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/list_live_rules:
+    get:
+      summary: 'Lists live rules for the type  '
+      description: "Lists the live rules defined for this type. \n If the type has public access, then any namespace can see this. Otherwise its members of the owning namespace "
+      operationId: core.design.list_live_rules
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/add_live_rule:
+    post:
+      summary: 'Adds a new live rule to the type before its published '
+      description: 'Owner admin group can add live rules to be applied after the publishing and making sets out of this '
+      operationId: core.design.add_live_rule
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/remove_live_rule:
+    delete:
+      summary: 'Removes a live rule '
+      description: 'Owner admin group can remove a live rule before its published '
+      operationId: core.design.remove_live_rule
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/test_location:
+    get:
+      summary: 'Tests the type schedule  '
+      description: "Tests the bounds of the type with geo-json or given another type, element or set. \n If the type is marked as private,\n then only testable to the members of the owning namesapce. "
+      operationId: core.design.test_location
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/design/test_time:
+    get:
+      summary: 'Tests the type schedule  '
+      description: "Tests schedule of the type with any generated time string \n If the type is marked as private,\n then only testable to the members of the owning namesapce. "
+      operationId: core.design.test_time
+      responses:
+        '501':
+          description: 'Not yet implemented'
 components:
   schemas:
     hexbatch_uuid:

@@ -15,9 +15,7 @@ class SetLeave extends Evt\ScopeSet
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Evt\ScopeSet::class

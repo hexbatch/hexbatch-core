@@ -14,9 +14,7 @@ class AskCredentials extends Api\ElsewhereApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,

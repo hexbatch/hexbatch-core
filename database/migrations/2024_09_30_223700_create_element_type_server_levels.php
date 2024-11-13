@@ -43,7 +43,7 @@ return new class extends Migration
 
 
         //Ancestor types cannot increase access, only lessen it
-        DB::statement("ALTER TABLE element_type_server_levels Add COLUMN access_type type_of_server_access NOT NULL default 'private_attribute';");
+        DB::statement("ALTER TABLE element_type_server_levels Add COLUMN access_type type_of_server_access NOT NULL default 'is_private';");
     }
 
     /**

@@ -12,9 +12,7 @@ class Region extends Meta
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Meta::class

@@ -12,9 +12,7 @@ class Ty extends Cmd
     const ACTION_NAME = TypeOfAction::BASE_TYPE;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Cmd::class

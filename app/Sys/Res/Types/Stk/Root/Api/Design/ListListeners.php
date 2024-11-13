@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
-use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\Search;
 use App\Sys\Res\Types\Stk\Root\Api;
 
@@ -15,9 +14,7 @@ class ListListeners extends Api\DesignApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,

@@ -13,9 +13,7 @@ class RunMaster extends Api\TypeApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,

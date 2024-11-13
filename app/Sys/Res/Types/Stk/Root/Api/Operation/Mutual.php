@@ -13,9 +13,7 @@ class Mutual extends Api\OperationApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\OperationApi::class,

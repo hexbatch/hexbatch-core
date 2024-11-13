@@ -13,9 +13,7 @@ class CurrentType extends BaseType
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Placeholder::class

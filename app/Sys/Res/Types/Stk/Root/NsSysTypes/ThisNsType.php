@@ -20,9 +20,7 @@ class ThisNsType extends BaseType
     }
 
     const HANDLE_ELEMENT_CLASS = SystemHandleElement::class;
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         BasePerNamespace::class,

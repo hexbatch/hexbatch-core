@@ -15,9 +15,7 @@ class TypeOwnerChange extends Evt\ScopeSet
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Evt\ScopeServer::class

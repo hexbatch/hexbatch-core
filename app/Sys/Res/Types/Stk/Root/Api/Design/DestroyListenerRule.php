@@ -14,9 +14,7 @@ class DestroyListenerRule extends Api\DesignApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,

@@ -13,9 +13,7 @@ class PublicType extends BaseType
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         LoggedIn::class,

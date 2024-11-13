@@ -15,9 +15,7 @@ class BaseEvent extends Event implements IEvent
 
     public static function getClassName() :string { return static::EVENT_NAME->value; }
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Event::class

@@ -14,9 +14,7 @@ class Ping extends Api\ElementApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,

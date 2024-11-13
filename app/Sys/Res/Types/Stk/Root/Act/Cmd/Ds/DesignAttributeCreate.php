@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\DesignAttributeCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 
 class DesignAttributeCreate extends Act\Cmd\Ds
@@ -18,6 +19,10 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\DesignPending::class
     ];
 
 }

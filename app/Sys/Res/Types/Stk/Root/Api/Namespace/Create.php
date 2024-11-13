@@ -14,9 +14,7 @@ class Create extends Api\NamespaceApi
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,

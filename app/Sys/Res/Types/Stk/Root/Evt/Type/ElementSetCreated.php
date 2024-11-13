@@ -14,9 +14,7 @@ class ElementSetCreated extends Evt\ScopeSet
     const EVENT_NAME = TypeOfEvent::ELEMENT_SET_CREATED;
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Evt\ScopeType::class

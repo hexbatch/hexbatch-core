@@ -12,9 +12,7 @@ class CmdNoSideEffects extends BaseType
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         BaseAction::class

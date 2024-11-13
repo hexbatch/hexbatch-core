@@ -13,9 +13,7 @@ class SemaphoreIdleSetType extends BaseType
 
 
 
-    const ATTRIBUTE_CLASSES = [
 
-    ];
 
     const PARENT_CLASSES = [
         Semaphore::class,
