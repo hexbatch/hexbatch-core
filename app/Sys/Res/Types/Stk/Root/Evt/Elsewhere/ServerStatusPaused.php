@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ServerStatusPaused extends Evt\ScopeSet
+class ServerStatusPaused extends Evt\ScopeElsewhere
 {
     const UUID = 'f1eccb62-07f2-4290-8f76-f0898e35704f';
     const EVENT_NAME = TypeOfEvent::SERVER_STATUS_PAUSED;

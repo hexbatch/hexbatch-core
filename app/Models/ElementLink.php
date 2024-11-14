@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int linker_namespace_id
  * @property int linker_element_id
  * @property int link_to_set_id
  * @property string ref_uuid

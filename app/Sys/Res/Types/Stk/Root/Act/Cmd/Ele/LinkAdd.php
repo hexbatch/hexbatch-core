@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\LinkAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class LinkAdd extends Act\Cmd\Ele
 {
@@ -18,6 +18,10 @@ class LinkAdd extends Act\Cmd\Ele
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\LinkCreated::class
     ];
 
 }

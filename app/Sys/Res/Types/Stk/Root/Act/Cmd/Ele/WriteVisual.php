@@ -23,7 +23,7 @@ class WriteVisual extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Element\ShapeDisplayWrite::class
+        Evt\Element\WritingVisual::class
     ];
 
 }

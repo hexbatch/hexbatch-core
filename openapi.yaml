@@ -368,6 +368,358 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
+  /api/v1/design/set_time:
+    post:
+      summary: 'Sets the schedule for the type  '
+      description: "Sets a schedule for the type before publishing \n There is only one schedule, which can be overridden by this, or emptied out by using this with no data"
+      operationId: core.design.set_time
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/change_owner:
+    patch:
+      summary: 'Change the element owner'
+      description: 'Element owner can give ownership to another namespace at any time. Any number of elements can be included with a path '
+      operationId: core.elements.change_owner
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/attribute_off:
+    patch:
+      summary: 'Turn off an attribute of elements'
+      description: 'Element admin group turn off attributes of elements in sets given by a path '
+      operationId: core.elements.attribute_off
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/attribute_on:
+    patch:
+      summary: 'Turn on an attribute of elements'
+      description: 'Element admin group turn on attributes of elements in sets given by a path '
+      operationId: core.elements.attribute_on
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/type_off:
+    patch:
+      summary: 'Turn off all the subtype attributes of elements'
+      description: 'Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path '
+      operationId: core.elements.type_off
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/type_on:
+    patch:
+      summary: 'Turn on all the attributes of a parent type in elements'
+      description: 'Element admin group turn on all parent type attributes. The types, elements and sets given by a path '
+      operationId: core.elements.type_on
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/read_attribute:
+    get:
+      summary: 'Read the same attributes in one or more elements'
+      description: "Can select the same attribute(s) in elements(s) to read, \n its up to the attribute access, the type access and the event handlers to decide who can "
+      operationId: core.elements.read_attribute
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/write_attribute:
+    patch:
+      summary: 'Write json to the same attributes of one or more elements'
+      description: 'Write one or more elements found in a path, that have the same attributes. If one can. '
+      operationId: core.elements.write_attribute
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/write_visual:
+    patch:
+      summary: 'Write opacity|color|border|texture to the same attributes of one or more elements'
+      description: "Admin groups changes visual rendering of opacity|color|border|texture for one or more elements found in a path, \n that have the same attributes. The system here does not render, so its up to the api clients to do something with the settings "
+      operationId: core.elements.write_visual
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/read_visual:
+    get:
+      summary: 'Read the locations of one or more elements'
+      description: "Can read pathed elements' geometry and maps due to design and live types \n its up to the attribute access, the type access and the event handlers to decide who can "
+      operationId: core.elements.read_visual
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/add_live:
+    post:
+      summary: 'Add a live type to one or more elements'
+      description: "If can read any attribute on a type, can add it as a live part to one or more elements in a search path.\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  "
+      operationId: core.elements.add_live
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/copy_live:
+    post:
+      summary: 'Copy a live type and its state to one or more elements'
+      description: "If can read any attribute on both the source and destination type, can copy its and its state to a new element.\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  "
+      operationId: core.elements.copy_live
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/remove_live:
+    delete:
+      summary: 'Remove a live type from one or more elements'
+      description: "If can read any attribute on the live type, can remove its and its state to a new element.\n If not part of the element ns, can still remove it if part of the type ns and event listeners allow  "
+      operationId: core.elements.remove_live
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/ping:
+    post:
+      summary: 'Ping one or more elements to a set'
+      description: 'Element ns can use that to ping elements to target sets.'
+      operationId: core.elements.ping_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/create:
+    post:
+      summary: 'Creates one or more new elements from a type'
+      description: 'Type admin can create one or more elements going to one or more namespaces. The namespace can reject. The inherited types can reject'
+      operationId: core.elements.create_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/destroy:
+    delete:
+      summary: 'Destroys one or more elements'
+      description: 'Element admin can destroy one or more elements, the type or parent types can reject this'
+      operationId: core.elements.destroy_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/promote:
+    post:
+      summary: 'Creates one or more elements'
+      description: 'System can make elements out of any types, not needing permissions. No events created when doing this'
+      operationId: core.elements.promote_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/promote_edit:
+    patch:
+      summary: 'Changes owner or value of or phase of one or more elements'
+      description: 'System can update elements not needing permissions. No events created when doing this'
+      operationId: core.elements.promote_edit_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/purge:
+    delete:
+      summary: 'System Destroy one or more elements'
+      description: 'System can destroy one or more elements without permission'
+      operationId: core.elements.purge_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/link:
+    post:
+      summary: 'Makes a link between an element and a set'
+      description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set \n The link can be assigned to another namespace, they can reject that. The linked set can reject the link"
+      operationId: core.elements.link
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/unlink:
+    delete:
+      summary: 'Destroys one or more links'
+      description: 'Link admin can remove one or more links they control'
+      operationId: core.elements.unlink
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/list_links:
+    get:
+      summary: 'Shows a list of links'
+      description: 'Link members can see all the links owned by namespaces they belong'
+      operationId: core.elements.list_links
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/show_link:
+    get:
+      summary: 'Show a link'
+      description: 'Link member can see information about a particular link'
+      operationId: core.elements.show_link
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/show:
+    get:
+      summary: 'Shows the value and information about an element'
+      description: 'Element members can see details about an element'
+      operationId: core.elements.show_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/list:
+    get:
+      summary: 'Shows list of elements'
+      description: 'Element members can see a list of all the elements of namespaces they belong'
+      operationId: core.elements.list_elements
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elements/show_public:
+    get:
+      summary: 'Shows public information about an element'
+      description: 'Anyone can see public information about an element, attributes that are marked as public will show their data.'
+      operationId: core.elements.show_public
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/show_namespace:
+    get:
+      summary: 'Shows a summary of the namespace'
+      description: "Namespace members can run this to see the owner, the name, the count of admins, members, types, elements \n Will show a list of the first admins (not a complete list)"
+      operationId: core.namespaces.show_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/show_namespace_public:
+    get:
+      summary: 'Shows a summary of the namespace'
+      description: 'Anyone can run this to see some info about the namespace. Will only show public data'
+      operationId: core.namespaces.show_namespace_public
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/list_namespaces:
+    get:
+      summary: 'Shows all the namespaces this caller is part of'
+      description: 'Will show owned, admin and member status of all namespaces this caller is part of'
+      operationId: core.namespaces.list_namespaces
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/edit_promotion:
+    patch:
+      summary: 'Allows the system to set namespace data'
+      description: "System can set data in namespaces without events going off. \n can set new homesets, public and private elements, source server,name \n can change ownership"
+      operationId: core.namespaces.edit_promotion
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/destroy_namespace:
+    delete:
+      summary: 'The owner can destroy a namespace'
+      description: 'User can destroy any namespace they own except their default namespace '
+      operationId: core.namespaces.destroy_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/create_namespace:
+    post:
+      summary: 'The user creates a new namespace with themself as the owner'
+      description: "user make new namespace. \n can set new homesets, public and private elements, source server,name, user, other data "
+      operationId: core.namespaces.create_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/promote_namespace:
+    post:
+      summary: 'Allows the system to make a new namespace'
+      description: "System make new namespaces and assign anyone as the owner. \n can set new homesets, public and private elements, source server,name, user, other data "
+      operationId: core.namespaces.promote_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/purge_namespace:
+    delete:
+      summary: 'Allows the system to destroy any namespace'
+      description: 'System can destroy any namespaces without events going off '
+      operationId: core.namespaces.purge_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/add_admin:
+    post:
+      summary: 'Add a new admin to the namespace'
+      description: 'Owner can add a new administrator (who will also be a member) '
+      operationId: core.namespaces.add_admin
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/list_admins:
+    get:
+      summary: 'Shows a list of all the admins from this namespace'
+      description: 'Any member can use this to get a full list of all the admins (includes owner)'
+      operationId: core.namespaces.list_admins
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/remove_admin:
+    delete:
+      summary: 'Remove admin privs from a member in the namespace'
+      description: 'Owner can remove administrator (who will still be a member) '
+      operationId: core.namespaces.remove_admin
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/purge_admin:
+    delete:
+      summary: 'System can remove admins from namespaces'
+      description: 'System can remove any admin from any group without raising events (person is still member) '
+      operationId: core.namespaces.purge_admin
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/promote_admin:
+    post:
+      summary: 'System can add admins to namespaces'
+      description: 'System can add anyone to be admin in group without raising events '
+      operationId: core.namespaces.promote_admin
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/add_member:
+    post:
+      summary: 'Add a member to the namespace'
+      description: 'Admin can add any other namespace as a member'
+      operationId: core.namespaces.add_member
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/remove_member:
+    delete:
+      summary: 'Remove member from the namespace'
+      description: 'Admin can remove member who is not administrator '
+      operationId: core.namespaces.remove_member
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/promote_member:
+    post:
+      summary: 'System can add members to namespaces'
+      description: 'System can add any member from group without raising events '
+      operationId: core.namespaces.promote_member
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/purge_member:
+    delete:
+      summary: 'System can remove members from namespaces'
+      description: 'System can remove any member from any group without raising events '
+      operationId: core.namespaces.purge_member
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/list_members:
+    get:
+      summary: 'Shows a list of all the members from this namespace'
+      description: 'Any member can use this to get a full list of all the members'
+      operationId: core.namespaces.list_members
+      responses:
+        '501':
+          description: 'Not yet implemented'
 components:
   schemas:
     hexbatch_uuid:

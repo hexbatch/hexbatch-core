@@ -12,7 +12,7 @@ use App\Sys\Res\Types\Stk\Root\Evt;
  * all of which must be ready;
  * when done the semaphore elements go back to the idle or waiting, based on the auto attribute
  */
-class WaitSemaphore extends Evt\ScopeSet
+class WaitSemaphore extends Evt\ScopeServer
 {
     const UUID = '28ccc870-c2e1-4a0e-9588-f55365a85b17';
     const EVENT_NAME = TypeOfEvent::WAIT_SEMAPHORE;

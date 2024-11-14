@@ -5,10 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\ElementCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-use App\Sys\Res\Types\Stk\Root\Evt\Element\ElementRecieved;
-use App\Sys\Res\Types\Stk\Root\Evt\Element\ElementRecievedBatch;
-use App\Sys\Res\Types\Stk\Root\Evt\Type\ElementOwnerChange;
-use App\Sys\Res\Types\Stk\Root\Evt\Type\ElementOwnerChangeBatch;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * if no handler for element creation, then only the type owner members can create
@@ -18,7 +15,7 @@ use App\Sys\Res\Types\Stk\Root\Evt\Type\ElementOwnerChangeBatch;
  *  if no list, then the caller will be the element owner
  *
  * Creation can be blocked by the following
- * @see ElementOwnerChange,ElementRecieved,ElementRecievedBatch,ElementOwnerChangeBatch
+ * @see Evt\Type\ElementOwnerChange,Evt\Type\ElementRecieved,Evt\Type\ElementRecievedBatch,Evt\Type\ElementOwnerChangeBatch
  *
  * it can access a list of sets from a child to create one per set (and put them in the set)
  *  if no set provided, it will put new element in the caller's home set.
@@ -39,6 +36,13 @@ class ElementCreate extends Act\Cmd\Ele
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Type\ElementOwnerChange::class,
+        Evt\Element\ElementRecieved::class,
+        Evt\Element\ElementRecievedBatch::class,
+        Evt\Type\ElementOwnerChangeBatch::class
     ];
 
 }

@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\LiveTypeRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /*
  * when live type is being removed , this is a set operation,
@@ -25,6 +26,10 @@ class LiveTypeRemove extends Act\Cmd\Ele
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Set\LiveTypeRemoved::class
     ];
 
 }

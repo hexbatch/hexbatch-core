@@ -59,12 +59,14 @@ enum TypeOfEvent: string
      */
     //scoped to same set
 
-    case ATTRIBUTE_READ = 'attribute_read';
+    case ATTRIBUTE_READING = 'attribute_reading';
+    case ATTRIBUTE_READ_LOCATION = 'attribute_read_location';
     case ATTRIBUTE_WRITE = 'attribute_write';
 
     case TYPE_WRITE = 'type_write'; //all the attributes of a type or subtype or live type is written to at once
-    case MAP_DISPLAY_WRITE = 'map_display_write';
-    case SHAPE_DISPLAY_WRITE = 'shape_display_write';
+    case DISPLAY_WRITING = 'display_writing';
+    case DISPLAY_READING = 'display_reading';
+    case TIME_READING = 'time_reading';
 
     case ELEMENT_ATTRIBUTE_OFF = 'element_attribute_off';
     case ELEMENT_ATTRIBUTE_ON = 'element_attribute_on';

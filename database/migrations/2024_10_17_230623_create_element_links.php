@@ -15,6 +15,16 @@ return new class extends Migration
         Schema::create('element_links', function (Blueprint $table) {
             $table->id();
 
+            $table->foreignId('linker_namespace_id')
+                ->nullable()
+                ->default(null)
+                ->comment("The namespace that owns this link")
+                ->index()
+                ->constrained('user_namespaces')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
             $table->foreignId('linker_element_id')
                 ->nullable(false)
                 ->comment("an element can point to a set (that is anywhere) as a link")

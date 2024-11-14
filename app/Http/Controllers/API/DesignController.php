@@ -19,7 +19,7 @@ class DesignController extends Controller {
 
     #[ApiTypeMarker( Root\Api\Design\ChangeOwner::class)]
     #[ApiEventMarker( Evt\Server\TypeOwnerChange::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[OA\Post(
         path: '/api/v1/design/change_owner',
         operationId: 'core.design.change_owner',
@@ -93,7 +93,7 @@ class DesignController extends Controller {
 
 
     #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[OA\Delete(
         path: '/api/v1/design/destroy',
         operationId: 'core.design.destroy',
@@ -111,7 +111,7 @@ class DesignController extends Controller {
 
 
     #[ApiTypeMarker( Root\Api\Design\Create::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[OA\Post(
         path: '/api/v1/design/create',
         operationId: 'core.design.create',
@@ -130,7 +130,7 @@ class DesignController extends Controller {
 
 
     #[ApiTypeMarker( Root\Api\Design\Edit::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[OA\Patch(
         path: '/api/v1/design/edit',
         operationId: 'core.design.edit',
@@ -169,7 +169,7 @@ class DesignController extends Controller {
 
 
     #[ApiTypeMarker( Root\Api\Design\ListDesigns::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[OA\Get(
         path: '/api/v1/design/list',
         operationId: 'core.design.list',
@@ -219,7 +219,7 @@ class DesignController extends Controller {
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\DestroyAttribute::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     public function destroy_attribute() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
@@ -248,7 +248,7 @@ class DesignController extends Controller {
 
     #[ApiTypeMarker( Root\Api\Design\CreateAttribute::class)]
     #[ApiEventMarker( Evt\Server\DesignPending::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[OA\Post(
         path: '/api/v1/design/create_attribute',
         operationId: 'core.design.create_attribute',
@@ -298,7 +298,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\AttributeLocation::class)]
     public function set_attribute_location() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -339,7 +339,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditAttribute::class)]
     public function edit_attribute() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -360,7 +360,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateListener::class)]
     public function create_listener() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -377,7 +377,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\DestroyListener::class)]
     public function destroy_listener() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -417,7 +417,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ShowListener::class)]
     public function show_listener() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -436,7 +436,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateListenerRule::class)]
     public function create_rule() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -455,7 +455,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\DestroyListenerRule::class)]
     public function destroy_rule() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -475,7 +475,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditListenerRule::class)]
     public function edit_rule() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -493,7 +493,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\TestListener::class)]
     public function test_listener() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -513,7 +513,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\RemoveParent::class)]
     public function remove_parent() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -534,7 +534,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiEventMarker( Evt\Server\DesignPending::class)]
     #[ApiTypeMarker( Root\Api\Design\AddParent::class)]
     public function add_parent() {
@@ -591,7 +591,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\AddLiveRule::class)]
     public function add_live_rule() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -609,7 +609,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\RemoveLiveRule::class)]
     public function remove_live_rule() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -671,7 +671,7 @@ class DesignController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\Time::class)]
     public function set_time() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);

@@ -8,7 +8,7 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 /**
  * One or more elements were moved from a different phase
  */
-class ElementSetCreated extends Evt\ScopeSet
+class ElementSetCreated extends Evt\ScopeType
 {
     const UUID = 'fa06219b-a995-4bb2-85dd-5645a47fd67c';
     const EVENT_NAME = TypeOfEvent::ELEMENT_SET_CREATED;

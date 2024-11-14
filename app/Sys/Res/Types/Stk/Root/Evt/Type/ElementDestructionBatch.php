@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ElementDestructionBatch extends Evt\ScopeSet
+class ElementDestructionBatch extends Evt\ScopeType
 {
     const UUID = '60d62ad8-e20e-49f8-9e9c-0f05c416b43c';
     const EVENT_NAME = TypeOfEvent::ELEMENT_DESTRUCTION_BATCH;

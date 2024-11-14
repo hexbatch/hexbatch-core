@@ -63,6 +63,7 @@ class DesignPromoteResponse extends DesignPromote implements IActionWorkReturn,I
     /**
      * @param DesignPromoteParams $params
      * @return DesignPromoteResponse
+     * @throws \Exception
      */
     public static function doWork($params): IActionWorkReturn
     {

@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\ElementDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /*
  * it is ok if this element is destroyed while things are working on it
@@ -21,6 +22,11 @@ class ElementDestroy extends Act\Cmd\Ele
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Type\ElementDestruction::class,
+        Evt\Type\ElementDestructionBatch::class
     ];
 
 }

@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class SetDestroyed extends Evt\ScopeSet
+class SetDestroyed extends Evt\ScopeServer
 {
     const UUID = '474374cd-555c-4b29-af01-29bd61f9bffd';
     const EVENT_NAME = TypeOfEvent::SET_DESTROYED;

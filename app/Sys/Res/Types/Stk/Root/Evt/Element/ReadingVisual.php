@@ -6,15 +6,10 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class MapDisplayWrite extends Evt\ScopeElement
+class ReadingVisual extends Evt\ScopeElement
 {
-    const UUID = '4a070471-0924-4a27-8ea0-3dbaf2e32a8e';
-    const EVENT_NAME = TypeOfEvent::MAP_DISPLAY_WRITE;
-
-
-
-
-
+    const UUID = '7b7736e8-8fec-4456-9279-a8d11e8bb633';
+    const EVENT_NAME = TypeOfEvent::DISPLAY_READING;
 
 
     const PARENT_CLASSES = [

@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\LiveTypeCopyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /*
  * The live type attached is also added to the target(s) with the live type's attribute values
@@ -20,6 +21,10 @@ class LiveTypeCopy extends Act\Cmd\Ele
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Set\LiveTypePasted::class
     ];
 
 }

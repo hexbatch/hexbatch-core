@@ -60,6 +60,9 @@ class SetupForSystem
         return $this;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function doParamsAndResponse()  :ElementType {
         /**
          * @var DesignPromoteParams $promo_params

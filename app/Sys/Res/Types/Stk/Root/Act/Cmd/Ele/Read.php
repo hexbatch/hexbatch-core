@@ -22,7 +22,7 @@ class Read extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\Read::class
+        Evt\Set\Reading::class
     ];
 
 }

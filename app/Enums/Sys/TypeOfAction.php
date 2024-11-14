@@ -40,7 +40,7 @@ enum TypeOfAction: string
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
 
     case PRAGMA_READ_TIME_SPAN = 'pragma_read_time_span'; //the start and stop time of the type that owns the element (current time span)
-    case PRAGMA_READ_LOCATION = 'pragma_read_bounds_shape'; //the shape of the attribute being read, includes display
+    case PRAGMA_READ_VISUAL = 'pragma_read_visual'; //the shape of the attribute being read, includes display
 
 
 

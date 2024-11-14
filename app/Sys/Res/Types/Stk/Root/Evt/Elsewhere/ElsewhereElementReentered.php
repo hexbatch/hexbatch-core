@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ElsewhereElementReentered extends Evt\ScopeSet
+class ElsewhereElementReentered extends Evt\ScopeElsewhere
 {
     const UUID = 'ba2a7b72-65a0-4948-b201-dba33ef453c1';
     const EVENT_NAME = TypeOfEvent::ELSEWHERE_ELEMENT_REENTERED;

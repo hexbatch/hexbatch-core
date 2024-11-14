@@ -8,7 +8,7 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 /**
  * This goes to the type  when a single element of a type is changed ownership or given for the first time
  */
-class ElementOwnerChange extends Evt\ScopeSet
+class ElementOwnerChange extends Evt\ScopeType
 {
     const UUID = 'c43da607-84d1-40f5-992d-db4d091e6ec9';
     const EVENT_NAME = TypeOfEvent::ELEMENT_OWNER_CHANGE;
