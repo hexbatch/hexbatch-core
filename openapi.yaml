@@ -584,6 +584,206 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
+  /api/v1/elsewhere/register:
+    post:
+      summary: 'Servers can register here'
+      description: 'Any server can register, they are sent their credentials and user info to their api . Registration can be blocked by event'
+      operationId: core.elsewhere.register
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/ask_credentials:
+    post:
+      summary: 'Servers can renew credentials'
+      description: 'Any server already registered can ask for new credentials and it will be sent to their api . This can be blocked by event'
+      operationId: core.elsewhere.ask_credentials
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/give_credentials:
+    post:
+      summary: 'Servers can renew credentials'
+      description: 'Can reset and send credentials to regisered server . This can be blocked by event'
+      operationId: core.elsewhere.give_credentials
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/push_credentials:
+    post:
+      summary: 'Servers can have credentials renewed without them asking'
+      description: 'Can send new credentials to regisered server . This can be blocked by event'
+      operationId: core.elsewhere.push_credentials
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/change_status:
+    patch:
+      summary: 'System can change server status'
+      description: 'Can change the server status to allowed|blocked|paused|pending. Events can block'
+      operationId: core.elsewhere.change_status
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/give_namespace:
+    post:
+      summary: 'A new namespace is given from elsewhere'
+      description: 'Servers can combine many namespaces at once to avoid extra http calls. Events can filter or block this'
+      operationId: core.elsewhere.give_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/give_set:
+    post:
+      summary: 'A new set is given from elsewhere'
+      description: 'Servers can combine many sets at once to avoid extra http calls. Events can filter or block this'
+      operationId: core.elsewhere.give_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/give_type:
+    post:
+      summary: 'A new type is given from elsewhere'
+      description: 'Servers can combine many types at once to avoid extra http calls. Events can filter or block this'
+      operationId: core.elsewhere.give_type
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/give_event:
+    post:
+      summary: 'An event to run is given from elsewhere'
+      description: 'The event runs if the type has setup the listener to be run by that server. Can be blocked before the listener is run'
+      operationId: core.elsewhere.give_event
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/give_element:
+    post:
+      summary: 'A new element is given from elsewhere'
+      description: "Servers can combine many element at once to avoid extra http calls. Events can filter or block this \n Elements that have the same guid and type as here are considered re-entered"
+      operationId: core.elsewhere.give_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/share_element:
+    post:
+      summary: 'Server wants to share element we gave them'
+      description: "Server A wants to give Server B the element that we gave them earlier. \n The response here will give B that element unless blocked "
+      operationId: core.elsewhere.share_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/ask_element:
+    post:
+      summary: 'Try to get element from another server'
+      description: "System can initiate transfer for elements. Can be many in one request. \nOnce the elements are talked about, will ask for the other stuff related, if missing. \nEvents can block this request "
+      operationId: core.elsewhere.ask_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/ask_type:
+    post:
+      summary: 'Try to get type from another server'
+      description: 'System can initiate transfer for types. Can be many in one request '
+      operationId: core.elsewhere.ask_type
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/ask_set:
+    post:
+      summary: 'Try to get set from another server'
+      description: 'System can initiate transfer for sets. Can be many in one request '
+      operationId: core.elsewhere.ask_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/ask_namespace:
+    post:
+      summary: 'Try to get namespace from another server'
+      description: 'System can initiate transfer for namespaces. Can be many in one request '
+      operationId: core.elsewhere.ask_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/push_element:
+    post:
+      summary: 'Push element to another server'
+      description: 'System can send elements to server '
+      operationId: core.elsewhere.push_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/push_set:
+    post:
+      summary: 'Push a set to another server'
+      description: 'System can send a set with its elements to server '
+      operationId: core.elsewhere.push_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/push_namespace:
+    post:
+      summary: 'Push a namespace to another server'
+      description: 'System can send a namespace to server '
+      operationId: core.elsewhere.push_namespace
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/push_type:
+    post:
+      summary: 'Push a type to another server'
+      description: 'System can send a type to server '
+      operationId: core.elsewhere.push_type
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/push_event:
+    post:
+      summary: 'Push an event to another server to complete'
+      description: 'System can send registered events to the other server '
+      operationId: core.elsewhere.push_event
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/destroyed_element:
+    post:
+      summary: 'Server reports it destroyed an element we gave them'
+      description: "We do record keeping, so if this is the record, event is called.  \nThis is notification after the fact and up to us how to handle it "
+      operationId: core.elsewhere.destroyed_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/suspended_type:
+    post:
+      summary: 'Server suspended type we share with them'
+      description: 'The other server can suspend a type we gave them, or they gave us. Its up to here how to handle it, can be blocked by events '
+      operationId: core.elsewhere.suspended_type
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/purge_elsewhere:
+    delete:
+      summary: 'System can remove server and all its associated'
+      description: 'System can remove all associated types,elements,namespaces,sets and designs based on that. No events raised'
+      operationId: core.elsewhere.purge_elsewhere
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/list_servers:
+    get:
+      summary: 'List the servers'
+      description: 'Anyone can filter servers with a path, and get a paginated list'
+      operationId: core.elsewhere.list_servers
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/elsewhere/show_server:
+    get:
+      summary: 'Information about a server'
+      description: 'Anyone can see public information about a server'
+      operationId: core.elsewhere.show_server
+      responses:
+        '501':
+          description: 'Not yet implemented'
   /api/v1/namespaces/show_namespace:
     get:
       summary: 'Shows a summary of the namespace'
@@ -725,6 +925,54 @@ paths:
       summary: 'Shows a list of all the members from this namespace'
       description: 'Any member can use this to get a full list of all the members'
       operationId: core.namespaces.list_members
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/operations/unshift:
+    post:
+      summary: 'Add elements to the front of the set'
+      description: 'namespace members of the sets can select one or more elements from one set to be unshifted to another '
+      operationId: core.operations.unshift
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/operations/combine:
+    post:
+      summary: 'Add or remove elements between sets'
+      description: 'namespace members of the sets can adjust set contents using logic operations '
+      operationId: core.operations.combine
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/operations/mutual:
+    post:
+      summary: 'Make a mutual from one or more sets'
+      description: 'Any sets and elements can have mutuals made from the readable attributes '
+      operationId: core.operations.mutual
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/operations/pop:
+    post:
+      summary: 'Pops elements from sets'
+      description: 'Namespace members of the sets can pop off elements to another set '
+      operationId: core.operations.pop
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/operations/push:
+    post:
+      summary: 'Push elements to sets'
+      description: 'Namespace members of the sets can push elements on the top positions of target sets '
+      operationId: core.operations.push
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/operations/shift:
+    post:
+      summary: 'shift elements from sets'
+      description: 'Namespace members of the sets can remove elements from the bottom positions of target sets '
+      operationId: core.operations.shift
       responses:
         '501':
           description: 'Not yet implemented'

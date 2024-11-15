@@ -95,7 +95,7 @@ class ElsewhereController extends Controller {
 
     #[OA\Patch(
         path: '/api/v1/elsewhere/change_status',
-        operationId: 'core.elsewhere.give_credentials',
+        operationId: 'core.elsewhere.change_status',
         description: "Can change the server status to allowed|blocked|paused|pending. Events can block",
         summary: 'System can change server status',
         responses: [
