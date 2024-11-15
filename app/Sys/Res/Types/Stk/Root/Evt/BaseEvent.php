@@ -14,17 +14,13 @@ class BaseEvent extends Event implements IEvent
     const EVENT_NAME = TypeOfEvent::BASE_EVENT;
 
     public static function getClassName() :string { return static::EVENT_NAME->value; }
+    public static function getEventName() :string { return static::EVENT_NAME->value; }
 
 
 
     const PARENT_CLASSES = [
         Event::class
     ];
-
-    public function getRelatedActions(): array
-    {
-        return [];
-    }
 
 
 }

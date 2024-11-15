@@ -8,8 +8,6 @@ use App\Api\Cmd\Type\AttributeAddHandle\AttributeHandleForSystem;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
-use App\Models\ElementType;
-use App\Models\ElementValue;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemTypes;
@@ -22,7 +20,6 @@ abstract class BaseAttribute implements ISystemAttribute
     protected ?Attribute $attribute = null;
 
     const UUID = '';
-    const TYPE_CLASS = '';
     const PARENT_ATTRIBUTE_CLASS = '';
     const HANDLE_ATTRIBUTE_CLASS = '';
     const ATTRIBUTE_NAME = '';
@@ -33,6 +30,10 @@ abstract class BaseAttribute implements ISystemAttribute
 
     protected bool $b_did_create_model = false;
     public function didCreateModel(): bool { return $this->b_did_create_model; }
+
+    public function getISystemAttribute() : ISystemAttribute {
+        return $this;
+    }
 
      public static function getClassUuid() : string {
          return static::UUID;
@@ -110,21 +111,21 @@ abstract class BaseAttribute implements ISystemAttribute
            $sys_params = new APSetupForSystem();
            $sys_params
                ->setUuid(static::getClassUuid())
-               ->setAttributeName(static::getAttributeName())
+               ->setAttributeName($this->getISystemAttribute()->getAttributeName())
                ->setDesignAttributeId(null)
-               ->setFinal(static::IS_FINAL)
+               ->setFinal($this->getISystemAttribute()::isFinal())
                ->setAbstract(static::IS_ABSTRACT)
-               ->setSeenByChild(static::IS_SEEN_BY_CHILDREN_TYPES)
+               ->setSeenByChild($this->getISystemAttribute()::isSeenChildrenTypes())
                ->setAttributeApproval(TypeOfApproval::PUBLISHING_APPROVED)
                ->setSystem(true);
 
-           if(static::getClassOwningSystemType()) {
+           if($this->getISystemAttribute()::getClassOwningSystemType()) {
                $sys_params->setOwnerElementTypeId(static::getClassOwningSystemType()::getDictionaryObject()->getTypeObject()->id);
            } else {
                throw new \LogicException("Attribute ". static::class . " Does not have a type");
            }
 
-           if(static::getClassParentSystemAttribute()) {
+           if($this->getISystemAttribute()::getClassParentSystemAttribute()) {
                $sys_params->setParentAttributeId(static::getClassParentSystemAttribute()::getDictionaryObject()->getAttributeObject()->id);
            }
 
@@ -144,20 +145,11 @@ abstract class BaseAttribute implements ISystemAttribute
 
 
 
-    public function getSystemParent(): ISystemAttribute
-    {
-        return SystemAttributes::getAttributeByUuid(static::PARENT_ATTRIBUTE_CLASS);
-    }
-
     public function getSystemHandle() : ?ISystemAttribute
     {
         return SystemAttributes::getAttributeByUuid(static::HANDLE_ATTRIBUTE_CLASS);
     }
 
-    public function getOwningSystemType(): ISystemType
-    {
-        return SystemTypes::getTypeByUuid(static::TYPE_CLASS);
-    }
 
     public function onCall(): ISystemResource
     {
@@ -168,7 +160,7 @@ abstract class BaseAttribute implements ISystemAttribute
     public function onNextStep(): void
     {
         if (!$this->b_did_create_model) {return;}
-        if (!static::getSystemHandle()) {return;}
+        if (!$this->getISystemAttribute()::getSystemHandle()) {return;}
 
         try
         {
@@ -186,25 +178,13 @@ abstract class BaseAttribute implements ISystemAttribute
 
     public function isFinal(): bool
     {
-        return false;
+        return static::IS_FINAL;
     }
 
     public function isSeenChildrenTypes(): bool
     {
-        return false;
+        return static::IS_SEEN_BY_CHILDREN_TYPES;
     }
 
 
-     public function getAttributeData(): ?array
-     {
-         return $this->getStartingElementValue()?->element_value?->getArrayCopy();
-     }
-
-     public function getStartingElementValue() :?ElementValue {
-         return $this->getAttributeObject()?->original_element_value;
-     }
-
-     public function getOwningType() : ?ElementType {
-         return $this->getAttributeObject()->type_owner;
-     }
  }

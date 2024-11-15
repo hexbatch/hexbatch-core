@@ -23,13 +23,11 @@ interface ISystemNamespace extends ISystemResource, INamespace
 
     public static function getNamespaceName() :string;
     public static function getNamespacePublicKey() :?string;
-    public function getNamespaceServer() :?ISystemServer;
     public function getNamespaceUser() :?ISystemUser;
 
-    public function getPublicElement() : ?ISystemElement ;
-    public function getPrivateElement() : ?ISystemElement ;
-    public function getNamespaceType() : ?ISystemType ;
-    public function getHomeSet() : ?ISystemSet ;
+    public function getISystemNamespace() : ISystemNamespace;
+
+
 
 
 }

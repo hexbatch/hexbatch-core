@@ -24,4 +24,7 @@ interface ISystemSet extends ISystemResource, ISet
     /** @return ISystemElement[] */
     public function getSystemElements() : array ;
 
+
+    public function getISystemSet() : ISystemSet;
+
 }

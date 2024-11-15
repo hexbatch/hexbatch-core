@@ -154,7 +154,5 @@ class Element extends Model implements ISystemModel
         return $this->ref_uuid;
     }
 
-    public function getObject(): Model {
-        return $this;
-    }
+
 }

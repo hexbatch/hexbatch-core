@@ -17,8 +17,6 @@ use Illuminate\Support\Facades\DB;
 class SystemResources
 {
 
-    const MAX_SYSTEM_RESOURCE_NAME_LENGTH = 16;
-    const MAX_SYSTEM_RESOURCE_NESTING = 16;
 
     /** @var array<string,SystemBase> $uuid_class_dictionary */
     protected static array $uuid_class_dictionary = [];

@@ -7,7 +7,6 @@ use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Namespaces\INamespace;
 use App\Sys\Res\Servers\IServer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -184,10 +183,7 @@ class Server extends Model implements IServer,ISystemModel
     }
 
 
-    public function getServerNamespaceInterface(): ?INamespace
-    {
-        return $this->owning_namespace;
-    }
+
 
     public function getServerObject(): ?Server
     {
@@ -198,7 +194,5 @@ class Server extends Model implements IServer,ISystemModel
         return $this->ref_uuid;
     }
 
-    public function getObject(): Model {
-        return $this;
-    }
+
 }

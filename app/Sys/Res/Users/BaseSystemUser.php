@@ -24,7 +24,7 @@ abstract class BaseSystemUser implements ISystemUser
         return static::NAMESPACE_CLASS;
     }
 
-
+    public function getISystemUser() : ISystemUser { return $this;}
     public function getUser() : User {
         if ($this->user) {return $this->user;}
         $maybe_user = User::whereRaw('users.ref_uuid = ?',static::getClassUuid())->first();
@@ -59,7 +59,7 @@ abstract class BaseSystemUser implements ISystemUser
     }
 
     public function getUserNamespace() :?ISystemNamespace {
-        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
+        return SystemNamespaces::getNamespaceByUuid(static::getSystemNamespaceClass());
     }
 
     public function onCall(): ISystemResource
@@ -72,7 +72,7 @@ abstract class BaseSystemUser implements ISystemUser
     {
         if (!$this->b_did_create_model) {return;}
         //users add in the default namespace using the uuid of the now generated ns
-        $ns = $this->getUserNamespace();
+        $ns = $this->getISystemUser()->getUserNamespace();
         if (!$ns) {
             throw new HexbatchInitException('user next step cannot get ns');
         }

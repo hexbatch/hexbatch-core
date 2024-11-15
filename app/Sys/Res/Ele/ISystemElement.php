@@ -11,10 +11,8 @@ interface ISystemElement extends ISystemResource,IElement
 
     public static function getDictionaryObject() :ISystemElement;
     public static function getSystemTypeClass() :string|ISystemType;
-    public static function getPhaseSystemTypeClass() :string|ISystemType;
     public static function getSystemNamespaceClass() :string|ISystemNamespace;
-    public function getSystemType() :?ISystemType;
-    public function getSystemNamespaceOwner() :?ISystemNamespace;
 
+    public function getISystemElement() : ISystemElement;
 
 }

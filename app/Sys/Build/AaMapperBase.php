@@ -5,6 +5,7 @@ namespace App\Sys\Build;
 
 class AaMapperBase
 {
+    /** @noinspection PhpUnused */
     const SOURCE_FOLDER = '';
     const OUTPUT_FILE = '';
 

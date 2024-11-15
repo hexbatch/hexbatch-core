@@ -10,6 +10,7 @@ use App\Helpers\Annotations\Access\TypeOfAccessMarker;
 class ApiAccessMarker
 {
 
+    /** @noinspection PhpUnused */
     public function __construct(
         TypeOfAccessMarker $marker
     ) {

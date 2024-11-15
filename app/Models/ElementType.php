@@ -406,6 +406,7 @@ class ElementType extends Model implements IType,ISystemModel
                          // that means its possible to design stuff using items without permissions (as long as in the proper ns memberships and admins)
                          // the lifecycle will be set to published after all is cleared
                          // bringing back retired types will start a new publish check
+                         Utilities::ignoreVar();//linting
                      }
                  }
             }
@@ -537,7 +538,5 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->ref_uuid;
     }
 
-    public function getObject(): Model {
-        return $this;
-    }
+
 }

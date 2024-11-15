@@ -43,13 +43,15 @@ abstract class BaseType implements ISystemType
     protected bool $b_did_create_model = false;
     public function didCreateModel(): bool { return $this->b_did_create_model; }
 
+
+    public function getISystemType() : ?ISystemType {return $this;}
     public static function getClassUuid() : string {
         return static::UUID;
     }
 
 
-    public function getClassServer() : ?ISystemServer {
-        return SystemServers::getServerByUuid(static::SERVER_CLASS);
+    public function getTypeServer() : ?ISystemServer {
+        return SystemServers::getServerByUuid($this->getISystemType()::getTypeServerClass());
     }
 
     public function getType() : ElementType {
@@ -72,13 +74,13 @@ abstract class BaseType implements ISystemType
                ->setUuid(static::getClassUuid())
                ->setTypeName(static::getClassName())
                ->setSystem(true)
-               ->setFinalType(static::isFinal())
+               ->setFinalType($this->getISystemType()::isFinal())
                 ->setLifecycle(TypeOfLifecycle::PUBLISHED)
                 ->setAccess(TypeOfServerAccess::IS_PUBLIC)
                 ->setFinalType(static::IS_FINAL);
 
-            $sys_params->setNamespaceId(static::getTypeNamespaceClass()::getDictionaryObject()->getNamespaceObject()?->id);
-            $sys_params->setServerId(static::getTypeServerClass()::getDictionaryObject()->getServerObject()?->id);
+            $sys_params->setNamespaceId($this->getISystemType()->getTypeNamespace()->getNamespaceObject()?->id);
+            $sys_params->setServerId($this->getISystemType()->getTypeServer()->getServerObject()?->id);
 
 
             $what =  $sys_params->doParamsAndResponse();
@@ -101,7 +103,9 @@ abstract class BaseType implements ISystemType
         return static::HANDLE_ELEMENT_CLASS;
     }
 
-    /** @return ISystemAttribute[] */
+    /** @return ISystemAttribute[]
+     * @noinspection PhpUnused
+     */
     public function getAttributes() :array {
         $ret = [];
         foreach (static::ATTRIBUTE_CLASSES as $class_name) {
@@ -195,7 +199,7 @@ abstract class BaseType implements ISystemType
     }
 
     public function getTypeNamespace() :?ISystemNamespace {
-        return SystemNamespaces::getNamespaceByUuid(static::NAMESPACE_CLASS);
+        return SystemNamespaces::getNamespaceByUuid($this->getISystemType()::getTypeNamespaceClass());
     }
 
     public static function getDictionaryObject() :ISystemType {
@@ -225,13 +229,13 @@ abstract class BaseType implements ISystemType
                 $sys_params = new HandleForSystem();
                 $sys_params
                     ->setTypeIds([$this->getTypeObject()->id])
-                    ->setHandleElementId(static::getHandleElement()->getElementObject()->id);
+                    ->setHandleElementId($this->getISystemType()::getHandleElement()->getElementObject()->id);
                 $sys_params->doParamsAndResponse();
             }
 
 
             $parent_ids = [];
-            foreach (static::getParentTypes() as $parent_system_object) {
+            foreach ($this->getISystemType()::getParentTypes() as $parent_system_object) {
                 $parent_ids[] = $parent_system_object->getTypeObject()->id;
             }
 

@@ -19,4 +19,6 @@ interface ISystemUser extends ISystemResource
 
     public static function getSystemNamespaceClass() :string|ISystemNamespace;
 
+    public function getISystemUser() : ISystemUser;
+
 }

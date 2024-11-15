@@ -658,25 +658,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
     }
 
 
-    public function getOwningType(): ?ElementType
-    {
-        return $this->type_owner;
-    }
 
-    public function getAttributeName(): string
-    {
-        return $this->attribute_name;
-    }
-
-    public function getStartingElementValue(): ?ElementValue
-    {
-        return $this->original_element_value;
-    }
-
-    public function getAttributeData(): ?array
-    {
-        return $this->original_element_value?->element_value->getArrayCopy();
-    }
 
     public function getAttributeObject() : ?Attribute {
         return $this;
@@ -686,7 +668,5 @@ class Attribute extends Model implements IAttribute,ISystemModel
         return $this->ref_uuid;
     }
 
-    public function getObject(): Model {
-        return $this;
-    }
+
 }

@@ -368,7 +368,4 @@ class UserNamespace extends Model implements INamespace,ISystemModel
         return $this->ref_uuid;
     }
 
-    public function getObject(): Model {
-        return $this;
-    }
 }

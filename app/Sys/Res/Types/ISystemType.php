@@ -31,11 +31,15 @@ interface ISystemType extends ISystemResource, IType
 
     public static function getSystemHandleElementClass() :string|ISystemElement;
 
-    /** @return ISystemAttribute[] */
+    /** @return ISystemAttribute[]
+     * @noinspection PhpUnused
+     */
     public function getAttributes() :array;
 
     public function getTypeNamespace() : ?ISystemNamespace;
     public function getHandleElement() : ?ISystemElement;
-    public function getClassServer() : ?ISystemServer;
+    public function getTypeServer() : ?ISystemServer;
+
+    public function getISystemType() : ?ISystemType;
 
 }

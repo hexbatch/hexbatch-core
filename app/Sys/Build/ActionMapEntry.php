@@ -20,6 +20,8 @@ class ActionMapEntry
     public bool $is_protected = false;
     public bool $has_events = true;
 
+    public array $events = [];
+
     public function isDataComplete() : bool {
         return $this->action_uuid && $this->action_name && $this->action_ouput_class &&
             $this->action_input_class && $this->action_param_class && $this->action_worker_class && $this->action_return_class;
@@ -68,6 +70,13 @@ class ActionMapEntry
             }
             $this->action_return_class = $full_class_name;
         }
+
+        foreach ($full_class_name::getRelatedEvents() as $rel) {
+            $this->events[$rel::EVENT_NAME->value] = $rel;
+            $this->events[$rel::getEventName()] = $rel;
+        }
+
+
     }
 
 
@@ -80,6 +89,7 @@ class ActionMapEntry
             'api_name'=> $this->getActionName(),
             'is_protected'=> $this->isProtected(),
             'has_events'=> $this->hasEvents(),
+            'events' => $this->events,
             BuildActionFacet::FACET_PARAMS->value => $this->getActionParamClass(),
             BuildActionFacet::FACET_INPUT->value => $this->getActionInputClass(),
             BuildActionFacet::FACET_OUTPUT->value => $this->getActionOuputClass(),

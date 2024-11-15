@@ -14,7 +14,6 @@ class RefCodes {
     const INVALID_UUID = 10;
     const INVALID_TIME = 11;
 
-    const SHAPE_COORDINATE_ISSUE = 12;
 
     //servers start at 500
     const SERVER_NOT_FOUND = 500;
@@ -71,13 +70,9 @@ class RefCodes {
     const RULE_CANNOT_EDIT = 4103;
 
 
-    //remotes start at 5000
 
-    const REMOTE_NOT_FOUND = 5001;
-    const REMOTE_SCHEMA_ISSUE = 5010;
-    const REMOTE_ACTIVITY_NOT_FOUND =  5015;
-    const REMOTE_UNCALLABLE =  5050;
-    const REMOTE_STACK_NOT_FOUND =  5200;
+
+
 
 
 
@@ -159,10 +154,7 @@ class RefCodes {
         self::RULE_CANNOT_DELETE => '',
         self::RULE_CANNOT_EDIT => '',
 
-        self::REMOTE_NOT_FOUND => '',
-        self::REMOTE_SCHEMA_ISSUE => '',
-        self::REMOTE_ACTIVITY_NOT_FOUND => '',
-        self::REMOTE_STACK_NOT_FOUND => '',
+
 
 
 

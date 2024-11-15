@@ -28,7 +28,7 @@ use App\Sys\Res\ISystemResource;
 
 
     protected ?ElementSet $set = null;
-
+     public function getISystemSet() : ISystemSet {return $this;}
      protected bool $b_did_create_model = false;
      public function didCreateModel(): bool { return $this->b_did_create_model; }
 
@@ -59,7 +59,7 @@ use App\Sys\Res\ISystemResource;
 
      public static function getDefiningSystemElement(): ?ISystemElement
      {
-         return SystemElements::getElementByUuid(static::ELEMENT_CLASS);
+         return SystemElements::getElementByUuid(static::getDefiningSystemElementClass());
      }
 
      public function getSystemElements(): array
@@ -89,14 +89,15 @@ use App\Sys\Res\ISystemResource;
        if ($this->set) {return $this->set;}
        try
        {
+           $iset = $this->getISystemSet();
            $element_ids = [];
-           foreach (static::getMemberSystemElementClasses() as $some_element_class) {
-               $element_ids[] = $some_element_class::getDictionaryObject()->getElementObject()?->id;
+           foreach ($iset->getSystemElements() as $some_element_class) {
+               $element_ids[] = $some_element_class->getElementObject()?->id;
            }
            $sys_params = new SetForSystem();
            $sys_params
                ->setUuid(static::getClassUuid())
-               ->setParentSetElementId(static::getDefiningSystemElementClass()::getDictionaryObject()->getElementObject()?->id)
+               ->setParentSetElementId($iset->getDefiningSystemElement()->getElementObject()?->id)
                ->setHasEvents(static::hasEvents())
                ->setSystem(true)
                ->setContentElementIds($element_ids)

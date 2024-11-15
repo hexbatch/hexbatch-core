@@ -5,6 +5,7 @@ namespace App\Api\Users\CreateToken;
 use App\Api\IApiOaParams;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use Illuminate\Http\Request;
 
 /**
@@ -22,7 +23,7 @@ class CreateTokenParams implements IApiOaParams
     public function fromRequest(Request $request,?int $seconds_to_live = null)
     {
         $this->passthrough = $request->all();
-        if (mb_strlen(json_encode($this->passthrough) ) > static::MAX_PASSTHROUGH_SIZE) {
+        if (mb_strlen(Utilities::maybeEncodeJson($this->passthrough) ) > static::MAX_PASSTHROUGH_SIZE) {
             throw new HexbatchNotPossibleException(__("msg.passthrough_data_too_big",['max'=>static::MAX_PASSTHROUGH_SIZE]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::BAD_LOGIN);

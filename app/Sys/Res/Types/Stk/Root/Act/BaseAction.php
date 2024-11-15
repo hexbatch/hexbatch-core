@@ -34,10 +34,9 @@ class BaseAction extends BaseType implements IAction
     const EVENT_CLASSES = [];
 
 
-    public function getRelatedEvents(): array
+    public static function getRelatedEvents(): array
     {
-
-        return [];
+        return static::EVENT_CLASSES;
     }
 }
 

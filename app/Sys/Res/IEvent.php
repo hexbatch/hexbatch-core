@@ -4,10 +4,9 @@ namespace App\Sys\Res;
 
 interface IEvent
 {
-    const EVENT_NAME = '';
 
 
-    /** @return IAction[] */
-    public function getRelatedActions(): array;
+
+    public static function getEventName() :string;
 
 }

@@ -7,11 +7,7 @@ use App\Api\Cmd\Namespace\EditPromotion\NsEditForSystem;
 use App\Api\Cmd\Namespace\Promote\NsForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\UserNamespace;
-use App\Sys\Collections\SystemElements;
 use App\Sys\Collections\SystemNamespaces;
-use App\Sys\Collections\SystemServers;
-use App\Sys\Collections\SystemSets;
-use App\Sys\Collections\SystemTypes;
 use App\Sys\Collections\SystemUsers;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
@@ -26,7 +22,6 @@ abstract class BaseNamespace implements ISystemNamespace
 {
 
 
-    const UUID = '';
     const TYPE_CLASS = '';
     const PUBLIC_ELEMENT_CLASS = '';
     const PRIVATE_ELEMENT_CLASS = '';
@@ -38,6 +33,7 @@ abstract class BaseNamespace implements ISystemNamespace
     protected bool $b_did_create_model = false;
     public function didCreateModel(): bool { return $this->b_did_create_model; }
 
+    public function getISystemNamespace() : ISystemNamespace {return $this;}
     public static function getClassName() :string {
         return 'Home '. static::getSystemHomeClass()::getClassName();
     }
@@ -90,7 +86,7 @@ abstract class BaseNamespace implements ISystemNamespace
                ->setNamespaceUserId(static::getSystemUserClass()::getDictionaryObject()->getUserObject()?->id)
                ->setSystem(true)
                ->setNamespaceName(static::getNamespaceName())
-               ->setNamespacePublicKey(static::getNamespacePublicKey())
+               ->setNamespacePublicKey($this->getISystemNamespace()::getNamespacePublicKey())
                ;
 
            $what =  $sys_params->doParamsAndResponse();
@@ -101,13 +97,8 @@ abstract class BaseNamespace implements ISystemNamespace
        }
    }
 
-    public function getNamespaceServer() :?ISystemServer { return SystemServers::getServerByUuid(static::SERVER_CLASS);}
     public function getNamespaceUser() :?ISystemUser { return SystemUsers::getSystemUserByUuid(static::USER_CLASS);}
 
-    public function getPublicElement() : ?ISystemElement { return SystemElements::getElementByUuid(static::PUBLIC_ELEMENT_CLASS);}
-    public function getPrivateElement() : ?ISystemElement { return SystemElements::getElementByUuid(static::PRIVATE_ELEMENT_CLASS);}
-    public function getNamespaceType() : ?ISystemType { return SystemTypes::getTypeByUuid(static::TYPE_CLASS);}
-    public function getHomeSet() : ?ISystemSet { return SystemSets::getSetByUuid(static::TYPE_CLASS);}
 
     public function getNamespaceObject() : UserNamespace {
         return $this->getNamespace();
@@ -123,7 +114,7 @@ abstract class BaseNamespace implements ISystemNamespace
     {
         if (!$this->b_did_create_model) {return;}
         //namespaces added in the home set , attribute and elements and user
-        $user = $this->getNamespaceUser();
+        $user = $this->getISystemNamespace()->getNamespaceUser();
         if (!$user) {
             throw new HexbatchInitException('namespace next step cannot get u');
         }
