@@ -2,68 +2,168 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Helpers\Annotations\Access\TypeOfAccessMarker;
+use App\Helpers\Annotations\ApiAccessMarker;
+use App\Helpers\Annotations\ApiEventMarker;
 use App\Helpers\Annotations\ApiTypeMarker;
-use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 
-use App\Http\Resources\PathCollection;
-use App\Http\Resources\PathPartResource;
-use App\Http\Resources\PathResource;
-use App\Models\Attribute;
-use App\Models\ElementType;
-use App\Models\Path;
-use App\Models\PathPart;
-use App\Models\UserNamespace;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+
 use App\Sys\Res\Types\Stk\Root;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
+use OpenApi\Attributes as OA;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class PathController extends Controller {
 
 
-
+    #[OA\Patch(
+        path: '/api/v1/paths/publish',
+        operationId: 'core.paths.publish',
+        description: "Paths can be used in other api calls after publishing",
+        summary: 'Publish a path, marking it as workable',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
     #[ApiTypeMarker( Root\Api\Path\Publish::class)]
     public function publish_path() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+    #[OA\Post(
+        path: '/api/v1/paths/add_handle',
+        operationId: 'core.paths.add_handle',
+        description: "Paths can be grouped, organized and controlled together",
+        summary: 'Add element handle to a path',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\PathHandleAdded::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
     #[ApiTypeMarker( Root\Api\Path\AddHandle::class)]
     public function add_handle() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+    #[OA\Patch(
+        path: '/api/v1/paths/remove_handle',
+        operationId: 'core.paths.remove_handle',
+        description: "Handles can be removed at any time, and left empty or new ones added",
+        summary: 'Remove element handle from a path',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\PathHandleRemoved::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
     #[ApiTypeMarker( Root\Api\Path\RemoveHandle::class)]
     public function remove_handle() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+
+    #[OA\Get(
+        path: '/api/v1/paths/list',
+        operationId: 'core.paths.list',
+        description: "Can filter by handle or see all paths",
+        summary: 'Lists the paths this namespace is a member of',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_MEMBER)]
     #[ApiTypeMarker( Root\Api\Path\ListAll::class)]
     public function list_paths() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+    #[OA\Get(
+        path: '/api/v1/paths/show',
+        operationId: 'core.paths.show',
+        description: "Members can see times and what uses a path",
+        summary: 'Shows a path',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_MEMBER)]
     #[ApiTypeMarker( Root\Api\Path\Show::class)]
     public function show_path() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
+    #[OA\Post(
+        path: '/api/v1/paths/copy',
+        operationId: 'core.paths.copy',
+        description: "Paths can be complicated to make and test, copying them for other use and editing those can be helpful. The new path is unpublished",
+        summary: 'Copies a path, with the caller the owner of the new path',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_MEMBER)]
     #[ApiTypeMarker( Root\Api\Path\Copy::class)]
     public function copy_path() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+    #[OA\Post(
+        path: '/api/v1/paths/create',
+        operationId: 'core.paths.create',
+        description: "The caller is the path owner. The name and phase is set",
+        summary: 'Creates a new empty path that is unpublished',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_OWNER)]
     #[ApiTypeMarker( Root\Api\Path\Create::class)]
     public function create_path() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+
+
+
+    #[OA\Patch(
+        path: '/api/v1/paths/edit',
+        operationId: 'core.paths.edit',
+        description: "Handles can be removed at any time, and left empty or new ones added",
+        summary: 'Change the path name and phase',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\PathHandleAdded::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
     #[ApiTypeMarker( Root\Api\Path\Edit::class)]
     public function edit_path() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+
+
+
+    #[OA\Post(
+        path: '/api/v1/paths/destroy',
+        operationId: 'core.paths.destry',
+        description: "No events when destroying, but if used for something will generate an error",
+        summary: 'Destroys a path',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_OWNER)]
     #[ApiTypeMarker( Root\Api\Path\Destroy::class)]
     public function destroy_path() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -71,139 +171,124 @@ class PathController extends Controller {
 
 
 
-
+    #[OA\Post(
+        path: '/api/v1/paths/create_part',
+        operationId: 'core.paths.create_part',
+        description: "Add a single part, or a tree of parts, and that can be attached to the unoccupied root, or to a leaf",
+        summary: 'Creates a part or part tree attached to the root or existing rule',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
     #[ApiTypeMarker( Root\Api\Path\CreatePart::class)]
     public function create_part() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
+    #[OA\Delete(
+        path: '/api/v1/paths/destroy_part',
+        operationId: 'core.paths.destroy_part',
+        description: "The part tree can be trimmed by deleting one rule and its children. This can also delete the root (and all the parts)",
+        summary: 'Removed a single part and all its children',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
     #[ApiTypeMarker( Root\Api\Path\DestroyPart::class)]
     public function destroy_part() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+    #[OA\Patch(
+        path: '/api/v1/paths/edit_part',
+        operationId: 'core.paths.edit_part',
+        description: "The part tree can be edited by changing one rule and its children. This can also edit the root (and all the parts)",
+        summary: 'Edits a single part and all its children',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
     #[ApiTypeMarker( Root\Api\Path\EditPart::class)]
     public function edit_part() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+
+
+
+    #[OA\Get(
+        path: '/api/v1/paths/show_part',
+        operationId: 'core.paths.show_part',
+        description: "Show a part by itself or a tree, if it has children.",
+        summary: 'Shows a part and its tree',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_MEMBER)]
     #[ApiTypeMarker( Root\Api\Path\ShowPartTree::class)]
     public function show_part_tree() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+
+
+    #[OA\Get(
+        path: '/api/v1/paths/test_part',
+        operationId: 'core.paths.test_part',
+        description: "Test a part by itself or a tree, if it has children. The tree (or part) will pretend to be the entire search. No events called",
+        summary: 'Test a path tree',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_MEMBER)]
     #[ApiTypeMarker( Root\Api\Path\TestPart::class)]
     public function test_part() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+
+
+    #[OA\Get(
+        path: '/api/v1/paths/search',
+        operationId: 'core.paths.search',
+        description: "If handle is set, event will be called. Handle can filter, augment or refine",
+        summary: 'Search with a path',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Element\SearchResults::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_MEMBER)]
     #[ApiTypeMarker( Root\Api\Path\Search::class)]
     public function search() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+
+    #[OA\Get(
+        path: '/api/v1/paths/test',
+        operationId: 'core.paths.test',
+        description: "Used before a path is published, can test to see how the parts are working out, no events called",
+        summary: 'Test a search',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_MEMBER)]
     #[ApiTypeMarker( Root\Api\Path\Test::class)]
     public function test() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    //_.~"~._.~"~._.~"~._.~"~.__.~"~._.~"~._.~"~._.~"~.__.~"~._.~"~._.~"~._.~"~.__.~"~._.~"~._.~"~._.~"~.__.~"~._.~"~._.~"~._.~"~._
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public function create_path_x(Request $request, UserNamespace $namespace): JsonResponse {
-        $out = Path::collectPath(collect: $request->collect(),owner: $namespace);
-        return response()->json(new PathResource($out,null,3),CodeOf::HTTP_OK);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function update_path_x(Request $request, UserNamespace $namespace, Path $path): JsonResponse {
-        Utilities::ignoreVar($namespace); //checked in route
-        $path->path_root_part->delete_subtree();
-        $out = Path::collectPath(collect: $request->collect(),path: $path);
-        return response()->json(new PathResource($out,null,3),CodeOf::HTTP_OK);
-    }
-
-
-    public function list_paths_x(UserNamespace $namespace): JsonResponse {
-        $out = Path::buildPath(owner_namespace_id: $namespace->id)->cursorPaginate();
-        return response()->json(new PathCollection($out),CodeOf::HTTP_OK);
-    }
-
-
-
-
-
-    public function add_part_subtree_x(Request $request, UserNamespace $namespace, Path $path, PathPart $path_part): JsonResponse {
-
-        PathPart::collectPathPart(collect: $request->collect(),owner: $path,parent: $path_part);
-        $out = Path::buildPath(id: $path->id,owner_namespace_id: $namespace->id)->first();
-        return response()->json(new PathResource($out),CodeOf::HTTP_OK);
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    public function edit_part_x(Request $request, UserNamespace $namespace, Path $path, PathPart $path_part): JsonResponse {
-        PathPart::collectPathPart(collect: $request->collect(),owner: $path,part: $path_part);
-        $out = Path::buildPath(id: $path->id,owner_namespace_id: $namespace->id)->first();
-        return response()->json(new PathResource($out),CodeOf::HTTP_OK);
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    public function delete_path_x(UserNamespace $namespace, Path $path): JsonResponse {
-        $path->path_root_part->delete_subtree();
-        $out = Path::buildPath(id: $path->id,owner_namespace_id: $namespace->id)->first();
-        return response()->json(new PathResource($out),CodeOf::HTTP_OK);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function delete_part_subtree_x(UserNamespace $namespace, Path $path, PathPart $path_part): JsonResponse {
-        $path_part->delete_subtree();
-        $out = Path::buildPath(id: $path->id,owner_namespace_id: $namespace->id)->first();
-        return response()->json(new PathResource($out),CodeOf::HTTP_OK);
-    }
-
-
-
-    public function get_part_x(UserNamespace $namespace, Path $path, PathPart $path_part): JsonResponse {
-        Utilities::ignoreVar($namespace); //checked in route
-        $out = PathPart::buildPathPart(id: $path_part->id,owner_path_id: $path->id)->first();
-        return response()->json(new PathPartResource($out),CodeOf::HTTP_OK);
-    }
-
-    public function path_test_x(Request $request, ElementType $element_type, Attribute $attribute): JsonResponse {
-        Utilities::ignoreVar($request,$element_type,$attribute); //checked in the middleware
-        return response()->json([],CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 }

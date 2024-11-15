@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Pa;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\PathHandleRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class PathHandleRemove extends Act\Cmd\Pa
 {
@@ -18,6 +18,10 @@ class PathHandleRemove extends Act\Cmd\Pa
 
     const PARENT_CLASSES = [
         Act\Cmd\Pa::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\PathHandleRemoved::class,
     ];
 
 }

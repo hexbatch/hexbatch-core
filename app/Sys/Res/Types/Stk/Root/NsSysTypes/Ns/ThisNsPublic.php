@@ -9,7 +9,7 @@ use App\Sys\Res\Types\Stk\Root\Namespace\PublicType;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 
 
-class ThisNsPublic extends BaseType
+class ThisNsPublic extends PublicType
 {
 
     public static function getClassUuid() : string {

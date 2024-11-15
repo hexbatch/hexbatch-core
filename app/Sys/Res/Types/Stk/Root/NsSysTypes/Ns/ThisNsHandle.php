@@ -6,10 +6,11 @@ use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\Stk\SystemNS\SystemHandleElement;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Handle;
+use App\Sys\Res\Types\Stk\Root\Handles\TypeHandle;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 
 
-class ThisNsHandle extends BaseType
+class ThisNsHandle extends TypeHandle
 {
 
     public static function getClassUuid() : string {
@@ -27,7 +28,7 @@ class ThisNsHandle extends BaseType
 
     const PARENT_CLASSES = [
         ThisNsType::class,
-        Handle::class
+        TypeHandle::class
     ];
 
 }

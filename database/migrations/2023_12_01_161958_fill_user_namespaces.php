@@ -34,6 +34,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
+            $table->foreignId('namespace_handle_element_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Optional element for managing the namespace and its events")
+                ->index()
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->restrictOnDelete();
+
             $table->foreignId('namespace_type_id')
                 ->nullable()->default(null)
                 ->comment("The type made for this user. This is derived from at least one server type")
@@ -120,6 +129,7 @@ return new class extends Migration
 
             $table->dropForeign(['namespace_user_id']);
             $table->dropForeign(['namespace_server_id']);
+            $table->dropForeign(['namespace_handle_element_id']);
             $table->dropForeign(['namespace_type_id']);
             $table->dropForeign(['public_element_id']);
             $table->dropForeign(['private_element_id']);
@@ -127,6 +137,7 @@ return new class extends Migration
 
             $table->dropColumn('namespace_user_id');
             $table->dropColumn('namespace_server_id');
+            $table->dropColumn('namespace_handle_element_id');
             $table->dropColumn('namespace_type_id');
             $table->dropColumn('public_element_id');
             $table->dropColumn('private_element_id');

@@ -27,6 +27,10 @@ enum TypeOfAccessMarker : string {
     case SYSTEM = 'system';
     case CALLING_SERVER = 'calling_server';
 
+    case PATH_OWNER = 'path_owner';
+    case PATH_ADMIN = 'path_admin';
+    case PATH_MEMBER = 'path_member';
+
 }
 
 

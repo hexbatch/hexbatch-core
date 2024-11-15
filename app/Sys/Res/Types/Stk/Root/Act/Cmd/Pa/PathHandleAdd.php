@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Pa;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\PathHandleAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class PathHandleAdd extends Act\Cmd\Pa
 {
@@ -18,6 +18,10 @@ class PathHandleAdd extends Act\Cmd\Pa
 
     const PARENT_CLASSES = [
         Act\Cmd\Pa::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\PathHandleAdded::class,
     ];
 
 }

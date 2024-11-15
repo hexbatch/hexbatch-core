@@ -38,7 +38,7 @@ enum TypeOfEvent: string
     //scoped same element
 
     //in path element
-    case SEARCH_RESULTS = 'search_results'; //ns member of element
+    case SEARCH_RESULTS = 'search_results'; //goes to handle
 
 
 
@@ -173,6 +173,9 @@ enum TypeOfEvent: string
 
     case NAMESPACE_CREATED = 'namespace_created';
     case NAMESPACE_DESTROYED = 'namespace_destroyed';
+
+    case NAMESPACE_HANDLE_ADDED = 'namespace_handle_added';
+    case NAMESPACE_HANDLE_REMOVED = 'namespace_handle_removed';
 
     case WAIT_SEMAPHORE = 'wait_semaphore';
 

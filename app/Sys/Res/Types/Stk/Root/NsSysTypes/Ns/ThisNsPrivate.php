@@ -9,7 +9,7 @@ use App\Sys\Res\Types\Stk\Root\Namespace\PrivateType;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 
 
-class ThisNsPrivate extends BaseType
+class ThisNsPrivate extends PrivateType
 {
 
     public static function getClassUuid() : string {

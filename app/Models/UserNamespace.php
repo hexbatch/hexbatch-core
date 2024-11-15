@@ -28,6 +28,7 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property int namespace_user_id
  * @property int namespace_server_id
+ * @property int namespace_handle_element_id
  * @property int namespace_type_id
  * @property int public_element_id
  * @property int private_element_id

@@ -6,10 +6,10 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class PathHandleAdded extends Evt\ScopeServer
+class NamespaceHandleRemoved extends Evt\ScopeServer
 {
-    const UUID = '793fd5da-e6b8-4196-9071-eebbd37713e1';
-    const EVENT_NAME = TypeOfEvent::PATH_HANDLE_ADDED;
+    const UUID = '7d84a655-a0e4-47b3-ae1a-6081133c5828';
+    const EVENT_NAME = TypeOfEvent::NAMESPACE_HANDLE_REMOVED;
 
 
     const PARENT_CLASSES = [

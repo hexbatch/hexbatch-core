@@ -6,7 +6,7 @@ use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Media;
 
 
-class Audio extends BaseType
+class Audio extends Media
 {
     const UUID = '01dbfb91-6a6c-49fa-9208-cfad3b0ffc77';
     const TYPE_NAME = 'media_audio';

@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthenticationController;
-use App\Http\Controllers\API\PathController;
+use App\Http\Controllers\API\PathControllerX;
 use App\Http\Controllers\API\ElsewhereController;
 use App\Http\Controllers\API\DesignControllerX;
 use App\Http\Controllers\API\NamespaceControllerX;
@@ -104,28 +104,28 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('paths')->group(function () {
                 Route::middleware(ValidateNamespaceOwner::class)->group(function () {
-                    Route::post('/create', [PathController::class, 'create_path_x'])->name('core.paths.create');
+                    Route::post('/create', [PathControllerX::class, 'create_path_x'])->name('core.paths.create');
                     Route::prefix('{path}')->group(function () {
-                        Route::delete('/delete', [PathController::class, 'delete_path_x'])->name('core.paths.delete');
+                        Route::delete('/delete', [PathControllerX::class, 'delete_path_x'])->name('core.paths.delete');
                     });
                 });
 
                 Route::prefix('{path}')->middleware([ValidateNamespaceAdmin::class])->group(function () {
-                    Route::patch('/update', [PathController::class, 'update_path_x'])->name('core.paths.update');
+                    Route::patch('/update', [PathControllerX::class, 'update_path_x'])->name('core.paths.update');
 
                     Route::prefix('/{path_part}')->middleware(ValidatePartOwnership::class)->group(function () {
-                        Route::patch('/edit_part', [PathController::class, 'edit_part_x'])->name('core.paths.parts.edit');
-                        Route::patch('/add_subtree', [PathController::class, 'add_part_subtree_x'])->name('core.paths.parts.add_subtree');
-                        Route::delete('/remove_subtree', [PathController::class, 'delete_part_subtree_x'])->name('core.paths.parts.remove_subtree');
+                        Route::patch('/edit_part', [PathControllerX::class, 'edit_part_x'])->name('core.paths.parts.edit');
+                        Route::patch('/add_subtree', [PathControllerX::class, 'add_part_subtree_x'])->name('core.paths.parts.add_subtree');
+                        Route::delete('/remove_subtree', [PathControllerX::class, 'delete_part_subtree_x'])->name('core.paths.parts.remove_subtree');
                     });
                 });
 
 
                 Route::middleware(ValidateNamespaceMember::class)->group(function (){
-                    Route::get('/list', [PathController::class, 'list_paths_x'])->name('core.paths.list');
-                    Route::get('/test', [PathController::class, 'path_test_x'])->name('core.paths.test');
+                    Route::get('/list', [PathControllerX::class, 'list_paths_x'])->name('core.paths.list');
+                    Route::get('/test', [PathControllerX::class, 'path_test_x'])->name('core.paths.test');
                     Route::prefix('/{path_part}')->middleware(ValidatePartOwnership::class)->group(function () {
-                        Route::get('/get/{levels?}', [PathController::class, 'get_part_x'])->name('core.paths.get');
+                        Route::get('/get/{levels?}', [PathControllerX::class, 'get_part_x'])->name('core.paths.get');
                     });
 
                 });

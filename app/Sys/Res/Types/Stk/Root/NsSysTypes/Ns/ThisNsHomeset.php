@@ -9,7 +9,7 @@ use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 
 
-class ThisNsHomeset extends BaseType
+class ThisNsHomeset extends HomeSet
 {
 
     public static function getClassUuid() : string {

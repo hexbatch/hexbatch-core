@@ -110,7 +110,7 @@ class TypeController extends Controller {
     }
 
     #[ApiTypeMarker( Root\Api\Type\Retire::class)]
-    public function retired() {
+    public function retire_type() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 

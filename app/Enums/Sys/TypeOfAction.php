@@ -199,6 +199,10 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_PURGE = 'cmd_namespace_purge'; //server admin
 
 
+    case CMD_NAMESPACE_HANDLE_ADD = 'cmd_namespace_handle_add';
+    case CMD_NAMESPACE_HANDLE_REMOVE = 'cmd_namespace_handle_remove';
+
+
     case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
     case CMD_SEMAPHORE_RESET = 'cmd_semaphore_reset';
     case CMD_SEMAPHORE_MASTER_CREATE = 'cmd_semaphore_master_create';

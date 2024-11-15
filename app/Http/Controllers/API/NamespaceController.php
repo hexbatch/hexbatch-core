@@ -55,7 +55,7 @@ class NamespaceController extends Controller {
     #[OA\Get(
         path: '/api/v1/namespaces/list_namespaces',
         operationId: 'core.namespaces.list_namespaces',
-        description: "Will show owned, admin and member status of all namespaces this caller is part of",
+        description: "Will show owned, admin and member status of all namespaces this caller is part of. Can filter by handle or namespace name",
         summary: 'Shows all the namespaces this caller is part of',
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -176,7 +176,7 @@ class NamespaceController extends Controller {
     #[OA\Post(
         path: '/api/v1/namespaces/add_admin',
         operationId: 'core.namespaces.add_admin',
-        description: "Owner can add a new administrator (who will also be a member) ",
+        description: "Owner can add a new administrator (who will also be a member).Event goes to handle ",
         summary: 'Add a new admin to the namespace',
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -195,7 +195,7 @@ class NamespaceController extends Controller {
     #[OA\Get(
         path: '/api/v1/namespaces/list_admins',
         operationId: 'core.namespaces.list_admins',
-        description: "Any member can use this to get a full list of all the admins (includes owner)",
+        description: "Any member can use this to get a full list of all the admins (includes owner). Can filter by handle or admin uuid or name",
         summary: 'Shows a list of all the admins from this namespace',
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -214,7 +214,7 @@ class NamespaceController extends Controller {
     #[OA\Delete(
         path: '/api/v1/namespaces/remove_admin',
         operationId: 'core.namespaces.remove_admin',
-        description: "Owner can remove administrator (who will still be a member) ",
+        description: "Owner can remove administrator (who will still be a member).Event goes to handle ",
         summary: 'Remove admin privs from a member in the namespace',
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -271,7 +271,7 @@ class NamespaceController extends Controller {
     #[OA\Post(
         path: '/api/v1/namespaces/add_member',
         operationId: 'core.namespaces.add_member',
-        description: "Admin can add any other namespace as a member",
+        description: "Admin can add any other namespace as a member. Event goes to handle",
         summary: 'Add a member to the namespace',
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -290,7 +290,7 @@ class NamespaceController extends Controller {
     #[OA\Delete(
         path: '/api/v1/namespaces/remove_member',
         operationId: 'core.namespaces.remove_member',
-        description: "Admin can remove member who is not administrator ",
+        description: "Admin can remove member who is not administrator. Event goes to handle ",
         summary: 'Remove member from the namespace',
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -348,7 +348,7 @@ class NamespaceController extends Controller {
     #[OA\Get(
         path: '/api/v1/namespaces/list_members',
         operationId: 'core.namespaces.list_members',
-        description: "Any member can use this to get a full list of all the members",
+        description: "Any member can use this to get a full list of all the members. Can filter by handle or member uuid/name",
         summary: 'Shows a list of all the members from this namespace',
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -357,6 +357,40 @@ class NamespaceController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Namespace\ListMembers::class)]
     public function list_members() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+    #[OA\Post(
+        path: '/api/v1/namespaces/add_handle',
+        operationId: 'core.namespaces.add_handle',
+        description: "Namespaces can be grouped, organized and controlled together",
+        summary: 'Add element handle to a namespace',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\NamespaceHandleAdded::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Namespace\AddHandle::class)]
+    public function add_handle() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+    #[OA\Patch(
+        path: '/api/v1/namespaces/remove_handle',
+        operationId: 'core.namespaces.remove_handle',
+        description: "Handles can be removed at any time, and left empty or new ones added",
+        summary: 'Remove element handle from a namespaces',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\NamespaceHandleRemoved::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::PATH_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Namespace\RemoveHandle::class)]
+    public function remove_handle() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 

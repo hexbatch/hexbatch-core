@@ -6,7 +6,7 @@ use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\NamespaceType;
 
 
-class PublicType extends BaseType
+class PublicType extends NamespaceType
 {
     const UUID = 'dc6a24eb-a9fa-4946-9f0e-d152f65d8a97';
     const TYPE_NAME = 'public';
