@@ -6,10 +6,10 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ElsewhereDestroyedElement extends Evt\ScopeElsewhere
+class ElsewherePushingType extends Evt\ScopeElsewhere
 {
-    const UUID = '90134989-7edd-4435-9731-d423c7e9388a';
-    const EVENT_NAME = TypeOfEvent::ELSEWHERE_DESTROYED_ELEMENT;
+    const UUID = '92245b59-df9a-4ad6-b9f6-fa21e1cfcb8f';
+    const EVENT_NAME = TypeOfEvent::ELSEWHERE_PUSHING_TYPE;
 
 
 

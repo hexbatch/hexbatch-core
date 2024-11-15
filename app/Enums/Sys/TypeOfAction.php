@@ -215,15 +215,28 @@ enum TypeOfAction: string
     case CMD_ELSEWHERE_GIVE_TYPE = 'cmd_elsewhere_give_type';
     case CMD_ELSEWHERE_GIVE_NS = 'cmd_elsewhere_give_ns';
     case CMD_ELSEWHERE_GIVE_SET = 'cmd_elsewhere_give_set';
+    case CMD_ELSEWHERE_GIVE_EVENT = 'cmd_elsewhere_give_event';
+    case CMD_ELSEWHERE_SHARING_ELEMENT = 'cmd_elsewhere_sharing_element';
+    case CMD_ELSEWHERE_DESTROYED_ELEMENT = 'cmd_elsewhere_destroyed_element';
+    case CMD_ELSEWHERE_SUSPENDED_TYPE = 'cmd_elsewhere_suspended_type';
 
     //admin area starts
     case CMD_ELSEWHERE_DO_REGISTRATION = 'cmd_elsewhere_do_registration'; //system admin or group only for this or below
-    case CMD_ELSEWHERE_GIVE_CREDENTIALS = 'cmd_elsewhere_give_credentials'; //system admin only
+    case CMD_ELSEWHERE_GIVE_CREDENTIALS = 'cmd_elsewhere_give_credentials';
+    case CMD_ELSEWHERE_PUSH_CREDENTIALS = 'cmd_elsewhere_push_credentials';
     case CMD_ELSEWHERE_ASK_CREDENTIALS = 'cmd_elsewhere_ask_credentials';
+    case CMD_ELSEWHERE_ASK_ELEMENT = 'cmd_elsewhere_ask_element';
+    case CMD_ELSEWHERE_ASK_TYPE = 'cmd_elsewhere_ask_type';
+    case CMD_ELSEWHERE_ASK_SET = 'cmd_elsewhere_ask_set';
+    case CMD_ELSEWHERE_ASK_NAMESPACE = 'cmd_elsewhere_ask_namespace';
     case CMD_ELSEWHERE_CHANGE_STATUS = 'cmd_elsewhere_change_status';
     case CMD_ELSEWHERE_PURGE = 'cmd_elsewhere_purge'; //removes all types,ns,ele,sets associated with server, no events
 
-
+    case CMD_ELSEWHERE_PUSH_ELEMENT = 'cmd_elsewhere_push_element';
+    case CMD_ELSEWHERE_PUSH_SET = 'cmd_elsewhere_push_set';
+    case CMD_ELSEWHERE_PUSH_TYPE = 'cmd_elsewhere_push_type';
+    case CMD_ELSEWHERE_PUSH_NAMESPACE = 'cmd_elsewhere_push_namespace';
+    case CMD_ELSEWHERE_PUSH_EVENT = 'cmd_elsewhere_push_event';
 
 
     public static function tryFromInput(string|int|bool|null $test ) : TypeOfAction {

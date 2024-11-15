@@ -199,11 +199,15 @@ enum TypeOfEvent: string
     case SERVER_STATUS_PENDING = 'server_status_pending';
     case SERVER_STATUS_PAUSED = 'server_status_paused';
 
-    case ELSEWHERE_PUSH_ELEMENT = 'elsewhere_push_element';
-    case ELSEWHERE_PUSH_SET = 'elsewhere_push_set';
-    case ELSEWHERE_PUSH_TYPE = 'elsewhere_push_type';
-    case ELSEWHERE_PUSH_NAMESPACE = 'elsewhere_push_namespace';
-    case ELSEWHERE_PUSH_EVENT = 'elsewhere_push_event';
+    case ELSEWHERE_ASKING_SET = 'elsewhere_asking_set';
+    case ELSEWHERE_ASKING_NAMESPACE = 'elsewhere_asking_namespace';
+    case ELSEWHERE_ASKING_TYPE = 'elsewhere_asking_type';
+    case ELSEWHERE_ASKING_ELEMENT = 'elsewhere_asking_element';
+    case ELSEWHERE_PUSHING_ELEMENT = 'elsewhere_pushing_element';
+    case ELSEWHERE_PUSHING_SET = 'elsewhere_pushing_set';
+    case ELSEWHERE_PUSHING_TYPE = 'elsewhere_pushing_type';
+    case ELSEWHERE_PUSHING_NAMESPACE = 'elsewhere_pushing_namespace';
+    case ELSEWHERE_PUSHING_EVENT = 'elsewhere_pushing_event';
 
     case ELSEWHERE_GIVES_ELEMENT = 'elsewhere_gives_element';
     case ELSEWHERE_GIVES_SET = 'elsewhere_gives_set';

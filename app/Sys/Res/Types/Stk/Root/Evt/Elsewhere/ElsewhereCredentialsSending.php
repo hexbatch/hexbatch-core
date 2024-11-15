@@ -7,6 +7,7 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * About to send new credentials to the elsewhere, can be cancelled
+ * This is set up to be a filter event in the things, so that credential logic can be extended
  */
 
 class ElsewhereCredentialsSending extends Evt\ScopeElsewhere

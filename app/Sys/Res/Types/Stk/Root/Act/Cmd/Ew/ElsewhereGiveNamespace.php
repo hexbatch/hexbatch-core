@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereGiveNamespaceMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class ElsewhereGiveNamespace extends Act\Cmd\Ew
 {
@@ -18,6 +18,10 @@ class ElsewhereGiveNamespace extends Act\Cmd\Ew
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Elsewhere\ElsewhereGivesNamespace::class
     ];
 
 }

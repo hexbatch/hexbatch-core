@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class GiveType extends Api\ElsewhereApi
+class PushCredentials extends Api\ElsewhereApi
 {
-    const UUID = '60a56e19-d29c-45b9-ad2a-7c138ad3ba97';
-    const TYPE_NAME = 'api_elsewhere_give_type';
+    const UUID = '929d4904-2fcd-4130-b224-8d9c499f61dd';
+    const TYPE_NAME = 'api_elsewhere_push_credentials';
 
 
 
@@ -18,7 +18,7 @@ class GiveType extends Api\ElsewhereApi
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Cmd\Ew\ElsewhereGiveType::class,
+        Act\Cmd\Ew\ElsewherePushCredentials::class,
     ];
 
 }

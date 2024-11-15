@@ -3,18 +3,21 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereDoRegistrationMetric;
+use App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ElsewhereDoRegistration extends Act\Cmd\Ew
+/**
+ *
+ */
+class ElsewherePushEvent extends Act\Cmd\Ew
 {
-    const UUID = 'ef63444b-45e6-4dea-a6c7-a9caee216ee2';
-    const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_DO_REGISTRATION;
+    const UUID = '67d4b737-528b-4747-9b7b-3b4939d01602';
+    const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_PUSH_EVENT;
 
     const ATTRIBUTE_CLASSES = [
-        ElsewhereDoRegistrationMetric::class
+        Metrics\ElsewherePushEventMetric::class
     ];
 
     const PARENT_CLASSES = [
@@ -23,7 +26,7 @@ class ElsewhereDoRegistration extends Act\Cmd\Ew
     ];
 
     const EVENT_CLASSES = [
-        Evt\Elsewhere\ServerRegistered::class
+        Evt\Elsewhere\ElsewherePushingEvent::class
     ];
 
 }

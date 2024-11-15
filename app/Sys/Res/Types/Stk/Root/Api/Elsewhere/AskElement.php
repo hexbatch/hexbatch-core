@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class GiveType extends Api\ElsewhereApi
+class AskElement extends Api\ElsewhereApi
 {
-    const UUID = '60a56e19-d29c-45b9-ad2a-7c138ad3ba97';
-    const TYPE_NAME = 'api_elsewhere_give_type';
+    const UUID = '939acf24-00f5-48b5-994a-4f7d3d990ffb';
+    const TYPE_NAME = 'api_elsewhere_ask_element';
 
 
 
@@ -18,7 +18,7 @@ class GiveType extends Api\ElsewhereApi
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Cmd\Ew\ElsewhereGiveType::class,
+        Act\Cmd\Ew\ElsewhereAskElement::class,
     ];
 
 }

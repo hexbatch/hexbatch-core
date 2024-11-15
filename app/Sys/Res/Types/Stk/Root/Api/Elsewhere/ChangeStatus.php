@@ -18,6 +18,7 @@ class ChangeStatus extends Api\ElsewhereApi
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
+        Act\Cmd\Ele\Search::class,
         Act\Cmd\Ew\ElsewhereChangeStatus::class,
     ];
 

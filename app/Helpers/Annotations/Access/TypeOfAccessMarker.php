@@ -25,6 +25,7 @@ enum TypeOfAccessMarker : string {
     case MIXED = 'mixed';
     case IS_PUBLIC = 'is_public'; //not logged in
     case SYSTEM = 'system';
+    case CALLING_SERVER = 'calling_server';
 
 }
 

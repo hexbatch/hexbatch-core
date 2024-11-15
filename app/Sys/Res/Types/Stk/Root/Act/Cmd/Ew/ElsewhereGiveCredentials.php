@@ -5,6 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereGiveCredentialsMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
 
 /**
  *
@@ -21,6 +23,11 @@ class ElsewhereGiveCredentials extends Act\Cmd\Ew
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,
         Act\SystemPrivilege::class,
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Elsewhere\ElsewhereCredentialsNew::class,
+        Evt\Elsewhere\ElsewhereCredentialsBad::class,
     ];
 
 }

@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereChangeStatusMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 
 class ElsewhereChangeStatus extends Act\Cmd\Ew
@@ -19,6 +20,13 @@ class ElsewhereChangeStatus extends Act\Cmd\Ew
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,
         Act\SystemPrivilege::class,
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Elsewhere\ServerStatusAllowed::class,
+        Evt\Elsewhere\ServerStatusBlocked::class,
+        Evt\Elsewhere\ServerStatusPaused::class,
+        Evt\Elsewhere\ServerStatusPending::class,
     ];
 
 }

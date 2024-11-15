@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereAskCredentialsMetric;
+use App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,13 +13,13 @@ use App\Sys\Res\Types\Stk\Root\Evt;
  *  will also @uses ElsewherePushCredentials if ok to send
  *
  */
-class ElsewhereAskCredentials extends Act\Cmd\Ew
+class ElsewhereAskSet extends Act\Cmd\Ew
 {
-    const UUID = '424d4d74-14f2-4b39-ba7f-8520bfc25852';
-    const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_ASK_CREDENTIALS;
+    const UUID = '91a1fecd-f40b-441f-b550-60e742bdd618';
+    const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_ASK_SET;
 
     const ATTRIBUTE_CLASSES = [
-        ElsewhereAskCredentialsMetric::class
+        Metrics\ElsewhereAskSetMetric::class
     ];
 
     const PARENT_CLASSES = [
@@ -28,8 +28,7 @@ class ElsewhereAskCredentials extends Act\Cmd\Ew
     ];
 
     const EVENT_CLASSES = [
-        Evt\Elsewhere\ElsewhereCredentialsAsking::class,
-        Evt\Elsewhere\ElsewhereCredentialsSending::class
+        Evt\Elsewhere\ElsewhereAskingSet::class,
     ];
 
 }

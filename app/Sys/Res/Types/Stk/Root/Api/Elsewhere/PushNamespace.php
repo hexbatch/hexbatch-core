@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class GiveType extends Api\ElsewhereApi
+class PushNamespace extends Api\ElsewhereApi
 {
-    const UUID = '60a56e19-d29c-45b9-ad2a-7c138ad3ba97';
-    const TYPE_NAME = 'api_elsewhere_give_type';
+    const UUID = '5b8d36e1-6198-4ee0-b65c-00f4165d1290';
+    const TYPE_NAME = 'api_elsewhere_push_namespace';
 
 
 
@@ -18,7 +18,7 @@ class GiveType extends Api\ElsewhereApi
 
     const PARENT_CLASSES = [
         Api\ElsewhereApi::class,
-        Act\Cmd\Ew\ElsewhereGiveType::class,
+        Act\Cmd\Ew\ElsewherePushNamespace::class,
     ];
 
 }
