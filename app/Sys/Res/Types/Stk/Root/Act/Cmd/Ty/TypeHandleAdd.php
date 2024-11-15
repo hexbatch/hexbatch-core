@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\TypeHandleAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * types which share the same handle are published and have other lifecycle changes, done  in a group,
@@ -21,6 +22,11 @@ class TypeHandleAdd extends Act\Cmd\Ty
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class
+    ];
+
+
+    const EVENT_CLASSES = [
+        Evt\Server\TypeHandleAdded::class
     ];
 
 }

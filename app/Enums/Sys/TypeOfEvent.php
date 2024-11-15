@@ -191,7 +191,7 @@ enum TypeOfEvent: string
     case WAIT_AVAILABLE = 'wait_available';
 
 
-
+    case CUSTOM_EVENT_FIRED = 'custom_event_fired'; //scope of the event after that depends on the custom event type parent
 
     /*
    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
@@ -236,16 +236,6 @@ enum TypeOfEvent: string
 
 
 
-
-
-
-    /*
-    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
-    "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
-     */
-    //mixed scope
-
-    case CUSTOM_EVENT = 'custom_event'; //scope depends on the custom event type parent
 
 
     public static function tryFromInput(string|int|bool|null $test): TypeOfEvent

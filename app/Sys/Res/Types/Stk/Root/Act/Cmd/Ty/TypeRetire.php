@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\TypeRetireMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class TypeRetire extends Act\Cmd\Ty
 {
@@ -19,6 +19,10 @@ class TypeRetire extends Act\Cmd\Ty
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\TypeRetired::class
     ];
 
 }

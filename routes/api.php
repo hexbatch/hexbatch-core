@@ -226,9 +226,7 @@ Route::prefix('v1')->group(function () {
   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-.   .-.-
  / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \ \ / / \
 `-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'   `-`-'
-todo Route optional parameter: all thinger api calls can take as an optional path param
-    * the path if given must return exists for at least one result
-    * This allows rate limiting later by the other layers
+
 
  */
 

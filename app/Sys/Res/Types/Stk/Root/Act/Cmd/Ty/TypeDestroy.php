@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\TypeDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * Can destroy by using a handle to group destroy related types and elements
@@ -22,6 +22,10 @@ class TypeDestroy extends Act\Cmd\Ty
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\TypeDeleted::class
     ];
 
 }

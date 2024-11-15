@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\TypePublishMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Server\TypePublished;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * Publishes the type, any referenced parent types, parent attributes, live rules, live requirements
@@ -25,6 +25,10 @@ class TypePublish extends Act\Cmd\Ty
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\TypePublished::class
     ];
 
 }

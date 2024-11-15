@@ -803,7 +803,7 @@ paths:
   /api/v1/namespaces/list_namespaces:
     get:
       summary: 'Shows all the namespaces this caller is part of'
-      description: 'Will show owned, admin and member status of all namespaces this caller is part of'
+      description: 'Will show owned, admin and member status of all namespaces this caller is part of. Can filter by handle or namespace name'
       operationId: core.namespaces.list_namespaces
       responses:
         '501':
@@ -851,7 +851,7 @@ paths:
   /api/v1/namespaces/add_admin:
     post:
       summary: 'Add a new admin to the namespace'
-      description: 'Owner can add a new administrator (who will also be a member) '
+      description: 'Owner can add a new administrator (who will also be a member).Event goes to handle '
       operationId: core.namespaces.add_admin
       responses:
         '501':
@@ -859,7 +859,7 @@ paths:
   /api/v1/namespaces/list_admins:
     get:
       summary: 'Shows a list of all the admins from this namespace'
-      description: 'Any member can use this to get a full list of all the admins (includes owner)'
+      description: 'Any member can use this to get a full list of all the admins (includes owner). Can filter by handle or admin uuid or name'
       operationId: core.namespaces.list_admins
       responses:
         '501':
@@ -867,7 +867,7 @@ paths:
   /api/v1/namespaces/remove_admin:
     delete:
       summary: 'Remove admin privs from a member in the namespace'
-      description: 'Owner can remove administrator (who will still be a member) '
+      description: 'Owner can remove administrator (who will still be a member).Event goes to handle '
       operationId: core.namespaces.remove_admin
       responses:
         '501':
@@ -891,7 +891,7 @@ paths:
   /api/v1/namespaces/add_member:
     post:
       summary: 'Add a member to the namespace'
-      description: 'Admin can add any other namespace as a member'
+      description: 'Admin can add any other namespace as a member. Event goes to handle'
       operationId: core.namespaces.add_member
       responses:
         '501':
@@ -899,7 +899,7 @@ paths:
   /api/v1/namespaces/remove_member:
     delete:
       summary: 'Remove member from the namespace'
-      description: 'Admin can remove member who is not administrator '
+      description: 'Admin can remove member who is not administrator. Event goes to handle '
       operationId: core.namespaces.remove_member
       responses:
         '501':
@@ -923,8 +923,24 @@ paths:
   /api/v1/namespaces/list_members:
     get:
       summary: 'Shows a list of all the members from this namespace'
-      description: 'Any member can use this to get a full list of all the members'
+      description: 'Any member can use this to get a full list of all the members. Can filter by handle or member uuid/name'
       operationId: core.namespaces.list_members
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/add_handle:
+    post:
+      summary: 'Add element handle to a namespace'
+      description: 'Namespaces can be grouped, organized and controlled together'
+      operationId: core.namespaces.add_handle
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/namespaces/remove_handle:
+    patch:
+      summary: 'Remove element handle from a namespaces'
+      description: 'Handles can be removed at any time, and left empty or new ones added'
+      operationId: core.namespaces.remove_handle
       responses:
         '501':
           description: 'Not yet implemented'
@@ -973,6 +989,174 @@ paths:
       summary: 'shift elements from sets'
       description: 'Namespace members of the sets can remove elements from the bottom positions of target sets '
       operationId: core.operations.shift
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/publish:
+    patch:
+      summary: 'Publish a path, marking it as workable'
+      description: 'Paths can be used in other api calls after publishing'
+      operationId: core.paths.publish
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/add_handle:
+    post:
+      summary: 'Add element handle to a path'
+      description: 'Paths can be grouped, organized and controlled together'
+      operationId: core.paths.add_handle
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/remove_handle:
+    patch:
+      summary: 'Remove element handle from a path'
+      description: 'Handles can be removed at any time, and left empty or new ones added'
+      operationId: core.paths.remove_handle
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/list:
+    get:
+      summary: 'Lists the paths this namespace is a member of'
+      description: 'Can filter by handle or see all paths'
+      operationId: core.paths.list
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/show:
+    get:
+      summary: 'Shows a path'
+      description: 'Members can see times and what uses a path'
+      operationId: core.paths.show
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/copy:
+    post:
+      summary: 'Copies a path, with the caller the owner of the new path'
+      description: 'Paths can be complicated to make and test, copying them for other use and editing those can be helpful. The new path is unpublished'
+      operationId: core.paths.copy
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/create:
+    post:
+      summary: 'Creates a new empty path that is unpublished'
+      description: 'The caller is the path owner. The name and phase is set'
+      operationId: core.paths.create
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/edit:
+    patch:
+      summary: 'Change the path name and phase'
+      description: 'Handles can be removed at any time, and left empty or new ones added'
+      operationId: core.paths.edit
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/destroy:
+    post:
+      summary: 'Destroys a path'
+      description: 'No events when destroying, but if used for something will generate an error'
+      operationId: core.paths.destry
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/create_part:
+    post:
+      summary: 'Creates a part or part tree attached to the root or existing rule'
+      description: 'Add a single part, or a tree of parts, and that can be attached to the unoccupied root, or to a leaf'
+      operationId: core.paths.create_part
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/destroy_part:
+    delete:
+      summary: 'Removed a single part and all its children'
+      description: 'The part tree can be trimmed by deleting one rule and its children. This can also delete the root (and all the parts)'
+      operationId: core.paths.destroy_part
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/edit_part:
+    patch:
+      summary: 'Edits a single part and all its children'
+      description: 'The part tree can be edited by changing one rule and its children. This can also edit the root (and all the parts)'
+      operationId: core.paths.edit_part
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/show_part:
+    get:
+      summary: 'Shows a part and its tree'
+      description: 'Show a part by itself or a tree, if it has children.'
+      operationId: core.paths.show_part
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/test_part:
+    get:
+      summary: 'Test a path tree'
+      description: 'Test a part by itself or a tree, if it has children. The tree (or part) will pretend to be the entire search. No events called'
+      operationId: core.paths.test_part
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/search:
+    get:
+      summary: 'Search with a path'
+      description: 'If handle is set, event will be called. Handle can filter, augment or refine'
+      operationId: core.paths.search
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/paths/test:
+    get:
+      summary: 'Test a search'
+      description: 'Used before a path is published, can test to see how the parts are working out, no events called'
+      operationId: core.paths.test
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/phases/show:
+    get:
+      summary: 'List phases'
+      description: 'Shows a phase if the caller is a member of the type which manages the phase. Shows stats about the phase'
+      operationId: core.phases.show
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/phases/list:
+    get:
+      summary: 'List phases'
+      description: 'Phases are listed if the caller is a member of the type which manages the phase, filterable via the type handle'
+      operationId: core.phases.list
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/server/us:
+    get:
+      summary: 'Show this server information'
+      description: 'Lists public information about the server: all the attributes in the About subtype will be shown, any meta attributes, and name|domain|url '
+      operationId: core.server.us
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/server/admin:
+    get:
+      summary: 'Show this server private information'
+      description: 'Lists private information about the server and links to edit each meta and about '
+      operationId: core.server.admin
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/server/edit:
+    patch:
+      summary: 'Edit this server information'
+      description: 'Edits only the name,domain and url. The about and the meta have to be done independ, but the admin view has the links to those'
+      operationId: core.server.edit
       responses:
         '501':
           description: 'Not yet implemented'
@@ -1093,6 +1277,182 @@ paths:
       summary: 'list elements in a set'
       description: 'Set namespace members can get a list of set contents '
       operationId: core.sets.list_elements
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/show:
+    get:
+      summary: 'Show information about a type'
+      description: 'See information about a type if one is a member, admin or owner '
+      operationId: core.types.show
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/show_public:
+    get:
+      summary: 'Show public data for a type'
+      description: 'Anyone can see public information including about and meta, name and current status '
+      operationId: core.types.show_public
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/list_published:
+    get:
+      summary: 'List published types'
+      description: 'Can see any published types where one is a member, admin or owner '
+      operationId: core.types.list_published
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/list_suspended:
+    get:
+      summary: 'List suspended types'
+      description: 'Can see any suspended types where one is a member, admin or owner '
+      operationId: core.types.list_suspended
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/list_all_suspended:
+    get:
+      summary: 'List all suspended types'
+      description: 'Public can see any suspended types '
+      operationId: core.types.list_all_suspended
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/list_live:
+    get:
+      summary: 'Show live types made from this type'
+      description: 'Members can see all the currently applied live using this type'
+      operationId: core.types.list_live
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/list_elements:
+    get:
+      summary: 'Show elements made from this type'
+      description: 'Members can see all the elements created. Use the element show command to get information about element'
+      operationId: core.types.list_elements
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/list_descendants:
+    get:
+      summary: 'Show type inheritance'
+      description: 'Members can see how this type is being inherited by other types.'
+      operationId: core.types.list_descendants
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/list_attribute_descendants:
+    get:
+      summary: 'Show attribute inheritance'
+      description: "Members can see how this type's attributes are being used in other types."
+      operationId: core.types.list_attribute_descendants
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/add_handle:
+    post:
+      summary: 'Add element handle to a type'
+      description: 'Types can be grouped, organized and controlled together'
+      operationId: core.types.add_handle
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/remove_handle:
+    patch:
+      summary: 'Remove element handle from a type'
+      description: 'Handles can be removed at any time, and be empty or new ones added'
+      operationId: core.types.remove_handle
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/add_attribute_handle:
+    post:
+      summary: 'Add attribute handle to an attribute'
+      description: 'Attributes can be grouped, organized and controlled together by an attribute handle. This can also be used for displaying debugging info'
+      operationId: core.types.add_attribute_handle
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/remove_attribute_handle:
+    patch:
+      summary: 'Remove attribute handle from an attribute'
+      description: 'Handles can be removed at any time, and be empty or new ones added'
+      operationId: core.types.remove_attribute_handle
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/change_owner:
+    patch:
+      summary: 'Changes the type owner'
+      description: 'The type owner can give the type to any other namespace'
+      operationId: core.types.change_owner
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/promote_owner:
+    patch:
+      summary: 'System can change the type owner'
+      description: 'Type owners can be changed by the system without events or permission'
+      operationId: core.types.promote_owner
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/destroy_type:
+    delete:
+      summary: 'Changes the type owner'
+      description: 'The type owner destroy the type, inheritied types and event on this type can block'
+      operationId: core.types.destroy_type
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/purge:
+    delete:
+      summary: 'System can delete types'
+      description: 'System can delete types, and all their elements and sets, without events or permission'
+      operationId: core.types.purge
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/fire_event:
+    post:
+      summary: 'Fires a custom event'
+      description: 'Custom events can be fired, their scope depends on what they inherit, smallest scope wins if multiple ancestors of mixed scope'
+      operationId: core.types.fire_event
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/publish:
+    patch:
+      summary: 'Publishes a design'
+      description: 'Type admins do unpublished design and mark it as ready for use. Events from inherited types and attributes can block'
+      operationId: core.types.publish
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/promote_publish:
+    patch:
+      summary: 'System publishes a design'
+      description: 'System can publish any design. This overrules any rules denying it (those events do not fire) '
+      operationId: core.types.promote_publish
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/suspend:
+    patch:
+      summary: 'Suspends a design'
+      description: "System can suspend a type. New elements cannot be created, but existing ones are left alone. \n Suspended types do not listen to events \n Can be blocked by events (system only listeners block, others listen to after the fact)"
+      operationId: core.types.suspend
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/types/retire:
+    patch:
+      summary: 'Retires a design'
+      description: "Type admins retire a type. Events from inherited types and attributes can block. \nUnpublished types using this after acceptance can still use it"
+      operationId: core.types.retire
       responses:
         '501':
           description: 'Not yet implemented'
