@@ -31,13 +31,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('handle_element_id')
-                ->nullable()->default(null)
-                ->comment("an element can help organize child parent relationships")
-                ->index()
-                ->constrained('elements')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
 
             $table->uuid('ref_uuid')
                 ->unique()

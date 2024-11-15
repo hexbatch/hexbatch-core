@@ -12,11 +12,6 @@ class SetLeave extends Evt\ScopeSet
     const EVENT_NAME = TypeOfEvent::SET_LEAVE;
 
 
-
-
-
-
-
     const PARENT_CLASSES = [
         Evt\ScopeSet::class
     ];

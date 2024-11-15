@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\SetCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-use App\Sys\Res\Types\Stk\Root\Evt\Type\ElementSetCreated;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 
 class SetCreate extends Act\Cmd\St
@@ -22,7 +22,8 @@ class SetCreate extends Act\Cmd\St
     ];
 
     const EVENT_CLASSES = [
-        ElementSetCreated::class
+        Evt\Server\SetCreated::class,
+        Evt\Set\SetChildCreated::class
     ];
 
 }

@@ -150,8 +150,6 @@ enum TypeOfAction: string
     case CMD_SET_MEMBER_PROMOTE = 'cmd_set_member_promote'; //add element to set, no events
     case CMD_SET_MEMBER_PURGE = 'cmd_set_member_purge'; //remove element from set, no events
 
-    case CMD_SET_CHILD_HANDLE_ADD = 'cmd_set_child_handle_add';
-    case CMD_SET_CHILD_HANDLE_REMOVE = 'cmd_set_child_handle_remove';
 
     case CMD_ELEMENT_PING = 'cmd_element_ping';
 

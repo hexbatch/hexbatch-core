@@ -139,7 +139,6 @@ enum TypeOfEvent: string
     case TYPE_PHASE_REMOVED = 'type_phase_removed';
     case TYPE_PHASE_ADDED = 'type_phase_added';
     case ELEMENT_PHASE_CHANGE_BATCH = 'element_phase_change_batch';
-    case ELEMENT_SET_CREATED = 'element_set_created';
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._

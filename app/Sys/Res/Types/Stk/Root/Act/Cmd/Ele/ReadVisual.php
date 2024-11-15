@@ -22,7 +22,6 @@ class ReadVisual extends Act\Cmd\Ele
     const PARENT_CLASSES = [
         Act\Pragma::class,
         Act\Cmd\Ele::class,
-        Act\CmdNoSideEffects::class
     ];
 
     const EVENT_CLASSES = [

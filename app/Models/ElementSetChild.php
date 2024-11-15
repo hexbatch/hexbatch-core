@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int id
  * @property int parent_set_id
  * @property int child_set_id
- * @property int handle_element_id
  * @property string ref_uuid
  *
  * @property string created_at

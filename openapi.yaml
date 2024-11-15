@@ -448,6 +448,14 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
+  /api/v1/elements/read_time:
+    get:
+      summary: 'Read the locations of one or more elements'
+      description: "Can read current or next time span of the element's type, its parents and applied live \n its up to the attribute access, the type access and the event handlers to decide who can "
+      operationId: core.elements.read_time
+      responses:
+        '501':
+          description: 'Not yet implemented'
   /api/v1/elements/add_live:
     post:
       summary: 'Add a live type to one or more elements'
@@ -717,6 +725,126 @@ paths:
       summary: 'Shows a list of all the members from this namespace'
       description: 'Any member can use this to get a full list of all the members'
       operationId: core.namespaces.list_members
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/add_element:
+    post:
+      summary: 'Change the element owner'
+      description: 'Element namespace members can put element into any set that allows that '
+      operationId: core.sets.add_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/promote_element:
+    post:
+      summary: 'System can add elements to sets'
+      description: 'System can add any element to any set without permission or events '
+      operationId: core.sets.promote_member
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/create:
+    post:
+      summary: 'Create a set from element'
+      description: 'Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets'
+      operationId: core.sets.create_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/promote:
+    post:
+      summary: 'System can make sets'
+      description: 'System can make sets from any element without permisision. No events '
+      operationId: core.sets.promote_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/destroy:
+    delete:
+      summary: 'Destroys the set, keeps the element'
+      description: 'Set owners can destroy their sets, bypassing the leave event, can be blocked by handlers on the type '
+      operationId: core.sets.destroy_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/remove_element:
+    delete:
+      summary: 'Change the element owner'
+      description: 'Element namespace members can put element into any set that allows that '
+      operationId: core.sets.remove_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/empty_set:
+    delete:
+      summary: 'Removes all elements except sticky ones'
+      description: 'Element namespace members can clear out sticky elements. Event handlers can block their elements from leaving '
+      operationId: core.sets.empty_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/stick_element:
+    patch:
+      summary: 'Makes element sticky in set operations'
+      description: 'Set namespace members can make sticky elements in those sets '
+      operationId: core.sets.stick_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/unstick_element:
+    patch:
+      summary: 'Unsticks one or more elements in one or more sets'
+      description: 'Set namespace members can unstick elements in those sets '
+      operationId: core.sets.unstick_element
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/purge:
+    delete:
+      summary: 'System can delete any set'
+      description: 'System can remove sets without events or permission '
+      operationId: core.sets.purge_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/purge_member:
+    delete:
+      summary: 'System can remove set contents'
+      description: 'System can remove elements without events from any set '
+      operationId: core.sets.purge_member
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/show:
+    get:
+      summary: 'Gives information about a set'
+      description: 'Shows information about a set to set members '
+      operationId: core.sets.show_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/public:
+    get:
+      summary: 'Shows a public view of this set'
+      description: 'Anyone can see public information '
+      operationId: core.sets.show_public
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/list_children:
+    get:
+      summary: 'List child sets'
+      description: 'Set namespace members can get a list of children sets '
+      operationId: core.sets.list_children
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/sets/list_elements:
+    get:
+      summary: 'list elements in a set'
+      description: 'Set namespace members can get a list of set contents '
+      operationId: core.sets.list_elements
       responses:
         '501':
           description: 'Not yet implemented'

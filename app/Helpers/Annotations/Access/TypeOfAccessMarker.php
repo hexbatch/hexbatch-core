@@ -18,6 +18,10 @@ enum TypeOfAccessMarker : string {
     case ELEMENT_OWNER = 'element_owner';
     case ELEMENT_ADMIN = 'element_admin';
     case ELEMENT_MEMBER = 'element_member';
+
+    case SET_OWNER = 'set_owner';
+    case SET_ADMIN = 'set_admin';
+    case SET_MEMBER = 'set_member';
     case MIXED = 'mixed';
     case IS_PUBLIC = 'is_public'; //not logged in
     case SYSTEM = 'system';

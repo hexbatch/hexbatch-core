@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\SetDestroyMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 
 class SetDestroy extends Act\Cmd\St
@@ -18,6 +19,11 @@ class SetDestroy extends Act\Cmd\St
 
     const PARENT_CLASSES = [
         Act\Cmd\St::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\SetDestroyed::class,
+        Evt\Set\SetChildDestroyed::class
     ];
 
 }

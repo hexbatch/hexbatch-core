@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberRemoveMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class SetMemberRemove extends Act\Cmd\St
 {
@@ -18,6 +18,10 @@ class SetMemberRemove extends Act\Cmd\St
 
     const PARENT_CLASSES = [
         Act\Cmd\St::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Set\SetLeave::class,
     ];
 
 }
