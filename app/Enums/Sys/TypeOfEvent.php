@@ -136,8 +136,11 @@ enum TypeOfEvent: string
     case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
     case ELEMENT_OWNER_CHANGE_BATCH = 'element_owner_change_batch'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
 
-    case TYPE_PHASE_REMOVED = 'type_phase_removed';
-    case TYPE_PHASE_ADDED = 'type_phase_added';
+    case PHASE_REMOVED = 'phase_removed';
+    case PHASE_ADDED = 'phase_added';
+    case PHASE_MOVING = 'phase_moving';
+    case PHASE_CUTTING = 'phase_cutting';
+    case PHASE_REPLACING = 'phase_replacing';
     case ELEMENT_PHASE_CHANGE_BATCH = 'element_phase_change_batch';
 
     /*

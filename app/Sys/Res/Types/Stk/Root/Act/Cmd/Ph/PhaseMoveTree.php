@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\PhaseMoveTreeMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 
 class PhaseMoveTree extends Act\Cmd\Ph
@@ -18,6 +19,10 @@ class PhaseMoveTree extends Act\Cmd\Ph
 
     const PARENT_CLASSES = [
         Act\Cmd\Ph::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Type\PhaseMoving::class,
     ];
 
 }

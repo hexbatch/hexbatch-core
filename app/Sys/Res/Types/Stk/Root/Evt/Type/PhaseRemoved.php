@@ -8,10 +8,10 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 /**
  * there was a phase edit action and the type was removed from one or more places
  */
-class TypePhaseRemoved extends Evt\ScopeType
+class PhaseRemoved extends Evt\ScopeType
 {
     const UUID = '27aff549-4d9f-47a9-b7f9-769743928b2e';
-    const EVENT_NAME = TypeOfEvent::TYPE_PHASE_REMOVED;
+    const EVENT_NAME = TypeOfEvent::PHASE_REMOVED;
 
 
 

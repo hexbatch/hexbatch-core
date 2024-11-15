@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\PhasePurgeMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 class PhasePurge extends Act\Cmd\Ph
 {
@@ -20,6 +20,10 @@ class PhasePurge extends Act\Cmd\Ph
         Act\Cmd\Ph::class,
         Act\SystemPrivilege::class,
         Act\NoEventsTriggered::class,
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Type\PhaseRemoved::class,
     ];
 
 }
