@@ -7,7 +7,6 @@ use App\Sys\Res\Atr\Stk\MetaData\NamespaceType\NamespaceData\ContactInfo;
 use App\Sys\Res\Atr\Stk\MetaData\NamespaceType\NamespaceData\MapLocation;
 use App\Sys\Res\Atr\Stk\MetaData\NamespaceType\NamespaceData\Name;
 use App\Sys\Res\Atr\Stk\MetaData\NamespaceType\NamespaceData\Timezone;
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\NamespaceType;
 
 

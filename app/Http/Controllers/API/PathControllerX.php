@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Helpers\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 
@@ -16,7 +15,6 @@ use App\Models\PathPart;
 use App\Models\UserNamespace;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Sys\Res\Types\Stk\Root;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class PathControllerX extends Controller {

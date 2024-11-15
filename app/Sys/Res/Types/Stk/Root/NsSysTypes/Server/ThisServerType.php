@@ -4,12 +4,12 @@ namespace App\Sys\Res\Types\Stk\Root\NsSysTypes\Server;
 
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\Stk\SystemNS\SystemHandleElement;
-use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stk\Root\About;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 use App\Sys\Res\Types\Stk\Root\Server;
 
 
-class ThisServerType extends BaseType
+class ThisServerType extends Server
 {
 
     public static function getClassUuid() : string {
@@ -27,7 +27,8 @@ class ThisServerType extends BaseType
 
     const PARENT_CLASSES = [
         ThisNsType::class,
-        Server::class
+        Server::class,
+        About::class
     ];
 
 }

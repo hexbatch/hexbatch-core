@@ -2,7 +2,6 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Namespace;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\NamespaceType;
 
 

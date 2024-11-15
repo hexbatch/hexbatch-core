@@ -3,6 +3,8 @@
 namespace App\Sys\Build;
 
 
+use App\Helpers\Utilities;
+
 class AaMapperBase
 {
     /** @noinspection PhpUnused */
@@ -47,5 +49,8 @@ class AaMapperBase
     /**
      * @return ActionMapEntry[]|ApiMapEntry[]
      */
-    public static function getMapData() : array {return [];}
+    public static function getMapData() : array {
+        Utilities::ignoreVar(static::SOURCE_FOLDER); //linting
+        return [];
+    }
 }

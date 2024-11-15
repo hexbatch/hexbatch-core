@@ -212,6 +212,7 @@ enum TypeOfAction: string
     case CMD_SERVER_PROMOTE = 'cmd_server_promote';
     case CMD_SERVER_EDIT = 'cmd_server_edit';
     case CMD_SERVER_SHOW = 'cmd_server_show';
+    case CMD_SERVER_SHOW_ADMIN = 'cmd_server_show_admin';
 
 
     //server to server

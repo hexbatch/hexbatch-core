@@ -2,7 +2,6 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Handles;
 
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Handle;
 
 

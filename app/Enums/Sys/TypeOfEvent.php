@@ -149,6 +149,7 @@ enum TypeOfEvent: string
      */
     //system wide
 
+    case SERVER_EDITED = 'server_edited';
     case LINK_CREATED = 'link_created';
     case LINK_DESTROYED = 'link_destroyed';
     case LINK_DESCRIPTION_ADDED = 'link_description_added';

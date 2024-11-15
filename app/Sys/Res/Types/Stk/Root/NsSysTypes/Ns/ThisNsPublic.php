@@ -4,7 +4,6 @@ namespace App\Sys\Res\Types\Stk\Root\NsSysTypes\Ns;
 
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Res\Ele\Stk\SystemNS\SystemHandleElement;
-use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Namespace\PublicType;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 

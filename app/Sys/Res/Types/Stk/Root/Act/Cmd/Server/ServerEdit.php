@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Server;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\ServerEditMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * asking elsewhere for new credentials
@@ -21,6 +22,10 @@ class ServerEdit extends Act\Cmd\Server
     const PARENT_CLASSES = [
         Act\Cmd\Server::class,
         Act\SystemPrivilege::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\ServerEdited::class,
     ];
 
 }
