@@ -39,6 +39,8 @@ class ElementCreate extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
+        Evt\Type\ElementCreation::class,
+        Evt\Type\ElementCreationBatch::class,
         Evt\Type\ElementOwnerChange::class,
         Evt\Element\ElementRecieved::class,
         Evt\Element\ElementRecievedBatch::class,

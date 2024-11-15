@@ -21,7 +21,8 @@ class ElementChangeOwner extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Type\ElementOwnerChange::class
+        Evt\Type\ElementOwnerChange::class,
+        Evt\Type\ElementOwnerChangeBatch::class
     ];
 
 }

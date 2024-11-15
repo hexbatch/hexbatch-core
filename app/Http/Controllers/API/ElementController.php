@@ -24,6 +24,7 @@ class ElementController extends Controller {
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
+    #[ApiEventMarker( Evt\Type\ElementOwnerChangeBatch::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_OWNER)]
     #[ApiTypeMarker( Root\Api\Element\ChangeOwner::class)]
     public function change_owner() {
@@ -325,6 +326,8 @@ class ElementController extends Controller {
     #[ApiEventMarker( Evt\Element\ElementRecieved::class)]
     #[ApiEventMarker( Evt\Element\ElementRecievedBatch::class)]
     #[ApiEventMarker( Evt\Type\ElementOwnerChangeBatch::class)]
+    #[ApiEventMarker( Evt\Type\ElementCreation::class)]
+    #[ApiEventMarker( Evt\Type\ElementCreationBatch::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
 
     #[ApiTypeMarker( Root\Api\Element\Create::class)]

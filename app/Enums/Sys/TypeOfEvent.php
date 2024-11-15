@@ -60,10 +60,8 @@ enum TypeOfEvent: string
     //scoped to same set
 
     case ATTRIBUTE_READING = 'attribute_reading';
-    case ATTRIBUTE_READ_LOCATION = 'attribute_read_location';
     case ATTRIBUTE_WRITE = 'attribute_write';
 
-    case TYPE_WRITE = 'type_write'; //all the attributes of a type or subtype or live type is written to at once
     case DISPLAY_WRITING = 'display_writing';
     case DISPLAY_READING = 'display_reading';
     case TIME_READING = 'time_reading';
@@ -152,8 +150,7 @@ enum TypeOfEvent: string
     case SERVER_EDITED = 'server_edited';
     case LINK_CREATED = 'link_created';
     case LINK_DESTROYED = 'link_destroyed';
-    case LINK_DESCRIPTION_ADDED = 'link_description_added';
-    case LINK_DESCRIPTION_REMOVED = 'link_description_removed';
+
 
     case TYPE_HANDLE_ADDED = 'type_handle_added';
     case TYPE_HANDLE_REMOVED = 'type_handle_removed';
@@ -181,14 +178,9 @@ enum TypeOfEvent: string
     case NAMESPACE_HANDLE_ADDED = 'namespace_handle_added';
     case NAMESPACE_HANDLE_REMOVED = 'namespace_handle_removed';
 
-    case WAIT_SEMAPHORE = 'wait_semaphore';
+    case WAIT_FAIL = 'wait_fail';
+    case WAIT_SUCCESS = 'wait_success';
 
-    case WAIT_MUTEX = 'wait_mutex';
-
-    case WAIT_ANY = 'wait_any';
-    case WAIT_ALL = 'wait_all';
-
-    case WAIT_AVAILABLE = 'wait_available';
 
 
     case CUSTOM_EVENT_FIRED = 'custom_event_fired'; //scope of the event after that depends on the custom event type parent

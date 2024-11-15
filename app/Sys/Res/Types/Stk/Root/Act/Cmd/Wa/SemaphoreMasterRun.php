@@ -5,6 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreMasterRunMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * @see MasterSemaphore
@@ -23,6 +24,11 @@ class SemaphoreMasterRun extends Act\Cmd\Wa
 
     const PARENT_CLASSES = [
         Act\Cmd\Wa::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Set\SetEnter::class,
+        Evt\Set\SetLeave::class,
     ];
 
 }

@@ -25,6 +25,7 @@ enum TypeOfAction: string
     case BASE_NAMESPACE = 'base_namespace';
     case BASE_ELSEWHERE = 'base_elsewhere';
     case BASE_SERVER = 'base_server';
+    case BASE_TIME = 'base_time';
     case BASE_ELEMENT = 'base_element';
     case BASE_DESIGN = 'base_design';
     case BASE_PATH = 'base_path';
@@ -166,6 +167,7 @@ enum TypeOfAction: string
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
 
 
+    case CMD_TIME_SPAN_ROTATION = 'cmd_time_span_rotation';
     case CMD_PHASE_CUT_TREE = 'cmd_phase_cut_tree';
     case CMD_PHASE_REPLACE_TREE = 'cmd_phase_replace_tree';
     case CMD_PHASE_MOVE_TREE = 'cmd_phase_move_tree';
@@ -203,6 +205,11 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_HANDLE_REMOVE = 'cmd_namespace_handle_remove';
 
 
+    case CMD_WAIT_ALL = 'cmd_wait_all';
+    case CMD_WAIT_ANY = 'cmd_wait_any';
+    case CMD_WAIT_AVAILABLE = 'cmd_wait_available';
+    case CMD_WAIT_MUTEX = 'cmd_wait_mutex';
+    case CMD_WAIT_SEMAPHORE = 'cmd_wait_semaphore';
     case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
     case CMD_SEMAPHORE_RESET = 'cmd_semaphore_reset';
     case CMD_SEMAPHORE_MASTER_CREATE = 'cmd_semaphore_master_create';

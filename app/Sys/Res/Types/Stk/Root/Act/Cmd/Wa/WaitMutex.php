@@ -4,17 +4,18 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa;
 
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreResetMetric;
+use App\Sys\Res\Atr\Stk\Act\Metrics\WaitMutexMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
-class SemaphoreReset extends Act\Cmd\Wa
+class WaitMutex extends Act\Cmd\Wa
 {
-    const UUID = '1b178a4d-885e-4dc0-a8f8-caff0d8cd572';
-    const ACTION_NAME = TypeOfAction::CMD_SEMAPHORE_RESET;
+    const UUID = 'ee9be879-1744-4a3b-ac5b-7b73386bf7c9';
+    const ACTION_NAME = TypeOfAction::CMD_WAIT_MUTEX;
 
 
     const ATTRIBUTE_CLASSES = [
-        SemaphoreResetMetric::class
+        WaitMutexMetric::class
     ];
 
     const PARENT_CLASSES = [
@@ -22,8 +23,8 @@ class SemaphoreReset extends Act\Cmd\Wa
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetEnter::class,
-        Evt\Set\SetLeave::class,
+        Evt\Server\WaitSuccess::class,
+        Evt\Server\WaitFail::class,
     ];
 
 }

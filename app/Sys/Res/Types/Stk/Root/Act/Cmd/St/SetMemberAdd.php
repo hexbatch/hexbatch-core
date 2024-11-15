@@ -22,6 +22,12 @@ class SetMemberAdd extends Act\Cmd\St
 
     const EVENT_CLASSES = [
         Evt\Set\SetEnter::class,
+        Evt\Set\ShapeEnter::class,
+        Evt\Set\MapEnter::class,
+        Evt\Set\TypeMapEnclosedStart::class,
+        Evt\Set\TypeMapEnclosingStart::class,
+        Evt\Set\TypeShapeEnclosedStart::class,
+        Evt\Set\TypeShapeEnclosingStart::class,
     ];
 
 }

@@ -7,7 +7,9 @@ use App\Sys\Res\Atr\Stk\Act\Metrics\PhaseMoveTreeMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
-
+/**
+ * Move the tree to another phase
+ */
 class PhaseMoveTree extends Act\Cmd\Ph
 {
     const UUID = '417eb53e-1615-42c9-9bfc-4349bfb5daa9';
@@ -23,6 +25,7 @@ class PhaseMoveTree extends Act\Cmd\Ph
 
     const EVENT_CLASSES = [
         Evt\Type\PhaseMoving::class,
+        Evt\Type\ElementPhaseChangeBatch::class,
     ];
 
 }

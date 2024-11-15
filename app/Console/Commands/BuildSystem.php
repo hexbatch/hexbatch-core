@@ -9,6 +9,8 @@ use App\Sys\Build\SystemResources;
 use App\Sys\Res\Atr\ISystemAttribute;
 use App\Sys\Res\Sets\ISystemSet;
 use App\Sys\Res\Types\ISystemType;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
 use Illuminate\Console\Command;
 
 class BuildSystem extends Command
@@ -21,7 +23,7 @@ class BuildSystem extends Command
      */
     protected $signature = 'hex:build {--check} {--list} {--list-attributes} {--list-types} {--list-elements} {--list-sets} '.
                                         ' {--list-users} {--list-servers} {--list-namespaces} {--mapper} ' .
-                                        ' {--show-current } {--show-old} {--show-new} {--build} {--trim-old}  '
+                                        ' {--show-current } {--show-old} {--show-new} {--build} {--trim-old} {--show-events} {--show-unused-events} '
     ;
 
 
@@ -169,6 +171,60 @@ class BuildSystem extends Command
 
 
         }
+
+
+        if ($this->option('show-events')) {
+            $data = [];
+            $type_names = array_values($load->types);
+            sort($type_names);
+            $events = [];
+            foreach ($type_names as $full_type_name ) {
+                if (!is_subclass_of($full_type_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) { continue; }
+               // $events = array_merge($full_type_name::EVENT_CLASSES,$events);
+                $data[] = [$full_type_name::getClassName(),implode("\n",$full_type_name::getRelatedEvents())];
+            }
+
+            $this->table(['Type Name','Events'],$data);
+        }
+
+        if ($this->option('show-unused-events')) {
+            $used_events = [];
+            $all_events_maybe = [];
+            $all_events = [];
+            $type_names = array_values($load->types);
+            sort($type_names);
+
+            foreach ($type_names as $full_type_name ) {
+                if (is_subclass_of($full_type_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) {
+                    $used_events = array_merge($full_type_name::getRelatedEvents(), $used_events);
+                }
+                if (is_subclass_of($full_type_name, 'App\Sys\Res\Types\Stk\Root\Evt\BaseEvent') ) {
+                    $all_events_maybe[] = $full_type_name;
+                }
+            }
+
+            $structure_only = [
+                Evt\ScopeElement::class,
+                Evt\ScopeType::class,
+                Evt\ScopeSet::class,
+                Evt\ScopeElsewhere::class,
+                Evt\ScopeServer::class,
+                Evt\Server\Nothing::class
+            ];
+            foreach ($all_events_maybe as $maybe_event) {
+                if (in_array($maybe_event,$structure_only)) {continue;}
+                $all_events[] = $maybe_event;
+            }
+            //filter out not real events
+
+            $diff = array_diff($all_events,$used_events);
+            $show_array = [];
+            foreach ($diff as $not_used) {
+                $show_array[] = [$not_used];
+            }
+            $this->table(['Event'],$show_array);
+        }
+
 
         if ($this->option('list')|| $this->option('list-attributes')) {
             $data = [];
@@ -454,6 +510,7 @@ class BuildSystem extends Command
                 $this->table(['Category','Uuid','Name'],$data);
             }
         }
+
 
 
 

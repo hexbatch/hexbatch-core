@@ -22,6 +22,12 @@ class SetMemberRemove extends Act\Cmd\St
 
     const EVENT_CLASSES = [
         Evt\Set\SetLeave::class,
+        Evt\Set\ShapeLeave::class,
+        Evt\Set\MapLeave::class,
+        Evt\Set\TypeMapEnclosedEnd::class,
+        Evt\Set\TypeMapEnclosingEnd::class,
+        Evt\Set\TypeShapeEnclosedEnd::class,
+        Evt\Set\TypeShapeEnclosingEnd::class,
     ];
 
 }

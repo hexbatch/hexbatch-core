@@ -1456,6 +1456,118 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
+  /api/v1/waits/create_master:
+    post:
+      summary: 'Create a master system'
+      description: 'A new master system is created with the caller the owner of the new types and sets and elements'
+      operationId: core.waits.create_master
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/update_master:
+    post:
+      summary: 'Update waiting master state'
+      description: 'Changes the ready state of a master'
+      operationId: core.waits.update_master
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/run_master:
+    post:
+      summary: 'Starts running a master'
+      description: 'Sets a pending master to run, any member of the type can do this. May have to wait, also may not work if limits set'
+      operationId: core.waits.run_master
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/reset_semaphore:
+    post:
+      summary: 'Semaphores moved to idle'
+      description: 'Semaphores moved to the idle state'
+      operationId: core.waits.reset_semaphore
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/ready_semaphore:
+    post:
+      summary: 'Sets semaphores ready to be used'
+      description: 'Semaphores moved to the waiting state'
+      operationId: core.waits.ready_semaphore
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/show_master:
+    get:
+      summary: 'Shows information about a master'
+      description: 'Type members can see the status of the master'
+      operationId: core.waits.show_master
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/show_master_run:
+    get:
+      summary: 'Shows master run data'
+      description: 'Shows the details about a run the master made, or current state if running'
+      operationId: core.waits.show_master_run
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/list_masters:
+    get:
+      summary: 'List masters'
+      description: 'Lists the masters the caller is a member, admin or owner of'
+      operationId: core.waits.list_masters
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/show_semaphore:
+    get:
+      summary: 'Show semaphore'
+      description: 'Shows information about a semaphore if the caller is a member, admin or owner'
+      operationId: core.waits.show_semaphore
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/list_semaphores:
+    get:
+      summary: 'List semaphores'
+      description: 'Lists the semaphores the caller is a member, admin or owner of'
+      operationId: core.waits.list_semaphores
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/list_waits:
+    get:
+      summary: 'List Waits'
+      description: 'Lists the semaphores or mutexes being waited on from types the caller is a member, admin or owner of'
+      operationId: core.waits.list_waits
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/show_wait:
+    get:
+      summary: 'Show wait info'
+      description: 'Shows information specific wait on a type the caller is a member, admin or owner'
+      operationId: core.waits.show_wait
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/list_mutexes:
+    get:
+      summary: 'List Mutexes'
+      description: 'Lists the mutexes created with types the caller is a member, admin or owner of'
+      operationId: core.waits.list_mutexes
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  /api/v1/waits/show_mutex:
+    get:
+      summary: 'Show mutex'
+      description: 'Shows information about a mutex if the caller is a member, admin or owner'
+      operationId: core.waits.show_mutex
+      responses:
+        '501':
+          description: 'Not yet implemented'
 components:
   schemas:
     hexbatch_uuid:

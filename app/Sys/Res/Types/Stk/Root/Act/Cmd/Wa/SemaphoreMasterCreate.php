@@ -6,6 +6,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreMasterCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * @see MasterSemaphore for the setup,
@@ -30,6 +31,15 @@ class SemaphoreMasterCreate extends Act\Cmd\Wa
 
     const PARENT_CLASSES = [
         Act\Cmd\Wa::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Type\ElementCreation::class,
+        Evt\Type\ElementCreationBatch::class,
+        Evt\Server\SetCreated::class,
+        Evt\Server\TypeOwnerChange::class,
+        Evt\Server\DesignPending::class,
+        Evt\Server\TypePublished::class,
     ];
 
 }
