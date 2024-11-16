@@ -5,11 +5,17 @@ namespace App\Providers;
 use App\Models\Attribute;
 use App\Models\AttributeRule;
 use App\Models\Element;
+use App\Models\ElementLink;
+use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\Path;
 use App\Models\PathPart;
+use App\Models\Phase;
 use App\Models\Server;
+use App\Models\Thing;
+use App\Models\ThingHook;
+use App\Models\ThingSetting;
 use App\Models\TimeBound;
 use App\Models\User;
 use App\Models\UserNamespace;
@@ -48,9 +54,16 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('attribute_rule', AttributeRule::class);
         Route::model('element', Element::class);
         Route::model('element_type', ElementType::class);
+        Route::model('element_set', ElementSet::class);
         Route::model('server', Server::class);
         Route::model('path', Path::class);
         Route::model('path_part', PathPart::class);
+        Route::model('phase', Phase::class);
+        Route::model('working_phase', Phase::class);
+        Route::model('element_link', ElementLink::class);
+        Route::model('thing', Thing::class);
+        Route::model('thing_setting', ThingSetting::class);
+        Route::model('thing_hook', ThingHook::class);
 
         $this->routes(function () {
             Route::middleware('api')

@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\ForceUnicode;
+use App\Http\Middleware\SetDefaultPhase;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -44,7 +45,7 @@ class Kernel extends HttpKernel
         'api' => [
             //\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
-            //todo add in middleware for default phase and optional path
+            SetDefaultPhase::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             ForceUnicode::class,
         ],

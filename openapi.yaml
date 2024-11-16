@@ -104,483 +104,654 @@ paths:
       responses:
         '204':
           description: 'Nothing returned'
-  /api/v1/design/change_owner:
+  '/api/v1/{namespace}/design/change_owner':
     post:
       summary: 'Changes the ownership of a type before its published.  '
       description: 'The owner ns can transfer this unpublished design to be owned by another namespace. Owners of subtypes can deny this change by listening to the type_owner_change event raised by this action'
       operationId: core.design.change_owner
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/promote_owner:
+  '/api/v1/{namespace}/design/promote_owner':
     post:
       summary: 'Changes the ownership of a type before its published. '
       description: 'The system can transfer this design to be managed by another namespace. No events are raised that can deny the change.'
       operationId: core.design.promote_owner
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/promote:
+  '/api/v1/{namespace}/design/promote':
     post:
       summary: 'Makes a new design type with anyone as the owner '
       description: 'The system can make a new design and assign this to any owner. No events are raised'
       operationId: core.design.promote
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/purge:
+  '/api/v1/{namespace}/design/purge':
     delete:
       summary: 'Deletes an unpublished type '
       description: 'The system can delete any design, owned by anyone, before publishing, without raising any events'
       operationId: core.design.purge
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/destroy:
+  '/api/v1/{namespace}/design/destroy':
     delete:
       summary: 'Deletes an unpublished type '
       description: 'A namespace can delete a new design, before publishing, without raising any events'
       operationId: core.design.destroy
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/create:
+  '/api/v1/{namespace}/design/create':
     post:
       summary: 'Makes a new design type '
       description: 'A namespace can make a new design, they are the owner. No events are raised'
       operationId: core.design.create
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/edit:
+  '/api/v1/{namespace}/design/edit':
     patch:
       summary: 'Edits the name, final type, access '
       description: "The owner or their admin group can change, before publishing, the name of the type, final status and access level \nNo events are raised"
       operationId: core.design.edit
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/show:
+  '/api/v1/{namespace}/design/show':
     get:
       summary: 'Shows information about a type '
       description: "See details about a type in any state. Lists the attributes, event listeners, live requirements and live rules \nIf the design type is set to public access, then any namespace can use this to see the information. Otherwise only the members of the owner namepace can \nTo see more detail about any one of these, use the show api for that reference"
       operationId: core.design.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/list:
+  '/api/v1/{namespace}/design/list':
     get:
       summary: 'Lists all the designed owned or managed  '
-      description: "See a list of all the designs this namespace either owns or has admin rights to. Once a type is published, it is not seen here\nCan see the name, uuid, the status and how many attributes, listeners, requirements and rules there are"
+      description: "See a list of all the designs this namespace either owns or has admin rights, is a member. Once a type is published, it is not seen here\nCan see the name, uuid, the status and how many attributes, listeners, requirements and rules there are"
       operationId: core.design.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/show_attribute:
+  '/api/v1/{namespace}/design/show_attribute':
     get:
       summary: 'Information about a single attribute on a type  '
       description: "See information about an attribute. Will list the settings and bounds, will show parent, and status \nShows stats about its descendants\nif the type is marked as public, and the attribute is marked as public then any namespace can use this,  \notherwise the members of the owning namesapce can "
       operationId: core.design.show_attribute
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/destroy_attribute:
+  '/api/v1/{namespace}/design/destroy_attribute':
     delete:
       summary: 'Delete an attribute'
       description: "Destroys an attribute. Attributes cannot be deleted after a type is published \nRemoving design attributes does not generate any event"
       operationId: core.design.destroy_attribute
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/promote_attribute:
+  '/api/v1/{namespace}/design/promote_attribute':
     post:
       summary: 'Creates a new attribute on a design for any design or namespace'
       description: "System can create a new attribute using any parent chain for any design owned by anyone \nThis does not generate any events"
       operationId: core.design.promote_attribute
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/create_attribute:
+  '/api/v1/{namespace}/design/create_attribute':
     post:
       summary: 'Creates a new attribute on a design'
       description: "Namespace admin group can create a new attribute using any parent chain for any design owned by anyone \nBut the design can only be published if the inheritance chain does not block this using the design_pending event"
       operationId: core.design.create_attribute
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/list_attributes:
+  '/api/v1/{namespace}/design/list_attributes':
     get:
       summary: 'Lists the attributes of a type  '
       description: "See a list of all the attributes the type uses\nShows information about its ancestors\nif the type is marked as private or the attribute is marked as private,\n then that attribute is not shown except to the members of the owning namesapce"
       operationId: core.design.list_attributes
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/set_attribute_location:
+  '/api/v1/{namespace}/design/set_attribute_location':
     patch:
       summary: 'Gives the attribute a shape or map  '
       description: "Each attribute can have one map or shape, or none at all\nCall this with no boundary to clear\nThe bounds of the type as a whole is a union of the attribute maps"
       operationId: core.design.set_attribute_location
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/test_attribute_location:
+  '/api/v1/{namespace}/design/test_attribute_location':
     get:
       summary: 'Allows testing and debugging of an attribute bounds  '
       description: "Tests the attribute bounds with geojson points and shapes, or other types and attributes\nif the type is marked as private or the attribute is marked as private,\n then that attribute is not testable except to the members of the owning namesapce. \n If using other attributes to test with, must be able to see that attribute. "
       operationId: core.design.test_attribute_location
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/edit_attribute:
+  '/api/v1/{namespace}/design/edit_attribute':
     patch:
       summary: 'Edits the properites of an unpublished attribute  '
       description: "Owner admin group can set the following properties to an attribute: \nparent, boolean properties, merge methods, access, value policy, value rules, initial value"
       operationId: core.design.edit_attribute
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/create_listener:
+  '/api/v1/{namespace}/design/create_listener':
     post:
       summary: 'Makes a new event listener for an attribute on the design '
       description: "Each attribute can have zero or one listeners. If replacing, then earlier must be destroyed. \nOwner admin group can create a listener on each attribute, as long as the type is not published \nIf inheriting from a parent, and that has a listener, then the listener must be for the same event type "
       operationId: core.design.create_listener
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/destroy_listener:
+  '/api/v1/{namespace}/design/destroy_listener':
     delete:
       summary: 'Makes a new event listener for an attribute on the design '
       description: 'Owner admin group can can remove the event listener from the attribute, before publishing '
       operationId: core.design.destroy_listener
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/list_listeners:
+  '/api/v1/{namespace}/design/list_listeners':
     get:
       summary: 'Allows testing and debugging of an attribute bounds  '
-      description: "Lists all the listeners, and the attributes that hold them, and the events listened \n To see the rules then use the show listener\n if the type is marked as private or the attribute is marked as private,\n then the listener is not shown except to the members of the owning namesapce"
+      description: "Lists all the listeners, and the attributes that hold them, and the events listened \n To see the rules then use the show listener. Any member can see"
       operationId: core.design.list_listeners
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/show_listener:
+  '/api/v1/{namespace}/design/show_listener':
     get:
       summary: 'Shows information about a specific listener'
       description: "Shows the information about the listener, including the rules it uses \n This is only shown to the owning namespace members"
       operationId: core.design.show_listener
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/create_rule:
+  '/api/v1/{namespace}/design/create_rule':
     post:
       summary: 'Creates a rule or rule tree attached to the root or existing rule '
       description: "Each listener can have a tree of rules with a single top root, but can have any number of branches or leaves \nOwner admin group can add a single rule, or a tree of rules, and that can be attached to the unoccupied root, or to a leaf "
       operationId: core.design.create_rule
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/destroy_rule:
+  '/api/v1/{namespace}/design/destroy_rule':
     delete:
       summary: 'Removes a single rule and all its children '
       description: "The listener tree can be edited by deleting parts of it. \nOwner admin group can prune the tree by branches or leaves "
       operationId: core.design.destroy_rule
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/edit_rule:
+  '/api/v1/{namespace}/design/edit_rule':
     post:
       summary: 'Edits a single rule and all its children '
       description: "The listener tree can be edited by changing one rule and its children \n For existing rules can change the phase,path,rank,logic, merge method and filter \n Owner admin group edit each leaf or branches or the entire tree "
       operationId: core.design.edit_rule
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/test_listener:
+  '/api/v1/{namespace}/design/test_rule':
+    post:
+      summary: 'Test a rule (or a rule tree) '
+      description: 'Can test part of the listener tree to figure out bugs '
+      operationId: core.design.test_rule
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/design/test_listener':
     get:
       summary: 'Test a rule tree against  '
       description: "A listener can be tested against a simulated event \n The tester provides the set, element, event, as long as the namespace using this can see the set and/or element, can test "
       operationId: core.design.test_listener
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/remove_parent:
+  '/api/v1/{namespace}/design/remove_parent':
     delete:
       summary: 'Removes a parent'
       description: "The owner or admin group can remove one or more parents from a design using a path. \nThis can be removed regardless of the approval status \nParents need approval to use, but do not notify the inheritance chain of design changes when dropping that parent"
       operationId: core.design.remove_parent
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/add_parent:
+  '/api/v1/{namespace}/design/add_parent':
     post:
       summary: 'Adds a parent'
       description: "The owner or admin group can add one or more published parents using a path.\n Regardless who owns it, the event of design_pending can block it from the inheritance chaing\n If a parent is declared retired or suspended before publishing, then this type cannot be published until that is changed\nParents need approval to use in the design, and later to publish, to look over any conflicts after the design allowed"
       operationId: core.design.add_parent
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/list_parents:
+  '/api/v1/{namespace}/design/list_parents':
     get:
       summary: 'Lists the parents of a type  '
       description: "Lists the parents the type (published or any other state) uses. \nLists the status of each parent, both their own lifecycle and the approval status being used here\n If the type has public access, then any namespace can see this. Otherwise its members of the owning namespace "
       operationId: core.design.list_parents
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/list_live_rules:
+  '/api/v1/{namespace}/design/list_live_rules':
     get:
       summary: 'Lists live rules for the type  '
       description: "Lists the live rules defined for this type. \n If the type has public access, then any namespace can see this. Otherwise its members of the owning namespace "
       operationId: core.design.list_live_rules
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/add_live_rule:
+  '/api/v1/{namespace}/design/add_live_rule':
     post:
       summary: 'Adds a new live rule to the type before its published '
       description: 'Owner admin group can add live rules to be applied after the publishing and making sets out of this '
       operationId: core.design.add_live_rule
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/remove_live_rule:
+  '/api/v1/{namespace}/design/remove_live_rule':
     delete:
       summary: 'Removes a live rule '
       description: 'Owner admin group can remove a live rule before its published '
       operationId: core.design.remove_live_rule
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/test_location:
+  '/api/v1/{namespace}/design/test_location':
     get:
       summary: 'Tests the type schedule  '
       description: "Tests the bounds of the type with geo-json or given another type, element or set. \n If the type is marked as private,\n then only testable to the members of the owning namesapce. "
       operationId: core.design.test_location
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/test_time:
+  '/api/v1/{namespace}/design/test_time':
     get:
       summary: 'Tests the type schedule  '
       description: "Tests schedule of the type with any generated time string \n If the type is marked as private,\n then only testable to the members of the owning namesapce. "
       operationId: core.design.test_time
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/design/set_time:
+  '/api/v1/{namespace}/design/set_time':
     post:
       summary: 'Sets the schedule for the type  '
       description: "Sets a schedule for the type before publishing \n There is only one schedule, which can be overridden by this, or emptied out by using this with no data"
       operationId: core.design.set_time
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/change_owner:
+  '/api/v1/{namespace}/elements/change_owner':
     patch:
       summary: 'Change the element owner'
       description: 'Element owner can give ownership to another namespace at any time. Any number of elements can be included with a path '
       operationId: core.elements.change_owner
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/attribute_off:
+  '/api/v1/{namespace}/elements/attribute_off':
     patch:
       summary: 'Turn off an attribute of elements'
       description: 'Element admin group turn off attributes of elements in sets given by a path '
       operationId: core.elements.attribute_off
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/attribute_on:
+  '/api/v1/{namespace}/elements/attribute_on':
     patch:
       summary: 'Turn on an attribute of elements'
       description: 'Element admin group turn on attributes of elements in sets given by a path '
       operationId: core.elements.attribute_on
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/type_off:
+  '/api/v1/{namespace}/elements/type_off':
     patch:
       summary: 'Turn off all the subtype attributes of elements'
       description: 'Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path '
       operationId: core.elements.type_off
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/type_on:
+  '/api/v1/{namespace}/elements/type_on':
     patch:
       summary: 'Turn on all the attributes of a parent type in elements'
       description: 'Element admin group turn on all parent type attributes. The types, elements and sets given by a path '
       operationId: core.elements.type_on
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/read_attribute:
+  '/api/v1/{namespace}/elements/read_attribute':
     get:
       summary: 'Read the same attributes in one or more elements'
       description: "Can select the same attribute(s) in elements(s) to read, \n its up to the attribute access, the type access and the event handlers to decide who can "
       operationId: core.elements.read_attribute
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/write_attribute:
+  '/api/v1/{namespace}/elements/read_live_type':
+    get:
+      summary: 'Read all the attributes of a type in one or more elements'
+      description: 'This is the same as core.elements.read_type but looks at the live and ignores the inherited'
+      operationId: core.elements.read_live_type
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/elements/read_type':
+    get:
+      summary: 'Read all the attributes of a live type in one or more elements'
+      description: "Can select the same type(s) in elements(s) to read, will either succeed if can read all of them or fail if one cannot be read \n its up to the attribute access, the type access and the event handlers to decide who can "
+      operationId: core.elements.read_type
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/elements/write_attribute':
     patch:
       summary: 'Write json to the same attributes of one or more elements'
       description: 'Write one or more elements found in a path, that have the same attributes. If one can. '
       operationId: core.elements.write_attribute
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/write_visual:
+  '/api/v1/{namespace}/elements/write_visual':
     patch:
       summary: 'Write opacity|color|border|texture to the same attributes of one or more elements'
       description: "Admin groups changes visual rendering of opacity|color|border|texture for one or more elements found in a path, \n that have the same attributes. The system here does not render, so its up to the api clients to do something with the settings "
       operationId: core.elements.write_visual
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/read_visual:
+  '/api/v1/{namespace}/elements/read_visual':
     get:
       summary: 'Read the locations of one or more elements'
       description: "Can read pathed elements' geometry and maps due to design and live types \n its up to the attribute access, the type access and the event handlers to decide who can "
       operationId: core.elements.read_visual
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/read_time:
+  '/api/v1/{namespace}/elements/read_time':
     get:
       summary: 'Read the locations of one or more elements'
       description: "Can read current or next time span of the element's type, its parents and applied live \n its up to the attribute access, the type access and the event handlers to decide who can "
       operationId: core.elements.read_time
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/add_live:
+  '/api/v1/{namespace}/elements/add_live':
     post:
       summary: 'Add a live type to one or more elements'
       description: "If can read any attribute on a type, can add it as a live part to one or more elements in a search path.\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  "
       operationId: core.elements.add_live
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/copy_live:
+  '/api/v1/{namespace}/elements/copy_live':
     post:
       summary: 'Copy a live type and its state to one or more elements'
       description: "If can read any attribute on both the source and destination type, can copy its and its state to a new element.\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  "
       operationId: core.elements.copy_live
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/remove_live:
+  '/api/v1/{namespace}/elements/remove_live':
     delete:
       summary: 'Remove a live type from one or more elements'
       description: "If can read any attribute on the live type, can remove its and its state to a new element.\n If not part of the element ns, can still remove it if part of the type ns and event listeners allow  "
       operationId: core.elements.remove_live
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/ping:
+  '/api/v1/{namespace}/elements/ping':
     post:
       summary: 'Ping one or more elements to a set'
       description: 'Element ns can use that to ping elements to target sets.'
-      operationId: core.elements.ping_element
+      operationId: core.elements.ping
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/create:
-    post:
-      summary: 'Creates one or more new elements from a type'
-      description: 'Type admin can create one or more elements going to one or more namespaces. The namespace can reject. The inherited types can reject'
-      operationId: core.elements.create_element
-      responses:
-        '501':
-          description: 'Not yet implemented'
-  /api/v1/elements/destroy:
+  '/api/v1/{namespace}/elements/destroy':
     delete:
       summary: 'Destroys one or more elements'
       description: 'Element admin can destroy one or more elements, the type or parent types can reject this'
       operationId: core.elements.destroy_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/promote:
-    post:
-      summary: 'Creates one or more elements'
-      description: 'System can make elements out of any types, not needing permissions. No events created when doing this'
-      operationId: core.elements.promote_element
-      responses:
-        '501':
-          description: 'Not yet implemented'
-  /api/v1/elements/promote_edit:
+  '/api/v1/{namespace}/elements/promote_edit':
     patch:
       summary: 'Changes owner or value of or phase of one or more elements'
       description: 'System can update elements not needing permissions. No events created when doing this'
       operationId: core.elements.promote_edit_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/purge:
+  '/api/v1/{namespace}/elements/purge':
     delete:
       summary: 'System Destroy one or more elements'
       description: 'System can destroy one or more elements without permission'
       operationId: core.elements.purge_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/link:
+  '/api/v1/{namespace}/elements/link':
     post:
       summary: 'Makes a link between an element and a set'
       description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set \n The link can be assigned to another namespace, they can reject that. The linked set can reject the link"
       operationId: core.elements.link
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/unlink:
-    delete:
-      summary: 'Destroys one or more links'
-      description: 'Link admin can remove one or more links they control'
-      operationId: core.elements.unlink
-      responses:
-        '501':
-          description: 'Not yet implemented'
-  /api/v1/elements/list_links:
-    get:
-      summary: 'Shows a list of links'
-      description: 'Link members can see all the links owned by namespaces they belong'
-      operationId: core.elements.list_links
-      responses:
-        '501':
-          description: 'Not yet implemented'
-  /api/v1/elements/show_link:
-    get:
-      summary: 'Show a link'
-      description: 'Link member can see information about a particular link'
-      operationId: core.elements.show_link
-      responses:
-        '501':
-          description: 'Not yet implemented'
-  /api/v1/elements/show:
+  '/api/v1/{namespace}/elements/show':
     get:
       summary: 'Shows the value and information about an element'
       description: 'Element members can see details about an element'
       operationId: core.elements.show_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/list:
+  '/api/v1/{namespace}/elements/list':
     get:
       summary: 'Shows list of elements'
       description: 'Element members can see a list of all the elements of namespaces they belong'
       operationId: core.elements.list_elements
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elements/show_public:
+  /api/v1/elements/public:
     get:
       summary: 'Shows public information about an element'
       description: 'Anyone can see public information about an element, attributes that are marked as public will show their data.'
       operationId: core.elements.show_public
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/elements/create_set':
+    post:
+      summary: 'Create a set from element'
+      description: 'Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets'
+      operationId: core.elements.create_set
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/elements/promote_set':
+    post:
+      summary: 'System can make sets'
+      description: 'System can make sets from any element without permisision. No events '
+      operationId: core.elements.promote_set
       responses:
         '501':
           description: 'Not yet implemented'
@@ -600,171 +771,234 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/give_credentials:
+  '/api/v1/{namespace}/elsewhere/give_credentials':
     post:
       summary: 'Servers can renew credentials'
-      description: 'Can reset and send credentials to regisered server . This can be blocked by event'
+      description: 'The elsewhere gave us credentials to use on their server. This will replace the older ones'
       operationId: core.elsewhere.give_credentials
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/push_credentials:
+  '/api/v1/{namespace}/elsewhere/push_credentials':
     post:
       summary: 'Servers can have credentials renewed without them asking'
       description: 'Can send new credentials to regisered server . This can be blocked by event'
       operationId: core.elsewhere.push_credentials
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/change_status:
+  '/api/v1/{namespace}/elsewhere/change_status':
     patch:
       summary: 'System can change server status'
       description: 'Can change the server status to allowed|blocked|paused|pending. Events can block'
       operationId: core.elsewhere.change_status
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/give_namespace:
+  '/api/v1/{namespace}/elsewhere/give_namespace':
     post:
       summary: 'A new namespace is given from elsewhere'
       description: 'Servers can combine many namespaces at once to avoid extra http calls. Events can filter or block this'
       operationId: core.elsewhere.give_namespace
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/give_set:
+  '/api/v1/{namespace}/elsewhere/give_set':
     post:
       summary: 'A new set is given from elsewhere'
       description: 'Servers can combine many sets at once to avoid extra http calls. Events can filter or block this'
       operationId: core.elsewhere.give_set
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/give_type:
+  '/api/v1/{namespace}/elsewhere/give_type':
     post:
       summary: 'A new type is given from elsewhere'
       description: 'Servers can combine many types at once to avoid extra http calls. Events can filter or block this'
       operationId: core.elsewhere.give_type
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/give_event:
+  '/api/v1/{namespace}/elsewhere/give_event':
     post:
       summary: 'An event to run is given from elsewhere'
       description: 'The event runs if the type has setup the listener to be run by that server. Can be blocked before the listener is run'
       operationId: core.elsewhere.give_event
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/give_element:
+  '/api/v1/{namespace}/elsewhere/give_element':
     post:
       summary: 'A new element is given from elsewhere'
       description: "Servers can combine many element at once to avoid extra http calls. Events can filter or block this \n Elements that have the same guid and type as here are considered re-entered"
       operationId: core.elsewhere.give_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/share_element:
+  '/api/v1/{namespace}/elsewhere/share_element':
     post:
       summary: 'Server wants to share element we gave them'
       description: "Server A wants to give Server B the element that we gave them earlier. \n The response here will give B that element unless blocked "
       operationId: core.elsewhere.share_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/ask_element:
+  '/api/v1/{namespace}/elsewhere/ask_element':
     post:
       summary: 'Try to get element from another server'
       description: "System can initiate transfer for elements. Can be many in one request. \nOnce the elements are talked about, will ask for the other stuff related, if missing. \nEvents can block this request "
       operationId: core.elsewhere.ask_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/ask_type:
+  '/api/v1/{namespace}/elsewhere/ask_type':
     post:
       summary: 'Try to get type from another server'
       description: 'System can initiate transfer for types. Can be many in one request '
       operationId: core.elsewhere.ask_type
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/ask_set:
+  '/api/v1/{namespace}/elsewhere/ask_set':
     post:
       summary: 'Try to get set from another server'
       description: 'System can initiate transfer for sets. Can be many in one request '
       operationId: core.elsewhere.ask_set
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/ask_namespace:
+  '/api/v1/{namespace}/elsewhere/ask_namespace':
     post:
       summary: 'Try to get namespace from another server'
       description: 'System can initiate transfer for namespaces. Can be many in one request '
       operationId: core.elsewhere.ask_namespace
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/push_element:
+  '/api/v1/{namespace}/elsewhere/push_element':
     post:
       summary: 'Push element to another server'
       description: 'System can send elements to server '
       operationId: core.elsewhere.push_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/push_set:
+  '/api/v1/{namespace}/elsewhere/push_set':
     post:
       summary: 'Push a set to another server'
       description: 'System can send a set with its elements to server '
       operationId: core.elsewhere.push_set
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/push_namespace:
+  '/api/v1/{namespace}/elsewhere/push_namespace':
     post:
       summary: 'Push a namespace to another server'
       description: 'System can send a namespace to server '
       operationId: core.elsewhere.push_namespace
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/push_type:
+  '/api/v1/{namespace}/elsewhere/push_type':
     post:
       summary: 'Push a type to another server'
       description: 'System can send a type to server '
       operationId: core.elsewhere.push_type
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/push_event:
+  '/api/v1/{namespace}/elsewhere/push_event':
     post:
       summary: 'Push an event to another server to complete'
       description: 'System can send registered events to the other server '
       operationId: core.elsewhere.push_event
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/destroyed_element:
+  '/api/v1/{namespace}/elsewhere/destroyed_element':
     post:
       summary: 'Server reports it destroyed an element we gave them'
-      description: "We do record keeping, so if this is the record, event is called.  \nThis is notification after the fact and up to us how to handle it "
+      description: "We do record keeping, so if this element is recorded as sent to that server, event is called.  \nThis is notification after the fact and up to us how to handle it "
       operationId: core.elsewhere.destroyed_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/suspended_type:
+  '/api/v1/{namespace}/elsewhere/suspended_type':
     post:
       summary: 'Server suspended type we share with them'
       description: 'The other server can suspend a type we gave them, or they gave us. Its up to here how to handle it, can be blocked by events '
       operationId: core.elsewhere.suspended_type
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/purge_elsewhere:
+  '/api/v1/{namespace}/elsewhere/purge_elsewhere':
     delete:
       summary: 'System can remove server and all its associated'
       description: 'System can remove all associated types,elements,namespaces,sets and designs based on that. No events raised'
       operationId: core.elsewhere.purge_elsewhere
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
@@ -773,366 +1007,545 @@ paths:
       summary: 'List the servers'
       description: 'Anyone can filter servers with a path, and get a paginated list'
       operationId: core.elsewhere.list_servers
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/elsewhere/show_server:
+  /api/v1/elsewhere/show:
     get:
       summary: 'Information about a server'
       description: 'Anyone can see public information about a server'
-      operationId: core.elsewhere.show_server
+      operationId: core.elsewhere.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/show_namespace:
+  /api/v1/elsewhere/admin_elsewhere:
+    get:
+      summary: 'System has private details about a server'
+      description: 'Provides links and detailed information about a particular server'
+      operationId: core.elsewhere.admin_elsewhere
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/links/unlink':
+    delete:
+      summary: 'Destroys one or more links'
+      description: 'Link admin can remove one or more links they control'
+      operationId: core.links.unlink
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/links/list':
+    get:
+      summary: 'Shows a list of links'
+      description: 'Link members can see all the links owned by namespaces they belong'
+      operationId: core.links.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/links/show':
+    get:
+      summary: 'Show a link'
+      description: 'Link member can see information about a particular link'
+      operationId: core.links.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/namespaces/show':
     get:
       summary: 'Shows a summary of the namespace'
       description: "Namespace members can run this to see the owner, the name, the count of admins, members, types, elements \n Will show a list of the first admins (not a complete list)"
-      operationId: core.namespaces.show_namespace
+      operationId: core.namespaces.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/show_namespace_public:
+  /api/v1/namespaces/public:
     get:
       summary: 'Shows a summary of the namespace'
       description: 'Anyone can run this to see some info about the namespace. Will only show public data'
-      operationId: core.namespaces.show_namespace_public
+      operationId: core.namespaces.show_public
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/list_namespaces:
+  '/api/v1/{namespace}/namespaces/list_namespaces':
     get:
       summary: 'Shows all the namespaces this caller is part of'
       description: 'Will show owned, admin and member status of all namespaces this caller is part of. Can filter by handle or namespace name'
-      operationId: core.namespaces.list_namespaces
+      operationId: core.namespaces.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/edit_promotion:
+  '/api/v1/{namespace}/namespaces/edit_promotion':
     patch:
       summary: 'Allows the system to set namespace data'
       description: "System can set data in namespaces without events going off. \n can set new homesets, public and private elements, source server,name \n can change ownership"
       operationId: core.namespaces.edit_promotion
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/destroy_namespace:
+  '/api/v1/{namespace}/namespaces/destroy':
     delete:
       summary: 'The owner can destroy a namespace'
       description: 'User can destroy any namespace they own except their default namespace '
-      operationId: core.namespaces.destroy_namespace
+      operationId: core.namespaces.destroy
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/create_namespace:
+  '/api/v1/{namespace}/namespaces/create':
     post:
       summary: 'The user creates a new namespace with themself as the owner'
       description: "user make new namespace. \n can set new homesets, public and private elements, source server,name, user, other data "
-      operationId: core.namespaces.create_namespace
+      operationId: core.namespaces.create
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/promote_namespace:
+  '/api/v1/{namespace}/namespaces/promote':
     post:
       summary: 'Allows the system to make a new namespace'
       description: "System make new namespaces and assign anyone as the owner. \n can set new homesets, public and private elements, source server,name, user, other data "
-      operationId: core.namespaces.promote_namespace
+      operationId: core.namespaces.promote
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/purge_namespace:
+  /api/v1/namespaces/purge:
     delete:
       summary: 'Allows the system to destroy any namespace'
       description: 'System can destroy any namespaces without events going off '
-      operationId: core.namespaces.purge_namespace
+      operationId: core.namespaces.purge
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/add_admin:
+  '/api/v1/{namespace}/namespaces/add_admin':
     post:
       summary: 'Add a new admin to the namespace'
       description: 'Owner can add a new administrator (who will also be a member).Event goes to handle '
       operationId: core.namespaces.add_admin
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/list_admins:
+  '/api/v1/{namespace}/namespaces/list_admins':
     get:
       summary: 'Shows a list of all the admins from this namespace'
       description: 'Any member can use this to get a full list of all the admins (includes owner). Can filter by handle or admin uuid or name'
       operationId: core.namespaces.list_admins
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/remove_admin:
+  '/api/v1/{namespace}/namespaces/remove_admin':
     delete:
       summary: 'Remove admin privs from a member in the namespace'
       description: 'Owner can remove administrator (who will still be a member).Event goes to handle '
       operationId: core.namespaces.remove_admin
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/purge_admin:
+  '/api/v1/{namespace}/namespaces/purge_admin':
     delete:
       summary: 'System can remove admins from namespaces'
       description: 'System can remove any admin from any group without raising events (person is still member) '
       operationId: core.namespaces.purge_admin
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/promote_admin:
+  '/api/v1/{namespace}/namespaces/promote_admin':
     post:
       summary: 'System can add admins to namespaces'
       description: 'System can add anyone to be admin in group without raising events '
       operationId: core.namespaces.promote_admin
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/add_member:
+  '/api/v1/{namespace}/namespaces/add_member':
     post:
       summary: 'Add a member to the namespace'
       description: 'Admin can add any other namespace as a member. Event goes to handle'
       operationId: core.namespaces.add_member
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/remove_member:
+  '/api/v1/{namespace}/namespaces/remove_member':
     delete:
       summary: 'Remove member from the namespace'
       description: 'Admin can remove member who is not administrator. Event goes to handle '
       operationId: core.namespaces.remove_member
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/promote_member:
+  '/api/v1/{namespace}/namespaces/promote_member':
     post:
       summary: 'System can add members to namespaces'
       description: 'System can add any member from group without raising events '
       operationId: core.namespaces.promote_member
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/purge_member:
+  '/api/v1/{namespace}/namespaces/purge_member':
     delete:
       summary: 'System can remove members from namespaces'
       description: 'System can remove any member from any group without raising events '
       operationId: core.namespaces.purge_member
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/list_members:
+  '/api/v1/{namespace}/namespaces/list_members':
     get:
       summary: 'Shows a list of all the members from this namespace'
       description: 'Any member can use this to get a full list of all the members. Can filter by handle or member uuid/name'
       operationId: core.namespaces.list_members
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/add_handle:
-    post:
+  '/api/v1/{namespace}/namespaces/add_handle':
+    patch:
       summary: 'Add element handle to a namespace'
       description: 'Namespaces can be grouped, organized and controlled together'
       operationId: core.namespaces.add_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/namespaces/remove_handle:
+  '/api/v1/{namespace}/namespaces/remove_handle':
     patch:
       summary: 'Remove element handle from a namespaces'
       description: 'Handles can be removed at any time, and left empty or new ones added'
       operationId: core.namespaces.remove_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/operations/unshift:
+  '/api/v1/{namespace}/operations/unshift':
     post:
       summary: 'Add elements to the front of the set'
       description: 'namespace members of the sets can select one or more elements from one set to be unshifted to another '
       operationId: core.operations.unshift
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/operations/combine:
+  '/api/v1/{namespace}/operations/combine':
     post:
       summary: 'Add or remove elements between sets'
       description: 'namespace members of the sets can adjust set contents using logic operations '
       operationId: core.operations.combine
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/operations/mutual:
+  '/api/v1/{namespace}/operations/mutual':
     post:
       summary: 'Make a mutual from one or more sets'
       description: 'Any sets and elements can have mutuals made from the readable attributes '
       operationId: core.operations.mutual
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/operations/pop:
+  '/api/v1/{namespace}/operations/pop':
     post:
       summary: 'Pops elements from sets'
       description: 'Namespace members of the sets can pop off elements to another set '
       operationId: core.operations.pop
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/operations/push:
+  '/api/v1/{namespace}/operations/push':
     post:
       summary: 'Push elements to sets'
       description: 'Namespace members of the sets can push elements on the top positions of target sets '
       operationId: core.operations.push
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/operations/shift:
+  '/api/v1/{namespace}/operations/shift':
     post:
       summary: 'shift elements from sets'
       description: 'Namespace members of the sets can remove elements from the bottom positions of target sets '
       operationId: core.operations.shift
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/publish:
+  '/api/v1/{namespace}/paths/publish':
     patch:
       summary: 'Publish a path, marking it as workable'
       description: 'Paths can be used in other api calls after publishing'
       operationId: core.paths.publish
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/add_handle:
-    post:
+  '/api/v1/{namespace}/paths/add_handle':
+    patch:
       summary: 'Add element handle to a path'
       description: 'Paths can be grouped, organized and controlled together'
       operationId: core.paths.add_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/remove_handle:
+  '/api/v1/{namespace}/paths/remove_handle':
     patch:
       summary: 'Remove element handle from a path'
       description: 'Handles can be removed at any time, and left empty or new ones added'
       operationId: core.paths.remove_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/list:
+  '/api/v1/{namespace}/paths/list':
     get:
       summary: 'Lists the paths this namespace is a member of'
       description: 'Can filter by handle or see all paths'
       operationId: core.paths.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/show:
+  '/api/v1/{namespace}/paths/show':
     get:
       summary: 'Shows a path'
       description: 'Members can see times and what uses a path'
       operationId: core.paths.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/copy:
+  '/api/v1/{namespace}/paths/copy':
     post:
       summary: 'Copies a path, with the caller the owner of the new path'
       description: 'Paths can be complicated to make and test, copying them for other use and editing those can be helpful. The new path is unpublished'
       operationId: core.paths.copy
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/create:
+  '/api/v1/{namespace}/paths/create':
     post:
       summary: 'Creates a new empty path that is unpublished'
       description: 'The caller is the path owner. The name and phase is set'
       operationId: core.paths.create
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/edit:
+  '/api/v1/{namespace}/paths/edit':
     patch:
       summary: 'Change the path name and phase'
       description: 'Handles can be removed at any time, and left empty or new ones added'
       operationId: core.paths.edit
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/destroy:
+  '/api/v1/{namespace}/paths/destroy':
     post:
       summary: 'Destroys a path'
       description: 'No events when destroying, but if used for something will generate an error'
       operationId: core.paths.destry
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/create_part:
+  '/api/v1/{namespace}/paths/create_part':
     post:
       summary: 'Creates a part or part tree attached to the root or existing rule'
       description: 'Add a single part, or a tree of parts, and that can be attached to the unoccupied root, or to a leaf'
       operationId: core.paths.create_part
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/destroy_part:
+  '/api/v1/{namespace}/paths/destroy_part':
     delete:
       summary: 'Removed a single part and all its children'
       description: 'The part tree can be trimmed by deleting one rule and its children. This can also delete the root (and all the parts)'
       operationId: core.paths.destroy_part
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/edit_part:
+  '/api/v1/{namespace}/paths/edit_part':
     patch:
       summary: 'Edits a single part and all its children'
       description: 'The part tree can be edited by changing one rule and its children. This can also edit the root (and all the parts)'
       operationId: core.paths.edit_part
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/show_part:
+  '/api/v1/{namespace}/paths/show_part':
     get:
       summary: 'Shows a part and its tree'
       description: 'Show a part by itself or a tree, if it has children.'
       operationId: core.paths.show_part
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/test_part:
+  '/api/v1/{namespace}/paths/test_part':
     get:
       summary: 'Test a path tree'
       description: 'Test a part by itself or a tree, if it has children. The tree (or part) will pretend to be the entire search. No events called'
       operationId: core.paths.test_part
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/search:
+  '/api/v1/{namespace}/paths/search':
     get:
       summary: 'Search with a path'
       description: 'If handle is set, event will be called. Handle can filter, augment or refine'
       operationId: core.paths.search
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/paths/test:
+  '/api/v1/{namespace}/paths/test':
     get:
       summary: 'Test a search'
       description: 'Used before a path is published, can test to see how the parts are working out, no events called'
       operationId: core.paths.test
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/phases/show:
+  '/api/v1/{namespace}/phases/show':
     get:
-      summary: 'List phases'
-      description: 'Shows a phase if the caller is a member of the type which manages the phase. Shows stats about the phase'
+      summary: 'Show details about a phase'
+      description: 'Shows a phase if the caller is a member of the type which manages the phase. Also shows system phases. Shows stats about the phase'
       operationId: core.phases.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/phases/list:
+  '/api/v1/{namespace}/phases/list':
     get:
       summary: 'List phases'
-      description: 'Phases are listed if the caller is a member of the type which manages the phase, filterable via the type handle'
+      description: 'Phases are listed if the caller is a member of the type which manages the phase, filterable via the type handle. System phases are listed here too'
       operationId: core.phases.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
@@ -1160,99 +1573,113 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/add_element:
+  '/api/v1/{namespace}/sets/add_element':
     post:
       summary: 'Change the element owner'
       description: 'Element namespace members can put element into any set that allows that '
       operationId: core.sets.add_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/promote_element:
+  '/api/v1/{namespace}/sets/promote_element':
     post:
       summary: 'System can add elements to sets'
       description: 'System can add any element to any set without permission or events '
-      operationId: core.sets.promote_member
+      operationId: core.sets.promote_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/create:
-    post:
-      summary: 'Create a set from element'
-      description: 'Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets'
-      operationId: core.sets.create_set
-      responses:
-        '501':
-          description: 'Not yet implemented'
-  /api/v1/sets/promote:
-    post:
-      summary: 'System can make sets'
-      description: 'System can make sets from any element without permisision. No events '
-      operationId: core.sets.promote_set
-      responses:
-        '501':
-          description: 'Not yet implemented'
-  /api/v1/sets/destroy:
+  '/api/v1/{namespace}/sets/destroy':
     delete:
       summary: 'Destroys the set, keeps the element'
       description: 'Set owners can destroy their sets, bypassing the leave event, can be blocked by handlers on the type '
       operationId: core.sets.destroy_set
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/remove_element:
+  '/api/v1/{namespace}/sets/remove_element':
     delete:
       summary: 'Change the element owner'
       description: 'Element namespace members can put element into any set that allows that '
       operationId: core.sets.remove_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/empty_set:
+  '/api/v1/{namespace}/sets/empty_set':
     delete:
       summary: 'Removes all elements except sticky ones'
       description: 'Element namespace members can clear out sticky elements. Event handlers can block their elements from leaving '
       operationId: core.sets.empty_set
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/stick_element:
+  '/api/v1/{namespace}/sets/stick_element':
     patch:
       summary: 'Makes element sticky in set operations'
       description: 'Set namespace members can make sticky elements in those sets '
       operationId: core.sets.stick_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/unstick_element:
+  '/api/v1/{namespace}/sets/unstick_element':
     patch:
       summary: 'Unsticks one or more elements in one or more sets'
       description: 'Set namespace members can unstick elements in those sets '
       operationId: core.sets.unstick_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/purge:
+  '/api/v1/{namespace}/sets/purge':
     delete:
       summary: 'System can delete any set'
       description: 'System can remove sets without events or permission '
       operationId: core.sets.purge_set
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/purge_member:
+  '/api/v1/{namespace}/sets/purge_member':
     delete:
       summary: 'System can remove set contents'
       description: 'System can remove elements without events from any set '
       operationId: core.sets.purge_member
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/show:
+  '/api/v1/{namespace}/sets/show':
     get:
       summary: 'Gives information about a set'
       description: 'Shows information about a set to set members '
       operationId: core.sets.show_set
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
@@ -1264,27 +1691,267 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/list_children:
+  '/api/v1/{namespace}/sets/list_children':
     get:
       summary: 'List child sets'
       description: 'Set namespace members can get a list of children sets '
       operationId: core.sets.list_children
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/sets/list_elements:
+  '/api/v1/{namespace}/sets/list_elements':
     get:
       summary: 'list elements in a set'
       description: 'Set namespace members can get a list of set contents '
       operationId: core.sets.list_elements
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/show:
+  '/api/v1/{namespace}/sets/list':
+    get:
+      summary: 'list sets'
+      description: 'Lists all sets this is a member, admin or owner  '
+      operationId: core.sets.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/hooks/list':
+    get:
+      summary: 'List all the hooks'
+      description: ''
+      operationId: core.things.hooks.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/hooks/create':
+    post:
+      summary: 'Create a new hook'
+      description: ''
+      operationId: core.things.hooks.create
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/hooks/show':
+    get:
+      summary: 'Shows information about a hook'
+      description: ''
+      operationId: core.things.hooks.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/hooks/edit':
+    patch:
+      summary: 'Edits a hook'
+      description: ''
+      operationId: core.things.hooks.edit
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/hooks/destroy':
+    delete:
+      summary: 'Edits a hook'
+      description: ''
+      operationId: core.things.hooks.destroy
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/debugging/breakpoint':
+    post:
+      summary: 'Add a breakpoint'
+      description: ''
+      operationId: core.things.debugging.breakpoint
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/debugging/clear':
+    delete:
+      summary: 'Removes a breakpoint'
+      description: ''
+      operationId: core.things.debugging.clear_breakpoint
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/debugging/run':
+    post:
+      summary: 'Runs from a stopped thing'
+      description: ''
+      operationId: core.things.debugging.run
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/debugging/single_step':
+    post:
+      summary: 'Single steps from a stopped thing'
+      description: ''
+      operationId: core.things.debugging.single_step
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/debugging/pause':
+    patch:
+      summary: 'Sets the thing to not run automatically'
+      description: ''
+      operationId: core.things.debugging.pause
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/debugging/unpause':
+    patch:
+      summary: 'Sets a thing to be automatically run'
+      description: 'No effect if not already paused'
+      operationId: core.things.debugging.unpause
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/list':
+    get:
+      summary: 'Lists things, searchable'
+      description: ''
+      operationId: core.things.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/show':
+    get:
+      summary: 'Shows a thing and its descendants'
+      description: ''
+      operationId: core.things.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/inspect':
+    get:
+      summary: 'Inspects a single thing'
+      description: ''
+      operationId: core.things.inspect
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/trim':
+    delete:
+      summary: 'Removes a thing and its descendants'
+      description: 'Parents of trimmed things will return false'
+      operationId: core.things.trim
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/rates/apply':
+    post:
+      summary: 'Applies a rate(s) to a thing and its descendants'
+      description: ''
+      operationId: core.things.rates.apply
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/rates/remove':
+    post:
+      summary: 'Removes a rate(s) to a thing and its descendants'
+      description: ''
+      operationId: core.things.rates.remove
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/rates/list':
+    get:
+      summary: 'Lists the rates that apply to a thing and its descendants'
+      description: ''
+      operationId: core.things.rates.list
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/rates/show':
+    get:
+      summary: 'Shows information about a setting/rate'
+      description: ''
+      operationId: core.things.rates.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/things/rates/edit':
+    post:
+      summary: 'Edit a setting/rate'
+      description: ''
+      operationId: core.things.rates.edit
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/types/show':
     get:
       summary: 'Show information about a type'
       description: 'See information about a type if one is a member, admin or owner '
       operationId: core.types.show
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
@@ -1296,19 +1963,25 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/list_published:
+  '/api/v1/{namespace}/types/list_published':
     get:
       summary: 'List published types'
       description: 'Can see any published types where one is a member, admin or owner '
       operationId: core.types.list_published
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/list_suspended:
+  '/api/v1/{namespace}/types/list_suspended':
     get:
       summary: 'List suspended types'
       description: 'Can see any suspended types where one is a member, admin or owner '
       operationId: core.types.list_suspended
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
@@ -1320,143 +1993,216 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/list_live:
+  '/api/v1/{namespace}/types/list_live':
     get:
       summary: 'Show live types made from this type'
       description: 'Members can see all the currently applied live using this type'
       operationId: core.types.list_live
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/list_elements:
+  '/api/v1/{namespace}/types/list_elements':
     get:
       summary: 'Show elements made from this type'
       description: 'Members can see all the elements created. Use the element show command to get information about element'
       operationId: core.types.list_elements
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/list_descendants:
+  '/api/v1/{namespace}/types/list_descendants':
     get:
       summary: 'Show type inheritance'
       description: 'Members can see how this type is being inherited by other types.'
       operationId: core.types.list_descendants
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/list_attribute_descendants:
+  '/api/v1/{namespace}/types/list_attribute_descendants':
     get:
       summary: 'Show attribute inheritance'
       description: "Members can see how this type's attributes are being used in other types."
       operationId: core.types.list_attribute_descendants
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/add_handle:
-    post:
+  '/api/v1/{namespace}/types/add_handle':
+    patch:
       summary: 'Add element handle to a type'
       description: 'Types can be grouped, organized and controlled together'
       operationId: core.types.add_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/remove_handle:
+  '/api/v1/{namespace}/types/remove_handle':
     patch:
       summary: 'Remove element handle from a type'
       description: 'Handles can be removed at any time, and be empty or new ones added'
       operationId: core.types.remove_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/add_attribute_handle:
-    post:
+  '/api/v1/{namespace}/types/add_attribute_handle':
+    patch:
       summary: 'Add attribute handle to an attribute'
       description: 'Attributes can be grouped, organized and controlled together by an attribute handle. This can also be used for displaying debugging info'
       operationId: core.types.add_attribute_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/remove_attribute_handle:
+  '/api/v1/{namespace}/types/remove_attribute_handle':
     patch:
       summary: 'Remove attribute handle from an attribute'
       description: 'Handles can be removed at any time, and be empty or new ones added'
       operationId: core.types.remove_attribute_handle
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/change_owner:
+  '/api/v1/{namespace}/types/change_owner':
     patch:
       summary: 'Changes the type owner'
       description: 'The type owner can give the type to any other namespace'
       operationId: core.types.change_owner
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/promote_owner:
+  '/api/v1/{namespace}/types/promote_owner':
     patch:
       summary: 'System can change the type owner'
       description: 'Type owners can be changed by the system without events or permission'
       operationId: core.types.promote_owner
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/destroy_type:
+  '/api/v1/{namespace}/types/destroy_type':
     delete:
       summary: 'Changes the type owner'
       description: 'The type owner destroy the type, inheritied types and event on this type can block'
       operationId: core.types.destroy_type
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/purge:
+  '/api/v1/{namespace}/types/purge':
     delete:
       summary: 'System can delete types'
       description: 'System can delete types, and all their elements and sets, without events or permission'
       operationId: core.types.purge
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/fire_event:
+  '/api/v1/{namespace}/types/fire_event':
     post:
       summary: 'Fires a custom event'
       description: 'Custom events can be fired, their scope depends on what they inherit, smallest scope wins if multiple ancestors of mixed scope'
       operationId: core.types.fire_event
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/publish:
+  '/api/v1/{namespace}/types/publish':
     patch:
       summary: 'Publishes a design'
       description: 'Type admins do unpublished design and mark it as ready for use. Events from inherited types and attributes can block'
       operationId: core.types.publish
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/promote_publish:
+  '/api/v1/{namespace}/types/promote_publish':
     patch:
       summary: 'System publishes a design'
       description: 'System can publish any design. This overrules any rules denying it (those events do not fire) '
       operationId: core.types.promote_publish
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/suspend:
+  '/api/v1/{namespace}/types/suspend':
     patch:
       summary: 'Suspends a design'
       description: "System can suspend a type. New elements cannot be created, but existing ones are left alone. \n Suspended types do not listen to events \n Can be blocked by events (system only listeners block, others listen to after the fact)"
       operationId: core.types.suspend
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/types/retire:
+  '/api/v1/{namespace}/types/retire':
     patch:
       summary: 'Retires a design'
       description: "Type admins retire a type. Events from inherited types and attributes can block. \nUnpublished types using this after acceptance can still use it"
       operationId: core.types.retire
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/create_master:
+  '/api/v1/{namespace}/types/create_element':
+    post:
+      summary: 'Creates one or more new elements from a type'
+      description: 'Type admin can create one or more elements going to one or more namespaces. The namespace can reject. The inherited types can reject'
+      operationId: core.types.create_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/types/promote_element':
+    post:
+      summary: 'Creates one or more elements'
+      description: 'System can make elements out of any types, not needing permissions. No events created when doing this'
+      operationId: core.types.promote_element
+      parameters:
+        -
+          $ref: '#/components/parameters/namespace'
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/waits/create_master':
     post:
       summary: 'Create a master system'
       description: 'A new master system is created with the caller the owner of the new types and sets and elements'
@@ -1464,7 +2210,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/update_master:
+  '/api/v1/{namespace}/waits/update_master':
     post:
       summary: 'Update waiting master state'
       description: 'Changes the ready state of a master'
@@ -1472,7 +2218,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/run_master:
+  '/api/v1/{namespace}/waits/run_master':
     post:
       summary: 'Starts running a master'
       description: 'Sets a pending master to run, any member of the type can do this. May have to wait, also may not work if limits set'
@@ -1480,7 +2226,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/reset_semaphore:
+  '/api/v1/{namespace}/waits/reset_semaphore':
     post:
       summary: 'Semaphores moved to idle'
       description: 'Semaphores moved to the idle state'
@@ -1488,7 +2234,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/ready_semaphore:
+  '/api/v1/{namespace}/waits/ready_semaphore':
     post:
       summary: 'Sets semaphores ready to be used'
       description: 'Semaphores moved to the waiting state'
@@ -1496,7 +2242,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/show_master:
+  '/api/v1/{namespace}/waits/show_master':
     get:
       summary: 'Shows information about a master'
       description: 'Type members can see the status of the master'
@@ -1504,7 +2250,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/show_master_run:
+  '/api/v1/{namespace}/waits/show_master_run':
     get:
       summary: 'Shows master run data'
       description: 'Shows the details about a run the master made, or current state if running'
@@ -1512,7 +2258,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/list_masters:
+  '/api/v1/{namespace}/waits/list_masters':
     get:
       summary: 'List masters'
       description: 'Lists the masters the caller is a member, admin or owner of'
@@ -1520,7 +2266,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/show_semaphore:
+  '/api/v1/{namespace}/waits/show_semaphore':
     get:
       summary: 'Show semaphore'
       description: 'Shows information about a semaphore if the caller is a member, admin or owner'
@@ -1528,7 +2274,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/list_semaphores:
+  '/api/v1/{namespace}/waits/list_semaphores':
     get:
       summary: 'List semaphores'
       description: 'Lists the semaphores the caller is a member, admin or owner of'
@@ -1536,7 +2282,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/list_waits:
+  '/api/v1/{namespace}/waits/list_waits':
     get:
       summary: 'List Waits'
       description: 'Lists the semaphores or mutexes being waited on from types the caller is a member, admin or owner of'
@@ -1544,7 +2290,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/show_wait:
+  '/api/v1/{namespace}/waits/show_wait':
     get:
       summary: 'Show wait info'
       description: 'Shows information specific wait on a type the caller is a member, admin or owner'
@@ -1552,7 +2298,7 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/list_mutexes:
+  '/api/v1/{namespace}/waits/list_mutexes':
     get:
       summary: 'List Mutexes'
       description: 'Lists the mutexes created with types the caller is a member, admin or owner of'
@@ -1560,11 +2306,51 @@ paths:
       responses:
         '501':
           description: 'Not yet implemented'
-  /api/v1/waits/show_mutex:
+  '/api/v1/{namespace}/waits/show_mutex':
     get:
       summary: 'Show mutex'
       description: 'Shows information about a mutex if the caller is a member, admin or owner'
       operationId: core.waits.show_mutex
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/waits/wait_if_available':
+    post:
+      summary: 'Do work if signal ready, otherwise do not wait'
+      description: 'Will wait only if this is immediately ready, otherwise it fails'
+      operationId: core.waits.wait_if_available
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/waits/wait_for_any':
+    post:
+      summary: 'Do work at first signal that is ready'
+      description: 'Will for only the first signal ready and ignore the other waits after that. Can set many signals to wait'
+      operationId: core.waits.wait_for_any
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/waits/wait_for_all':
+    post:
+      summary: 'Do work after all signals are ready'
+      description: 'Will for all the signals to be ready. Can set many signals to wait'
+      operationId: core.waits.wait_for_all
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/waits/wait_for_mutex':
+    post:
+      summary: 'Do work after mutex allows'
+      description: 'Will wait for this mutex'
+      operationId: core.waits.wait_for_mutex
+      responses:
+        '501':
+          description: 'Not yet implemented'
+  '/api/v1/{namespace}/waits/wait_for_semaphore':
+    post:
+      summary: 'Do work when semaphore allows'
+      description: 'Will wait on the semaphore'
+      operationId: core.waits.wait_for_semaphore
       responses:
         '501':
           description: 'Not yet implemented'
@@ -1684,3 +2470,11 @@ components:
           value:
             username: will
             password: xamp
+  parameters:
+    namespace:
+      name: namespace
+      in: path
+      description: Namespace
+      required: true
+      schema:
+        $ref: '#/components/schemas/hexbatch_username'

@@ -17,7 +17,7 @@ class RemoveElement extends Api\SetApi
 
     const PARENT_CLASSES = [
         Api\SetApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
         Act\Cmd\St\SetMemberRemove::class,
     ];
 

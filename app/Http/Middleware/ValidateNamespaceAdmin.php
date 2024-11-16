@@ -8,7 +8,7 @@ use App\Helpers\Utilities;
 use App\Models\UserNamespace;
 use Symfony\Component\HttpFoundation\Response;
 
-class ValidateNamespaceAdmin extends ValidateNamespaceOwner
+class ValidateNamespaceAdmin extends ValidateNamespaceBase
 {
 
     protected function checkPermission(UserNamespace $user_namespace) {

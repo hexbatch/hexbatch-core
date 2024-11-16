@@ -28,7 +28,7 @@ class MeResponse implements IApiOaResponse
     {
         $this->uuid = $user->ref_uuid;
         $this->username = $user->username;
-        $this->registered_at = Carbon::createFromTimestamp($user->created_at)->toIso8601String();
+        $this->registered_at = Carbon::createFromTimestamp($user->created_at_ts,config('app.timezone'))->toIso8601String();
     }
 
 

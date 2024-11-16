@@ -17,7 +17,7 @@ class Search extends Api\PathApi
 
     const PARENT_CLASSES = [
         Api\PathApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
     ];
 
 }

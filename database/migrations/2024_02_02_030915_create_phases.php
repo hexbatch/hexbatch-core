@@ -45,6 +45,9 @@ return new class extends Migration
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
+
+            $table->string('phase_name',128)->nullable(false)->unique()
+                ->comment("The unique name of the phase, using the naming rules");
         });
 
         DB::statement('ALTER TABLE phases ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

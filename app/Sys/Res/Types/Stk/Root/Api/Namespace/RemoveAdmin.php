@@ -18,7 +18,7 @@ class RemoveAdmin extends Api\NamespaceApi
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ns\NamespaceAdminRemove::class,
     ];
 

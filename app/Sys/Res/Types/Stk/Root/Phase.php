@@ -42,6 +42,7 @@ class Phase extends BaseType
                     ->setSystem(true)
                     ->setUuid(static::getClassUuid())
                     ->setDefaultPhase(static::IS_DEFAULT_PHASE)
+                    ->setPhaseName(static::getClassName())
                     ->setPhaseTypeId($this->getTypeObject()->id)
                     ->setEditedByPhaseId(null);
 

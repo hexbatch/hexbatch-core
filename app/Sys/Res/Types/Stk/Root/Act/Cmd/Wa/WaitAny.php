@@ -3,8 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreResetMetric;
-use App\Sys\Res\Atr\Stk\Act\Metrics\WaitAllMetric;
+use App\Sys\Res\Atr\Stk\Act\Metrics;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -15,7 +14,7 @@ class WaitAny extends Act\Cmd\Wa
 
 
     const ATTRIBUTE_CLASSES = [
-        WaitAllMetric::class
+        Metrics\WaitAnyMetric::class
     ];
 
     const PARENT_CLASSES = [

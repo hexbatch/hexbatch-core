@@ -17,7 +17,7 @@ class ListPhases extends Api\PhaseApi
 
     const PARENT_CLASSES = [
         Api\PhaseApi::class,
-        Act\Cmd\Ele\Search::class
+        Act\Cmd\Pa\Search::class
     ];
 
 }

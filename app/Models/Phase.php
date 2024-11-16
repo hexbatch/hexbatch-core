@@ -18,8 +18,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int phase_type_id
  * @property int edited_by_phase_id
  * @property bool is_default_phase
- * @property string ref_uuid
  * @property bool is_system
+ * @property string ref_uuid
+ * @property string phase_name
  *
  * @property string created_at
  * @property string updated_at

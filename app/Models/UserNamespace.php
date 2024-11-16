@@ -135,14 +135,14 @@ class UserNamespace extends Model implements INamespace,ISystemModel
         $build = UserNamespace::select('user_namespaces.*')
             ->selectRaw(" extract(epoch from  user_namespaces.created_at) as created_at_ts,
                                     extract(epoch from  user_namespaces.updated_at) as updated_at_ts,
-                                    IF(namespace_user_id = $me_id,true,false) as is_owner
+                                    CASE WHEN namespace_user_id = $me_id THEN true ELSE false END as is_owner
                                     ")
             /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
              * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
-             * @uses UserNamespace::user_home_set(),UserNamespace::namespace_admins() ,UserNamespace::namespace_members()
+             * @uses UserNamespace::user_home_set()
              */
             ->with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
-                 'user_home_set', 'user_admin_group');
+                 'user_home_set');
 
         if ($id) {
             $build->where('user_namespaces.id', $id);
@@ -198,7 +198,15 @@ class UserNamespace extends Model implements INamespace,ISystemModel
                         if (count($parts) === 1) {
                             //it is the group name, scoped the namespace
                             $ns_name = $parts[0];
-                            $build = $this->where('namespace_name', $ns_name)->whereNull('namespace_server_id');
+                            /** @var Server $system_server */
+                            $system_server = Server::buildServer(is_system: true)->first();
+                            $build = $this->where('namespace_name', $ns_name);
+                            if ($system_server) {
+                                $build->where('namespace_server_id',$system_server->id);
+                            } else {
+                                $build->whereNull('namespace_server_id');
+                            }
+
                         } else if (count($parts) === 2) {
                             // first should be a server
                             $server_name = $parts[0];

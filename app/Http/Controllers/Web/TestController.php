@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Web;
 
 
 
+use App\Sys\Build\SystemResources;
+
 class TestController
 {
     /**
@@ -12,5 +14,6 @@ class TestController
      */
     public function test() {
 
+        dd(SystemResources::build());
     }
 }

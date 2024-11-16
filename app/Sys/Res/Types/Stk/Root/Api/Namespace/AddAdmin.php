@@ -7,7 +7,6 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-
 class AddAdmin extends Api\NamespaceApi
 {
     const UUID = 'ac34e519-cd58-4281-9799-8cffc7e0137b';
@@ -19,7 +18,7 @@ class AddAdmin extends Api\NamespaceApi
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ns\NamespaceAdminAdd::class,
     ];
 

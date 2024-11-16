@@ -4,11 +4,10 @@ namespace App\Api\Cmd\Set\Promote;
 
 
 use App\Api\Cmd\Set\SetParams;
-
 use App\Models\ElementSet;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\BuildActionFacet;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\St\SetPromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\SetPromote;
 
 
 class SetForSystem

@@ -13,7 +13,7 @@ enum TypeOfAccessMarker : string {
     case TYPE_ADMIN = 'type_admin';
     case TYPE_MEMBER = 'type_member';
 
-    case LINK_ADMIN = 'link_admin';
+    case LINK_OWNER = 'link_owner';
     case LINK_MEMBER = 'link_member';
     case ELEMENT_OWNER = 'element_owner';
     case ELEMENT_ADMIN = 'element_admin';

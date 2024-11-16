@@ -15,6 +15,7 @@ trait PhaseParams
     protected ?bool $default_phase = null;
 
     protected ?string $uuid = null;
+    protected ?string $phase_name = null;
 
 
     protected ?bool $system = null;
@@ -29,8 +30,14 @@ trait PhaseParams
         $this->edited_by_phase_id = static::intRefFromCollection($collection,'edited_by_phase_id');
         $this->uuid = static::uuidFromCollection($collection,'uuid');
         $this->default_phase = static::boolFromCollection($collection,'default_phase');
+        $this->phase_name = static::stringFromCollection($collection,'phase_name');
 
         $this->validate();
+    }
+
+    public function getPhaseName(): ?string
+    {
+        return $this->phase_name;
     }
 
     public function getPhaseId(): ?int

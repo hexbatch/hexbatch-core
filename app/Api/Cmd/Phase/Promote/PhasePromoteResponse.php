@@ -45,6 +45,10 @@ class PhasePromoteResponse extends PhasePromote implements IActionWorkReturn,IAc
             $phase->phase_type_id = $params->getPhaseTypeId();
         }
 
+        if ($params->getPhaseName()) {
+            $phase->phase_name = $params->getPhaseName();
+        }
+
         if ($params->getEditedByPhaseId()) {
             $phase->edited_by_phase_id = $params->getEditedByPhaseId();
         }

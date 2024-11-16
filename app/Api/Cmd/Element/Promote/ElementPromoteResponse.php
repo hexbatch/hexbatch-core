@@ -9,7 +9,7 @@ use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\Phase;
 use App\Models\Thing;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\ElementPromote;
 use Illuminate\Support\Facades\DB;
 
 class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn,IActionOaResponse,IActionWorker

@@ -110,17 +110,21 @@ class Server extends Model implements IServer,ISystemModel
 
 
     public static function buildServer(
-        ?int $id = null)
+        ?int $id = null,?bool $is_system = null)
     : Builder
     {
 
         /**
          * @var Builder $build
          */
-        $build = Element::select('servers.*');
+        $build = Server::select('servers.*');
 
         if ($id) {
             $build->where('servers.id', $id);
+        }
+
+        if ($is_system !== null) {
+            $build->where('is_system',$is_system);
         }
 
         /**

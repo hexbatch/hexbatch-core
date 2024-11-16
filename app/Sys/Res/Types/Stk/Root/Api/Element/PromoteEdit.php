@@ -18,7 +18,7 @@ class PromoteEdit extends Api\ElementApi
 
     const PARENT_CLASSES = [
         Api\ElementApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ele\ElementPromoteEdit::class,
     ];
 

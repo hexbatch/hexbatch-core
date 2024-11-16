@@ -17,7 +17,7 @@ class RemoveHandleAttribute extends Api\TypeApi
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ty\AttributeHandleRemove::class
     ];
 

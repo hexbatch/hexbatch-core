@@ -18,7 +18,7 @@ class AddParent extends Api\DesignApi
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ds\DesignParentAdd::class,
     ];
 

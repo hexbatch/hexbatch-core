@@ -34,6 +34,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string two_factor_confirmed_at
  *
  * @property string created_at
+ * @property int created_at_ts
  * @property string updated_at
  *
  * @property UserNamespace default_namespace

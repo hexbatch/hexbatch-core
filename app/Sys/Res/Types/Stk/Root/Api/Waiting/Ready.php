@@ -17,7 +17,7 @@ class Ready extends Api\TypeApi
 
     const PARENT_CLASSES = [
         Api\WaitingApi::class,
-        Act\Cmd\Ele\Search::class,
+        Act\Cmd\Pa\Search::class,
         Act\Cmd\Wa\SemaphoreReady::class,
     ];
 

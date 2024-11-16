@@ -17,7 +17,7 @@ class ListChildren extends Api\SetApi
 
     const PARENT_CLASSES = [
         Api\SetApi::class,
-        Act\Cmd\Ele\Search::class
+        Act\Cmd\Pa\Search::class
     ];
 
 }

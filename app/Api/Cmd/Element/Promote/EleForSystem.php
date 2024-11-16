@@ -5,7 +5,7 @@ use App\Api\Cmd\Element\BulkElementParams;
 use App\Models\Element;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\BuildActionFacet;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\ElementPromote;
 
 class EleForSystem
 {
