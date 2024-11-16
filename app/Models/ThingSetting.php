@@ -72,5 +72,14 @@ class ThingSetting extends Model
     const DEFAULT_JSON_SIZE_LIMIT = 10000;
 
 
+    public function checkSettingOwnership(Thing $thing) : ?ThingSettingCluster{
+        /** @var ThingSettingCluster|null $bonding */
+        return ThingSettingCluster::where('setting_cluster_thing_id',$thing->id)->where('owning_setting_id',$this->id)->first();
+    }
+
+    public function getName() : string {
+        return "Setting Id # $this->id";
+    }
+
 
 }

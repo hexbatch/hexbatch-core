@@ -581,9 +581,11 @@ Route::prefix('v1')->group(function () {
                             Route::get('list', [Api\ThingController::class, 'thing_rate_list'])->name('core.things.rates.list');
 
                             Route::prefix('{thing_setting}')->group(function () {
-                                Route::delete('remove', [Api\ThingController::class, 'thing_rate_remove'])->name('core.things.rates.remove');
-                                Route::get('show', [Api\ThingController::class, 'thing_rate_show'])->name('core.things.rates.show');
-                                Route::post('edit', [Api\ThingController::class, 'thing_rate_edit'])->name('core.things.rates.edit');
+                                Route::middleware(Middleware\ValidateThingSettingOwnership::class)->group(function () {
+                                    Route::delete('remove', [Api\ThingController::class, 'thing_rate_remove'])->name('core.things.rates.remove');
+                                    Route::get('show', [Api\ThingController::class, 'thing_rate_show'])->name('core.things.rates.show');
+                                    Route::post('edit', [Api\ThingController::class, 'thing_rate_edit'])->name('core.things.rates.edit');
+                                });
                             });
                         });
 
@@ -593,9 +595,11 @@ Route::prefix('v1')->group(function () {
 
 
                             Route::prefix('{thing_hook}')->group(function () {
-                                Route::get('show', [Api\ThingController::class, 'thing_hook_show'])->name('core.things.hooks.show');
-                                Route::patch('edit', [Api\ThingController::class, 'thing_hook_edit'])->name('core.things.hooks.edit');
-                                Route::delete('destroy', [Api\ThingController::class, 'thing_hook_destroy'])->name('core.things.hooks.destroy');
+                                Route::middleware(Middleware\ValidateThingHookOwnership::class)->group(function () {
+                                    Route::get('show', [Api\ThingController::class, 'thing_hook_show'])->name('core.things.hooks.show');
+                                    Route::patch('edit', [Api\ThingController::class, 'thing_hook_edit'])->name('core.things.hooks.edit');
+                                    Route::delete('destroy', [Api\ThingController::class, 'thing_hook_destroy'])->name('core.things.hooks.destroy');
+                                });
                             });
                         });
                     });

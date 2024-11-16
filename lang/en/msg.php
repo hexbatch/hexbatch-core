@@ -154,7 +154,11 @@ return [
 
     //elsewhere
     'not_elsewhere_owner' => "This is not the owning namespace :ref for the server :server",
-    'this_server_is_not_elsewhere' => "This is not the server you are looking for"
+    'this_server_is_not_elsewhere' => "This is not the server you are looking for",
+
+    //thing
+    'thing_owner_does_not_match_hook_given' => 'The hook given :ref is not associated with the hook :hook',
+    'thing_owner_does_not_match_setting_given' => 'The hook given :ref is not associated with the setting :setting',
 
 
 ];

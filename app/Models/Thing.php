@@ -146,4 +146,8 @@ class Thing extends Model
         return $build;
     }
 
+    public function getName() : string {
+        return "Hook # $this->id";
+    }
+
 }

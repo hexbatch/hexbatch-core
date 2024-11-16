@@ -35,8 +35,8 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property string hooked_thing_callback_url
  * @property string ref_uuid
- * @property string thing_cluster_name
- * @property string thing_cluster_notes
+ * @property string hook_name
+ * @property string hook_notes
  * @property ArrayObject extra_data
  * @property TypeThingHookMode thing_hook_mode
  *
@@ -71,5 +71,14 @@ class ThingHook extends Model
         'extra_data' => AsArrayObject::class,
         'thing_hook_mode' => TypeThingHookMode::class,
     ];
+
+    public function checkHookOwnership(Thing $thing) : ?ThingHookCluster{
+        /** @var ThingHookCluster|null $bonding */
+        return ThingHookCluster::where('hooked_thing_id',$thing->id)->where('owning_thing_hook_id',$this->id)->first();
+    }
+
+    public function getName() : string {
+        return $this->hook_name;
+    }
 
 }

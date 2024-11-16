@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Utilities;
 use App\Models\UserNamespace;
 use Symfony\Component\HttpFoundation\Response;
 

@@ -105,6 +105,10 @@ class RefCodes {
 
     const PATH_SCHEMA_ISSUE = 10004;
 
+
+    const THING_HOOK_NOT_FOUND = 20001;
+    const THING_SETTING_NOT_FOUND = 20005;
+
     const URLS = [
         self::JSON_ISSUE => '',
         self::MAP_COORDINATE_ISSUE => '',
@@ -175,6 +179,9 @@ class RefCodes {
         self::PATH_NOT_FOUND => '',
         self::PATH_CANNOT_EDIT => '',
         self::PATH_BAD_NAME => '',
+
+        self::THING_HOOK_NOT_FOUND => '',
+        self::THING_SETTING_NOT_FOUND => '',
 
     ];
 }

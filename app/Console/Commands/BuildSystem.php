@@ -177,10 +177,9 @@ class BuildSystem extends Command
             $data = [];
             $type_names = array_values($load->types);
             sort($type_names);
-            $events = [];
+
             foreach ($type_names as $full_type_name ) {
                 if (!is_subclass_of($full_type_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) { continue; }
-               // $events = array_merge($full_type_name::EVENT_CLASSES,$events);
                 $data[] = [$full_type_name::getClassName(),implode("\n",$full_type_name::getRelatedEvents())];
             }
 
