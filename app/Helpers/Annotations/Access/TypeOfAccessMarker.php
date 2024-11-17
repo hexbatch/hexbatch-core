@@ -6,6 +6,7 @@ namespace App\Helpers\Annotations\Access;
  */
 enum TypeOfAccessMarker : string {
 
+    case DEFAULT_NAMESPACE_OWNER = 'default_namespace_owner';
     case NAMESPACE_OWNER = 'namespace_owner';
     case NAMESPACE_ADMIN = 'namespace_admin';
     case NAMESPACE_MEMBER = 'namespace_member';

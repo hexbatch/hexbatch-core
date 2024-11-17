@@ -170,17 +170,23 @@ Route::prefix('v1')->group(function () {
 
                     });
 
+                    Route::middleware(Middleware\ValidateDefaultNamespaceOwner::class)->group(function () {
+                        Route::post('start_user_deletion', [Api\NamespaceController::class, 'start_user_deletion'])->name('core.namespaces.start_user_deletion');
+                    });
 
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                        Route::post('start_transfer', [Api\NamespaceController::class, 'start_transfer'])->name('core.namespaces.start_transfer');
+                        Route::post('transfer_owner', [Api\NamespaceController::class, 'transfer_owner'])->name('core.namespaces.transfer_owner');
                         Route::post('add_admin', [Api\NamespaceController::class, 'add_admin'])->name('core.namespaces.add_admin');
                         Route::delete('remove_admin', [Api\NamespaceController::class, 'remove_admin'])->name('core.namespaces.remove_admin');
                         Route::delete('destroy', [Api\NamespaceController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
-                        Route::patch('add_handle', [Api\NamespaceController::class, 'add_handle'])->name('core.namespaces.add_handle');
-                        Route::patch('remove_handle', [Api\NamespaceController::class, 'remove_handle'])->name('core.namespaces.remove_handle');
+
                     });
 
 
                     Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                        Route::patch('add_handle', [Api\NamespaceController::class, 'add_handle'])->name('core.namespaces.add_handle');
+                        Route::patch('remove_handle', [Api\NamespaceController::class, 'remove_handle'])->name('core.namespaces.remove_handle');
                         Route::post('add_member', [Api\NamespaceController::class, 'add_member'])->name('core.namespaces.add_member');
                         Route::delete('remove_member', [Api\NamespaceController::class, 'remove_member'])->name('core.namespaces.remove_member');
 
@@ -210,13 +216,13 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('{path}')->group(function () {
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
                         Route::patch('publish', [Api\PathController::class, 'publish_path'])->name('core.paths.publish');
-                        Route::patch('add_handle', [Api\PathController::class, 'add_handle'])->name('core.paths.add_handle');
-                        Route::patch('remove_handle', [Api\PathController::class, 'remove_handle'])->name('core.paths.remove_handle');
                         Route::delete('destroy', [Api\PathController::class, 'destroy_path'])->name('core.paths.destroy');
                     });
 
 
                     Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                        Route::patch('add_handle', [Api\PathController::class, 'add_handle'])->name('core.paths.add_handle');
+                        Route::patch('remove_handle', [Api\PathController::class, 'remove_handle'])->name('core.paths.remove_handle');
                         Route::post('edit', [Api\PathController::class, 'edit_path'])->name('core.paths.edit');
                         Route::post('create_part', [Api\PathController::class, 'create_part'])->name('core.paths.create_part');
 
@@ -329,6 +335,8 @@ Route::prefix('v1')->group(function () {
                             Route::patch('promote_edit', [Api\ElementController::class, 'promote_edit_element'])->name('core.elements.promote_edit');
                             Route::delete('purge', [Api\ElementController::class, 'purge_element'])->name('core.elements.purge');
                             Route::post('promote_set', [Api\ElementController::class, 'promote_set'])->name('core.elements.promote_set');
+                            Route::post('promote_live', [Api\ElementController::class, 'promote_live'])->name('core.elements.promote_live');
+                            Route::delete('demote_live', [Api\ElementController::class, 'demote_live'])->name('core.elements.demote_live');
                         });
 
                         Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {

@@ -107,7 +107,6 @@ class NamespaceControllerX extends Controller
 
     public function transfer_namespace(Request $request,User $user): JsonResponse {
         Utilities::ignoreVar($request,$user);
-        //todo implement transfer, new s.a in the private to allow the transfer to the user ref stored as the value
         return response()->json([], \Symfony\Component\HttpFoundation\Response::HTTP_SERVICE_UNAVAILABLE);
     }
 

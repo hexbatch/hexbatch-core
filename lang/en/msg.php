@@ -32,6 +32,7 @@ return [
     'namespace_not_found' => 'Namespace not found using :ref',
     'namespace_invalid_name' => 'Namespace has invalid name :ref',
     'namespace_not_system' => 'You are not a system namespace :ref',
+    'namespace_not_default_owner' => 'You are not the owner of the default user namespace :ref',
     'namespace_not_owner' => 'You are not the owner of the namespace :ref',
     'namespace_not_admin' => 'You are not an administor of the namespace :ref',
     'namespace_not_member' => 'You are not a member of the namespace :ref',

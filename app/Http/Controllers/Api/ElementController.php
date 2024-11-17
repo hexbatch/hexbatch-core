@@ -543,4 +543,36 @@ class ElementController extends Controller {
     }
 
 
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/elements/promote_live',
+        operationId: 'core.elements.promote_live',
+        description: "System can add live types without permisision. No events ",
+        summary: 'System adds live types',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiTypeMarker( Root\Api\Element\PromoteLive::class)]
+    public function promote_live() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/elements/promote_live',
+        operationId: 'core.elements.promote_live',
+        description: "System can remove live types from elements without permisision. No events ",
+        summary: 'System subtracts live types',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiTypeMarker( Root\Api\Element\DemoteLive::class)]
+    public function demote_live() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
 }

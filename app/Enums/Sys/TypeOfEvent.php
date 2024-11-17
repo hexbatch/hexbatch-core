@@ -172,7 +172,10 @@ enum TypeOfEvent: string
 
 
 
+    case USER_DELETION_STARTING = 'user_deletion_starting';
     case NAMESPACE_CREATED = 'namespace_created';
+    case NAMESPACE_STARTING_TRANSFER = 'namespace_starting_transfer';
+    case NAMESPACE_TRANSFERRED = 'namespace_transferred';
     case NAMESPACE_DESTROYED = 'namespace_destroyed';
 
     case NAMESPACE_HANDLE_ADDED = 'namespace_handle_added';

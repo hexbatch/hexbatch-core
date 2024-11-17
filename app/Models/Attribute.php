@@ -35,7 +35,7 @@ use Illuminate\Validation\ValidationException;
  * if no key for appearance, the browser will use some defaults
  *
  * if attribute needs some protection from read or write using namespaces or other, use rules
- * //todo any attribute that has a read event listener must be private
+ *
  */
 
 /**

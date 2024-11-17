@@ -234,7 +234,7 @@ class AuthenticationController extends Controller
     public function delete_user(): JsonResponse
     {
         //todo implement delete user, removes this user, deletes the namespaces, including the default
-        // make new s.a attribute on the private in default and set this as ok_to_delete = false default, must set this as truthful before can delete
+        // check if the StartUserDeletion is on the default ns private element, and if a start for the ns transfer is still there, then make sure that is done first
         return response()->json([], CodeOf::HTTP_SERVICE_UNAVAILABLE);
     }
 

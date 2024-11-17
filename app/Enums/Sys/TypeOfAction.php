@@ -165,6 +165,8 @@ enum TypeOfAction: string
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
     case CMD_ELEMENT_PURGE = 'cmd_element_purge'; //server admin
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
+    case CMD_LIVE_TYPE_PROMOTE = 'cmd_live_type_promote';
+    case CMD_LIVE_TYPE_DEMOTE = 'cmd_live_type_demote';
     case CMD_LIVE_TYPE_COPY = 'cmd_live_type_copy';
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
 
@@ -196,7 +198,10 @@ enum TypeOfAction: string
 
 
 
+    case CMD_PREPARE_USER_DELETION = 'cmd_prepare_user_deletion';
     case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
+    case CMD_NAMESPACE_PREP_TRANSFER = 'cmd_namespace_prep_transfer';
+    case CMD_NAMESPACE_DO_TRANSFER = 'cmd_namespace_do_transfer';
     case CMD_NAMESPACE_PROMOTE = 'cmd_namespace_promote';
     case CMD_NAMESPACE_EDIT_PROMOTION = 'cmd_namespace_edit_promotion';
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns

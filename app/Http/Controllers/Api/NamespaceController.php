@@ -138,6 +138,61 @@ class NamespaceController extends Controller {
 
 
 
+    #[OA\Post(
+        path: '/api/v1/{namespace}/namespaces/transfer_owner',
+        operationId: 'core.namespaces.transfer_owner',
+        description: "The selected namespaces are given to another user as long as they were processed in the starting transfer step as a safety check ".
+        "\n The event is sent after the fact. If this is a transfer of a default ns, then a new default ns is made for that user giving it up ",
+        summary: 'The user gives the namespace(s) to another user',
+        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\NamespaceTransfered::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
+    #[ApiTypeMarker( Root\Api\Namespace\TransferOwner::class)]
+    public function transfer_owner() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/namespaces/start_user_deletion',
+        operationId: 'core.namespaces.start_transfer',
+        description: "The selected namespaces are marked as allowed for transfer. Event can stop this. Not transferred yet. ",
+        summary: 'The user gives permission for the transfer of the namespace(s)',
+        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\UserDeletionStarting::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::DEFAULT_NAMESPACE_OWNER)]
+    #[ApiTypeMarker( Root\Api\Namespace\StartUserDeletion::class)]
+    public function start_user_deletion() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/namespaces/start_transfer',
+        operationId: 'core.namespaces.start_transfer',
+        description: "The selected namespaces are marked as allowed for transfer. Event can stop this. Not transferred yet. ",
+        summary: 'The user gives permission for the transfer of the namespace(s)',
+        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\NamespaceTransfered::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
+    #[ApiTypeMarker( Root\Api\Namespace\StartTransfer::class)]
+    public function start_transfer() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
 
     #[OA\Post(
         path: '/api/v1/{namespace}/namespaces/promote',

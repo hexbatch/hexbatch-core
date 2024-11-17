@@ -36,6 +36,7 @@ class RefCodes {
     const NAMESPACE_MEMBER_MISSING_ISSUE = 2006;
     const NAMESPACE_CANNOT_DELETE_CORE_PARTS = 2007;
     const NAMESPACE_SCHEMA_ISSUE = 2010;
+    const NAMESPACE_NOT_DEFAULT_OWNER = 2011;
 
 
     // bounds start at 3000

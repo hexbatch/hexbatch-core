@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class AddLive extends Api\ElementApi
+class DemoteLive extends Api\ElementApi
 {
-    const UUID = 'e5c47fc2-e128-4912-b546-6d78b0420f90';
-    const TYPE_NAME = 'api_element_add_live';
+    const UUID = '80de40b0-c682-447f-b7a2-a0e4cf20faf4';
+    const TYPE_NAME = 'api_element_demote_live';
 
 
 
@@ -19,7 +19,7 @@ class AddLive extends Api\ElementApi
     const PARENT_CLASSES = [
         Api\ElementApi::class,
         Act\Cmd\Pa\Search::class,
-        Act\Cmd\Ele\LiveTypeAdd::class,
+        Act\Cmd\Ele\LiveTypeDemote::class,
     ];
 
 }
