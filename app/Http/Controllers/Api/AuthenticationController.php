@@ -3,19 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Fortify\CreateNewUser;
-use App\Api\Users\CreateToken\CreateTokenParams;
-use App\Api\Users\CreateToken\CreateTokenResponse;
-use App\Api\Users\CreateToken\HexbatchSecondsToLive;
-use App\Api\Users\Login\LoginParams;
-use App\Api\Users\Login\LoginResponse;
-use App\Api\Users\Me\MeResponse;
-use App\Api\Users\Registration\RegistrationParams;
+use App\Api\Calls\User\CreateToken\CreateTokenParams;
+use App\Api\Calls\User\CreateToken\CreateTokenResponse;
+use App\Api\Calls\User\CreateToken\HexbatchSecondsToLive;
+use App\Api\Calls\User\Login\LoginParams;
+use App\Api\Calls\User\Login\LoginResponse;
+use App\Api\Calls\User\MeResponse;
+use App\Api\Calls;
+
 use App\Exceptions\HexbatchAuthException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Annotations\Access\TypeOfAccessMarker;
+use App\Helpers\Annotations\ApiAccessMarker;
+use App\Helpers\Annotations\ApiEventMarker;
+use App\Helpers\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Sys\Res\Types\Stk\Root\Api;
+use App\Sys\Res\Types\Stk\Root\Evt;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -90,12 +97,15 @@ class AuthenticationController extends Controller
     #[OA\Post(
         path: '/api/v1/users/register',
         operationId: 'core.users.register',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: RegistrationParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Calls\User\Registration\UserRegistrationParams::class)),
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Register with just a username and a password',
-                                content: new JsonContent(ref: MeResponse::class))
+                                content: new JsonContent(ref: Calls\User\Registration\UserRegistrationResponse::class))
         ]
     )]
+    #[ApiEventMarker( Evt\Server\UserRegistrationProcessing::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiTypeMarker( Api\User\UserRegister::class)]
     public function register(Request $request): JsonResponse
     {
         //todo put in db transaction, the user and ns creation and the ns home set stuff
@@ -233,13 +243,38 @@ class AuthenticationController extends Controller
 
 
 
-
-    public function delete_user(): JsonResponse
-    {
-        //todo implement delete user, removes this user, deletes the namespaces, including the default
-        // check if the StartUserDeletion is on the default ns private element, and if a start for the ns transfer is still there, then make sure that is done first
-        return response()->json([], CodeOf::HTTP_SERVICE_UNAVAILABLE);
+    #[OA\Delete(
+        path: '/api/v1/users/auth/start_deletion',
+        operationId: 'core.users.auth.start_deletion',
+        description: "The user is deleted. Event can stop this ",
+        summary: 'The user deletes the account',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\UserDeletionStarting::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::USER)]
+    #[ApiTypeMarker( Api\User\StartUserDeletion::class)]
+    public function start_user_deletion() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
+
+    #[OA\Post(
+        path: '/api/v1/users/auth/prepare_deletion',
+        operationId: 'core.users.auth.prepare_deletion',
+        description: "The user is marked to allow deletion. Event can stop this. Not deleted yet. ",
+        summary: 'The user gives permission for its own deletion',
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\UserDeletionPreparing::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::USER)]
+    #[ApiTypeMarker( Api\User\PrepareUserDeletion::class)]
+    public function prepare_user_deletion() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
 
 
     public function available(): JsonResponse

@@ -9,9 +9,9 @@ use App\Helpers\Annotations\ApiEventMarker;
 use App\Helpers\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
 use App\Sys\Res\Types\Stk\Root;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
-use OpenApi\Attributes as OA;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class NamespaceController extends Controller {
     #[OA\Get(
@@ -156,22 +156,7 @@ class NamespaceController extends Controller {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
-    #[OA\Post(
-        path: '/api/v1/{namespace}/namespaces/start_user_deletion',
-        operationId: 'core.namespaces.start_transfer',
-        description: "The selected namespaces are marked as allowed for transfer. Event can stop this. Not transferred yet. ",
-        summary: 'The user gives permission for the transfer of the namespace(s)',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Server\UserDeletionStarting::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::DEFAULT_NAMESPACE_OWNER)]
-    #[ApiTypeMarker( Root\Api\Namespace\StartUserDeletion::class)]
-    public function start_user_deletion() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
+
 
 
     #[OA\Post(

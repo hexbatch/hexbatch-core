@@ -17,4 +17,8 @@ class PublishPromoteParams extends TypePublishPromote implements IActionParams,I
 
     }
 
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

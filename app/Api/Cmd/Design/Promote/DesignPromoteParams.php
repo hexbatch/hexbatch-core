@@ -21,4 +21,8 @@ class DesignPromoteParams extends DesignPromote implements IActionParams,IAction
     }
 
 
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

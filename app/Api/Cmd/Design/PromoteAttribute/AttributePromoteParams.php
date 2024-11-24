@@ -16,4 +16,8 @@ class AttributePromoteParams extends DesignAttributePromote implements IActionPa
 
     }
 
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

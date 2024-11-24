@@ -19,4 +19,8 @@ class AttributeAddHandleParams extends AttributeHandleAdd implements IActionPara
     }
 
 
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

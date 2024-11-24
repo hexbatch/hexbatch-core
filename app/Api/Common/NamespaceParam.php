@@ -2,7 +2,7 @@
 
 namespace App\Api\Common;
 
-use App\Api\Users\HexbatchUserName;
+use App\Api\Calls\User\HexbatchUserName;
 use OpenApi\Attributes as OA;
 
 #[OA\PathParameter(

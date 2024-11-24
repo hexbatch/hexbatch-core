@@ -6,6 +6,7 @@ use App\Api\Cmd\IActionOaResponse;
 use App\Api\Cmd\IActionWorker;
 use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
+use App\Models\Server;
 use App\Models\Thing;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespacePromote;
@@ -33,14 +34,25 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
         $ns = new UserNamespace();
         $ns->ref_uuid = $params->getUuid();
         $ns->namespace_user_id = $params->getNamespaceUserId();
-        $ns->namespace_server_id = $params->getNamespaceServerId();
-        $ns->namespace_type_id = $params->getNamespaceTypeId();
-        $ns->public_element_id = $params->getPublicElementId();
-        $ns->private_element_id = $params->getPrivateElementId();
-        $ns->namespace_home_set_id = $params->getNamespaceHomeSetId();
-        $ns->namespace_public_key = $params->getNamespacePublicKey();
-        $ns->namespace_name = $params->getNamespaceName();
-        $ns->is_system = $params->isSystem();
+        if ($params->getNamespaceServerId()) {
+            $ns->namespace_server_id = $params->getNamespaceServerId();
+        } else {
+            $ns->namespace_server_id = Server::getDefaultServer()->id;
+        }
+
+        if ($params->getNamespaceTypeId()) {
+            $ns->namespace_type_id = $params->getNamespaceTypeId();
+            $ns->public_element_id = $params->getPublicElementId();
+            $ns->private_element_id = $params->getPrivateElementId();
+            $ns->namespace_home_set_id = $params->getNamespaceHomeSetId();
+            $ns->namespace_public_key = $params->getNamespacePublicKey();
+            $ns->namespace_name = $params->getNamespaceName();
+            $ns->is_system = $params->isSystem();
+        } else {
+            //todo make new type  based on username
+            // make new user namespace based on the type (creates the promo elements, set and ns)
+        }
+
 
         $ns->save();
         $this->generated_namespace = $ns;

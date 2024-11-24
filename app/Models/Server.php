@@ -198,5 +198,13 @@ class Server extends Model implements IServer,ISystemModel
         return $this->ref_uuid;
     }
 
+    public static function getDefaultServer() : Server {
+        $server = Server::buildServer(is_system: true)->first();
+        if (!$server) {
+            throw new \LogicException("No system server made");
+        }
+        return $server;
+    }
+
 
 }

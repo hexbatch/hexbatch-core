@@ -19,6 +19,8 @@ class ElementPromoteParams extends ElementPromote implements IActionParams,IActi
     }
 
 
-
-
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

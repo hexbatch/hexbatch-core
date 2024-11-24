@@ -32,6 +32,7 @@ enum TypeOfAction: string
     case BASE_PHASE = 'base_phase';
     case BASE_SET = 'base_set';
     case BASE_TYPE = 'base_type';
+    case BASE_USER = 'base_user';
     case BASE_WAIT = 'base_wait';
 
 
@@ -198,7 +199,7 @@ enum TypeOfAction: string
 
 
 
-    case CMD_PREPARE_USER_DELETION = 'cmd_prepare_user_deletion';
+
     case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
     case CMD_NAMESPACE_PREP_TRANSFER = 'cmd_namespace_prep_transfer';
     case CMD_NAMESPACE_DO_TRANSFER = 'cmd_namespace_do_transfer';
@@ -210,6 +211,13 @@ enum TypeOfAction: string
 
     case CMD_NAMESPACE_HANDLE_ADD = 'cmd_namespace_handle_add';
     case CMD_NAMESPACE_HANDLE_REMOVE = 'cmd_namespace_handle_remove';
+
+
+    case CMD_USER_PREPARE_DELETION = 'cmd_user_prepare_deletion';
+    case CMD_USER_START_DELETION = 'cmd_user_start_deletion';
+    case CMD_USER_REGISTER = 'cmd_user_register';
+    case CMD_USER_LOGIN = 'cmd_user_login';
+    case CMD_USER_EDIT = 'cmd_user_edit';
 
 
     case CMD_WAIT_ALL = 'cmd_wait_all';

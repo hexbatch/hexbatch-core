@@ -19,6 +19,8 @@ class SetPromoteParams extends SetPromote implements IActionParams,IActionOaInpu
     }
 
 
-
-
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

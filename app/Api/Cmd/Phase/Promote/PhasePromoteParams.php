@@ -22,6 +22,8 @@ class PhasePromoteParams extends PhasePromote implements IActionParams,IActionOa
     }
 
 
-
-
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

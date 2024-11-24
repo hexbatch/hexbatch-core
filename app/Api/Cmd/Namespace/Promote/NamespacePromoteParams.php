@@ -18,4 +18,8 @@ class NamespacePromoteParams extends NamespacePromote implements IActionParams,I
 
     }
 
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

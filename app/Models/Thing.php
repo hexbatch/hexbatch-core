@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Api\Thinger\IApiThingSetup;
+use App\Api\Calls\IApiThingSetup;
 use App\Enums\Rules\TypeMergeJson;
 use App\Enums\Rules\TypeOfLogic;
 use App\Enums\Things\TypeOfThingStatus;

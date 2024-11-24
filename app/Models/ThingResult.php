@@ -4,7 +4,7 @@ namespace App\Models;
 
 
 
-use App\Api\Thinger\IApiThingResult;
+use App\Api\Calls\IApiThingResult;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;

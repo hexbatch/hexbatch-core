@@ -25,4 +25,8 @@ class NamespaceEditPromotionParams extends NamespaceEditPromotion implements IAc
 
     }
 
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

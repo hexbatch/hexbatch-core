@@ -47,14 +47,14 @@ class ApiMapEntry
             $this->api_response_class = $full_class_name;
         }
 
-        if (isset($interfaces['App\Api\Thinger\IApiThingSetup'])) {
+        if (isset($interfaces['App\Api\Calls\IApiThingSetup'])) {
             if ($this->api_thing_setup_class) {
                 throw new \LogicException("Already have an IApiThingSetup for $this->api_name $this->api_uuid");
             }
             $this->api_thing_setup_class = $full_class_name;
         }
 
-        if (isset($interfaces['App\Api\Thinger\IApiThingResult'])) {
+        if (isset($interfaces['App\Api\Calls\IApiThingResult'])) {
             if ($this->api_thing_result_class) {
                 throw new \LogicException("Already have an IApiThingResult for $this->api_name $this->api_uuid");
             }

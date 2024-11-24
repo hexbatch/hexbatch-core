@@ -18,6 +18,8 @@ class ElementEditPromoteParams extends ElementPromoteEdit implements IActionPara
     }
 
 
-
-
+    public function pushData(Thing $thing): void
+    {
+        // TODO: Implement pushData() method.
+    }
 }

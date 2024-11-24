@@ -62,8 +62,7 @@ Route::prefix('v1')->group(function () {
 
             Route::delete('/logout', [Api\AuthenticationController::class, 'logout'])->name('core.users.logout');
 
-            Route::delete('/delete', [Api\AuthenticationController::class, 'delete_user'])
-                ->name('core.users.auth.delete');
+
 
             Route::prefix('auth')->group(function () {
 
@@ -75,6 +74,12 @@ Route::prefix('v1')->group(function () {
 
                 Route::delete('/remove_current_token', [Api\AuthenticationController::class, 'remove_current_token'])
                     ->name('core.users.auth.remove_current_token');
+
+                Route::delete('/start_deletion', [Api\AuthenticationController::class, 'start_user_deletion'])
+                    ->name('core.users.auth.start_deletion');
+
+                Route::post('/prepare_deletion', [Api\AuthenticationController::class, 'prepare_user_deletion'])
+                    ->name('core.users.auth.prepare_deletion');
             });
         });
 
@@ -170,9 +175,6 @@ Route::prefix('v1')->group(function () {
 
                     });
 
-                    Route::middleware(Middleware\ValidateDefaultNamespaceOwner::class)->group(function () {
-                        Route::post('start_user_deletion', [Api\NamespaceController::class, 'start_user_deletion'])->name('core.namespaces.start_user_deletion');
-                    });
 
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
                         Route::post('start_transfer', [Api\NamespaceController::class, 'start_transfer'])->name('core.namespaces.start_transfer');
