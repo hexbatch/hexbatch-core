@@ -4,11 +4,12 @@ namespace App\Api;
 
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 
 /**
  * Marks a class which does the json input definition for the OA for success
  */
 interface IApiOaParams
 {
-    public function fromRequest(Request $request);
+    public function fromCollection(Collection $collection);
 }

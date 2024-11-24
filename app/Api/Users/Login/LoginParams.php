@@ -2,11 +2,11 @@
 
 namespace App\Api\Users\Login;
 
+use App\Api\BaseParams;
 use App\Api\IApiOaParams;
 use App\Api\Users\HexbatchUserName;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes as OA;
@@ -21,6 +21,8 @@ use OpenApi\Attributes as OA;
 
 class LoginParams implements IApiOaParams
 {
+    use BaseParams;
+
     #[OA\Property(title: 'User Name',type: HexbatchUserName::class,
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]
 
@@ -32,10 +34,14 @@ class LoginParams implements IApiOaParams
     )]
     protected string $password;
 
-    public function fromRequest(Request $request)
+    public function fromCollection(\Illuminate\Support\Collection $collection)
     {
-        $this->username = $request->request->getString('username');
-        $this->password = $request->request->getString('password');
+        $this->username =  static::stringFromCollection($collection,'username');
+        $this->password =  static::stringFromCollection($collection,'password');
+        $this->validate();
+    }
+
+    protected function validate() {
         try {
             Validator::make(
                 ['username' => $this->username,'password'=>$this->password],

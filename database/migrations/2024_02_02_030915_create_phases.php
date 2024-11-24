@@ -31,8 +31,9 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->boolean('is_default_phase') //todo flip the others off if this is set
+            $table->boolean('is_default_phase')
                 ->nullable(false)->default(false)
+                ->index()
                 ->comment("If true then only that row can be true, and the others set as false");
 
             $table->boolean('is_system')->default(false)->nullable(false)
@@ -56,6 +57,10 @@ return new class extends Migration
 
         DB::statement("
                 CREATE TRIGGER update_modified_time BEFORE UPDATE ON phases FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+            ");
+
+        DB::statement("
+               CREATE UNIQUE INDEX only_one_row_with_default_true_uix ON phases (is_default_phase) WHERE (is_default_phase);
             ");
     }
 

@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Design\PromoteAttribute;
 
-use App\Api\Cmd\BaseParams;
+use App\Api\BaseParams;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;

@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Namespace;
 
-use App\Api\Cmd\BaseParams;
+use App\Api\BaseParams;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Rules\NamespaceNameReq;

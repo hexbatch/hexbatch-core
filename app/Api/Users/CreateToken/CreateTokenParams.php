@@ -2,6 +2,7 @@
 
 namespace App\Api\Users\CreateToken;
 
+use App\Api\BaseParams;
 use App\Api\IApiOaParams;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -14,21 +15,24 @@ use Illuminate\Http\Request;
 
 class CreateTokenParams implements IApiOaParams
 {
+    use BaseParams;
     const MAX_PASSTHROUGH_SIZE = 1024*20; //20k
 
     protected array $passthrough;
 
     protected ?int $seconds = null;
 
-    public function fromRequest(Request $request,?int $seconds_to_live = null)
+
+    public function fromCollection(\Illuminate\Support\Collection $collection)
     {
-        $this->passthrough = $request->all();
+        $this->passthrough = $collection->toArray();
+        unset($this->passthrough['seconds_to_live']);
         if (mb_strlen(Utilities::maybeEncodeJson($this->passthrough) ) > static::MAX_PASSTHROUGH_SIZE) {
             throw new HexbatchNotPossibleException(__("msg.passthrough_data_too_big",['max'=>static::MAX_PASSTHROUGH_SIZE]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::BAD_LOGIN);
         }
-        $this->seconds = $seconds_to_live;
+        $this->seconds = $this->intRefFromCollection($collection,'seconds_to_live');
         if ($this->seconds > HexbatchSecondsToLive::MAX_SECONDS || $this->seconds < 1) {
             throw new HexbatchNotPossibleException(__("msg.token_too_long_lived",['seconds'=>HexbatchSecondsToLive::MAX_SECONDS]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

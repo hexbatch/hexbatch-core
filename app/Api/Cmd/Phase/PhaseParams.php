@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Phase;
 
-use App\Api\Cmd\BaseParams;
+use App\Api\BaseParams;
 use Illuminate\Support\Collection;
 
 

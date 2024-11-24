@@ -57,7 +57,7 @@ return new class extends Migration
 
             $table->foreignId('collection_set_member_id')
                 ->nullable()->default(null)
-                ->comment("Data has an set member")
+                ->comment("Data has a set member")
                 ->index()
                 ->constrained('element_set_members')
                 ->cascadeOnUpdate()
@@ -76,9 +76,18 @@ return new class extends Migration
             $table->foreignId('collection_path_id')
                 ->nullable()
                 ->default(null)
-                ->comment("Data has a path in the setup")
+                ->comment("Data has a path")
                 ->index()
                 ->constrained('paths')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('collection_user_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Data has a user")
+                ->index()
+                ->constrained('users')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

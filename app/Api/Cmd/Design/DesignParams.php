@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Design;
 
-use App\Api\Cmd\BaseParams;
+use App\Api\BaseParams;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotPossibleException;

@@ -12,6 +12,8 @@ interface IActionParams
 {
     public function fromThing(Thing $thing): void ;
 
+    public function pushData(Thing $thing): void ;
+
     public function fromCollection(Collection $collection);
 
 }

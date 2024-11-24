@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\Cmd;
+namespace App\Api;
 
 use App\Exceptions\HexbatchInvalidException;
 use App\Exceptions\RefCodes;

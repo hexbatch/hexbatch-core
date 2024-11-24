@@ -19,6 +19,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -66,7 +67,7 @@ class AuthenticationController extends Controller
     {
 
         $params = new LoginParams();
-        $params->fromRequest($request);
+        $params->fromCollection(new Collection($request->all()));
         $user = User::where('username',$params->getUsername())->first();
 
         if (!$user || !Hash::check($params->getPassword(),$user->password) ) {
@@ -101,7 +102,7 @@ class AuthenticationController extends Controller
         //  the username and the default namespace need to be the same name (convention, not needed otherwise)
         try {
             $params = new RegistrationParams();
-            $params->fromRequest($request);
+            $params->fromCollection(new Collection($request->all()));
             $user = (new CreateNewUser)->create([
                 'username' => $params->getUsername(),'password'=>$params->getPassword(),
                 'password_confirmation'=>$params->getPassword()]);
@@ -160,7 +161,9 @@ class AuthenticationController extends Controller
     public function create_token(Request $request,?int $seconds=null): JsonResponse
     {
         $params = new CreateTokenParams();
-        $params->fromRequest($request,$seconds);
+        $collect = new Collection($request->all());
+        $collect['seconds_to_live'] = $seconds;
+        $params->fromCollection($collect);
 
         $expires = null;
         if ($params->getSeconds()) {
@@ -241,7 +244,7 @@ class AuthenticationController extends Controller
 
     public function available(): JsonResponse
     {
-        //todo implement available which looks through both the usernames and the namespaces (with null server), default ns is the username
+        //todo implement available which is given a name looks through both the usernames and the namespaces (with default server), if not found then 200
         return response()->json([], CodeOf::HTTP_SERVICE_UNAVAILABLE);
     }
 

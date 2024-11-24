@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Type\PublishPromote;
 
-use App\Api\Cmd\BaseParams;
+use App\Api\BaseParams;
 use App\Enums\Types\TypeOfLifecycle;
 use Illuminate\Support\Collection;
 

@@ -123,6 +123,7 @@ return new class extends Migration
 
 
         DB::statement("CREATE TYPE type_of_thing_status AS ENUM (
+            'thing_building',
             'thing_pending',
             'thing_waiting',
             'thing_paused',
@@ -130,7 +131,7 @@ return new class extends Migration
             'thing_error'
             );");
 
-        DB::statement("ALTER TABLE things Add COLUMN thing_status type_of_thing_status NOT NULL default 'thing_pending';");
+        DB::statement("ALTER TABLE things Add COLUMN thing_status type_of_thing_status NOT NULL default 'thing_building';");
 
         DB::statement("ALTER TABLE things Add COLUMN thing_child_logic type_of_logic NOT NULL default 'and';");
         DB::statement("ALTER TABLE things Add COLUMN thing_logic type_of_logic NOT NULL default 'and';");

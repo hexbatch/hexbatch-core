@@ -3,13 +3,13 @@
 namespace App\Api\Users\Registration;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Api\BaseParams;
 use App\Api\IApiOaParams;
 use App\Api\Users\HexbatchUserName;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
 use App\Rules\UserNameReq;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +24,8 @@ use OpenApi\Attributes as OA;
 
 class RegistrationParams implements IApiOaParams
 {
+    use BaseParams;
+
     #[OA\Property(title: 'User Name',type: HexbatchUserName::class,
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]
 
@@ -35,10 +37,19 @@ class RegistrationParams implements IApiOaParams
     )]
     protected string $password;
 
-    public function fromRequest(Request $request)
+    public function fromCollection(\Illuminate\Support\Collection $collection)
     {
-        $this->username = $request->request->getString('username');
-        $this->password = $request->request->getString('password');
+
+        // todo add the user to the thing data, make this a thinger and for the user register,
+        //  have the user creation action a child of the create default namespace action (some new actions)
+
+        //todo if the api is get only and does not processing at all (list from a select statement or me) it still goes through the thing but is not deferred
+        $this->username =  static::stringFromCollection($collection,'username');
+        $this->password =  static::stringFromCollection($collection,'password');
+        $this->validate();
+    }
+
+    protected function validate() {
         try {
             Validator::make(
                 ['username' => $this->username,'password'=>$this->password],

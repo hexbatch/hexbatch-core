@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Set;
 
-use App\Api\Cmd\BaseParams;
+use App\Api\BaseParams;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use Illuminate\Support\Collection;

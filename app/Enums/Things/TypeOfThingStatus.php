@@ -5,6 +5,7 @@ namespace App\Enums\Things;
  */
 enum TypeOfThingStatus : string {
 
+  case THING_BUILDING = 'thing_building';
   case THING_PENDING = 'thing_pending';
   case THING_WAITING = 'thing_waiting'; //when waiting for incoming remote, event or signal
   case THING_PAUSED = 'thing_paused'; //-- to stop auto running of things, when the debugger is single stepping or breakpoint

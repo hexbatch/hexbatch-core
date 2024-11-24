@@ -1,7 +1,7 @@
 <?php
 namespace App\Api\Cmd\Server;
 
-use App\Api\Cmd\BaseParams;
+use App\Api\BaseParams;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
