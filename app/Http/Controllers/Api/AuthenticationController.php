@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\Fortify\CreateNewUser;
 use App\Api\Calls\User\CreateToken\CreateTokenParams;
 use App\Api\Calls\User\CreateToken\CreateTokenResponse;
 use App\Api\Calls\User\CreateToken\HexbatchSecondsToLive;
@@ -11,8 +10,8 @@ use App\Api\Calls\User\Login\LoginResponse;
 use App\Api\Calls\User\MeResponse;
 use App\Api\Calls;
 
+use App\Api\Common\ThingResponse;
 use App\Exceptions\HexbatchAuthException;
-use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Annotations\Access\TypeOfAccessMarker;
 use App\Helpers\Annotations\ApiAccessMarker;
@@ -20,16 +19,17 @@ use App\Helpers\Annotations\ApiEventMarker;
 use App\Helpers\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
+use App\Models\Thing;
 use App\Models\User;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use App\Sys\Res\Types\Stk\Root\Act;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\NewAccessToken;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
@@ -108,22 +108,13 @@ class AuthenticationController extends Controller
     #[ApiTypeMarker( Api\User\UserRegister::class)]
     public function register(Request $request): JsonResponse
     {
-        //todo put in db transaction, the user and ns creation and the ns home set stuff
-        //  the username and the default namespace need to be the same name (convention, not needed otherwise)
-        try {
-            $params = new RegistrationParams();
-            $params->fromCollection(new Collection($request->all()));
-            $user = (new CreateNewUser)->create([
-                'username' => $params->getUsername(),'password'=>$params->getPassword(),
-                'password_confirmation'=>$params->getPassword()]);
-
-            $user->refresh();
-            return response()->json(\MattyRad\OpenApi\Serializer::serialize(new MeResponse(user: $user)), CodeOf::HTTP_CREATED);
-        } catch (ValidationException $v) {
-            throw new HexbatchNotPossibleException($v->getMessage(),
-                CodeOf::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::BAD_REGISTRATION);
+        $top_thing = Thing::makeApiCall(Act\Cmd\Us\UserRegister::getClassUuid(),$request->collect());
+        $top_thing->pushLeavesToJobs();
+        if ($top_thing->isComplete()) {
+            return response()->json($top_thing->getThingResponseJson(), $top_thing->getThingResponseHttpCode());
         }
+        return response()->json(\MattyRad\OpenApi\Serializer::serialize(new ThingResponse(thing: $top_thing)), $top_thing->getThingResponseHttpCode());
+
     }
 
 

@@ -3,7 +3,6 @@
 namespace App\Sys\Build;
 
 
-use App\Sys\Res\Types\Stk\Root\Act\NoEventsTriggered;
 use App\Sys\Res\Types\Stk\Root\Act\SystemPrivilege;
 
 class ApiMapEntry
@@ -28,7 +27,6 @@ class ApiMapEntry
             $this->api_uuid = $full_class_name::getClassUuid();
             $this->api_name = $full_class_name::getClassName();
             $this->is_protected = $full_class_name::hasInAncestors(SystemPrivilege::class);
-            $this->has_events = !$full_class_name::hasInAncestors(NoEventsTriggered::class);
         } else {
             return;
         }
@@ -71,7 +69,6 @@ class ApiMapEntry
             'uuid'=> $this->getUuid(),
             'api_name'=> $this->getApiName(),
             'is_protected'=> $this->isProtected(),
-            'has_events'=> $this->hasEvents(),
             BuildApiFacet::FACET_PARAMS->value => $this->getApiParamsClass(),
             BuildApiFacet::FACET_RESPONSE->value => $this->getApiResponseClass(),
             BuildApiFacet::FACET_SETUP->value => $this->getApiThingSetupClass(),

@@ -9,6 +9,7 @@ use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * this stores the user getting back the api info, as well as the outgoing and incoming remotes
@@ -26,6 +27,8 @@ use Illuminate\Database\Eloquent\Model;
  *
  *  @property string created_at
  *  @property string updated_at
+ *  @property HexError hex_error
+ *  @property Thing result_owner_thing
  */
 class ThingResult extends Model
 {
@@ -55,5 +58,15 @@ class ThingResult extends Model
     protected $casts = [
         'result_response' => AsArrayObject::class,
     ];
+
+    public function hex_error() : BelongsTo {
+        return $this->belongsTo(HexError::class,'result_hex_error_id','id');
+    }
+
+    public function result_owner_thing() : BelongsTo {
+        return $this->belongsTo(Thing::class,'owner_thing_id','id');
+    }
+
+
 
 }

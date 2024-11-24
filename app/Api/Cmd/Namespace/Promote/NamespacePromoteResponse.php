@@ -25,7 +25,7 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
 
     public function toThing(Thing $thing)
     {
-
+        $thing->setCurrentData([$this->generated_namespace]);
     }
 
     protected function run(NamespacePromoteParams $params) {

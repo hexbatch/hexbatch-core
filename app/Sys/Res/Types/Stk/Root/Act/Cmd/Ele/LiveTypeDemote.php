@@ -19,13 +19,11 @@ class LiveTypeDemote extends Act\Cmd\Ele
     ];
 
     const PARENT_CLASSES = [
-        Act\Cmd\Ele::class
-    ];
-
-    const EVENT_CLASSES = [
+        Act\Cmd\Ele::class,
         Act\SystemPrivilege::class,
         Act\NoEventsTriggered::class,
     ];
+
 
 }
 

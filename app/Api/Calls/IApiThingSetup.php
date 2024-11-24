@@ -3,6 +3,7 @@
 namespace App\Api\Calls;
 
 
+use App\Helpers\Actions\ActionNode;
 use App\Models\Thing;
 
 /**
@@ -44,10 +45,10 @@ use App\Models\Thing;
  */
 interface IApiThingSetup
 {
-    public function pushData(Thing $thing): void ;
+    public function setupDataWithThing(Thing $thing, $params): void ;
 
     /**
-     * @return array
+     * @return ActionNode[]
      */
     public function getActions(): array ;
 }

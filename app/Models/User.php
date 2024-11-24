@@ -135,6 +135,22 @@ class User extends Authenticatable implements ISystemModel
 
     }
 
+    public static function getUser(
+        ?int $id = null )
+    : User
+    {
+        $ret = static::buildUser(id:$id)->first();
+
+        if (!$ret) {
+            $arg_types = [];
+            $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new \LogicException("Could not find user via $arg_type : $arg_val");
+        }
+        return $ret;
+    }
 
     public static function buildUser(
         ?int $id = null )

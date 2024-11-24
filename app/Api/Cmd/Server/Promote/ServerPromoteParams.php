@@ -17,14 +17,16 @@ class ServerPromoteParams extends ServerPromote implements IActionParams,IAction
     use ServerParams;
 
 
-    public function fromThing(Thing $thing): void
+    public function setupThingData(Thing $thing): void
     {
 
     }
 
 
-    public function pushData(Thing $thing): void
+    public function setupDataWithThing(Thing $thing): void
     {
         // TODO: Implement pushData() method.
     }
+
+    public function processChildrenData( Thing $thing): void {}
 }

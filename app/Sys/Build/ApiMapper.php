@@ -14,7 +14,7 @@ use RegexIterator;
  */
 class ApiMapper extends AaMapperBase
 {
-    const SOURCE_FOLDER = 'app/Api/Thinger';
+    const SOURCE_FOLDER = 'app/Api/Cmd';
     const OUTPUT_FILE = 'bootstrap/cache/hbc_api_cache.php';
 
 

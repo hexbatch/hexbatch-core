@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\Things\TypeOfThingStatus;
 use App\Models\Thing;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,14 +19,23 @@ class RunThing implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-
+        public Thing $thing
     ) {}
 
-    /**
-     * @see Thing
-     */
+
     public function handle(): void
     {
-        //todo put in thing running here for the row
+        if ($this->thing->thing_status !== TypeOfThingStatus::THING_PENDING) {return;}
+        try {
+            $this->thing->setProcessedAt();
+            $this->thing->runThing();
+
+        } catch (\Exception $e) {
+            $this->thing->thing_status = TypeOfThingStatus::THING_ERROR;
+            $this->thing->setException($e);
+        }
+
+        //see if all children ran, if so, put the parent on the processing
+        $this->thing->maybeQueueParent();
     }
 }

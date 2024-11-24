@@ -43,6 +43,6 @@ class NewUserReturn extends Act\Cmd\Us\UserRegister implements IActionOaResponse
 
     public function toThing(Thing $thing)
     {
-        // TODO: Implement toThing() method.
+        $thing->setCurrentData([$this->user]);
     }
 }

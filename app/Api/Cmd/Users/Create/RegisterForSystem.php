@@ -2,6 +2,7 @@
 namespace App\Api\Cmd\Users\Create;
 
 
+
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\BuildActionFacet;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -27,5 +28,6 @@ class RegisterForSystem extends UserCreateParams
          */
         return  $promo_work::doWork($reg_params);
     }
+
 
 }

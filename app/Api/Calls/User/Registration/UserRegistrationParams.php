@@ -6,11 +6,13 @@ namespace App\Api\Calls\User\Registration;
 use App\Api\Calls\IApiThingSetup;
 
 use App\Api\IApiOaParams;
+use App\Helpers\Actions\ActionNode;
 use App\Models\Thing;
 
 use App\Sys\Res\Types\Stk\Root\Api;
 
 use App\Api\Cmd;
+use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -18,6 +20,7 @@ use OpenApi\Attributes as OA;
 class UserRegistrationParams extends Api\User\UserRegister implements IApiOaParams, IApiThingSetup
 {
 
+    protected ?Collection $collection = null;
     #[OA\Property(title: 'New User')]
     protected Cmd\Users\Create\UserCreateParams $new_user;
 
@@ -25,13 +28,14 @@ class UserRegistrationParams extends Api\User\UserRegister implements IApiOaPara
 
     public function fromCollection(Collection $collection)
     {
+        $this->collection = $collection;
         //todo make a new action param for each action, and have them be class members, and call their from collection
         // but if only using data from a previous action, how to struture that?
     }
 
 
 
-    public function pushData(Thing $thing): void
+    public function setupDataWithThing(Thing $thing, $params): void
     {
         /*
          *todo The api params will write to the thing data, if it wants to, and then for each of its member actions make a new thing child or descendant, and
@@ -43,12 +47,17 @@ class UserRegistrationParams extends Api\User\UserRegister implements IApiOaPara
     }
 
 
+    /**
+     * @return ActionNode[]
+     */
     public function getActions(): array
     {
         return [
-            Cmd\Users\Create\UserCreateParams::class,
-            Cmd\Namespace\Promote\NamespacePromoteParams::class,
-            //todo edit new user, set that ns as the default
+            new ActionNode(action_class: Act\Cmd\Us\UserEdit::class,collection: $this->collection,action_children: [
+                new ActionNode(action_class: Act\Cmd\Ns\NamespacePromote::class,collection: $this->collection,action_children: [
+                    new ActionNode(action_class: Act\Cmd\Us\UserRegister::class ,collection: $this->collection)
+                ])
+            ])
         ];
     }
 

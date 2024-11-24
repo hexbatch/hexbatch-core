@@ -3,6 +3,8 @@
 namespace App\Models;
 
 
+use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
@@ -52,5 +54,29 @@ class HexError extends Model
     protected $casts = [
         'hex_error_trace' => AsArrayObject::class,
     ];
+
+    public static function createFromException(\Exception $e) : HexError{
+        $node = new HexError();
+        //todo fill in the props
+        return $node;
+    }
+    public function getErrorJson() : array {
+
+        return [
+            'type' => $this->getRefCodeUrl(),
+            'version' => Utilities::getVersionString(),
+            'instance' => $this->hex_error_code,
+            'message' => $this->hex_error_message,
+            'file' => $this->hex_error_file,
+            'line' => $this->hex_error_line,
+            'trace' => $this->hex_error_trace->getArrayCopy(),
+
+        ];
+    }
+
+    public function getRefCodeUrl(): ?string
+    {
+        return (RefCodes::URLS[$this->hex_error_code]??null);
+    }
 
 }

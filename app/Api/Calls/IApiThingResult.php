@@ -2,6 +2,7 @@
 
 namespace App\Api\Calls;
 
+use App\Models\Thing;
 use App\Models\ThingResult;
 
 /**
@@ -10,5 +11,6 @@ use App\Models\ThingResult;
  */
 interface IApiThingResult
 {
-    public static function writeReturn( ThingResult $result, $api_result): void;
+    public function processChildrenData( Thing $thing): void;
+    public function writeReturn( ThingResult $result): void;
 }

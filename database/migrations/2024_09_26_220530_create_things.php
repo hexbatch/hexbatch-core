@@ -100,6 +100,10 @@ return new class extends Migration
             $table->timestamp('thing_invalid_at')->nullable()->default(null)
                 ->comment('if set, then this thing will return false to its parent if the time its processed is after');
 
+            $table->timestamp('process_started_at')->nullable()->default(null)
+                ->comment('if set, then this thing started processing at this time');
+
+
             $table->boolean('is_waiting_on_hook')->default(false)->nullable(false)
                 ->comment('if true then look at the hook cluster table for pending hook returns');
 

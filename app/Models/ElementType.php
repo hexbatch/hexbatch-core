@@ -144,8 +144,40 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->hasMany(ElementTypeParent::class,'child_type_id','id');
     }
 
+
+    public static function getElementType(
+        ?int             $id = null,
+        ?string          $uuid = null,
+        ?int             $owner_namespace_id = null,
+        ?int             $map_bound_id = null,
+        ?int             $shape_bound_id = null,
+        ?int             $time_bound_id = null,
+        ?TypeOfLifecycle $lifecycle = null,
+    )
+    : ElementType
+    {
+        $ret = static::buildElementType(id:$id,uuid: $uuid,owner_namespace_id: $owner_namespace_id,map_bound_id: $map_bound_id,
+            shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id,lifecycle: $lifecycle)->first();
+
+        if (!$ret) {
+            $arg_types = [];
+            $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            if ($owner_namespace_id) { $arg_types[] = 'ns'; $arg_vals[] = $owner_namespace_id;}
+            if ($map_bound_id) { $arg_types[] = 'map'; $arg_vals[] = $map_bound_id;}
+            if ($shape_bound_id) { $arg_types[] = 'shape'; $arg_vals[] = $shape_bound_id;}
+            if ($time_bound_id) { $arg_types[] = 'time'; $arg_vals[] = $time_bound_id;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new \LogicException("Could not find type via $arg_type : $arg_val");
+        }
+        return $ret;
+    }
+
     public static function buildElementType(
         ?int             $id = null,
+        ?string          $uuid = null,
         ?int             $owner_namespace_id = null,
         ?int             $map_bound_id = null,
         ?int             $shape_bound_id = null,
@@ -180,6 +212,10 @@ class ElementType extends Model implements IType,ISystemModel
 
         if ($lifecycle) {
             $build->where('element_types.lifecycle', $lifecycle);
+        }
+
+        if ($uuid) {
+            $build->where('element_types.ref_uuid', $uuid);
         }
 
         if ($shape_bound_id) {

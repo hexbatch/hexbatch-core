@@ -3,7 +3,6 @@
 namespace App\Sys\Build;
 
 
-use App\Sys\Res\Types\Stk\Root\Act\NoEventsTriggered;
 use App\Sys\Res\Types\Stk\Root\Act\SystemPrivilege;
 
 class ActionMapEntry
@@ -32,7 +31,7 @@ class ActionMapEntry
             $this->action_uuid = $full_class_name::getClassUuid();
             $this->action_name = $full_class_name::getClassName();
             $this->is_protected = $full_class_name::hasInAncestors(SystemPrivilege::class);
-            $this->has_events = !$full_class_name::hasInAncestors(NoEventsTriggered::class);
+            $this->has_events = (bool)count($full_class_name::getRelatedEvents());
         } else {
             return;
         }
