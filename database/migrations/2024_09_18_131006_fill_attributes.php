@@ -85,9 +85,9 @@ return new class extends Migration
 
         });
 
-        DB::statement("ALTER TABLE attributes Add COLUMN live_merge_method type_merge_json NOT NULL default 'overwrite';");
-        DB::statement("ALTER TABLE attributes Add COLUMN reentry_merge_method type_merge_json NOT NULL default 'overwrite';");
-        DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method type_merge_json NOT NULL default 'overwrite';");
+        DB::statement("ALTER TABLE attributes Add COLUMN live_merge_method type_of_merge_logic NOT NULL default 'union';");
+        DB::statement("ALTER TABLE attributes Add COLUMN reentry_merge_method type_of_merge_logic NOT NULL default 'union';");
+        DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method type_of_merge_logic NOT NULL default 'union';");
 
 
         DB::statement('ALTER TABLE attributes ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');

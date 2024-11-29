@@ -29,8 +29,6 @@ class UserRegistrationParams extends Api\User\UserRegister implements IApiOaPara
     public function fromCollection(Collection $collection)
     {
         $this->collection = $collection;
-        //todo make a new action param for each action, and have them be class members, and call their from collection
-        // but if only using data from a previous action, how to struture that?
     }
 
 

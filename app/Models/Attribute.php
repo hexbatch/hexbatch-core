@@ -5,7 +5,7 @@ namespace App\Models;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Attributes\TypeOfSetValuePolicy;
 use App\Enums\Bounds\TypeOfLocation;
-use App\Enums\Rules\TypeMergeJson;
+use App\Enums\Rules\TypeOfMergeLogic;
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
@@ -55,9 +55,9 @@ use Illuminate\Validation\ValidationException;
  * @property string value_json_path
  * @property string attribute_name
  *
- * @property TypeMergeJson popped_writing_method
- * @property TypeMergeJson live_merge_method
- * @property TypeMergeJson reentry_merge_method
+ * @property TypeOfMergeLogic popped_writing_method
+ * @property TypeOfMergeLogic live_merge_method
+ * @property TypeOfMergeLogic reentry_merge_method
  * @property TypeOfSetValuePolicy set_value_policy
  * @property TypeOfApproval attribute_approval
  *
@@ -102,9 +102,9 @@ class Attribute extends Model implements IAttribute,ISystemModel
      */
     protected $casts = [
         'server_access_type' => TypeOfServerAccess::class,
-        'popped_writing_method' => TypeMergeJson::class,
-        'live_merge_method' => TypeMergeJson::class,
-        'reentry_merge_method' => TypeMergeJson::class,
+        'popped_writing_method' => TypeOfMergeLogic::class,
+        'live_merge_method' => TypeOfMergeLogic::class,
+        'reentry_merge_method' => TypeOfMergeLogic::class,
         'set_value_policy' => TypeOfSetValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,
     ];
@@ -613,15 +613,15 @@ class Attribute extends Model implements IAttribute,ISystemModel
                 }
 
                 if ($collect->has('popped_writing_method')) {
-                    $this->popped_writing_method = TypeMergeJson::tryFromInput($collect->get('popped_writing_method'));
+                    $this->popped_writing_method = TypeOfMergeLogic::tryFromInput($collect->get('popped_writing_method'));
                 }
 
                 if ($collect->has('reentry_merge_method')) {
-                    $this->reentry_merge_method = TypeMergeJson::tryFromInput($collect->get('reentry_merge_method'));
+                    $this->reentry_merge_method = TypeOfMergeLogic::tryFromInput($collect->get('reentry_merge_method'));
                 }
 
                 if ($collect->has('live_merge_method')) {
-                    $this->live_merge_method = TypeMergeJson::tryFromInput($collect->get('live_merge_method'));
+                    $this->live_merge_method = TypeOfMergeLogic::tryFromInput($collect->get('live_merge_method'));
                 }
 
             }

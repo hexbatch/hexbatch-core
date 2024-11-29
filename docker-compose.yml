@@ -5,8 +5,9 @@ volumes:
   hbc_redis_data:
 
 networks:
-  dev_hbc_network:
-      name: network_hbc
+    dev_hbc_network:
+        driver: bridge
+        name: dev_hbc_network
 
 services:
 

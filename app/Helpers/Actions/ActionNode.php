@@ -2,7 +2,7 @@
 
 namespace App\Helpers\Actions;
 
-use App\Enums\Rules\TypeMergeJson;
+use App\Enums\Rules\TypeOfMergeLogic;
 use App\Enums\Rules\TypeOfLogic;
 use App\Sys\Res\Types\ISystemType;
 use Illuminate\Support\Collection;
@@ -14,7 +14,7 @@ class ActionNode
     protected string|ISystemType $action_class;
     protected TypeOfLogic $action_child_logic;
     protected TypeOfLogic $action_logic;
-    protected TypeMergeJson $merge_method;
+    protected TypeOfMergeLogic $merge_method;
 
     /** @var ActionNode[] $action_children  */
     protected array $action_children = [];
@@ -24,12 +24,12 @@ class ActionNode
     /**
      * @param ActionNode[] $action_children
      */
-    public function __construct(string $action_class,
-                                ?Collection $collection = null,
-                                TypeOfLogic $action_child_logic = TypeOfLogic::AND,
-                                TypeOfLogic $action_logic = TypeOfLogic::AND,
-                                TypeMergeJson $merge_method = TypeMergeJson::OR_MERGE,
-                                array $action_children = []
+    public function __construct(string         $action_class,
+                                ?Collection    $collection = null,
+                                TypeOfLogic    $action_child_logic = TypeOfLogic::AND,
+                                TypeOfLogic    $action_logic = TypeOfLogic::AND,
+                                TypeOfMergeLogic $merge_method = TypeOfMergeLogic::UNION,
+                                array          $action_children = []
 
     )
     {
@@ -80,12 +80,12 @@ class ActionNode
         return $this;
     }
 
-    public function getMergeMethod(): TypeMergeJson
+    public function getMergeMethod(): TypeOfMergeLogic
     {
         return $this->merge_method;
     }
 
-    public function setMergeMethod(TypeMergeJson $merge_method): ActionNode
+    public function setMergeMethod(TypeOfMergeLogic $merge_method): ActionNode
     {
         $this->merge_method = $merge_method;
         return $this;

@@ -170,7 +170,6 @@ class User extends Authenticatable implements ISystemModel
             $build->where('users.id',$id);
         }
 
-
         return $build;
     }
 

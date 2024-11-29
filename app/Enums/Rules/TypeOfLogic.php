@@ -9,6 +9,7 @@ enum TypeOfLogic: string
 
     case NOP = 'nop';
     case AND = 'and';
+
     case OR = 'or';
     case OR_ALL = 'or_all'; //no shortcutting the other or parts if one is truthful, this is the same as making a pipe combing all data from sources
     case XOR = 'xor';

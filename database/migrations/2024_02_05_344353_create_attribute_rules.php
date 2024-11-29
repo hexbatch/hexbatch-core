@@ -107,20 +107,18 @@ return new class extends Migration
         DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_logic type_of_logic NOT NULL default 'and';");
 
 
-        DB::statement("CREATE TYPE type_merge_json AS ENUM (
-            'no_merge',
-            'overwrite',
-            'or_merge',
-            'and_merge',
-            'xor_merge'
-            'overwrite_add',
-            'overwrite_subtract',
-            'oldest',
-            'newest'
+        DB::statement("CREATE TYPE type_of_merge_logic AS ENUM (
+            'union',
+            'union_newest',
+            'difference',
+            'union_newest_add',
+            'union_add'
+            'union_newest_sub',
+            'union_sub'
             );");
 
 
-        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_merge_method type_merge_json NOT NULL default 'overwrite';");
+        DB::statement("ALTER TABLE attribute_rules Add COLUMN rule_merge_method type_of_merge_logic NOT NULL default 'union';");
 
 
         DB::statement("ALTER TABLE attribute_rules ALTER COLUMN created_at SET DEFAULT NOW();");
@@ -158,7 +156,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('attribute_rules');
         DB::statement("DROP TYPE type_of_logic;");
-        DB::statement("DROP TYPE type_merge_json;");
+        DB::statement("DROP TYPE type_of_merge_logic;");
 
     }
 };

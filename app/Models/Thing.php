@@ -4,9 +4,11 @@ namespace App\Models;
 
 
 use App\Api\Calls\IApiThingSetup;
-use App\Enums\Rules\TypeMergeJson;
+use App\Enums\Rules\TypeOfMergeLogic;
 use App\Enums\Rules\TypeOfLogic;
+use App\Enums\Things\TypeOfThingDataSource;
 use App\Enums\Things\TypeOfThingStatus;
+use App\Helpers\ArrayMerge;
 use App\Jobs\RunThing;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\ApiMapper;
@@ -61,7 +63,8 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
  * @property TypeOfThingStatus thing_status
  * @property TypeOfLogic thing_child_logic
  * @property TypeOfLogic thing_logic
- * @property TypeMergeJson thing_merge_method
+ * @property TypeOfMergeLogic thing_merge_method_json
+ * @property TypeOfMergeLogic thing_merge_method_data
  *
  * @property string created_at
  * @property int created_at_ts
@@ -70,7 +73,7 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
  * @property ThingDatum[] thing_collection
  * @property ThingResult thing_result
  * @property Thing thing_parent
- * @property Thing[] thing_children
+ * @property Thing[]|\Illuminate\Database\Eloquent\Collection thing_children
  */
 class Thing extends Model
 {
@@ -98,7 +101,8 @@ class Thing extends Model
         'thing_status' => TypeOfThingStatus::class,
         'thing_logic' => TypeOfLogic::class,
         'thing_child_logic' => TypeOfLogic::class,
-        'thing_merge_method' => TypeMergeJson::class,
+        'thing_merge_method_json' => TypeOfMergeLogic::class,
+        'thing_merge_method_data' => TypeOfMergeLogic::class,
     ];
 
 
@@ -142,6 +146,78 @@ class Thing extends Model
         return false;
     }
 
+
+    public function isSuccess() : bool {
+        //see if flag already set, if so, then do not re-evaluate
+        if ($this->thing_status === TypeOfThingStatus::THING_ERROR) {
+            return false;
+        }
+
+        if ($this->thing_status === TypeOfThingStatus::THING_SUCCESS) {
+            return true;
+        }
+
+        //status not set
+        //maybe its always true or always false
+        if ($this->thing_logic === TypeOfLogic::ALWAYS_FALSE) {return false;}
+        if ($this->thing_logic === TypeOfLogic::ALWAYS_TRUE) {return true;}
+        // see what is up with the data!
+
+
+        //if this has empty data, then it is an error
+        $current_data = $this->getCurrentData();
+        if (empty($current_data)) { return false;}
+
+        $true_count = 0;
+        $false_count = 0;
+        foreach ($current_data as $datum) {
+            if ($datum->collection_json === null) {continue;}
+            if ($datum->isJsonFalse()) { $false_count++;} else { $true_count++;}
+        }
+        //if there is data (passed check above) and no countable json then success
+        if (empty($true_count) && empty($false_count)) {return true;}
+
+        //now use the self logic to see what is up with these counts!
+        return static::doLogic($this->thing_logic,$true_count,$false_count);
+    }
+
+    public static function doLogic(TypeOfLogic $logic,int $true_count, int $false_count) {
+        return match($logic) {
+            TypeOfLogic::AND => $false_count && $true_count,
+            TypeOfLogic::OR, TypeOfLogic::OR_ALL => $false_count || $true_count,
+            TypeOfLogic::XOR => $false_count xor $true_count,
+            TypeOfLogic::NAND => !($false_count && $true_count),
+            TypeOfLogic::NOR, TypeOfLogic::NOR_ALL => !($false_count || $true_count),
+            TypeOfLogic::XNOR => !($false_count xor $true_count),
+            TypeOfLogic::NOP, TypeOfLogic::ALWAYS_TRUE => true,
+            TypeOfLogic::ALWAYS_FALSE => false
+        };
+    }
+
+    /**
+     * @return ThingDatum[]
+     */
+    public function getCurrentData() : array  {
+        $ret = [];
+        foreach ($this->thing_collection as $datum) {
+            if ($datum->thing_data_source === TypeOfThingDataSource::FROM_CURRENT) { $ret[] = $datum;}
+        }
+        return $ret;
+    }
+
+    /**
+     * @return array[]
+     */
+    public function getCurrentJson() : array  {
+        $ret = [];
+        foreach ($this->getCurrentData() as $datum) {
+            if ($datum->collection_json !== null) {
+                $ret[] = $datum->collection_json->getArrayCopy();
+            }
+        }
+        return $ret;
+    }
+
     /**
      * @return Thing[]
      */
@@ -175,6 +251,97 @@ class Thing extends Model
 
     }
 
+    public function checkChildLogic() : ?bool {
+        if (!count($this->thing_children)) {return true;} //if no children then always true for child logic
+
+        $true_count = 0;
+        $false_count = 0;
+        //go through all the children, see their status and return null if any are not complete
+        foreach ($this->thing_children as $child) {
+            if (!$child->isComplete()) {return null;}
+            if ($child->isSuccess()) { $true_count++;} else { $false_count++;}
+
+        }
+        return static::doLogic($this->thing_child_logic,$true_count,$false_count);
+    }
+
+    public function getMergedJson() : ?array {
+
+        $working = [];
+        $current = $this->getCurrentJson();
+        if (empty($current)) {return null;}
+        switch ($this->thing_merge_method_json) {
+            case TypeOfMergeLogic::UNION:
+            case TypeOfMergeLogic::INTERSECTION:
+            case TypeOfMergeLogic::DIFFERENCE:
+            case TypeOfMergeLogic::UNION_ADD:
+            case TypeOfMergeLogic::UNION_SUB:
+            {
+                $working = $current;
+                break;
+            }
+            case TypeOfMergeLogic::UNION_NEWEST:
+            case TypeOfMergeLogic::UNION_NEWEST_ADD:
+            case TypeOfMergeLogic::UNION_NEWEST_SUB:
+            {
+                $working = array_reverse($current);
+                break;
+            }
+        }
+        return ArrayMerge::mergeArrays($this->thing_merge_method_json,$working);
+    }
+
+    /**
+     * todo use the pulled data function in action and api handlers
+     * returns the logic merged child data and the merged json
+     * @return ThingDatum[]
+     */
+    public function pullChildData(array &$json) : array {
+
+        $json = [];
+
+        //merge child json to one json
+        //merge child data to array but do not write
+        $working = [];
+        $current = $this->thing_children;
+        switch ($this->thing_merge_method_json) {
+            case TypeOfMergeLogic::UNION:
+            case TypeOfMergeLogic::INTERSECTION:
+            case TypeOfMergeLogic::DIFFERENCE:
+            case TypeOfMergeLogic::UNION_ADD:
+            case TypeOfMergeLogic::UNION_SUB:
+            {
+                $working = $current;
+                break;
+            }
+            case TypeOfMergeLogic::UNION_NEWEST:
+            case TypeOfMergeLogic::UNION_NEWEST_ADD:
+            case TypeOfMergeLogic::UNION_NEWEST_SUB:
+            {
+                $working = $current->reverse();
+                break;
+            }
+        }
+
+        $all_json = [];
+        foreach ($working as $child) {
+            $json_of_child = $child->getMergedJson();
+            if ($json_of_child === null) {continue;}
+            $all_json[] = $json_of_child;
+        }
+        $json =  ArrayMerge::mergeArrays($this->thing_merge_method_json,$all_json);
+
+        $all_stuff = [];
+        foreach ($working as  $childer) {
+            $stuff = $childer->getCurrentData();
+            if (!empty($stuff)) {
+                $all_stuff[] = $stuff;
+            }
+        }
+
+        return ArrayMerge::mergeArrays($this->thing_merge_method_json,$all_stuff);
+    }
+
     /**
      * @return void
      * @throws \Exception
@@ -183,33 +350,42 @@ class Thing extends Model
         try {
             DB::beginTransaction();
             //todo check the child logic, see if can run or just fail here
-
-            //todo pull children data up to this data, if any, merge the children data together and put in from _children source
-            // (how to decide which children data to put in from_children)? (missing step)
-            // if any child json then do json merge logic
-
-            //see if action or api or attribute rule
-            $type = ElementType::getElementType(id: $this->api_or_action_type_id);
-            if (is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Api') ) {
-                /** @var \App\Api\Calls\IApiThingResult $result */
-                $result = ApiMapper::getApiInterface(BuildApiFacet::FACET_RESPONSE,$type::getClassUuid());
-                $result->processChildrenData($this);
-                $result->writeReturn($this->thing_result);
-            } elseif (is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction')) {
-                /** @var \App\Api\Cmd\IActionWorker $work */
-                $work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER,$type::getClassUuid());
-
-                /** @var \App\Api\Cmd\IActionParams $params */
-                $params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS,$type::getClassUuid());
-
-                $params->processChildrenData($this);
-                $work_results = $work::doWork($params);
-                $work_results->toThing($this);
-
-            } else {
-                throw new \LogicException("Thing has neither an action or api: $type->ref_uuid ". $type->getName());
+            $child_logic = $this->checkChildLogic();
+            if ($child_logic !== null) {
+                if (!$child_logic) {
+                    $this->thing_status = TypeOfThingStatus::THING_ERROR;
+                }
             }
-            $this->thing_status = TypeOfThingStatus::THING_SUCCESS;
+
+            if ($this->thing_status !== TypeOfThingStatus::THING_ERROR) {
+                // child logic allows it to be processed
+                //todo pull children data up to this data, if any, merge the children data together and put in from _children source
+                // (how to decide which children data to put in from_children)? (missing step)
+                // if any child json then do json merge logic
+
+                //see if action or api or attribute rule
+                $type = ElementType::getElementType(id: $this->api_or_action_type_id);
+                if (is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Api')) {
+                    /** @var \App\Api\Calls\IApiThingResult $result */
+                    $result = ApiMapper::getApiInterface(BuildApiFacet::FACET_RESPONSE, $type::getClassUuid());
+                    $result->processChildrenData($this);
+                    $result->writeReturn($this->thing_result);
+                } elseif (is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction')) {
+                    /** @var \App\Api\Cmd\IActionWorker $work */
+                    $work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER, $type::getClassUuid());
+
+                    /** @var \App\Api\Cmd\IActionParams $params */
+                    $params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS, $type::getClassUuid());
+
+                    $params->processChildrenData($this);
+                    $work_results = $work::doWork($params);
+                    $work_results->toThing($this);
+
+                } else {
+                    throw new \LogicException("Thing has neither an action or api: $type->ref_uuid " . $type->getName());
+                }
+                $this->thing_status = TypeOfThingStatus::THING_SUCCESS;
+            }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

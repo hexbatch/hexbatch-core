@@ -60,6 +60,24 @@ class ThingDatum extends Model
         'thing_data_source' => TypeOfThingDataSource::class,
     ];
 
+    const LOGIC_STATE_KEY = 'hex_logic_state';
+
+    public function isJsonFalse() : bool {
+        //if it has non-null json but that json is empty array or empty object or false primitive as first element of array,
+        // or false value in top object key of logic_state (if provided) its false
+        if ($this->collection_json === null) {return false;}
+        if (empty($this->collection_json->count())) {
+            return false;
+        }
+        if ($this->collection_json->offsetExists(static::LOGIC_STATE_KEY)) {
+            $what = $this->collection_json->offsetGet(static::LOGIC_STATE_KEY);
+            if (!empty($what)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public static function buildThingData(
         ?int $id = null,

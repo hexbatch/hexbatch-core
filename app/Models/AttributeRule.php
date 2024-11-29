@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Rules\TypeMergeJson;
+use App\Enums\Rules\TypeOfMergeLogic;
 use App\Enums\Rules\TypeOfLogic;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
@@ -77,7 +77,7 @@ the rules can react there when creation events to things in the set, the paths i
  *
  * @property TypeOfLogic rule_child_logic
  * @property TypeOfLogic rule_logic
- * @property TypeMergeJson rule_merge_method
+ * @property TypeOfMergeLogic rule_merge_method
  *
  *
  * @property string created_at
@@ -117,7 +117,7 @@ class AttributeRule extends Model
     protected $casts = [
         'rule_child_logic' => TypeOfLogic::class,
         'rule_logic' => TypeOfLogic::class,
-        'rule_merge_method' => TypeMergeJson::class,
+        'rule_merge_method' => TypeOfMergeLogic::class,
     ];
 
 
@@ -362,7 +362,7 @@ class AttributeRule extends Model
 
 
             if ($collect->has('rule_merge_method')) {
-                $this->rule_merge_method = TypeMergeJson::tryFromInput($collect->get('rule_merge_method'));
+                $this->rule_merge_method = TypeOfMergeLogic::tryFromInput($collect->get('rule_merge_method'));
             }
 
             if ($collect->has('filter_json_path')) {
