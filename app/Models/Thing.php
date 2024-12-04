@@ -8,7 +8,6 @@ use App\Enums\Rules\TypeOfMergeLogic;
 use App\Enums\Rules\TypeOfLogic;
 use App\Enums\Things\TypeOfThingDataSource;
 use App\Enums\Things\TypeOfThingStatus;
-use App\Helpers\ArrayMerge;
 use App\Jobs\RunThing;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\ApiMapper;
@@ -274,21 +273,12 @@ class Thing extends Model
             case TypeOfMergeLogic::UNION:
             case TypeOfMergeLogic::INTERSECTION:
             case TypeOfMergeLogic::DIFFERENCE:
-            case TypeOfMergeLogic::UNION_ADD:
-            case TypeOfMergeLogic::UNION_SUB:
             {
                 $working = $current;
                 break;
             }
-            case TypeOfMergeLogic::UNION_NEWEST:
-            case TypeOfMergeLogic::UNION_NEWEST_ADD:
-            case TypeOfMergeLogic::UNION_NEWEST_SUB:
-            {
-                $working = array_reverse($current);
-                break;
-            }
         }
-        return ArrayMerge::mergeArrays($this->thing_merge_method_json,$working);
+        return TypeOfMergeLogic::mergeArrays($this->thing_merge_method_json,$working);
     }
 
     /**
@@ -308,17 +298,8 @@ class Thing extends Model
             case TypeOfMergeLogic::UNION:
             case TypeOfMergeLogic::INTERSECTION:
             case TypeOfMergeLogic::DIFFERENCE:
-            case TypeOfMergeLogic::UNION_ADD:
-            case TypeOfMergeLogic::UNION_SUB:
             {
                 $working = $current;
-                break;
-            }
-            case TypeOfMergeLogic::UNION_NEWEST:
-            case TypeOfMergeLogic::UNION_NEWEST_ADD:
-            case TypeOfMergeLogic::UNION_NEWEST_SUB:
-            {
-                $working = $current->reverse();
                 break;
             }
         }
@@ -329,7 +310,7 @@ class Thing extends Model
             if ($json_of_child === null) {continue;}
             $all_json[] = $json_of_child;
         }
-        $json =  ArrayMerge::mergeArrays($this->thing_merge_method_json,$all_json);
+        $json =  TypeOfMergeLogic::mergeArrays($this->thing_merge_method_json,$all_json);
 
         $all_stuff = [];
         foreach ($working as  $childer) {
@@ -339,7 +320,7 @@ class Thing extends Model
             }
         }
 
-        return ArrayMerge::mergeArrays($this->thing_merge_method_json,$all_stuff);
+        return TypeOfMergeLogic::mergeArrays($this->thing_merge_method_json,$all_stuff);
     }
 
     /**

@@ -109,12 +109,8 @@ return new class extends Migration
 
         DB::statement("CREATE TYPE type_of_merge_logic AS ENUM (
             'union',
-            'union_newest',
             'difference',
-            'union_newest_add',
-            'union_add'
-            'union_newest_sub',
-            'union_sub'
+            'intersection'
             );");
 
 
