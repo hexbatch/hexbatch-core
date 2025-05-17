@@ -108,7 +108,7 @@ class AuthenticationController extends Controller
     #[ApiTypeMarker( Api\User\UserRegister::class)]
     public function register(Request $request): JsonResponse
     {
-        $top_thing = Thing::makeApiCall(Act\Cmd\Us\UserRegister::getClassUuid(),$request->collect());
+        $top_thing = Thing::makeApiCall(Api\User\UserRegister::getClassUuid(),$request->collect());
         $top_thing->pushLeavesToJobs();
         if ($top_thing->isComplete()) {
             return response()->json($top_thing->getThingResponseJson(), $top_thing->getThingResponseHttpCode());

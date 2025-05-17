@@ -8,6 +8,8 @@ use App\Enums\Rules\TypeOfMergeLogic;
 use App\Enums\Rules\TypeOfLogic;
 use App\Enums\Things\TypeOfThingDataSource;
 use App\Enums\Things\TypeOfThingStatus;
+use App\Enums\Types\TypeOfServerEventAccess;
+use App\Helpers\Utilities;
 use App\Jobs\RunThing;
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\ApiMapper;
@@ -26,12 +28,31 @@ use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 /**
+ *
+ * Summary :
+ *  All things are started by api calls or action rules. The api should be attribute rules (always)
+ *  Each api type has that attribute as metrics, and there is stored the attribute_rules
+ *   When action rules are instantiated to things, the collection has the calling info, in case it wants to use that, and has data sent via the api call too
+ *      The server_event for each api call has the event_trigger_type_id set to the api call, and not the event
+ *
+ * The Api types, when they are being setup make their rule chains
+ *
+ * mapping rules to things
+
+
+ *
+ *
+ *
+
+
+
+
  * thing is marked as done when all children done, and there is no pagination id
  *
  * When there is a full page for a container, the parent makes a cursor row in the data
-   * A new child thing is made for using that next page of data , the child may start later according to the backoff
-    * the child results combined or_all to the parent. Empty data for the last cursor is child success too.
-   * the thing parent cannot complete until all the new children return success.
+ * A new child thing is made for using that next page of data , the child may start later according to the backoff
+ * the child results combined or_all to the parent. Empty data for the last cursor is child success too.
+ * the thing parent cannot complete until all the new children return success.
  * todo when an action has @see NoEventsTriggered up-type, then its not going to add preconditions by event listeners
  *   there is no permission check, if the action has it, regardless who is calling then no events
  *
@@ -45,7 +66,9 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
  * @property int id
  * @property int parent_thing_id
  * @property int after_thing_id
- * @property int api_or_action_type_id
+ * @property int event_type_id
+ * @property int api_type_id
+ * @property int action_type_id
  * @property int thing_rule_id
  * @property int thing_phase_id
  *
@@ -55,15 +78,14 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
  * @property int debugging_breakpoint
  * @property bool is_waiting_on_hook
  *
- * @property string thing_start_after
+ * @property string thing_start_at
  * @property string thing_invalid_at
  * @property string process_started_at
  * @property string ref_uuid
  * @property TypeOfThingStatus thing_status
  * @property TypeOfLogic thing_child_logic
  * @property TypeOfLogic thing_logic
- * @property TypeOfMergeLogic thing_merge_method_json
- * @property TypeOfMergeLogic thing_merge_method_data
+ * @property TypeOfMergeLogic thing_merge_method
  *
  * @property string created_at
  * @property int created_at_ts
@@ -100,8 +122,7 @@ class Thing extends Model
         'thing_status' => TypeOfThingStatus::class,
         'thing_logic' => TypeOfLogic::class,
         'thing_child_logic' => TypeOfLogic::class,
-        'thing_merge_method_json' => TypeOfMergeLogic::class,
-        'thing_merge_method_data' => TypeOfMergeLogic::class,
+        'thing_merge_method' => TypeOfMergeLogic::class
     ];
 
 
@@ -269,7 +290,7 @@ class Thing extends Model
         $working = [];
         $current = $this->getCurrentJson();
         if (empty($current)) {return null;}
-        switch ($this->thing_merge_method_json) {
+        switch ($this->thing_merge_method) {
             case TypeOfMergeLogic::UNION:
             case TypeOfMergeLogic::INTERSECTION:
             case TypeOfMergeLogic::DIFFERENCE:
@@ -278,7 +299,7 @@ class Thing extends Model
                 break;
             }
         }
-        return TypeOfMergeLogic::mergeArrays($this->thing_merge_method_json,$working);
+        return TypeOfMergeLogic::mergeArrays($this->thing_merge_method,$working);
     }
 
     /**
@@ -294,7 +315,7 @@ class Thing extends Model
         //merge child data to array but do not write
         $working = [];
         $current = $this->thing_children;
-        switch ($this->thing_merge_method_json) {
+        switch ($this->thing_merge_method) {
             case TypeOfMergeLogic::UNION:
             case TypeOfMergeLogic::INTERSECTION:
             case TypeOfMergeLogic::DIFFERENCE:
@@ -310,7 +331,7 @@ class Thing extends Model
             if ($json_of_child === null) {continue;}
             $all_json[] = $json_of_child;
         }
-        $json =  TypeOfMergeLogic::mergeArrays($this->thing_merge_method_json,$all_json);
+        $json =  TypeOfMergeLogic::mergeArrays($this->thing_merge_method,$all_json);
 
         $all_stuff = [];
         foreach ($working as  $childer) {
@@ -320,7 +341,7 @@ class Thing extends Model
             }
         }
 
-        return TypeOfMergeLogic::mergeArrays($this->thing_merge_method_json,$all_stuff);
+        return TypeOfMergeLogic::mergeArrays($this->thing_merge_method,$all_stuff);
     }
 
     /**
@@ -345,26 +366,51 @@ class Thing extends Model
                 // if any child json then do json merge logic
 
                 //see if action or api or attribute rule
-                $type = ElementType::getElementType(id: $this->api_or_action_type_id);
-                if (is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Api')) {
-                    /** @var \App\Api\Calls\IApiThingResult $result */
-                    $result = ApiMapper::getApiInterface(BuildApiFacet::FACET_RESPONSE, $type::getClassUuid());
-                    $result->processChildrenData($this);
-                    $result->writeReturn($this->thing_result);
-                } elseif (is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction')) {
-                    /** @var \App\Api\Cmd\IActionWorker $work */
-                    $work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER, $type::getClassUuid());
 
-                    /** @var \App\Api\Cmd\IActionParams $params */
-                    $params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS, $type::getClassUuid());
+                if ( $this->api_type_id) {
+                    $type = ElementType::getElementType(id:  $this->api_type_id);
+                    if(is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Api')) {
+                        /** @var \App\Api\Calls\IApiThingResult $result */
+                        $result = ApiMapper::getApiInterface(BuildApiFacet::FACET_RESPONSE, $type::getClassUuid());
+                        $result->processChildrenData($this);
+                        $result->writeReturn($this->thing_result);
+                    } else {
+                        throw new \LogicException("Thing api type is not an api: $type->ref_uuid " . $type->getName());
+                    }
 
-                    $params->processChildrenData($this);
-                    $work_results = $work::doWork($params);
-                    $work_results->toThing($this);
+                } else if ($this->action_type_id) {
+
+                    $type = ElementType::getElementType(id:  $this->action_type_id);
+                    if(is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) {
+                        /** @var \App\Api\Cmd\IActionWorker $work */
+                        $work = ActionMapper::getActionInterface(BuildActionFacet::FACET_WORKER, $type::getClassUuid());
+
+                        /** @var \App\Api\Cmd\IActionParams $params */
+                        $params = ActionMapper::getActionInterface(BuildActionFacet::FACET_PARAMS, $type::getClassUuid());
+
+                        $params->processChildrenData($this);
+                        $work_results = $work::doWork($params);
+                        $work_results->toThing($this);
+                    } else {
+                        throw new \LogicException("Thing action type is not an action: $type->ref_uuid " . $type->getName());
+                    }
+
+                }
+
+                else if ($this->event_type_id) {
+
+                    $type = ElementType::getElementType(id:  $this->event_type_id);
+                    if(is_subclass_of($type, 'App\Sys\Res\Types\Stk\Root\Evt\BaseEvent') ) {
+                        //todo somehow the server listeners are found here and each rule chain is put into the tree
+
+                    } else {
+                        throw new \LogicException("Thing action type is not a event: $type->ref_uuid " . $type->getName());
+                    }
 
                 } else {
-                    throw new \LogicException("Thing has neither an action or api: $type->ref_uuid " . $type->getName());
+                    throw new \LogicException("Thing has neither action, api or event");
                 }
+
                 $this->thing_status = TypeOfThingStatus::THING_SUCCESS;
             }
             DB::commit();
@@ -400,28 +446,59 @@ class Thing extends Model
     }
 
     /**
-     *
-     * todo when api success then need to update the response with the facet for the API response
-     *
-     * todo any request can have a user callback uri set in the collection,
-     *  so create the result row for the api call when this is made, and set the result callback if that url is set
+     * This is only called for events or api that run on this server
      */
-    public static function makeApiCall(string $uuid,Collection $collection,?Phase $phase = null) : Thing {
+    public static function makeThingTree(
+                                            ServerEvent $server_event,
+                                            Collection $collection,
+                                            Phase $phase,
+                                            ?Thing $after_thing = null,
+                                            int $start_at_ts = null,
+                                            int $invalid_at_ts = null
+    )
+    : Thing {
+        if ($server_event->event_access === TypeOfServerEventAccess::FORBIDDEN_EVENT) {
+            throw new \LogicException("cannot run server event if forbidden on this server: ".$server_event->id);}
+
+
 
         $root = new Thing();
 
-        $api_call_type = ElementType::getElementType(uuid: $uuid);
-        $root->api_or_action_type_id = $api_call_type->id;
 
-        if (!$phase) {$phase = Phase::getDefaultPhase();}
+        $root->event_type_id = $server_event->event_trigger_type_id;
+        //todo get the rule tree and make a mirror thing tree using the collection to set (and if any path id, then set that in the collection for that node)
+        // next step is to get the rule tree from the postgres recursive call and walk through the tree, so (recursive, then make tree resetting the path or unsetting it for each node)
+        /*
+the attribute_rules.rule_path_id is part of the caller data setup for that action
+parent_thing_id => setup when the tree is created
+after_thing_id  => null for api calls
+api_type_id => the api type (if this is a root)
+action_type_id => the action type (if from rule tree or api)
+thing_rule_id => attribute_rules.id
+thing_phase_id => from the caller data (see caller data setup), unless attribute_rules.rule_phase_id
+
+thing_start_at => null for api calls
+thing_invalid_at => null for api calls
+process_started_at =>setup when run
+is_waiting_on_hook => hook api or null
+debugging_breakpoint => hook api or null
+thing_rank => attribute_rules.rule_rank
+
+thing_child_logic => attribute_rules.child_logic
+thing_logic => attribute_rules.rule_logic
+thing_merge_method => attribute_rules.rule_merge_method
+         */
+
+
         $root->thing_phase_id = $phase->id;
         $root->save();
+        //todo get any relevant thing hooks/thing settings, and make clusters of them for the thing (use the collection for fine tuning this for type
         /** @var \App\Api\IApiOaParams $params */
-        $params = ApiMapper::getApiInterface(BuildApiFacet::FACET_PARAMS,$uuid);
+        $params = ApiMapper::getApiInterface(BuildApiFacet::FACET_PARAMS,$server_event->listening_to_event->ref_uuid);
         $params->fromCollection($collection);
 
         /** @var IApiThingSetup $setup */
-        $setup = ApiMapper::getApiInterface(BuildApiFacet::FACET_SETUP,$uuid);
+        $setup = ApiMapper::getApiInterface(BuildApiFacet::FACET_SETUP,$server_event->listening_to_event->ref_uuid);
         $setup->setupDataWithThing($root, $params);
         $actions = $setup->getActions();
 
@@ -429,6 +506,46 @@ class Thing extends Model
             static::makeAction($root,$action);
         }
         return static::getThing(id:$root->id);
+
+    }
+
+    /**
+     *
+     * todo when api success then need to update the response with the facet for the API response
+     *
+     * todo any request can have a user callback uri set in the collection,
+     *  so create the result row for the api call when this is made, and set the result callback if that url is set
+     *
+     *
+     * @property int caller_attribute_id
+     * @property int caller_user_id
+     * @property int caller_element_id
+     * @property int caller_type_id
+     * @property int caller_server_id
+     */
+    public static function makeApiCall(string $uuid,?Collection $collection =null,?Phase $phase = null,
+                                       ?ElementSet $caller_set = null,?ElementType $caller_type = null,
+                                       ?Attribute $caller_attribute = null,?Element $caller_element = null,
+                                       ?UserNamespace $caller_namespace = null,?Server $caller_server = null
+    )
+    : Thing {
+        if (!$phase) {$phase = Phase::getDefaultPhase();}
+        if (!$caller_server) { $caller_server = Server::getDefaultServer();}
+        if (!$caller_namespace) { $caller_namespace = Utilities::getCurrentNamespace();}
+        if (!$collection) {$collection = new Collection();}
+        if ($caller_set) {$collection->put('caller_set',$caller_set); }
+        if ($caller_type) {$collection->put('caller_type',$caller_type); }
+        if ($caller_attribute) {$collection->put('caller_attribute',$caller_attribute); }
+        if ($caller_element) {$collection->put('caller_element',$caller_element); }
+        if ($caller_namespace) {$collection->put('caller_namespace',$caller_namespace); }
+        if ($caller_server) {$collection->put('caller_server',$caller_server); }
+
+        $api_call_type = ElementType::getElementType(uuid: $uuid);
+        if (!is_subclass_of($api_call_type, 'App\Sys\Res\Types\Stk\Root\Api') ) {
+            throw new \LogicException("Can only call with api types here: ". $api_call_type->getUuid());
+        }
+        $server_event = ServerEvent::getEvent(event_type_id: $api_call_type->id, event_server_id: $caller_server->id);
+        return static::makeThingTree(server_event: $server_event,collection: $collection,phase: $phase);
 
     }
 
@@ -441,7 +558,7 @@ class Thing extends Model
         $node->parent_thing_id = $parent_thing->id;
         $uuid = $action_node->getActionClass()::getClassUuid();
         $api_call_type = ElementType::getElementType(uuid: $uuid);
-        $node->api_or_action_type_id = $api_call_type->id;
+        $node->api_type_id = $api_call_type->id;
         $node->thing_phase_id = $parent_thing->thing_phase_id;
         $node->thing_child_logic = $action_node->getActionChildLogic();
         $node->thing_logic = $action_node->getActionLogic();
@@ -539,4 +656,4 @@ class Thing extends Model
         return "Hook # $this->id";
     }
 
-}
+            }

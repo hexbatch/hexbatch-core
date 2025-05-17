@@ -67,12 +67,11 @@ the rules can react there when creation events to things in the set, the paths i
  * @property int owning_server_event_id
  * @property int parent_rule_id
  * @property int rule_phase_id
- * @property int rule_action_or_event_type_id
+ * @property int rule_action_type_id
  * @property int rule_path_id
  * @property int rule_rank
  * @property string ref_uuid
  * @property string rule_name
- * @property string filter_json_path
  * @property string top_json_key
  *
  * @property TypeOfLogic rule_child_logic
@@ -344,7 +343,7 @@ class AttributeRule extends Model
                      */
                     $event_type = (new ElementType())->resolveRouteBinding($hint_event);
                     //todo see if the event type is a valid event
-                    $this->rule_action_or_event_type_id = $event_type->id;
+                    $this->rule_action_type_id = $event_type->id;
                 }
             }
 
@@ -365,10 +364,7 @@ class AttributeRule extends Model
                 $this->rule_merge_method = TypeOfMergeLogic::tryFromInput($collect->get('rule_merge_method'));
             }
 
-            if ($collect->has('filter_json_path')) {
-                $this->filter_json_path = $collect->get('filter_json_path');
-                Utilities::testValidJsonPath($this->filter_json_path);
-            }
+
 
             try {
                 $this->save();

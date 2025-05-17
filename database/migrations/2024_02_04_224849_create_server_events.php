@@ -20,7 +20,7 @@ return new class extends Migration
 
             $table->foreignId('event_trigger_type_id')
                 ->nullable(false)
-                ->comment("The event that this imported type will call")
+                ->comment("The event which this is listening for")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()

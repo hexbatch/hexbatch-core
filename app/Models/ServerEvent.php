@@ -98,11 +98,34 @@ class ServerEvent extends Model
         return $this->belongsTo(ElementType::class,'event_trigger_type_id');
     }
 
+    public static function getEvent(
+        ?int $id = null,
+        ?int $owning_attribute_id = null,
+        ?int $event_type_id = null,
+        ?int $event_server_id = null,
+    ) : ServerEvent {
+        $ret = static::buildEvent(id:$id,owning_attribute_id:$owning_attribute_id, event_type_id: $event_type_id, event_server_id: $event_server_id)->first();
+
+        if (!$ret) {
+            $arg_types = [];
+            $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($owning_attribute_id) { $arg_types[] = 'attribute'; $arg_vals[] = $owning_attribute_id;}
+            if ($event_type_id) { $arg_types[] = 'type'; $arg_vals[] = $event_type_id;}
+            if ($event_server_id) { $arg_types[] = 'server'; $arg_vals[] = $event_server_id;}
+
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new \LogicException("Could not find server event via $arg_type : $arg_val");
+        }
+        return $ret;
+    }
 
     public static function buildEvent(
         ?int $id = null,
-        ?int $owning_attribute = null,
-        ?int $event_type_id = null
+        ?int $owning_attribute_id = null,
+        ?int $event_type_id = null,
+        ?int $event_server_id = null,
     )
     : Builder
     {
@@ -119,13 +142,18 @@ class ServerEvent extends Model
             $build->where('server_events.id',$id);
         }
 
-        if ($owning_attribute) {
-            $build->where('server_events.owning_attribute_id',$owning_attribute);
+        if ($owning_attribute_id) {
+            $build->where('server_events.owning_attribute_id',$owning_attribute_id);
         }
 
         if ($event_type_id) {
             $build->where('server_events.event_trigger_type_id',$event_type_id);
         }
+
+        if ($event_server_id) {
+            $build->where('server_events.event_server_id',$event_server_id);
+        }
+
 
 
 

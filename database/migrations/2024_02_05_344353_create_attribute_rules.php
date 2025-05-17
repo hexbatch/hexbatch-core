@@ -44,7 +44,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->foreignId('rule_action_or_event_type_id')
+            $table->foreignId('rule_action_type_id')
                 ->nullable()->default(null)
                 ->comment("The event that is being listened, or the action being done")
                 ->index()
@@ -125,9 +125,6 @@ return new class extends Migration
 
         Schema::table('attribute_rules', function (Blueprint $table) {
 
-            $table->string('filter_json_path')
-                ->nullable()->default(null)
-                ->comment("if set then the data this rule node has will filter the child results to only have matching in one json to give to the parent");
 
             $table->string('rule_name',256)->nullable(false)
                 ->comment("The name of the rule (does not have to be unique and is optional. Can also have notes");

@@ -25,7 +25,10 @@ class ThingResponse implements IApiOaResponse
     public string $status;
 
     #[OA\Property(title: 'Api Name')]
-    public string $api_name;
+    public ?string $api_name;
+
+    #[OA\Property(title: 'Action Name')]
+    public ?string $action_name;
 
     #[OA\Property(title: 'Is Waiting')]
     public bool $waiting;
@@ -44,9 +47,14 @@ class ThingResponse implements IApiOaResponse
         $this->uuid = $thing->ref_uuid;
         $this->parent_uuid = $thing->thing_parent?->ref_uuid;
         $this->status = $thing->thing_status->value;
-        if ($thing->api_or_action_type_id) {
-            $type = ElementType::getElementType(id: $thing->api_or_action_type_id);
+        if ($thing->api_type_id) {
+            $type = ElementType::getElementType(id: $thing->api_type_id);
             $this->api_name = $type->getName();
+            $this->action_name = null;
+        } elseif ($thing->action_type_id) {
+            $type = ElementType::getElementType(id: $thing->action_type_id);
+            $this->action_name = $type->getName();
+            $this->api_name = null;
         }
         $this->waiting = false;
         if ($thing->is_waiting_on_hook) { $this->waiting = true;}

@@ -64,9 +64,25 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('api_or_action_type_id')
+            $table->foreignId('api_type_id')
                 ->nullable()->default(null)
-                ->comment("When api is made, its type is put here")
+                ->comment("When api starts a thing tree, its type is put here")
+                ->index()
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('action_type_id')
+                ->nullable()->default(null)
+                ->comment("When thing is about action, its type is put here")
+                ->index()
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('event_type_id')
+                ->nullable()->default(null)
+                ->comment("When thing tree is about an event, its type is put here")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
@@ -94,7 +110,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->timestamp('thing_start_after')->nullable()->default(null)
+            $table->timestamp('thing_start_at')->nullable()->default(null)
                 ->comment('if set, then this will be done after the time, and not before');
 
             $table->timestamp('thing_invalid_at')->nullable()->default(null)
@@ -139,11 +155,10 @@ return new class extends Migration
 
         DB::statement("ALTER TABLE things Add COLUMN thing_child_logic type_of_logic NOT NULL default 'and';");
         DB::statement("ALTER TABLE things Add COLUMN thing_logic type_of_logic NOT NULL default 'and';");
-        DB::statement("ALTER TABLE things Add COLUMN thing_merge_method_json type_of_merge_logic NOT NULL default 'union';");
-        DB::statement("ALTER TABLE things Add COLUMN thing_merge_method_data type_of_merge_logic NOT NULL default 'union';");
+        DB::statement("ALTER TABLE things Add COLUMN thing_merge_method type_of_merge_logic NOT NULL default 'union';");
 
         Schema::table('things', function (Blueprint $table) {
-            $table->index(['thing_status','thing_start_after']);
+            $table->index(['thing_status','thing_start_at']);
         });
 
 

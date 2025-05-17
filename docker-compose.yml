@@ -70,7 +70,7 @@ services:
   redis_hbc:
     image: redis
     container_name: redis_hbc
-    command: redis-server --save 60 1 --loglevel warning --requirepass "${REDIS_PASSWORD}"
+    command: redis-server  --loglevel warning --requirepass "${REDIS_PASSWORD}"
     volumes:
         - hbc_redis_data:/var/lib/redis/data
     ports:
