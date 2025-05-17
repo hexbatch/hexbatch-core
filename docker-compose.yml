@@ -14,13 +14,12 @@ services:
   webserver_hbc:
     container_name: webserver_hbc
     build:
-      context: ./docker/php
+      context: .docker/php
     ports:
       - "${HBC_PHP_WEBSERVER_PORT}:80"
     volumes:
       - ./:/var/www/html
     environment:
-      XDEBUG_CONFIG: client_host=host.docker.internal
       APACHE_DOCUMENT_ROOT: /var/www/html/public
     depends_on:
       - db_hbc
@@ -34,7 +33,7 @@ services:
   db_hbc:
     container_name: db_hbc
     build:
-      context: ./docker/postgres
+      context: .docker/postgres
     restart: always
     environment:
       POSTGRES_DB: "${HBC_DATABASE_ROOT_USER}"
