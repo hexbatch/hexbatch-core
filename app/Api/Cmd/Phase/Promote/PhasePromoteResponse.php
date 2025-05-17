@@ -10,7 +10,6 @@ use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 
 use App\Models\Phase;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph\PhasePromote;
 
 
@@ -25,7 +24,7 @@ class PhasePromoteResponse extends PhasePromote implements IActionWorkReturn,IAc
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

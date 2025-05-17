@@ -1,6 +1,6 @@
 <?php /** @noinspection DuplicatedCode */
 namespace App\Enums\Rules;
-use App\Models\ThingDatum;
+use App\Models\HexbatchDatum;
 
 /**
  * postgres enum type_of_merge_logic
@@ -71,7 +71,7 @@ enum TypeOfMergeLogic : string {
 
 
     /**
-     *  each array can have elements, each element can be a key or list: with primitives, arrays (list or hash) or ThingData
+     *  each array can have elements, each element can be a key or list: with primitives, arrays (list or hash) or HexbatchDatum
      *  The first array has the items all the other arrays must have
      *  the second array can have matching items anywhere if both are a list, but if hash the keys must match
      *
@@ -88,13 +88,13 @@ enum TypeOfMergeLogic : string {
         if (array_is_list($b) && !array_is_list($a)) {return [];}
         $ret = [];
         if (array_is_list($b) && array_is_list($a)) {
-            //primitives and ThingData can be in different indexes, and repeated, but we will combine any repeats. Arrays are index dependent, same index arrays are intersected
+            //primitives and HexbatchDatum can be in different indexes, and repeated, but we will combine any repeats. Arrays are index dependent, same index arrays are intersected
             $rem = [];
 
-            //build hash of ThingDatum
+            //build hash of HexbatchDatum
             $b_data = [];
             foreach ($b as  $b_val) {
-                if ($b_val instanceof ThingDatum) {
+                if ($b_val instanceof HexbatchDatum) {
                     $b_data[strval($b_val->id)] = $b_val;
                 }
             }
@@ -109,7 +109,7 @@ enum TypeOfMergeLogic : string {
                         $ret[] =$a_val;
                     }
                 }
-                elseif ($a_val instanceof ThingDatum) {
+                elseif ($a_val instanceof HexbatchDatum) {
                     if (array_key_exists(strval($a_val->id),$b_data)) {
                         unset($b_data[$a_val->id]); //keep data unique
                         $ret[] = $a_val;
@@ -134,7 +134,7 @@ enum TypeOfMergeLogic : string {
             }
         } else {
 
-            //do the hashes get common keys and compare the value of the key, the value can be a primitive, array or ThingData
+            //do the hashes get common keys and compare the value of the key, the value can be a primitive, array or HexbatchDatum
             $distict_keys = array_intersect_key($a,$b);
             foreach ($distict_keys as $some_key) {
                 $a_val = $a[$some_key];
@@ -142,7 +142,7 @@ enum TypeOfMergeLogic : string {
                 $a_type = gettype($a_val);
                 if ($a_type==='boolean' || $a_type==='integer' || $a_type==='double' || $a_type==='string') {
                     if ($a_val === $b_val) { $ret[$some_key]= $a_val;}
-                } else if ($a_val instanceof ThingDatum && $b_val instanceof ThingDatum) {
+                } else if ($a_val instanceof HexbatchDatum && $b_val instanceof HexbatchDatum) {
                     if ($a_val->id === $b_val->id) { $ret[$some_key] = $a_val; }
                 } else if( is_array($a_val) && is_array($b_val)) {
                     $maybe = TypeOfMergeLogic::mergeIntersection($a_val,$b_val);
@@ -158,14 +158,14 @@ enum TypeOfMergeLogic : string {
 
 
     /**
-     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash) or ThingData
+     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash) or HexbatchDatum
      * the results is items not in either array
      * if one array is a list and the other is a hash, then return empty array
      * if both are lists, then only unique items, any arrays kept have their original structure
      * if both are hashes, then only keys that are different
-     * @param array|ThingDatum[] $a
-     * @param array|ThingDatum[]  $b
-     * @return array|ThingDatum[]
+     * @param array|HexbatchDatum[] $a
+     * @param array|HexbatchDatum[]  $b
+     * @return array|HexbatchDatum[]
      */
     protected static function mergeDifference(array $a, array $b) : array {
 
@@ -189,17 +189,17 @@ enum TypeOfMergeLogic : string {
             }
 
 
-            //build hash of ThingDatum
+            //build hash of HexbatchDatum
             $b_data = [];
             foreach ($b as  $b_val) {
-                if ($b_val instanceof ThingDatum) {
+                if ($b_val instanceof HexbatchDatum) {
                     $b_data[strval($b_val->id)] = $b_val;
                 }
             }
 
             $a_data = [];
             foreach ($a as  $a_val) {
-                if ($a_val instanceof ThingDatum) {
+                if ($a_val instanceof HexbatchDatum) {
                     $a_data[strval($a_val->id)] = $a_val;
                 }
             }
@@ -211,7 +211,7 @@ enum TypeOfMergeLogic : string {
                     if (!in_array($json,$rem_b_arrays)) {
                         $ret[] = $a_val;
                     }
-                } elseif ($a_val instanceof ThingDatum) {
+                } elseif ($a_val instanceof HexbatchDatum) {
                     if (!array_key_exists(strval($a_val->id),$b_data)) {
                         $ret[] = $a_val;
                     }
@@ -226,7 +226,7 @@ enum TypeOfMergeLogic : string {
                     if (!in_array($json,$rem_a_arrays)) {
                         $ret[] = $b_val;
                     }
-                } elseif ($b_val instanceof ThingDatum) {
+                } elseif ($b_val instanceof HexbatchDatum) {
                     if (!array_key_exists(strval($b_val->id),$a_data)) {
                         $ret[] = $b_val;
                     }
@@ -252,14 +252,14 @@ enum TypeOfMergeLogic : string {
 
 
     /**
-     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash) or ThingData
+     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash) or HexbatchDatum
      * the result is items in both arrays
      * if one array is a list and the other is a hash, then return empty array
      * if both are lists, then only unique items, any arrays kept have their original structure, so no array merging
      * if both are hashes, then common keys are combined, with array merging (this call recursive) and the others are kept
-     * @param array|ThingDatum[] $a
-     * @param array|ThingDatum[]  $b
-     * @return array|ThingDatum[]
+     * @param array|HexbatchDatum[] $a
+     * @param array|HexbatchDatum[]  $b
+     * @return array|HexbatchDatum[]
      */
     protected static function mergeUnion(array $a, array $b) : array
     {
@@ -277,7 +277,7 @@ enum TypeOfMergeLogic : string {
                         $ret[] = $a_val;
                         $rem[] = $json;
                     }
-                } elseif ($a_val instanceof ThingDatum) {
+                } elseif ($a_val instanceof HexbatchDatum) {
                     if (!in_array($a_val->id . '-data-key',$rem)) {
                         $ret[] = $a_val;
                         $rem[] = $a_val->id . '-data-key';
@@ -294,7 +294,7 @@ enum TypeOfMergeLogic : string {
                         $ret[] = $b_val;
                         $rem[] = $json;
                     }
-                } elseif ($b_val instanceof ThingDatum) {
+                } elseif ($b_val instanceof HexbatchDatum) {
                     if (!in_array($b_val->id . '-data-key',$rem)) {
                         $ret[] = $b_val;
                         $rem[] = $b_val->id . '-data-key';

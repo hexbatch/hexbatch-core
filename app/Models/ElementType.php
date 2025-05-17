@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Bounds\TypeOfLocation;
-use App\Enums\Things\TypeOfThingStatus;
+use App\Enums\Things\TypeOfHexbatchDataStatus;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
@@ -312,7 +312,7 @@ class ElementType extends Model implements IType,ISystemModel
         if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return true;}
         if (Element::where('element_parent_type_id',$this->id)->exists() ) {return true;}
         if (ElementTypeParent::where('parent_type_id',$this->id)->exists() ) {return true;}
-        if (ThingDatum::buildThingData(collection_type_id:$this->id,thing_status: TypeOfThingStatus::THING_PENDING)->exists() ) {return true;}
+        if (HexbatchDatum::buildThingData(collection_type_id:$this->id,thing_status: TypeOfHexbatchDataStatus::THING_PENDING)->exists() ) {return true;}
 
         //and cannot delete if in a path used by a thing
         if (PathPart::buildPathPart(pending_thing_type_id: $this->id)->exists() ) { return true;}

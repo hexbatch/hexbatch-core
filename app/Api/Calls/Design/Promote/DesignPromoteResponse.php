@@ -4,8 +4,7 @@ namespace App\Api\Calls\Design\Promote;
 
 use App\Api\Calls\IApiThingResult;
 use App\Api\IApiOaResponse;
-use App\Models\Thing;
-use App\Models\ThingResult;
+
 use App\Sys\Res\Types\Stk\Root\Api\Design\Promotion;
 
 /**
@@ -14,12 +13,12 @@ use App\Sys\Res\Types\Stk\Root\Api\Design\Promotion;
 class DesignPromoteResponse  extends Promotion implements IApiThingResult,IApiOaResponse
 {
 
-    public function writeReturn(ThingResult $result): void
+    public function writeReturn( $result): void
     {
 
     }
 
-    public function processChildrenData(Thing $thing): void
+    public function processChildrenData( $thing): void
     {
         // TODO: Implement processChildrenData() method.
     }

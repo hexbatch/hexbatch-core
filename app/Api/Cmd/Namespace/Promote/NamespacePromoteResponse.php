@@ -7,7 +7,6 @@ use App\Api\Cmd\IActionWorker;
 use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\Server;
-use App\Models\Thing;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespacePromote;
 
@@ -23,7 +22,7 @@ class NamespacePromoteResponse extends NamespacePromote implements IActionWorkRe
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
         $thing->setCurrentData([$this->generated_namespace]);
     }

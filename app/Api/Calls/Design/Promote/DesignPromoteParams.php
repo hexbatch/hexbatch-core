@@ -6,7 +6,6 @@ use App\Api\BaseParams;
 use App\Api\Calls\IApiThingSetup;
 use App\Api\IApiOaParams;
 use App\Helpers\Actions\ActionNode;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Api\Design\Promotion;
 use Illuminate\Support\Collection;
 
@@ -21,7 +20,7 @@ class DesignPromoteParams extends Promotion implements IApiOaParams, IApiThingSe
 
 
 
-    public function setupDataWithThing(Thing $thing, $params): void
+    public function setupDataWithThing( $thing, $params): void
     {
 
     }

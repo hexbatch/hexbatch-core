@@ -4,7 +4,6 @@ namespace App\Api\Calls;
 
 
 use App\Helpers\Actions\ActionNode;
-use App\Models\Thing;
 
 /**
  * gather data in setters
@@ -45,7 +44,7 @@ use App\Models\Thing;
  */
 interface IApiThingSetup
 {
-    public function setupDataWithThing(Thing $thing, $params): void ;
+    public function setupDataWithThing( $thing, $params): void ;
 
     /**
      * @return ActionNode[]

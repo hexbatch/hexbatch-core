@@ -12,16 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('thing_data', function (Blueprint $table) {
+        Schema::create('hexbatch_data', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('owning_thing_id')
-                ->nullable()->default(null)
-                ->comment("Set belong to this thing")
-                ->index()
-                ->constrained('things')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('collection_attribute_id')
                 ->nullable()->default(null)
@@ -109,9 +102,9 @@ return new class extends Migration
                 'from_action_setup',
                 'from_api_setup');");
 
-        DB::statement("ALTER TABLE thing_data Add COLUMN thing_data_source type_of_thing_data_source NOT NULL default 'not_set';");
+        DB::statement("ALTER TABLE hexbatch_data Add COLUMN thing_data_source type_of_thing_data_source NOT NULL default 'not_set';");
 
-        DB::statement("ALTER TABLE thing_data ADD CONSTRAINT chk_one_thing_set CHECK (
+        DB::statement("ALTER TABLE hexbatch_data ADD CONSTRAINT chk_one_thing_set CHECK (
             num_nonnulls(collection_attribute_id  ,collection_type_id, collection_namespace_id, collection_element_id, collection_set_id) = 1)
         ;");
     }
@@ -121,7 +114,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('thing_data');
+        Schema::dropIfExists('hexbatch_data');
         DB::statement("DROP TYPE type_of_thing_data_source;");
 
     }

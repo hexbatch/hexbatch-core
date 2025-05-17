@@ -7,7 +7,6 @@ use App\Api\Cmd\IActionOaResponse;
 use App\Api\Cmd\IActionWorkReturn;
 use App\Api\Common\HexbatchUuid;
 
-use App\Models\Thing;
 use App\Models\User;
 use Carbon\Carbon;
 use OpenApi\Attributes as OA;
@@ -41,7 +40,7 @@ class NewUserReturn extends Act\Cmd\Us\UserRegister implements IActionOaResponse
     }
 
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
         $thing->setCurrentData([$this->user]);
     }

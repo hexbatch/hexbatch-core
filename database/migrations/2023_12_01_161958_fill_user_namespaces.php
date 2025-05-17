@@ -102,7 +102,7 @@ return new class extends Migration
             $table->string('namespace_name',61)
                 ->nullable(false)
                 ->index()
-                ->comment("All things created by this user_token is prefixed by this name");
+                ->comment("All created by this user_token is prefixed by this name");
         });
 
         DB::statement(/** @lang text */

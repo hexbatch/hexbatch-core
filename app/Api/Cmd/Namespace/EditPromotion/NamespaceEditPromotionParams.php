@@ -4,7 +4,6 @@ namespace App\Api\Cmd\Namespace\EditPromotion;
 use App\Api\Cmd\IActionOaInput;
 use App\Api\Cmd\IActionParams;
 use App\Api\Cmd\Namespace\NamespaceParams;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespaceEditPromotion;
 
 
@@ -20,15 +19,15 @@ class NamespaceEditPromotionParams extends NamespaceEditPromotion implements IAc
             throw new \LogicException("Uuid needs to be set before you can edit the ns");
         }
     }
-    public function setupThingData(Thing $thing): void
+    public function setupThingData(mixed $thing): void
     {
 
     }
 
-    public function setupDataWithThing(Thing $thing): void
+    public function setupDataWithThing(mixed $thing): void
     {
         // TODO: Implement pushData() method.
     }
 
-    public function processChildrenData( Thing $thing): void {}
+    public function processChildrenData(mixed $thing): void {}
 }

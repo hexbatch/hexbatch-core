@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Enums\Things\TypeOfThingStatus;
+use App\Enums\Things\TypeOfHexbatchDataStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -336,7 +336,7 @@ class UserNamespace extends Model implements INamespace,ISystemModel
         if( ElementType::where('owner_namespace_id',$this->id)->exists() ) {return true;}
         if( Server::where('owning_namespace_id',$this->id)->exists() ) {return true;}
         if( Element::where('element_namespace_id',$this->id)->exists() ) {return true;}
-        if (ThingDatum::buildThingData(collection_namespace_id:$this->id,thing_status: TypeOfThingStatus::THING_PENDING)->exists() ) {return true;}
+        if (HexbatchDatum::buildThingData(collection_namespace_id:$this->id,thing_status: TypeOfHexbatchDataStatus::THING_PENDING)->exists() ) {return true;}
         return false;
     }
 

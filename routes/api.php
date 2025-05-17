@@ -563,60 +563,6 @@ Route::prefix('v1')->group(function () {
             }); //end design
 
 
-            Route::prefix('things')->group(function () {
-                Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
-
-                    Route::get('list', [Api\ThingController::class, 'thing_list'])->name('core.things.list');
-
-                    Route::prefix('{thing}')->group(function () {
-
-                        Route::get('show', [Api\ThingController::class, 'thing_show'])->name('core.things.show');
-                        Route::get('inspect', [Api\ThingController::class, 'thing_inspect'])->name('core.things.inspect');
-                        Route::delete('trim', [Api\ThingController::class, 'thing_trim_tree'])->name('core.things.trim');
-
-
-
-                        Route::prefix('debugging')->group(function () {
-                            Route::post('breakpoint', [Api\ThingController::class, 'thing_add_breakpoint'])->name('core.things.debugging.breakpoint');
-                            Route::delete('clear', [Api\ThingController::class, 'thing_clear_breakpoint'])->name('core.things.debugging.clear_breakpoint');
-                            Route::post('run', [Api\ThingController::class, 'thing_run'])->name('core.things.debugging.run');
-                            Route::post('single_step', [Api\ThingController::class, 'thing_single_step'])->name('core.things.debugging.single_step');
-                            Route::patch('pause', [Api\ThingController::class, 'thing_pause'])->name('core.things.debugging.pause');
-                            Route::patch('unpause', [Api\ThingController::class, 'thing_unpause'])->name('core.things.debugging.unpause');
-                        });
-
-                        Route::prefix('rates')->group(function () {
-
-                            Route::post('apply', [Api\ThingController::class, 'thing_rate_apply'])->name('core.things.rates.apply');
-                            Route::get('list', [Api\ThingController::class, 'thing_rate_list'])->name('core.things.rates.list');
-
-                            Route::prefix('{thing_setting}')->group(function () {
-                                Route::middleware(Middleware\ValidateThingSettingOwnership::class)->group(function () {
-                                    Route::delete('remove', [Api\ThingController::class, 'thing_rate_remove'])->name('core.things.rates.remove');
-                                    Route::get('show', [Api\ThingController::class, 'thing_rate_show'])->name('core.things.rates.show');
-                                    Route::post('edit', [Api\ThingController::class, 'thing_rate_edit'])->name('core.things.rates.edit');
-                                });
-                            });
-                        });
-
-                        Route::prefix('hooks')->group(function () {
-                            Route::get('list', [Api\ThingController::class, 'thing_hook_list'])->name('core.things.hooks.list');
-                            Route::post('create', [Api\ThingController::class, 'thing_hook_create'])->name('core.things.hooks.create');
-
-
-                            Route::prefix('{thing_hook}')->group(function () {
-                                Route::middleware(Middleware\ValidateThingHookOwnership::class)->group(function () {
-                                    Route::get('show', [Api\ThingController::class, 'thing_hook_show'])->name('core.things.hooks.show');
-                                    Route::patch('edit', [Api\ThingController::class, 'thing_hook_edit'])->name('core.things.hooks.edit');
-                                    Route::delete('destroy', [Api\ThingController::class, 'thing_hook_destroy'])->name('core.things.hooks.destroy');
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-
-
 
         }); //end user namespace defined behavior
 

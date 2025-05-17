@@ -3,20 +3,18 @@
 namespace App\Models;
 
 
-use App\Enums\Things\TypeOfThingDataSource;
-use App\Enums\Things\TypeOfThingStatus;
+use App\Enums\Things\TypeOfHexbatchDataSource;
+use App\Enums\Things\TypeOfHexbatchDataStatus;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\JoinClause;
 
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int owning_thing_id
  * @property int collection_attribute_id
  * @property int collection_type_id
  * @property int collection_element_id
@@ -27,13 +25,13 @@ use Illuminate\Database\Query\JoinClause;
  * @property int collection_user_id
  * @property bool is_cursor
  * @property ArrayObject collection_json
- * @property TypeOfThingDataSource thing_data_source
+ * @property TypeOfHexbatchDataSource thing_data_source
  *
  */
-class ThingDatum extends Model
+class HexbatchDatum extends Model
 {
 
-    protected $table = 'thing_data';
+    protected $table = 'hexbatch_data';
     public $timestamps = false;
 
     /**
@@ -57,10 +55,10 @@ class ThingDatum extends Model
      */
     protected $casts = [
         'collection_json' => AsArrayObject::class,
-        'thing_data_source' => TypeOfThingDataSource::class,
+        'thing_data_source' => TypeOfHexbatchDataSource::class,
     ];
 
-    const LOGIC_STATE_KEY = 'hex_logic_state';
+    const string LOGIC_STATE_KEY = 'hex_logic_state';
 
     public function isJsonFalse() : bool {
         //if it has non-null json but that json is empty array or empty object or false primitive as first element of array,
@@ -83,7 +81,7 @@ class ThingDatum extends Model
         ?int $id = null,
         ?int $collection_type_id = null,
         ?int $collection_namespace_id = null,
-        ?TypeOfThingStatus $thing_status = null
+        ?TypeOfHexbatchDataStatus $thing_status = null
     )
     : Builder
     {
@@ -91,33 +89,24 @@ class ThingDatum extends Model
         /**
          * @var Builder $build
          */
-        $build =  ThingDatum::select('thing_data.*')
+        $build =  HexbatchDatum::select('hexbatch_data.*')
 
         ;
 
         if ($id) {
-            $build->where('things.id',$id);
+            $build->where('hexbatch_data.id',$id);
         }
 
         if ($collection_type_id) {
-            $build->where('things.collection_type_id',$collection_type_id);
+            $build->where('hexbatch_data.collection_type_id',$collection_type_id);
         }
 
         if ($collection_namespace_id) {
-            $build->where('things.collection_namespace_id',$collection_namespace_id);
+            $build->where('hexbatch_data.collection_namespace_id',$collection_namespace_id);
         }
 
         if ($thing_status) {
-            $build->join('things',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($thing_status) {
-                    $join
-                        ->on('things.id','=','things.owning_thing_id')
-                        ->where('things.thing_status',$thing_status);
-                }
-            );
+           throw new \RuntimeException("not implemented");
         }
 
 

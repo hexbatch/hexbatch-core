@@ -15,7 +15,7 @@ class UserRegistrationResult  extends Api\User\UserRegister implements IApiOaRes
 {
 
     #[OA\Property(title: 'Created User')]
-    protected NewUserReturn $created_user;
+    public NewUserReturn $created_user;
 
 
     public function __construct(User $user)

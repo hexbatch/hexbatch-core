@@ -6,7 +6,6 @@ use App\Api\Cmd\IActionParams;
 
 use App\Api\Cmd\Server\ServerParams;
 
-use App\Models\Thing;
 
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Server\ServerPromote;
 
@@ -17,16 +16,16 @@ class ServerPromoteParams extends ServerPromote implements IActionParams,IAction
     use ServerParams;
 
 
-    public function setupThingData(Thing $thing): void
+    public function setupThingData(mixed $thing): void
     {
 
     }
 
 
-    public function setupDataWithThing(Thing $thing): void
+    public function setupDataWithThing(mixed $thing): void
     {
         // TODO: Implement pushData() method.
     }
 
-    public function processChildrenData( Thing $thing): void {}
+    public function processChildrenData(mixed $thing): void {}
 }

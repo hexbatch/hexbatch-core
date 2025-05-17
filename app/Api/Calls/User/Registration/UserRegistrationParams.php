@@ -7,7 +7,6 @@ use App\Api\Calls\IApiThingSetup;
 
 use App\Api\IApiOaParams;
 use App\Helpers\Actions\ActionNode;
-use App\Models\Thing;
 
 use App\Sys\Res\Types\Stk\Root\Api;
 
@@ -33,7 +32,7 @@ class UserRegistrationParams extends Api\User\UserRegister implements IApiOaPara
 
 
 
-    public function setupDataWithThing(Thing $thing, $params): void
+    public function setupDataWithThing( $thing, $params): void
     {
         /*
          *todo The api params will write to the thing data, if it wants to, and then for each of its member actions make a new thing child or descendant, and

@@ -13,9 +13,6 @@ use App\Models\Path;
 use App\Models\PathPart;
 use App\Models\Phase;
 use App\Models\Server;
-use App\Models\Thing;
-use App\Models\ThingHook;
-use App\Models\ThingSetting;
 use App\Models\TimeBound;
 use App\Models\User;
 use App\Models\UserNamespace;
@@ -61,9 +58,6 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('phase', Phase::class);
         Route::model('working_phase', Phase::class);
         Route::model('element_link', ElementLink::class);
-        Route::model('thing', Thing::class);
-        Route::model('thing_setting', ThingSetting::class);
-        Route::model('thing_hook', ThingHook::class);
 
         $this->routes(function () {
             Route::middleware('api')

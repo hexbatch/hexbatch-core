@@ -9,7 +9,6 @@ use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\ElementSet;
 use App\Models\ElementSetMember;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\SetPromote;
 
 class SetPromoteResponse extends SetPromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
@@ -22,7 +21,7 @@ class SetPromoteResponse extends SetPromote implements IActionWorkReturn,IAction
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

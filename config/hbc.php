@@ -18,17 +18,6 @@ return [
     'version' => env('APP_VERSION', \App\Helpers\Utilities::getVersionString()),
 
 
-    'things' => [
-        'rules' => [
-            'pagination_size' => env('HBC_THING_RULE_PAGINATION_SIZE',\App\Models\ThingSetting::DEFAULT_PAGINATION_SIZE),
-            'pagination_limit' => env('HBC_THING_RULE_PAGINATION_LIMIT',\App\Models\ThingSetting::DEFAULT_PAGINATION_LIMIT),
-            'depth_limit' => env('HBC_THING_RULE_DEPTH_LIMIT',\App\Models\ThingSetting::DEFAULT_DEPTH_LIMIT),
-            'backoff_page_policy' => env('HBC_THING_RULE_BACKOFF_PAGE_POLICY',\App\Models\ThingSetting::DEFAULT_BACKOFF_PAGE_POLICY),
-            'backoff_rate_policy' => env('HBC_THING_RULE_BACKOFF_RATE_POLICY',\App\Models\ThingSetting::DEFAULT_BACKOFF_RATE_POLICY),
-            'rate_limit' => env('HBC_THING_RULE_RATE_LIMIT',\App\Models\ThingSetting::DEFAULT_RATE_LIMIT),
-            'json_size_limit' => env('HBC_THING_RULE_JSON_SIZE_LIMIT',\App\Models\ThingSetting::DEFAULT_JSON_SIZE_LIMIT),
-        ]
-    ],
 
     'system' => [
         'user' => [

@@ -4,7 +4,6 @@ namespace App\Api\Cmd\Namespace\Promote;
 use App\Api\Cmd\IActionOaInput;
 use App\Api\Cmd\IActionParams;
 use App\Api\Cmd\Namespace\NamespaceParams;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespacePromote;
 
 
@@ -13,16 +12,16 @@ class NamespacePromoteParams extends NamespacePromote implements IActionParams,I
     use NamespaceParams;
 
 
-    public function setupThingData(Thing $thing): void
+    public function setupThingData(mixed $thing): void
     {
         //todo get the user id from the thing
 
     }
 
-    public function setupDataWithThing(Thing $thing): void
+    public function setupDataWithThing(mixed $thing): void
     {
         // TODO: Implement pushData() method.
     }
 
-    public function processChildrenData( Thing $thing): void {}
+    public function processChildrenData(mixed $thing): void {}
 }

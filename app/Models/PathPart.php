@@ -10,7 +10,7 @@ use App\Enums\Paths\TimeComparisonType;
 
 use App\Enums\Rules\TypeOfLogic;
 
-use App\Enums\Things\TypeOfThingStatus;
+use App\Enums\Things\TypeOfHexbatchDataStatus;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
@@ -228,25 +228,12 @@ class PathPart extends Model
                 }
             );
 
-            // join to the thing table that is pending, then find if using the type anywhere
-            $build->join('things',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('attribute_rules.id','=','things.thing_rule_id');
-                }
-            );
         }
 
         if ($type_id || $pending_thing_type_id) {
             $build->where('path_parts.path_type_id', $type_id);
         }
 
-        if ($pending_thing_type_id) {
-            $build->where('things.thing_status', TypeOfThingStatus::THING_PENDING);
-        }
 
         /**
          * @uses PathPart::path_owner(),PathPart::path_part_parent(),PathPart::path_part_children()

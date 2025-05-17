@@ -7,7 +7,6 @@ use App\Api\Cmd\IActionWorker;
 use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\ElementType;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypeHandleAdd;
 
 class AddHandleResponse extends TypeHandleAdd implements IActionWorkReturn,IActionOaResponse,IActionWorker
@@ -21,7 +20,7 @@ class AddHandleResponse extends TypeHandleAdd implements IActionWorkReturn,IActi
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

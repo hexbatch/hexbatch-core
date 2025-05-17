@@ -10,7 +10,6 @@ use App\Api\Calls\User\Login\LoginResponse;
 use App\Api\Calls\User\MeResponse;
 use App\Api\Calls;
 
-use App\Api\Common\ThingResponse;
 use App\Exceptions\HexbatchAuthException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Annotations\Access\TypeOfAccessMarker;
@@ -19,11 +18,9 @@ use App\Helpers\Annotations\ApiEventMarker;
 use App\Helpers\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
-use App\Models\Thing;
 use App\Models\User;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use App\Sys\Res\Types\Stk\Root\Act;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,8 +50,7 @@ class AuthenticationController extends Controller
     public function me(Request $request) {
         $user = User::buildUser($request->user()->id)->first();
 
-        return response()->json(
-            \MattyRad\OpenApi\Serializer::serialize(new MeResponse(user: $user)), CodeOf::HTTP_OK);
+        return response()->json(new MeResponse(user: $user), CodeOf::HTTP_OK);
     }
 
 
@@ -87,8 +83,7 @@ class AuthenticationController extends Controller
         $user->tokens()->delete(); //change later to keep reserved tokens
 
         $token = $user->createToken($request->username)->plainTextToken;
-        $serialized = \MattyRad\OpenApi\Serializer::serialize(new LoginResponse(message: __("auth.success"),auth_token: $token));
-        return response()->json($serialized);
+        return response()->json(new LoginResponse(message: __("auth.success"),auth_token: $token));
     }
 
 
@@ -108,12 +103,8 @@ class AuthenticationController extends Controller
     #[ApiTypeMarker( Api\User\UserRegister::class)]
     public function register(Request $request): JsonResponse
     {
-        $top_thing = Thing::makeApiCall(Api\User\UserRegister::getClassUuid(),$request->collect());
-        $top_thing->pushLeavesToJobs();
-        if ($top_thing->isComplete()) {
-            return response()->json($top_thing->getThingResponseJson(), $top_thing->getThingResponseHttpCode());
-        }
-        return response()->json(\MattyRad\OpenApi\Serializer::serialize(new ThingResponse(thing: $top_thing)), $top_thing->getThingResponseHttpCode());
+
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
 
     }
 
@@ -183,8 +174,7 @@ class AuthenticationController extends Controller
                 "UPDATE personal_access_tokens SET passthrough = :json_string WHERE id = :id"
                 ,['json_string'=>$passthrough_json,'id'=>$token_id]);
         }
-        return response()->json(\MattyRad\OpenApi\Serializer::serialize(new CreateTokenResponse(auth_token: $token->plainTextToken)),
-            CodeOf::HTTP_CREATED);
+        return response()->json(new CreateTokenResponse(auth_token: $token->plainTextToken), CodeOf::HTTP_CREATED);
     }
 
 

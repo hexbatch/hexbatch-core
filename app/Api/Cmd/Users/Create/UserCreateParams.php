@@ -11,7 +11,6 @@ use App\Api\Cmd\IActionParams;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\Thing;
 
 use App\Models\User;
 use App\Rules\UserNameReq;
@@ -80,16 +79,16 @@ class UserCreateParams extends Act\Cmd\Us\UserRegister implements IActionParams,
     }
 
 
-    public function setupThingData(Thing $thing): void
+    public function setupThingData(mixed $thing): void
     {
 
     }
 
 
-    public function setupDataWithThing(Thing $thing): void
+    public function setupDataWithThing(mixed $thing): void
     {
         // TODO: Implement pushData() method.
     }
 
-    public function processChildrenData( Thing $thing): void {}
+    public function processChildrenData(mixed $thing): void {}
 }

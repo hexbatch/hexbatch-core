@@ -2,8 +2,7 @@
 
 namespace App\Api\Calls;
 
-use App\Models\Thing;
-use App\Models\ThingResult;
+
 
 /**
  * will fill in the top thing result with data and error conditions,
@@ -11,6 +10,6 @@ use App\Models\ThingResult;
  */
 interface IApiThingResult
 {
-    public function processChildrenData( Thing $thing): void;
-    public function writeReturn( ThingResult $result): void;
+    public function processChildrenData(  $thing): void;
+    public function writeReturn(  $result): void;
 }

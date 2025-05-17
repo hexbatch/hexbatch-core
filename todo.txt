@@ -1,0 +1,35 @@
+
+old things notes
+ * Summary :
+ *  All things are started by api calls or action rules. The api should be attribute rules (always)
+ *  Each api type has that attribute as metrics, and there is stored the attribute_rules
+ *   When action rules are instantiated to things, the collection has the calling info, in case it wants to use that, and has data sent via the api call too
+ *      The server_event for each api call has the event_trigger_type_id set to the api call, and not the event
+ *
+ * The Api types, when they are being setup make their rule chains
+ *
+ * mapping rules to things
+ *
+ *
+ *
+
+
+
+
+ * thing is marked as done when all children done, and there is no pagination id
+ *
+ * When there is a full page for a container, the parent makes a cursor row in the data
+ * A new child thing is made for using that next page of data , the child may start later according to the backoff
+ * the child results combined or_all to the parent. Empty data for the last cursor is child success too.
+ * the thing parent cannot complete until all the new children return success.
+
+ * todo when an action has @see NoEventsTriggered up-type, then its not going to add preconditions by event listeners
+ *   there is no permission check, if the action has it, regardless who is calling then no events
+ *
+ * todo the thing will have a list built and updated by the hbc:system that allows code (and not db) checks for action inheritance
+ *   for @see SystemPrivilege there is a permission check but events can be called
+ *
+ * todo the thing function that accepts the params @see IApiThingSetup for notes
+
+
+

@@ -8,7 +8,6 @@ use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
-use App\Models\Thing;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespaceEditPromotion;
 
@@ -25,7 +24,7 @@ class NamespaceEditPromotionResponse extends NamespaceEditPromotion implements I
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

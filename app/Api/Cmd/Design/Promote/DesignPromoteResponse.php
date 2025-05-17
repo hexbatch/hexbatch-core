@@ -7,7 +7,6 @@ use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\ElementType;
 use App\Models\ElementTypeServerLevel;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignPromote;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +20,7 @@ class DesignPromoteResponse extends DesignPromote implements IActionWorkReturn,I
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

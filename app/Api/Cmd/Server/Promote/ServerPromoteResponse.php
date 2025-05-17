@@ -8,7 +8,6 @@ use App\Api\Cmd\IActionWorker;
 use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\Server;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Server\ServerPromote;
 
 class ServerPromoteResponse extends ServerPromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
@@ -21,7 +20,7 @@ class ServerPromoteResponse extends ServerPromote implements IActionWorkReturn,I
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

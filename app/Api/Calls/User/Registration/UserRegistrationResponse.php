@@ -5,9 +5,7 @@ namespace App\Api\Calls\User\Registration;
 use App\Api\Calls\IApiThingResult;
 
 
-use App\Models\Thing;
-use App\Models\ThingDatum;
-use App\Models\ThingResult;
+use App\Helpers\Utilities;
 use App\Models\User;
 use App\Sys\Res\Types\Stk\Root\Api;
 
@@ -20,18 +18,17 @@ class UserRegistrationResponse  extends Api\User\UserRegister implements IApiThi
 {
 
 
-    public  function writeReturn(ThingResult $result): void
+    public  function writeReturn( $result): void
     {
-        /** @var ThingDatum $data */
-        $data = ThingDatum::where('owning_thing_id',$result->owner_thing_id)->whereNotNull('collection_user_id')->first();
+
         $user = User::getUser(id:$data->collection_user_id);
-        $result->result_response = \MattyRad\OpenApi\Serializer::serialize(new UserRegistrationResult(user: $user));
+        $result->result_response = Utilities::wrapJsonEncode(new UserRegistrationResult(user: $user));
         $result->result_http_status = CodeOf::HTTP_CREATED;
         $result->save();
     }
 
 
-    public function processChildrenData(Thing $thing): void
+    public function processChildrenData( $thing): void
     {
         // TODO: Implement processChildrenData() method.
     }

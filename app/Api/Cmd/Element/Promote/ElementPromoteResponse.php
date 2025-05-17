@@ -8,7 +8,6 @@ use App\Exceptions\HexbatchInvalidException;
 use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\Phase;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\ElementPromote;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +22,7 @@ class ElementPromoteResponse extends ElementPromote implements IActionWorkReturn
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

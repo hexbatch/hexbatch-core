@@ -4,7 +4,6 @@ namespace App\Models;
 
 
 
-use App\Enums\Things\TypeOfThingStatus;
 use App\Enums\Types\TypeOfServerEventAccess;
 use App\Exceptions\HexbatchCoreException;
 
@@ -280,8 +279,7 @@ class ServerEvent extends Model
 
     public function isInUse() : bool {
 
-        if (Thing::buildThing(server_event_id: $this->id)->where('thing_status',TypeOfThingStatus::THING_PENDING)->count() ) {return true;}
-        //if any rule children have not been processed
+                //if any rule children have not been processed
 
         return false;
     }

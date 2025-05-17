@@ -4,7 +4,6 @@ namespace App\Api\Cmd\Set\Promote;
 use App\Api\Cmd\IActionOaInput;
 use App\Api\Cmd\IActionParams;
 use App\Api\Cmd\Set\SetParams;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\SetPromote;
 
 
@@ -13,16 +12,16 @@ class SetPromoteParams extends SetPromote implements IActionParams,IActionOaInpu
 
     use SetParams;
 
-    public function setupThingData(Thing $thing): void
+    public function setupThingData(mixed $thing): void
     {
 
     }
 
 
-    public function setupDataWithThing(Thing $thing): void
+    public function setupDataWithThing(mixed $thing): void
     {
         // TODO: Implement pushData() method.
     }
 
-    public function processChildrenData( Thing $thing): void {}
+    public function processChildrenData(mixed $thing): void {}
 }

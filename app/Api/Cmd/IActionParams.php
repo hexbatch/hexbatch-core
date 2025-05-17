@@ -2,7 +2,6 @@
 
 namespace App\Api\Cmd;
 
-use App\Models\Thing;
 use Illuminate\Support\Collection;
 
 /**
@@ -10,11 +9,11 @@ use Illuminate\Support\Collection;
  */
 interface IActionParams
 {
-    public function setupThingData(Thing $thing): void ;
+    public function setupThingData(mixed $thing): void ;
 
-    public function processChildrenData( Thing $thing): void;
+    public function processChildrenData(mixed $thing): void;
 
-    public function setupDataWithThing(Thing $thing): void ;
+    public function setupDataWithThing(mixed $thing): void ;
 
     public function fromCollection(Collection $collection);
 

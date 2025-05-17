@@ -9,7 +9,6 @@ use App\Exceptions\HexbatchInvalidException;
 use App\Models\Element;
 use App\Models\ElementSet;
 
-use App\Models\Thing;
 
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPromoteEdit;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +24,7 @@ class ElementEditPromoteResponse extends ElementPromoteEdit implements IActionWo
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

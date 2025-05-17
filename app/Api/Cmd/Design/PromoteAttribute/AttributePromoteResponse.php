@@ -6,7 +6,6 @@ use App\Api\Cmd\IActionWorker;
 use App\Api\Cmd\IActionWorkReturn;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\Attribute;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromote;
 
 class AttributePromoteResponse extends DesignAttributePromote implements IActionWorkReturn,IActionOaResponse,IActionWorker
@@ -19,7 +18,7 @@ class AttributePromoteResponse extends DesignAttributePromote implements IAction
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }

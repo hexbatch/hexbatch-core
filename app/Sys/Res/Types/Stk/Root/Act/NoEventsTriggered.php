@@ -7,7 +7,6 @@ use App\Sys\Res\Types\BaseType;
 
 /**
  * todo (also this) cannot be inherited without permission!
- * @see \App\Models\Thing for notes
  *
  */
 class NoEventsTriggered extends BaseType

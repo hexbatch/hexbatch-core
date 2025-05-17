@@ -9,7 +9,6 @@ use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInvalidException;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
-use App\Models\Thing;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublishPromote;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +22,7 @@ class PublishPromoteResponse extends TypePublishPromote implements IActionWorkRe
         parent::__construct();
     }
 
-    public function toThing(Thing $thing)
+    public function toThing( $thing)
     {
 
     }
