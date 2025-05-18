@@ -224,7 +224,7 @@ class Utilities {
         return DB::statement($proc);
     }
 
-    const BASE_64_OPTION = 'base64';
+    const string BASE_64_OPTION = 'base64';
     /**
      * return a base64 encrypted string, you can also choose hex or null as encoding.
      * @source https://stackoverflow.com/a/62175263/2420206
@@ -295,33 +295,8 @@ class Utilities {
         return file_get_contents(base_path() . DIRECTORY_SEPARATOR . 'version') ? : null;
     }
 
-    /**
-     * To compare a version string as a number
-     * @author https://stackoverflow.com/questions/1142496/regex-replace-for-decimals (the heart of it,The regex and the if statement)
-     * @example converts something like '0.1.2' to 0.12
-     * @param string|null $version_string
-     *
-     * @return float|null
-     */
-    public static function convertVersionToFloat(?string $version_string) : ?float {
-        if (empty($version_string)) {return null;}
-        $dashes_and_underscores_to_points = str_replace('-','.',$version_string);
-        $dashes_and_underscores_to_points = str_replace('_','.',$dashes_and_underscores_to_points);
-        $only_numbers_and_points = preg_replace('/[^\d.]+/', '', $dashes_and_underscores_to_points);
-        if (($pos = strpos($only_numbers_and_points, '.')) !== false) {
-            $no_extra_points = substr($only_numbers_and_points, 0, $pos+1).str_replace('.', '', substr($only_numbers_and_points, $pos+1));
-        } else {
-            $no_extra_points = $only_numbers_and_points;
-        }
-        $val = floatval($no_extra_points);
-        return $val;
-    }
 
-    /** @noinspection PhpUnused */
-    public static function getVersionFloat() : float {
 
-        $string_version = static::getVersionString();
-        return static::convertVersionToFloat($string_version);
-    }
+
 
 }

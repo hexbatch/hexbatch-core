@@ -26,8 +26,8 @@ abstract class BaseNamespace implements ISystemNamespace
     const PUBLIC_ELEMENT_CLASS = '';
     const PRIVATE_ELEMENT_CLASS = '';
     const HOMESET_CLASS = '';
-    const SERVER_CLASS = ThisServer::class;
-    const USER_CLASS = SystemUser::class;
+    const string SERVER_CLASS = ThisServer::class;
+    const string USER_CLASS = SystemUser::class;
 
     protected ?UserNamespace $namespace = null;
     protected bool $b_did_create_model = false;

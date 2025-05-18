@@ -15,7 +15,7 @@ use App\Helpers\Utilities;
 class CreateTokenParams implements IApiOaParams
 {
     use BaseParams;
-    const MAX_PASSTHROUGH_SIZE = 1024*20; //20k
+    const int|float MAX_PASSTHROUGH_SIZE = 1024*20; //20k
 
     protected array $passthrough;
 

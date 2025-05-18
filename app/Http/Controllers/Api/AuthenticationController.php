@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Fortify\CreateNewUser;
 use App\Api\Calls\User\CreateToken\CreateTokenParams;
 use App\Api\Calls\User\CreateToken\CreateTokenResponse;
 use App\Api\Calls\User\CreateToken\HexbatchSecondsToLive;
@@ -11,6 +12,7 @@ use App\Api\Calls\User\MeResponse;
 use App\Api\Calls;
 
 use App\Exceptions\HexbatchAuthException;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Annotations\Access\TypeOfAccessMarker;
 use App\Helpers\Annotations\ApiAccessMarker;
@@ -19,6 +21,7 @@ use App\Helpers\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\OpenApi\Users\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Carbon\Carbon;
@@ -27,6 +30,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\NewAccessToken;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
@@ -92,19 +96,52 @@ class AuthenticationController extends Controller
     #[OA\Post(
         path: '/api/v1/users/register',
         operationId: 'core.users.register',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Calls\User\Registration\UserRegistrationParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: RegistrationParams::class)),
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Register with just a username and a password',
                                 content: new JsonContent(ref: Calls\User\Registration\UserRegistrationResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Server\UserRegistrationProcessing::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[ApiTypeMarker( Api\User\UserRegister::class)]
     public function register(Request $request): JsonResponse
     {
+        /*
+         todo discussion below
 
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+            put action I on create new user
+
+            actions:
+
+            finish
+                finish (db transaction for all, sync) holds flag to send events or not, and if system, holds ns object
+                                                         its callback has open api for new user
+                    create handle (p0)
+                    create private element (p1)
+                    create public element (p2)
+                    create home set (p3)
+                    create home element (p4)
+                    create namespace (p5)
+                        create type
+                            make user
+
+
+         */
+
+        try {
+            $params = new RegistrationParams();
+            $params->fromRequest($request);
+            $user = (new CreateNewUser)->create([
+                'username' => $params->getUsername(),'password'=>$params->getPassword(),
+                'password_confirmation'=>$params->getPassword()]);
+
+            $user->refresh();
+            return response()->json(new MeResponse(user: $user), CodeOf::HTTP_CREATED);
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
+                CodeOf::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::BAD_REGISTRATION);
+        }
 
     }
 

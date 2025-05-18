@@ -11,7 +11,7 @@ class SystemElements extends SystemBase
 {
     public static array $class_name_array;
     protected static array $uuid_class_names = [];
-    const SOURCE_FOLDER = 'app/Sys/Res/Ele/Stk';
+    const string SOURCE_FOLDER = 'app/Sys/Res/Ele/Stk';
 
     /** @var array<string,ISystemResource> $resource_array */
     protected static array $resource_array = []; //keyed by uuid

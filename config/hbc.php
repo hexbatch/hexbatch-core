@@ -15,7 +15,7 @@ return [
 
 
 
-    'version' => env('APP_VERSION', \App\Helpers\Utilities::getVersionString()),
+    'version' => env('APP_VERSION', \Hexbatch\Things\Helpers\ThingUtilities::getVersionAsString(for_lib: false)),
 
 
 

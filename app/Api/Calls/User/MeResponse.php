@@ -6,13 +6,14 @@ use App\Api\Common\HexbatchUuid;
 use App\Api\IApiOaResponse;
 use App\Models\User;
 use Carbon\Carbon;
+use JsonSerializable;
 use OpenApi\Attributes as OA;
 
 /**
  * Show details about the logged-in user
  */
 #[OA\Schema(schema: 'Me')]
-class MeResponse implements IApiOaResponse
+class MeResponse implements IApiOaResponse,  JsonSerializable
 {
     #[OA\Property(title: 'User unique id',type: HexbatchUuid::class)]
     public string $uuid;
@@ -32,4 +33,12 @@ class MeResponse implements IApiOaResponse
     }
 
 
+    public function jsonSerialize(): array
+    {
+        $ret = [];
+        $ret['uuid'] = $this->uuid;
+        $ret['username'] = $this->username;
+        $ret['registered_at'] = $this->registered_at;
+        return $ret;
+    }
 }
