@@ -159,7 +159,7 @@ enum TypeOfAction: string
 
 
     case CMD_ELEMENT_PROMOTE = 'cmd_element_promote';
-    case CMD_ELEMENT_PROMOTE_EDIT = 'cmd_element_promote_edit';
+    case CMD_ELEMENT_EDIT = 'cmd_element_edit';
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
@@ -178,7 +178,7 @@ enum TypeOfAction: string
     case CMD_PHASE_MOVE_TREE = 'cmd_phase_move_tree';
 
     case CMD_PHASE_PURGE = 'cmd_phase_purge';
-    case CMD_PHASE_PROMOTE = 'cmd_phase_promote';
+    case CMD_PHASE_CREATE = 'cmd_phase_create';
 
     case CMD_FIRE_CUSTOM_EVENT = 'cmd_fire_custom_event'; //scope depends on the base type of the custom event
 
@@ -204,7 +204,7 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_PREP_TRANSFER = 'cmd_namespace_prep_transfer';
     case CMD_NAMESPACE_DO_TRANSFER = 'cmd_namespace_do_transfer';
     case CMD_NAMESPACE_PROMOTE = 'cmd_namespace_promote';
-    case CMD_NAMESPACE_EDIT_PROMOTION = 'cmd_namespace_edit_promotion';
+    case CMD_NAMESPACE_EDIT = 'cmd_namespace_edit';
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
     case CMD_NAMESPACE_PURGE = 'cmd_namespace_purge'; //server admin
 

@@ -136,14 +136,16 @@ class User extends Authenticatable implements ISystemModel
     }
 
     public static function getUser(
-        ?int $id = null )
-    : User
+        ?int $id = null ,
+        ?string          $uuid = null
+    ): User
     {
-        $ret = static::buildUser(id:$id)->first();
+        $ret = static::buildUser(me_id:$id,uuid: $uuid)->first();
 
         if (!$ret) {
             $arg_types = [];
             $arg_vals = [];
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
@@ -153,7 +155,9 @@ class User extends Authenticatable implements ISystemModel
     }
 
     public static function buildUser(
-        ?int $id = null )
+        ?int $me_id = null ,
+        ?string         $uuid = null
+    )
     : Builder
     {
 
@@ -166,8 +170,12 @@ class User extends Authenticatable implements ISystemModel
 
         ;
 
-        if ($id) {
-            $build->where('users.id',$id);
+        if ($me_id) {
+            $build->where('users.id',$me_id);
+        }
+
+        if ($uuid) {
+            $build->where('users.ref_uuid', $uuid);
         }
 
         return $build;

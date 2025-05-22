@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Sets;
 
 
-use App\Api\Cmd\Set\Promote\SetForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Helpers\Utilities;
 use App\Models\ElementSet;
@@ -11,15 +10,17 @@ use App\Sys\Collections\SystemElements;
 use App\Sys\Collections\SystemSets;
 use App\Sys\Res\Ele\ISystemElement;
 use App\Sys\Res\ISystemResource;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\SetCreate;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\St\SetMemberAdd;
 
 
-
- class BaseSet implements ISystemSet
+class BaseSet implements ISystemSet
 {
      const UUID = '';
 
     const ELEMENT_CLASS = '';
     const HAS_EVENTS = true;
+    const IS_STICKY = false;
 
     const CONTAINING_ELEMENT_CLASSES = [
 
@@ -45,6 +46,7 @@ use App\Sys\Res\ISystemResource;
      }
 
      public static function hasEvents() :bool { return static::HAS_EVENTS;}
+     public static function isSticky() :bool { return static::IS_STICKY;}
 
      public static function getDefiningSystemElementClass() :string|ISystemElement {
          return static::ELEMENT_CLASS;
@@ -90,20 +92,32 @@ use App\Sys\Res\ISystemResource;
        try
        {
            $iset = $this->getISystemSet();
-           $element_ids = [];
+           $element_uuids = [];
            foreach ($iset->getSystemElements() as $some_element_class) {
-               $element_ids[] = $some_element_class->getElementObject()?->id;
+               $element_uuids[] = $some_element_class->getElementObject()?->getUuid();
            }
-           $sys_params = new SetForSystem();
-           $sys_params
-               ->setUuid(static::getClassUuid())
-               ->setParentSetElementId($iset->getDefiningSystemElement()->getElementObject()?->id)
-               ->setHasEvents(static::hasEvents())
-               ->setSystem(true)
-               ->setContentElementIds($element_ids)
-              ;
+           array_filter($element_uuids, static function($var){return $var !== null;} );
 
-           $what =  $sys_params->doParamsAndResponse();
+           $setter = new SetCreate(
+               given_element_uuid: $iset->getDefiningSystemElement()->getElementObject()?->getUuid(),
+               uuid: static::getClassUuid(),
+               set_has_events: static::hasEvents(), is_system: true
+           );
+           $setter->runAction();
+
+            if (count($element_uuids)) {
+                $better = new SetMemberAdd(
+                    given_set_uuid: $setter->getCreatedSet()->ref_uuid,
+                    given_element_uuids: $element_uuids,
+                    is_sticky: static::isSticky(),
+                    is_system: true
+                );
+                $better->runAction();
+            }
+
+
+
+           $what =  $setter->getCreatedSet();
            $this->b_did_create_model = true;
            return $what;
 

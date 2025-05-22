@@ -40,12 +40,17 @@ abstract class SystemBase
                 return static::$resource_array[$uuid_check];
             }
             /** @var ISystemResource $obj */
-            $obj = new $some_class_name;
+            $obj = static::makeNewClass($some_class_name);
             $ret = $obj->OnCall();
             $uuid = static::getUuid($some_class_name);
             static::$resource_array[$uuid] = $ret;
         }
         return $ret;
+    }
+
+    protected static function makeNewClass(string $some_class_name) : ISystemResource {
+        /** @type ISystemResource */
+        return new $some_class_name(b_type_init:true);
     }
 
 

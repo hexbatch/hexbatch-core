@@ -58,7 +58,9 @@ class UserNamespaceMember extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'is_admin' => 'boolean'
+    ];
 
     public function namespace_member() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'member_namespace_id');

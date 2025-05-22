@@ -3,8 +3,6 @@
 namespace App\Sys\Res\Atr;
 
 
-use App\Api\Cmd\Design\PromoteAttribute\APSetupForSystem;
-use App\Api\Cmd\Type\AttributeAddHandle\AttributeHandleForSystem;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
@@ -13,6 +11,7 @@ use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\ISystemType;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromote;
 
 
 abstract class BaseAttribute implements ISystemAttribute
@@ -108,29 +107,23 @@ abstract class BaseAttribute implements ISystemAttribute
    {
        if ($this->attribute) {return $this->attribute;}
        try {
-           $sys_params = new APSetupForSystem();
-           $sys_params
-               ->setUuid(static::getClassUuid())
-               ->setAttributeName($this->getISystemAttribute()->getAttributeName())
-               ->setDesignAttributeId(null)
-               ->setFinal($this->getISystemAttribute()::isFinal())
-               ->setAbstract(static::IS_ABSTRACT)
-               ->setSeenByChild($this->getISystemAttribute()::isSeenChildrenTypes())
-               ->setAttributeApproval(TypeOfApproval::PUBLISHING_APPROVED)
-               ->setSystem(true);
-
-           if($this->getISystemAttribute()::getClassOwningSystemType()) {
-               $sys_params->setOwnerElementTypeId(static::getClassOwningSystemType()::getDictionaryObject()->getTypeObject()->id);
-           } else {
-               throw new \LogicException("Attribute ". static::class . " Does not have a type");
-           }
-
+           $parent_uuid = null;
            if($this->getISystemAttribute()::getClassParentSystemAttribute()) {
-               $sys_params->setParentAttributeId(static::getClassParentSystemAttribute()::getDictionaryObject()->getAttributeObject()->id);
+               $parent_uuid = static::getClassParentSystemAttribute()::getDictionaryObject()->getAttributeObject()?->getUuid();
            }
 
+           $creator = new DesignAttributePromote(
+               attribute_name: $this->getISystemAttribute()->getAttributeName(),
+               owner_type_uuid: static::getClassOwningSystemType()::getDictionaryObject()->getTypeObject()->getUuid(),
+               parent_attribute_uuid: $parent_uuid, is_final: $this->getISystemAttribute()::isFinal(),
+               is_abstract: static::IS_ABSTRACT,
+               is_seen_in_child_elements: $this->getISystemAttribute()::isSeenChildrenTypes(),
+               attribute_approval: TypeOfApproval::PUBLISHING_APPROVED,
+               is_system: true
+           );
+           $creator->runAction();
 
-           $what =  $sys_params->doParamsAndResponse();
+           $what =  $creator->getCreatedAttribute();
            $this->b_did_create_model = true;
            return $what;
        } catch (\Exception $e) {
@@ -161,18 +154,8 @@ abstract class BaseAttribute implements ISystemAttribute
     {
         if (!$this->b_did_create_model) {return;}
         if (!$this->getISystemAttribute()::getSystemHandle()) {return;}
-
-        try
-        {
-            $sys_params = new AttributeHandleForSystem();
-            $sys_params
-                ->setAttributeIds([$this->getAttributeObject()->id])
-                ->setHandleAttributeId(static::getSystemHandle()->getAttributeObject()->id);
-            $sys_params->doParamsAndResponse();
-
-        } catch (\Exception $e) {
-            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
-        }
+        $this->getAttributeObject()->design_attribute_id = static::getSystemHandle()->getAttributeObject()->id;
+        $this->getAttributeObject()->save();
     }
 
 

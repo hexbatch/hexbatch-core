@@ -10,7 +10,6 @@ use App\Enums\Paths\TimeComparisonType;
 
 use App\Enums\Rules\TypeOfLogic;
 
-use App\Enums\Things\TypeOfHexbatchDataStatus;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
@@ -385,7 +384,7 @@ class PathPart extends Model
 
                 if ($collect->has('map_bound') || $collect->has('shape_bound') || $collect->has('time_bound') ) {
                     $owner_namespace = $owner->namespace_owner;
-                    if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(id: $owner->path_owning_namespace_id)->first();}
+                    if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(me_id: $owner->path_owning_namespace_id)->first();}
 
                     if ($collect->has('map_bound')) {
 

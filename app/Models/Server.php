@@ -110,7 +110,11 @@ class Server extends Model implements IServer,ISystemModel
 
 
     public static function buildServer(
-        ?int $id = null,?bool $is_system = null)
+        ?int            $me_id = null,
+        ?int            $type_id = null,
+        ?string         $uuid = null,
+        ?bool           $is_system = null
+    )
     : Builder
     {
 
@@ -119,8 +123,16 @@ class Server extends Model implements IServer,ISystemModel
          */
         $build = Server::select('servers.*');
 
-        if ($id) {
-            $build->where('servers.id', $id);
+        if ($me_id) {
+            $build->where('servers.id', $me_id);
+        }
+
+        if ($type_id) {
+            $build->where('servers.server_type_id', $type_id);
+        }
+
+        if ($uuid) {
+            $build->where('servers.ref_uuid', $uuid);
         }
 
         if ($is_system !== null) {
@@ -166,7 +178,7 @@ class Server extends Model implements IServer,ISystemModel
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = Server::buildServer(id:$first_id)->first();
+                    $ret = Server::buildServer(me_id:$first_id)->first();
                 }
             }
         } finally {
@@ -180,6 +192,26 @@ class Server extends Model implements IServer,ISystemModel
         }
         return $ret;
 
+    }
+
+    public static function getThisServer(
+        ?int             $id = null,
+        ?int             $type_id = null,
+        ?string          $uuid = null
+    )
+    : Server
+    {
+        $ret = static::buildServer(me_id:$id,type_id: $type_id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = []; $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            if ($type_id) { $arg_types[] = 'type_id'; $arg_vals[] = $type_id;}
+            $arg_val = implode('|',$arg_vals); $arg_type = implode('|',$arg_types);
+            throw new \InvalidArgumentException("Could not find server via $arg_type : $arg_val");
+        }
+        return $ret;
     }
 
     public function getName() :string {

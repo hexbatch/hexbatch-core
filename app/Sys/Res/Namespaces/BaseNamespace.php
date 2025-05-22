@@ -3,8 +3,6 @@
 namespace App\Sys\Res\Namespaces;
 
 
-use App\Api\Cmd\Namespace\EditPromotion\NsEditForSystem;
-use App\Api\Cmd\Namespace\Promote\NsForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemNamespaces;
@@ -15,6 +13,8 @@ use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Servers\Stock\ThisServer;
 use App\Sys\Res\Sets\ISystemSet;
 use App\Sys\Res\Types\ISystemType;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespaceCreate;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespaceEdit;
 use App\Sys\Res\Users\ISystemUser;
 use App\Sys\Res\Users\Stock\SystemUser;
 
@@ -80,18 +80,13 @@ abstract class BaseNamespace implements ISystemNamespace
     public function makeNamespace() :UserNamespace
    {
        try {
-           $sys_params = new NsForSystem();
-           $sys_params
-               ->setUuid(static::getClassUuid())
-               ->setNamespaceUserId(static::getSystemUserClass()::getDictionaryObject()->getUserObject()?->id)
-               ->setSystem(true)
-               ->setNamespaceName(static::getNamespaceName())
-               ->setNamespacePublicKey($this->getISystemNamespace()::getNamespacePublicKey())
-               ;
+           $ns = new NamespaceCreate(namespace_name: static::getNamespaceName(), public_key: $this->getISystemNamespace()::getNamespacePublicKey(),
+               uuid: static::getClassUuid(), given_user_uuid: static::getSystemUserClass()::getDictionaryObject()->getUserObject()?->getUuid(),
+               is_stub: true, is_system: true);
+           $ns->runAction(); //just stubbed, so no elements or sets created
 
-           $what =  $sys_params->doParamsAndResponse();
            $this->b_did_create_model = true;
-           return $what;
+           return $ns->getCreatedNamespace();
        } catch (\Exception $e) {
             throw new HexbatchInitException('[makeNamespace] '.$e->getMessage(),$e->getCode(),null,$e);
        }
@@ -120,18 +115,15 @@ abstract class BaseNamespace implements ISystemNamespace
         }
 
         try {
-            $sys_params = new NsEditForSystem();
-            $sys_params
-                ->setUuid(static::getClassUuid())
-                ->setNamespaceName(static::getNamespaceName())
-                ->setNamespaceServerId(static::getSystemServerClass()::getDictionaryObject()->getServerObject()?->id)
-                ->setNamespaceTypeId(static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()?->id)
-                ->setNamespaceHomeSetId(static::getSystemHomeClass()::getDictionaryObject()->getSetObject()?->id)
-                ->setPublicElementId(static::getSystemPublicClass()::getDictionaryObject()->getElementObject()?->id)
-                ->setPrivateElementId(static::getSystemPrivateClass()::getDictionaryObject()->getElementObject()?->id)
-            ;
-
-            $sys_params->doParamsAndResponse();
+            $ns = new NamespaceEdit(given_namespace_uuid: $this->getNamespace()->getUuid(),
+                given_server_uuid: static::getSystemServerClass()::getDictionaryObject()->getServerObject()?->getUuid(),
+                given_type_uuid: static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()?->getUuid(),
+                given_public_element_uuid: static::getSystemPublicClass()::getDictionaryObject()->getElementObject()?->getUuid(),
+                given_private_element_uuid: static::getSystemPrivateClass()::getDictionaryObject()->getElementObject()?->getUuid(),
+                given_home_set_uuid: static::getSystemHomeClass()::getDictionaryObject()->getSetObject()?->getUuid(),
+                is_system: true
+                        );
+           $ns->runAction();
         } catch (\Exception $e) {
             throw new HexbatchInitException('[makeNamespace] '.$e->getMessage(),$e->getCode(),null,$e);
         }

@@ -16,7 +16,8 @@ enum TypeOfApproval : string {
     case PUBLISHING_DENIED = 'publishing_denied';
 
 
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfApproval {
+    public static function tryFromInput(string|int|bool|null $test ) : ?TypeOfApproval {
+        if ($test === null) {return null;}
         $maybe  = TypeOfApproval::tryFrom($test);
         if (!$maybe ) {
             $delimited_values = implode('|',array_column(TypeOfApproval::cases(),'value'));

@@ -4,9 +4,6 @@ namespace App\Sys\Res\Ele;
 
 
 
-use App\Api\Cmd\Element\Promote\EleForSystem;
-use App\Api\Cmd\Element\Promote\ElementPromoteParams;
-use App\Api\Cmd\Element\PromoteEdit\EditEleForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Element;
 
@@ -18,7 +15,8 @@ use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Types\ISystemType;
-
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementEdit;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\ElementCreate;
 
 
 class BaseElement implements ISystemElement
@@ -69,18 +67,19 @@ class BaseElement implements ISystemElement
             return $this->element;
         }
         try {
-            $sys_params = new EleForSystem;
-            $sys_params
-                ->setDestinationSetIds([ElementPromoteParams::NO_SETS_MADE_YET_STUB_ID])
-                ->setNsOwnerIds([$this->getISystemElement()::getSystemNamespaceClass()::getDictionaryObject()->getNamespaceObject()->id])
-                ->setParentTypeId(static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()->id)
-                ->setPhaseId(null)
-                ->setSystem(true)
-                ->setNumberPerSet(1)
-                ->setUuids([static::getClassUuid()]);
+            $creator = new ElementCreate(
+                given_type_uuid:static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()->getUuid(),
+                given_namespace_uuid: $this->getISystemElement()::getSystemNamespaceClass()::getDictionaryObject()->getNamespaceObject()->getUuid(),
+                given_phase_uuid: null,
+                given_set_uuids: [],
+                number_to_create: 1,
+                preassinged_uuids: [static::getClassUuid()],
+                is_system: true, send_event: false
+            );
 
-
-            $what = $sys_params->doParamsAndResponse();
+            $creator->runAction();
+            if (!count($creator->getElementsCreated())) { throw new \LogicException("Could not create element ".static::getClassUuid());}
+            $what = $creator->getElementsCreated()[0];
             $this->b_did_create_model = true;
             return $what;
 
@@ -107,13 +106,10 @@ class BaseElement implements ISystemElement
             return;
         }
         try {
-            $sys_params = new EditEleForSystem();
-            $sys_params
-                ->setElementIds([$this->getElementObject()->id])
-                ->setPhaseId(Phase::getDefaultPhase()->id);
+            $changer = new ElementEdit(given_element_uuid: $this->getElementObject()->getUuid(),
+                change_phase_uuid: Phase::getDefaultPhase()->ref_uuid,is_system: true);
 
-
-            $sys_params->doParamsAndResponse();
+            $changer->runAction();
 
         } catch (\Exception $e) {
             throw new HexbatchInitException(message: $e->getMessage() . ': code ' . $e->getCode(), prev: $e);

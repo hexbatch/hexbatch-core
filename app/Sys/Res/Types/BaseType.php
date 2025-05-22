@@ -3,11 +3,8 @@
 namespace App\Sys\Res\Types;
 
 
-use App\Api\Cmd\Design\Promote\SetupForSystem;
-use App\Api\Cmd\Type\AddHandle\HandleForSystem;
-use App\Api\Cmd\Type\PublishPromote\PublishForSystem;
 use App\Enums\Attributes\TypeOfServerAccess;
-use App\Enums\Types\TypeOfLifecycle;
+use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ElementType;
 use App\Sys\Collections\SystemAttributes;
@@ -22,9 +19,17 @@ use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Servers\Stock\ThisServer;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignCreate;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignParentAdd;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
+use Hexbatch\Things\Interfaces\IThingAction;
+use Illuminate\Support\Facades\DB;
 
-abstract class BaseType implements ISystemType
+
+abstract class BaseType implements ISystemType, IThingAction
 {
+    use ActionableBase;
+
     protected ?ElementType $type = null;
 
     const UUID = '';
@@ -69,23 +74,17 @@ abstract class BaseType implements ISystemType
         if ($this->type) {return $this->type;}
         try
         {
-            $sys_params = new SetupForSystem;
-            $sys_params
-               ->setUuid(static::getClassUuid())
-               ->setTypeName(static::getClassName())
-               ->setSystem(true)
-               ->setFinalType($this->getISystemType()::isFinal())
-                ->setLifecycle(TypeOfLifecycle::PUBLISHED)
-                ->setAccess(TypeOfServerAccess::IS_PUBLIC)
-                ->setFinalType(static::IS_FINAL);
-
-            $sys_params->setNamespaceId($this->getISystemType()->getTypeNamespace()->getNamespaceObject()?->id);
-            $sys_params->setServerId($this->getISystemType()->getTypeServer()->getServerObject()?->id);
+            $design = new DesignCreate(type_name: static::getClassName(), is_final: $this->getISystemType()::isFinal(),
+                access: TypeOfServerAccess::IS_PUBLIC, uuid: static::getClassUuid(),
+                is_system: true,send_event: false
+            );
+            $design->runAction();
+            $created_type = $design->getCreatedType();
 
 
-            $what =  $sys_params->doParamsAndResponse();
+
             $this->b_did_create_model = true;
-            return $what;
+            return $created_type;
 
        } catch (\Exception $e) {
             throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
@@ -209,7 +208,7 @@ abstract class BaseType implements ISystemType
     public static function getClassName() :string { return static::TYPE_NAME; }
     public static function getTypeNamespaceClass() :string|ISystemNamespace { return static::NAMESPACE_CLASS; }
     public static function getTypeServerClass() :string|ISystemServer { return static::SERVER_CLASS; }
-    public function isFinal(): bool { return false; }
+    public function isFinal(): bool { return static::IS_FINAL; }
 
 
 
@@ -225,31 +224,32 @@ abstract class BaseType implements ISystemType
         if (!$this->b_did_create_model) {return;}
         try
         {
+            DB::beginTransaction();
             if (static::HANDLE_ELEMENT_CLASS) {
-                $sys_params = new HandleForSystem();
-                $sys_params
-                    ->setTypeIds([$this->getTypeObject()->id])
-                    ->setHandleElementId($this->getISystemType()::getHandleElement()->getElementObject()->id);
-                $sys_params->doParamsAndResponse();
+                $this->getTypeObject()->type_handle_element_id = $this->getISystemType()::getHandleElement()->getElementObject()->id;
+                $this->getTypeObject()->save();
             }
 
 
-            $parent_ids = [];
+            $parent_uuids = [];
             foreach ($this->getISystemType()::getParentTypes() as $parent_system_object) {
-                $parent_ids[] = $parent_system_object->getTypeObject()->id;
+                $parent_uuids[] = $parent_system_object->getTypeObject()->getUuid();
             }
+            $parenter = new DesignParentAdd(given_type_uuid: $this->getTypeObject()->getUuid(),
+                given_parent_uuids: $parent_uuids, approval: TypeOfApproval::PUBLISHING_APPROVED, is_system: true, send_event: false);
+            $parenter->runAction();
 
-            $sys_params = new PublishForSystem();
-            $sys_params
-                ->setTypeId($this->getTypeObject()->id)
-                ->setParentIds($parent_ids)
-                ->setLifecycle(TypeOfLifecycle::PUBLISHED); //at the very least, with no parents, publish this
-            $sys_params->doParamsAndResponse();
+
+            $publish = new TypePublish(given_type_uuid: $this->getTypeObject()->getUuid(),is_system: true,send_event: false);
+            $publish->runAction();
+            DB::commit();
 
         } catch (\Exception $e) {
+            DB::rollBack();
             throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
         }
     }
+
 
 
 

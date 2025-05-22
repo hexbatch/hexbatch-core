@@ -3,14 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Fortify\CreateNewUser;
-use App\Api\Calls\User\CreateToken\CreateTokenParams;
-use App\Api\Calls\User\CreateToken\CreateTokenResponse;
-use App\Api\Calls\User\CreateToken\HexbatchSecondsToLive;
-use App\Api\Calls\User\Login\LoginParams;
-use App\Api\Calls\User\Login\LoginResponse;
-use App\Api\Calls\User\MeResponse;
 use App\Api\Calls;
-
 use App\Exceptions\HexbatchAuthException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -21,7 +14,13 @@ use App\Helpers\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\OpenApi\Users\RegistrationParams;
+use App\OpenApi\Users\CreateToken\CreateTokenParams;
+use App\OpenApi\Users\CreateToken\CreateTokenResponse;
+use App\OpenApi\Users\CreateToken\HexbatchSecondsToLive;
+use App\OpenApi\Users\Login\LoginParams;
+use App\OpenApi\Users\Login\LoginResponse;
+use App\OpenApi\Users\MeResponse;
+use App\OpenApi\Users\Registration\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Carbon\Carbon;
@@ -108,22 +107,13 @@ class AuthenticationController extends Controller
     {
         /*
          todo discussion below
+            run the UserRegister command
 
-            put action I on create new user
 
-            actions:
+
 
             finish
-                finish (db transaction for all, sync) holds flag to send events or not, and if system, holds ns object
-                                                         its callback has open api for new user
-                    create handle (p0)
-                    create private element (p1)
-                    create public element (p2)
-                    create home set (p3)
-                    create home element (p4)
-                    create namespace (p5)
-                        create type
-                            make user
+
 
 
          */

@@ -2,7 +2,6 @@
 
 namespace App\Sys\Res\Types\Stk\Root;
 
-use App\Api\Cmd\Phase\Promote\PhaseForSystem;
 use App\Exceptions\HexbatchInitException;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
@@ -37,16 +36,16 @@ class Phase extends BaseType
         if (!$this->b_did_create_model) {return $ret;}
         if (static::EDITED_BY_PHASE_SYSTEM_CLASS) {
             try {
-                $sys_params = new PhaseForSystem();
-                $sys_params
-                    ->setSystem(true)
-                    ->setUuid(static::getClassUuid())
-                    ->setDefaultPhase(static::IS_DEFAULT_PHASE)
-                    ->setPhaseName(static::getClassName())
-                    ->setPhaseTypeId($this->getTypeObject()->id)
-                    ->setEditedByPhaseId(null);
+                $creator = new Root\Act\Cmd\Ph\PhaseCreate(
+                    given_type_uuid: $this->getTypeObject()->getUuid(),
+                    phase_name: static::getClassName(),
+                    uuid: static::getClassUuid(),
+                    is_default_phase: static::IS_DEFAULT_PHASE,
+                    is_system: true
 
-                $this->phase = $sys_params->doParamsAndResponse();
+                );
+                $creator->runAction();
+                $this->phase = $creator->getCreatedPhase();
 
             } catch (\Exception $e) {
                 throw new HexbatchInitException(message: $e->getMessage() . ': code ' . $e->getCode(), prev: $e);
@@ -72,13 +71,8 @@ class Phase extends BaseType
             if (!$editing_phase) {
                 throw new \LogicException("Cannot find phase from editor of ".static::EDITED_BY_PHASE_SYSTEM_CLASS);
             }
-            $sys_params = new PhaseForSystem();
-            $sys_params
-                ->setPhaseId($this->phase->id)
-                ->setEditedByPhaseId($editing_phase->id)
-                ;
-
-            $sys_params->doParamsAndResponse();
+            $this->phase->edited_by_phase_id = $editing_phase->id;
+            $this->phase->save();
 
         } catch (\Exception $e) {
             throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);

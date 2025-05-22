@@ -18,7 +18,7 @@ class EditPromotion extends Api\NamespaceApi
 
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Cmd\Ns\NamespaceEditPromotion::class,
+        Act\Cmd\Ns\NamespaceEdit::class,
     ];
 
 }

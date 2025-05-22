@@ -222,29 +222,38 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
 
     public static function buildAttribute(
-        ?int $id = null,
-        ?int $namespace_id = null,
-        ?int $type_id = null,
-        ?int $shape_id = null,
+        ?int    $me_id = null,
+        ?int    $namespace_id = null,
+        ?int    $type_id = null,
+        ?int    $shape_id = null,
+        ?string $uuid = null,
+        bool    $b_do_relations = false
     )
     : Builder
     {
-
+        /** @var Builder $build */
         $build =  Attribute::select('attributes.*')
-            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts");
+
+        if ($b_do_relations)
+        {
             /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound() */
             /** @uses Attribute::attached_event(),Attribute::original_element_value() */
-            ->with('attribute_parent', 'type_owner','attribute_shape_bound','attached_event','original_element_value')
+            $build->
+                with('attribute_parent', 'type_owner', 'attribute_shape_bound', 'attached_event', 'original_element_value');
+        }
 
 
-       ;
-
-        if ($id) {
-            $build->where('attributes.id',$id);
+        if ($me_id) {
+            $build->where('attributes.id',$me_id);
         }
 
         if ($type_id) {
             $build->where('attributes.owner_element_type_id',$type_id);
+        }
+
+        if ($uuid) {
+            $build->where('attributes.ref_uuid',$uuid);
         }
 
         if ($shape_id) {
@@ -269,6 +278,25 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
 
         return $build;
+    }
+
+    public static function getThisAttribute(
+        ?int             $id = null,
+        ?string          $uuid = null
+    )
+    : Attribute
+    {
+        $ret = static::buildAttribute(me_id:$id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = []; $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new \InvalidArgumentException("Could not find attribute via $arg_type : $arg_val");
+        }
+        return $ret;
     }
 
     /**
@@ -356,7 +384,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
 
-                    $first_build = Attribute::buildAttribute(id: $first_id);
+                    $first_build = Attribute::buildAttribute(me_id: $first_id);
                     $ret = $first_build->first();
 
                 }
@@ -454,7 +482,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
                     $element_value->horde_type_id = $attribute->owner_element_type_id;
                     $element_value->horde_originating_type_id = $attribute->owner_element_type_id;
                     $element_value->save();
-                    $attribute = Attribute::buildAttribute(id:$attribute->id)->first();
+                    $attribute = Attribute::buildAttribute(me_id:$attribute->id)->first();
                     //put in element value row, so save this first
                 }
 
@@ -554,7 +582,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
                 if ($collect->has('shape')) {
                     $owner_namespace = $owner->owner_namespace;
-                    if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(id: $owner->owner_namespace_id)->first();}
+                    if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(me_id: $owner->owner_namespace_id)->first();}
                     $hint_location_bound = $collect->get('shape');
                     if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
                         $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);

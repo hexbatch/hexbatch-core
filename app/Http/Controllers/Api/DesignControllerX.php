@@ -93,7 +93,7 @@ class DesignControllerX extends Controller
      */
     public function new_attribute(Request $request,ElementType $element_type): JsonResponse {
         $attribute = Attribute::collectAttribute(collect: $request->collect(),owner: $element_type);
-        $out = Attribute::buildAttribute(id:$attribute->id)->first();
+        $out = Attribute::buildAttribute(me_id:$attribute->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
@@ -102,7 +102,7 @@ class DesignControllerX extends Controller
      */
     public function edit_attribute(Request $request,ElementType $element_type, Attribute $attribute): JsonResponse {
         $attribute = Attribute::collectAttribute(collect: $request->collect(), owner: $element_type, attribute: $attribute);
-        $out = Attribute::buildAttribute(id:$attribute->id)->first();
+        $out = Attribute::buildAttribute(me_id:$attribute->id)->first();
         return response()->json(new AttributeResource($out,null,3), \Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 

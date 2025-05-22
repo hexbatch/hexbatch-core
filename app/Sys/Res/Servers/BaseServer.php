@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Servers;
 
 
-use App\Api\Cmd\Server\Promote\ServerForSystem;
+use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Server;
 use App\Sys\Collections\SystemNamespaces;
@@ -11,6 +11,7 @@ use App\Sys\Collections\SystemServers;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Types\ISystemType;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Server\ServerPromote;
 
 
 abstract class BaseServer implements ISystemServer
@@ -58,20 +59,18 @@ abstract class BaseServer implements ISystemServer
        if ($this->server) {return $this->server;}
        try
        {
-           $sys_params = new ServerForSystem();
-           $sys_params
-               ->setUuid(static::getClassUuid())
-               ->setSystem(true)
-               ->setServerName(static::getServerName())
-               ->setServerUrl(static::getServerUrl())
-               ->setServerDomain(static::getServerDomain())
-               ->setServerAccessToken(null)
-               ->setAccessTokenExpiresAt(null)
-               ->setServerStatus($this->getServerStatus())
+           $creator = new ServerPromote(
+             given_type_uuid:   $this->getISystemServer()::getSystemTypeClass()::getDictionaryObject()->getTypeObject()->getUuid(),
+             given_namespace_uuid:  $this->getISystemServer()->getServerSystemNamespace()?->getNamespaceObject()?->getUuid(),
+             server_name:   static::getServerName(),
+               server_domain: static::getServerDomain(),
+               server_url: static::getServerUrl(),
+               server_status: TypeOfServerStatus::ALLOWED_SERVER,
+               uuid: static::getClassUuid(),is_system: true
+           );
 
-               ;
-
-           $what =  $sys_params->doParamsAndResponse();
+           $creator->runAction();
+           $what =  $creator->getCreatedServer();
            $this->b_did_create_model = true;
            return $what;
 
@@ -97,15 +96,8 @@ abstract class BaseServer implements ISystemServer
 
     public function onNextStep(): void
     {
-        if (!$this->b_did_create_model) {return;}
-        $sys_params = new ServerForSystem();
-        $sys_params
-            ->setServerId($this->server->id)
-            ->setServerName(static::getServerName())
-            ->setServerTypeId($this->getISystemServer()::getSystemTypeClass()::getDictionaryObject()->getTypeObject()?->id)
-            ->setOwningNamespaceId($this->getISystemServer()->getServerSystemNamespace()?->getNamespaceObject()?->id);
-
-         $sys_params->doParamsAndResponse();
+//        if (!$this->b_did_create_model) {return;}
+        //should be all there
     }
 
 

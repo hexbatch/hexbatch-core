@@ -78,7 +78,8 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
     }
 
     public static function buildSet(
-        ?int $id = null
+        ?int            $me_id = null,
+        ?string         $uuid = null
     )
     : Builder
     {
@@ -90,14 +91,37 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
             ->selectRaw(" extract(epoch from  element_sets.created_at) as created_at_ts,  extract(epoch from  element_sets.updated_at) as updated_at_ts")
         ;
 
-        if ($id) {
-            $build->where('element_sets.id', $id);
+        if ($me_id) {
+            $build->where('element_sets.id', $me_id);
+        }
+
+        if ($uuid) {
+            $build->where('element_sets.ref_uuid', $uuid);
         }
 
         /** @uses ElementSet::element_members(),ElementSet::defining_element(),ElementSetMember::of_element() */
         $build->with('element_members','defining_element','element_members.of_element');
 
         return $build;
+    }
+
+    public static function getThisSet(
+        ?int             $id = null,
+        ?string          $uuid = null
+    )
+    : ElementSet
+    {
+        $ret = static::buildSet(me_id:$id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = []; $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new \InvalidArgumentException("Could not find set via $arg_type : $arg_val");
+        }
+        return $ret;
     }
 
     /**
@@ -123,7 +147,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = ElementSet::buildSet(id:$first_id)->first();
+                    $ret = ElementSet::buildSet(me_id:$first_id)->first();
                 }
             }
         } finally {
@@ -150,8 +174,13 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
 
 
 
-    public function addElement(Element $ele,bool $events) : ElementSetMember {
-        return new ElementSetMember(); //todo make code to add in the element to the set, include the element_values and related
+    public function addElement(Element $ele, bool $is_sticky = false) : ElementSetMember {
+        $node = new ElementSetMember();
+        $node->holder_set_id = $this->id;
+        $node->member_element_id = $ele->id;
+        $node->is_sticky = $is_sticky;
+        $node->save();
+        return $node; //todo make code to  include the element_values and related
     }
 
     public function getName(): string {

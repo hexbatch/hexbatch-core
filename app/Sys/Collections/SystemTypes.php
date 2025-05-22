@@ -26,6 +26,11 @@ class SystemTypes extends SystemBase
         return static::getResourceByUuid($class_name_or_uuid);
     }
 
+    protected static function makeNewClass(string $some_class_name) : ISystemResource {
+        /** @type BaseType*/
+        return new $some_class_name(b_type_init:true);
+    }
+
 
 
     protected  static function postFindClasses() : void {
@@ -37,6 +42,7 @@ class SystemTypes extends SystemBase
         foreach (static::$class_name_array as $sys_type_class) {
             foreach ($sys_type_class::getAttributeClasses() as $att) {
                 static::$attribute_to_type_uuid[$att::getClassUuid()] = $sys_type_class;
+                $sys_type_class::registerAction();
             }
         }
     }

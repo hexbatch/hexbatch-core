@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Bounds\TypeOfLocation;
-use App\Enums\Things\TypeOfHexbatchDataStatus;
+use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
@@ -157,7 +157,7 @@ class ElementType extends Model implements IType,ISystemModel
     : ElementType
     {
         $ret = static::buildElementType(id:$id,uuid: $uuid,owner_namespace_id: $owner_namespace_id,map_bound_id: $map_bound_id,
-            shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id,lifecycle: $lifecycle)->first();
+            shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle)->first();
 
         if (!$ret) {
             $arg_types = [];
@@ -170,7 +170,7 @@ class ElementType extends Model implements IType,ISystemModel
             if ($time_bound_id) { $arg_types[] = 'time'; $arg_vals[] = $time_bound_id;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \LogicException("Could not find type via $arg_type : $arg_val");
+            throw new \InvalidArgumentException("Could not find type via $arg_type : $arg_val");
         }
         return $ret;
     }
@@ -183,6 +183,7 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
+        array            $only_uuids = []
     )
     : Builder
     {
@@ -216,6 +217,10 @@ class ElementType extends Model implements IType,ISystemModel
 
         if ($uuid) {
             $build->where('element_types.ref_uuid', $uuid);
+        }
+
+        if (count($only_uuids)) {
+            $build->whereIn('element_types.ref_uuid', $only_uuids);
         }
 
         if ($shape_bound_id) {
@@ -312,7 +317,6 @@ class ElementType extends Model implements IType,ISystemModel
         if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return true;}
         if (Element::where('element_parent_type_id',$this->id)->exists() ) {return true;}
         if (ElementTypeParent::where('parent_type_id',$this->id)->exists() ) {return true;}
-        if (HexbatchDatum::buildThingData(collection_type_id:$this->id,thing_status: TypeOfHexbatchDataStatus::THING_PENDING)->exists() ) {return true;}
 
         //and cannot delete if in a path used by a thing
         if (PathPart::buildPathPart(pending_thing_type_id: $this->id)->exists() ) { return true;}
@@ -506,7 +510,7 @@ class ElementType extends Model implements IType,ISystemModel
                 }
 
                 $owner_namespace = $this->owner_namespace;
-                if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(id: $this->owner_namespace_id)->first();}
+                if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(me_id: $this->owner_namespace_id)->first();}
 
                 if ($collect->has('time_bound')) {
                     $hint_time_bound = $collect->get('time_bound');
@@ -572,6 +576,19 @@ class ElementType extends Model implements IType,ISystemModel
 
     public function getUuid(): string{
         return $this->ref_uuid;
+    }
+
+    public function canBePublished() : bool {
+        if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return false;}
+        foreach ($this->type_parents as $parent) {
+            if ($parent->parent_type_approval !== TypeOfApproval::PUBLISHING_APPROVED) {return false;}
+        }
+
+        foreach ($this->type_attributes as $att) {
+            if ($att->attribute_approval !== TypeOfApproval::PUBLISHING_APPROVED) {return false;}
+        }
+
+        return true;
     }
 
 

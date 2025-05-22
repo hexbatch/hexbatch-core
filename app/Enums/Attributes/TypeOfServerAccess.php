@@ -11,7 +11,8 @@ enum TypeOfServerAccess : string {
     case IS_PUBLIC = 'is_public';
     case IS_PROTECTED = 'is_protected';
 
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfServerAccess {
+    public static function tryFromInput(string|int|bool|null $test ) : ?TypeOfServerAccess {
+        if ($test === null) {return null;}
         $maybe  = TypeOfServerAccess::tryFrom($test);
         if (!$maybe ) {
             $delimited_values = implode('|',array_column(TypeOfServerAccess::cases(),'value'));

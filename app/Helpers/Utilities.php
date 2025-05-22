@@ -40,6 +40,20 @@ class Utilities {
         return true;
     }
 
+    public static function is_uuid_array(array $what, bool $b_throw_exception = false) : bool{
+        if (empty($what)) {
+            if ($b_throw_exception) {throw new \InvalidArgumentException("No uuid in array");}
+            return false;
+        }
+        foreach ($what as $who) {
+            if (!static::is_uuid($who)) {
+                if ($b_throw_exception) {throw new \InvalidArgumentException("Invalid uuid $who");}
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static function is_uuid_similar(?string $guid) : bool{
         if (empty($guid)) {return false;}
         $test_this = str_replace('-','',$guid);

@@ -16,10 +16,12 @@ class UserRegistrationProcessing extends Evt\ScopeServer
 
 
 
-
     const PARENT_CLASSES = [
         Evt\ScopeServer::class
     ];
+
+
+
 
 }
 

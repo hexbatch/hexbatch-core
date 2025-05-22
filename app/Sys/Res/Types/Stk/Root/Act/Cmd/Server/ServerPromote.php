@@ -2,9 +2,21 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Server;
 
+use App\Enums\Server\TypeOfServerStatus;
 use App\Enums\Sys\TypeOfAction;
+use App\Models\ActionDatum;
+use App\Models\Element;
+use App\Models\ElementType;
+
+use App\Models\Server;
+use App\Models\UserNamespace;
 use App\Sys\Res\Atr\Stk\Act\Metrics\ServerPromiteMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
+
+use Hexbatch\Things\Enums\TypeOfThingStatus;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * asking elsewhere for new credentials
@@ -20,9 +32,147 @@ class ServerPromote extends Act\Cmd\Server
 
     const PARENT_CLASSES = [
         Act\Cmd\Server::class,
-        Act\SystemPrivilege::class,
-        Act\NoEventsTriggered::class,
+        Act\SystemPrivilege::class
     ];
+
+    const EVENT_CLASSES = [
+        Evt\Elsewhere\ServerRegistered::class
+    ];
+
+
+    public function getGivenType(): ElementType
+    {
+        /** @uses ActionDatum::data_type() */
+        return $this->action_data->data_type;
+    }
+
+    public function getCreatedServer(): Server
+    {
+        /** @uses ActionDatum::data_server() */
+        return $this->action_data->data_server;
+    }
+
+    public function getGivenNamespace(): ?UserNamespace
+    {
+        /** @uses ActionDatum::data_namespace() */
+        return $this->action_data->data_namespace;
+    }
+
+
+
+
+
+    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid','uuid','server_name','server_domain',
+        'server_url','access_token_expires_at','server_access_token'];
+
+
+    public function __construct(
+        protected string              $given_type_uuid ,
+        protected string              $given_namespace_uuid ,
+        protected string             $server_name ,
+        protected string             $server_domain ,
+        protected string             $server_url ,
+
+        protected TypeOfServerStatus  $server_status = TypeOfServerStatus::UNKNOWN_SERVER,
+        protected ?string             $access_token_expires_at = null,
+        protected ?string             $server_access_token = null,
+
+        protected ?string             $uuid = null,
+
+        protected bool                $is_system = false,
+        protected bool                $send_event = false,
+        protected ?ActionDatum        $action_data = null,
+        protected ?int                $action_data_parent_id = null,
+        protected ?int                $action_data_root_id = null,
+        protected bool                $b_type_init = false
+    )
+    {
+
+        parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
+            is_system: $this->is_system, send_event: $this->send_event,
+            action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id);
+    }
+
+
+
+    protected function initData(bool $b_save = true) : ActionDatum {
+        parent::initData(b_save: false);
+        $this->action_data->data_type_id = Element::getThisElement(uuid: $this->given_type_uuid)->id;
+        $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
+        $this->action_data->collection_data->offsetSet('server_status',$this->server_status->value);
+        $this->action_data->save();
+        return $this->action_data;
+    }
+
+    protected function restoreData(array $data = []) {
+        parent::restoreData($data);
+        if ($this->action_data) {
+            $status_string = $this->action_data->collection_data->offsetGet('server_status');
+            $this->server_status = TypeOfServerStatus::tryFromInput($status_string);
+        }
+    }
+
+
+    public function getActionPriority(): int
+    {
+        return 0;
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function runAction(array $data = []): void
+    {
+        parent::runAction($data);
+
+
+        try {
+            DB::beginTransaction();
+            $server = new Server();
+
+            $server->ref_uuid = $this->uuid;
+            $server->owning_namespace_id = $this->getGivenNamespace()->id;
+            $server->server_type_id = $this->getGivenType()->id;
+            $server->server_status = $this->server_status ;
+
+            if ($this->access_token_expires_at) {
+                $server->access_token_expires_at = Carbon::parse($this->access_token_expires_at)->timezone('UTC')->toDateTimeString() ;
+            }
+
+            $server->server_access_token = $this->server_access_token ;
+            $server->server_name = $this->server_name ;
+            $server->server_domain = $this->server_domain ;
+            $server->server_url = $this->server_url ;
+            $server->is_system = $this->is_system ;
+
+
+
+            $server->save();
+            $this->action_data->data_server_id = $server->id;
+            $this->action_data->save();
+            $this->action_data->refresh();
+            if ($this->send_event) {
+                $this->post_events_to_send = Evt\Elsewhere\ServerRegistered::makeEventActions(
+                    source: $this, data: $this->action_data,elsewhere_context: $server);
+            }
+
+
+            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
+            throw $e;
+        }
+
+    }
+
+
+
+    protected function getMyData() :array {
+        return ['server'=>$this->getCreatedServer(),'given_namespace'=>$this->getGivenNamespace(),'given_type'=>$this->getGivenType()];
+    }
 
 }
 

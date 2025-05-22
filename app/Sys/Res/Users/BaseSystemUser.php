@@ -3,13 +3,13 @@
 namespace App\Sys\Res\Users;
 
 
-use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchInitException;
 use App\Models\User;
 use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Us\UserRegister;
 
 abstract class BaseSystemUser implements ISystemUser
 {
@@ -38,17 +38,11 @@ abstract class BaseSystemUser implements ISystemUser
     public function makeUser() :User
    {
        try {
-           $user = (new CreateNewUser)->create([
-               "username" => static::getUserName(),
-               "password" => static::getUserPassword(),
-               "password_confirmation" => static::getUserPassword()
-           ]);
-           $user->ref_uuid = static::getClassUuid();
-           $user->is_system = true;
-           $user->save();
-           $user->refresh();
+           $register = new UserRegister(user_name: static::getUserName(), user_password: static::getUserPassword(),
+               uuid: static::getClassUuid(), is_system: true, send_event: false);
+           $register->runAction();
            $this->b_did_create_model = true;
-           return $user;
+           return $register->getCreatedUser();
        } catch (\Exception $e) {
             throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
        }

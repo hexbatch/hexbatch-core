@@ -3,7 +3,6 @@
 namespace App\Models;
 
 
-use App\Enums\Things\TypeOfHexbatchDataStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -11,6 +10,10 @@ use App\Helpers\Utilities;
 use App\Rules\NamespaceNameReq;
 use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Namespaces\INamespace;
+use Hexbatch\Things\Enums\TypeOfOwnerGroup;
+use Hexbatch\Things\Interfaces\IThingOwner;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\Models\ThingHook;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,7 +59,7 @@ use Illuminate\Validation\ValidationException;
  * @property UserNamespace[] namespace_members
  * @property UserNamespace[] namespace_admins
  */
-class UserNamespace extends Model implements INamespace,ISystemModel
+class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 {
 
     protected $table = 'user_namespaces';
@@ -124,32 +127,43 @@ class UserNamespace extends Model implements INamespace,ISystemModel
     }
 
     public static function buildNamespace(
-        ?int $id = null,
-        ?int $user_id = null,
-        int $id_is_member_of_namespace = null,
-        int $id_is_admin_of_namespace = null
+        ?int            $me_id = null,
+        ?int            $user_id = null,
+        ?string         $uuid = null,
+        int             $id_is_member_of_namespace = null,
+        int             $id_is_admin_of_namespace = null,
+        bool            $b_relations = false
     )
     : Builder
     {
-        $me_id = Utilities::getTypeCastedAuthUser()?->id;
+
+        /** @var Builder $build */
         $build = UserNamespace::select('user_namespaces.*')
             ->selectRaw(" extract(epoch from  user_namespaces.created_at) as created_at_ts,
                                     extract(epoch from  user_namespaces.updated_at) as updated_at_ts,
-                                    CASE WHEN namespace_user_id = $me_id THEN true ELSE false END as is_owner
-                                    ")
-            /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
-             * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
-             * @uses UserNamespace::user_home_set()
-             */
-            ->with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
-                 'user_home_set');
+                                    CASE WHEN namespace_user_id = $user_id THEN true ELSE false END as is_owner
+                                    ");
 
-        if ($id) {
-            $build->where('user_namespaces.id', $id);
+            if ($b_relations) {
+                /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
+                 * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
+                 * @uses UserNamespace::user_home_set()
+                 */
+                $build->
+                with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
+                    'user_home_set');
+            }
+
+        if ($me_id) {
+            $build->where('user_namespaces.id', $me_id);
         }
 
         if ($user_id) {
             $build->where('user_namespaces.namespace_user_id', $user_id);
+        }
+
+        if ($uuid) {
+            $build->where('user_namespaces.ref_uuid', $uuid);
         }
 
         if ($id_is_member_of_namespace) {
@@ -221,7 +235,7 @@ class UserNamespace extends Model implements INamespace,ISystemModel
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = UserNamespace::buildNamespace(id:$first_id)->first();
+                    $ret = UserNamespace::buildNamespace(me_id:$first_id)->first();
                 }
             }
         }
@@ -311,7 +325,6 @@ class UserNamespace extends Model implements INamespace,ISystemModel
         $member->parent_namespace_id = $this->id;
         $member->is_admin = $is_admin;
         $member->save();
-        $member->refresh();
         return $member;
     }
 
@@ -336,7 +349,6 @@ class UserNamespace extends Model implements INamespace,ISystemModel
         if( ElementType::where('owner_namespace_id',$this->id)->exists() ) {return true;}
         if( Server::where('owning_namespace_id',$this->id)->exists() ) {return true;}
         if( Element::where('element_namespace_id',$this->id)->exists() ) {return true;}
-        if (HexbatchDatum::buildThingData(collection_namespace_id:$this->id,thing_status: TypeOfHexbatchDataStatus::THING_PENDING)->exists() ) {return true;}
         return false;
     }
 
@@ -354,19 +366,50 @@ class UserNamespace extends Model implements INamespace,ISystemModel
 
     /**
      *
-     * //todo add private and public types and put into the user home set
      *
      * //todo when the user home set is created from the user type element, its put into the Standard set, all_users
      *
      */
-    public static function createNamespace(string $namespace_name,?User $owning_user = null,?Server $server = null) : UserNamespace {
+    public static function createNamespace(string $namespace_name,?int $owning_user_id = null,?int $server_id = null,?string $ref = null,
+        ?int $type_id = null,?int $public_element_id = null,?int $private_element_id = null,?int $home_set_id = null,
+        ?string $public_key = null, bool $is_system = false
+    )
+    : UserNamespace
+    {
         $node = new UserNamespace();
-        $node->namespace_user_id = $owning_user?->id;
-        $node->namespace_server_id = $server?->id;
+        $node->namespace_user_id = $owning_user_id;
+        $node->namespace_server_id = $server_id;
+        if ($ref) {$node->ref_uuid = $ref;}
+        if ($type_id) {$node->namespace_type_id = $type_id;}
+        if ($public_element_id) {$node->public_element_id = $public_element_id;}
+        if ($private_element_id) {$node->private_element_id = $private_element_id;}
+        if ($home_set_id) {$node->namespace_home_set_id = $home_set_id;}
+        if ($public_key) {$node->namespace_public_key = $public_key;}
+        $node->is_system = $is_system;
         $node->setNamespaceName($namespace_name);
         $node->save();
-        $node->refresh();
-        return static::buildNamespace(id:$node->id)->first();
+        $node->addMember(child:$node,is_admin: true);
+        return static::buildNamespace(me_id:$node->id)->first();
+    }
+
+    public static function getThisNamespace(
+        ?int             $id = null,
+        ?string          $uuid = null
+    )
+    : UserNamespace
+    {
+        $ret = static::buildNamespace(me_id:$id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = [];
+            $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new \InvalidArgumentException("Could not find namespace via $arg_type : $arg_val");
+        }
+        return $ret;
     }
 
     public function getNamespaceObject(): UserNamespace {
@@ -377,4 +420,69 @@ class UserNamespace extends Model implements INamespace,ISystemModel
         return $this->ref_uuid;
     }
 
+    public function getOwnerId(): int
+    {
+        return $this->id;
+    }
+
+    public function setReadGroupBuilding($builder, string $connecting_table_name, string $connecting_owner_type_column,
+                                         string $connecting_owner_id_column, TypeOfOwnerGroup $hint, ?string $alias = null
+    ): void
+    {
+
+
+        $owner_type = $this->getOwnerType();
+
+        $joiner = /** @param JoinClause $join */
+            function ($join)
+            use ($owner_type, $connecting_table_name, $connecting_owner_type_column, $connecting_owner_id_column,$alias)
+            {
+                $join
+                    ->on("$alias.parent_namespace_id", '=', "$connecting_table_name.$connecting_owner_id_column")
+                    ->where("$connecting_table_name.$connecting_owner_type_column", $owner_type)
+                    ->where("$alias.is_admin",true)
+                ;
+            };
+
+        if ($hint !== TypeOfOwnerGroup::HOOK_CALLBACK_CREATION) {
+            $builder->join("user_namespace_members as $alias",$joiner);
+
+        } else {
+            $builder->leftJoin("user_namespaces as $alias",$joiner);
+        }
+    }
+
+    const NAMESPACE_TAG = 'namespace';
+
+    public function getTags(): array
+    {
+        return [static::NAMESPACE_TAG];
+    }
+
+    const string OWNER_TYPE = 'namespace';
+    public function getOwnerType(): string
+    {
+       return static::getOwnerTypeStatic();
+    }
+
+    public static function getOwnerTypeStatic(): string
+    {
+        return static::OWNER_TYPE;
+    }
+
+    public static function resolveOwner(int $owner_id): IThingOwner
+    {
+        /** @var static|null  $ret */
+        $ret = static::buildNamespace(me_id: $owner_id)->first();
+        if (!$ret) {
+            throw new \InvalidArgumentException("namespace not found using $owner_id");
+        }
+        return $ret;
+    }
+
+    public static function registerOwner(): void
+    {
+        Thing::registerOwnerType(static::class);
+        ThingHook::registerOwnerType(static::class);
+    }
 }

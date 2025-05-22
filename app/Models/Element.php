@@ -80,8 +80,11 @@ class Element extends Model implements ISystemModel
 
 
     public static function buildElement(
-        ?int $id = null)
-    : Builder
+        ?int    $me_id = null,
+        ?string $uuid = null,
+        bool    $b_do_relations = false
+
+    ): Builder
     {
 
         /**
@@ -91,14 +94,40 @@ class Element extends Model implements ISystemModel
             ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
         ;
 
-        if ($id) {
-            $build->where('elements.id', $id);
+        if ($me_id) {
+            $build->where('elements.id', $me_id);
         }
 
-        /** @uses Element::element_namespace(),Element::element_parent_type() */
-        $build->with('element_namespace','element_parent_type');
+        if ($uuid) {
+            $build->where('elements.ref_uuid', $uuid);
+        }
+
+        if ($b_do_relations) {
+            /** @uses Element::element_namespace(),Element::element_parent_type() */
+            $build->with('element_namespace','element_parent_type');
+        }
+
 
         return $build;
+    }
+
+    public static function getThisElement(
+        ?int             $id = null,
+        ?string          $uuid = null
+    )
+    : Element
+    {
+        $ret = static::buildElement(me_id:$id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = []; $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new \InvalidArgumentException("Could not find element via $arg_type : $arg_val");
+        }
+        return $ret;
     }
 
     /**
@@ -125,7 +154,7 @@ class Element extends Model implements ISystemModel
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = Element::buildElement(id:$first_id)->first();
+                    $ret = Element::buildElement(me_id:$first_id)->first();
                 }
             }
         } finally {
