@@ -3,7 +3,7 @@
 namespace App\Sys\Build;
 
 use App\Sys\Collections\SystemBase;
-use App\Sys\Res\Types\Stk\Root\Api;
+use App\Sys\Res\Atr\BaseAttribute;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -13,36 +13,32 @@ use RegexIterator;
  * get hash of api name with subarray for the different interfaces and the api type
  * write hash to file keyed by uuid from the api type, put api name in the structure
  */
-class ApiMapper extends AaMapperBase
+class AttributeMapper extends AaMapperBase
 {
-    const SOURCE_FOLDER = 'app/Sys/Res/Types/Stk/Root/Api';
-    const OUTPUT_FILE = 'bootstrap/cache/hbc_api_cache.php';
+    const SOURCE_FOLDER = 'app/Sys/Res/Atr/Stk';
+    const OUTPUT_FILE = 'bootstrap/cache/hbc_attribute_cache.php';
 
 
-
-    public static function getApiEntry(string $uuid) :ApiMapEntry
+    public static function getAttributeEntry(string $uuid) :AttributeMapEntry
     {
         $what = include base_path(static::OUTPUT_FILE);
         if (!isset($what[$uuid]) || !isset($what[$uuid]['class']) ) {
-            throw new \LogicException("getApiEntry: Cannot find api for $uuid. It is not in the ".static::OUTPUT_FILE);
+            throw new \LogicException("getAttributeEntry: Cannot find api for $uuid. It is not in the ".static::OUTPUT_FILE);
         }
 
-        return new ApiMapEntry(info:$what[$uuid]);
+        return new AttributeMapEntry(info:$what[$uuid]);
     }
 
-    /**
-     * @param string $uuid
-     * @return string|Api
-     */
-    public static function getApiClass(string $uuid) :string|Api
+
+    public static function getAttributeClass(string $uuid) :string|BaseAttribute
     {
-        $what = static::getApiEntry($uuid);
-        /** @type Api */
+        $what = static::getAttributeEntry($uuid);
+        /** @type BaseAttribute */
         return  $what->getFullClassName();
     }
 
     /**
-     * @return ApiMapEntry[]
+     * @return ActionMapEntry[]
      */
     public static function getMapData() : array
     {
@@ -56,10 +52,10 @@ class ApiMapper extends AaMapperBase
             $namespace = SystemBase::extract_namespace($file);
             $class = basename($file, '.php');
             $full_class_name = $namespace . '\\' .$class;
-            if (is_subclass_of($full_class_name, 'App\Sys\Res\Types\Stk\Root\Api') ) {
+            if (is_subclass_of($full_class_name, 'App\Sys\Res\Atr\BaseAttribute') ) {
                 $uuid = $full_class_name::getClassUuid();
                 if (empty($map_entries[$uuid])) {
-                    $map_entries[$uuid] = new ApiMapEntry();
+                    $map_entries[$uuid] = new AttributeMapEntry();
                 }
                 $map_entries[$uuid]->setFromClassName($full_class_name);
             }
@@ -69,7 +65,7 @@ class ApiMapper extends AaMapperBase
 
 
         usort($map_entries,
-            function(ApiMapEntry $a, ApiMapEntry $b) {
+            function(AttributeMapEntry $a, AttributeMapEntry $b) {
                 return $a->getInternalName() <=> $b->getInternalName();
             });
 

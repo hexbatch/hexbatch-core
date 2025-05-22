@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Users\Login;
 
-use App\Api\BaseParams;
+use App\Api\BaseParamsTrait;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\OpenApi\Users\HexbatchUserName;
@@ -20,7 +20,7 @@ use OpenApi\Attributes as OA;
 
 class LoginParams
 {
-    use BaseParams;
+    use BaseParamsTrait;
 
     #[OA\Property(title: 'User Name',type: HexbatchUserName::class,
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]

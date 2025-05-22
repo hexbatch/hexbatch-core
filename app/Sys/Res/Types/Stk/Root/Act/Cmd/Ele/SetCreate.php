@@ -3,6 +3,9 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Helpers\Annotations\Documentation\HexbatchBlurb;
+use App\Helpers\Annotations\Documentation\HexbatchDescription;
+use App\Helpers\Annotations\Documentation\HexbatchTitle;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
@@ -13,7 +16,18 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
+#[HexbatchTitle( title: "New set")]
+#[HexbatchBlurb( blurb: "Creates a new set from a given element")]
+#[HexbatchDescription( description: "Any element can become a set without loosing any of its element functionality.
+## Sets are the bedrock of the library
 
+ * A set can optionally have a parent set.  Parents cannot be changed later. Children can be parents.
+ * A set can choose to turn off events fired when an element enters or leaves it.
+ * The owner of any set is the owner of its element, but elements can have their ownership changed
+ * Sets can set up action hooks in the element type of do things when its content changes, or filter what can enter
+
+ \" ' > <
+")]
 class SetCreate extends Act\Cmd\St
 {
     const UUID = '06c6d184-1230-4bd1-9ee4-80657a9e3620';

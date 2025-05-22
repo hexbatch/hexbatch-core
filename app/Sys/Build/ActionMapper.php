@@ -3,6 +3,7 @@
 namespace App\Sys\Build;
 
 use App\Sys\Collections\SystemBase;
+use App\Sys\Res\Types\Stk\Root\Act\BaseAction;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -14,18 +15,26 @@ use RegexIterator;
  */
 class ActionMapper extends AaMapperBase
 {
-    const SOURCE_FOLDER = 'app/Api/Cmd';
+    const SOURCE_FOLDER = 'app/Sys/Res/Types/Stk/Root/Act/Cmd';
     const OUTPUT_FILE = 'bootstrap/cache/hbc_action_cache.php';
 
 
-    public static function getActionInterface(BuildActionFacet $facet,string $uuid) {
+    public static function getActionEntry(string $uuid) :ActionMapEntry
+    {
         $what = include base_path(static::OUTPUT_FILE);
-
-        if (!isset($what[$uuid]) || !isset($what[$uuid][$facet->value]) ) {
-           throw new \LogicException("The facet $facet->value for $uuid is not in the bootstrap file ".static::OUTPUT_FILE);
+        if (!isset($what[$uuid]) || !isset($what[$uuid]['class']) ) {
+            throw new \LogicException("getActionEntry: Cannot find api for $uuid. It is not in the ".static::OUTPUT_FILE);
         }
-        $class = $what[$uuid][$facet->value];
-        return new $class;
+
+        return new ActionMapEntry(info:$what[$uuid]);
+    }
+
+
+    public static function getActionClass(string $uuid) :string|BaseAction
+    {
+        $what = static::getActionEntry($uuid);
+        /** @type BaseAction */
+        return  $what->getFullClassName();
     }
 
     /**
@@ -48,7 +57,7 @@ class ActionMapper extends AaMapperBase
                 if (empty($map_entries[$uuid])) {
                     $map_entries[$uuid] = new ActionMapEntry();
                 }
-                $map_entries[$uuid]->setAction($full_class_name);
+                $map_entries[$uuid]->setFromClassName($full_class_name);
             }
 
         }
@@ -57,7 +66,7 @@ class ActionMapper extends AaMapperBase
 
         usort($map_entries,
             function(ActionMapEntry $a, ActionMapEntry $b) {
-                return $a->getActionName() <=> $b->getActionName();
+                return $a->getInternalName() <=> $b->getInternalName();
             });
 
 

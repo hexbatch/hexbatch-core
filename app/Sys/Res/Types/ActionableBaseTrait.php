@@ -14,7 +14,7 @@ use Hexbatch\Things\Interfaces\IThingOwner;
 use Hexbatch\Things\Models\Thing;
 use Hexbatch\Things\Models\ThingHook;
 
-trait ActionableBase
+trait ActionableBaseTrait
 {
 
     protected ?TypeOfThingStatus $status = null;

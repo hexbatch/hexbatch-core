@@ -3,6 +3,9 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\User;
 
 
+use App\Helpers\Annotations\Documentation\HexbatchBlurb;
+use App\Helpers\Annotations\Documentation\HexbatchDescription;
+use App\Helpers\Annotations\Documentation\HexbatchTitle;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
@@ -15,7 +18,11 @@ use Hexbatch\Things\Interfaces\ICallResponse;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
+#[HexbatchTitle( title: "Register")]
+#[HexbatchBlurb( blurb: "Creates a new user and his default namespace")]
+#[HexbatchDescription( description: "
 
+  Makes a new user, his default namespace including a new type, which is used to build the home set, and public and private elements")]
 class UserRegister extends Api\UserApi
 {
     const UUID = '6608f89f-ec12-427e-a653-9edc8acc5d19';

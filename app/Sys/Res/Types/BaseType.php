@@ -13,7 +13,9 @@ use App\Sys\Collections\SystemNamespaces;
 use App\Sys\Collections\SystemServers;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\Atr\ISystemAttribute;
+use App\Sys\Res\DocumentTrait;
 use App\Sys\Res\Ele\ISystemElement;
+use App\Sys\Res\IDocument;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
@@ -26,9 +28,9 @@ use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
 
-abstract class BaseType implements ISystemType, IThingAction
+abstract class BaseType implements ISystemType, IThingAction, IDocument
 {
-    use ActionableBase;
+    use ActionableBaseTrait,DocumentTrait;
 
     protected ?ElementType $type = null;
 

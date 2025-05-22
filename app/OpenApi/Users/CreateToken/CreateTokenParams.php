@@ -2,11 +2,10 @@
 
 namespace App\OpenApi\Users\CreateToken;
 
-use App\Api\BaseParams;
+use App\Api\BaseParamsTrait;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\OpenApi\Users\HexbatchToken;
 use OpenApi\Attributes as OA;
 
 /**
@@ -15,7 +14,7 @@ use OpenApi\Attributes as OA;
 
 class CreateTokenParams
 {
-    use BaseParams;
+    use BaseParamsTrait;
     const int|float MAX_PASSTHROUGH_SIZE = 1024*20; //20k
 
     #[OA\Property( title: "Passthrough data (optional)", items: new OA\Items(), nullable: true)]

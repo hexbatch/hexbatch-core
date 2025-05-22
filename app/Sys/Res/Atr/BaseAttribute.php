@@ -9,13 +9,17 @@ use App\Models\Attribute;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemTypes;
+use App\Sys\Res\DocumentTrait;
+use App\Sys\Res\IDocument;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\ISystemType;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromote;
 
 
-abstract class BaseAttribute implements ISystemAttribute
+abstract class BaseAttribute implements ISystemAttribute, IDocument
 {
+    use DocumentTrait;
+
     protected ?Attribute $attribute = null;
 
     const UUID = '';
@@ -119,7 +123,7 @@ abstract class BaseAttribute implements ISystemAttribute
                is_abstract: static::IS_ABSTRACT,
                is_seen_in_child_elements: $this->getISystemAttribute()::isSeenChildrenTypes(),
                attribute_approval: TypeOfApproval::PUBLISHING_APPROVED,
-               is_system: true
+               is_system: $this->getISystemAttribute()::isSystem()
            );
            $creator->runAction();
 
@@ -159,12 +163,22 @@ abstract class BaseAttribute implements ISystemAttribute
     }
 
 
-    public function isFinal(): bool
+    public static function isFinal(): bool
     {
         return static::IS_FINAL;
     }
 
-    public function isSeenChildrenTypes(): bool
+    public static function isSystem(): bool
+    {
+        return true;
+    }
+
+    public static function isAbstract(): bool
+    {
+        return static::IS_ABSTRACT;
+    }
+
+    public static function isSeenChildrenTypes(): bool
     {
         return static::IS_SEEN_BY_CHILDREN_TYPES;
     }

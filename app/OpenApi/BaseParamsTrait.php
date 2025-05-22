@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Collection;
 
-trait BaseParams
+trait BaseParamsTrait
 {
     public static function intRefFromCollection(Collection $collection,string $param_name) : ?int {
         $what  = (int)$collection->get($param_name);

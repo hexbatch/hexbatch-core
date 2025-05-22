@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Sys\Build\ActionMapper;
 use App\Sys\Build\ApiMapper;
+use App\Sys\Build\AttributeMapper;
 use App\Sys\Build\LoadStatic;
 use App\Sys\Build\SystemResources;
 use App\Sys\Res\Atr\ISystemAttribute;
@@ -127,8 +128,11 @@ class BuildSystem extends Command
         if ($this->option('mapper')) {
             $this->info("Writing actions to ". ActionMapper::getOutputPath());
             ActionMapper::writeToStandardFile();
-            $this->info("Writing apis to ". ActionMapper::getOutputPath());
+            $this->info("Writing api to ". ActionMapper::getOutputPath());
             ApiMapper::writeToStandardFile();
+
+            $this->info("Writing attributes to ". AttributeMapper::getOutputPath());
+            AttributeMapper::writeToStandardFile();
             $this->info("Done");
             return 0;
         }

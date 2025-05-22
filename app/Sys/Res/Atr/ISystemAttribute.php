@@ -19,8 +19,10 @@ interface ISystemAttribute extends ISystemResource,IAttribute
 
     public function getSystemHandle() : ?ISystemAttribute;
 
-    public function isFinal() : bool;
-    public function isSeenChildrenTypes() : bool;
+    public static function isSystem(): bool;
+    public static function isAbstract(): bool;
+    public static function isFinal() : bool;
+    public static function isSeenChildrenTypes() : bool;
 
 
     public function getISystemAttribute() : ISystemAttribute;
