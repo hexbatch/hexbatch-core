@@ -10,7 +10,7 @@ use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElementCreateMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -41,7 +41,7 @@ class ElementCreate extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CREATE;
 
     const ATTRIBUTE_CLASSES = [
-        ElementCreateMetric::class
+
     ];
 
     const PARENT_CLASSES = [

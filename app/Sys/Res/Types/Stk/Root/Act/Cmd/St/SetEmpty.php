@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SetEmptyMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class SetEmpty extends Act\Cmd\St
     const ACTION_NAME = TypeOfAction::CMD_SET_EMPTY;
 
     const ATTRIBUTE_CLASSES = [
-        SetEmptyMetric::class
+
     ];
 
     const PARENT_CLASSES = [

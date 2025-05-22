@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElementChangeOwnerMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class ElementChangeOwner extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CHANGE_OWNER;
 
     const ATTRIBUTE_CLASSES = [
-        ElementChangeOwnerMetric::class
+
     ];
 
     const PARENT_CLASSES = [

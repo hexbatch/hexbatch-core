@@ -9,7 +9,6 @@ use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
 
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignParentAddMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
@@ -22,7 +21,7 @@ class DesignParentAdd extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_ADD;
 
     const ATTRIBUTE_CLASSES = [
-        DesignParentAddMetric::class
+
     ];
 
     const PARENT_CLASSES = [

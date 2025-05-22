@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElementPurgeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class ElementPurge extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PURGE;
 
     const ATTRIBUTE_CLASSES = [
-        ElementPurgeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

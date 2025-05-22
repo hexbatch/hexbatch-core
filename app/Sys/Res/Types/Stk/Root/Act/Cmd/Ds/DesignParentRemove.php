@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignParentRemoveMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class DesignParentRemove extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_REMOVE;
 
     const ATTRIBUTE_CLASSES = [
-        DesignParentRemoveMetric::class
+
     ];
 
     const PARENT_CLASSES = [

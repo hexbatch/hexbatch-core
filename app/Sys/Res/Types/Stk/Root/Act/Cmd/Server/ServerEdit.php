@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Server;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ServerEditMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -16,7 +16,7 @@ class ServerEdit extends Act\Cmd\Server
     const ACTION_NAME = TypeOfAction::CMD_SERVER_EDIT;
 
     const ATTRIBUTE_CLASSES = [
-        ServerEditMetric::class
+
     ];
 
     const PARENT_CLASSES = [

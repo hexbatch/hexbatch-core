@@ -7,7 +7,6 @@ use App\Enums\Types\TypeOfApproval;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\ElementType;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignAttributePromoteMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +19,6 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
 
     const ATTRIBUTE_CLASSES = [
-        DesignAttributePromoteMetric::class
     ];
 
     const PARENT_CLASSES = [

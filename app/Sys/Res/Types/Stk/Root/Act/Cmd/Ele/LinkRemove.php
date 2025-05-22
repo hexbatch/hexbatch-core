@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\LinkRemoveMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class LinkRemove extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_LINK_REMOVE;
 
     const ATTRIBUTE_CLASSES = [
-        LinkRemoveMetric::class
+
     ];
 
     const PARENT_CLASSES = [

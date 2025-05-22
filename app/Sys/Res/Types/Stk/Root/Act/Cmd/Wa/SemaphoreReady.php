@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreReadyMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -14,7 +14,7 @@ class SemaphoreReady extends Act\Cmd\Wa
 
 
     const ATTRIBUTE_CLASSES = [
-        SemaphoreReadyMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Op;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\OpPopMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -21,7 +21,7 @@ class Pop extends Act\Cmd\Op
 
 
     const ATTRIBUTE_CLASSES = [
-        OpPopMetric::class
+
     ];
 
     const PARENT_CLASSES = [

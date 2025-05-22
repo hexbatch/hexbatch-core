@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceMemberPurgeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class NamespaceMemberPurge extends Act\Cmd\Ns
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_MEMBER_PURGE;
 
     const ATTRIBUTE_CLASSES = [
-        NamespaceMemberPurgeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignTimeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -15,7 +15,7 @@ class DesignTime extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_TIME;
 
     const ATTRIBUTE_CLASSES = [
-        DesignTimeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

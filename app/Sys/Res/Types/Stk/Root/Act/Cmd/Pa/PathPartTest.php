@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Pa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\PathPartTestMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class PathPartTest extends Act\Cmd\Pa
     const ACTION_NAME = TypeOfAction::CMD_PATH_PART_TEST;
 
     const ATTRIBUTE_CLASSES = [
-        PathPartTestMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceAdminRemoveMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class NamespaceAdminRemove extends Act\Cmd\Ns
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_ADMIN_REMOVE;
 
     const ATTRIBUTE_CLASSES = [
-        NamespaceAdminRemoveMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignListenerTestMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -19,7 +18,6 @@ class DesignListenerTest extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LISTENER_TEST;
 
     const ATTRIBUTE_CLASSES = [
-        DesignListenerTestMetric::class
     ];
 
     const PARENT_CLASSES = [

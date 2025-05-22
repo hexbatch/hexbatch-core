@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt;
 
 use App\Enums\Sys\TypeOfEvent;
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
@@ -13,7 +14,6 @@ use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\IEvent;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Event;
-use BlueM\Tree;
 
 
 class BaseEvent extends Event implements IEvent
@@ -37,6 +37,7 @@ class BaseEvent extends Event implements IEvent
     )
     {
         parent::__construct(b_type_init: $this->b_type_init);
+        Utilities::ignoreVar(static::EVENT_NAME);
     }
 
     /** @return static[] */

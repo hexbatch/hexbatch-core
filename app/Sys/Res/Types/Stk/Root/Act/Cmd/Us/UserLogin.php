@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Us;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class UserLogin extends Act\Cmd\Us
     const ACTION_NAME = TypeOfAction::CMD_USER_LOGIN;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\UserLoginMetric::class
+
     ];
 
     const PARENT_CLASSES = [

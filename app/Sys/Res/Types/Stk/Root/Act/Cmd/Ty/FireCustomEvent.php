@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\FireCustomEventMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class FireCustomEvent extends Act\Cmd\Ty
     const ACTION_NAME = TypeOfAction::CMD_FIRE_CUSTOM_EVENT;
 
     const ATTRIBUTE_CLASSES = [
-        FireCustomEventMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -19,7 +19,7 @@ class ElsewhereAskNamespace extends Act\Cmd\Ew
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_ASK_NAMESPACE;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\ElsewhereAskNamespaceMetric::class
+
     ];
 
     const PARENT_CLASSES = [

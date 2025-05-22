@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\NamespacePromoteMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class NamespacePromote extends Act\Cmd\Ns
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_PROMOTE;
 
     const ATTRIBUTE_CLASSES = [
-        NamespacePromoteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

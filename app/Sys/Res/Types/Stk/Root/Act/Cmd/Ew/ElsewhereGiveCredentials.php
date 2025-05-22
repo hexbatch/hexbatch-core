@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereGiveCredentialsMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -17,7 +17,7 @@ class ElsewhereGiveCredentials extends Act\Cmd\Ew
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_GIVE_CREDENTIALS;
 
     const ATTRIBUTE_CLASSES = [
-        ElsewhereGiveCredentialsMetric::class
+
     ];
 
     const PARENT_CLASSES = [

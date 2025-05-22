@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -15,7 +15,7 @@ class LiveTypeDemote extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_DEMOTE;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\LiveTypeDemoteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -10,7 +10,7 @@ use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\ElementSetChild;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SetCreateMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
@@ -34,7 +34,7 @@ class SetCreate extends Act\Cmd\St
     const ACTION_NAME = TypeOfAction::CMD_SET_CREATE;
 
     const ATTRIBUTE_CLASSES = [
-        SetCreateMetric::class
+
     ];
 
     const PARENT_CLASSES = [

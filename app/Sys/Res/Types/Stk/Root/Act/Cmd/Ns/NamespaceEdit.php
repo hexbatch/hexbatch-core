@@ -10,7 +10,7 @@ use App\Models\ElementType;
 use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
-use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceEditPromotionMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +22,7 @@ class NamespaceEdit extends Act\Cmd\Ns
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_EDIT;
 
     const ATTRIBUTE_CLASSES = [
-        NamespaceEditPromotionMetric::class
+
     ];
 
     const PARENT_CLASSES = [

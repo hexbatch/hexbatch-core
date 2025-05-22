@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElementPingMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Set\AttributeWrite;
 
@@ -28,7 +28,7 @@ class ElementPing extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PING;
 
     const ATTRIBUTE_CLASSES = [
-        ElementPingMetric::class
+
     ];
 
     const PARENT_CLASSES = [

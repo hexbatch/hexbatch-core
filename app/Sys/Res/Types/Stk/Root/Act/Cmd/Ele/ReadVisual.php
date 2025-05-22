@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ReadVisualMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -16,7 +16,7 @@ class ReadVisual extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::PRAGMA_READ_VISUAL;
 
     const ATTRIBUTE_CLASSES = [
-        ReadVisualMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\TypePublishPromoteMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class TypePublishPromote extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_TYPE_PUBLISH_PROMOTE;
 
     const ATTRIBUTE_CLASSES = [
-        TypePublishPromoteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
-use App\Sys\Res\Atr\Stk\Act\Metrics\TypePublishMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Server\TypePublished;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -25,7 +25,7 @@ class TypePublish extends Act\Cmd\Ty
 
 
     const ATTRIBUTE_CLASSES = [
-        TypePublishMetric::class
+
     ];
 
     const PARENT_CLASSES = [

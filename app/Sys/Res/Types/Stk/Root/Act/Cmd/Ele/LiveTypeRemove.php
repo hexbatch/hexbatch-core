@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\LiveTypeRemoveMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -21,7 +21,7 @@ class LiveTypeRemove extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_REMOVE;
 
     const ATTRIBUTE_CLASSES = [
-        LiveTypeRemoveMetric::class
+
     ];
 
     const PARENT_CLASSES = [

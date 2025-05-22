@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreMasterCreateMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -26,7 +26,7 @@ class SemaphoreMasterCreate extends Act\Cmd\Wa
 
 
     const ATTRIBUTE_CLASSES = [
-        SemaphoreMasterCreateMetric::class
+
     ];
 
     const PARENT_CLASSES = [

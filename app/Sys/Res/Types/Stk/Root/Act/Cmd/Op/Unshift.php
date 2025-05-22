@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Op;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\OpUnshiftMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -19,7 +19,7 @@ class Unshift extends Act\Cmd\Op
     const ACTION_NAME = TypeOfAction::OP_UNSHIFT;
 
     const ATTRIBUTE_CLASSES = [
-        OpUnshiftMetric::class
+
     ];
 
     const PARENT_CLASSES = [

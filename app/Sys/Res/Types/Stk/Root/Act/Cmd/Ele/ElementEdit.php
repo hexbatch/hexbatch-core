@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\Phase;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElementPromoteEditMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +22,7 @@ class ElementEdit extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_EDIT;
 
     const ATTRIBUTE_CLASSES = [
-        ElementPromoteEditMetric::class
+
     ];
 
     const PARENT_CLASSES = [

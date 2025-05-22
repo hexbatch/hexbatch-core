@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElementPromoteMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -24,7 +24,7 @@ class ElementPromote extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PROMOTE;
 
     const ATTRIBUTE_CLASSES = [
-        ElementPromoteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Pa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SearchMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -21,7 +21,7 @@ class Search extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::PRAGMA_SEARCH;
 
     const ATTRIBUTE_CLASSES = [
-        SearchMetric::class
+
     ];
 
     const PARENT_CLASSES = [

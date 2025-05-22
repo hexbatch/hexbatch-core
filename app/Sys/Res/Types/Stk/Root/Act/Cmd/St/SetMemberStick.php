@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberStickMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class SetMemberStick extends Act\Cmd\St
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_STICK;
 
     const ATTRIBUTE_CLASSES = [
-        SetMemberStickMetric::class
+
     ];
 
     const PARENT_CLASSES = [

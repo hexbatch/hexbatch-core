@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereDoRegistrationMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -14,7 +14,7 @@ class ElsewhereDoRegistration extends Act\Cmd\Ew
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_DO_REGISTRATION;
 
     const ATTRIBUTE_CLASSES = [
-        ElsewhereDoRegistrationMetric::class
+
     ];
 
     const PARENT_CLASSES = [

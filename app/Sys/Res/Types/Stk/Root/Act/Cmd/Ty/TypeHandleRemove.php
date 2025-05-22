@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\TypeHandleRemoveMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class TypeHandleRemove extends Act\Cmd\Ty
     const ACTION_NAME = TypeOfAction::CMD_TYPE_HANDLE_REMOVE;
 
     const ATTRIBUTE_CLASSES = [
-        TypeHandleRemoveMetric::class
+
     ];
 
     const PARENT_CLASSES = [

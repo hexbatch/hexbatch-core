@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class NamespaceTransferPre extends Act\Cmd\Ns
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_PREP_TRANSFER;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\NamespaceTransferPreMetric::class
+
     ];
 
     const PARENT_CLASSES = [

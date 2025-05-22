@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\PhaseReplaceTreeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -14,7 +14,7 @@ class PhaseReplaceTree extends Act\Cmd\Ph
     const ACTION_NAME = TypeOfAction::CMD_PHASE_REPLACE_TREE;
 
     const ATTRIBUTE_CLASSES = [
-        PhaseReplaceTreeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

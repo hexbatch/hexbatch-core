@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Pa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\PathPartDestroyMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class PathPartDestroy extends Act\Cmd\Pa
     const ACTION_NAME = TypeOfAction::CMD_PATH_PART_DESTROY;
 
     const ATTRIBUTE_CLASSES = [
-        PathPartDestroyMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ReadTimeSpanMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -16,7 +16,7 @@ class ReadTimeSpan extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::PRAGMA_READ_TIME_SPAN;
 
     const ATTRIBUTE_CLASSES = [
-        ReadTimeSpanMetric::class
+
     ];
 
     const PARENT_CLASSES = [

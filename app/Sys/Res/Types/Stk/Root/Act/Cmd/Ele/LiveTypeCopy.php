@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\LiveTypeCopyMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -16,7 +16,7 @@ class LiveTypeCopy extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_COPY;
 
     const ATTRIBUTE_CLASSES = [
-        LiveTypeCopyMetric::class
+
     ];
 
     const PARENT_CLASSES = [

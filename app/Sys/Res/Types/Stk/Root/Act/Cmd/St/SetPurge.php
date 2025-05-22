@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SetPurgeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class SetPurge extends Act\Cmd\St
     const ACTION_NAME = TypeOfAction::CMD_SET_PURGE;
 
     const ATTRIBUTE_CLASSES = [
-        SetPurgeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

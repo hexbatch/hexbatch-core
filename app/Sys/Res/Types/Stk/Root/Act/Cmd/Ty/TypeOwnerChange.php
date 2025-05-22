@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\TypeOwnerChangeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -14,7 +14,7 @@ class TypeOwnerChange extends Act\Cmd\Ty
 
 
     const ATTRIBUTE_CLASSES = [
-        TypeOwnerChangeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

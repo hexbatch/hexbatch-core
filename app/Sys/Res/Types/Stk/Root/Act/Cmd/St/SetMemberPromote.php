@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberPromoteMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class SetMemberPromote extends Act\Cmd\St
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_PROMOTE;
 
     const ATTRIBUTE_CLASSES = [
-        SetMemberPromoteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

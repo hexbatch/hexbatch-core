@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\TypeHandleAddMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -17,7 +17,7 @@ class TypeHandleAdd extends Act\Cmd\Ty
     const ACTION_NAME = TypeOfAction::CMD_TYPE_HANDLE_ADD;
 
     const ATTRIBUTE_CLASSES = [
-        TypeHandleAddMetric::class
+
     ];
 
     const PARENT_CLASSES = [

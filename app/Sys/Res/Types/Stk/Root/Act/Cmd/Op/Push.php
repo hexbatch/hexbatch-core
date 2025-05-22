@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Op;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\OpPushMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -18,7 +18,7 @@ class Push extends Act\Cmd\Op
     const ACTION_NAME = TypeOfAction::OP_PUSH;
 
     const ATTRIBUTE_CLASSES = [
-        OpPushMetric::class
+
     ];
 
     const PARENT_CLASSES = [

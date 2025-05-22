@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignTimeTestMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -15,7 +15,7 @@ class DesignTimeTest extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_TIME_TEST;
 
     const ATTRIBUTE_CLASSES = [
-        DesignTimeTestMetric::class
+
     ];
 
     const PARENT_CLASSES = [

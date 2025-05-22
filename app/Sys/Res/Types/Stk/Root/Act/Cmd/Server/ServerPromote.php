@@ -10,7 +10,7 @@ use App\Models\ElementType;
 
 use App\Models\Server;
 use App\Models\UserNamespace;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ServerPromiteMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 use Hexbatch\Things\Enums\TypeOfThingStatus;
@@ -27,7 +27,7 @@ class ServerPromote extends Act\Cmd\Server
     const ACTION_NAME = TypeOfAction::CMD_SERVER_PROMOTE;
 
     const ATTRIBUTE_CLASSES = [
-        ServerPromiteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\PhaseMoveTreeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -16,7 +16,7 @@ class PhaseMoveTree extends Act\Cmd\Ph
     const ACTION_NAME = TypeOfAction::CMD_PHASE_MOVE_TREE;
 
     const ATTRIBUTE_CLASSES = [
-        PhaseMoveTreeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\LinkAddMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class LinkAdd extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_LINK_ADD;
 
     const ATTRIBUTE_CLASSES = [
-        LinkAddMetric::class
+
     ];
 
     const PARENT_CLASSES = [

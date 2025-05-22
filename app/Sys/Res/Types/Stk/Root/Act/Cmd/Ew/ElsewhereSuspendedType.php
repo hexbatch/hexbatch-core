@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -16,7 +16,7 @@ class ElsewhereSuspendedType extends Act\Cmd\Ew
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_SUSPENDED_TYPE;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\ElsewhereSuspendedTypeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

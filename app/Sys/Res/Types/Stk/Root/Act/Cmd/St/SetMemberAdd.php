@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SetMemberAddMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -19,7 +19,7 @@ class SetMemberAdd extends Act\Cmd\St
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_ADD;
 
     const ATTRIBUTE_CLASSES = [
-        SetMemberAddMetric::class
+
     ];
 
     const PARENT_CLASSES = [

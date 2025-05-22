@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SetDestroyMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -14,7 +14,7 @@ class SetDestroy extends Act\Cmd\St
     const ACTION_NAME = TypeOfAction::CMD_SET_DESTROY;
 
     const ATTRIBUTE_CLASSES = [
-        SetDestroyMetric::class
+
     ];
 
     const PARENT_CLASSES = [

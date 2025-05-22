@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignPromoteMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -14,7 +14,7 @@ class DesignPromote extends Act\Cmd\Ds
 
 
     const ATTRIBUTE_CLASSES = [
-        DesignPromoteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

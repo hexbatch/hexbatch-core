@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\PhasePurgeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -13,7 +13,7 @@ class PhasePurge extends Act\Cmd\Ph
     const ACTION_NAME = TypeOfAction::CMD_PHASE_PURGE;
 
     const ATTRIBUTE_CLASSES = [
-        PhasePurgeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

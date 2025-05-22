@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\LiveTypeAddMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -30,7 +30,7 @@ class LiveTypeAdd extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_ADD;
 
     const ATTRIBUTE_CLASSES = [
-        LiveTypeAddMetric::class
+
     ];
 
     const PARENT_CLASSES = [

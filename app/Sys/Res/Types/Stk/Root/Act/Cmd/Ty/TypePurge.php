@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\TypePurgeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -14,7 +14,7 @@ class TypePurge extends Act\Cmd\Ty
 
 
     const ATTRIBUTE_CLASSES = [
-        TypePurgeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

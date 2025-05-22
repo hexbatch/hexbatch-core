@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElementOnMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -14,7 +14,7 @@ class ElementOn extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::PRAGMA_ELEMENT_ON;
 
     const ATTRIBUTE_CLASSES = [
-        ElementOnMetric::class
+
     ];
 
     const PARENT_CLASSES = [

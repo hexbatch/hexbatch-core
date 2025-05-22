@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignEditMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +12,6 @@ class DesignEdit extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_EDIT;
 
     const ATTRIBUTE_CLASSES = [
-        DesignEditMetric::class
     ];
 
     const PARENT_CLASSES = [

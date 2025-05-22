@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignOwnerChangeMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -18,7 +17,6 @@ class DesignOwnerChange extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_OWNER_CHANGE;
 
     const ATTRIBUTE_CLASSES = [
-        DesignOwnerChangeMetric::class
     ];
 
     const PARENT_CLASSES = [

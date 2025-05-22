@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Us;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -16,7 +16,7 @@ class UserPrepareDeletion extends Act\Cmd\Us
     const ACTION_NAME = TypeOfAction::CMD_USER_PREPARE_DELETION;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\UserPrepareDeletionMetric::class
+
     ];
 
     const PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\ElsewhereChangeStatusMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -14,7 +14,7 @@ class ElsewhereChangeStatus extends Act\Cmd\Ew
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_CHANGE_STATUS;
 
     const ATTRIBUTE_CLASSES = [
-        ElsewhereChangeStatusMetric::class
+
     ];
 
     const PARENT_CLASSES = [

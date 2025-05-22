@@ -10,7 +10,7 @@ use App\Models\ElementType;
 use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
-use App\Sys\Res\Atr\Stk\Act\Metrics\NamespaceCreateMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -24,7 +24,7 @@ class NamespaceCreate extends Act\Cmd\Ns
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_CREATE;
 
     const ATTRIBUTE_CLASSES = [
-        NamespaceCreateMetric::class
+
     ];
 
     const PARENT_CLASSES = [

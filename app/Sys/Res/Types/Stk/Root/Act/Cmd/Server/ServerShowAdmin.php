@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Server;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -15,7 +15,7 @@ class ServerShowAdmin extends Act\Cmd\Server
     const ACTION_NAME = TypeOfAction::CMD_SERVER_SHOW_ADMIN;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\ServerShowAdminMetric::class
+
     ];
 
     const PARENT_CLASSES = [

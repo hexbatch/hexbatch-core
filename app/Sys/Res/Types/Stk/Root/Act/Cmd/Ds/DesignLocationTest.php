@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignLocationTestMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -17,7 +16,6 @@ class DesignLocationTest extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION_TEST;
 
     const ATTRIBUTE_CLASSES = [
-        DesignLocationTestMetric::class
     ];
 
     const PARENT_CLASSES = [

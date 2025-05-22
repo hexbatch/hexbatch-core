@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\SemaphoreMasterUpdateMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -19,7 +19,7 @@ class SemaphoreMasterUpdate extends Act\Cmd\Wa
 
 
     const ATTRIBUTE_CLASSES = [
-        SemaphoreMasterUpdateMetric::class
+
     ];
 
     const PARENT_CLASSES = [

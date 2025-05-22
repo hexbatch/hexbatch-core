@@ -7,7 +7,7 @@ use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\Phase;
-use App\Sys\Res\Atr\Stk\Act\Metrics\PhasePromoteMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
@@ -19,7 +19,7 @@ class PhaseCreate extends Act\Cmd\Ph
     const ACTION_NAME = TypeOfAction::CMD_PHASE_CREATE;
 
     const ATTRIBUTE_CLASSES = [
-        PhasePromoteMetric::class
+
     ];
 
     const PARENT_CLASSES = [

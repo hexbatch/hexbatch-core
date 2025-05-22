@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignPurgeMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -14,7 +14,7 @@ class DesignPurge extends Act\Cmd\Ds
 
 
     const ATTRIBUTE_CLASSES = [
-        DesignPurgeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

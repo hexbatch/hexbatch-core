@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignRuleDestroyMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /*
@@ -16,7 +16,7 @@ class DesignRuleDestroy extends Act\Cmd\Ds
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_RULE_DESTROY;
 
     const ATTRIBUTE_CLASSES = [
-        DesignRuleDestroyMetric::class
+
     ];
 
     const PARENT_CLASSES = [

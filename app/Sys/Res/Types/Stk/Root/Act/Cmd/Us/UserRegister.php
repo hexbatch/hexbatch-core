@@ -6,7 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\User;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -21,7 +21,7 @@ class UserRegister extends Act\Cmd\Us
     const TypeOfAction ACTION_NAME = TypeOfAction::CMD_USER_REGISTER;
 
     const array ATTRIBUTE_CLASSES = [
-        Metrics\UserRegisterMetric::class
+
     ];
 
     const array PARENT_CLASSES = [

@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ew;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -17,7 +17,7 @@ class ElsewherePushType extends Act\Cmd\Ew
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_PUSH_TYPE;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\ElsewherePushTypeMetric::class
+
     ];
 
     const PARENT_CLASSES = [

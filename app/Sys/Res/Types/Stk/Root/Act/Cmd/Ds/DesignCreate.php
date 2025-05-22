@@ -10,7 +10,6 @@ use App\Models\ElementTypeServerLevel;
 use App\Models\Server;
 
 use App\Models\UserNamespace;
-use App\Sys\Res\Atr\Stk\Act\Metrics\DesignCreateMetric;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +22,6 @@ class DesignCreate extends Act\Cmd\Ds
 
 
     const ATTRIBUTE_CLASSES = [
-        DesignCreateMetric::class
     ];
 
     const PARENT_CLASSES = [

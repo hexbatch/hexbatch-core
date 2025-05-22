@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Pa;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics\PathCreateMetric;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
@@ -13,7 +13,7 @@ class PathCreate extends Act\Cmd\Pa
     const ACTION_NAME = TypeOfAction::CMD_PATH_CREATE;
 
     const ATTRIBUTE_CLASSES = [
-        PathCreateMetric::class
+
     ];
 
     const PARENT_CLASSES = [

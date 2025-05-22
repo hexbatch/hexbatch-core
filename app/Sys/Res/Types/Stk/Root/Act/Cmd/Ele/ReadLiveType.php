@@ -3,7 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Atr\Stk\Act\Metrics;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -18,7 +18,7 @@ class ReadLiveType extends Act\Cmd\Ele
     const ACTION_NAME = TypeOfAction::PRAGMA_READ_LIVE_TYPE;
 
     const ATTRIBUTE_CLASSES = [
-        Metrics\ReadLiveTypeMetric::class
+
     ];
 
     const PARENT_CLASSES = [
