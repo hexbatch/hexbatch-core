@@ -15,7 +15,7 @@ abstract class BaseSystemUser implements ISystemUser
 {
     protected ?User $user = null;
 
-
+    public static function getFullClassName() :string {return static::class;}
     const NAMESPACE_CLASS = ThisNamespace::class;
 
     protected bool $b_did_create_model = false;
@@ -73,9 +73,14 @@ abstract class BaseSystemUser implements ISystemUser
         $this->getUserObject()->default_namespace_id = $ns->getNamespaceObject()->id;
         $this->getUserObject()->save();
 
-        //todo make a list of namespaces the user will belong to and then add that here
+
     }
 
+    public function __construct(
+        protected bool $b_type_init = false
+    ) {
+
+    }
 
 
 }

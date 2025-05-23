@@ -78,6 +78,7 @@ class UserRegister extends Api\UserApi
             } else {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();

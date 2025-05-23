@@ -7,7 +7,7 @@ use App\Enums\Sys\TypeOfAction;
 
 
 
-abstract class Cmd extends BaseAction
+class Cmd extends BaseAction
 {
     const UUID = 'f4717906-b735-415d-80d0-6c17d4177595';
 

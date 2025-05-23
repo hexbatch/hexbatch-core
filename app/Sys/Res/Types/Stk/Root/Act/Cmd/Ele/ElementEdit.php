@@ -29,7 +29,7 @@ class ElementEdit extends Act\Cmd\Ele
         Act\Cmd\Ele::class
     ];
 
-    public function getEditedElement(): Element
+    public function getEditedElement(): ?Element
     {
         /** @uses ActionDatum::data_element() */
         return $this->action_data->data_element;
@@ -45,8 +45,8 @@ class ElementEdit extends Act\Cmd\Ele
 
 
     public function __construct(
-        protected string               $given_element_uuid ,
-        protected ?string              $change_phase_uuid ,
+        protected ?string               $given_element_uuid = null ,
+        protected ?string              $change_phase_uuid = null,
         protected bool                $is_system = false,
         protected bool                $send_event = false,
         protected ?ActionDatum        $action_data = null,
@@ -74,7 +74,9 @@ class ElementEdit extends Act\Cmd\Ele
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if (!$this->getEditedElement()) {
+            throw new \InvalidArgumentException("Need element before can edit");
+        }
 
         try {
             DB::beginTransaction();
@@ -83,6 +85,7 @@ class ElementEdit extends Act\Cmd\Ele
             }
 
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -102,11 +105,15 @@ class ElementEdit extends Act\Cmd\Ele
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
+        if ($this->given_element_uuid) {
+            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
+        }
+
         if ($this->change_phase_uuid) {
             $this->action_data->data_phase_id = Phase::getThisPhase(uuid: $this->change_phase_uuid)->id;
         }
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 

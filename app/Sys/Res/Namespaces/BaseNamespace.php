@@ -29,6 +29,8 @@ abstract class BaseNamespace implements ISystemNamespace
     const string SERVER_CLASS = ThisServer::class;
     const string USER_CLASS = SystemUser::class;
 
+    public static function getFullClassName() :string {return static::class;}
+
     protected ?UserNamespace $namespace = null;
     protected bool $b_did_create_model = false;
     public function didCreateModel(): bool { return $this->b_did_create_model; }
@@ -82,7 +84,7 @@ abstract class BaseNamespace implements ISystemNamespace
        try {
            $ns = new NamespaceCreate(namespace_name: static::getNamespaceName(), public_key: $this->getISystemNamespace()::getNamespacePublicKey(),
                uuid: static::getClassUuid(), given_user_uuid: static::getSystemUserClass()::getDictionaryObject()->getUserObject()?->getUuid(),
-               is_stub: true, is_system: true);
+               is_stub: true, is_system: true,send_event: false);
            $ns->runAction(); //just stubbed, so no elements or sets created
 
            $this->b_did_create_model = true;
@@ -121,7 +123,7 @@ abstract class BaseNamespace implements ISystemNamespace
                 given_public_element_uuid: static::getSystemPublicClass()::getDictionaryObject()->getElementObject()?->getUuid(),
                 given_private_element_uuid: static::getSystemPrivateClass()::getDictionaryObject()->getElementObject()?->getUuid(),
                 given_home_set_uuid: static::getSystemHomeClass()::getDictionaryObject()->getSetObject()?->getUuid(),
-                is_system: true
+                is_system: true,send_event: false
                         );
            $ns->runAction();
         } catch (\Exception $e) {
@@ -130,6 +132,10 @@ abstract class BaseNamespace implements ISystemNamespace
 
     }
 
+    public function __construct(
+        protected bool $b_type_init = false
+    ) {
 
+    }
 
 }

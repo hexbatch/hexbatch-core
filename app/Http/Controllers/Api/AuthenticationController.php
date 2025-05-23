@@ -95,6 +95,8 @@ class AuthenticationController extends Controller
     #[OA\Post(
         path: '/api/v1/users/register',
         operationId: 'core.users.register',
+        description: "",
+        summary: '',
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: RegistrationParams::class)),
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Register with just a username and a password',

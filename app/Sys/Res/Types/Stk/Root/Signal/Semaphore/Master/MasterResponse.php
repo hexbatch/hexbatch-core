@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Signal\Master;
+namespace App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master;
 
 
 use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stk\Root\Signal\MasterSemaphore;
+use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\MasterSemaphore;
 
 
 class MasterResponse extends BaseType

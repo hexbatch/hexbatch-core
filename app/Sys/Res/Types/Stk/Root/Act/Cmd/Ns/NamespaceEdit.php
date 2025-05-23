@@ -29,7 +29,7 @@ class NamespaceEdit extends Act\Cmd\Ns
         Act\Cmd\Ns::class
     ];
 
-    public function getEditedNamespace(): UserNamespace
+    public function getEditedNamespace(): ?UserNamespace
     {
         /** @uses ActionDatum::data_namespace() */
         return $this->action_data->data_namespace;
@@ -72,7 +72,7 @@ class NamespaceEdit extends Act\Cmd\Ns
     ];
 
     public function __construct(
-        protected string       $given_namespace_uuid ,
+        protected ?string       $given_namespace_uuid = null,
         protected ?string      $namespace_name = null,
         protected ?string      $public_key = null,
         protected ?string         $given_user_uuid = null,
@@ -98,15 +98,16 @@ class NamespaceEdit extends Act\Cmd\Ns
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
+
+        if ($this->given_namespace_uuid) {
+            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
+        }
+
 
         if ($this->given_server_uuid) {
             $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
         }
 
-        if ($this->given_server_uuid) {
-            $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
-        }
 
         if ($this->given_type_uuid) {
             $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
@@ -128,6 +129,7 @@ class NamespaceEdit extends Act\Cmd\Ns
             $this->action_data->data_user_id = User::getUser(uuid: $this->given_user_uuid)->id;
         }
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 
@@ -139,6 +141,9 @@ class NamespaceEdit extends Act\Cmd\Ns
     {
         parent::runAction($data);
         $namespace = $this->getEditedNamespace();
+        if (!$namespace) {
+            throw new \InvalidArgumentException("Need namespace to edit");
+        }
         try {
             DB::beginTransaction();
             if ($this->is_system) {
@@ -178,7 +183,7 @@ class NamespaceEdit extends Act\Cmd\Ns
             $namespace->save();
 
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

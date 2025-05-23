@@ -65,7 +65,7 @@ class DesignCreate extends Act\Cmd\Ds
     )
     {
         if (!$this->given_server_uuid) {
-            $this->given_server_uuid = Server::getDefaultServer()->ref_uuid;
+            $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
         }
         parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
             is_system: $this->is_system, send_event: $this->send_event,
@@ -88,10 +88,17 @@ class DesignCreate extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
-        $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->owner_namespace_uuid)->id;
+        if ($this->given_server_uuid) {
+            $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
+        }
+
+        if ($this->owner_namespace_uuid) {
+            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->owner_namespace_uuid)->id;
+        }
+
         $this->action_data->collection_data->offsetSet('access',$this->access?->value);
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 
@@ -106,10 +113,13 @@ class DesignCreate extends Act\Cmd\Ds
         try {
             DB::beginTransaction();
             $type = new ElementType();
-            $type->ref_uuid = $this->uuid;
+            if ($this->uuid) {
+                $type->ref_uuid = $this->uuid;
+            }
+
             $type->type_name = $this->type_name;
 
-            $type->owner_namespace_id = $this->getGivenNamespace()->id;
+            $type->owner_namespace_id = $this->getGivenNamespace()?->id;
             $type->imported_from_server_id = $this->getGivenServer()?->id;
             $type->is_system = $this->is_system;
             $type->is_final_type = $this->is_final;

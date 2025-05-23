@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Signal;
+namespace App\Sys\Res\Types\Stk\Root\Signal\Semaphore;
 
 
 
@@ -8,13 +8,15 @@ use App\Sys\Res\Atr\Stk\Signal\Master\NumberSemaphores;
 use App\Sys\Res\Atr\Stk\Signal\Master\WaitingSetLifetime;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa\SemaphoreReady;
+use App\Sys\Res\Types\Stk\Root\Signal\Semaphore;
+use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\OuterSet\WaitingResponseSetType;
 
 
 /**
- The master semaphore has 4 types that it uses, each will be derived from the types below
- The first type will be inheriting from this,
+ * The master semaphore has 4 types that it uses, each will be derived from the types below
+ * The first type will be inheriting from this,
  * the @uses \App\Sys\Res\Types\Stk\Root\NamespaceType of the logged in ns
- * and perhaps others,such as @uses \App\Sys\Res\Types\Stk\Root\Signal\Master\Remote
+ * and perhaps others,such as @uses \App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\Remote
  *
  * That master type will have semaphores inheriting from it and @uses Semaphore
  *  Unless its given another semaphore type to use instead, this would allow master semaphores to be chained
@@ -22,12 +24,12 @@ use App\Sys\Res\Types\Stk\Root\Act\Cmd\Wa\SemaphoreReady;
  *   which will be handled without rules processing the middle part of the request chain
  *
  * it will have a response inheriting from that master type and
- * @uses \App\Sys\Res\Types\Stk\Root\Signal\Master\MasterResponse
+ * @uses \App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\MasterResponse
  *
- * It will have an outer set from that master type and @uses \App\Sys\Res\Types\Stk\Root\Signal\Master\OuterSetType
+ * It will have an outer set from that master type and @uses \App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\OuterSetType
  * there is only one set here for the lifetime of the type
  *
- * It will have an action set from that master type and @uses \App\Sys\Res\Types\Stk\Root\Signal\Master\ActionSetType
+ * It will have an action set from that master type and @uses \App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\OuterSet\ActionSetType
  * There will be a new action set made for each run
  *
  * All the newly created types share the same element has a handle, which is created from the base type given to make the others

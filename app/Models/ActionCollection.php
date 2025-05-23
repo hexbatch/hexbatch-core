@@ -207,6 +207,7 @@ class ActionCollection extends Model
     : void
     {
 
+        $uuids = array_unique($uuids);
         $column = static::CLASS_TO_COLUMN_MAPPING[$class]??null;
         if (!$column) {
             throw new \LogicException('[addUuids] Unexpected class '.$class);

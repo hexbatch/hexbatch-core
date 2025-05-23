@@ -72,7 +72,7 @@ class SetCreate extends Act\Cmd\St
 
 
     public function __construct(
-        protected string               $given_element_uuid ,
+        protected ?string               $given_element_uuid = null ,
         protected ?string              $given_parent_set_uuid = null,
         protected ?string             $uuid = null,
         protected bool                $set_has_events = true,
@@ -103,12 +103,17 @@ class SetCreate extends Act\Cmd\St
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if (!$this->getGivenElement()) {
+            throw new \InvalidArgumentException("Need element");
+        }
 
         try {
             DB::beginTransaction();
             $set = new ElementSet();
-            $set->ref_uuid = $this->uuid;
+            if ($this->uuid) {
+                $set->ref_uuid = $this->uuid;
+            }
+
             $set->parent_set_element_id = $this->getGivenElement()?->id;
             $set->has_events = $this->set_has_events;
             $set->is_system = $this->is_system;
@@ -133,6 +138,7 @@ class SetCreate extends Act\Cmd\St
             }
 
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -152,11 +158,15 @@ class SetCreate extends Act\Cmd\St
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
+        if ($this->given_element_uuid) {
+            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
+        }
+
         if ($this->given_parent_set_uuid) {
             $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_parent_set_uuid)->id;
         }
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 

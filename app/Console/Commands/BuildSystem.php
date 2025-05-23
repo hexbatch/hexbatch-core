@@ -153,7 +153,6 @@ class BuildSystem extends Command
 
             }
             foreach ($load->attributes as  $full_class_attribute) {
-                if (is_subclass_of($full_class_attribute, 'App\Sys\Res\Atr\Stk\Act\ActionMetric') ) { $number_metrics++;}
                 if (is_subclass_of($full_class_attribute, 'App\Sys\Res\Atr\Stk\MetaData\Metadata') ) { $number_metadata++;}
             }
             $this->info('UUID '.count($load->uuid_classes));
@@ -164,7 +163,6 @@ class BuildSystem extends Command
             $this->info('    Meta '.$number_meta);
             $this->info('    Others '.count($load->type_name_uuids) - $number_actions - $number_api - $number_events - $number_meta);
             $this->info('ATTRIBUTES '.count($load->attribute_name_uuids));
-            $this->info('    Metrics '.$number_metrics);
             $this->info('    Meta '.$number_metadata);
             $this->info('SETS '.count($load->type_sets));
             $this->info('ELEMENTS '.count($load->type_elements));

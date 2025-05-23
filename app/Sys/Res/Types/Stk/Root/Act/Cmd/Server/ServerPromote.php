@@ -40,7 +40,7 @@ class ServerPromote extends Act\Cmd\Server
     ];
 
 
-    public function getGivenType(): ElementType
+    public function getGivenType(): ?ElementType
     {
         /** @uses ActionDatum::data_type() */
         return $this->action_data->data_type;
@@ -67,11 +67,11 @@ class ServerPromote extends Act\Cmd\Server
 
 
     public function __construct(
-        protected string              $given_type_uuid ,
-        protected string              $given_namespace_uuid ,
-        protected string             $server_name ,
-        protected string             $server_domain ,
-        protected string             $server_url ,
+        protected ?string              $given_type_uuid = null,
+        protected ?string              $given_namespace_uuid = null,
+        protected ?string             $server_name = null,
+        protected ?string             $server_domain = null,
+        protected ?string             $server_url = null,
 
         protected TypeOfServerStatus  $server_status = TypeOfServerStatus::UNKNOWN_SERVER,
         protected ?string             $access_token_expires_at = null,
@@ -97,10 +97,16 @@ class ServerPromote extends Act\Cmd\Server
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_type_id = Element::getThisElement(uuid: $this->given_type_uuid)->id;
-        $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
+        if ($this->given_type_uuid) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        }
+        if ($this->given_namespace_uuid) {
+            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
+        }
+
         $this->action_data->collection_data->offsetSet('server_status',$this->server_status->value);
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 
@@ -131,9 +137,12 @@ class ServerPromote extends Act\Cmd\Server
             DB::beginTransaction();
             $server = new Server();
 
-            $server->ref_uuid = $this->uuid;
-            $server->owning_namespace_id = $this->getGivenNamespace()->id;
-            $server->server_type_id = $this->getGivenType()->id;
+            if ($this->uuid) {
+                $server->ref_uuid = $this->uuid;
+            }
+
+            $server->owning_namespace_id = $this->getGivenNamespace()?->id;
+            $server->server_type_id = $this->getGivenType()?->id;
             $server->server_status = $this->server_status ;
 
             if ($this->access_token_expires_at) {

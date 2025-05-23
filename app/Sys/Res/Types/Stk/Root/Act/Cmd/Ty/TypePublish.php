@@ -37,7 +37,7 @@ class TypePublish extends Act\Cmd\Ty
     ];
 
 
-    public function getPublishingType(): ElementType
+    public function getPublishingType(): ?ElementType
     {
         return $this->action_data->data_type;
     }
@@ -47,7 +47,7 @@ class TypePublish extends Act\Cmd\Ty
 
 
     public function __construct(
-        protected string              $given_type_uuid ,
+        protected ?string              $given_type_uuid =null,
         protected bool                $is_system = false,
         protected bool                $send_event = false,
         protected ?ActionDatum        $action_data = null,
@@ -75,7 +75,9 @@ class TypePublish extends Act\Cmd\Ty
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if (!$this->getPublishingType()) {
+            throw new \InvalidArgumentException("Need type before can publish");
+        }
         if ($this->getPublishingType()->lifecycle === TypeOfLifecycle::PUBLISHED) {
             throw new \RuntimeException("Type already published");
         }
@@ -116,8 +118,12 @@ class TypePublish extends Act\Cmd\Ty
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        if ($this->given_type_uuid) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        }
+
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 

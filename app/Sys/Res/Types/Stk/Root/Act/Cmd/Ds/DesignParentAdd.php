@@ -32,7 +32,7 @@ class DesignParentAdd extends Act\Cmd\Ds
         Evt\Server\DesignPending::class
     ];
 
-    public function getDesignType(): ElementType
+    public function getDesignType(): ?ElementType
     {
         return $this->action_data->data_type;
     }
@@ -49,11 +49,11 @@ class DesignParentAdd extends Act\Cmd\Ds
 
     const array ACTIVE_COLLECTION_KEYS = ['given_parent_uuids'=>ElementType::class];
     public function __construct(
-        protected string              $given_type_uuid ,
+        protected ?string              $given_type_uuid = null,
         /**
          * @var string[] $given_parent_uuids
          */
-        protected array               $given_parent_uuids,
+        protected array               $given_parent_uuids = [],
         protected ?TypeOfApproval     $approval = null,
         protected bool                $is_system = false,
         protected bool                $send_event = false,
@@ -86,7 +86,9 @@ class DesignParentAdd extends Act\Cmd\Ds
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if (!$this->getDesignType()) {
+            throw new \InvalidArgumentException("Need type before can add parents to it");
+        }
         $approval = $this->approval?:TypeOfApproval::PENDING_DESIGN_APPROVAL;
         if (!$this->is_system) {
             $approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
@@ -94,14 +96,16 @@ class DesignParentAdd extends Act\Cmd\Ds
         try {
             DB::beginTransaction();
             foreach ($this->getParents() as $parent) {
-                ElementTypeParent::addParent(parent: $parent, child: $this->getType(), init_approval: $approval);
+                ElementTypeParent::addParent(parent: $parent, child: $this->getDesignType(), init_approval: $approval);
                 if ($this->send_event) {
                     $this->post_events_to_send = array_merge($this->post_events_to_send,
                         Evt\Server\DesignPending::makeEventActions(source: $this,data: $this->action_data,type_context: $parent));
                 }
 
             }
+            $this->saveCollectionKeys();
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -128,9 +132,13 @@ class DesignParentAdd extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        if ($this->given_type_uuid) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        }
+
         $this->action_data->collection_data->offsetSet('approval',$this->approval?->value);
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 

@@ -35,11 +35,11 @@ class UserRegister extends Act\Cmd\Us
     ];
 
 
-    protected ?User $created_user = null;
 
     public function getCreatedUser(): ?User
     {
-        return $this->created_user;
+        return /** @uses ActionDatum::data_user() */
+            $this->action_data->data_user;
     }
 
 
@@ -66,15 +66,6 @@ class UserRegister extends Act\Cmd\Us
 
     }
 
-    protected function restoreData(array $data = []) {
-        parent::restoreData($data);
-        if ($this->action_data) {
-            if (!$this->created_user) {
-                /** @uses ActionDatum::data_user() */
-                $this->created_user = $this->action_data->data_user;
-            }
-        }
-    }
 
     public function getActionPriority(): int
     {
@@ -91,32 +82,34 @@ class UserRegister extends Act\Cmd\Us
 
         try {
             DB::beginTransaction();
-            if (!$this->created_user) {
-                $this->created_user = (new CreateNewUser)->create([
+            $created_user = null;
+            if (!$this->getCreatedUser()) {
+                $created_user = (new CreateNewUser)->create([
                     "username" => $this->user_name,
                     "password" => $this->user_password,
                     "password_confirmation" => $this->user_password
                 ]);
-                $this->action_data->data_user_id = $this->created_user->id;
+                $this->action_data->data_user_id = $created_user->id;
                 $this->action_data->save();
             }
 
             $b_save_again = false;
 
-            if ($this->uuid) {
-                $this->created_user->ref_uuid = $this->uuid;
+            if ($this->uuid && $created_user) {
+                $created_user->ref_uuid = $this->uuid;
                 $b_save_again = true;
             }
 
-            if ($this->is_system) {
+            if ($this->is_system && $created_user) {
                 $b_save_again = true;
-                $this->created_user->is_system = $this->is_system;
+                $created_user->is_system = $this->is_system;
             }
 
             if ($b_save_again) {
-                $this->created_user->save();
+                $created_user->save();
             }
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
             if ($this->send_event) {
                 $this->post_events_to_send = Evt\Server\UserRegistrationProcessing::makeEventActions(source: $this, data: $this->action_data);
             }
@@ -133,7 +126,7 @@ class UserRegister extends Act\Cmd\Us
 
 
     protected function getMyData() :array {
-        return ['user'=>$this->created_user];
+        return ['user'=>$this->getCreatedUser()];
     }
 
 

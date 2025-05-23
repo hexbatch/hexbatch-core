@@ -57,6 +57,8 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
 
      public static function getClassName() :string { return static::ATTRIBUTE_NAME; }
 
+    public static function getFullClassName() :string {return static::class;}
+
     public static function getDictionaryObject() :ISystemAttribute {
         return SystemAttributes::getAttributeByUuid(static::class);
     }
@@ -123,6 +125,7 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
                is_abstract: static::IS_ABSTRACT,
                is_seen_in_child_elements: $this->getISystemAttribute()::isSeenChildrenTypes(),
                attribute_approval: TypeOfApproval::PUBLISHING_APPROVED,
+               uuid: static::getClassUuid(),
                is_system: $this->getISystemAttribute()::isSystem()
            );
            $creator->runAction();
@@ -182,6 +185,10 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
     {
         return static::IS_SEEN_BY_CHILDREN_TYPES;
     }
+    public function __construct(
+        protected bool $b_type_init = false
+    ) {
 
+    }
 
  }

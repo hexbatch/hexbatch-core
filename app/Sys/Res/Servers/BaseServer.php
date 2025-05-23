@@ -21,6 +21,8 @@ abstract class BaseServer implements ISystemServer
     const NAMESPACE_CLASS = '';
     const SERVER_TYPE_CLASS = '';
 
+    public static function getFullClassName() :string {return static::class;}
+
     protected bool $b_did_create_model = false;
     public function didCreateModel(): bool { return $this->b_did_create_model; }
 
@@ -66,7 +68,7 @@ abstract class BaseServer implements ISystemServer
                server_domain: static::getServerDomain(),
                server_url: static::getServerUrl(),
                server_status: TypeOfServerStatus::ALLOWED_SERVER,
-               uuid: static::getClassUuid(),is_system: true
+               uuid: static::getClassUuid(),is_system: true,send_event: false
            );
 
            $creator->runAction();
@@ -101,6 +103,10 @@ abstract class BaseServer implements ISystemServer
     }
 
 
+    public function __construct(
+        protected bool $b_type_init = false
+    ) {
 
+    }
 
   }

@@ -37,7 +37,7 @@ class SetMemberAdd extends Act\Cmd\St
     ];
 
 
-    public function getSetUsed(): ElementSet
+    public function getSetUsed(): ?ElementSet
     {
         /** @uses ActionDatum::data_set() */
         return $this->action_data->data_set;
@@ -85,11 +85,11 @@ class SetMemberAdd extends Act\Cmd\St
         'allowed_element_uuids'=>['class'=>Element::class,'partition'=>1] ,
     ];
     public function __construct(
-        protected string       $given_set_uuid ,
+        protected ?string       $given_set_uuid = null ,
         /**
          * @var string[] $given_element_uuids
          */
-        protected array        $given_element_uuids,
+        protected array        $given_element_uuids = [],
         protected bool         $is_sticky = false,
         protected bool         $is_system = false,
         protected bool         $send_event = false,
@@ -124,7 +124,9 @@ class SetMemberAdd extends Act\Cmd\St
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if (!$this->getSetUsed()) {
+            throw new \InvalidArgumentException("Need set before can add member");
+        }
 
         try {
             DB::beginTransaction();
@@ -132,7 +134,9 @@ class SetMemberAdd extends Act\Cmd\St
                 $this->getSetUsed()->addElement(ele: $element,is_sticky: $this->is_sticky);
                 $this->added_element_uuids[] = $element->ref_uuid;
             }
+            $this->saveCollectionKeys();
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -152,8 +156,12 @@ class SetMemberAdd extends Act\Cmd\St
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_set_uuid)->id;
+        if ($this->given_set_uuid) {
+            $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_set_uuid)->id;
+        }
+
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 
@@ -165,6 +173,7 @@ class SetMemberAdd extends Act\Cmd\St
             $events = Evt\Set\SetEnter::makeEventActions(source: $this, data: $this->action_data);
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
+                //todo on the children set handler, fill in the allowed
             }
 
             //last in tree is the

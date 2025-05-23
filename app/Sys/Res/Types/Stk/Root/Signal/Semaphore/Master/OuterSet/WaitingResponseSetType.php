@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Signal\Master;
+namespace App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\OuterSet;
 
 use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\OuterSetType;
 
 
 class WaitingResponseSetType extends BaseType

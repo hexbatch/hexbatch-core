@@ -90,7 +90,7 @@ class NamespaceCreate extends Act\Cmd\Ns
     )
     {
         if (!$this->given_server_uuid) {
-            $this->given_server_uuid = Server::getDefaultServer()->ref_uuid;
+            $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
         }
         parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
             is_system: $this->is_system, send_event: $this->send_event,
@@ -101,17 +101,17 @@ class NamespaceCreate extends Act\Cmd\Ns
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_user_id = $this->given_user_uuid;
-
         if ($this->given_user_uuid) {
-            $this->action_data->data_user_id = User::getUser(uuid: $this->given_server_uuid)->id;
+            $this->action_data->data_user_id = User::getUser(uuid: $this->given_user_uuid)->id;
         }
+
 
         if ($this->given_server_uuid) {
             $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
         }
 
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 
@@ -188,6 +188,7 @@ class NamespaceCreate extends Act\Cmd\Ns
                 $this->post_events_to_send = Evt\Server\NamespaceCreated::makeEventActions(source: $this, data: $this->action_data);
             }
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

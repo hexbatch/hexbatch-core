@@ -137,7 +137,7 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
     public function type_children() : HasMany {
-        return $this->hasMany(ElementType::class,'parent_type_id','id');
+        return $this->hasMany(ElementTypeParent::class,'parent_type_id','id');
     }
 
     public function type_parents() : HasMany {
@@ -309,7 +309,7 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
     public function getName() :string {
-        return $this->owner_namespace->getName().UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
+        return $this->owner_namespace?->getName().UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
     }
 
     public function isInUse() : bool {

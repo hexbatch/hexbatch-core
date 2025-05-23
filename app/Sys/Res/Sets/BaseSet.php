@@ -29,6 +29,8 @@ class BaseSet implements ISystemSet
 
 
     protected ?ElementSet $set = null;
+
+    public static function getFullClassName() :string {return static::class;}
      public function getISystemSet() : ISystemSet {return $this;}
      protected bool $b_did_create_model = false;
      public function didCreateModel(): bool { return $this->b_did_create_model; }
@@ -101,7 +103,7 @@ class BaseSet implements ISystemSet
            $setter = new SetCreate(
                given_element_uuid: $iset->getDefiningSystemElement()->getElementObject()?->getUuid(),
                uuid: static::getClassUuid(),
-               set_has_events: static::hasEvents(), is_system: true
+               set_has_events: static::hasEvents(), is_system: true,send_event: false
            );
            $setter->runAction();
 
@@ -110,7 +112,7 @@ class BaseSet implements ISystemSet
                     given_set_uuid: $setter->getCreatedSet()->ref_uuid,
                     given_element_uuids: $element_uuids,
                     is_sticky: static::isSticky(),
-                    is_system: true
+                    is_system: true,send_event: false
                 );
                 $better->runAction();
             }
@@ -143,7 +145,11 @@ class BaseSet implements ISystemSet
         Utilities::ignoreVar(); //for linting
     }
 
+    public function __construct(
+        protected bool $b_type_init = false
+    ) {
 
+    }
 
 
  }

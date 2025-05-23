@@ -531,16 +531,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
                 }
 
                 if ($collect->has('attribute_name')) {
-                    $this->attribute_name = $collect->get('attribute_name');
-                    try {
-                        Validator::make(['attribute_name' => $this->attribute_name], [
-                            'attribute_name' => ['required', 'string', new AttributeNameReq($this->owner_element_type_id,$this->current_attribute)],
-                        ])->validate();
-                    } catch (ValidationException $v) {
-                        throw new HexbatchNotPossibleException($v->getMessage(),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-                    }
+                    $this->setAttributeName($collect->get('attribute_name'));
                 }
 
                 if (!$this->attribute_name) {
@@ -694,6 +685,19 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
     public function getUuid(): string {
         return $this->ref_uuid;
+    }
+
+    function setAttributeName(string $name) {
+        try {
+            Validator::make(['attribute_name' => $name], [
+                'attribute_name' => ['required', 'string', new AttributeNameReq(element_type_id: $this->owner_element_type_id,attribute: $this)],
+            ])->validate();
+            $this->attribute_name = $name;
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        }
     }
 
 

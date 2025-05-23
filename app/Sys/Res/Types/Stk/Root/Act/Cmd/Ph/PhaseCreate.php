@@ -56,9 +56,9 @@ class PhaseCreate extends Act\Cmd\Ph
 
 
     public function __construct(
-        protected string              $given_type_uuid ,
+        protected ?string             $given_type_uuid = null ,
         protected ?string             $given_edit_phase_uuid = null,
-        protected string              $phase_name ,
+        protected ?string             $phase_name = null,
         protected ?string             $uuid = null,
         protected bool                $is_default_phase = false,
         protected bool                $is_system = false,
@@ -77,11 +77,15 @@ class PhaseCreate extends Act\Cmd\Ph
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_type_id = Element::getThisElement(uuid: $this->given_type_uuid)->id;
+        if ($this->given_type_uuid) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        }
+
         if ($this->given_edit_phase_uuid) {
             $this->action_data->data_set_id = Phase::getThisPhase(uuid: $this->given_edit_phase_uuid)->id;
         }
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 
@@ -98,12 +102,17 @@ class PhaseCreate extends Act\Cmd\Ph
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if (!$this->getGivenType() || !$this->phase_name) {
+            throw new \InvalidArgumentException("Need type and name");
+        }
 
         try {
             DB::beginTransaction();
             $phase = new Phase();
-            $phase->ref_uuid = $this->uuid;
+            if ($this->uuid) {
+                $phase->ref_uuid = $this->uuid;
+            }
+
             $phase->phase_type_id = $this->getGivenType()->id;
             $phase->setPhaseName($this->phase_name);
             if ($this->getGivenEditPhase()) {
@@ -123,6 +132,7 @@ class PhaseCreate extends Act\Cmd\Ph
 
 
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

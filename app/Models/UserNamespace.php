@@ -139,20 +139,25 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 
         /** @var Builder $build */
         $build = UserNamespace::select('user_namespaces.*')
-            ->selectRaw(" extract(epoch from  user_namespaces.created_at) as created_at_ts,
-                                    extract(epoch from  user_namespaces.updated_at) as updated_at_ts,
-                                    CASE WHEN namespace_user_id = $user_id THEN true ELSE false END as is_owner
-                                    ");
+            ->selectRaw(" extract(epoch from  user_namespaces.created_at) as created_at_ts")
+            ->selectRaw("extract(epoch from  user_namespaces.updated_at) as updated_at_ts");
 
-            if ($b_relations) {
-                /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
-                 * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
-                 * @uses UserNamespace::user_home_set()
-                 */
-                $build->
-                with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
-                    'user_home_set');
-            }
+        if ($user_id) {
+            $build->selectRaw("CASE WHEN namespace_user_id = $user_id THEN true ELSE false END as is_owner");
+        } else {
+            $build->selectRaw("false as is_owner");
+        }
+
+
+        if ($b_relations) {
+            /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
+             * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
+             * @uses UserNamespace::user_home_set()
+             */
+            $build->
+            with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
+                'user_home_set');
+        }
 
         if ($me_id) {
             $build->where('user_namespaces.id', $me_id);
@@ -370,7 +375,8 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
      * //todo when the user home set is created from the user type element, its put into the Standard set, all_users
      *
      */
-    public static function createNamespace(string $namespace_name,?int $owning_user_id = null,?int $server_id = null,?string $ref = null,
+    public static function createNamespace(string $namespace_name,?int $owning_user_id = null,?int $server_id = null,
+                                           ?string $ref = null,
         ?int $type_id = null,?int $public_element_id = null,?int $private_element_id = null,?int $home_set_id = null,
         ?string $public_key = null, bool $is_system = false
     )

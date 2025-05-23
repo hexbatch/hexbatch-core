@@ -7,6 +7,7 @@ use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph\PhaseCreate;
 
 /**
  * When new type published, and new row is created in @see \App\Models\Phase
@@ -35,13 +36,17 @@ class Phase extends BaseType
         $ret = parent::onCall();
         if (!$this->b_did_create_model) {return $ret;}
         if (static::EDITED_BY_PHASE_SYSTEM_CLASS) {
+            $type_uuid = $this->getTypeObject()->getUuid();
+            $mu_uuid = static::getClassUuid();
+            $name = static::getClassName();
+            $is_default = static::IS_DEFAULT_PHASE;
             try {
-                $creator = new Root\Act\Cmd\Ph\PhaseCreate(
-                    given_type_uuid: $this->getTypeObject()->getUuid(),
-                    phase_name: static::getClassName(),
-                    uuid: static::getClassUuid(),
-                    is_default_phase: static::IS_DEFAULT_PHASE,
-                    is_system: true
+                $creator = new PhaseCreate(
+                    given_type_uuid: $type_uuid,
+                    phase_name: $name,
+                    uuid: $mu_uuid,
+                    is_default_phase: $is_default,
+                    is_system: true,send_event: false
 
                 );
                 $creator->runAction();
@@ -49,6 +54,8 @@ class Phase extends BaseType
 
             } catch (\Exception $e) {
                 throw new HexbatchInitException(message: $e->getMessage() . ': code ' . $e->getCode(), prev: $e);
+            } catch (\Error $e) {
+                throw new \RuntimeException("got error ". $e);
             }
         }
         return $ret;

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Signal\Master;
+namespace App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master;
 
 
 
 use App\Sys\Res\Types\BaseType;
-use App\Sys\Res\Types\Stk\Root\Signal\MasterSemaphore;
+use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\MasterSemaphore;
 
 /**
 * make new type with master to have the remote called when the

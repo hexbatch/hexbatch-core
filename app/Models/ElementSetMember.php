@@ -5,7 +5,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int member_rank
  * @property bool is_sticky
  *
- * @property ElementValue of_value
  * @property Element of_element
  */
 class ElementSetMember extends Model
@@ -47,13 +46,10 @@ class ElementSetMember extends Model
      */
     protected $casts = [];
 
-    public function of_element() : HasOne {
-        return $this->hasOne(Element::class,'member_element_id');
+    public function of_element() : BelongsTo {
+        return $this->belongsTo(Element::class,'member_element_id');
     }
 
-    public function of_value() : HasOne {
-        return $this->hasOne(ElementValue::class,'element_set_member_id');
-    }
 
 
 
@@ -83,9 +79,9 @@ class ElementSetMember extends Model
         }
 
         /**
-         * @uses ElementSetMember::of_element(),ElementSetMember::of_value()
+         * @uses ElementSetMember::of_element()
          */
-        $build->with('of_element','of_value');
+        $build->with('of_element');
 
         return $build;
     }

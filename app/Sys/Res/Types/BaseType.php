@@ -5,8 +5,11 @@ namespace App\Sys\Res\Types;
 
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfApproval;
+use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchInitException;
+use App\Models\ActionDatum;
 use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemElements;
 use App\Sys\Collections\SystemNamespaces;
@@ -61,13 +64,18 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         return SystemServers::getServerByUuid($this->getISystemType()::getTypeServerClass());
     }
 
-    public function getType() : ElementType {
+    public function getType(bool $b_construct_if_missing = true) : ?ElementType {
         if ($this->type) {return $this->type;}
         $maybe = ElementType::whereRaw('ref_uuid = ?',static::getClassUuid())->first();
         if ($maybe) {
             $this->type = $maybe;
         } else {
-            $this->type = $this->makeType();
+            if ($b_construct_if_missing) {
+                $this->type = $this->makeType();
+            } else {
+                return null;
+            }
+
         }
         return $this->type;
     }
@@ -76,7 +84,9 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         if ($this->type) {return $this->type;}
         try
         {
-            $design = new DesignCreate(type_name: static::getClassName(), is_final: $this->getISystemType()::isFinal(),
+            $design = new DesignCreate(type_name: static::getClassName(),
+                owner_namespace_uuid: $this->getISystemType()->getTypeNamespace()::getClassUuid(),
+                is_final: $this->getISystemType()::isFinal(),
                 access: TypeOfServerAccess::IS_PUBLIC, uuid: static::getClassUuid(),
                 is_system: true,send_event: false
             );
@@ -207,11 +217,11 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         return SystemTypes::getTypeByUuid(static::class);
     }
 
+    public static function getFullClassName() :string {return static::class;}
     public static function getClassName() :string { return static::TYPE_NAME; }
     public static function getTypeNamespaceClass() :string|ISystemNamespace { return static::NAMESPACE_CLASS; }
     public static function getTypeServerClass() :string|ISystemServer { return static::SERVER_CLASS; }
     public function isFinal(): bool { return static::IS_FINAL; }
-
 
 
 
@@ -229,17 +239,26 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
             DB::beginTransaction();
             if (static::HANDLE_ELEMENT_CLASS) {
                 $this->getTypeObject()->type_handle_element_id = $this->getISystemType()::getHandleElement()->getElementObject()->id;
+                $this->getTypeObject()->imported_from_server_id = $this->getTypeServer()->getServerObject()?->id;
                 $this->getTypeObject()->save();
             }
 
 
             $parent_uuids = [];
             foreach ($this->getISystemType()::getParentTypes() as $parent_system_object) {
+                $parent_system_object->getTypeObject()->refresh();
+                if($parent_system_object->getTypeObject()->lifecycle !== TypeOfLifecycle::PUBLISHED) {
+                    throw new \LogicException("the parent ".$parent_system_object->getTypeObject()->getName(). " is not published yet when doing the child ".static::getClassName());
+                }
                 $parent_uuids[] = $parent_system_object->getTypeObject()->getUuid();
             }
-            $parenter = new DesignParentAdd(given_type_uuid: $this->getTypeObject()->getUuid(),
-                given_parent_uuids: $parent_uuids, approval: TypeOfApproval::PUBLISHING_APPROVED, is_system: true, send_event: false);
-            $parenter->runAction();
+            if (count($parent_uuids)) {
+                $parenter = new DesignParentAdd(given_type_uuid: $this->getTypeObject()->getUuid(),
+                    given_parent_uuids: $parent_uuids, approval: TypeOfApproval::PUBLISHING_APPROVED, is_system: true,
+                    send_event: false);
+                $parenter->runAction();
+            }
+
 
 
             $publish = new TypePublish(given_type_uuid: $this->getTypeObject()->getUuid(),is_system: true,send_event: false);
@@ -253,6 +272,26 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
     }
 
 
+    public function __construct(
+        protected ?ActionDatum   $action_data = null,
+        protected ?int           $action_data_parent_id = null,
+        protected ?int           $action_data_root_id = null,
+        protected ?UserNamespace $owner = null,
+        protected bool           $b_type_init = false,
+        protected bool         $is_system = false,
+        protected bool         $send_event = true,
 
+    )
+    {
+
+        if ($this->b_type_init) {
+            return;
+        }
+        if ($this->action_data) {  $this->restoreData(); } else {$this->initData();}
+
+    }
+
+    const array ACTIVE_COLLECTION_KEYS = [];
+    const array ACTIVE_DATA_KEYS = [];
 
 }

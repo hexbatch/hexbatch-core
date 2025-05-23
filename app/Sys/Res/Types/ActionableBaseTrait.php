@@ -4,7 +4,6 @@ namespace App\Sys\Res\Types;
 
 
 use App\Models\ActionDatum;
-use App\Models\UserNamespace;
 use App\Sys\Collections\SystemTypes;
 use BlueM\Tree;
 use Carbon\Carbon;
@@ -47,9 +46,10 @@ trait ActionableBaseTrait
         $this->action_data->root_data_id = $this->action_data_root_id;
         $this->action_data->parent_data_id = $this->action_data_parent_id;
         $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->data_action_type_id = $this->getType()->id;
+        $this->action_data->data_action_type_id = $this->getType(b_construct_if_missing: false)?->id;
         if ($b_save || count(static::ACTIVE_COLLECTION_KEYS)) {
             $this->action_data->save();
+            $this->action_data->refresh();
         }
         $this->saveCollectionKeys();
         return $this->action_data;
@@ -62,20 +62,7 @@ trait ActionableBaseTrait
 
     protected function getActionStatus() : TypeOfThingStatus { return $this->action_data->action_status;}
 
-    public function __construct(
-        protected ?ActionDatum   $action_data = null,
-        protected ?int           $action_data_parent_id = null,
-        protected ?int           $action_data_root_id = null,
-        protected ?UserNamespace $owner = null,
-        protected bool           $b_type_init = false,
-        protected bool         $is_system = false,
-        protected bool         $send_event = true,
 
-    )
-    {
-        if ($this->b_type_init) {return;}
-        if ($this->action_data) {  $this->restoreData(); } else {$this->initData();}
-    }
 
 
     public function getActionOwner(): ?IThingOwner {
@@ -190,7 +177,7 @@ trait ActionableBaseTrait
         return $this->getMyData();
     }
 
-    const array ACTIVE_COLLECTION_KEYS = [];
+
 
     protected function saveCollectionKeys() {
         foreach (static::ACTIVE_COLLECTION_KEYS as $property_name => $class_or_array) {
@@ -206,11 +193,12 @@ trait ActionableBaseTrait
         }
     }
 
-    private static function getClassAndPartition(string|array $class_or_array,string &$class,?int &$partition) {
+    private static function getClassAndPartition(string|array $class_or_array,?string &$class,?int &$partition) {
         $partition = 0;
         if (is_array($class_or_array)) {
-            $class = $class_or_array['class'];
-            if (array_key_exists('partition',$class_or_array[])) {
+            $class = $class_or_array['class']??null;
+            if (!$class) { throw new \LogicException("class subkey not set for partitioning");}
+            if (array_key_exists('partition',$class_or_array)) {
                 if ($class_or_array['partition'] === null) {
                     $partition = null;
                 } else {
@@ -223,7 +211,7 @@ trait ActionableBaseTrait
     }
 
 
-    const array ACTIVE_DATA_KEYS = [];
+
     public function getInitialConstantData(): ?array {
         $ret = [];
         foreach (static::ACTIVE_DATA_KEYS as $key) {

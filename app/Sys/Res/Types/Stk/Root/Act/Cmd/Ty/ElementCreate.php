@@ -63,7 +63,7 @@ class ElementCreate extends Act\Cmd\Ele
         return $this->action_data->getCollectionOfType(Element::class);
     }
 
-    public function getNamespaceUsed(): UserNamespace
+    public function getNamespaceUsed(): ?UserNamespace
     {
         return $this->action_data->data_namespace;
     }
@@ -83,7 +83,7 @@ class ElementCreate extends Act\Cmd\Ele
     }
 
 
-    public function getTemplateType(): ElementType
+    public function getTemplateType(): ?ElementType
     {
         return $this->action_data->data_type;
     }
@@ -95,16 +95,16 @@ class ElementCreate extends Act\Cmd\Ele
 
     const array ACTIVE_COLLECTION_KEYS = ['created_element_uuids'=>Element::class,'given_set_uuids'=>ElementSet::class];
 
-    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid','given_phase_uuid','given_set_uuid',
+    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid','given_phase_uuid',
         'number_to_create','preassinged_uuids'];
 
 
     public function __construct(
-        protected string       $given_type_uuid ,
-        protected string       $given_namespace_uuid ,
-        protected ?string      $given_phase_uuid ,
-        protected array        $given_set_uuids ,
-        protected int          $number_to_create ,
+        protected ?string       $given_type_uuid = null,
+        protected ?string       $given_namespace_uuid = null,
+        protected ?string      $given_phase_uuid = null,
+        protected array        $given_set_uuids = [],
+        protected int          $number_to_create = 0,
         protected array        $preassinged_uuids = [],
         protected bool         $is_system = false,
         protected bool         $send_event = false,
@@ -138,6 +138,13 @@ class ElementCreate extends Act\Cmd\Ele
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
+        if (!$this->getNamespaceUsed()) {
+            throw new \InvalidArgumentException("Need namespace before can make element");
+        }
+
+        if (!$this->getTemplateType()) {
+            throw new \InvalidArgumentException("Need template type before can make element");
+        }
         if ($this->number_to_create <= 0) {return;}
         $post_actions = [];
         $post_events = [];
@@ -155,8 +162,11 @@ class ElementCreate extends Act\Cmd\Ele
                         $ele = $this->makeElement(loop_number: $uuid_index++);
                         $created_ele_to_set[] = $ele->ref_uuid;
                     } //end creating elements for the set
-                    $post_actions[] = new Act\Cmd\St\SetMemberAdd(given_set_uuid: $set->ref_uuid,given_element_uuids: $created_ele_to_set,
-                        is_system: $this->is_system,send_event: $this->send_event);
+                    if ($this->send_event) {
+                        $post_actions[] = new Act\Cmd\St\SetMemberAdd(given_set_uuid: $set->ref_uuid,given_element_uuids: $created_ele_to_set,
+                            is_system: $this->is_system,send_event: $this->send_event);
+                    }
+
 
                     if (count($created_ele_to_set) > 1 ) {
                         if ($this->send_event) {
@@ -187,9 +197,13 @@ class ElementCreate extends Act\Cmd\Ele
             }
 
 
-            $this->restoreCollectionKeys();
+            $this->saveCollectionKeys();
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->post_events_to_send = array_merge($post_actions,$post_events);
+            $this->action_data->refresh();
+            if ($this->send_event) {
+                $this->post_events_to_send = array_merge($post_actions,$post_events);
+            }
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -233,8 +247,14 @@ class ElementCreate extends Act\Cmd\Ele
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_type_id =ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        $this->action_data->data_namespace_id =UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
+        if ($this->given_type_uuid) {
+            $this->action_data->data_type_id =ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        }
+
+        if ($this->given_namespace_uuid) {
+            $this->action_data->data_namespace_id =UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
+        }
+
 
         if ($this->given_phase_uuid) {
             $this->action_data->data_phase_id = Phase::getThisPhase(uuid: $this->given_phase_uuid)->id;
@@ -243,6 +263,7 @@ class ElementCreate extends Act\Cmd\Ele
         }
 
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 

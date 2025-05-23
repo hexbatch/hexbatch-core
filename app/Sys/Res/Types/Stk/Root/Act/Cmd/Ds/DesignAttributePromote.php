@@ -56,8 +56,8 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
 
     public function __construct(
-        protected string                $attribute_name ,
-        protected string                $owner_type_uuid,
+        protected ?string                $attribute_name = null,
+        protected ?string                $owner_type_uuid = null,
         protected ?string                $parent_attribute_uuid = null,
         protected ?string                $design_attribute_uuid = null,
         protected bool                $is_final = false,
@@ -95,7 +95,10 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->owner_type_uuid)->id;
+        if ($this->owner_type_uuid) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->owner_type_uuid)->id;
+        }
+
         if ($this->parent_attribute_uuid) {
             $this->action_data->data_second_attribute_id = Attribute::getThisAttribute(uuid: $this->parent_attribute_uuid)->id;
         }
@@ -106,6 +109,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
         $this->action_data->collection_data->offsetSet('attribute_approval',$this->attribute_approval?->value);
         $this->action_data->save();
+        $this->action_data->refresh();
         return $this->action_data;
     }
 
@@ -116,12 +120,21 @@ class DesignAttributePromote extends Act\Cmd\Ds
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
+        if (!$this->getGivenOwnerType()) {
+            throw new \InvalidArgumentException("Need owning type before can make attribute");
+        }
 
+        if (!$this->attribute_name) {
+            throw new \InvalidArgumentException("Need attr name given before can make attribute");
+        }
         try {
             DB::beginTransaction();
             $attr = new Attribute();
-            $attr->ref_uuid = $this->uuid;
-            $attr->attribute_name = $this->attribute_name;
+            if ($this->uuid) {
+                $attr->ref_uuid = $this->uuid;
+            }
+
+            $attr->setAttributeName($this->attribute_name);
             $attr->attribute_approval = $this->attribute_approval;
             $attr->owner_element_type_id = $this->getGivenOwnerType()->id ;
             $attr->parent_attribute_id = $this->getGivenParentAttribute()?->id ;

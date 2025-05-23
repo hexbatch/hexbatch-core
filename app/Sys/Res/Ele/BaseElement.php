@@ -42,6 +42,8 @@ class BaseElement implements ISystemElement
         return 'Element ' . static::getSystemTypeClass()::getClassName();
     }
 
+    public static function getFullClassName() :string {return static::class;}
+
     public static function getClassUuid(): string
     {
         return static::UUID;
@@ -131,7 +133,11 @@ class BaseElement implements ISystemElement
         return static::NAMESPACE_CLASS;
     }
 
+    public function __construct(
+        protected bool $b_type_init = false
+    ) {
 
+    }
 
 
 }

@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Signal;
+namespace App\Sys\Res\Types\Stk\Root\Signal\Mutex;
 
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Container;
+use App\Sys\Res\Types\Stk\Root\Signal\Mutex;
 
 
 class MutexClaimedSetType extends BaseType
