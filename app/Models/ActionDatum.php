@@ -18,7 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int id
  * @property int parent_data_id
  * @property int root_data_id
- * @property int data_action_type_id
+ * @property int data_type_owner_id
+ * @property int data_namespace_owner_id
  * @property int data_attribute_id
  * @property int data_second_attribute_id
  * @property int data_third_attribute_id
@@ -39,7 +40,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool is_sending_events
  * @property TypeOfThingStatus action_status
  * @property ArrayObject collection_data
- * @property ElementType data_action_type
+ * @property ElementType data_owner_type
+ * @property UserNamespace data_owner_namespace
  * @property ActionDatum|null data_root
  * @property ActionDatum|null data_parent
  * @property ActionDatum[] data_children
@@ -81,8 +83,8 @@ class ActionDatum extends Model
         return $this->belongsTo(ActionDatum::class,'root_data_id','id');
     }
 
-    public function data_action_type() : BelongsTo {
-        return $this->belongsTo(ElementType::class,'data_action_type_id','id');
+    public function data_owner_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'data_type_owner_id','id');
     }
 
     public function data_user() : BelongsTo {
@@ -107,6 +109,10 @@ class ActionDatum extends Model
 
     public function data_namespace() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'data_namespace_id','id');
+    }
+
+    public function data_owner_namespace() : BelongsTo {
+        return $this->belongsTo(UserNamespace::class,'data_namespace_owner_id','id');
     }
 
     public function data_phase() : BelongsTo {
@@ -195,8 +201,8 @@ class ActionDatum extends Model
         }
 
         if ($b_linkages) {
-            /** @uses static::data_children(),static::data_root(),static::data_parent(),static::data_action_type(),static::action_collection() */
-            $build->with('data_children','data_root','data_parent','data_action_type','action_collection');
+            /** @uses static::data_children(),static::data_root(),static::data_parent(),static::data_owner_type(),static::action_collection() */
+            $build->with('data_children','data_root','data_parent','data_owner_type','action_collection');
         }
 
         return $build;

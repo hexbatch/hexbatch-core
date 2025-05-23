@@ -55,7 +55,7 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
          return static::PARENT_ATTRIBUTE_CLASS;
      }
 
-     public static function getClassName() :string { return static::ATTRIBUTE_NAME; }
+     public static function getHexbatchClassName() :string { return static::ATTRIBUTE_NAME; }
 
     public static function getFullClassName() :string {return static::class;}
 
@@ -82,7 +82,7 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
          return $ret;
      }
      public static function getChainName() :string {
-        if (!static::PARENT_ATTRIBUTE_CLASS) {return static::getClassName();}
+        if (!static::PARENT_ATTRIBUTE_CLASS) {return static::getHexbatchClassName();}
 
         $names = [];
 
@@ -92,9 +92,9 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
         $rev = array_reverse(static::getParentClasses());
 
         foreach ($rev as $parent_class) {
-            $names[] = $parent_class::getClassName();
+            $names[] = $parent_class::getHexbatchClassName();
         }
-        $names[] = static::getClassName();
+        $names[] = static::getHexbatchClassName();
         return implode(UserNamespace::NAMESPACE_SEPERATOR,$names);
      }
 

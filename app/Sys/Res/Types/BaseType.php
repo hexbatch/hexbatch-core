@@ -84,7 +84,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         if ($this->type) {return $this->type;}
         try
         {
-            $design = new DesignCreate(type_name: static::getClassName(),
+            $design = new DesignCreate(type_name: static::getHexbatchClassName(),
                 owner_namespace_uuid: $this->getISystemType()->getTypeNamespace()::getClassUuid(),
                 is_final: $this->getISystemType()::isFinal(),
                 access: TypeOfServerAccess::IS_PUBLIC, uuid: static::getClassUuid(),
@@ -153,14 +153,14 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
 
     public static function getParentNameTree() :array  {
         $ret = [];
-        $ret[static::getClassName()] = [] ;
+        $ret[static::getHexbatchClassName()] = [] ;
         foreach (static::PARENT_CLASSES as $full_class_name) {
             $interfaces = class_implements($full_class_name);
             if (isset($interfaces['App\Sys\Res\Types\ISystemType'])) {
                 /**
                  * @type ISystemType $full_class_name
                  */
-                $ret[static::getClassName()][] = $full_class_name::getParentNameTree();
+                $ret[static::getHexbatchClassName()][] = $full_class_name::getParentNameTree();
             }
         }
         return $ret;
@@ -218,7 +218,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
     }
 
     public static function getFullClassName() :string {return static::class;}
-    public static function getClassName() :string { return static::TYPE_NAME; }
+    public static function getHexbatchClassName() :string { return static::TYPE_NAME; }
     public static function getTypeNamespaceClass() :string|ISystemNamespace { return static::NAMESPACE_CLASS; }
     public static function getTypeServerClass() :string|ISystemServer { return static::SERVER_CLASS; }
     public function isFinal(): bool { return static::IS_FINAL; }
@@ -248,7 +248,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
             foreach ($this->getISystemType()::getParentTypes() as $parent_system_object) {
                 $parent_system_object->getTypeObject()->refresh();
                 if($parent_system_object->getTypeObject()->lifecycle !== TypeOfLifecycle::PUBLISHED) {
-                    throw new \LogicException("the parent ".$parent_system_object->getTypeObject()->getName(). " is not published yet when doing the child ".static::getClassName());
+                    throw new \LogicException("the parent ".$parent_system_object->getTypeObject()->getName(). " is not published yet when doing the child ".static::getHexbatchClassName());
                 }
                 $parent_uuids[] = $parent_system_object->getTypeObject()->getUuid();
             }

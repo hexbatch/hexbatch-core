@@ -34,10 +34,17 @@ class RegistrationParams
     )]
     protected string $password;
 
+
+    #[OA\Property(  title: 'Public key',type: 'string',minLength: 10,
+        example: [new OA\Examples(summary: "optional public key to show data later is valid", value:'any public key') ]
+    )]
+    protected string $public_key;
+
     public function fromRequest(Request $request)
     {
         $this->username = $request->request->getString('username');
         $this->password = $request->request->getString('password');
+        $this->public_key = (string)$request->request->get('public_key');
         try {
             Validator::make(
                 ['username' => $this->username,'password'=>$this->password],
@@ -52,6 +59,7 @@ class RegistrationParams
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::BAD_REGISTRATION);
         }
+
     }
 
     public function getUsername(): string
@@ -62,6 +70,11 @@ class RegistrationParams
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function getPublicKey(): string
+    {
+        return $this->public_key;
     }
 
 

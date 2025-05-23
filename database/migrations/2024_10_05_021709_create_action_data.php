@@ -33,8 +33,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('data_namespace_owner_id')
+                ->nullable()->default(null)
+                ->comment("Data is owned by a namespace")
+                ->index()
+                ->constrained('user_namespaces')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
 
-            $table->foreignId('data_action_type_id')
+            $table->foreignId('data_type_owner_id')
                 ->nullable()->default(null)
                 ->comment("Data is used by a type in an action")
                 ->index()

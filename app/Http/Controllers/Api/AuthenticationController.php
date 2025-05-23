@@ -14,6 +14,9 @@ use App\Helpers\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Callbacks\HexbatchCallbackResponse;
+use App\OpenApi\ErrorResponse;
 use App\OpenApi\Users\CreateToken\CreateTokenParams;
 use App\OpenApi\Users\CreateToken\CreateTokenResponse;
 use App\OpenApi\Users\CreateToken\HexbatchSecondsToLive;
@@ -24,6 +27,7 @@ use App\OpenApi\Users\Registration\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Carbon\Carbon;
+use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -90,8 +94,9 @@ class AuthenticationController extends Controller
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Post(
         path: '/api/v1/users/register',
         operationId: 'core.users.register',
@@ -100,40 +105,38 @@ class AuthenticationController extends Controller
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: RegistrationParams::class)),
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Register with just a username and a password',
-                                content: new JsonContent(ref: Calls\User\Registration\UserRegistrationResponse::class))
+                                content: new JsonContent(ref: MeResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Server\UserRegistrationProcessing::class)]
     #[ApiTypeMarker( Api\User\UserRegister::class)]
     public function register(Request $request): JsonResponse
     {
-        /*
-         todo discussion below
-            run the UserRegister command
 
-
-
-
-            finish
-
-
-
-         */
-
-        try {
-            $params = new RegistrationParams();
-            $params->fromRequest($request);
-            $user = (new CreateNewUser)->create([
-                'username' => $params->getUsername(),'password'=>$params->getPassword(),
-                'password_confirmation'=>$params->getPassword()]);
-
-            $user->refresh();
-            return response()->json(new MeResponse(user: $user), CodeOf::HTTP_CREATED);
-        } catch (ValidationException $v) {
-            throw new HexbatchNotPossibleException($v->getMessage(),
-                CodeOf::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::BAD_REGISTRATION);
+        $params = new RegistrationParams();
+        $params->fromRequest($request);
+        $api = new Api\User\UserRegister(params: $params);
+        $thing = $api->createThingTree();
+        $callbacks = $thing->applied_callbacks;
+        if (count($callbacks)) {
+            foreach ($callbacks as $callback) {
+                if($thing->isSuccess()) {
+                    $test_me = MeResponse::fromCallback($callback);
+                    if ($test_me) {
+                        return response()->json($test_me,CodeOf::HTTP_CREATED);
+                    }
+                }
+                if($thing->isFailedOrError()) {
+                    $test_err = ErrorResponse::fromCallback($callback);
+                    if ($test_err) {
+                        return response()->json($test_err,$callback->callback_http_code);
+                    }
+                }
+            }
+            return  response()->json(new HexbatchCallbackCollectionResponse(given_callbacks: $callbacks),CodeOf::HTTP_OK);
         }
+
+        return  response()->json(new ThingResponse(thing:$thing),CodeOf::HTTP_OK);
 
     }
 

@@ -36,8 +36,8 @@ abstract class BaseNamespace implements ISystemNamespace
     public function didCreateModel(): bool { return $this->b_did_create_model; }
 
     public function getISystemNamespace() : ISystemNamespace {return $this;}
-    public static function getClassName() :string {
-        return 'Home '. static::getSystemHomeClass()::getClassName();
+    public static function getHexbatchClassName() :string {
+        return 'Home '. static::getSystemHomeClass()::getHexbatchClassName();
     }
 
     public static function getDictionaryObject() :ISystemNamespace {
@@ -78,6 +78,10 @@ abstract class BaseNamespace implements ISystemNamespace
             $this->namespace = $this->makeNamespace();
         }
         return $this->namespace;
+    }
+
+    public static function getCreatedNamespace() : UserNamespace {
+        return UserNamespace::getThisNamespace(uuid: static::getClassUuid());
     }
     public function makeNamespace() :UserNamespace
    {

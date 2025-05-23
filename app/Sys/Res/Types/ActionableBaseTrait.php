@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types;
 
 
 use App\Models\ActionDatum;
+use App\Models\UserNamespace;
 use App\Sys\Collections\SystemTypes;
 use BlueM\Tree;
 use Carbon\Carbon;
@@ -39,6 +40,11 @@ trait ActionableBaseTrait
         return false;
     }
 
+    public function getDataOwner() : ?UserNamespace {
+        /** @uses ActionDatum::data_owner_namespace() */
+        return $this->action_data->data_owner_namespace;
+    }
+
     protected function initData(bool $b_save = true) : ActionDatum {
         $this->action_data = new ActionDatum();
         $this->action_data->is_system_privilege = $this->is_system;
@@ -46,7 +52,8 @@ trait ActionableBaseTrait
         $this->action_data->root_data_id = $this->action_data_root_id;
         $this->action_data->parent_data_id = $this->action_data_parent_id;
         $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->data_action_type_id = $this->getType(b_construct_if_missing: false)?->id;
+        $this->action_data->data_type_owner_id = $this->getType(b_construct_if_missing: false)?->id;
+        $this->action_data->data_namespace_owner_id = $this->owner?->id;
         if ($b_save || count(static::ACTIVE_COLLECTION_KEYS)) {
             $this->action_data->save();
             $this->action_data->refresh();
@@ -131,7 +138,7 @@ trait ActionableBaseTrait
         return false;
     }
 
-    public function getActionTags(): array { return [static::getClassName()];}
+    public function getActionTags(): array { return [static::getHexbatchClassName()];}
 
     public function getRenderHtml(): ?string {return null;}
 
@@ -226,7 +233,7 @@ trait ActionableBaseTrait
     }
 
     public function setChildActionResult(IThingAction $child): void {
-        //todo make sure this is set to false, and short circuits if the child is an event that returns denied
+
     }
 
     public function getMoreSiblingActions(): array {
@@ -269,7 +276,8 @@ trait ActionableBaseTrait
 
     public static function registerAction(): void
     {
-        Thing::registerActionType(static::class);
-        ThingHook::registerActionType(static::class);
+        Thing::registerActionType(static::getHexbatchClassName());
+        ThingHook::registerActionType(static::getHexbatchClassName());
     }
+
 }

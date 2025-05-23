@@ -80,7 +80,7 @@ class BuildSystem extends Command
              */
             $attr_class = $info['attribute_class'];
 
-            $this->warn("Attribute ".$attr_class::getClassName()." $uuid is duplicate claimed by type".$type_class::getClassName());
+            $this->warn("Attribute ".$attr_class::getHexbatchClassName()." $uuid is duplicate claimed by type".$type_class::getHexbatchClassName());
         }
 
 
@@ -142,7 +142,7 @@ class BuildSystem extends Command
             $number_api = 0;
             $number_events = 0;
             $number_meta = 0;
-            $number_metrics = 0;
+
             $number_metadata = 0;
             foreach ($load->types as  $val) {
                 $full_class_type_name = $val;
@@ -182,7 +182,7 @@ class BuildSystem extends Command
 
             foreach ($type_names as $full_type_name ) {
                 if (!is_subclass_of($full_type_name, 'App\Sys\Res\Types\Stk\Root\Act\BaseAction') ) { continue; }
-                $data[] = [$full_type_name::getClassName(),implode("\n",$full_type_name::getRelatedEvents())];
+                $data[] = [$full_type_name::getHexbatchClassName(),implode("\n",$full_type_name::getRelatedEvents())];
             }
 
             $this->table(['Type Name','Events'],$data);
@@ -242,7 +242,7 @@ class BuildSystem extends Command
                     /** @type ISystemType $type_class */
                     $type_class = $load->attribute_type_classes[$attribute_class]??null;
                     if ($type_class) {
-                        $type_name = $type_class::getClassName();
+                        $type_name = $type_class::getHexbatchClassName();
                     }
                 }
                 $data[] = [$name, $uuid, $type_name];
@@ -377,7 +377,7 @@ class BuildSystem extends Command
                       "\n   Handle Element " . $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getClassUuid()
 
                     . "\n   Handle Type    ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getClassUuid()
-                      ."\n   ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getClassName()
+                      ."\n   ". $some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getHexbatchClassName()
 
                     . "\n   ".$some_namespace::getSystemTypeClass()::getSystemHandleElementClass()::getSystemTypeClass()::getFlatInheritance();
 
@@ -388,19 +388,19 @@ class BuildSystem extends Command
                     $dets
                     ,
 
-                    " Type    ". $some_namespace::getSystemTypeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassName()
+                    " Type    ". $some_namespace::getSystemTypeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getHexbatchClassName()
                     . "\n   ".$some_namespace::getSystemTypeClass()::getFlatInheritance()
-                    ." Home Set   ". $some_namespace::getSystemHomeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getClassName()
+                    ." Home Set   ". $some_namespace::getSystemHomeClass()::getClassUuid() ."\n   ". $some_namespace::getSystemTypeClass()::getHexbatchClassName()
                     . "\n   ".$some_namespace::getSystemHomeClass()::getDefiningSystemElementClass()::getSystemTypeClass()::getFlatInheritance()
 
                     ,
 
 
-                     " Public    ". $some_namespace::getSystemPublicClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPublicClass()::getSystemTypeClass()::getClassName()
+                     " Public    ". $some_namespace::getSystemPublicClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPublicClass()::getSystemTypeClass()::getHexbatchClassName()
                     . "\n   ".$some_namespace::getSystemPublicClass()::getSystemTypeClass()::getFlatInheritance()
 
                     . " \n "
-                    ." Private    ". $some_namespace::getSystemPrivateClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getClassName()
+                    ." Private    ". $some_namespace::getSystemPrivateClass()::getClassUuid() ."\n   ". $some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getHexbatchClassName()
                     . "\n   ".$some_namespace::getSystemPrivateClass()::getSystemTypeClass()::getFlatInheritance()
                     ."\n   "
                     ,
@@ -419,7 +419,7 @@ class BuildSystem extends Command
                     $data[] = [
                         $build_type,
                         $new_class::getClassUuid(),
-                        $new_class::getClassName()
+                        $new_class::getHexbatchClassName()
                     ];
                 }
             }
@@ -480,7 +480,7 @@ class BuildSystem extends Command
                     $data[] = [
                        $build_type,
                        $something_made::getClassUuid(),
-                       $something_made::getClassName(),
+                       $something_made::getHexbatchClassName(),
                     ];
                 }
             }

@@ -30,10 +30,10 @@ class BaseAction extends BaseType implements IAction
         parent::__construct(action_data: $this->action_data,
             action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id,
             owner: $this->owner, b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event);
-        Utilities::ignoreVar(static::ACTION_NAME,static::getClassName());
+        Utilities::ignoreVar(static::ACTION_NAME,static::getHexbatchClassName());
     }
 
-    public static function getClassName() :string { return static::ACTION_NAME->value; }
+    public static function getHexbatchClassName() :string { return static::ACTION_NAME->value; }
 
 
     const ATTRIBUTE_CLASSES = [

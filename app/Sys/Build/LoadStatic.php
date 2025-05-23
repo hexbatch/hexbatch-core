@@ -113,7 +113,7 @@ class LoadStatic
                 /**
                  * @type ISystemType $full_class_name
                  */
-                $name = $full_class_name::getClassName();
+                $name = $full_class_name::getHexbatchClassName();
                 if (!Utilities::isValidResourceName($name)) {
                     $this->bad_type_name[$uuid] = $name;
 
@@ -148,7 +148,7 @@ class LoadStatic
                 /**
                  * @type ISystemAttribute $full_class_name
                  */
-                $name = $full_class_name::getClassName();
+                $name = $full_class_name::getHexbatchClassName();
                 if (!Utilities::isValidResourceName($name)) {
                     $this->bad_attribute_name[$uuid] = $name;
 

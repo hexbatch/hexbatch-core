@@ -38,7 +38,7 @@ class Phase extends BaseType
         if (static::EDITED_BY_PHASE_SYSTEM_CLASS) {
             $type_uuid = $this->getTypeObject()->getUuid();
             $mu_uuid = static::getClassUuid();
-            $name = static::getClassName();
+            $name = static::getHexbatchClassName();
             $is_default = static::IS_DEFAULT_PHASE;
             try {
                 $creator = new PhaseCreate(

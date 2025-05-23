@@ -37,9 +37,9 @@ class BaseElement implements ISystemElement
         return $this->b_did_create_model;
     }
 
-    public static function getClassName(): string
+    public static function getHexbatchClassName(): string
     {
-        return 'Element ' . static::getSystemTypeClass()::getClassName();
+        return 'Element ' . static::getSystemTypeClass()::getHexbatchClassName();
     }
 
     public static function getFullClassName() :string {return static::class;}

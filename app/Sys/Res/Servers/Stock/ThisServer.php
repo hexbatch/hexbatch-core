@@ -33,7 +33,7 @@ class ThisServer extends BaseServer {
         return $name;
     }
 
-    public static function getClassName() : string { return static::getServerName();}
+    public static function getHexbatchClassName() : string { return static::getServerName();}
     public static function getServerName(): string
     {
         $name = config('hbc.system.server.name');

@@ -26,7 +26,7 @@ class AttributeMapEntry extends ActionMap
 
             $this->full_class_name = $full_class_name;
             $this->type_uuid = $full_class_name::getClassUuid();
-            $this->internal_name = $full_class_name::getClassName();
+            $this->internal_name = $full_class_name::getHexbatchClassName();
             $this->is_system = $full_class_name::isSystem();
             $this->has_events = false;
             $this->is_abstract = $full_class_name::isAbstract();

@@ -10,6 +10,7 @@ use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
 use App\OpenApi\Users\MeResponse;
+use App\OpenApi\Users\Registration\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -59,8 +60,14 @@ class UserRegister extends Api\UserApi
         protected ?string $public_key = null,
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
+        ?RegistrationParams $params = null
     )
     {
+        if($params) {
+            if (!$this->user_name) { $this->user_name = $params->getUsername();}
+            if (!$this->user_password) { $this->user_password = $params->getPassword();}
+            if (!$this->public_key) { $this->public_key = $params->getPublicKey();}
+        }
         parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init);
     }
 
@@ -141,6 +148,8 @@ class UserRegister extends Api\UserApi
             }
 
         }
+
+        $this->action_data->refresh();
 
     }
 

@@ -39,8 +39,8 @@ class BaseSet implements ISystemSet
          return static::UUID;
      }
 
-     public static function getClassName() :string {
-         return 'Set defined by '. static::getDefiningSystemElementClass()::getClassName();
+     public static function getHexbatchClassName() :string {
+         return 'Set defined by '. static::getDefiningSystemElementClass()::getHexbatchClassName();
      }
 
      public static function getDictionaryObject() :ISystemSet {

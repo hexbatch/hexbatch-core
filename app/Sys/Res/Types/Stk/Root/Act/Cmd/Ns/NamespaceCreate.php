@@ -136,6 +136,8 @@ class NamespaceCreate extends Act\Cmd\Ns
 
         $nodes = [];
         //todo set up the kids
+        //todo how to set up caller context in the trees?
+        //make the type inherit from BasePerNamespace, unless the context is under a user namespace, then use that as the ancestor
 
         /*
           finish (db transaction for all, sync) holds flag to send events or not, and if system, holds ns object

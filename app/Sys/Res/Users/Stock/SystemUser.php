@@ -35,7 +35,7 @@ class SystemUser extends BaseSystemUser
         return $name;
     }
 
-    public static function getClassName() :string { return static::getUserName(); }
+    public static function getHexbatchClassName() :string { return static::getUserName(); }
     public static function getUserPassword() :string {
         $pw = config('hbc.system.user.password');
         if (!$pw) {

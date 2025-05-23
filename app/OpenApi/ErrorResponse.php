@@ -5,7 +5,9 @@ namespace App\OpenApi;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
+use App\OpenApi\Users\MeResponse;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\ThingCallback;
 use Illuminate\Support\Facades\Request;
 use JsonSerializable;
 use OpenApi\Attributes as OA;
@@ -133,6 +135,11 @@ class ErrorResponse implements  JsonSerializable
             $ret['other_errors'] = $this->other_errors;
         }
         return $ret;
+    }
+
+    public static function fromCallback(ThingCallback $callback) : ?MeResponse {
+        return null;
+        //todo fill in error from callback
     }
 }
 

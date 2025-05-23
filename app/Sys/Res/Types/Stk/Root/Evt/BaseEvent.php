@@ -22,7 +22,7 @@ class BaseEvent extends Event implements IEvent
 
     const EVENT_NAME = TypeOfEvent::BASE_EVENT;
 
-    public static function getClassName() :string { return static::EVENT_NAME->value; }
+    public static function getHexbatchClassName() :string { return static::EVENT_NAME->value; }
     public static function getEventName() :string { return static::EVENT_NAME->value; }
 
 

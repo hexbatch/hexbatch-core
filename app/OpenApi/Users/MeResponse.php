@@ -6,6 +6,7 @@ use App\Api\Common\HexbatchUuid;
 use App\Models\User;
 use Carbon\Carbon;
 use Hexbatch\Things\Interfaces\ICallResponse;
+use Hexbatch\Things\Models\ThingCallback;
 use JsonSerializable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
@@ -58,5 +59,10 @@ class MeResponse implements  JsonSerializable,ICallResponse
     public function getData(): ?array
     {
         return $this->jsonSerialize();
+    }
+
+    public static function fromCallback(ThingCallback $callback) : ?MeResponse {
+        return null;
+        //todo fill in me from callback
     }
 }
