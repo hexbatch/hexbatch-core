@@ -84,15 +84,16 @@ class NamespaceEdit extends Act\Cmd\Ns
         protected bool         $is_system = false,
         protected bool         $send_event = true,
         protected ?ActionDatum $action_data = null,
-        protected ?int         $action_data_parent_id = null,
-        protected ?int         $action_data_root_id = null,
-        protected bool         $b_type_init = false
+        protected ?ActionDatum        $parent_action_data = null,
+        protected ?UserNamespace      $owner_namespace = null,
+        protected bool         $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
     )
     {
 
-        parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
-            is_system: $this->is_system, send_event: $this->send_event,
-            action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id);
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,priority: $this->priority,tags: $this->tags);
     }
 
 
@@ -140,6 +141,10 @@ class NamespaceEdit extends Act\Cmd\Ns
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
+        if ($this->isActionComplete()) {
+            return;
+        }
+
         $namespace = $this->getEditedNamespace();
         if (!$namespace) {
             throw new \InvalidArgumentException("Need namespace to edit");

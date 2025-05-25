@@ -100,12 +100,20 @@ class AuthenticationController extends Controller
     #[OA\Post(
         path: '/api/v1/users/register',
         operationId: 'core.users.register',
-        description: "",
-        summary: '',
+        description: "Register a new user",
+        summary: 'Creates a namespace along with that new user',
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: RegistrationParams::class)),
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Register with just a username and a password',
-                                content: new JsonContent(ref: MeResponse::class))
+                                content: new JsonContent(ref: MeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but unexpected callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Server\UserRegistrationProcessing::class)]

@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int data_second_attribute_id
  * @property int data_third_attribute_id
  * @property int data_type_id
+ * @property int data_second_type_id
  * @property int data_element_id
  * @property int data_second_element_id
  * @property int data_set_member_id
@@ -38,8 +39,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int data_mutual_id
  * @property bool is_system_privilege
  * @property bool is_sending_events
+ * @property int data_priority
  * @property TypeOfThingStatus action_status
  * @property ArrayObject collection_data
+ * @property ArrayObject data_tags
  * @property ElementType data_owner_type
  * @property UserNamespace data_owner_namespace
  * @property ActionDatum|null data_root
@@ -49,6 +52,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property User data_user
  * @property UserNamespace data_namespace
  * @property ElementType data_type
+ * @property ElementType data_second_type
  * @property Attribute data_attribute
  * @property Attribute data_second_attribute
  * @property Attribute data_third_attribute
@@ -93,6 +97,10 @@ class ActionDatum extends Model
 
     public function data_type() : BelongsTo {
         return $this->belongsTo(ElementType::class,'data_type_id','id');
+    }
+
+    public function data_second_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'data_second_type_id','id');
     }
 
     public function data_attribute() : BelongsTo {
@@ -165,7 +173,9 @@ class ActionDatum extends Model
     protected $casts = [
         'is_sending_events' => 'boolean',
         'is_system_privilege' => 'boolean',
+        'data_priority' => 'integer',
         'collection_data' => AsArrayObject::class,
+        'data_tags' => AsArrayObject::class,
         'action_status' => TypeOfThingStatus::class,
     ];
 
@@ -229,7 +239,19 @@ class ActionDatum extends Model
                 $ret[] = $collect->$col;
             }
         }
-        return $ret;
+
+        //filter duplicate objects, do not use distinct in the action_collection because we may want duplicates later
+        $collection = array_filter($ret, function($obj)
+        {
+            static $idList = array();
+            if(in_array($obj->id,$idList)) {
+                return false;
+            }
+            $idList []= $obj->getId();
+            return true;
+        });
+
+        return $collection;
     }
     /** @return string[] */
     public function getUuidsFromCollection(string $class, ?int $partition_flag = 0) :array  {

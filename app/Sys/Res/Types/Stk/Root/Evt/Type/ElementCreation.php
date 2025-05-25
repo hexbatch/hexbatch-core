@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
+use App\Models\ElementType;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
@@ -20,6 +21,21 @@ class ElementCreation extends Evt\ScopeType
     const PARENT_CLASSES = [
         Evt\ScopeType::class
     ];
+
+    public function getAskedAboutType(): ?ElementType
+    {
+        return $this->action_data?->data_type;
+    }
+
+    public function getParentType(): ?ElementType
+    {
+        return $this->action_data?->second_second_type;
+    }
+
+    public function canCreate(): bool
+    {
+        return true;  //todo this is stubbed
+    }
 
 }
 

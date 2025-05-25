@@ -6,7 +6,7 @@ use App\Enums\Sys\TypeOfAction;
 
 use App\Models\ActionDatum;
 use App\Models\Element;
-use App\Models\ElementSet;
+
 use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
@@ -15,6 +15,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
+use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -74,18 +75,22 @@ class ElementCreate extends Act\Cmd\Ele
         return $this->action_data->data_phase;
     }
 
-    /**
-     * @return ElementSet[]
-     */
-    public function getSetsUsed(): array
-    {
-        return $this->action_data->getCollectionOfType(class: ElementSet::class);
+    protected function setTemplateType(ElementType $type) : void {
+        $this->action_data->data_type_id = $type->id;
+        $this->given_type_uuid = $type->ref_uuid;
+        $this->action_data->collection_data =$this->getInitialConstantData();
+        $this->action_data->save();
     }
-
 
     public function getTemplateType(): ?ElementType
     {
         return $this->action_data->data_type;
+    }
+
+    public function setNumberToMake(int $number_allowed) : void {
+        $this->number_to_create = min($number_allowed,$this->number_to_create);
+        $this->action_data->collection_data =$this->getInitialConstantData();
+        $this->action_data->save();
     }
 
     /**
@@ -93,7 +98,7 @@ class ElementCreate extends Act\Cmd\Ele
      */
     protected array $created_element_uuids = [];
 
-    const array ACTIVE_COLLECTION_KEYS = ['created_element_uuids'=>Element::class,'given_set_uuids'=>ElementSet::class];
+    const array ACTIVE_COLLECTION_KEYS = ['created_element_uuids'=>Element::class];
 
     const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid','given_phase_uuid',
         'number_to_create','preassinged_uuids'];
@@ -103,21 +108,21 @@ class ElementCreate extends Act\Cmd\Ele
         protected ?string       $given_type_uuid = null,
         protected ?string       $given_namespace_uuid = null,
         protected ?string      $given_phase_uuid = null,
-        protected array        $given_set_uuids = [],
         protected int          $number_to_create = 0,
         protected array        $preassinged_uuids = [],
         protected bool         $is_system = false,
-        protected bool         $send_event = false,
+        protected bool         $send_event = true,
         protected ?ActionDatum $action_data = null,
-        protected ?int         $action_data_parent_id = null,
-        protected ?int         $action_data_root_id = null,
-        protected bool         $b_type_init = false
+        protected ?ActionDatum        $parent_action_data = null,
+        protected ?UserNamespace      $owner_namespace = null,
+        protected bool         $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
     )
     {
 
-        parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
-            is_system: $this->is_system, send_event: $this->send_event,
-            action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id);
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,priority: $this->priority,tags: $this->tags);
 
     }
 
@@ -138,12 +143,19 @@ class ElementCreate extends Act\Cmd\Ele
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
+        if ($this->isActionComplete()) {
+            return;
+        }
         if (!$this->getNamespaceUsed()) {
             throw new \InvalidArgumentException("Need namespace before can make element");
         }
 
         if (!$this->getTemplateType()) {
             throw new \InvalidArgumentException("Need template type before can make element");
+        }
+
+        if (!$this->getTemplateType()->isPublished()) {
+            throw new \InvalidArgumentException("Template type needs to be published");
         }
         if ($this->number_to_create <= 0) {return;}
         $post_actions = [];
@@ -154,47 +166,25 @@ class ElementCreate extends Act\Cmd\Ele
 
             DB::beginTransaction();
 
-            if (count($this->getSetsUsed())) {
-                foreach ($this->getSetsUsed() as $set) {
-                    $created_ele_to_set = [];
-                    $ele = null;
-                    for ($set_index = 0; $set_index < $this->number_to_create; $set_index++) {
-                        $ele = $this->makeElement(loop_number: $uuid_index++);
-                        $created_ele_to_set[] = $ele->ref_uuid;
-                    } //end creating elements for the set
-                    if ($this->send_event) {
-                        $post_actions[] = new Act\Cmd\St\SetMemberAdd(given_set_uuid: $set->ref_uuid,given_element_uuids: $created_ele_to_set,
-                            is_system: $this->is_system,send_event: $this->send_event);
-                    }
 
 
-                    if (count($created_ele_to_set) > 1 ) {
-                        if ($this->send_event) {
-                            $post_events = array_merge($post_events,
-                                Evt\Element\ElementRecievedBatch::makeEventActions(source: $this,data: $this->action_data));
-                        }
-                    } else {
-                        if ($this->send_event) {
-                            $post_events = array_merge($post_events,
-                                Evt\Element\ElementRecieved::makeEventActions(source: $this,data: $this->action_data,
-                                    element_context: $ele));
-                        }
+            for ($set_index = 0; $set_index < $this->number_to_create; $set_index++) {
+                $this->makeElement(loop_number: $uuid_index++);
+            } //end non set creation
 
 
-                    }
+            if (count($this->created_element_uuids) > 1 ) {
+                if ($this->send_event) {
+                    $this->post_events_to_send =
+                        Evt\Element\ElementRecievedBatch::makeEventActions(source: $this,data: $this->action_data);
                 }
             } else {
-                //no set given
-                for ($set_index = 0; $set_index < $this->number_to_create; $set_index++) {
-                    $ele = $this->makeElement(loop_number: $uuid_index++);
-                    if ($this->send_event) {
-                        $post_events = array_merge($post_events,
-                            Evt\Element\ElementRecieved::makeEventActions(source: $this, data: $this->action_data,
-                                element_context: $ele));
-                    }
-
-                } //end non set creation
+                if ($this->send_event) {
+                    $this->post_events_to_send =
+                        Evt\Element\ElementRecieved::makeEventActions(source: $this,data: $this->action_data);
+                }
             }
+
 
 
             $this->saveCollectionKeys();
@@ -213,7 +203,8 @@ class ElementCreate extends Act\Cmd\Ele
 
     }
 
-    private function makeElement(int $loop_number) : Element {
+    private function makeElement(int $loop_number) : void
+    {
 
         $phase_id = $this->getPhaseUsed()?->id;
         $namespace_owner_id = $this->getNamespaceUsed()->id;
@@ -231,7 +222,6 @@ class ElementCreate extends Act\Cmd\Ele
         $ele->save();
         $ele->refresh();
         $this->created_element_uuids[] = $ele->ref_uuid;
-        return $ele;
     }
 
 
@@ -239,7 +229,6 @@ class ElementCreate extends Act\Cmd\Ele
     protected function getMyData() :array {
         return [
             'created_elements'=>$this->getElementsCreated(),'template_type'=>$this->getTemplateType(),
-            'sets_used' => $this->getSetsUsed(),
             'namespace_used'=>$this->getNamespaceUsed(),'phase_used'=>$this->getPhaseUsed()];
     }
 
@@ -294,6 +283,39 @@ class ElementCreate extends Act\Cmd\Ele
         }
 
         return null;
+    }
+
+    public function setChildActionResult(IThingAction $child): void {
+
+
+        if ($child instanceof Evt\Type\ElementCreationBatch || $child instanceof Evt\Type\ElementCreation) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+
+            else if($child->isActionSuccess()) {
+                if ($child->getAskedAboutType() === $this->getTemplateType()) {
+                    if ($this->getTemplateType()->isParentOfThis($child->getParentType())) //todo change to or ancestor later when doing element_type_ancestors
+                    if ($child instanceof Evt\Type\ElementCreationBatch) {
+                        $number_allowed = $child->getNumberAllowed();
+                        if (null !== $number_allowed) {
+                            $this->setNumberToMake($number_allowed);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        if ($child instanceof TypePublish) {
+            if ($child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+            else if($child->isActionSuccess() && $child->getPublishingType()) {
+                $this->setTemplateType(type: $child->getPublishingType());
+            }
+        }
+
     }
 
 }

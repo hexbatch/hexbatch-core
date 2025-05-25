@@ -261,7 +261,8 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
 
 
 
-            $publish = new TypePublish(given_type_uuid: $this->getTypeObject()->getUuid(),is_system: true,send_event: false);
+            $publish = new TypePublish(given_type_uuid: $this->getTypeObject()->getUuid(),
+                is_system: true,send_event: false,publishing_status: TypeOfApproval::PUBLISHING_APPROVED);
             $publish->runAction();
             DB::commit();
 
@@ -274,12 +275,13 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
 
     public function __construct(
         protected ?ActionDatum   $action_data = null,
-        protected ?int           $action_data_parent_id = null,
-        protected ?int           $action_data_root_id = null,
-        protected ?UserNamespace $owner = null,
+        protected ?ActionDatum   $parent_action_data = null,
+        protected ?UserNamespace $owner_namespace = null,
         protected bool           $b_type_init = false,
-        protected bool         $is_system = false,
-        protected bool         $send_event = true,
+        protected bool           $is_system = false,
+        protected bool           $send_event = true,
+        protected int            $priority = 0,
+        protected array          $tags = []
 
     )
     {

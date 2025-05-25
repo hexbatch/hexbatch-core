@@ -6,7 +6,6 @@ namespace App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\BaseType;
 
 /**
- * todo this cannot be inherited without permission!
  *
  */
 class SystemPrivilege extends BaseType

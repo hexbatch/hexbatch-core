@@ -7,6 +7,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\User;
 
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -52,17 +53,18 @@ class UserRegister extends Act\Cmd\Us
         protected ?string      $user_password = null,
         protected ?string      $uuid = null,
         protected bool         $is_system = false,
-        protected bool         $send_event = false,
+        protected bool         $send_event = true,
         protected ?ActionDatum $action_data = null,
-        protected ?int         $action_data_parent_id = null,
-        protected ?int         $action_data_root_id = null,
-        protected bool         $b_type_init = false
+        protected ?ActionDatum        $parent_action_data = null,
+        protected ?UserNamespace      $owner_namespace = null,
+        protected bool         $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
     )
     {
 
-        parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
-            is_system: $this->is_system, send_event: $this->send_event,
-            action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id);
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,priority: $this->priority,tags: $this->tags);
 
     }
 
@@ -79,7 +81,9 @@ class UserRegister extends Act\Cmd\Us
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if ($this->isActionComplete()) {
+            return;
+        }
         try {
             DB::beginTransaction();
             $created_user = null;
@@ -157,7 +161,7 @@ class UserRegister extends Act\Cmd\Us
 
 
         if ($child instanceof Evt\Server\UserRegistrationStarting) {
-            if ($child->isActionFail()) {
+            if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
         }

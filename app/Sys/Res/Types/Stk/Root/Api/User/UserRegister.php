@@ -34,10 +34,23 @@ class UserRegister extends Api\UserApi
         Api\UserApi::class,
         Act\Cmd\Us\UserRegister::class,
     ];
+
+
+    protected function setCreatedNamespace(UserNamespace $namespace) : void {
+        $this->action_data->data_namespace_id = $namespace->id;
+        $this->action_data->save();
+    }
+
     public function getCreatedNamespace(): UserNamespace
     {
         /** @uses ActionDatum::data_namespace() */
         return $this->action_data->data_namespace;
+    }
+
+
+    protected function setCreatedUser(User $user) : void {
+        $this->action_data->data_user_id = $user->id;
+        $this->action_data->save();
     }
 
     public function getCreatedUser(): User
@@ -60,7 +73,9 @@ class UserRegister extends Api\UserApi
         protected ?string $public_key = null,
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
-        ?RegistrationParams $params = null
+        ?RegistrationParams $params = null,
+        protected int            $priority = 0,
+        protected array          $tags = []
     )
     {
         if($params) {
@@ -68,7 +83,7 @@ class UserRegister extends Api\UserApi
             if (!$this->user_password) { $this->user_password = $params->getPassword();}
             if (!$this->public_key) { $this->public_key = $params->getPublicKey();}
         }
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init);
+        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,priority: $this->priority,tags: $this->tags);
     }
 
     /**
@@ -76,6 +91,11 @@ class UserRegister extends Api\UserApi
      */
     public function runAction(array $data = []): void
     {
+        parent::runAction($data);
+        if ($this->isActionComplete()) {
+            return;
+        }
+
         try {
             DB::beginTransaction();
             if ($this->getCreatedUser() && $this->getCreatedNamespace()) {
@@ -103,13 +123,11 @@ class UserRegister extends Api\UserApi
         $nodes = [];
 
         $register = new Act\Cmd\Us\UserRegister(
-            user_name: $this->user_name,user_password: $this->user_password,is_system: false,send_event: true,
-            action_data_parent_id: $this->action_data->id,action_data_root_id: $this->action_data->id);
+            user_name: $this->user_name,user_password: $this->user_password,is_system: false,send_event: true, parent_action_data: $this->action_data);
         $nodes[] = ['id' => $register->getActionData()->id, 'parent' => -1, 'title' => $register->getType()->getName(),'action'=>$register];
 
         $namespace = new Act\Cmd\Ns\NamespaceCreate(
-            namespace_name: $this->user_name,is_system: false,send_event: true,
-            action_data_parent_id: $this->action_data->id,action_data_root_id: $this->action_data->id);
+            namespace_name: $this->user_name,is_system: false,send_event: true, parent_action_data: $this->action_data);
         $nodes[] = ['id' => $namespace->getActionData()->id, 'parent' => -1, 'title' => $namespace->getType()->getName(),'action'=>$namespace];
 
 
@@ -128,28 +146,28 @@ class UserRegister extends Api\UserApi
 
     public function setChildActionResult(IThingAction $child): void {
 
-
-        if ($child instanceof Act\Cmd\Us\UserRegister && $child->getCreatedUser()) {
-            if ($child->isActionFail() || !$child->isActionSuccess()) {
+        if ($child instanceof Act\Cmd\Us\UserRegister) {
+            if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            } else {
-                $this->action_data->data_user_id = $child->getCreatedUser()->id;
-                $this->action_data->save();
+            }
+            else {
+                if ($this->isActionSuccess() && $child->getCreatedUser()) {
+                    $this->setCreatedUser(user: $child->getCreatedUser());
+                }
+
             }
 
         }
 
-        if ($child instanceof Act\Cmd\Ns\NamespaceCreate && $child->getCreatedNamespace()) {
-            if ($child->isActionSuccess() && $child->getCreatedNamespace()) {
-                $this->action_data->data_namespace_id = $child->getCreatedNamespace()->id;
-                $this->action_data->save();
-            } else {
+        if ($child instanceof Act\Cmd\Ns\NamespaceCreate) {
+            if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            } else {
+                if ($this->isActionSuccess() && $child->getCreatedNamespace()) {
+                    $this->setCreatedNamespace(namespace: $child->getCreatedNamespace());
+                }
             }
-
         }
-
-        $this->action_data->refresh();
 
     }
 

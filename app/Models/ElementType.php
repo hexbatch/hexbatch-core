@@ -581,14 +581,36 @@ class ElementType extends Model implements IType,ISystemModel
     public function canBePublished() : bool {
         if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return false;}
         foreach ($this->type_parents as $parent) {
-            if ($parent->parent_type_approval !== TypeOfApproval::PUBLISHING_APPROVED) {return false;}
+            if ($parent->parent_type_approval !== TypeOfApproval::DESIGN_APPROVED) {return false;}
         }
 
         foreach ($this->type_attributes as $att) {
-            if ($att->attribute_approval !== TypeOfApproval::PUBLISHING_APPROVED) {return false;}
+            if ($att->attribute_approval !== TypeOfApproval::DESIGN_APPROVED) {return false;}
         }
 
         return true;
+    }
+
+    public function isPublished() : bool {
+        return $this->lifecycle === TypeOfLifecycle::PUBLISHED;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getParentUuids() : array {
+        $ret = [];
+        foreach ($this->type_parents as $par) {
+            $ret[] = $par->ref_uuid;
+        }
+        return $ret;
+    }
+
+    public function isParentOfThis(ElementType $type) {
+        foreach ($this->type_parents as $par) {
+            if ($type->ref_uuid === $par->ref_uuid) {return true;}
+        }
+        return false;
     }
 
 

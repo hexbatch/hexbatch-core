@@ -217,13 +217,18 @@ class ActionCollection extends Model
         $table_name = app($class)->getTable();
 
         $what = DB::table("$table_name as my_tab")
-            ->selectRaw('my_tab.id, my_tab.ref_uuid')
+            ->selectRaw('my_tab.id, my_tab.ref_uuid, act.id as collect_id')
             ->whereIn('my_tab.ref_uuid',$uuids)
+            ->leftJoin("action_collections as act","act.$column","my_tab.id")
             ->get()->toArray();
 
         $ref = [];
+        $todo = [];
         foreach ($what as $row) {
             $ref[$row->ref_uuid] = $row->id;
+            if (!$row->collect_id) {
+                $todo[$row->ref_uuid] = $row->id;
+            }
         }
 
         $missing = [];
@@ -237,8 +242,11 @@ class ActionCollection extends Model
             }
         }
 
+        //see what is already here, and then add the others
+
+
         $inserts = [];
-        foreach ($ref as $table_id ) {
+        foreach ($todo as $table_id ) {
             $inserts[] = ['parent_action_data_id'=>$parent->id,$column=>$table_id,'collection_partition_flag'=>$partition_flag];
         }
         ActionCollection::insert($inserts);

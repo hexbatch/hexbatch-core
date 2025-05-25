@@ -82,6 +82,14 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('data_second_type_id')
+                ->nullable()->default(null)
+                ->comment("Data has a second type in main operation")
+                ->index()
+                ->constrained('element_types')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->foreignId('data_set_id')
                 ->nullable()->default(null)
                 ->comment("Data has a set")
@@ -192,10 +200,18 @@ return new class extends Migration
             $table->boolean('is_sending_events')->default(false)->nullable(false)
                 ->comment('if true then this action does not send events');
 
+            $table->integer('data_priority')->default(0)->nullable(false)
+                ->comment('sets the priority of the action and thus thing');
+
             $table->timestamps();
 
             $table->jsonb('collection_data')
                 ->nullable()->default(null)->comment("Other data here");
+
+
+            $table->jsonb('data_tags')
+                ->nullable()->default(null)
+                ->comment("array of string tags for the action to feed the things");
 
 
         });

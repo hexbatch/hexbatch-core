@@ -67,6 +67,16 @@ class ElementTypeParent extends Model
         return $this->ref_uuid;
     }
 
+    public static function updateParentStatus(ElementType $parent, ElementType $child,TypeOfApproval $approval)
+    {
+        /** @var static $current */
+        $current = ElementTypeParent::buildTypeParents(child_type_id: $child->id,parent_type_id: $parent->id)->first();
+        if (!$current) {
+            throw new \InvalidArgumentException(sprintf("Parent child relationship not found for %s->%s ",$parent->ref_uuid,$child->ref_uuid ));
+        }
+        $current->parent_type_approval = $approval;
+        $current->save();
+    }
 
     /**
      * @throws \Exception
@@ -115,6 +125,44 @@ class ElementTypeParent extends Model
             DB::rollback();
             throw $e;
         }
+    }
+
+
+    public static function buildTypeParents(
+        ?int    $me_id = null,
+        ?string $uuid = null,
+        ?int $child_type_id = null,
+        ?int $parent_type_id = null
+
+    ): Builder
+    {
+
+        /**
+         * @var Builder $build
+         */
+        $build = Element::select('element_type_parents.*')
+            ->selectRaw(" extract(epoch from  element_type_parents.created_at) as created_at_ts")
+            ->selectRaw("extract(epoch from  element_type_parents.updated_at) as updated_at_ts")
+        ;
+
+        if ($me_id) {
+            $build->where('element_type_parents.id', $me_id);
+        }
+
+        if ($uuid) {
+            $build->where('element_type_parents.ref_uuid', $uuid);
+        }
+
+        if ($child_type_id) {
+            $build->where('element_type_parents.child_type_id', $child_type_id);
+        }
+
+        if ($parent_type_id) {
+            $build->where('element_type_parents.parent_type_id', $parent_type_id);
+        }
+
+
+        return $build;
     }
 
 

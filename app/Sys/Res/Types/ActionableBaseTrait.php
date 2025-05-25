@@ -46,14 +46,29 @@ trait ActionableBaseTrait
     }
 
     protected function initData(bool $b_save = true) : ActionDatum {
+        $root_id = null;
+        $owner_id = null;
+        if ($this->parent_action_data) {
+            $root_id = $this->parent_action_data->root_data_id? : $this->parent_action_data->id;
+        }
+        if ($this->owner_namespace) {
+            $owner_id = $this->owner_namespace->id;
+        } elseif ($this->parent_action_data) {
+            $owner_id = $this->parent_action_data->data_namespace_owner_id;
+        }
+
+
         $this->action_data = new ActionDatum();
+        $this->action_data->data_priority = $this->priority;
+        $this->action_data->data_tags = $this->tags;
         $this->action_data->is_system_privilege = $this->is_system;
         $this->action_data->is_sending_events = $this->send_event;
-        $this->action_data->root_data_id = $this->action_data_root_id;
-        $this->action_data->parent_data_id = $this->action_data_parent_id;
+        $this->action_data->root_data_id = $root_id;
+        $this->action_data->parent_data_id = $this->parent_action_data?->id;
+        $this->action_data->data_namespace_owner_id = $owner_id;
         $this->action_data->collection_data =$this->getInitialConstantData();
         $this->action_data->data_type_owner_id = $this->getType(b_construct_if_missing: false)?->id;
-        $this->action_data->data_namespace_owner_id = $this->owner?->id;
+
         if ($b_save || count(static::ACTIVE_COLLECTION_KEYS)) {
             $this->action_data->save();
             $this->action_data->refresh();
@@ -73,12 +88,17 @@ trait ActionableBaseTrait
 
 
     public function getActionOwner(): ?IThingOwner {
-        return $this->owner;
+        return $this->owner_namespace;
     }
 
     public function isActionComplete(): bool
     {
         return in_array($this->getActionStatus(),TypeOfThingStatus::STATUSES_OF_COMPLETION);
+    }
+
+    public function isActionWaiting(): bool
+    {
+        return $this->getActionStatus() === TypeOfThingStatus::THING_WAITING;
     }
 
     public function isActionSuccess(): bool
@@ -106,7 +126,7 @@ trait ActionableBaseTrait
 
     public function getActionPriority(): int
     {
-        return 0;
+        return $this->action_data->data_priority;
     }
 
     public function getActionType(): string
@@ -138,7 +158,7 @@ trait ActionableBaseTrait
         return false;
     }
 
-    public function getActionTags(): array { return [static::getHexbatchClassName()];}
+    public function getActionTags(): array { return $this->action_data->data_tags->getArrayCopy()??[];}
 
     public function getRenderHtml(): ?string {return null;}
 
@@ -157,11 +177,14 @@ trait ActionableBaseTrait
 
     protected function restoreData(array $data = []) {
         if ($this->action_data) {
+            $this->action_data->refresh();
             foreach (static::ACTIVE_DATA_KEYS as $key) {
                 $this->$key = $this->action_data->collection_data->offsetGet($key);
             }
             $this->is_system = $this->action_data->is_system_privilege;
             $this->send_event = $this->action_data->is_sending_events;
+            $this->priority = $this->action_data->data_priority  ;
+            $this->tags = $this->action_data->data_tags->getArrayCopy()??[] ;
         }
 
         foreach (static::ACTIVE_DATA_KEYS as $key) {
@@ -276,8 +299,8 @@ trait ActionableBaseTrait
 
     public static function registerAction(): void
     {
-        Thing::registerActionType(static::getHexbatchClassName());
-        ThingHook::registerActionType(static::getHexbatchClassName());
+        Thing::registerActionType(static::class);
+        ThingHook::registerActionType(static::class);
     }
 
 }

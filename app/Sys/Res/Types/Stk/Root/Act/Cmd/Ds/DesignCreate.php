@@ -57,19 +57,20 @@ class DesignCreate extends Act\Cmd\Ds
         protected ?TypeOfServerAccess $access = null,
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
-        protected bool                $send_event = false,
+        protected bool                $send_event = true,
         protected ?ActionDatum        $action_data = null,
-        protected ?int                $action_data_parent_id = null,
-        protected ?int                $action_data_root_id = null,
-        protected bool                $b_type_init = false
+        protected ?ActionDatum        $parent_action_data = null,
+        protected ?UserNamespace      $owner_namespace = null,
+        protected bool                $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
     )
     {
         if (!$this->given_server_uuid) {
             $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
         }
-        parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
-            is_system: $this->is_system, send_event: $this->send_event,
-            action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id);
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,priority: $this->priority,tags: $this->tags);
     }
 
 
@@ -109,7 +110,9 @@ class DesignCreate extends Act\Cmd\Ds
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
-
+        if ($this->isActionComplete()) {
+            return;
+        }
         try {
             DB::beginTransaction();
             $type = new ElementType();

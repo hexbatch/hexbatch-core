@@ -45,6 +45,7 @@ class BaseEvent extends Event implements IEvent
                                      ?ElementType $type_context = null,?ElementSet $set_context = null,
                                      ?Element $element_context = null,
                                      ?Server $elsewhere_context = null,?Phase $phase_context = null
+    //todo remember priority and tags when doing event fill in later
 
     ) : array
     {

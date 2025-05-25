@@ -63,6 +63,6 @@ class MeResponse implements  JsonSerializable,ICallResponse
 
     public static function fromCallback(ThingCallback $callback) : ?MeResponse {
         return null;
-        //todo fill in me from callback
+        //todo fill in me from callback, and also put in a callback reference here
     }
 }

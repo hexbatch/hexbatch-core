@@ -2,7 +2,9 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 
+use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
+use App\Enums\Types\TypeOfApproval;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
@@ -13,6 +15,10 @@ use App\Models\UserNamespace;
 
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use App\Sys\Res\Types\Stk\Root\Namespace\BasePerNamespace;
+use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
+use App\Sys\Res\Types\Stk\Root\Namespace\PrivateType;
+use App\Sys\Res\Types\Stk\Root\Namespace\PublicType;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
@@ -35,6 +41,30 @@ class NamespaceCreate extends Act\Cmd\Ns
         Evt\Server\NamespaceCreated::class
     ];
 
+    const BASE_TYPE_POSTFIX = '_base';
+
+    protected function getBaseTypePostfix() : string {
+        return $this->base_postfix? : static::BASE_TYPE_POSTFIX;
+    }
+
+    const PUBLIC_TYPE_POSTFIX = '_public';
+
+    protected function getPublicTypePostfix() : string {
+        return $this->public_postfix? : static::PUBLIC_TYPE_POSTFIX;
+    }
+
+    const PRIVATE_TYPE_POSTFIX = '_private';
+
+    protected function getPrivateTypePostfix() : string {
+        return $this->private_postfix? : static::PRIVATE_TYPE_POSTFIX;
+    }
+
+    const HOME_TYPE_POSTFIX = '_home';
+
+    protected function getHomeTypePostfix() : string {
+        return $this->home_postfix? : static::HOME_TYPE_POSTFIX;
+    }
+
 
     public function getCreatedNamespace(): ?UserNamespace
     {
@@ -56,9 +86,19 @@ class NamespaceCreate extends Act\Cmd\Ns
         return $this->action_data->data_set;
     }
 
-    public function getGeneratedType(): ?ElementType
+    protected function changeHomeSet(ElementSet $set) : void {
+        $this->action_data->data_set_id = $set->id;
+        $this->action_data->save();
+    }
+
+    public function getBaseType(): ?ElementType
     {   /** @uses ActionDatum::data_type() */
         return $this->action_data->data_type;
+    }
+
+    protected function changeBaseType(ElementType $type) : void {
+        $this->action_data->data_type_id = $type->id;
+        $this->action_data->save();
     }
 
     public function getGeneratedPublicElement(): ?Element
@@ -71,30 +111,48 @@ class NamespaceCreate extends Act\Cmd\Ns
         return $this->action_data->data_element;
     }
 
+    protected function changePublicElement(Element $el): void
+    {
+         $this->action_data->data_second_element_id = $el->id;
+         $this->action_data->save();
+    }
 
-    const array ACTIVE_DATA_KEYS = ['namespace_name','public_key','uuid','given_user_uuid','given_server_uuid', 'is_stub'];
+    protected function changePrivateElement(Element $el): void
+    {
+        $this->action_data->data_element_id = $el->id;
+        $this->action_data->save();
+    }
+
+
+    const array ACTIVE_DATA_KEYS = ['namespace_name','public_key','uuid','given_user_uuid','given_server_uuid', 'is_stub',
+        'base_postfix','public_postfix','private_postfix','home_postfix'];
 
     public function __construct(
-        protected ?string      $namespace_name = null,
-        protected ?string      $public_key = null,
-        protected ?string      $uuid = null,
-        protected ?string         $given_user_uuid = null,
-        protected ?string         $given_server_uuid = null,
-        protected bool         $is_stub = false,
-        protected bool         $is_system = false,
-        protected bool         $send_event = true,
-        protected ?ActionDatum $action_data = null,
-        protected ?int         $action_data_parent_id = null,
-        protected ?int         $action_data_root_id = null,
-        protected bool         $b_type_init = false
+        protected ?string        $namespace_name = null,
+        protected ?string        $public_key = null,
+        protected ?string        $uuid = null,
+        protected ?string        $given_user_uuid = null,
+        protected ?string        $given_server_uuid = null,
+        protected ?string        $base_postfix = null,
+        protected ?string        $public_postfix = null,
+        protected ?string        $private_postfix = null,
+        protected ?string        $home_postfix = null,
+        protected bool           $is_stub = false,
+        protected bool           $is_system = false,
+        protected bool           $send_event = true,
+        protected ?ActionDatum   $action_data = null,
+        protected ?ActionDatum   $parent_action_data = null,
+        protected ?UserNamespace $owner_namespace = null,
+        protected bool           $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
     )
     {
         if (!$this->given_server_uuid) {
             $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
         }
-        parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
-            is_system: $this->is_system, send_event: $this->send_event,
-            action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id);
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,priority: $this->priority,tags: $this->tags);
     }
 
 
@@ -118,49 +176,197 @@ class NamespaceCreate extends Act\Cmd\Ns
 
 
     public function setChildActionResult(IThingAction $child): void {
-        $b_save = false;
 
-        if ($child instanceof Act\Cmd\Us\UserRegister && $child->getCreatedUser()) { //todo use the kids to set the generated fields
-            $this->given_user_uuid = $child->getCreatedUser()->id;
-            $b_save = $this->update_data_key('given_user_id',$this->given_user_uuid);
+        if ($child instanceof Act\Cmd\Ty\TypePublish) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            } else if($child->isActionSuccess()) {
+                if ($child->getPublishingType()) {
+                    $this->changeBaseType(type: $child->getPublishingType());
+                }
+            }
         }
 
-        if ($b_save) {
-            $this->action_data->save();
+        if ($child instanceof Act\Cmd\Ty\ElementCreate) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+            if($child->isActionSuccess() && count($child->getElementsCreated()  ) === 1) {
+                if (in_array('private element', $child->getActionTags())) {
+                    $this->changePrivateElement($child->getElementsCreated()[0]);
+                }
+                else if (in_array('public element', $child->getActionTags())) {
+                    $this->changePublicElement($child->getElementsCreated()[0]);
+                }
+            }
         }
+
+        if ($child instanceof Act\Cmd\Ele\SetCreate) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+            else if($child->isActionSuccess()) {
+                $this->changeHomeSet(set: $child->getCreatedSet());
+            }
+        }
+
+        if ($child instanceof Act\Cmd\St\SetMemberAdd) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+        }
+
+
     }
 
     public function getChildrenTree(): ?Tree
     {
         if ($this->is_stub) {return null;}
 
-        $nodes = [];
-        //todo set up the kids
-        //todo how to set up caller context in the trees?
-        //make the type inherit from BasePerNamespace, unless the context is under a user namespace, then use that as the ancestor
 
+
+        $base_parent_guid = $this->action_data->data_owner_namespace?
+                        $this->action_data->data_owner_namespace->user_base_type?->ref_uuid:
+                        BasePerNamespace::getClassUuid();
+
+        $base_type = new Act\Cmd\Ds\DesignCreate(
+            type_name: $this->namespace_name.$this->getBaseTypePostfix(),access: TypeOfServerAccess::IS_PROTECTED
+        );
+
+        $base_type_parent = new Act\Cmd\Ds\DesignParentAdd(
+            given_parent_uuids: [$base_parent_guid],approval: TypeOfApproval::DESIGN_APPROVED
+        );
+
+        $base_type_publish = new Act\Cmd\Ty\TypePublish(
+             publishing_status: TypeOfApproval::PUBLISHING_APPROVED
+        );
+
+
+
+
+        $public_type = new Act\Cmd\Ds\DesignCreate(
+            type_name: $this->namespace_name.$this->getPublicTypePostfix(),access: TypeOfServerAccess::IS_PUBLIC
+        );
+
+        $public_type_parent = new Act\Cmd\Ds\DesignParentAdd(
+            given_parent_uuids: [PublicType::getClassUuid()],approval: TypeOfApproval::DESIGN_APPROVED
+        );
+
+        $pubic_type_publish = new Act\Cmd\Ty\TypePublish(
+             publishing_status: TypeOfApproval::PUBLISHING_APPROVED
+        );
+
+        $private_type = new Act\Cmd\Ds\DesignCreate(
+            type_name: $this->namespace_name.$this->getPrivateTypePostfix(),access: TypeOfServerAccess::IS_PRIVATE
+        );
+
+        $private_type_parent = new Act\Cmd\Ds\DesignParentAdd(
+            given_parent_uuids: [PrivateType::getClassUuid()],approval: TypeOfApproval::DESIGN_APPROVED
+        );
+
+        $private_type_publish = new Act\Cmd\Ty\TypePublish(
+             publishing_status: TypeOfApproval::PUBLISHING_APPROVED
+        );
+
+
+        $home_type = new Act\Cmd\Ds\DesignCreate(
+            type_name: $this->namespace_name.$this->getHomeTypePostfix(),access: TypeOfServerAccess::IS_PRIVATE
+        );
+
+        $home_type_parent = new Act\Cmd\Ds\DesignParentAdd(
+            given_parent_uuids: [HomeSet::getClassUuid()],approval: TypeOfApproval::DESIGN_APPROVED
+        );
+
+        $home_type_publish = new Act\Cmd\Ty\TypePublish(
+             publishing_status: TypeOfApproval::PUBLISHING_APPROVED
+        );
+
+
+        //all namespace elements are put in the default phase
+        $public_type_element = new Act\Cmd\Ty\ElementCreate(number_to_create: 1,tags: ['public element']);
+        $private_type_element = new Act\Cmd\Ty\ElementCreate(number_to_create: 1,priority: 1,tags: ['private element']);
+        $home_type_element = new Act\Cmd\Ty\ElementCreate(number_to_create: 1,tags: ['home set']);
+
+        $home_set = new Act\Cmd\Ele\SetCreate();
+
+        $add_to_set = new Act\Cmd\St\SetMemberAdd(priority: 1);
+
+
+        //
         /*
-          finish (db transaction for all, sync) holds flag to send events or not, and if system, holds ns object
-                                                         its callback has open api for new user
-                    create handle (p0)
-                    create private element (p1)
-                    create public element (p2)
-                    create home set (p3)
-                    create home element (p4)
-                    create namespace (p5)
-                        create type
-                            make user
+         * need type first, then equally the home set element, the private
+         * store reference for each handler made here, to do the below: to restore the action, if needed, and alter it
+
+           uses A  (the publishing object) :$base_type_publish
+           uses B (the home set element creation object) //set owner on type via the callback :$home_type_element
+           uses C (the private element creation object) //set owner on type via the callback :$private_type_element
+           uses D (the public element creation object) //set owner on type via the callback :$public_type_element
+           uses E (the home set object) : $home_set
+
+           add elements to set : $add_to_set
+               make set (E) : $home_set
+                   home-set element (B) ::$home_type_element
+                       publish :$home_type_publish
+                           add parent :$home_type_parent
+                               make type (home set type) :$home_type
+                               uses A
+
+               make private element (C) :$private_type_element
+                   publish :$private_type_publish
+                       add parent :$private_type_parent
+                           make type (private type) :$private_type
+                           publish (A) :$base_type_publish
+                                add parent :$base_type_parent
+                                    make type (namespace base type) :$base_type
+
+               make public element (D) :$public_type_element
+                   publish :$pubic_type_publish
+                       add parent :$public_type_parent
+                           make type (public type) :$public_type
+                           uses A
 
          */
 
+        if ($this->send_event) {
+            $nodes = [];
+            $nodes[] = ['id' => $base_type_publish->getActionData()->id, 'parent' => -1, 'title' => $base_type_publish->getType()->getName(),'action'=>$base_type_publish,'priority'=>0];
+            $nodes[] = ['id' => $home_type_element->getActionData()->id, 'parent' => -1, 'title' => $home_type_element->getType()->getName(),'action'=>$home_type_element,'priority'=>0];
+            $nodes[] = ['id' => $private_type_element->getActionData()->id, 'parent' => -1, 'title' => $private_type_element->getType()->getName(),'action'=>$private_type_element,'priority'=>0];
+            $nodes[] = ['id' => $public_type_element->getActionData()->id, 'parent' => -1, 'title' => $public_type_element->getType()->getName(),'action'=>$public_type_element,'priority'=>0];
+            $nodes[] = ['id' => $home_set->getActionData()->id, 'parent' => -1, 'title' => $home_set->getType()->getName(),'action'=>$home_set,'priority'=>0];
+            $nodes[] = ['id' => $add_to_set->getActionData()->id, 'parent' => -1, 'title' => $add_to_set->getType()->getName(),'action'=>$add_to_set,'priority'=>1];
 
-        if (count($nodes)) {
+
+                $nodes[] = ['id' => $home_set->getActionData()->id, 'parent' => $add_to_set->getActionData()->id, 'title' => $home_set->getType()->getName(),'action'=>$home_set,'priority'=>0,'note'=>'ps'];
+                    $nodes[] = ['id' => $home_type_element->getActionData()->id, 'parent' => $home_set->getActionData()->id, 'title' => $home_type_element->getType()->getName(),'action'=>$home_type_element,'priority'=>0,'note'=>'ps|el'];
+                        $nodes[] = ['id' => $home_type_publish->getActionData()->id, 'parent' => $home_type_element->getActionData()->id, 'title' => $home_type_publish->getType()->getName(),'action'=>$home_type_publish,'priority'=>0,'note'=>'ps|el|pub'];
+                            $nodes[] = ['id' => $home_type_parent->getActionData()->id, 'parent' => $home_type_publish->getActionData()->id, 'title' => $home_type_parent->getType()->getName(),'action'=>$home_type_parent,'priority'=>0,'note'=>'ps|el|pub|par'];
+                                $nodes[] = ['id' => $home_type->getActionData()->id, 'parent' => $home_type_parent->getActionData()->id, 'title' => $home_type->getType()->getName(),'action'=>$home_type,'priority'=>0,'note'=>'ps|el|pub|par|ty'];
+                                $nodes[] = ['id' => $base_type_publish->getActionData()->id, 'parent' => $home_type_parent->getActionData()->id, 'title' => $base_type_publish->getType()->getName(),'action'=>$base_type_publish,'priority'=>0,'note'=>'ps|el|pub|par|base_pub'];
+
+                $nodes[] = ['id' => $private_type_element->getActionData()->id, 'parent' => $add_to_set->getActionData()->id, 'title' => $private_type_element->getType()->getName(),'action'=>$private_type_element,'priority'=>1,'note'=>'pv'];
+                    $nodes[] = ['id' => $private_type_publish->getActionData()->id, 'parent' => $private_type_element->getActionData()->id, 'title' => $private_type_publish->getType()->getName(),'action'=>$private_type_publish,'priority'=>0,'note'=>'pv|pub'];
+                        $nodes[] = ['id' => $private_type_parent->getActionData()->id, 'parent' => $private_type_publish->getActionData()->id, 'title' => $private_type_parent->getType()->getName(),'action'=>$private_type_parent,'priority'=>0,'note'=>'pv|pub|par'];
+                            $nodes[] = ['id' => $private_type->getActionData()->id, 'parent' => $private_type_parent->getActionData()->id, 'title' => $private_type->getType()->getName(),'action'=>$private_type,'priority'=>0,'note'=>'pv|pub|par|ty'];
+                            $nodes[] = ['id' => $base_type_publish->getActionData()->id, 'parent' => $private_type_parent->getActionData()->id, 'title' => $base_type_publish->getType()->getName(),'action'=>$base_type_publish,'priority'=>0,'note'=>'pv|pub|par|base_pub'];
+                                $nodes[] = ['id' => $base_type_parent->getActionData()->id, 'parent' => $base_type_publish->getActionData()->id, 'title' => $base_type_parent->getType()->getName(),'action'=>$base_type_parent,'priority'=>0,'note'=>'pv|pub|par|base_pub|par'];
+                                    $nodes[] = ['id' => $base_type->getActionData()->id, 'parent' => $base_type_parent->getActionData()->id, 'title' => $base_type->getType()->getName(),'action'=>$base_type,'priority'=>0,'note'=>'pv|pub|par|base_pub|par|ty'];
+
+                $nodes[] = ['id' => $public_type_element->getActionData()->id, 'parent' => $add_to_set->getActionData()->id, 'title' => $public_type_element->getType()->getName(),'action'=>$public_type_element,'priority'=>0,'note'=>'pu'];
+                    $nodes[] = ['id' => $pubic_type_publish->getActionData()->id, 'parent' => $public_type_element->getActionData()->id, 'title' => $pubic_type_publish->getType()->getName(),'action'=>$pubic_type_publish,'priority'=>0,'note'=>'pu|pub'];
+                        $nodes[] = ['id' => $public_type_parent->getActionData()->id, 'parent' => $pubic_type_publish->getActionData()->id, 'title' => $public_type_parent->getType()->getName(),'action'=>$public_type_parent,'priority'=>0,'note'=>'pu|pub|par'];
+                            $nodes[] = ['id' => $public_type->getActionData()->id, 'parent' => $public_type_parent->getActionData()->id, 'title' => $public_type->getType()->getName(),'action'=>$public_type,'priority'=>0,'note'=>'pu|el|pub|par|ty'];
+                            $nodes[] = ['id' => $base_type_publish->getActionData()->id, 'parent' => $public_type_parent->getActionData()->id, 'title' => $base_type_publish->getType()->getName(),'action'=>$base_type_publish,'priority'=>0,'note'=>'pu|el|pub|par|base_pub'];
+
+
             return new Tree(
                 $nodes,
                 ['rootId' => -1]
             );
         }
+
         return null;
+
 
     }
 
@@ -171,12 +377,15 @@ class NamespaceCreate extends Act\Cmd\Ns
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
+        if ($this->isActionComplete()) {
+            return;
+        }
         try {
             DB::beginTransaction();
             $created_namespace = UserNamespace::createNamespace(
                 namespace_name: $this->namespace_name, owning_user_id: $this->getGivenUser()?->id,
                 server_id: $this->getGivenServer()?->id, ref: $this->uuid,
-                type_id: $this->getGeneratedType()?->id,
+                type_id: $this->getBaseType()?->id,
                 public_element_id: $this->getGeneratedPublicElement()?->id,
                 private_element_id: $this->getGeneratedPrivateElement()?->id,
                 home_set_id: $this->getGeneratedSet()?->id,
@@ -185,7 +394,6 @@ class NamespaceCreate extends Act\Cmd\Ns
 
 
             $this->action_data->data_namespace_id = $created_namespace->id;
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
             if ($this->send_event) {
                 $this->post_events_to_send = Evt\Server\NamespaceCreated::makeEventActions(source: $this, data: $this->action_data);
             }

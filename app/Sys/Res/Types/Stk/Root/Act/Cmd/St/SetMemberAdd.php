@@ -7,10 +7,12 @@ use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
 
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
+use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
 class SetMemberAdd extends Act\Cmd\St
@@ -43,6 +45,13 @@ class SetMemberAdd extends Act\Cmd\St
         return $this->action_data->data_set;
     }
 
+    protected function changeSetUsed(ElementSet $set) : void {
+        $this->action_data->data_set_id = $set->id;
+        $this->given_set_uuid = $set->ref_uuid;
+        $this->action_data->collection_data =$this->getInitialConstantData();
+        $this->action_data->save();
+    }
+
     /**
      * @return Element[]
      */
@@ -57,6 +66,36 @@ class SetMemberAdd extends Act\Cmd\St
     public function getElementsGiven(): array
     {
         return $this->action_data->getCollectionOfType(class: Element::class,partition_flag: 0);
+    }
+
+    /**
+     * @param Element[] $elements
+     */
+    protected function addElementsGiven(array $elements): void
+    {
+        $uuids = [];
+        foreach ($elements as $element) {
+            $uuids[] = $element->ref_uuid;
+        }
+        $this->given_element_uuids = array_unique( array_merge($this->given_element_uuids,$uuids) );
+        $this->saveCollectionKeys();
+        $this->action_data->collection_data =$this->getInitialConstantData();
+        $this->action_data->save();
+    }
+
+    /**
+     * @param Element[] $elements
+     */
+    protected function addElementsAllowed(array $elements): void
+    {
+        $uuids = [];
+        foreach ($elements as $element) {
+            $uuids[] = $element->ref_uuid;
+        }
+        $this->allowed_element_uuids = array_unique( array_merge($this->given_element_uuids,$uuids) );
+        $this->saveCollectionKeys();
+        $this->action_data->collection_data =$this->getInitialConstantData();
+        $this->action_data->save();
     }
 
     /**
@@ -92,19 +131,20 @@ class SetMemberAdd extends Act\Cmd\St
         protected array        $given_element_uuids = [],
         protected bool         $is_sticky = false,
         protected bool         $is_system = false,
-        protected bool         $send_event = false,
+        protected bool         $send_event = true,
         protected ?ActionDatum $action_data = null,
-        protected ?int         $action_data_parent_id = null,
-        protected ?int         $action_data_root_id = null,
-        protected bool         $b_type_init = false
+        protected ?ActionDatum        $parent_action_data = null,
+        protected ?UserNamespace      $owner_namespace = null,
+        protected bool         $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
     )
     {
         if ($this->is_system) {
             $this->allowed_element_uuids = $this->given_element_uuids;
         }
-        parent::__construct(action_data: $this->action_data, b_type_init: $this->b_type_init,
-            is_system: $this->is_system, send_event: $this->send_event,
-            action_data_parent_id: $this->action_data_parent_id, action_data_root_id: $this->action_data_root_id);
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,priority: $this->priority,tags: $this->tags);
     }
 
 
@@ -124,6 +164,9 @@ class SetMemberAdd extends Act\Cmd\St
     public function runAction(array $data = []): void
     {
         parent::runAction($data);
+        if ($this->isActionComplete()) {
+            return;
+        }
         if (!$this->getSetUsed()) {
             throw new \InvalidArgumentException("Need set before can add member");
         }
@@ -168,15 +211,13 @@ class SetMemberAdd extends Act\Cmd\St
     public function getChildrenTree(): ?Tree
     {
 
-        if ($this->send_event && !$this->is_system) {
+        if ($this->send_event) {
             $nodes = [];
             $events = Evt\Set\SetEnter::makeEventActions(source: $this, data: $this->action_data);
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
-                //todo on the children set handler, fill in the allowed
             }
 
-            //last in tree is the
             if (count($nodes)) {
                 return new Tree(
                     $nodes,
@@ -186,6 +227,40 @@ class SetMemberAdd extends Act\Cmd\St
         }
 
         return null;
+    }
+
+    public function setChildActionResult(IThingAction $child): void {
+
+
+        if ($child instanceof Evt\Set\SetEnter) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+            else if($child->isActionSuccess()) {
+                if ($this->given_set_uuid === $child->getAskedAboutSet()?->ref_uuid) {
+                    $this->addElementsAllowed(elements: $child->getAllowedElements());
+                }
+            }
+        }
+
+        if ($child instanceof Act\Cmd\Ty\ElementCreate) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+            else if($child->isActionSuccess()) {
+                $this->addElementsGiven(elements: $child->getElementsCreated());
+            }
+        }
+
+        if ($child instanceof Act\Cmd\Ele\SetCreate) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+            else if($child->isActionSuccess()) {
+                $this->changeSetUsed(set: $child->getCreatedSet());
+            }
+        }
+
     }
 
 }

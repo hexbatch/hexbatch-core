@@ -73,7 +73,6 @@ class BaseElement implements ISystemElement
                 given_type_uuid:static::getSystemTypeClass()::getDictionaryObject()->getTypeObject()->getUuid(),
                 given_namespace_uuid: $this->getISystemElement()::getSystemNamespaceClass()::getDictionaryObject()->getNamespaceObject()->getUuid(),
                 given_phase_uuid: null,
-                given_set_uuids: [],
                 number_to_create: 1,
                 preassinged_uuids: [static::getClassUuid()],
                 is_system: true, send_event: false
@@ -109,7 +108,7 @@ class BaseElement implements ISystemElement
         }
         try {
             $changer = new ElementEdit(given_element_uuid: $this->getElementObject()->getUuid(),
-                change_phase_uuid: Phase::getDefaultPhase()->ref_uuid,is_system: true);
+                change_phase_uuid: Phase::getDefaultPhase()->ref_uuid,is_system: true,send_event: false );
 
             $changer->runAction();
 

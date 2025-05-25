@@ -126,7 +126,7 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
                is_seen_in_child_elements: $this->getISystemAttribute()::isSeenChildrenTypes(),
                attribute_approval: TypeOfApproval::PUBLISHING_APPROVED,
                uuid: static::getClassUuid(),
-               is_system: $this->getISystemAttribute()::isSystem()
+               is_system: $this->getISystemAttribute()::isSystem(),send_event: false
            );
            $creator->runAction();
 
