@@ -33,10 +33,11 @@ class BaseEvent extends Event implements IEvent
 
 
     public function __construct(
-        protected bool $b_type_init = false
+        protected bool $b_type_init = false,
+        protected bool           $is_async = true
     )
     {
-        parent::__construct(b_type_init: $this->b_type_init);
+        parent::__construct(b_type_init: $this->b_type_init,is_async: $this->is_async);
         Utilities::ignoreVar(static::EVENT_NAME);
     }
 

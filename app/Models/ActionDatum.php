@@ -39,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int data_mutual_id
  * @property bool is_system_privilege
  * @property bool is_sending_events
+ * @property bool is_async
  * @property int data_priority
  * @property TypeOfThingStatus action_status
  * @property ArrayObject collection_data

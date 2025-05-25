@@ -155,7 +155,7 @@ trait ActionableBaseTrait
 
     public function isAsync(): bool
     {
-        return false;
+        return $this->action_data?->is_async??true;
     }
 
     public function getActionTags(): array { return $this->action_data->data_tags->getArrayCopy()??[];}

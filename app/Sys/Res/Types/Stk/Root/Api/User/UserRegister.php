@@ -73,6 +73,7 @@ class UserRegister extends Api\UserApi
         protected ?string $public_key = null,
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
+        protected bool $is_async = false,
         ?RegistrationParams $params = null,
         protected int            $priority = 0,
         protected array          $tags = []
@@ -83,7 +84,7 @@ class UserRegister extends Api\UserApi
             if (!$this->user_password) { $this->user_password = $params->getPassword();}
             if (!$this->public_key) { $this->public_key = $params->getPublicKey();}
         }
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,priority: $this->priority,tags: $this->tags);
+        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
     }
 
     /**

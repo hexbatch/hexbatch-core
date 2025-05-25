@@ -280,8 +280,9 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         protected bool           $b_type_init = false,
         protected bool           $is_system = false,
         protected bool           $send_event = true,
+        protected bool           $is_async = true,
         protected int            $priority = 0,
-        protected array          $tags = []
+        protected array          $tags = [],
 
     )
     {

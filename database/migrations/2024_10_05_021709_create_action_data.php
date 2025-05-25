@@ -200,6 +200,8 @@ return new class extends Migration
             $table->boolean('is_sending_events')->default(false)->nullable(false)
                 ->comment('if true then this action does not send events');
 
+            $table->boolean('is_async')->default(true)->nullable(false)->comment("if true then this is asyncronous");
+
             $table->integer('data_priority')->default(0)->nullable(false)
                 ->comment('sets the priority of the action and thus thing');
 
