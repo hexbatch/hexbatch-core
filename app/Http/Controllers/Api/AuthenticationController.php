@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\Fortify\CreateNewUser;
-use App\Api\Calls;
+
 use App\Exceptions\HexbatchAuthException;
-use App\Exceptions\HexbatchNotPossibleException;
+
 use App\Exceptions\RefCodes;
 use App\Helpers\Annotations\Access\TypeOfAccessMarker;
 use App\Helpers\Annotations\ApiAccessMarker;
@@ -15,8 +14,6 @@ use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
-use App\OpenApi\Callbacks\HexbatchCallbackResponse;
-use App\OpenApi\ErrorResponse;
 use App\OpenApi\Users\CreateToken\CreateTokenParams;
 use App\OpenApi\Users\CreateToken\CreateTokenResponse;
 use App\OpenApi\Users\CreateToken\HexbatchSecondsToLive;
@@ -33,7 +30,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\NewAccessToken;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
@@ -125,26 +121,8 @@ class AuthenticationController extends Controller
         $params->fromRequest($request);
         $api = new Api\User\UserRegister(params: $params);
         $thing = $api->createThingTree();
-        $callbacks = $thing->applied_callbacks;
-        if (count($callbacks)) {
-            foreach ($callbacks as $callback) {
-                if($thing->isSuccess()) {
-                    $test_me = MeResponse::fromCallback($callback);
-                    if ($test_me) {
-                        return response()->json($test_me,CodeOf::HTTP_CREATED);
-                    }
-                }
-                if($thing->isFailedOrError()) {
-                    $test_err = ErrorResponse::fromCallback($callback);
-                    if ($test_err) {
-                        return response()->json($test_err,$callback->callback_http_code);
-                    }
-                }
-            }
-            return  response()->json(new HexbatchCallbackCollectionResponse(given_callbacks: $callbacks),CodeOf::HTTP_OK);
-        }
-
-        return  response()->json(new ThingResponse(thing:$thing),CodeOf::HTTP_OK);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out,'thing'=>$thing],$http_code);
 
     }
 

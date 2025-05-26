@@ -17,6 +17,10 @@ use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\ICallResponse;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\Models\ThingCallback;
+use Hexbatch\Things\Models\ThingHook;
+use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Register")]
@@ -173,9 +177,20 @@ class UserRegister extends Api\UserApi
     }
 
 
-    public static function runHook(array $header, array $body): ICallResponse
+    public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
     {
-        return new MeResponse(user: $body['user']);
+        if ($thing->thing_status === TypeOfThingStatus::THING_SUCCESS) {
+            $user_data = $body['user']??null;
+            if ($user_data && intval($user_data['id']??null) ) {
+                /** @var User $user */
+                $user = User::buildUser(me_id: $user_data['id'])->first();
+                return new MeResponse(user: $user);
+            } else {
+                throw new \RuntimeException("Could not find id in the user");
+            }
+        } else {
+            return new ThingResponse(thing:$thing);
+        }
     }
 
 

@@ -431,6 +431,10 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return $this->id;
     }
 
+    public function getOwnerUuid() : string {
+        return $this->ref_uuid;
+    }
+
     public function setReadGroupBuilding($builder, string $connecting_table_name, string $connecting_owner_type_column,
                                          string $connecting_owner_id_column, TypeOfOwnerGroup $hint, ?string $alias = null
     ): void
@@ -482,6 +486,15 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         $ret = static::buildNamespace(me_id: $owner_id)->first();
         if (!$ret) {
             throw new \InvalidArgumentException("namespace not found using $owner_id");
+        }
+        return $ret;
+    }
+
+    public static function resolveOwnerFromUiid(string $uuid) : IThingOwner {
+        /** @var static|null  $ret */
+        $ret = static::buildNamespace(uuid: $uuid)->first();
+        if (!$ret) {
+            throw new \InvalidArgumentException("namespace not found using $uuid");
         }
         return $ret;
     }

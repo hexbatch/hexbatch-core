@@ -61,8 +61,9 @@ class MeResponse implements  JsonSerializable,ICallResponse
         return $this->jsonSerialize();
     }
 
-    public static function fromCallback(ThingCallback $callback) : ?MeResponse {
+
+    public function getWaitTimeoutInSeconds(): ?int
+    {
         return null;
-        //todo fill in me from callback, and also put in a callback reference here
     }
 }

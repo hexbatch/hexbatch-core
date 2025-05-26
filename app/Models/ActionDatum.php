@@ -41,6 +41,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool is_sending_events
  * @property bool is_async
  * @property int data_priority
+ * @property int action_wait_timeout_seconds
+ * @property string ref_uuid
  * @property TypeOfThingStatus action_status
  * @property ArrayObject collection_data
  * @property ArrayObject data_tags
@@ -175,6 +177,7 @@ class ActionDatum extends Model
         'is_sending_events' => 'boolean',
         'is_system_privilege' => 'boolean',
         'data_priority' => 'integer',
+        'action_wait_timeout_seconds' => 'integer',
         'collection_data' => AsArrayObject::class,
         'data_tags' => AsArrayObject::class,
         'action_status' => TypeOfThingStatus::class,
@@ -185,6 +188,7 @@ class ActionDatum extends Model
 
     public static function buildHexbatchData(
         ?int $me_id = null,
+        ?string $uuid = null,
         ?int $data_action_type_id = null,
         ?int $collection_namespace_id = null,
         bool $b_linkages = false
@@ -201,6 +205,10 @@ class ActionDatum extends Model
 
         if ($me_id) {
             $build->where('action_data.id',$me_id);
+        }
+
+        if ($uuid) {
+            $build->where('action_data.ref_uuid',$uuid);
         }
 
         if ($data_action_type_id) {

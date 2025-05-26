@@ -205,6 +205,9 @@ return new class extends Migration
             $table->integer('data_priority')->default(0)->nullable(false)
                 ->comment('sets the priority of the action and thus thing');
 
+            $table->integer('action_wait_timeout_seconds')->default(null)->nullable()
+                ->comment('when action sets the timeout its recorded here');
+
             $table->timestamps();
 
             $table->jsonb('collection_data')
@@ -214,6 +217,12 @@ return new class extends Migration
             $table->jsonb('data_tags')
                 ->nullable()->default(null)
                 ->comment("array of string tags for the action to feed the things");
+
+            $table->uuid('ref_uuid')
+                ->unique()
+                ->default(DB::raw('uuid_generate_v4()'))
+                ->nullable(false)
+                ->comment("used for display and id outside the code");
 
 
         });

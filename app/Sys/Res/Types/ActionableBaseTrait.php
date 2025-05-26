@@ -101,6 +101,10 @@ trait ActionableBaseTrait
         return $this->getActionStatus() === TypeOfThingStatus::THING_WAITING;
     }
 
+    public function getWaitTimeout() : ?int {
+        return $this->action_data?->action_wait_timeout_seconds;
+    }
+
     public function isActionSuccess(): bool
     {
         return $this->getActionStatus() === TypeOfThingStatus::THING_SUCCESS;
@@ -118,6 +122,11 @@ trait ActionableBaseTrait
     }
 
     public function getActionId(): int {return $this->action_data->id; }
+
+
+    public function getActionUuid() : string {
+        return $this->getType(b_construct_if_missing: false)->getUuid();
+    }
 
     public function getActionRef(): ?string
     {
@@ -297,10 +306,30 @@ trait ActionableBaseTrait
         return $ret;
     }
 
+    public static function resolveActionFromUiid(string $uuid) : IThingAction
+    {
+        if (array_key_exists($uuid,static::$data_cache)) {
+            return static::$data_cache[$uuid];
+        }
+
+        /** @var BaseType $system_type */
+        $system_type = SystemTypes::getTypeByUuid(static::UUID);
+        if (!$system_type) {throw new \InvalidArgumentException("cannot resolve action for command by id of $action_id");}
+
+        /** @var ActionDatum $data */
+        $data = ActionDatum::buildHexbatchData(uuid: $uuid)->first();
+
+        $ret =  new $system_type(action_data:$data);
+        static::$data_cache[$uuid] = $ret;
+        return $ret;
+    }
+
     public static function registerAction(): void
     {
         Thing::registerActionType(static::class);
         ThingHook::registerActionType(static::class);
     }
+
+
 
 }

@@ -5,17 +5,24 @@ namespace App\Sys\Res\Types\Stk\Root;
 
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
+use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Callbacks\HexbatchCallbackResponse;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
 use Hexbatch\Things\Enums\TypeOfCallback;
+use Hexbatch\Things\Enums\TypeOfCallbackStatus;
 use Hexbatch\Things\Enums\TypeOfHookMode;
 use Hexbatch\Things\Interfaces\ICallResponse;
 use Hexbatch\Things\Interfaces\IHookCode;
 use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\Models\ThingCallback;
 use Hexbatch\Things\Models\ThingHook;
+use Hexbatch\Things\OpenApi\Callbacks\CallbackSearchParams;
+use Hexbatch\Things\OpenApi\Errors\ThingErrorResponse;
 use Hexbatch\Things\OpenApi\Hooks\HookParams;
 use Hexbatch\Things\OpenApi\Hooks\HookSearchParams;
+use Hexbatch\Things\OpenApi\Things\ThingResponse;
 
 
 /**
@@ -51,9 +58,9 @@ class Api extends BaseType implements IHookCode
     }
 
 
-    public static function runHook(array $header, array $body): ICallResponse
+    public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
     {
-        throw new \LogicException("hook not implemented for api ". static::getHexbatchClassName());
+        return new ThingResponse(thing:$thing);
     }
 
     public function onNextStep(): void
@@ -88,6 +95,38 @@ class Api extends BaseType implements IHookCode
             $owner = ThisNamespace::getCreatedNamespace();
         }
         return Thing::buildFromAction(action: $this,owner: $owner,extra_tags: $tags );
+    }
+
+    public function getCallbackResponse(?int &$http_status = null)
+    : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse
+    {
+        if (!$this->getActionData()) {return null;}
+        $search_params = new CallbackSearchParams(
+            is_blocking: true,
+            is_after: true,
+            thing_action_type: static::getHexbatchClassName(),
+            thing_action_id: $this->getActionData()->id);
+
+        $search_params->setHookOwner(ThisNamespace::getCreatedNamespace());
+        /** @var ThingCallback[] $maybe_callbacks */
+        $maybe_callbacks = ThingCallback::buildCallback(params: $search_params)->get();
+        if (count($maybe_callbacks) === 0) {return null;}
+        if (count($maybe_callbacks) === 1) {
+            $http_status = $maybe_callbacks[0]->callback_http_code;
+            if ($maybe_callbacks[0]->callback_error) {
+                return new ThingErrorResponse(error: $maybe_callbacks[0]->callback_error);
+            }
+            if ($maybe_callbacks[0]->thing_callback_status === TypeOfCallbackStatus::CALLBACK_SUCCESSFUL) {
+                return $maybe_callbacks[0]->callback_incoming_data->getArrayCopy();
+            }
+            return new HexbatchCallbackResponse(callback: $maybe_callbacks[0]);
+
+        }
+        $http_status = 0;
+        foreach ($maybe_callbacks as $callback) {
+            if ($callback->callback_http_code > $http_status) { $http_status = $callback->callback_http_code;}
+        }
+        return new HexbatchCallbackCollectionResponse(given_callbacks: $maybe_callbacks);
     }
 
 }
