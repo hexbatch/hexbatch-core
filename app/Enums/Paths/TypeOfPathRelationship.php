@@ -3,9 +3,9 @@ namespace App\Enums\Paths;
 
 
 /**
- * postgres enum path_relationship_type
+ * postgres enum type_of_path_relationship
  */
-enum PathRelationshipType : string {
+enum TypeOfPathRelationship : string {
     case NO_RELATIONSHIP = 'no_relationship';
 
 
@@ -65,10 +65,10 @@ enum PathRelationshipType : string {
     case ELEMENT_OF_SET = 'element_of_set';
 
 
-    public static function tryFromInput(string|int|bool|null $test ) : PathRelationshipType {
-        $maybe  = PathRelationshipType::tryFrom($test);
+    public static function tryFromInput(string|int|bool|null $test ) : TypeOfPathRelationship {
+        $maybe  = TypeOfPathRelationship::tryFrom($test);
         if (!$maybe ) {
-            $delimited_values = implode('|',array_column(PathRelationshipType::cases(),'value'));
+            $delimited_values = implode('|',array_column(TypeOfPathRelationship::cases(),'value'));
             throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
         }
         return $maybe;

@@ -314,7 +314,7 @@ trait ActionableBaseTrait
 
         /** @var BaseType $system_type */
         $system_type = SystemTypes::getTypeByUuid(static::UUID);
-        if (!$system_type) {throw new \InvalidArgumentException("cannot resolve action for command by id of $action_id");}
+        if (!$system_type) {throw new \InvalidArgumentException("cannot resolve action for command by uuid of $uuid");}
 
         /** @var ActionDatum $data */
         $data = ActionDatum::buildHexbatchData(uuid: $uuid)->first();

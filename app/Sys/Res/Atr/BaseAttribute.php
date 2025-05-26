@@ -165,6 +165,9 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
         $this->getAttributeObject()->save();
     }
 
+    public function onNextStepB(): void {}
+    public function onNextStepC(): void {}
+
 
     public static function isFinal(): bool
     {

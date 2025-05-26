@@ -139,6 +139,10 @@ class BaseSet implements ISystemSet
         return $this;
     }
 
+    public function onNextStepB(): void {}
+
+    public function onNextStepC(): void {}
+
     public function onNextStep(): void
     {
         if (!$this->b_did_create_model) {return;}

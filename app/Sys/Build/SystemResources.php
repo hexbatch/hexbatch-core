@@ -52,7 +52,12 @@ class SystemResources
         $ret['users'] =SystemUsers::generateObjects();
         $ret['namespaces'] =SystemNamespaces::generateObjects();
         $ret['types'] =SystemTypes::generateObjects();
+        SystemTypes::doNextStep(); //type parents
+
         $ret['attributes'] =SystemAttributes::generateObjects();
+
+        SystemTypes::doNextStepB(); //publish
+
         $ret['elements'] =SystemElements::generateObjects();
         $ret['sets'] =SystemSets::generateObjects();
         $ret['servers'] =SystemServers::generateObjects();
@@ -67,13 +72,15 @@ class SystemResources
         //then call the second step to initialize the rest, if model not created in last step then nothing done in that class
         SystemUsers::doNextStep();
         SystemNamespaces::doNextStep();
-        SystemTypes::doNextStep();
+
         SystemAttributes::doNextStep(); //do after the types
 
         SystemElements::doNextStep();
         SystemSets::doNextStep();
 
-        SystemServers::doNextStep(); //do last
+        SystemServers::doNextStep();
+
+        SystemTypes::doNextStepC(); //setup element handlers
 
     }
 

@@ -63,7 +63,7 @@ class DesignParentAdd extends Act\Cmd\Ds
         return $this->action_data->getCollectionOfType(ElementType::class);
     }
 
-    const array ACTIVE_DATA_KEYS = ['given_type_uuid'];
+    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_parent_uuids'];
 
     const array ACTIVE_COLLECTION_KEYS = ['given_parent_uuids'=>ElementType::class];
     public function __construct(
@@ -126,7 +126,9 @@ class DesignParentAdd extends Act\Cmd\Ds
                             throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
                         }
                     }
-                    ElementTypeParent::addParent(parent: $parent, child: $this->getDesignType(), init_approval: $this->approval);
+                    $b_check_parent = true;
+                    if ($this->is_system && !$this->send_event) { $b_check_parent = false;}
+                    ElementTypeParent::addParent(parent: $parent, child: $this->getDesignType(), init_approval: $this->approval,check_parent_published: $b_check_parent);
                 }
             }
 

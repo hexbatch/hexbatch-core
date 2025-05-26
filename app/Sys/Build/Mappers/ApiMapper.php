@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sys\Build;
+namespace App\Sys\Build\Mappers;
 
 use App\Sys\Collections\SystemBase;
 use App\Sys\Res\Types\Stk\Root\Api;

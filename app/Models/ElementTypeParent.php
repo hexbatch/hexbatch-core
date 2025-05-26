@@ -10,6 +10,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\DB;
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * @property ElementType parent_type
  *
  *
  */
@@ -62,6 +65,9 @@ class ElementTypeParent extends Model
         'parent_type_approval' => TypeOfApproval::class
     ];
 
+    public function parent_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'parent_type_id','id');
+    }
 
     public function getName() :string {
         return $this->ref_uuid;
@@ -81,7 +87,10 @@ class ElementTypeParent extends Model
     /**
      * @throws \Exception
      */
-    public static function addParent(ElementType $parent, ElementType $child,TypeOfApproval $init_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL) :ElementTypeParent {
+    public static function addParent(ElementType $parent, ElementType $child,TypeOfApproval $init_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL
+        ,bool $check_parent_published = true)
+    :ElementTypeParent
+    {
 
 
         //parent is not checked for validity until the publish event
@@ -93,10 +102,12 @@ class ElementTypeParent extends Model
                     RefCodes::TYPE_CANNOT_INHERIT);
             }
 
-            if ( $parent->lifecycle !== TypeOfLifecycle::PUBLISHED) {
-                throw new HexbatchNotPossibleException(__('msg.parent_type_must_be_published'),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::TYPE_CANNOT_INHERIT);
+            if ($check_parent_published) {
+                if ($parent->lifecycle !== TypeOfLifecycle::PUBLISHED) {
+                    throw new HexbatchNotPossibleException(__('msg.parent_type_must_be_published'),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::TYPE_CANNOT_INHERIT);
+                }
             }
 
             $par = new ElementTypeParent();
@@ -140,7 +151,7 @@ class ElementTypeParent extends Model
         /**
          * @var Builder $build
          */
-        $build = Element::select('element_type_parents.*')
+        $build = ElementTypeParent::select('element_type_parents.*')
             ->selectRaw(" extract(epoch from  element_type_parents.created_at) as created_at_ts")
             ->selectRaw("extract(epoch from  element_type_parents.updated_at) as updated_at_ts")
         ;

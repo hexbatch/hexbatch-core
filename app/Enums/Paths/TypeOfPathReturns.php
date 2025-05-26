@@ -1,9 +1,9 @@
 <?php
 namespace App\Enums\Paths;
 /**
- * postgres enum path_returns_type
+ * postgres enum type_of_path_returns
  */
-enum PathReturnsType : string {
+enum TypeOfPathReturns : string {
 
   case EXISTS = 'exists';
   case TYPE = 'type';
@@ -22,10 +22,10 @@ enum PathReturnsType : string {
   case COUNT = 'count' ;
 
 
-    public static function tryFromInput(string|int|bool|null $test ) : PathReturnsType {
-        $maybe  = PathReturnsType::tryFrom($test);
+    public static function tryFromInput(string|int|bool|null $test ) : TypeOfPathReturns {
+        $maybe  = TypeOfPathReturns::tryFrom($test);
         if (!$maybe ) {
-            $delimited_values = implode('|',array_column(PathReturnsType::cases(),'value'));
+            $delimited_values = implode('|',array_column(TypeOfPathReturns::cases(),'value'));
             throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
         }
         return $maybe;

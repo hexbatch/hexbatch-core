@@ -100,8 +100,7 @@ class AuthenticationController extends Controller
         summary: 'Creates a namespace along with that new user',
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: RegistrationParams::class)),
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Register with just a username and a password',
-                                content: new JsonContent(ref: MeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Registered', content: new JsonContent(ref: MeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 

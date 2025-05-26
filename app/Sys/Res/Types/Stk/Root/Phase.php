@@ -62,9 +62,9 @@ class Phase extends BaseType
 
     }
 
-    public function onNextStep(): void
+    public function onNextStepB(): void
     {
-        parent::onNextStep();
+        parent::onNextStepB();
         if (!$this->b_did_create_model) {return;}
         if (!static::EDITED_BY_PHASE_SYSTEM_CLASS) {return;}
 

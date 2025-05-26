@@ -9,5 +9,7 @@ interface ISystemResource
     public static function getFullClassName() :string;
     public function onCall(): ISystemResource;
     public function onNextStep(): void;
+    public function onNextStepB(): void;
+    public function onNextStepC(): void;
     public function didCreateModel(): bool;
 }

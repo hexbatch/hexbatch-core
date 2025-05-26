@@ -95,4 +95,19 @@ class SystemTypes extends SystemBase
 
     }
 
+    public static function doNextStep() {
+        parent::doNextStep();
+    }
+    public static function doNextStepB() {
+        foreach (static::$resource_array as $res) {
+            $res->onNextStepB();
+        }
+    }
+
+    public static function doNextStepC() {
+        foreach (static::$resource_array as $res) {
+            $res->onNextStepC();
+        }
+    }
+
 }

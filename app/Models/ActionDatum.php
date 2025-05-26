@@ -256,7 +256,7 @@ class ActionDatum extends Model
             if(in_array($obj->id,$idList)) {
                 return false;
             }
-            $idList []= $obj->getId();
+            $idList []= $obj->id;
             return true;
         });
 

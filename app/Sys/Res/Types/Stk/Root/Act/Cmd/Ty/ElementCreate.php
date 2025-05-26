@@ -155,9 +155,10 @@ class ElementCreate extends Act\Cmd\Ele
             throw new \InvalidArgumentException("Need template type before can make element");
         }
 
-        if (!$this->getTemplateType()->isPublished()) {
-            throw new \InvalidArgumentException("Template type needs to be published");
+        if (!$this->getTemplateType()->isPublished() ) {
+            throw new \InvalidArgumentException(sprintf("Template type %s needs to be published before making element",$this->getTemplateType()->getName() ));
         }
+
         if ($this->number_to_create <= 0) {return;}
         $post_actions = [];
         $post_events = [];

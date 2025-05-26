@@ -78,41 +78,14 @@ abstract class SystemBase
     }
 
 
+    public static function doNextStepC() {
+
+    }
+    public static function doNextStepB() {
+
+    }
     public static function doNextStep() {
 
-
-        //sort into path order
-        usort(static::$resource_array,function (ISystemResource $a, ISystemResource $b) {
-            $a_parts = explode('\\',$a::getFullClassName());
-            $b_parts = explode('\\',$b::getFullClassName());
-
-            $a_stub = '';
-            $b_stub = '';
-            for($i = 0; $i < max(count($b_parts),count($b_parts)); $i++) {
-                $a_name = $a_parts[$i]??null;
-                $b_name = $b_parts[$i]??null;
-                if ($a_name) {$a_stub .= '\\'.$a_name;}
-                if ($b_name) {$b_stub .= '\\'.$b_name;}
-                if ($a_stub === $b_stub) {continue;}
-
-                if ($a_name && $b_name) {
-                    $look_a_name = $a_parts[$i+1]??null;
-                    $look_b_name = $b_parts[$i+1]??null;
-                    if (($look_b_name && $look_a_name) || (!$look_b_name && !$look_a_name)) {
-                        return $a_name <=> $b_name;
-                    }
-                    if (!$look_a_name) { return -1;}
-                    if (!$look_b_name) { return 1;}
-
-                }
-                else if (!$a_name) {return -1;}
-                else if (!$b_name) {return 1;}
-                else {
-                    return 0;
-                }
-            }
-            return 0;
-        });
         foreach (static::$resource_array as $res) {
             $res->onNextStep();
         }

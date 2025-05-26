@@ -1,23 +1,26 @@
 <?php
+namespace App\Sys\Build\Mappers;
 
-namespace App\Sys\Build;
 
 
-use App\Sys\Res\Types\Stk\Root\Act\NoEventsTriggered;
 use App\Sys\Res\Types\Stk\Root\Act\SystemPrivilege;
 
-class ApiMapEntry extends ActionMap
+class ActionMapEntry extends ActionMap
 {
-    public function setFromClassName(string $full_class_name) {
-        if (is_subclass_of($full_class_name, 'App\Sys\Res\Types\Stk\Root\Api') ) {
+
+
+    public function setFromClassName(string $full_class_name)
+    {
+        if (is_subclass_of($full_class_name, 'App\Sys\Res\Types\Stk\Root\Act\Cmd')) {
 
             $this->full_class_name = $full_class_name;
             $this->type_uuid = $full_class_name::getClassUuid();
             $this->internal_name = $full_class_name::getHexbatchClassName();
             $this->is_system = $full_class_name::hasInAncestors(SystemPrivilege::class);
-            $this->has_events = !$full_class_name::hasInAncestors(NoEventsTriggered::class);
+            $this->has_events = (bool)count($full_class_name::getRelatedEvents());
         }
 
     }
 
 }
+

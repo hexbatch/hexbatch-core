@@ -5,7 +5,6 @@ namespace App\Sys\Res\Types;
 
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfApproval;
-use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchInitException;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
@@ -231,8 +230,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         return $this;
     }
 
-    public function onNextStep(): void
-    {
+    public function onNextStepC(): void {
         if (!$this->b_did_create_model) {return;}
         try
         {
@@ -242,28 +240,50 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
                 $this->getTypeObject()->imported_from_server_id = $this->getTypeServer()->getServerObject()?->id;
                 $this->getTypeObject()->save();
             }
+            DB::commit();
 
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
+        }
+    }
 
-            $parent_uuids = [];
-            foreach ($this->getISystemType()::getParentTypes() as $parent_system_object) {
-                $parent_system_object->getTypeObject()->refresh();
-                if($parent_system_object->getTypeObject()->lifecycle !== TypeOfLifecycle::PUBLISHED) {
-                    throw new \LogicException("the parent ".$parent_system_object->getTypeObject()->getName(). " is not published yet when doing the child ".static::getHexbatchClassName());
-                }
-                $parent_uuids[] = $parent_system_object->getTypeObject()->getUuid();
-            }
-            if (count($parent_uuids)) {
-                $parenter = new DesignParentAdd(given_type_uuid: $this->getTypeObject()->getUuid(),
-                    given_parent_uuids: $parent_uuids, approval: TypeOfApproval::PUBLISHING_APPROVED, is_system: true,
-                    send_event: false);
-                $parenter->runAction();
-            }
+    public function onNextStepB(): void {
 
-
+        if (!$this->b_did_create_model) {return;}
+        try
+        {
+            DB::beginTransaction();
 
             $publish = new TypePublish(given_type_uuid: $this->getTypeObject()->getUuid(),
                 is_system: true,send_event: false,publishing_status: TypeOfApproval::PUBLISHING_APPROVED);
             $publish->runAction();
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new HexbatchInitException(message:$e->getMessage() .': code '.$e->getCode(),prev: $e);
+        }
+
+    }
+    public function onNextStep(): void
+    {
+        if (!$this->b_did_create_model) {return;}
+        try
+        {
+            DB::beginTransaction();
+
+
+            $parent_uuids = [];
+            foreach ($this->getISystemType()::getParentTypes() as $parent_system_object) {
+                $parent_uuids[] = $parent_system_object->getTypeObject()->getUuid();
+            }
+            if (count($parent_uuids)) {
+                $parenter = new DesignParentAdd(given_type_uuid: $this->getTypeObject()->getUuid(), given_parent_uuids: $parent_uuids,
+                    approval: TypeOfApproval::PUBLISHING_APPROVED, is_system: true, send_event: false,
+                    );
+                $parenter->runAction();
+            }
             DB::commit();
 
         } catch (\Exception $e) {

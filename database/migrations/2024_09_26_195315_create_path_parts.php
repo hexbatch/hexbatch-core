@@ -199,7 +199,7 @@ return new class extends Migration
 
 
         //relationship with the path parent
-        DB::statement("CREATE TYPE path_relationship_type AS ENUM (
+        DB::statement("CREATE TYPE type_of_path_relationship AS ENUM (
             'no_relationship',
 
             'rule_event',
@@ -255,14 +255,14 @@ return new class extends Migration
             'up_set'
             );");
 
-        DB::statement("ALTER TABLE path_parts Add COLUMN path_relationship path_relationship_type NOT NULL default 'no_relationship';");
+        DB::statement("ALTER TABLE path_parts Add COLUMN path_relationship type_of_path_relationship NOT NULL default 'no_relationship';");
 
 
 
         // and a second postgres type and column for if this applies to the age of the element, how long been in the set, the age of the type, or when the value in the set was changed
         // can use a second node for same stuff to do multiple matching for ages (example match age when element joined set and when value changed there)
 
-        DB::statement("CREATE TYPE time_comparison_type AS ENUM (
+        DB::statement("CREATE TYPE type_of_time_comparison AS ENUM (
             'no_time_comparison',
             'age_element',
             'joined_set_at',
@@ -270,10 +270,10 @@ return new class extends Migration
             'element_value_changed' -- dynamic or const
             );");
 
-        DB::statement("ALTER TABLE path_parts Add COLUMN time_comparison time_comparison_type NOT NULL default 'no_time_comparison';");
+        DB::statement("ALTER TABLE path_parts Add COLUMN time_comparison type_of_time_comparison NOT NULL default 'no_time_comparison';");
 
 
-        DB::statement("CREATE TYPE path_returns_type AS ENUM (
+        DB::statement("CREATE TYPE type_of_path_returns AS ENUM (
             'exists',
             'type',
             'values',
@@ -291,7 +291,7 @@ return new class extends Migration
             );");
         //see  https://dba.stackexchange.com/a/214504 for the scalar stuff
 
-        DB::statement("ALTER TABLE path_parts Add COLUMN path_returns path_returns_type NOT NULL default 'exists';");
+        DB::statement("ALTER TABLE path_parts Add COLUMN path_returns type_of_path_returns NOT NULL default 'exists';");
 
         DB::statement("ALTER TABLE path_parts Add COLUMN path_child_logic type_of_logic NOT NULL default 'and';");
         DB::statement("ALTER TABLE path_parts Add COLUMN path_logic type_of_logic NOT NULL default 'and';");
@@ -342,9 +342,9 @@ return new class extends Migration
     {
         Schema::dropIfExists('path_parts');
 
-        DB::statement("DROP TYPE path_relationship_type;");
-        DB::statement("DROP TYPE time_comparison_type;");
-        DB::statement("DROP TYPE path_returns_type;");
+        DB::statement("DROP TYPE type_of_path_relationship;");
+        DB::statement("DROP TYPE type_of_time_comparison;");
+        DB::statement("DROP TYPE type_of_path_returns;");
     }
 
 };

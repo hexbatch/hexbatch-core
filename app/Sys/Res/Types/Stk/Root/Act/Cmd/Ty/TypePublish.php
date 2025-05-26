@@ -91,30 +91,43 @@ class TypePublish extends Act\Cmd\Ty
         if ($this->isActionComplete()) {
             return;
         }
-        if (!$this->getPublishingType()) {
+        $target = $this->getPublishingType();
+
+        if (!$target) {
             throw new \InvalidArgumentException("Need type before can publish");
         }
-        if ($this->getPublishingType()->lifecycle === TypeOfLifecycle::PUBLISHED) {
+        $target->refresh();
+
+        if ($target->lifecycle === TypeOfLifecycle::PUBLISHED) {
             throw new \RuntimeException("Type already published");
         }
 
-        if ($this->getPublishingType()->canBePublished()) {
-            throw new \RuntimeException(" Cannot be published");
+        if ($target->canBePublished()) {
+            $parent_stuff_array = [];
+            /** @var ElementTypeParent $parent */
+            foreach ($target->type_parents as $parent) {
+                $parent_stuff_array[] = sprintf(" %s -> %s ",$parent->parent_type->getName(),$parent->parent_type_approval->value);
+            }
+            throw new \RuntimeException(sprintf(" %s type cannot be published, its lifecycle is %s, its parents are %s. Parent count of %s",
+                $target->getName(),$target->lifecycle->value,implode('|',$parent_stuff_array) ,
+                count($target->type_parents)
+            ));
         }
         try {
 
             DB::beginTransaction();
-            if (!$this->is_system && ($this->publishing_status !== TypeOfApproval::APPROVAL_NOT_SET)) {
+            if (!$this->send_event &&  ($this->publishing_status !== TypeOfApproval::APPROVAL_NOT_SET)) {
                 //manually make this set for all parents , else they are set in the child answers
-                foreach ($this->getPublishingType()->type_parents as $parent) {
-                    ElementTypeParent::updateParentStatus(parent: $parent, child: $this->getPublishingType(), approval: $this->publishing_status);
+                foreach ($target->type_parents as $parent) {
+                    /** @uses ElementTypeParent::parent_type() */
+                    ElementTypeParent::updateParentStatus(parent: $parent->parent_type, child: $target, approval: $this->publishing_status);
                 }
             }
 
 
             //check to see if all parents have approved this design, if so then success, else fail
             /** @var ElementTypeParent[] $check_parents */
-            $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $this->getPublishingType()->id)->get();
+            $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $target->id)->get();
             $my_status = TypeOfThingStatus::THING_SUCCESS;
             foreach ($check_parents as $checker) {
                 if ($checker->parent_type_approval === TypeOfApproval::PUBLISHING_DENIED) {
@@ -122,6 +135,8 @@ class TypePublish extends Act\Cmd\Ty
                     break;
                 }
             }
+            $target->lifecycle = TypeOfLifecycle::PUBLISHED;
+            $target->save();
             $this->setActionStatus($my_status);
             DB::commit();
         } catch (\Exception $e) {
@@ -154,7 +169,7 @@ class TypePublish extends Act\Cmd\Ty
     protected function restoreData(array $data = []) {
         parent::restoreData($data);
         if ($this->action_data) {
-            $approval_string = $this->action_data->collection_data->offsetGet('access');
+            $approval_string = $this->action_data->collection_data->offsetGet('publishing_status');
             $this->publishing_status = TypeOfApproval::tryFromInput($approval_string);
         }
     }

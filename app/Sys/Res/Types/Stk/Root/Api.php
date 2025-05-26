@@ -40,6 +40,22 @@ class Api extends BaseType implements IHookCode
         Root::class
     ];
 
+    const FAMILY_CLASSES = [
+        Api::class,
+        Api\DesignApi::class,
+        Api\ElementApi::class,
+        Api\ElsewhereApi::class,
+        Api\NamespaceApi::class,
+        Api\OperationApi::class,
+        Api\PathApi::class,
+        Api\PhaseApi::class,
+        Api\ServerApi::class,
+        Api\SetApi::class,
+        Api\TypeApi::class,
+        Api\UserApi::class,
+        Api\WaitingApi::class
+    ];
+
     public function __construct(
         protected ?ActionDatum   $action_data = null,
         protected ?UserNamespace $owner_namespace = null,
@@ -63,10 +79,12 @@ class Api extends BaseType implements IHookCode
         return new ThingResponse(thing:$thing);
     }
 
-    public function onNextStep(): void
+    public function onNextStepB(): void
     {
-        parent::onNextStep();
-        $search_params = new HookSearchParams(action_type: static::getHexbatchClassName(), is_blocking: true, is_after: true);
+        parent::onNextStepB();
+        if (in_array(static::class,static::FAMILY_CLASSES)) {return;}
+
+        $search_params = new HookSearchParams(action_type: static::class, is_blocking: true, is_after: true);
         $maybe_hook = ThingHook::buildHook(params: $search_params)->first();
         if (!$maybe_hook) {
             $params = new HookParams(

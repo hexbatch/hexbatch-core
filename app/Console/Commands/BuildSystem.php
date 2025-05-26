@@ -2,16 +2,15 @@
 
 namespace App\Console\Commands;
 
-use App\Sys\Build\ActionMapper;
-use App\Sys\Build\ApiMapper;
-use App\Sys\Build\AttributeMapper;
 use App\Sys\Build\LoadStatic;
+use App\Sys\Build\Mappers\ActionMapper;
+use App\Sys\Build\Mappers\ApiMapper;
+use App\Sys\Build\Mappers\AttributeMapper;
 use App\Sys\Build\SystemResources;
 use App\Sys\Res\Atr\ISystemAttribute;
 use App\Sys\Res\Sets\ISystemSet;
 use App\Sys\Res\Types\ISystemType;
 use App\Sys\Res\Types\Stk\Root\Evt;
-
 use Illuminate\Console\Command;
 
 class BuildSystem extends Command

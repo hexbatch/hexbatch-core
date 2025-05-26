@@ -7,6 +7,7 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 
 
@@ -216,11 +217,22 @@ class ActionCollection extends Model
 
         $table_name = app($class)->getTable();
 
-        $what = DB::table("$table_name as my_tab")
+        $what_laravel = DB::table("$table_name as my_tab")
             ->selectRaw('my_tab.id, my_tab.ref_uuid, act.id as collect_id')
             ->whereIn('my_tab.ref_uuid',$uuids)
-            ->leftJoin("action_collections as act","act.$column","my_tab.id")
-            ->get()->toArray();
+            ->leftJoin("action_collections as act",
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($parent,$column) {
+                    $join
+                        ->on("act.$column",'=',"my_tab.id")
+                        ->where('act.parent_action_data_id',$parent->id);
+                }
+            )
+            ;
+
+        $what = $what_laravel->get()->toArray();
 
         $ref = [];
         $todo = [];

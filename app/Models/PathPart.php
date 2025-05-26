@@ -4,9 +4,9 @@ namespace App\Models;
 
 
 
-use App\Enums\Paths\PathRelationshipType;
-use App\Enums\Paths\PathReturnsType;
-use App\Enums\Paths\TimeComparisonType;
+use App\Enums\Paths\TypeOfPathRelationship;
+use App\Enums\Paths\TypeOfPathReturns;
+use App\Enums\Paths\TypeOfTimeComparison;
 
 use App\Enums\Rules\TypeOfLogic;
 
@@ -67,9 +67,9 @@ use Illuminate\Validation\ValidationException;
  *
  * @property TypeOfLogic path_child_logic
  * @property TypeOfLogic path_logic
- * @property PathRelationshipType path_relationship
- * @property TimeComparisonType time_comparison
- * @property PathReturnsType path_returns
+ * @property TypeOfPathRelationship path_relationship
+ * @property TypeOfTimeComparison time_comparison
+ * @property TypeOfPathReturns path_returns
  * @property TypeOfLifecycle path_lifecycle
  *
  * @property string created_at
@@ -106,9 +106,9 @@ class PathPart extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'path_relationship' => PathRelationshipType::class,
-        'time_comparison' => TimeComparisonType::class,
-        'path_returns' => PathReturnsType::class,
+        'path_relationship' => TypeOfPathRelationship::class,
+        'time_comparison' => TypeOfTimeComparison::class,
+        'path_returns' => TypeOfPathReturns::class,
         'path_child_logic' => TypeOfLogic::class,
         'path_logic' => TypeOfLogic::class,
         'path_lifecycle' => TypeOfLifecycle::class,
@@ -526,15 +526,15 @@ class PathPart extends Model
 
 
                 if ($collect->has('path_relationship')) {
-                    $this->path_relationship = PathRelationshipType::tryFromInput($collect->get('path_relationship'));
+                    $this->path_relationship = TypeOfPathRelationship::tryFromInput($collect->get('path_relationship'));
                 }
 
                 if ($collect->has('time_comparison')) {
-                    $this->time_comparison = TimeComparisonType::tryFromInput($collect->get('time_comparison'));
+                    $this->time_comparison = TypeOfTimeComparison::tryFromInput($collect->get('time_comparison'));
                 }
 
                 if ($collect->has('path_returns')) {
-                    $this->path_returns = PathReturnsType::tryFromInput($collect->get('path_returns'));
+                    $this->path_returns = TypeOfPathReturns::tryFromInput($collect->get('path_returns'));
                 }
 
                 if ($collect->has('path_child_logic')) {
