@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root;
 
 
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
 use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
@@ -67,6 +68,9 @@ class Api extends BaseType implements IHookCode
         protected array          $tags = []
     )
     {
+        if (!$this->owner_namespace && !($this->action_data?->data_namespace_owner_id)) {
+            $this->owner_namespace = Utilities::getCurrentNamespace();
+        }
         // always the top of the food chain, so never has a parent data structure
         parent::__construct(action_data: $this->action_data, owner_namespace: $this->owner_namespace,
             b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);

@@ -54,9 +54,6 @@ class BaseAction extends BaseType implements IAction
         return static::EVENT_CLASSES;
     }
 
-    public static function getActionTypeStatic(): string
-    {
-        return static::ACTION_NAME->value;
-    }
+
 }
 

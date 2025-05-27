@@ -118,7 +118,7 @@ class AuthenticationController extends Controller
 
         $params = new RegistrationParams();
         $params->fromRequest($request);
-        $api = new Api\User\UserRegister(params: $params);
+        $api = new Api\User\UserRegister(is_async: false, params: $params);
         $thing = $api->createThingTree();
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out,'thing'=>$thing],$http_code);

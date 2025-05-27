@@ -60,6 +60,7 @@ trait ActionableBaseTrait
 
         $this->action_data = new ActionDatum();
         $this->action_data->data_priority = $this->priority;
+        $this->action_data->is_async = $this->is_async;
         $this->action_data->data_tags = $this->tags;
         $this->action_data->is_system_privilege = $this->is_system;
         $this->action_data->is_sending_events = $this->send_event;
@@ -88,7 +89,7 @@ trait ActionableBaseTrait
 
 
     public function getActionOwner(): ?IThingOwner {
-        return $this->owner_namespace;
+        return $this->owner_namespace?:$this->action_data->data_namespace_owner;
     }
 
     public function isActionComplete(): bool
@@ -145,7 +146,7 @@ trait ActionableBaseTrait
 
     public static function getActionTypeStatic(): string
     {
-        return static::TYPE_NAME;
+        return static::class;
     }
 
     public function getChildrenTree(): ?Tree {return null;}

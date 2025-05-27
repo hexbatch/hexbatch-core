@@ -42,7 +42,6 @@ class SystemTypes extends SystemBase
         foreach (static::$class_name_array as $sys_type_class) {
             foreach ($sys_type_class::getAttributeClasses() as $att) {
                 static::$attribute_to_type_uuid[$att::getClassUuid()] = $sys_type_class;
-                $sys_type_class::registerAction();
             }
         }
     }
