@@ -61,7 +61,7 @@ class TypePublish extends Act\Cmd\Ty
         protected ?string              $given_type_uuid =null,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -75,11 +75,6 @@ class TypePublish extends Act\Cmd\Ty
             b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
     }
 
-
-    public function getActionPriority(): int
-    {
-        return 0;
-    }
 
 
     /**
@@ -138,6 +133,7 @@ class TypePublish extends Act\Cmd\Ty
             $target->lifecycle = TypeOfLifecycle::PUBLISHED;
             $target->save();
             $this->setActionStatus($my_status);
+            $this->wakeLinkedThings();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -182,7 +178,7 @@ class TypePublish extends Act\Cmd\Ty
             $events = [];
             $nodes = [];
             foreach ($this->getPublishingType()->type_parents as $parent) {
-                $events[] =  Evt\Server\TypePublished::makeEventActions(source: $this,data: $this->action_data,type_context: $parent);
+                $events =  Evt\Server\TypePublished::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
             }
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];

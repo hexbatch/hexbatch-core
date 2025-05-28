@@ -85,7 +85,7 @@ Route::prefix('v1')->group(function () {
 
 
 
-        Route::group(['prefix' => '{user_namespace}'], function () {
+        Route::middleware(Middleware\ValidateNamespaceMember::class)->prefix('{user_namespace}')->group( function () {
 
             Route::prefix('server')->group(function () {
                 Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
@@ -157,7 +157,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('/create', [Api\NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
                 });
 
-                Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                Route::middleware([])->group(function () {
                     Route::get('list', [Api\NamespaceController::class, 'list_namespaces'])->name('core.namespaces.list_namespaces');
 
                 });
@@ -194,7 +194,7 @@ Route::prefix('v1')->group(function () {
 
                     });
 
-                    Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                    Route::middleware([])->group(function () {
                         Route::get('show', [Api\NamespaceController::class, 'show_namespace'])->name('core.namespaces.show');
                         Route::get('list_admins', [Api\NamespaceController::class, 'list_admins'])->name('core.namespaces.list_admins');
                         Route::get('/list_members', [Api\NamespaceController::class, 'list_members'])->name('core.namespaces.list_members');//will was here
@@ -210,7 +210,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('create', [Api\PathController::class, 'create_path'])->name('core.paths.create');
                 });
 
-                Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                Route::middleware([])->group(function () {
                     Route::get('list', [Api\PathController::class, 'list_paths'])->name('core.paths.list');
                 });
 
@@ -238,7 +238,7 @@ Route::prefix('v1')->group(function () {
 
                     });
 
-                    Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                    Route::middleware([])->group(function () {
                         Route::get('show', [Api\PathController::class, 'show_path'])->name('core.paths.show');
                         Route::get('copy', [Api\PathController::class, 'copy_path'])->name('core.paths.copy');
 
@@ -267,7 +267,7 @@ Route::prefix('v1')->group(function () {
                             Route::delete('unlink', [Api\LinkController::class, 'unlink_link'])->name('core.links.unlink');
                         });
 
-                        Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                        Route::middleware([])->group(function () {
                             Route::get('show', [Api\LinkController::class, 'show_link'])->name('core.links.show');
                         });
                     });
@@ -292,7 +292,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('create_master', [Api\WaitController::class, 'create_master'])->name('core.waits.create_master');
                 });
 
-                Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                Route::middleware([])->group(function () {
                     Route::get('list_masters', [Api\WaitController::class, 'list_masters'])->name('core.waits.list_masters');
                     Route::get('list_semaphores', [Api\WaitController::class, 'list_semaphores'])->name('core.waits.list_semaphores');
                     Route::get('list_waits', [Api\WaitController::class, 'list_waits'])->name('core.waits.list_waits');
@@ -307,7 +307,7 @@ Route::prefix('v1')->group(function () {
                         Route::post('ready_semaphore', [Api\WaitController::class, 'ready_semaphore'])->name('core.waits.ready_semaphore');
                     });
 
-                    Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                    Route::middleware([])->group(function () {
                         Route::post('run_master', [Api\WaitController::class, 'run_master'])->name('core.waits.run_master');
                         Route::get('show_master', [Api\WaitController::class, 'show_master'])->name('core.waits.show_master');
                         Route::get('show_master_run', [Api\WaitController::class, 'show_master_run'])->name('core.waits.show_master_run');
@@ -327,7 +327,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('elements')->group(function () {
 
                 Route::prefix('phase/{working_phase}')->group(function () {
-                    Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                    Route::middleware([])->group(function () {
                         Route::get('list', [Api\ElementController::class, 'list_elements'])->name('core.elements.list_elements');
                     });
 
@@ -359,7 +359,7 @@ Route::prefix('v1')->group(function () {
 
                         });
 
-                        Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                        Route::middleware([])->group(function () {
                             Route::patch('attribute_off', [Api\ElementController::class, 'attribute_off'])->name('core.elements.attribute_off');
                             Route::patch('attribute_on', [Api\ElementController::class, 'attribute_on'])->name('core.elements.attribute_on');
                             Route::patch('type_off', [Api\ElementController::class, 'type_off'])->name('core.elements.type_off');
@@ -401,7 +401,7 @@ Route::prefix('v1')->group(function () {
                         });
 
 
-                        Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                        Route::middleware([])->group(function () {
                             Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
                             Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
                             Route::delete('empty_set', [Api\SetController::class, 'empty_set'])->name('core.sets.empty_set');
@@ -424,7 +424,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('types')->group(function () {
 
 
-                Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                Route::middleware([])->group(function () {
                     Route::get('list_published', [Api\TypeController::class, 'list_published'])->name('core.types.list_published');
                     Route::get('list_suspended', [Api\TypeController::class, 'list_suspended'])->name('core.types.list_suspended');
                 });
@@ -459,7 +459,7 @@ Route::prefix('v1')->group(function () {
 
                     });
 
-                    Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
+                    Route::middleware([])->group(function () {
                         Route::get('show', [Api\TypeController::class, 'show_type'])->name('core.types.show');
                         Route::get('list_live', [Api\TypeController::class, 'list_live'])->name('core.types.list_live');
                         Route::get('list_elements', [Api\TypeController::class, 'list_elements'])->name('core.types.list_elements');
@@ -484,7 +484,7 @@ Route::prefix('v1')->group(function () {
                     Route::post('create', [Api\DesignController::class, 'create_design'])->name('core.design.create');
                 });
 
-                Route::middleware(Middleware\ValidateNamespaceMember::class)->group( function () {
+                Route::middleware([])->group( function () {
                     Route::get('list', [Api\DesignController::class, 'list_designs'])->name('core.design.list');
                 });
 
@@ -537,7 +537,7 @@ Route::prefix('v1')->group(function () {
                     }); //end design admin
 
 
-                    Route::middleware(Middleware\ValidateNamespaceMember::class)->group( function () {
+                    Route::middleware([])->group( function () {
                         Route::get('show', [Api\DesignController::class, 'show_design'])->name('core.design.show');
                         Route::get('list_attributes', [Api\DesignController::class, 'list_attributes'])->name('core.design.list_attributes');
                         Route::get('test_location', [Api\DesignController::class, 'test_location'])->name('core.design.test_location');

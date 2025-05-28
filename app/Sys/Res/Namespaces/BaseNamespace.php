@@ -80,7 +80,7 @@ abstract class BaseNamespace implements ISystemNamespace
         return $this->namespace;
     }
 
-    public static function getCreatedNamespace() : UserNamespace {
+    public static function getCreatedNamespace() : ?UserNamespace {
         return UserNamespace::getThisNamespace(uuid: static::getClassUuid());
     }
     public function makeNamespace() :UserNamespace

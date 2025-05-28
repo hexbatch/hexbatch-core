@@ -45,7 +45,7 @@ class UserRegister extends Api\UserApi
         $this->action_data->save();
     }
 
-    public function getCreatedNamespace(): UserNamespace
+    public function getCreatedNamespace(): ?UserNamespace
     {
         /** @uses ActionDatum::data_namespace() */
         return $this->action_data->data_namespace;
@@ -57,7 +57,7 @@ class UserRegister extends Api\UserApi
         $this->action_data->save();
     }
 
-    public function getCreatedUser(): User
+    public function getCreatedUser(): ?User
     {
         /** @uses ActionDatum::data_user() */
         return $this->action_data->data_user;
@@ -77,7 +77,7 @@ class UserRegister extends Api\UserApi
         protected ?string $public_key = null,
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
-        protected bool $is_async = false,
+        protected ?bool $is_async = null,
         ?RegistrationParams $params = null,
         protected int            $priority = 0,
         protected array          $tags = []
@@ -125,14 +125,16 @@ class UserRegister extends Api\UserApi
 
     public function getChildrenTree(): ?Tree
     {
-        $nodes = [];
+        $this->action_data->refresh();
 
+        $nodes = [];
         $register = new Act\Cmd\Us\UserRegister(
-            user_name: $this->user_name,user_password: $this->user_password,is_system: false,send_event: true, parent_action_data: $this->action_data);
+            user_name: $this->user_name, user_password: $this->user_password, is_system: false, send_event: true,
+            parent_action_data: $this->action_data,tags: ['register user']);
         $nodes[] = ['id' => $register->getActionData()->id, 'parent' => -1, 'title' => $register->getType()->getName(),'action'=>$register];
 
         $namespace = new Act\Cmd\Ns\NamespaceCreate(
-            namespace_name: $this->user_name,is_system: false,send_event: true, parent_action_data: $this->action_data);
+            namespace_name: $this->user_name,is_system: false,send_event: true, parent_action_data: $this->action_data,tags: ['create namespace']);
         $nodes[] = ['id' => $namespace->getActionData()->id, 'parent' => -1, 'title' => $namespace->getType()->getName(),'action'=>$namespace];
 
 
@@ -156,7 +158,7 @@ class UserRegister extends Api\UserApi
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
             else {
-                if ($this->isActionSuccess() && $child->getCreatedUser()) {
+                if ($child->getCreatedUser()) {
                     $this->setCreatedUser(user: $child->getCreatedUser());
                 }
 
@@ -168,7 +170,7 @@ class UserRegister extends Api\UserApi
             if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             } else {
-                if ($this->isActionSuccess() && $child->getCreatedNamespace()) {
+                if ($child->getCreatedNamespace()) {
                     $this->setCreatedNamespace(namespace: $child->getCreatedNamespace());
                 }
             }

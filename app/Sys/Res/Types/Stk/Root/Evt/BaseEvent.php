@@ -34,7 +34,7 @@ class BaseEvent extends Event implements IEvent
 
     public function __construct(
         protected bool $b_type_init = false,
-        protected bool           $is_async = true
+        protected ?bool           $is_async = null
     )
     {
         parent::__construct(b_type_init: $this->b_type_init,is_async: $this->is_async);
@@ -42,10 +42,10 @@ class BaseEvent extends Event implements IEvent
     }
 
     /** @return static[] */
-    public static function makeEventActions(BaseType $source,?ActionDatum $data = null,
-                                     ?ElementType $type_context = null,?ElementSet $set_context = null,
-                                     ?Element $element_context = null,
-                                     ?Server $elsewhere_context = null,?Phase $phase_context = null
+    public static function makeEventActions(BaseType $source,?ActionDatum $action_data = null,
+                                     ?ElementType    $type_context = null,?ElementSet $set_context = null,
+                                     ?Element        $element_context = null,
+                                     ?Server         $elsewhere_context = null,?Phase $phase_context = null
     //todo remember priority and tags when doing event fill in later
 
     ) : array

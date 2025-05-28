@@ -79,7 +79,7 @@ class DesignParentAdd extends Act\Cmd\Ds
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected int                   $priority = 0,
         protected array             $tags = []
     )
@@ -90,10 +90,6 @@ class DesignParentAdd extends Act\Cmd\Ds
     }
 
 
-    public function getActionPriority(): int
-    {
-        return 0;
-    }
 
   /*
    * type the design
@@ -188,7 +184,7 @@ class DesignParentAdd extends Act\Cmd\Ds
             $events = [];
             $nodes = [];
             foreach ($this->getParents() as $parent) {
-                $events[] =  Evt\Server\DesignPending::makeEventActions(source: $this,data: $this->action_data,type_context: $parent);
+                $events =  Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
             }
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];

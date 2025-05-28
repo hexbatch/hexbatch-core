@@ -49,7 +49,7 @@ class SetCreate extends Act\Cmd\St
     ];
 
 
-    public function getGivenElement(): Element
+    public function getGivenElement(): ?Element
     {
         /** @uses ActionDatum::data_element() */
         return $this->action_data->data_element;
@@ -87,7 +87,7 @@ class SetCreate extends Act\Cmd\St
         protected bool                $set_has_events = true,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -101,11 +101,6 @@ class SetCreate extends Act\Cmd\St
             b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
     }
 
-
-    public function getActionPriority(): int
-    {
-        return 0;
-    }
 
 
     /**
@@ -137,7 +132,7 @@ class SetCreate extends Act\Cmd\St
             $this->action_data->save();
 
             if ($this->send_event) {
-                $this->post_events_to_send = Evt\Server\SetCreated::makeEventActions(source: $this, data: $this->action_data,set_context: $set);
+                $this->post_events_to_send = Evt\Server\SetCreated::makeEventActions(source: $this, action_data: $this->action_data,set_context: $set);
             }
 
             if ($this->getGivenParent()) {
@@ -148,11 +143,12 @@ class SetCreate extends Act\Cmd\St
                 if ($this->send_event) {
                     $this->post_events_to_send =
                         array_merge($this->post_events_to_send,
-                            Evt\Set\SetChildCreated::class::makeEventActions(source: $this, data: $this->action_data,set_context: $set) );
+                            Evt\Set\SetChildCreated::class::makeEventActions(source: $this, action_data: $this->action_data,set_context: $set) );
                 }
             }
 
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->wakeLinkedThings();
             $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {

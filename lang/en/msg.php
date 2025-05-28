@@ -27,6 +27,7 @@ return [
     'user_not_priv' => 'Not in the admin group of this user',
     'passthrough_data_too_big' => 'The passthrough data for this token is too big, the max is :max bytes',
     'token_too_long_lived' => 'The token can only be created for up to :seconds seconds',
+    'no_namespace' => 'There is no namespace found in the route when asking for it, or the user is not authenticated, or the user has no default namespace',
 
     //namespaces
     'namespace_not_found' => 'Namespace not found using :ref',

@@ -72,5 +72,9 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
         'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+        'verify_namespace_member' => Middleware\ValidateNamespaceMember::class,
+        'verify_namespace_admin' => Middleware\ValidateNamespaceMember::class,
+        'verify_namespace_owner' => Middleware\ValidateNamespaceOwner::class,
+        'thing_owner' => Middleware\SetThingOwner::class,
     ];
 }

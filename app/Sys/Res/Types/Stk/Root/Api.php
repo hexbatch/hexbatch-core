@@ -8,6 +8,7 @@ use App\Models\ActionDatum;
 use App\Models\UserNamespace;
 use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Callbacks\HexbatchCallbackResponse;
+use App\OpenApi\ErrorResponse;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
@@ -24,6 +25,8 @@ use Hexbatch\Things\OpenApi\Errors\ThingErrorResponse;
 use Hexbatch\Things\OpenApi\Hooks\HookParams;
 use Hexbatch\Things\OpenApi\Hooks\HookSearchParams;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 
 /**
@@ -63,14 +66,24 @@ class Api extends BaseType implements IHookCode
         protected bool           $b_type_init = false,
         protected bool           $is_system = false,
         protected bool           $send_event = true,
-        protected bool           $is_async = false,
+        protected ?bool           $is_async = null,
         protected int            $priority = 0,
         protected array          $tags = []
     )
     {
-        if (!$this->owner_namespace && !($this->action_data?->data_namespace_owner_id)) {
+        if (!$this->owner_namespace ) {
+            if ($this->action_data?->data_namespace_owner) {
+                $this->owner_namespace = $this->action_data?->data_namespace_owner;
+            }
+        }
+        if (!$this->owner_namespace ) {
             $this->owner_namespace = Utilities::getCurrentNamespace();
         }
+
+        if (!$this->owner_namespace) {
+            $this->owner_namespace = Utilities::getSystemNamespace();
+        }
+
         // always the top of the food chain, so never has a parent data structure
         parent::__construct(action_data: $this->action_data, owner_namespace: $this->owner_namespace,
             b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
@@ -114,13 +127,17 @@ class Api extends BaseType implements IHookCode
     public function createThingTree(array $tags = []) : Thing {
         $owner = $this->getDataOwner();
         if (!$owner) {
-            $owner = ThisNamespace::getCreatedNamespace();
+            $owner = Utilities::getThisUserDefaultNamespace();
+        }
+        if (!$owner) {
+            $owner = Utilities::getSystemNamespace();
         }
         return Thing::buildFromAction(action: $this,owner: $owner,extra_tags: $tags );
     }
 
+
     public function getCallbackResponse(?int &$http_status = null)
-    : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse
+    : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse|ThingResponse|ErrorResponse
     {
         if (!$this->getActionData()) {return null;}
         $search_params = new CallbackSearchParams(
@@ -132,7 +149,17 @@ class Api extends BaseType implements IHookCode
         $search_params->setHookOwner(ThisNamespace::getCreatedNamespace());
         /** @var ThingCallback[] $maybe_callbacks */
         $maybe_callbacks = ThingCallback::buildCallback(params: $search_params)->get();
-        if (count($maybe_callbacks) === 0) {return null;}
+        if (count($maybe_callbacks) === 0) {
+            //find the thing tied to this api
+            $http_status = CodeOf::HTTP_OK;
+            try {
+                $thing = Thing::getThing(action_type_id: $this->getActionId(), action_type: $this->getActionType());
+                return new ThingResponse(thing: $thing);
+            } catch (\Exception $e) {
+                Log::warning(sprintf("Could not find thing for %s / %s of ",$this->getActionType(),$this->getActionId()) );
+                return ErrorResponse::fromException(e: $e);
+            }
+        }
         if (count($maybe_callbacks) === 1) {
             $http_status = $maybe_callbacks[0]->callback_http_code;
             if ($maybe_callbacks[0]->callback_error) {

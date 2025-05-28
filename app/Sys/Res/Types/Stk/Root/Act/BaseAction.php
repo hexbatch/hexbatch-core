@@ -24,7 +24,7 @@ class BaseAction extends BaseType implements IAction
         protected bool           $b_type_init = false,
         protected bool           $is_system = false,
         protected bool           $send_event = true,
-        protected bool           $is_async = true,
+        protected ?bool           $is_async = null,
         protected int            $priority = 0,
         protected array          $tags = []
     )

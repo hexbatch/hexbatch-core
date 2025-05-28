@@ -101,7 +101,7 @@ class ElementCreate extends Act\Cmd\Ele
     const array ACTIVE_COLLECTION_KEYS = ['created_element_uuids'=>Element::class];
 
     const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid','given_phase_uuid',
-        'number_to_create','preassinged_uuids'];
+        'number_to_create','preassinged_uuids','b_must_have_namespace'];
 
 
     public function __construct(
@@ -110,9 +110,10 @@ class ElementCreate extends Act\Cmd\Ele
         protected ?string      $given_phase_uuid = null,
         protected int          $number_to_create = 0,
         protected array        $preassinged_uuids = [],
+        protected bool         $b_must_have_namespace = true,
         protected bool         $is_system = false,
         protected bool         $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -128,10 +129,6 @@ class ElementCreate extends Act\Cmd\Ele
     }
 
 
-    public function getActionPriority(): int
-    {
-        return 0;
-    }
 
     /*
      * type the design
@@ -147,7 +144,7 @@ class ElementCreate extends Act\Cmd\Ele
         if ($this->isActionComplete()) {
             return;
         }
-        if (!$this->getNamespaceUsed()) {
+        if ($this->b_must_have_namespace && !$this->getNamespaceUsed()) {
             throw new \InvalidArgumentException("Need namespace before can make element");
         }
 
@@ -178,12 +175,12 @@ class ElementCreate extends Act\Cmd\Ele
             if (count($this->created_element_uuids) > 1 ) {
                 if ($this->send_event) {
                     $this->post_events_to_send =
-                        Evt\Element\ElementRecievedBatch::makeEventActions(source: $this,data: $this->action_data);
+                        Evt\Element\ElementRecievedBatch::makeEventActions(source: $this, action_data: $this->action_data);
                 }
             } else {
                 if ($this->send_event) {
                     $this->post_events_to_send =
-                        Evt\Element\ElementRecieved::makeEventActions(source: $this,data: $this->action_data);
+                        Evt\Element\ElementRecieved::makeEventActions(source: $this, action_data: $this->action_data);
                 }
             }
 
@@ -191,6 +188,7 @@ class ElementCreate extends Act\Cmd\Ele
 
             $this->saveCollectionKeys();
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->wakeLinkedThings();
             $this->action_data->refresh();
             if ($this->send_event) {
                 $this->post_events_to_send = array_merge($post_actions,$post_events);
@@ -264,11 +262,11 @@ class ElementCreate extends Act\Cmd\Ele
         if ($this->send_event && !$this->is_system) {
             $nodes = [];
             if (count($this->getElementsCreated()) > 1) {
-                $events = Evt\Type\ElementCreationBatch::makeEventActions(source: $this, data: $this->action_data,
+                $events = Evt\Type\ElementCreationBatch::makeEventActions(source: $this, action_data: $this->action_data,
                     type_context: $this->getTemplateType());
             } else {
-                $events = Evt\Type\ElementCreation::makeEventActions(source: $this, data: $this->action_data,
-                    type_context: $this->getTemplateType(),element_context: $this->getElementsCreated()[0]);
+                $events = Evt\Type\ElementCreation::makeEventActions(source: $this, action_data: $this->action_data,
+                    type_context: $this->getTemplateType());
             }
 
             foreach ($events as $event) {

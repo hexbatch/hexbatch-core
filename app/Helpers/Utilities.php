@@ -8,6 +8,7 @@ use App\Exceptions\RefCodes;
 use App\Models\User;
 use App\Models\UserNamespace;
 use App\Rules\ResourceNameReq;
+use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -201,10 +202,14 @@ class Utilities {
         return $user;
     }
 
-    public static function getDefaultNamespace() : ?UserNamespace {
+    public static function getThisUserDefaultNamespace() : ?UserNamespace {
 
         $user = static::getTypeCastedAuthUser();
-        return $user->default_namespace;
+        return $user?->default_namespace;
+    }
+
+    public static function getSystemNamespace() : UserNamespace {
+        return UserNamespace::getThisNamespace(uuid: ThisNamespace::getClassUuid());
     }
 
     public static function getCurrentNamespace() : ?UserNamespace {

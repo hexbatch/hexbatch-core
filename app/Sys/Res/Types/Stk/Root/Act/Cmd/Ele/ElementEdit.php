@@ -50,7 +50,7 @@ class ElementEdit extends Act\Cmd\Ele
         protected ?string              $change_phase_uuid = null,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -65,10 +65,6 @@ class ElementEdit extends Act\Cmd\Ele
     }
 
 
-    public function getActionPriority(): int
-    {
-        return 0;
-    }
 
 
     /**

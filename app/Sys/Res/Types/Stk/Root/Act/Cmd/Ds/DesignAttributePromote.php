@@ -68,7 +68,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
-        protected bool                  $is_async = true,
+        protected ?bool                  $is_async = null,
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -81,11 +81,6 @@ class DesignAttributePromote extends Act\Cmd\Ds
             b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
     }
 
-
-    public function getActionPriority(): int
-    {
-        return 100;
-    }
 
     protected function restoreData(array $data = []) {
         parent::restoreData($data);

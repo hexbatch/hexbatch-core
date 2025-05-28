@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -443,23 +444,26 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 
         $owner_type = $this->getOwnerType();
 
-        $joiner = /** @param JoinClause $join */
-            function ($join)
-            use ($owner_type, $connecting_table_name, $connecting_owner_type_column, $connecting_owner_id_column,$alias)
-            {
-                $join
-                    ->on("$alias.parent_namespace_id", '=', "$connecting_table_name.$connecting_owner_id_column")
-                    ->where("$connecting_table_name.$connecting_owner_type_column", $owner_type)
-                    ->where("$alias.is_admin",true)
-                ;
-            };
+        $query_members = DB::table("user_namespace_members as mem")
+            ->selectRaw("mem.id as member_id, $connecting_table_name.id as connector_id")
+            ->where("mem.is_admin",true)
+            ->join($connecting_table_name, 'mem.id', '=', "$connecting_table_name.$connecting_owner_id_column")
+            ->where("$connecting_table_name.$connecting_owner_type_column", $owner_type)
+        ;
+
+
+
+
+        /** @noinspection PhpPossiblePolymorphicInvocationInspection */
+        $builder->withExpression('members_only',$query_members);
 
         if ($hint !== TypeOfOwnerGroup::HOOK_CALLBACK_CREATION) {
-            $builder->join("user_namespace_members as $alias",$joiner);
-
+            $operator = "join";
         } else {
-            $builder->leftJoin("user_namespaces as $alias",$joiner);
+            $operator = "leftJoin";
         }
+
+        $builder->$operator("members_only as $alias","$alias.connector_id","$connecting_table_name.id");
     }
 
     const NAMESPACE_TAG = 'namespace';

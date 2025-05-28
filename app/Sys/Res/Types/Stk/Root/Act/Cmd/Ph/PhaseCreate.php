@@ -63,7 +63,7 @@ class PhaseCreate extends Act\Cmd\Ph
         protected bool                $is_default_phase = false,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -91,11 +91,6 @@ class PhaseCreate extends Act\Cmd\Ph
         return $this->action_data;
     }
 
-
-    public function getActionPriority(): int
-    {
-        return 0;
-    }
 
 
     /**
@@ -132,7 +127,7 @@ class PhaseCreate extends Act\Cmd\Ph
             $this->action_data->refresh();
             if ($this->send_event) {
                 $this->post_events_to_send = Evt\Type\PhaseAdded::makeEventActions(
-                    source: $this, data: $this->action_data,phase_context: $phase);
+                    source: $this, action_data: $this->action_data,phase_context: $phase);
             }
 
 

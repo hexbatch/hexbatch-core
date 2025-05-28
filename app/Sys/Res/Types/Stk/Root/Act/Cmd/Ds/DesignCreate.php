@@ -58,7 +58,7 @@ class DesignCreate extends Act\Cmd\Ds
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -75,10 +75,6 @@ class DesignCreate extends Act\Cmd\Ds
     }
 
 
-    public function getActionPriority(): int
-    {
-        return 100;
-    }
 
     protected function restoreData(array $data = []) {
         parent::restoreData($data);

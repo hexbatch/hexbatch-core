@@ -83,7 +83,7 @@ class NamespaceEdit extends Act\Cmd\Ns
         protected ?string         $given_home_set_uuid = null,
         protected bool         $is_system = false,
         protected bool         $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,

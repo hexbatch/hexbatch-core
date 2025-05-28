@@ -54,7 +54,7 @@ class UserRegister extends Act\Cmd\Us
         protected ?string      $uuid = null,
         protected bool         $is_system = false,
         protected bool         $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -70,10 +70,6 @@ class UserRegister extends Act\Cmd\Us
     }
 
 
-    public function getActionPriority(): int
-    {
-        return 100;
-    }
 
 
     /**
@@ -116,7 +112,7 @@ class UserRegister extends Act\Cmd\Us
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
             $this->action_data->refresh();
             if ($this->send_event) {
-                $this->post_events_to_send = Evt\Server\UserRegistrationProcessing::makeEventActions(source: $this, data: $this->action_data);
+                $this->post_events_to_send = Evt\Server\UserRegistrationProcessing::makeEventActions(source: $this, action_data: $this->action_data);
             }
             DB::commit();
         } catch (\Exception $e) {
@@ -140,7 +136,7 @@ class UserRegister extends Act\Cmd\Us
 
         if ($this->send_event && !$this->is_system) {
             $nodes = [];
-            $events = Evt\Server\UserRegistrationStarting::makeEventActions(source: $this, data: $this->action_data);
+            $events = Evt\Server\UserRegistrationStarting::makeEventActions(source: $this, action_data: $this->action_data);
 
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];

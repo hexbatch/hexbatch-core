@@ -80,7 +80,7 @@ class ServerPromote extends Act\Cmd\Server
 
         protected bool                $is_system = false,
         protected bool                $send_event = true,
-        protected bool                $is_async = true,
+        protected ?bool                $is_async = null,
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
@@ -119,11 +119,6 @@ class ServerPromote extends Act\Cmd\Server
         }
     }
 
-
-    public function getActionPriority(): int
-    {
-        return 0;
-    }
 
 
     /**
@@ -166,7 +161,7 @@ class ServerPromote extends Act\Cmd\Server
             $this->action_data->refresh();
             if ($this->send_event) {
                 $this->post_events_to_send = Evt\Elsewhere\ServerRegistered::makeEventActions(
-                    source: $this, data: $this->action_data,elsewhere_context: $server);
+                    source: $this, action_data: $this->action_data,elsewhere_context: $server);
             }
 
 

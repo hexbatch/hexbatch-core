@@ -57,10 +57,15 @@ trait ActionableBaseTrait
             $owner_id = $this->parent_action_data->data_namespace_owner_id;
         }
 
-
+        $async_flag = true;
+        if ($this->is_async === null) {
+            if ($this->parent_action_data?->is_async !== null) {$async_flag = $this->parent_action_data->is_async; }
+        } else {
+            $async_flag = $this->is_async;
+        }
         $this->action_data = new ActionDatum();
         $this->action_data->data_priority = $this->priority;
-        $this->action_data->is_async = $this->is_async;
+        $this->action_data->is_async = $async_flag;
         $this->action_data->data_tags = $this->tags;
         $this->action_data->is_system_privilege = $this->is_system;
         $this->action_data->is_sending_events = $this->send_event;
@@ -136,7 +141,7 @@ trait ActionableBaseTrait
 
     public function getActionPriority(): int
     {
-        return $this->action_data->data_priority;
+        return $this->priority;
     }
 
     public function getActionType(): string
@@ -174,6 +179,17 @@ trait ActionableBaseTrait
 
 
 
+
+    public function wakeLinkedThings() : void
+    {
+        if ($this->action_data) {
+            /** @uses ActionDatum::data_things() $that */
+            foreach ($this->action_data->data_things as $that) {
+                $that->continueThing();
+            }
+        }
+    }
+
     public function runAction(array $data = []): void {
         $this->restoreData($data);
 
@@ -191,7 +207,10 @@ trait ActionableBaseTrait
             foreach (static::ACTIVE_DATA_KEYS as $key) {
                 $this->$key = $this->action_data->collection_data->offsetGet($key);
             }
+            $this->owner_namespace = $this->action_data->data_owner_namespace;
+            $this->parent_action_data = $this->action_data->data_parent;
             $this->is_system = $this->action_data->is_system_privilege;
+            $this->is_async = $this->action_data->is_async;
             $this->send_event = $this->action_data->is_sending_events;
             $this->priority = $this->action_data->data_priority  ;
             $this->tags = $this->action_data->data_tags->getArrayCopy()??[] ;

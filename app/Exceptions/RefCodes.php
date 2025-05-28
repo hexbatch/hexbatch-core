@@ -28,6 +28,7 @@ class RefCodes {
     const int BAD_REGISTRATION = 1001;
     const int USER_NOT_FOUND = 1003;
     const int USER_NOT_PRIV = 1004;
+    const int NO_NAMESPACE = 1005;
 
     // namespaces start at 2000
     const int NAMESPACE_NOT_FOUND = 2003;
@@ -129,6 +130,7 @@ class RefCodes {
         self::BAD_REGISTRATION => '',
         self::USER_NOT_FOUND => '',
         self::USER_NOT_PRIV => '',
+        self::NO_NAMESPACE => '',
 
         self::NAMESPACE_NOT_FOUND => '',
         self::NAMESPACE_NOT_OWNER => '',
