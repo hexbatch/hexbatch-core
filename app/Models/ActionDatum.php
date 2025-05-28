@@ -79,9 +79,6 @@ class ActionDatum extends Model
         return $this->hasMany(ActionDatum::class,'parent_data_id','id');
     }
 
-    public function data_things() : HasMany {
-        return $this->hasMany(Thing::class,'action_type_id','id')->where('action_type',$this->data_owner_type::class);
-    }
 
     public function action_collection() : HasMany {
         return $this->hasMany(ActionCollection::class,'parent_action_data_id','id');

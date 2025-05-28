@@ -13,6 +13,7 @@ use Hexbatch\Things\Interfaces\IThingAction;
 use Hexbatch\Things\Interfaces\IThingOwner;
 use Hexbatch\Things\Models\Thing;
 use Hexbatch\Things\Models\ThingHook;
+use Illuminate\Database\Eloquent\Collection;
 
 trait ActionableBaseTrait
 {
@@ -94,7 +95,7 @@ trait ActionableBaseTrait
 
 
     public function getActionOwner(): ?IThingOwner {
-        return $this->owner_namespace?:$this->action_data->data_namespace_owner;
+        return $this->owner_namespace?:$this->action_data->data_owner_namespace;
     }
 
     public function isActionComplete(): bool
@@ -130,8 +131,8 @@ trait ActionableBaseTrait
     public function getActionId(): int {return $this->action_data->id; }
 
 
-    public function getActionUuid() : string {
-        return $this->getType(b_construct_if_missing: false)->getUuid();
+    public function getActionUuid() : ?string {
+        return $this->action_data?->ref_uuid;
     }
 
     public function getActionRef(): ?string
@@ -178,15 +179,23 @@ trait ActionableBaseTrait
     public function getRenderHtml(): ?string {return null;}
 
 
+    /**
+     * @return Collection|Thing[]
+     */
+    public function  getLinkedThings() : Collection|array
+    {
+        if (!$this->getActionType() || !$this->getActionId()) {return [];}
+        /** @var Thing[] $what */
+        return  Thing::buildThing(action_type_id: $this->getActionId(), action_type: $this->getActionType())->get();
+    }
 
-
+    /**
+     * @throws \Exception
+     */
     public function wakeLinkedThings() : void
     {
-        if ($this->action_data) {
-            /** @uses ActionDatum::data_things() $that */
-            foreach ($this->action_data->data_things as $that) {
-                $that->continueThing();
-            }
+        foreach ($this->getLinkedThings() as $thung) {
+            $thung->continueThing();
         }
     }
 
@@ -205,7 +214,9 @@ trait ActionableBaseTrait
         if ($this->action_data) {
             $this->action_data->refresh();
             foreach (static::ACTIVE_DATA_KEYS as $key) {
-                $this->$key = $this->action_data->collection_data->offsetGet($key);
+                if ($this->action_data->collection_data->offsetExists($key)) {
+                    $this->$key = $this->action_data->collection_data->offsetGet($key);
+                }
             }
             $this->owner_namespace = $this->action_data->data_owner_namespace;
             $this->parent_action_data = $this->action_data->data_parent;

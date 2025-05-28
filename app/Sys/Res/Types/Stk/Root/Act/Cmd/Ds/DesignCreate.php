@@ -79,8 +79,10 @@ class DesignCreate extends Act\Cmd\Ds
     protected function restoreData(array $data = []) {
         parent::restoreData($data);
         if ($this->action_data) {
-            $access_string = $this->action_data->collection_data->offsetGet('access');
-            $this->access = TypeOfServerAccess::tryFromInput($access_string);
+            if ($this->action_data->collection_data?->offsetExists('access')) {
+                $access_string = $this->action_data->collection_data->offsetGet('access');
+                $this->access = TypeOfServerAccess::tryFromInput($access_string);
+            }
         }
     }
 
@@ -98,6 +100,12 @@ class DesignCreate extends Act\Cmd\Ds
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
+    }
+
+    public function getInitialConstantData(): ?array {
+        $ret = parent::getInitialConstantData();
+        $ret['access'] = $this->access?->value;
+        return $ret;
     }
 
 

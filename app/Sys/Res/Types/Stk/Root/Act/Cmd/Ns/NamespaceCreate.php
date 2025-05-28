@@ -193,11 +193,11 @@ class NamespaceCreate extends Act\Cmd\Ns
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
             if($child->isActionSuccess() && count($child->getElementsCreated()  ) === 1) {
-                if (in_array('private element', $child->getActionTags())) {
+                if (in_array('make private element', $child->getActionTags())) {
                     $private_element = $child->getElementsCreated()[0];
                     $this->changePrivateElement(el: $private_element);
                 }
-                else if (in_array('public element', $child->getActionTags())) {
+                else if (in_array('make public element', $child->getActionTags())) {
                     $this->changePublicElement($child->getElementsCreated()[0]);
                 }
             }
@@ -234,7 +234,7 @@ class NamespaceCreate extends Act\Cmd\Ns
         //all namespace elements are put in the default phase
 
 
-        $add_to_set = new Act\Cmd\St\SetMemberAdd(parent_action_data: $this->getActionData(), priority: 1,tags: ['add to home set','priority-1']);
+        $add_to_set = new Act\Cmd\St\SetMemberAdd(auto_allow_given_elements: true, parent_action_data: $this->getActionData(), priority: 1, tags: ['add to home set','priority-1']);
         $home_set = new Act\Cmd\Ele\SetCreate(parent_action_data: $add_to_set->getActionData(),tags: ['make home set']);
         $public_type_element = new Act\Cmd\Ty\ElementCreate(number_to_create: 1,b_must_have_namespace: false, parent_action_data: $add_to_set->getActionData(), tags: ['make public element']);
 

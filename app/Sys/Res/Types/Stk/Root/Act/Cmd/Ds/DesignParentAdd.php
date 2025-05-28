@@ -158,8 +158,11 @@ class DesignParentAdd extends Act\Cmd\Ds
     protected function restoreData(array $data = []) {
         parent::restoreData($data);
         if ($this->action_data) {
-            $approval_string = $this->action_data->collection_data->offsetGet('approval');
-            $this->approval = TypeOfApproval::tryFromInput($approval_string);
+            if ($this->action_data->collection_data?->offsetExists('approval')) {
+                $approval_string = $this->action_data->collection_data->offsetGet('approval');
+                $this->approval = TypeOfApproval::tryFromInput($approval_string);
+            }
+
         }
     }
 
@@ -174,6 +177,12 @@ class DesignParentAdd extends Act\Cmd\Ds
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
+    }
+
+    public function getInitialConstantData(): ?array {
+        $ret = parent::getInitialConstantData();
+        $ret['approval'] = $this->approval?->value;
+        return $ret;
     }
 
 

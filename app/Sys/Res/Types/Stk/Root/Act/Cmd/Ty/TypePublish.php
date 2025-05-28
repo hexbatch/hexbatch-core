@@ -97,7 +97,7 @@ class TypePublish extends Act\Cmd\Ty
             throw new \RuntimeException("Type already published");
         }
 
-        if ($target->canBePublished()) {
+        if (!$target->canBePublished() && ($this->publishing_status === TypeOfApproval::APPROVAL_NOT_SET)) {
             $parent_stuff_array = [];
             /** @var ElementTypeParent $parent */
             foreach ($target->type_parents as $parent) {
@@ -105,7 +105,7 @@ class TypePublish extends Act\Cmd\Ty
             }
             throw new \RuntimeException(sprintf(" %s type cannot be published, its lifecycle is %s, its parents are %s. Parent count of %s",
                 $target->getName(),$target->lifecycle->value,implode('|',$parent_stuff_array) ,
-                count($target->type_parents)
+                count($target->type_parents) //todo put after in else and only if publishing status is not set
             ));
         }
         try {
@@ -165,9 +165,17 @@ class TypePublish extends Act\Cmd\Ty
     protected function restoreData(array $data = []) {
         parent::restoreData($data);
         if ($this->action_data) {
-            $approval_string = $this->action_data->collection_data->offsetGet('publishing_status');
-            $this->publishing_status = TypeOfApproval::tryFromInput($approval_string);
+            if ($this->action_data->collection_data?->offsetExists('publishing_status')) {
+                $approval_string = $this->action_data->collection_data->offsetGet('publishing_status');
+                $this->publishing_status = TypeOfApproval::tryFromInput($approval_string);
+            }
         }
+    }
+
+    public function getInitialConstantData(): ?array {
+        $ret = parent::getInitialConstantData();
+        $ret['publishing_status'] = $this->publishing_status?->value;
+        return $ret;
     }
 
 

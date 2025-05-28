@@ -215,7 +215,7 @@ class Utilities {
     public static function getCurrentNamespace() : ?UserNamespace {
         $namespace = null;
         $what_route = Route::current();
-        if ($what_route->hasParameter('user_namespace')) {
+        if ($what_route?->hasParameter('user_namespace')) {
             $namespace = $what_route->parameter('user_namespace');
             if (!$namespace) {
                 $user_namespace_name = $what_route->originalParameter('user_namespace');

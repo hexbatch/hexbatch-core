@@ -224,10 +224,12 @@ class ActionCollection extends Model
                 /**
                  * @param JoinClause $join
                  */
-                function (JoinClause $join) use($parent,$column) {
+                function (JoinClause $join) use($parent,$column,$partition_flag) {
                     $join
                         ->on("act.$column",'=',"my_tab.id")
-                        ->where('act.parent_action_data_id',$parent->id);
+                        ->where('act.parent_action_data_id',$parent->id)
+                        ->where('act.collection_partition_flag',$partition_flag)
+                    ;
                 }
             )
             ;

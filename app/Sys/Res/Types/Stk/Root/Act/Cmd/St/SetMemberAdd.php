@@ -81,6 +81,9 @@ class SetMemberAdd extends Act\Cmd\St
         $this->saveCollectionKeys();
         $this->action_data->collection_data =$this->getInitialConstantData();
         $this->action_data->save();
+        if ($this->auto_allow_given_elements) {
+            $this->addElementsAllowed(elements: $elements);
+        }
     }
 
     /**
@@ -92,7 +95,7 @@ class SetMemberAdd extends Act\Cmd\St
         foreach ($elements as $element) {
             $uuids[] = $element->ref_uuid;
         }
-        $this->allowed_element_uuids = array_unique( array_merge($this->given_element_uuids,$uuids) );
+        $this->allowed_element_uuids = array_unique( array_merge($this->allowed_element_uuids,$uuids) );
         $this->saveCollectionKeys();
         $this->action_data->collection_data =$this->getInitialConstantData();
         $this->action_data->save();
@@ -116,7 +119,7 @@ class SetMemberAdd extends Act\Cmd\St
      */
     protected array $allowed_element_uuids = [];
 
-    const array ACTIVE_DATA_KEYS = ['given_set_uuid','is_sticky'];
+    const array ACTIVE_DATA_KEYS = ['given_set_uuid','is_sticky','auto_allow_given_elements'];
 
     const array ACTIVE_COLLECTION_KEYS = [
         'given_element_uuids'=>['class'=>Element::class,'partition'=>0] ,
@@ -130,6 +133,7 @@ class SetMemberAdd extends Act\Cmd\St
          */
         protected array        $given_element_uuids = [],
         protected bool         $is_sticky = false,
+        protected bool         $auto_allow_given_elements = false,
         protected bool         $is_system = false,
         protected bool         $send_event = true,
         protected ?bool                $is_async = null,

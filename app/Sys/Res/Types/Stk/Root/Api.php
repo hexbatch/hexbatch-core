@@ -72,8 +72,8 @@ class Api extends BaseType implements IHookCode
     )
     {
         if (!$this->owner_namespace ) {
-            if ($this->action_data?->data_namespace_owner) {
-                $this->owner_namespace = $this->action_data?->data_namespace_owner;
+            if ($this->action_data?->data_owner_namespace) {
+                $this->owner_namespace = $this->action_data->data_owner_namespace;
             }
         }
         if (!$this->owner_namespace ) {

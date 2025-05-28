@@ -106,6 +106,9 @@ class UserRegister extends Api\UserApi
             if ($this->getCreatedUser() && $this->getCreatedNamespace()) {
                 $this->getCreatedNamespace()->namespace_user_id = $this->getCreatedUser()->id;
                 $this->getCreatedNamespace()->save();
+
+                $this->getCreatedUser()->default_namespace_id = $this->getCreatedNamespace()->id;
+                $this->getCreatedUser()->save();
                 $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
             } else {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
@@ -182,14 +185,30 @@ class UserRegister extends Api\UserApi
     public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
     {
         if ($thing->thing_status === TypeOfThingStatus::THING_SUCCESS) {
-            $user_data = $body['user']??null;
-            if ($user_data && intval($user_data['id']??null) ) {
-                /** @var User $user */
-                $user = User::buildUser(me_id: $user_data['id'])->first();
-                return new MeResponse(user: $user);
-            } else {
-                throw new \RuntimeException("Could not find id in the user");
+
+            $meta = $body['thing_meta']??null;
+            $action_uuid = null;
+            if ($meta) {
+                $action_uuid = $meta['action']??null;
             }
+
+            if ($action_uuid  ) {
+                /**
+                 * @var ActionDatum $action
+                 */
+                $action = ActionDatum::buildHexbatchData(uuid: $action_uuid)->first();
+                if ($action) {
+                    $action_id = $action->id;
+                    /** @var static  $me */
+                    $me = static::resolveAction(action_id: $action_id);
+                    $user = $me->getCreatedUser();
+                    $user->refresh();
+                    return new MeResponse(user: $user );
+                }
+
+
+            }
+            throw new \RuntimeException("Could not find action ref or make response");
         } else {
             return new ThingResponse(thing:$thing);
         }

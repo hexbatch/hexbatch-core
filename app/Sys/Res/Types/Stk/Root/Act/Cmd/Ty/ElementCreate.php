@@ -207,7 +207,7 @@ class ElementCreate extends Act\Cmd\Ele
     {
 
         $phase_id = $this->getPhaseUsed()?->id;
-        $namespace_owner_id = $this->getNamespaceUsed()->id;
+        $namespace_owner_id = $this->getNamespaceUsed()?->id;
         $type_id = $this->getTemplateType()->id;
 
         $ele = new Element();

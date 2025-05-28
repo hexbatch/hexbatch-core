@@ -85,8 +85,11 @@ class DesignAttributePromote extends Act\Cmd\Ds
     protected function restoreData(array $data = []) {
         parent::restoreData($data);
         if ($this->action_data) {
-            $access_string = $this->action_data->collection_data->offsetGet('attribute_approval');
-            $this->attribute_approval = TypeOfApproval::tryFromInput($access_string);
+            if ($this->action_data->collection_data?->offsetExists('attribute_approval')) {
+                $access_string = $this->action_data->collection_data->offsetGet('attribute_approval');
+                $this->attribute_approval = TypeOfApproval::tryFromInput($access_string);
+            }
+
         }
     }
 
@@ -108,6 +111,12 @@ class DesignAttributePromote extends Act\Cmd\Ds
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
+    }
+
+    public function getInitialConstantData(): ?array {
+        $ret = parent::getInitialConstantData();
+        $ret['attribute_approval'] = $this->attribute_approval?->value;
+        return $ret;
     }
 
 

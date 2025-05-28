@@ -114,10 +114,19 @@ class ServerPromote extends Act\Cmd\Server
     protected function restoreData(array $data = []) {
         parent::restoreData($data);
         if ($this->action_data) {
-            $status_string = $this->action_data->collection_data->offsetGet('server_status');
-            $this->server_status = TypeOfServerStatus::tryFromInput($status_string);
+            if ($this->action_data->collection_data?->offsetExists('server_status')) {
+                $status_string = $this->action_data->collection_data->offsetGet('server_status');
+                $this->server_status = TypeOfServerStatus::tryFromInput($status_string);
+            }
         }
     }
+
+    public function getInitialConstantData(): ?array {
+        $ret = parent::getInitialConstantData();
+        $ret['server_status'] = $this->server_status?->value;
+        return $ret;
+    }
+
 
 
 

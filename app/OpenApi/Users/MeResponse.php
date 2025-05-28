@@ -6,7 +6,6 @@ use App\Api\Common\HexbatchUuid;
 use App\Models\User;
 use Carbon\Carbon;
 use Hexbatch\Things\Interfaces\ICallResponse;
-use Hexbatch\Things\Models\ThingCallback;
 use JsonSerializable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
@@ -24,7 +23,11 @@ class MeResponse implements  JsonSerializable,ICallResponse
     public string $username = '';
 
     #[OA\Property(title: 'When the user was registered',format: 'date-time')]
-    public string $registered_at = '';
+    public ?string $registered_at = '';
+
+
+    #[OA\Property(title: 'Namespace uuid',type: HexbatchUuid::class)]
+    public string $namespace_uuid = '';
 
 
 
@@ -33,7 +36,8 @@ class MeResponse implements  JsonSerializable,ICallResponse
         if ($user) {
             $this->uuid = $user->ref_uuid;
             $this->username = $user->username;
-            $this->registered_at = Carbon::createFromTimestamp($user->created_at_ts,config('app.timezone'))->toIso8601String();
+            $this->registered_at = $user->created_at? Carbon::parse($user->created_at,config('app.timezone'))->toIso8601String():null;
+            $this->namespace_uuid = $user->default_namespace?->ref_uuid;
         }
 
     }
@@ -45,6 +49,7 @@ class MeResponse implements  JsonSerializable,ICallResponse
         $ret['uuid'] = $this->uuid;
         $ret['username'] = $this->username;
         $ret['registered_at'] = $this->registered_at;
+        $ret['namespace_uuid'] = $this->namespace_uuid;
         return $ret;
     }
 
