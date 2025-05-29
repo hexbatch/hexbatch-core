@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\ForceUnicode;
+use App\Http\Middleware\SetDefaultPhase;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -24,6 +25,8 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
+    //note: put open api validation here after making the spec
+
     /**
      * The application's route middleware groups.
      *
@@ -42,6 +45,7 @@ class Kernel extends HttpKernel
         'api' => [
             //\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            SetDefaultPhase::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             ForceUnicode::class,
         ],
@@ -68,5 +72,9 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
         'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+        'verify_namespace_member' => Middleware\ValidateNamespaceMember::class,
+        'verify_namespace_admin' => Middleware\ValidateNamespaceMember::class,
+        'verify_namespace_owner' => Middleware\ValidateNamespaceOwner::class,
+        'thing_owner' => Middleware\SetThingOwner::class,
     ];
 }

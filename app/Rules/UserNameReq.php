@@ -2,13 +2,11 @@
 
 namespace App\Rules;
 
-use App\Helpers\Utilities;
-use App\Models\User;
 use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
 
-class UserNameReq implements ValidationRule
+class UserNameReq extends ResourceNameReq
 {
+    const MAX_NAME_LENGTH = 30;
     /**
      * Run the validation rule.
      *
@@ -16,9 +14,10 @@ class UserNameReq implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        parent::validate($attribute,$value,$fail);
 
         if (in_array(mb_strtolower($value),static::RESERVED_NAMES) )  {
-            $fail('auth.not_reserved_word',['word'=>$value])->translate();
+            $fail('auth.not_reserved_word')->translate(['word'=>$value]);
         }
     }
 

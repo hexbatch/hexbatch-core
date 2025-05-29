@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
+
+use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
+class AttributeHandleRemove extends Act\Cmd\Ty
+{
+    const UUID = '3618e198-e428-45ac-94e7-7aac4d1e8f85';
+    const ACTION_NAME = TypeOfAction::CMD_ATTRIBUTE_HANDLE_REMOVE;
+
+    const ATTRIBUTE_CLASSES = [
+    ];
+
+    const PARENT_CLASSES = [
+        Act\Cmd\Ty::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\AttributeHandleRemoved::class
+    ];
+
+}
+

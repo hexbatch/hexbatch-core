@@ -12,7 +12,7 @@ class MakeTimeSpans extends Command
      *
      * @var string
      */
-    protected $signature = 'bounds:make_time_spans';
+    protected $signature = 'hex:make_time_spans';
 
     /**
      * The console command description.

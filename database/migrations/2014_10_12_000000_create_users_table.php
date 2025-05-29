@@ -14,43 +14,18 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('element_type_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The user type")
-                ->unique('udx_user_element_type_id')
-                ->constrained('element_types')
+
+            $table->foreignId('default_namespace_id')
+                ->nullable()->default(null)
+                ->comment("The main namespace that is created for the user. Cannot delete")
+                ->index()
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
-                ->nullOnDelete();
+                ->restrictOnDelete();
 
-
-            $table->foreignId('element_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The user element that stores the user data")
-                ->unique('udx_user_element_id')
-                ->constrained('elements')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-
-            $table->foreignId('user_group_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The dedicated group for this user")
-                ->unique('udx_user_dedicated_group_id')
-                ->constrained('user_groups')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
-
-            $table->foreignId('server_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The server this user belongs to, null means this one")
-                ->index('idx_user_has_server_id')
-                ->constrained('servers')
-                ->cascadeOnUpdate()
-                ->nullOnDelete();
+            $table->boolean('is_system')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true then this user is from system boot');
 
             $table->uuid('ref_uuid')
                 ->unique()
@@ -58,7 +33,7 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
             $table->string('name')->nullable();
-            $table->string('username',61)->unique();//username is only 30, but visiting users have their server name appended
+            $table->string('username',30)->unique();
             $table->string('email')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

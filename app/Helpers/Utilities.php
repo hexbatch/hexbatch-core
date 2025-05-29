@@ -3,21 +3,55 @@
 namespace App\Helpers;
 
 use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
+use App\Models\UserNamespace;
+use App\Rules\ResourceNameReq;
+use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use JsonException;
+use JsonPath\InvalidJsonPathException;
+use JsonPath\JsonPath;
 use LogicException;
 
 class Utilities {
     public static function ignoreVar(...$params) {}
+
+    public static function isValidResourceName(string $name) {
+        try {
+            Validator::make(['attribute_name' => $name], [
+                'attribute_name' => ['required', 'string', new ResourceNameReq],
+            ])->validate();
+            return true;
+        } catch (ValidationException) {
+            return false;
+        }
+    }
 
     public static function is_uuid(?string $guid) : bool{
         if (empty($guid)) {return false;}
         $test_this = str_replace('-','',$guid);
         if (!ctype_xdigit($test_this)) {return false;}
         if (strlen($test_this) !== 32) {return false;}
+        return true;
+    }
+
+    public static function is_uuid_array(array $what, bool $b_throw_exception = false) : bool{
+        if (empty($what)) {
+            if ($b_throw_exception) {throw new \InvalidArgumentException("No uuid in array");}
+            return false;
+        }
+        foreach ($what as $who) {
+            if (!static::is_uuid($who)) {
+                if ($b_throw_exception) {throw new \InvalidArgumentException("Invalid uuid $who");}
+                return false;
+            }
+        }
         return true;
     }
 
@@ -30,7 +64,7 @@ class Utilities {
     }
 
     public static function boolishToBool($val) : bool {
-        if (is_string($val)) {return false;}
+        if (empty($val)) {return false;}
         $boolval = ( is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val );
         return ( $boolval===null  ? false : $boolval );
     }
@@ -41,6 +75,22 @@ class Utilities {
             'off', '0', 'no', 'false', '' =>true,
             default => false
         };
+    }
+
+    public static function cleanMaybeIntArrayToUniqueAndSorted(array $vals) : array {
+        $ret = [];
+        foreach ($vals as $val) {
+            if (is_array($val) || is_object($val)) {
+                throw new LogicException("This is not the int you were looking for");
+            }
+            $ret[] = intval($val);
+
+        }
+        $ret = array_unique($ret,SORT_NUMERIC);
+        usort($ret,function(int $a,int $b) {
+            return $a <=> $b;
+        });
+        return $ret;
     }
 
     public static function positiveBoolWords($val) : bool {
@@ -75,6 +125,20 @@ class Utilities {
             return json_last_error_msg();
         }
         return null;
+    }
+
+    public static function testValidJsonPath(?string $maybe_json_path): void {
+        if (empty($maybe_json_path)) {return;}
+        try {
+            $test = [1,2,3,"apples"=>"two"];//this is just to test, and is ok to keep, this can be any array
+            JsonPath::get($test,$maybe_json_path);
+        } /** @noinspection PhpRedundantCatchClauseInspection */
+        catch (InvalidJsonPathException) {
+            throw new HexbatchNotPossibleException(__("msg.invalid_json_path",['ref'=>$maybe_json_path]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::JSON_PATH_ISSUE);
+
+        }
     }
 
 
@@ -138,6 +202,35 @@ class Utilities {
         return $user;
     }
 
+    public static function getThisUserDefaultNamespace() : ?UserNamespace {
+
+        $user = static::getTypeCastedAuthUser();
+        return $user?->default_namespace;
+    }
+
+    public static function getSystemNamespace() : UserNamespace {
+        return UserNamespace::getThisNamespace(uuid: ThisNamespace::getClassUuid());
+    }
+
+    public static function getCurrentNamespace() : ?UserNamespace {
+        $namespace = null;
+        $what_route = Route::current();
+        if ($what_route?->hasParameter('user_namespace')) {
+            $namespace = $what_route->parameter('user_namespace');
+            if (!$namespace) {
+                $user_namespace_name = $what_route->originalParameter('user_namespace');
+                if ($user_namespace_name) {
+                    $namespace = (new UserNamespace())->resolveRouteBinding($user_namespace_name);
+                }
+
+            }
+            if (!$namespace instanceof UserNamespace) {
+                throw new LogicException("getCurrentNamespace does not see a Namespace in the parameter");
+            }
+        }
+        return $namespace;
+    }
+
     public static function runDbFile(?string $start_path) :bool {
         $path = realpath($start_path);
         if (!$path) {
@@ -150,7 +243,7 @@ class Utilities {
         return DB::statement($proc);
     }
 
-    const BASE_64_OPTION = 'base64';
+    const string BASE_64_OPTION = 'base64';
     /**
      * return a base64 encrypted string, you can also choose hex or null as encoding.
      * @source https://stackoverflow.com/a/62175263/2420206
@@ -207,5 +300,22 @@ class Utilities {
         if (empty($what)) {return $what; }
         return strip_tags(htmlspecialchars($what,ENT_QUOTES| ENT_HTML401,'UTF-8',false));
     }
+
+    public  static function cleanAnsiFromString(string $what) : string {
+        $step_a = preg_replace(/** @lang text */ '#\\x1b[[][^A-Za-z]*[A-Za-z]#', '', $what);
+        $step_b = preg_replace('#\\.[.]+#','-->',$step_a,1);
+        $step_c = preg_replace('#\\.[.]+#','',$step_b);
+        $step_d = htmlspecialchars_decode($step_c);
+        $step_e = str_replace('&gt;','>',$step_d);
+        return $step_e;
+    }
+
+    public static function getVersionString() : ?string {
+        return file_get_contents(base_path() . DIRECTORY_SEPARATOR . 'version') ? : null;
+    }
+
+
+
+
 
 }

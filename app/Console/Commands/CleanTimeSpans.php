@@ -12,7 +12,7 @@ class CleanTimeSpans extends Command
      *
      * @var string
      */
-    protected $signature = 'bounds:clean_time_spans';
+    protected $signature = 'hex:clean_time_spans';
 
     /**
      * The console command description.

@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
+
+use App\Enums\Sys\TypeOfAction;
+
+use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
+
+class PhaseReplaceTree extends Act\Cmd\Ph
+{
+    const UUID = '1b33ccfb-65ec-4856-9de0-cbae85eaa753';
+    const ACTION_NAME = TypeOfAction::CMD_PHASE_REPLACE_TREE;
+
+    const ATTRIBUTE_CLASSES = [
+
+    ];
+
+    const PARENT_CLASSES = [
+        Act\Cmd\Ph::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Type\PhaseReplacing::class,
+    ];
+
+}
+

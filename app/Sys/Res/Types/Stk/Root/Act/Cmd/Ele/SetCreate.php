@@ -1,0 +1,203 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
+
+use App\Enums\Sys\TypeOfAction;
+use App\Helpers\Annotations\Documentation\HexbatchBlurb;
+use App\Helpers\Annotations\Documentation\HexbatchDescription;
+use App\Helpers\Annotations\Documentation\HexbatchTitle;
+use App\Models\ActionDatum;
+use App\Models\Element;
+use App\Models\ElementSet;
+use App\Models\ElementSetChild;
+
+use App\Models\UserNamespace;
+use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Things\Enums\TypeOfThingStatus;
+use Hexbatch\Things\Interfaces\IThingAction;
+use Illuminate\Support\Facades\DB;
+
+#[HexbatchTitle( title: "New set")]
+#[HexbatchBlurb( blurb: "Creates a new set from a given element")]
+#[HexbatchDescription( description: "Any element can become a set without loosing any of its element functionality.
+## Sets are the bedrock of the library
+
+ * A set can optionally have a parent set.  Parents cannot be changed later. Children can be parents.
+ * A set can choose to turn off events fired when an element enters or leaves it.
+ * The owner of any set is the owner of its element, but elements can have their ownership changed
+ * Sets can set up action hooks in the element type of do things when its content changes, or filter what can enter
+
+ \" ' > <
+")]
+class SetCreate extends Act\Cmd\St
+{
+    const UUID = '06c6d184-1230-4bd1-9ee4-80657a9e3620';
+    const ACTION_NAME = TypeOfAction::CMD_SET_CREATE;
+
+    const ATTRIBUTE_CLASSES = [
+
+    ];
+
+    const PARENT_CLASSES = [
+        Act\Cmd\St::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\SetCreated::class,
+        Evt\Set\SetChildCreated::class
+    ];
+
+
+    public function getGivenElement(): ?Element
+    {
+        /** @uses ActionDatum::data_element() */
+        return $this->action_data->data_element;
+    }
+
+    public function setGivenElement(Element $element) : void {
+        $this->action_data->data_element_id = $element->id;
+        $this->given_element_uuid = $element->ref_uuid;
+        $this->action_data->collection_data =$this->getInitialConstantData();
+        $this->action_data->save();
+    }
+
+    public function getGivenParent(): ?ElementSet
+    {
+        /** @uses ActionDatum::data_set() */
+        return $this->action_data->data_set;
+    }
+
+    public function getCreatedSet(): ?ElementSet
+    {
+        /** @uses ActionDatum::data_second_set() */
+        return $this->action_data->data_second_set;
+    }
+
+
+
+
+    const array ACTIVE_DATA_KEYS = ['given_element_uuid','given_parent_set_uuid','uuid','set_has_events'];
+
+
+    public function __construct(
+        protected ?string               $given_element_uuid = null ,
+        protected ?string              $given_parent_set_uuid = null,
+        protected ?string             $uuid = null,
+        protected bool                $set_has_events = true,
+        protected bool                $is_system = false,
+        protected bool                $send_event = true,
+        protected ?bool                $is_async = null,
+        protected ?ActionDatum        $action_data = null,
+        protected ?ActionDatum        $parent_action_data = null,
+        protected ?UserNamespace      $owner_namespace = null,
+        protected bool                $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
+    )
+    {
+
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace ,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+    }
+
+
+
+    /**
+     * @throws \Exception
+     */
+    public function runAction(array $data = []): void
+    {
+        parent::runAction($data);
+        if ($this->isActionComplete()) {
+            return;
+        }
+
+        if (!$this->getGivenElement()) {
+            throw new \InvalidArgumentException("Need element");
+        }
+
+        try {
+            DB::beginTransaction();
+            $set = new ElementSet();
+            if ($this->uuid) {
+                $set->ref_uuid = $this->uuid;
+            }
+
+            $set->parent_set_element_id = $this->getGivenElement()->id;
+            $set->has_events = $this->set_has_events;
+            $set->is_system = $this->is_system;
+            $set->save();
+            $this->action_data->data_second_set_id = $set->id;
+            $this->action_data->save();
+
+            if ($this->send_event) {
+                $this->post_events_to_send = Evt\Server\SetCreated::makeEventActions(source: $this, action_data: $this->action_data,set_context: $set);
+            }
+
+            if ($this->getGivenParent()) {
+                $rel = new ElementSetChild();
+                $rel->parent_set_id = $this->getGivenParent()->id;
+                $rel->child_set_id = $set->id;
+                $rel->save();
+                if ($this->send_event) {
+                    $this->post_events_to_send =
+                        array_merge($this->post_events_to_send,
+                            Evt\Set\SetChildCreated::class::makeEventActions(source: $this, action_data: $this->action_data,set_context: $set) );
+                }
+            }
+
+            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->wakeLinkedThings();
+            $this->action_data->refresh();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
+            throw $e;
+        }
+
+    }
+
+
+
+    protected function getMyData() :array {
+        return ['element'=>$this->getGivenElement(),'given_parent'=>$this->getGivenParent(),'set'=>$this->getCreatedSet()];
+    }
+
+
+
+    protected function initData(bool $b_save = true) : ActionDatum {
+        parent::initData(b_save: false);
+        if ($this->given_element_uuid) {
+            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
+        }
+
+        if ($this->given_parent_set_uuid) {
+            $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_parent_set_uuid)->id;
+        }
+        $this->action_data->save();
+        $this->action_data->refresh();
+        return $this->action_data;
+    }
+
+
+    public function setChildActionResult(IThingAction $child): void {
+
+
+
+        if ($child instanceof Act\Cmd\Ty\ElementCreate) {
+            if ($child->isActionFail() || $child->isActionError()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+            else if($child->isActionSuccess()) {
+                if (count($child->getElementsCreated()  ) === 1) {
+                    $this->setGivenElement(element: $child->getElementsCreated()[0]);
+                }
+            }
+        }
+
+    }
+
+}
+

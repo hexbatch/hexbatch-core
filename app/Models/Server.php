@@ -2,22 +2,82 @@
 
 namespace App\Models;
 
+use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\Sys\Res\ISystemModel;
+use App\Sys\Res\Servers\IServer;
+use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\MasterSemaphore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Communication with elsewhere uses @uses MasterSemaphore
+ */
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
+ * @property int server_type_id
+ * @property int owning_namespace_id
+ * @property bool is_system
  * @property string ref_uuid
+ * @property TypeOfServerStatus server_status
+ * @property string server_domain
+ * @property string server_url
+ * @property string server_name
+ * @property string server_access_token
+ * @property string status_change_at
+ * @property string access_token_expires_at
+ *
+ * @property UserNamespace owning_namespace
+ *
+ *  @property string created_at
+ *  @property string updated_at
  *
  */
-class Server extends Model
+class Server extends Model implements IServer,ISystemModel
 {
+
+    /*
+     * When transferring sets, element order (the entry order of the elements to the set table) is always preserved
+     *
+     * When transferring sets, will fail to transfer set if any of the types in the set are forbidden on the other server
+     *
+     * server ns are not initially owned, but can be assigned to a user later
+     *
+     * When an element has linked to a set, and that element owner ns is registered on the same server that set is being copied to,
+     * then also transfer that element
+     *
+     * All elements transferred have the same uuid in the newly created elements
+     * All ns transferred keep their uuid
+     * all incoming servers keep their uuid
+     *
+     * The server has a ns, any element stuff is in its public or private element
+     */
+
+    //get, list, are done by paths
+    // edit means details in the element
+    //read and write attributes regular data updates in the api
+
+    //only namespaces are transferred not users themselves
+
+    //live types on elements are transferred
+
+    //copied elements are always copied inside a set, this set can be a type already known, or a container
+    //when previously copied element is sent back to this server, that is updated via the attribute's merge policy for this re-import (different from live merge)
+
+
+    /*
+     note: when ns is transferred to elsewhere, the public set from the ns is sent too, minus any attributes or types not fitting into the access level
+      if something needs to be updated, then rules can be made to push that element again
+     */
+
+
+
 
     protected $table = 'servers';
     public $timestamps = false;
@@ -41,22 +101,49 @@ class Server extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'server_status' => TypeOfServerStatus::class,
+    ];
+
+    public function owning_namespace() : BelongsTo {
+        return $this->belongsTo(UserNamespace::class,'owning_namespace_id');
+    }
 
 
     public static function buildServer(
-        ?int $id = null)
+        ?int            $me_id = null,
+        ?int            $type_id = null,
+        ?string         $uuid = null,
+        ?bool           $is_system = null
+    )
     : Builder
     {
 
         /**
          * @var Builder $build
          */
-        $build = Element::select('servers.*');
+        $build = Server::select('servers.*');
 
-        if ($id) {
-            $build->where('servers.id', $id);
+        if ($me_id) {
+            $build->where('servers.id', $me_id);
         }
+
+        if ($type_id) {
+            $build->where('servers.server_type_id', $type_id);
+        }
+
+        if ($uuid) {
+            $build->where('servers.ref_uuid', $uuid);
+        }
+
+        if ($is_system !== null) {
+            $build->where('is_system',$is_system);
+        }
+
+        /**
+         * @uses Server::owning_namespace()
+         */
+        $build->with('owning_namespace');
 
         return $build;
     }
@@ -76,11 +163,23 @@ class Server extends Model
         try {
             if ($field) {
                 $build = $this->where($field, $value);
+            } else {
+                if (Utilities::is_uuid($value)) {
+                    $build = $this->where('ref_uuid', $value);
+                } else {
+                    if (is_string($value)) {
+                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+                        if (count($parts) === 1) {
+                            $s_name = $parts[0];
+                            $build = $this->where('server_name', $s_name);
+                        }
+                    }
+                }
             }
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $ret = Server::buildServer(id:$first_id)->first();
+                    $ret = Server::buildServer(me_id:$first_id)->first();
                 }
             }
         } finally {
@@ -96,7 +195,49 @@ class Server extends Model
 
     }
 
-    public function getName() :string {
-        return $this->id;
+    public static function getThisServer(
+        ?int             $id = null,
+        ?int             $type_id = null,
+        ?string          $uuid = null
+    )
+    : Server
+    {
+        $ret = static::buildServer(me_id:$id,type_id: $type_id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = []; $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            if ($type_id) { $arg_types[] = 'type_id'; $arg_vals[] = $type_id;}
+            $arg_val = implode('|',$arg_vals); $arg_type = implode('|',$arg_types);
+            throw new \InvalidArgumentException("Could not find server via $arg_type : $arg_val");
+        }
+        return $ret;
     }
+
+    public function getName() :string {
+        return $this->server_domain;
+    }
+
+
+
+
+    public function getServerObject(): ?Server
+    {
+        return $this;
+    }
+
+    public function getUuid(): string{
+        return $this->ref_uuid;
+    }
+
+    public static function getDefaultServer(bool $b_throw_on_missing = true) : ?Server {
+        $server = Server::buildServer(is_system: true)->first();
+        if (!$server && $b_throw_on_missing) {
+            throw new \LogicException("No system server made");
+        }
+        return $server;
+    }
+
+
 }

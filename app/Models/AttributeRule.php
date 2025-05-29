@@ -2,35 +2,89 @@
 
 namespace App\Models;
 
+use App\Enums\Rules\TypeOfMergeLogic;
+use App\Enums\Rules\TypeOfLogic;
+use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
-use App\Models\Enums\Attributes\AttributeRuleType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
+
+
+
+/*
+ * Add to rules:
+
+ *
+
+ *
+ * required goes to the to-do , and can use type ancestors and the children can listen for remotes
+ *
+ * event handlers are ignored in rule chains
+ * * unless the top rule (with an attribute owning id) has an event listening to
+ * * a command is executed by a child, and the parent (not necessarily the top level one) can listen to events caused by the child command
+ *
+ * All rules are passed information from the api call or event
+ *   caller ns (directly or indirectly)
+ *   api type
+ *   event type
+ *   thing ref
+ *   set id of the context
+ *   server type
+ *   thing uuid
+ * This is sent via a standard element that always has the same id and uuid, but has different reads. No writes,  just a special system hook
+ *
+ * Short circuit,
+ *  rule chain A parent of B, B returns true or false and A logic makes it true or false no matter what A does, A will not do any target stuff,
+ *   and will pass the data up
+ *
+ * //  when attr is inherited, the parent rule is run before the child rule, if the parent fails the child rule does not run. going back to the root ancestor
+    //  events have no children, so can only listen to one event at a time
+
+remotes are executed by command in the rule
+
+
+
+rule children pass up either path results or data
+
+the rules can react there when creation events to things in the set, the paths in the rules can filter about whose home set we want
+ */
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int rule_parent_attribute_id
- * @property int target_attribute_id
- * @property int rule_weight
- * @property int rule_numeric_min
- * @property int rule_numeric_max
- * @property string rule_regex
- * @property AttributeRuleType rule_type
+ * @property int owning_server_event_id
+ * @property int parent_rule_id
+ * @property int rule_phase_id
+ * @property int rule_action_type_id
+ * @property int rule_path_id
+ * @property int rule_rank
+ * @property string ref_uuid
+ * @property string rule_name
+ * @property string top_json_key
+ *
+ * @property TypeOfLogic rule_child_logic
+ * @property TypeOfLogic rule_logic
+ * @property TypeOfMergeLogic rule_merge_method
+ *
+ *
  * @property string created_at
  * @property string updated_at
  *
- *
- * @property int created_at_ts
- * @property int updated_at_ts
- * @property Attribute rule_parent
- * @property Attribute rule_target
- *
+ * @property ServerEvent owning_event
+ * @property AttributeRule rule_parent
+ * @property AttributeRule[] rule_children
  */
 class AttributeRule extends Model
 {
@@ -60,82 +114,292 @@ class AttributeRule extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'rule_type' => AttributeRuleType::class,
+        'rule_child_logic' => TypeOfLogic::class,
+        'rule_logic' => TypeOfLogic::class,
+        'rule_merge_method' => TypeOfMergeLogic::class,
     ];
 
+
+
+
     public function rule_parent() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','rule_parent_attribute_id');
+        return $this->belongsTo(AttributeRule::class,'parent_rule_id');
     }
 
-    public function rule_target() : BelongsTo {
-        return $this->belongsTo('App\Models\Attribute','target_attribute_id');
+    public function rule_children() : HasMany {
+        return $this->hasMany(AttributeRule::class,'parent_rule_id')
+            /** @uses AttributeRule::rule_children() */
+            ->with('rule_children');
     }
-    const DEFAULT_WEIGHT = 1;
 
-    public bool $delete_mode = false;
+    public function owning_event() : BelongsTo {
+        return $this->belongsTo(ServerEvent::class,'owning_server_event_id');
+    }
 
-    public static function createRule(string|array $rule_hint, AttributeRuleType $rule_type, ?Attribute $parent = null) : AttributeRule {
-        $ret = new AttributeRule();
-        $ret->rule_type = $rule_type;
-        if ($parent) {
-            $ret->rule_parent_attribute_id = $parent->id;
+
+
+    public function getName() : string {
+        if ($this->rule_name) {return $this->rule_name;}
+        return $this->ref_uuid;
+    }
+
+    public static function buildAttributeRule(
+        ?int $id = null
+    )
+    : Builder
+    {
+
+        $build = ElementType::select('attribute_rules.*')
+            ->selectRaw(" extract(epoch from  attribute_rules.created_at) as created_at_ts,  extract(epoch from  attribute_rules.updated_at) as updated_at_ts")
+
+            /** @uses AttributeRule::owning_event() */
+            /** @uses AttributeRule::rule_parent(),AttributeRule::rule_children() */
+            ->with('owning_event','rule_parent')
+        ;
+
+        if ($id) {
+            $build->where('attribute_rules.id', $id);
         }
-        $use_rule_hint = $rule_hint;
-        if (is_array($rule_hint)) {
-            if (!array_key_exists('target',$rule_hint)) {
-                throw new HexbatchNotPossibleException(__("msg.attribute_schema_missing_rule_attribute"),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-            }
-            $use_rule_hint = $rule_hint['target'];
-            if (array_key_exists('delete',$rule_hint) && Utilities::boolishToBool($rule_hint['delete'])) {
-                $ret->delete_mode = true;
-            }
 
-            if (array_key_exists('weight',$rule_hint) && !is_array($rule_hint['weight'])) {
-                $ret->rule_weight = (int)$rule_hint['weight'];
-            }
 
-            if (array_key_exists('min',$rule_hint) && !is_array($rule_hint['min'])) {
-                $ret->rule_numeric_min = (float)$rule_hint['min'];
-            }
+        return $build;
+    }
 
-            if (array_key_exists('max',$rule_hint) && !is_array($rule_hint['max'])) {
-                $ret->rule_numeric_max = (float)$rule_hint['max'];
-            }
-            if (array_key_exists('regex',$rule_hint) && !is_array($rule_hint['regex'])) {
-                $rest_regex = $rule_hint['regex'];
-                $bare_regex = trim($rest_regex, '/');
-                $test_regex = "/$bare_regex/";
-                $issues = Utilities::regexHasErrors($test_regex);
-                if ($issues) {
-                    throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_bad_regex", ['issue' => $issues]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $build = null;
+        $ret = null;
+        try {
+            if ($field) {
+                $ret = $this->where($field, $value)->first();
+            } else {
+                if (Utilities::is_uuid($value)) {
+                    $build = $this->where('ref_uuid', $value);
                 }
-                $ret->rule_regex = $test_regex;
+            }
+
+            if ($build) {
+                $first_id = (int)$build->value('id');
+                if ($first_id) {
+                    $first_build = AttributeRule::buildAttributeRule(id: $first_id);
+                    $ret = $first_build->first();
+                }
             }
         }
-        /**
-         * @var Attribute $found_attribute
-         */
-        $found_attribute = (new Attribute())->resolveRouteBinding($use_rule_hint);
-        if (!$ret->delete_mode && $found_attribute->is_retired) {
-            throw new HexbatchNotPossibleException(__("msg.attribute_schema_rule_retired",['name'=>$found_attribute->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+        catch (\Exception $e) {
+            Log::warning('Attribute rule resolving: '. $e->getMessage());
         }
-        $ret->target_attribute_id = $found_attribute->id;
+        finally {
+            if (empty($ret)) {
+                throw new HexbatchNotFound(
+                    __('msg.rule_not_found',['ref'=>$value]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::RULE_NOT_FOUND
+                );
+            }
+        }
         return $ret;
     }
 
-    public function deleteModeActivate() {
-        if ($this->delete_mode) {
-            AttributeRule::where('rule_parent_attribute_id',$this->rule_parent_attribute_id)
-                ->where('target_attribute_id',$this->target_attribute_id)
-                ->where('rule_type',$this->rule_type->value)
-                ->delete();
+
+
+    public static function collectRule(
+        Collection|string $collect,?AttributeRule $rule = null,?AttributeRule $parent_rule = null,?ServerEvent $owner_event = null)
+    : AttributeRule
+    {
+        // one rule or a tree of rules can be passed in to be copied,  parents can be referred by uuid, or the parents can be collected
+
+        try {
+            DB::beginTransaction();
+            if (is_string($collect) && Utilities::is_uuid($collect)) {
+                return (new AttributeRule())->resolveRouteBinding($collect);
+            }
+            else if(!$rule) {
+                //see if the uuid is set, if so, then get that
+                if ($collect->has('uuid')) {
+                    $maybe_uuid = $collect->get('uuid');
+                    if (is_string($maybe_uuid) &&  Utilities::is_uuid($maybe_uuid) ) {
+                        $rule =  (new AttributeRule())->resolveRouteBinding($maybe_uuid);
+                    } else {
+
+                        throw new HexbatchNotFound(
+                            __('msg.rule_not_found',['ref'=>(string)$maybe_uuid]),
+                            \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                            RefCodes::RULE_NOT_FOUND
+                        );
+                    }
+                } else {
+                    $rule = new AttributeRule();
+                }
+            }
+
+
+            if ($owner_event) {
+                $rule->owning_server_event_id = $owner_event->id;
+            }
+            $rule->editRule($collect,$parent_rule);
+
+            $rule = AttributeRule::buildAttributeRule(id:$rule->id)->first();
+            DB::commit();
+            return $rule;
+        }
+
+        catch (\Exception $e) {
+            DB::rollBack();
+            if ($e instanceof HexbatchCoreException) {
+                throw $e;
+            }
+            throw new HexbatchNotPossibleException(
+                $e->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::RULE_SCHEMA_ISSUE);
+
         }
     }
 
+
+    /**
+     *
+     * A rule or a rule chain can be created or edited here
+     * If editing, pass in the rule uuid for lookup of the parent
+     * this ignores the owning event of the rule or chain
+     * @throws \Exception
+     */
+    public function editRule(Collection $collect,?AttributeRule $parent_rule = null) : void {
+        try {
+            DB::beginTransaction();
+
+
+            if ($collect->has('rule_name')) {
+                try {
+                    if ($this->rule_name = $collect->get('rule_name')) {
+                        Validator::make(
+                            ['rule_name' => $this->rule_name],
+                            ['rule_name' => ['required', 'string', 'max:255'],
+                        ])->validate();
+                    }
+                } catch (ValidationException $v) {
+                    throw new HexbatchNotPossibleException($v->getMessage(),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::RULE_SCHEMA_ISSUE);
+                }
+            }
+
+
+
+            if ($collect->has('parent')) {
+                $maybe_uuid = $collect->get('parent');
+                if (is_string($maybe_uuid) &&  Utilities::is_uuid($maybe_uuid) ) {
+                    $parent_rule =  (new AttributeRule())->resolveRouteBinding($maybe_uuid);
+                } else {
+                    throw new HexbatchNotPossibleException(
+                        __('msg.parent_rule_not_found',['ref'=>$maybe_uuid]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::RULE_SCHEMA_ISSUE);
+                }
+            }
+
+            if ($parent_rule) {
+                //check to make sure the parent and the child are in the same chain
+                $parent_event_id = $parent_rule->owning_server_event_id;
+                $this_event_id = $this->owning_server_event_id;
+
+                if (!$parent_event_id || !$this_event_id || ($this_event_id !== $parent_event_id)) {
+                    throw new HexbatchNotPossibleException(
+                        __('msg.rule_parent_child_be_same_chain',['ref'=>$this->getName(),'other'=>$parent_rule->getName()]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::RULE_SCHEMA_ISSUE);
+
+                }
+                $this->parent_rule_id = $parent_rule->id;
+            }
+
+
+
+            if ($collect->has('children')) {
+                $my_event = ServerEvent::buildEvent(id:$this->owning_server_event_id)->first();
+                collect($collect->get('children'))->each(function ($hint_child, int $key) use($my_event) {
+                    Utilities::ignoreVar($key);
+                    AttributeRule::collectRule(collect: $hint_child,parent_rule: $this, owner_event: $my_event);
+                });
+            }
+
+
+
+            if ($collect->has('rule_path')) {
+                $hint_path = $collect->get('rule_path');
+                if (is_string($hint_path) || $hint_path instanceof Collection) {
+                    $path = Path::collectPath($hint_path);
+                    $this->rule_path_id = $path->id;
+                }
+            }
+
+
+            if ($collect->has('event')) {
+                $hint_event = $collect->get('event');
+                if (is_string($hint_event) && Utilities::is_uuid($hint_event)) {
+                    /**
+                     * @var ElementType $event_type
+                     */
+                    $event_type = (new ElementType())->resolveRouteBinding($hint_event);
+                    //todo see if the event type is a valid event
+                    $this->rule_action_type_id = $event_type->id;
+                }
+            }
+
+
+
+
+
+            if ($collect->has('rule_child_logic')) {
+                $this->rule_child_logic = TypeOfLogic::tryFromInput($collect->get('rule_child_logic'));
+            }
+
+            if ($collect->has('rule_logic')) {
+                $this->rule_logic = TypeOfLogic::tryFromInput($collect->get('rule_logic'));
+            }
+
+
+            if ($collect->has('rule_merge_method')) {
+                $this->rule_merge_method = TypeOfMergeLogic::tryFromInput($collect->get('rule_merge_method'));
+            }
+
+
+
+            try {
+                $this->save();
+            } catch (\Exception $f) {
+                throw new HexbatchNotPossibleException(
+                    __('msg.rule_cannot_be_edited',['ref'=>$this->getName(),'error'=>$f->getMessage()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::RULE_SCHEMA_ISSUE);
+            }
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+
+
+    public function delete_subtree() :void {
+        if ($this->owning_event->isInUse()) {
+            throw new HexbatchNotFound(
+                __('msg.rule_cannot_be_deleted_if_in_use',['ref'=>$this->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::RULE_NOT_FOUND
+            );
+        }
+        try {
+            DB::beginTransaction();
+            $this->delete();
+            DB::commit();
+        }catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 }

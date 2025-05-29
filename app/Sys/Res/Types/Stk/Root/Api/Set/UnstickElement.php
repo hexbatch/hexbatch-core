@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Api\Set;
+
+use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Api;
+
+
+class UnstickElement extends Api\SetApi
+{
+    const UUID = 'b229bd56-9bab-4716-9cc2-e18ea93f8f29';
+    const TYPE_NAME = 'api_set_unstick_element';
+
+
+
+
+
+    const PARENT_CLASSES = [
+        Api\SetApi::class,
+        Act\Cmd\Pa\Search::class,
+        Act\Cmd\St\SetMemberUnstick::class,
+    ];
+
+}
+

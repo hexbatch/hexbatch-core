@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
+
+use App\Enums\Sys\TypeOfEvent;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
+
+class WaitFail extends Evt\ScopeServer
+{
+    const UUID = 'fdc229b8-c6e3-4f96-8230-a076352d2530';
+    const EVENT_NAME = TypeOfEvent::WAIT_FAIL;
+
+
+
+
+
+
+
+    const PARENT_CLASSES = [
+        Evt\ScopeServer::class
+    ];
+
+}
+

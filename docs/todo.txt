@@ -1,0 +1,18 @@
+
+°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
+
+
+
+
+
+
+
+
+todo talk about how live types on an element does not change its bounds, just attribute shapes
+todo talk about what triggers intersection events and what does not (attribute on, type on, element enter set trigger) time bounds do not
+
+
+
+
+°º¤ø,¸¸,ø¤º°`°º¤ø,¸,ø¤°º¤ø,¸¸,ø¤º°`°º¤ø,¸
+

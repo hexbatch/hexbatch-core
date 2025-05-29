@@ -34,7 +34,6 @@ class LocationBoundResource extends JsonResource
             'uuid' => $this->ref_uuid,
             'name' => $this->getName(),
             'location_type' => $this->location_type,
-            'is_retired' => $this->is_retired,
             'created_at' => Carbon::createFromTimestamp($this->created_at_ts)->toIso8601String(),
         ];
 

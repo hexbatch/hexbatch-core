@@ -15,17 +15,13 @@ return new class extends Migration
         Schema::create('location_bounds', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('user_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The owner of the bound")
-                ->index('idx_location_bound_user_id')
-                ->constrained('users')
+            $table->foreignId('location_bound_namespace_id')
+                ->nullable(false)
+                ->comment("The namespace this entry is for")
+                ->index()
+                ->constrained('user_namespaces')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
-
-            $table->boolean('is_retired')->default(false)->nullable(false)
-                ->comment('if true then cannot be added to token types or make new tokens');
 
         });
 
@@ -47,12 +43,27 @@ return new class extends Migration
                               ;
                     ");
 
+        DB::statement("ALTER TABLE location_bounds
+                              Add COLUMN shape_bounding_box
+                              box3d
+                              ;
+                    ");
+
+        DB::statement("ALTER TABLE location_bounds
+                              Add COLUMN map_bounding_box
+                              box2d
+                              ;
+                    ");
+
         Schema::table('location_bounds', function (Blueprint $table) {
             $table->jsonb('geo_json')->comment("the original json that is used to make this geom");
+            $table->jsonb('display_json')->comment("keys used by outside to render map or shape");
             $table->timestamps();
 
             $table->string('bound_name',128)->nullable(false)->index()
                 ->comment("The unique name of the location bound, using the naming rules");
+
+            $table->unique(['location_bound_namespace_id','bound_name']);
         });
 
         DB::statement('ALTER TABLE location_bounds ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -69,17 +80,22 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
             BEGIN
                 NEW.geom = ST_AsText(ST_GeomFromGeoJSON(New.geo_json));
+                IF location_type = 'shape' THEN
+                  NEW.shape_bounding_box = ST_3DExtent(NEW.geom);
+                ELSE
+                  NEW.map_bounding_box = ST_Extent(NEW.geom);
+                END IF;
                 RETURN NEW;
             END;
             $$ language 'plpgsql';
         ");
 
         DB::statement("
-            CREATE TRIGGER set_geo_before_ins BEFORE INSERT ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
+            CREATE TRIGGER set_bound_geo_before_ins BEFORE INSERT ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
         ");
 
         DB::statement("
-            CREATE TRIGGER set_geo_before_ups BEFORE UPDATE ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
+            CREATE TRIGGER set_bound_geo_before_ups BEFORE UPDATE ON location_bounds FOR EACH ROW EXECUTE PROCEDURE update_location_bounds_geo_column();
         ");
 
     }

@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Evt\Element;
+
+use App\Enums\Sys\TypeOfEvent;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
+
+class NamespaceAdminAdding extends Evt\ScopeElement
+{
+    const UUID = '00e105a0-5b7f-4a8c-b80f-84f8f83b56ba';
+    const EVENT_NAME = TypeOfEvent::NAMESPACE_ADMIN_ADDING;
+
+
+
+
+
+
+
+    const PARENT_CLASSES = [
+        Evt\ScopeElement::class
+    ];
+
+}
+

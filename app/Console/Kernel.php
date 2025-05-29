@@ -25,3 +25,11 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 }
+
+//todo make new command to give ownership to someone of abandoned namespace
+
+//todo get token for the system user so that can be updated
+
+//todo write command to trim pending things if they are done and past a time
+
+//todo command to trim  paths not in the todo, not a constraint, not in the rules,and without a handle element

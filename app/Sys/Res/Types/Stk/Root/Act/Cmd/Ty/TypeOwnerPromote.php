@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
+
+use App\Enums\Sys\TypeOfAction;
+
+use App\Sys\Res\Types\Stk\Root\Act;
+
+
+class TypeOwnerPromote extends Act\Cmd\Ty
+{
+    const UUID = '8f4180e0-5ccc-4871-9a2a-8b1b22ae0e2a';
+    const ACTION_NAME = TypeOfAction::CMD_TYPE_OWNER_PROMOTE;
+
+    const ATTRIBUTE_CLASSES = [
+
+    ];
+
+    const PARENT_CLASSES = [
+        Act\Cmd\Ty::class,
+        Act\SystemPrivilege::class,
+        Act\NoEventsTriggered::class,
+    ];
+
+}
+

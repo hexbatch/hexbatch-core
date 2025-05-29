@@ -3,7 +3,6 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
-use App\Rules\ResourceNameReq;
 use App\Rules\UserNameReq;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -15,7 +14,7 @@ class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules;
 
-    const MAX_USERNAME_LENGTH = 30;
+
     /**
      * Validate and create a newly registered user.
      *
@@ -24,12 +23,11 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input, ?string $server_name = null): User
     {
-        $max = static::MAX_USERNAME_LENGTH;
-        if ($server_name) {$max = static::MAX_USERNAME_LENGTH * 2 + 1;}
+
         //The server name is the server username here, so not using domain name in the table
         Validator::make($input, [
             'name' => [ 'string', 'max:255'],
-            'username'=>['required','string',"max:$max",'min:3',Rule::unique(User::class),new ResourceNameReq,new UserNameReq],
+            'username'=>['required','string','min:3',Rule::unique(User::class,'username'),new UserNameReq],
             'password' => $this->passwordRules(),
         ])->validate();
 
@@ -38,5 +36,9 @@ class CreateNewUser implements CreatesNewUsers
             'username' => $input['username'],
             'password' => Hash::make($input['password']),
         ]);
+    }
+
+    public static function getPasswordRules() : array  {
+        return (new static)->passwordRules();
     }
 }

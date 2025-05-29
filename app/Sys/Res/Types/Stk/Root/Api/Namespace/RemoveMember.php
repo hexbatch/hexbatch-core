@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
+
+
+use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Api;
+
+
+class RemoveMember extends Api\NamespaceApi
+{
+    const UUID = '310b7928-d5a6-4fcd-9ab7-3ca85d932408';
+    const TYPE_NAME = 'api_namespace_remove_member';
+
+
+
+
+
+    const PARENT_CLASSES = [
+        Api\NamespaceApi::class,
+        Act\Cmd\Pa\Search::class,
+        Act\Cmd\Ns\NamespaceMemberRemove::class,
+    ];
+
+}
+

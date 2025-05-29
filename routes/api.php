@@ -1,111 +1,579 @@
 <?php
 
-use App\Http\Controllers\API\AuthenticationController;
-use App\Http\Controllers\API\ElementController;
-use App\Http\Controllers\API\LocationBoundController;
-use App\Http\Controllers\API\RemoteController;
-use App\Http\Controllers\API\TimeBoundController;
-use App\Http\Controllers\API\UserGroupController;
-use App\Http\Controllers\API\AttributeController;
+use App\Http\Controllers\Api;
+use App\Http\Middleware;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
 */
 
+
 Route::prefix('v1')->group(function () {
-    Route::prefix('users')->group(function () {
-        Route::post('/login', [AuthenticationController::class, 'login'])->name('core.users.login');
-        Route::post('/register', [AuthenticationController::class, 'register'])->name('core.users.register');
-        Route::get('/get/{user}', [ElementController::class, 'get_user'])->name('core.users.read');
+
+
+    Route::prefix('servers')->group(function () {
+        Route::get('us', [Api\ServerController::class, 'us'])->name('core.server.us');
     });
+
+    Route::prefix('elements')->group(function () {
+        Route::get('public', [Api\ElementController::class, 'show_public'])->name('core.elements.show_public');
+    });
+
+    Route::prefix('namespaces')->group(function () {
+        Route::get('public', [Api\NamespaceController::class, 'show_namespace_public'])->name('core.namespaces.show_public');
+    });
+
+    Route::prefix('sets')->group(function () {
+        Route::get('public', [Api\SetController::class, 'show_public'])->name('core.sets.show_public');
+    });
+
+    Route::prefix('types')->group(function () {
+        Route::get('public', [Api\TypeController::class, 'show_type_public'])->name('core.types.show_public');
+        Route::get('suspended', [Api\TypeController::class, 'list_all_suspended'])->name('core.types.list_all_suspended');
+    });
+
+    Route::prefix('elsewhere')->group(function () {
+        Route::post('ask_credentials', [Api\ElsewhereController::class, 'ask_credentials'])->name('core.elsewhere.ask_credentials');
+        Route::post('register', [Api\ElsewhereController::class, 'register_elsewhere'])->name('core.elsewhere.register');
+
+        Route::get('list_servers', [Api\ElsewhereController::class, 'list_servers'])->name('core.elsewhere.list_servers');
+
+        Route::prefix('{server}')->group(function () {
+            Route::get('show', [Api\ElsewhereController::class, 'show_elsewhere_public'])->name('core.elsewhere.show');
+        });
+    });
+
+    Route::prefix('users')->group(function () {
+        Route::post('/login', [Api\AuthenticationController::class, 'login'])->name('core.users.login');
+        Route::post('/register', [Api\AuthenticationController::class, 'register'])->name('core.users.register');
+        Route::get('/avialable', [Api\AuthenticationController::class, 'available']);
+    });
+
+
+
+
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('users')->group(function () {
-            Route::get('/me', [AuthenticationController::class, 'me']);
+            Route::get('/me', [Api\AuthenticationController::class, 'me'])->name('core.users.me');
 
-            Route::post('/logout', [AuthenticationController::class, 'logout'])->name('core.users.logout');
+            Route::delete('/logout', [Api\AuthenticationController::class, 'logout'])->name('core.users.logout');
+
+
 
             Route::prefix('auth')->group(function () {
 
-                Route::post('/create/{seconds_to_live?}', [AuthenticationController::class, 'create_token'])
+                Route::post('/create/{seconds_to_live?}', [Api\AuthenticationController::class, 'create_token'])
                     ->name('core.users.auth.create')->whereNumber('seconds_to_live');
 
-                Route::get('/passthrough', [AuthenticationController::class, 'get_token_passthrough'])
+                Route::get('/passthrough', [Api\AuthenticationController::class, 'get_token_passthrough'])
                     ->name('core.users.auth.passthrough');
 
-                Route::delete('/delete', [AuthenticationController::class, 'delete_this_token'])
-                    ->name('core.users.auth.delete');
-            });
+                Route::delete('/remove_current_token', [Api\AuthenticationController::class, 'remove_current_token'])
+                    ->name('core.users.auth.remove_current_token');
 
-            Route::get('/groups', [UserGroupController::class, 'list_my_groups'])->name('core.users.groups.list');
-        });
+                Route::delete('/start_deletion', [Api\AuthenticationController::class, 'start_user_deletion'])
+                    ->name('core.users.auth.start_deletion');
 
-
-        Route::prefix('groups')->group(function () {
-            Route::post('/create/{group_name}', [UserGroupController::class, 'group_create'])->name('core.groups.create');
-            Route::delete('/{user_group}/destroy', [UserGroupController::class, 'group_destroy'])->name('core.groups.destroy');
-            Route::get('/{user_group}/list', [UserGroupController::class, 'group_list_members'])->name('core.groups.list');
-            Route::get('/{user_group}/get', [UserGroupController::class, 'group_get'])->name('core.groups.get');
-            Route::put('/{user_group}/member/add/{user}', [UserGroupController::class, 'group_member_add'])->name('core.groups.member.add');
-            Route::delete('/{user_group}/member/remove/{user}', [UserGroupController::class, 'group_member_remove'])->name('core.groups.member.remove');
-            Route::put('/{user_group}/admin/add/{user}', [UserGroupController::class, 'group_admin_add'])->name('core.groups.admin.add');
-            Route::patch('/{user_group}/admin/remove/{user}', [UserGroupController::class, 'group_admin_remove'])->name('core.groups.admin.remove');
-        });
-
-        Route::prefix('bounds')->group(function () {
-            Route::prefix('schedule')->group(function () {
-                Route::get('/{time_bound}/get', [TimeBoundController::class, 'time_bound_get'])->name('core.bounds.schedule.get');
-                Route::delete('/{time_bound}/delete', [TimeBoundController::class, 'time_bound_delete'])->name('core.bounds.schedule.delete');
-                Route::patch('/{time_bound}/edit', [TimeBoundController::class, 'time_bound_edit'])->name('core.bounds.schedule.edit');
-                Route::get('/{time_bound}/ping/{time_to_ping}', [TimeBoundController::class, 'time_bound_ping'])->name('core.bounds.schedule.ping');
-                Route::post('/create', [TimeBoundController::class, 'time_bound_create'])->name('core.bounds.schedule.create');
-                Route::get('/list/{user?}', [TimeBoundController::class, 'time_bound_list'])->name('core.bounds.schedule.list');
-            });
-
-            Route::prefix('locations')->group(function () {
-                Route::get('/{location_bound}/get', [LocationBoundController::class, 'location_bound_get'])->name('core.bounds.location.get');
-                Route::delete('/{location_bound}/delete', [LocationBoundController::class, 'location_bound_delete'])->name('core.bounds.location.delete');
-                Route::patch('/{location_bound}/edit', [LocationBoundController::class, 'location_bound_edit'])->name('core.bounds.location.edit');
-                Route::get('/{location_bound}/ping/{location_json_to_ping}', [LocationBoundController::class, 'location_bound_ping'])->name('core.bounds.location.ping');
-                Route::post('/create/{location_type}', [LocationBoundController::class, 'location_bound_create'])->name('core.bounds.location.create');
-                Route::get('/list/{user?}', [LocationBoundController::class, 'location_bound_list'])->name('core.bounds.location.list');
-            });
-        }); //end bounds
-
-        Route::prefix('attributes')->group(function () {
-            Route::post('/create', [AttributeController::class, 'attribute_create'])->name('core.attributes.create');
-            Route::patch('/{attribute}/edit', [AttributeController::class, 'attribute_edit_patch'])->name('core.attributes.edit');
-            Route::delete('/{attribute}/destroy', [AttributeController::class, 'attribute_delete'])->name('core.attributes.destroy');
-            Route::get('/{attribute}/get/{levels?}', [AttributeController::class, 'attribute_get'])->name('core.attributes.get');
-            Route::get('/{attribute}/ping/{attribute_ping_type}', [AttributeController::class, 'attribute_ping'])->name('core.attributes.ping');
-            Route::get('/list/managed', [AttributeController::class, 'attribute_list_managed'])->name('core.attributes.list.managed');
-            Route::get('/list/usage', [AttributeController::class, 'attribute_list_usage'])->name('core.attributes.list.usage');
-            Route::get('/standard/list', [AttributeController::class, 'attribute_list_standard'])->name('core.attributes.standard.list');
-        });
-
-        Route::prefix('remotes')->group(function () {
-            Route::post('/create', [RemoteController::class, 'remote_create'])->name('core.remotes.create');
-            Route::patch('/{remote}/edit', [RemoteController::class, 'remote_edit_patch'])->name('core.remotes.edit');
-            Route::delete('/{remote}/destroy', [RemoteController::class, 'remote_delete'])->name('core.remotes.destroy');
-            Route::get('/{remote}/get/{levels?}', [RemoteController::class, 'remote_get'])->name('core.remotes.get');
-            Route::post('/{remote}/test', [RemoteController::class, 'remote_test'])->name('core.remotes.test');
-            Route::get('/list', [RemoteController::class, 'remote_list'])->name('core.remotes.list');
-            Route::prefix('activities')->group(function () {
-                Route::post('/{remote_activity}/update', [RemoteController::class, 'update_activity'])->name('core.remotes.activity.update');
-                Route::get('/list/{remote_activity_status_type?}', [RemoteController::class, 'list_activities'])->name('core.remotes.activity.list');
-                Route::get('/{remote_activity}/get/{levels?}', [RemoteController::class, 'get_activity'])->name('core.remotes.activity.get');
+                Route::post('/prepare_deletion', [Api\AuthenticationController::class, 'prepare_user_deletion'])
+                    ->name('core.users.auth.prepare_deletion');
             });
         });
+
+
+
+        Route::middleware(Middleware\ValidateNamespaceMember::class)->prefix('{user_namespace}')->group( function () {
+
+            Route::prefix('server')->group(function () {
+                Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
+                    Route::post('/edit', [Api\ServerController::class, 'edit_server'])->name('core.server.edit');
+                    Route::get('/admin', [Api\ServerController::class, 'show_admin'])->name('core.server.admin');
+                });
+            });
+
+
+            Route::prefix('operations')->group(function () {
+
+                Route::post('unshift', [Api\OperationController::class, 'op_combine'])->name('core.operations.unshift');
+                Route::post('combine', [Api\OperationController::class, 'op_unshift'])->name('core.operations.combine');
+                Route::post('shift', [Api\OperationController::class, 'op_shift'])->name('core.operations.shift');
+                Route::post('push', [Api\OperationController::class, 'op_push'])->name('core.operations.push');
+                Route::post('pop', [Api\OperationController::class, 'op_pop'])->name('core.operations.pop');
+                Route::post('mutual', [Api\OperationController::class, 'op_mutual'])->name('core.operations.mutual');
+            });
+
+
+            Route::prefix('elsewhere')->group(function () {
+
+                Route::prefix('{server}')->group(function () {
+
+                    Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
+                        Route::post('push_credentials', [Api\ElsewhereController::class, 'push_credentials'])->name('core.elsewhere.push_credentials');
+                        Route::patch('change_status', [Api\ElsewhereController::class, 'change_status'])->name('core.elsewhere.change_status');
+                        Route::delete('change_status', [Api\ElsewhereController::class, 'purge_elsewhere'])->name('core.elsewhere.purge_elsewhere');
+
+                        Route::post('ask_element', [Api\ElsewhereController::class, 'ask_element'])->name('core.elsewhere.ask_element');
+                        Route::post('ask_type', [Api\ElsewhereController::class, 'ask_type'])->name('core.elsewhere.ask_type');
+                        Route::post('ask_set', [Api\ElsewhereController::class, 'ask_set'])->name('core.elsewhere.ask_set');
+                        Route::post('ask_namespace', [Api\ElsewhereController::class, 'ask_namespace'])->name('core.elsewhere.ask_namespace');
+
+                        Route::post('push_element', [Api\ElsewhereController::class, 'push_element'])->name('core.elsewhere.push_element');
+                        Route::post('push_set', [Api\ElsewhereController::class, 'push_set'])->name('core.elsewhere.push_set');
+                        Route::post('push_namespace', [Api\ElsewhereController::class, 'push_namespace'])->name('core.elsewhere.push_namespace');
+                        Route::post('push_type', [Api\ElsewhereController::class, 'push_type'])->name('core.elsewhere.push_type');
+                        Route::post('push_event', [Api\ElsewhereController::class, 'push_event'])->name('core.elsewhere.push_event');
+                        Route::get('admin_elsewhere', [Api\ElsewhereController::class, 'show_admin_elsewhere'])->name('core.elsewhere.admin_elsewhere');
+                    });
+
+                    Route::middleware(Middleware\ValidateElsewhereOwner::class)->group( function () {
+                        Route::post('give_credentials', [Api\ElsewhereController::class, 'give_credentials'])->name('core.elsewhere.give_credentials');
+                        Route::post('give_namespace', [Api\ElsewhereController::class, 'give_namespace'])->name('core.elsewhere.give_namespace');
+                        Route::post('give_set', [Api\ElsewhereController::class, 'give_set'])->name('core.elsewhere.give_set');
+                        Route::post('give_type', [Api\ElsewhereController::class, 'give_type'])->name('core.elsewhere.give_type');
+                        Route::post('give_event', [Api\ElsewhereController::class, 'give_event'])->name('core.elsewhere.give_event');
+                        Route::post('give_element', [Api\ElsewhereController::class, 'give_element'])->name('core.elsewhere.give_element');
+                        Route::post('share_element', [Api\ElsewhereController::class, 'share_element'])->name('core.elsewhere.share_element');
+
+                        Route::post('destroyed_element', [Api\ElsewhereController::class, 'destroyed_element'])->name('core.elsewhere.destroyed_element');
+                        Route::post('suspended_type', [Api\ElsewhereController::class, 'suspended_type'])->name('core.elsewhere.suspended_type');
+                    });
+                });
+
+            });
+
+
+
+            Route::prefix('namespaces')->group(function () {
+
+
+                Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
+                    Route::post('promote', [Api\NamespaceController::class, 'promote_namespace'])->name('core.namespaces.promote');
+                });
+
+                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                    Route::post('/create', [Api\NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
+                });
+
+                Route::middleware([])->group(function () {
+                    Route::get('list', [Api\NamespaceController::class, 'list_namespaces'])->name('core.namespaces.list_namespaces');
+
+                });
+
+
+                Route::prefix('{target_namespace}')->group(function () {
+
+                    Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
+                        Route::patch('edit_promotion', [Api\NamespaceController::class, 'edit_promotion'])->name('core.namespaces.edit_promotion');
+                        Route::delete('purge', [Api\NamespaceController::class, 'purge_namespace'])->name('core.namespaces.purge');
+                        Route::delete('purge_admin', [Api\NamespaceController::class, 'purge_admin'])->name('core.namespaces.purge_admin');
+                        Route::delete('purge_member', [Api\NamespaceController::class, 'purge_member'])->name('core.namespaces.purge_member');
+                        Route::post('promote_admin', [Api\NamespaceController::class, 'promote_admin'])->name('core.namespaces.promote_admin');
+                        Route::post('promote_member', [Api\NamespaceController::class, 'promote_member'])->name('core.namespaces.promote_member');
+
+                    });
+
+
+                    Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                        Route::post('start_transfer', [Api\NamespaceController::class, 'start_transfer'])->name('core.namespaces.start_transfer');
+                        Route::post('transfer_owner', [Api\NamespaceController::class, 'transfer_owner'])->name('core.namespaces.transfer_owner');
+                        Route::post('add_admin', [Api\NamespaceController::class, 'add_admin'])->name('core.namespaces.add_admin');
+                        Route::delete('remove_admin', [Api\NamespaceController::class, 'remove_admin'])->name('core.namespaces.remove_admin');
+                        Route::delete('destroy', [Api\NamespaceController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
+
+                    });
+
+
+                    Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                        Route::patch('add_handle', [Api\NamespaceController::class, 'add_handle'])->name('core.namespaces.add_handle');
+                        Route::patch('remove_handle', [Api\NamespaceController::class, 'remove_handle'])->name('core.namespaces.remove_handle');
+                        Route::post('add_member', [Api\NamespaceController::class, 'add_member'])->name('core.namespaces.add_member');
+                        Route::delete('remove_member', [Api\NamespaceController::class, 'remove_member'])->name('core.namespaces.remove_member');
+
+                    });
+
+                    Route::middleware([])->group(function () {
+                        Route::get('show', [Api\NamespaceController::class, 'show_namespace'])->name('core.namespaces.show');
+                        Route::get('list_admins', [Api\NamespaceController::class, 'list_admins'])->name('core.namespaces.list_admins');
+                        Route::get('/list_members', [Api\NamespaceController::class, 'list_members'])->name('core.namespaces.list_members');//will was here
+
+                    });
+                });
+            });
+
+
+            Route::prefix('paths')->group(function () {
+
+                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                    Route::post('create', [Api\PathController::class, 'create_path'])->name('core.paths.create');
+                });
+
+                Route::middleware([])->group(function () {
+                    Route::get('list', [Api\PathController::class, 'list_paths'])->name('core.paths.list');
+                });
+
+
+                Route::prefix('{path}')->group(function () {
+                    Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                        Route::patch('publish', [Api\PathController::class, 'publish_path'])->name('core.paths.publish');
+                        Route::delete('destroy', [Api\PathController::class, 'destroy_path'])->name('core.paths.destroy');
+                    });
+
+
+                    Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                        Route::patch('add_handle', [Api\PathController::class, 'add_handle'])->name('core.paths.add_handle');
+                        Route::patch('remove_handle', [Api\PathController::class, 'remove_handle'])->name('core.paths.remove_handle');
+                        Route::post('edit', [Api\PathController::class, 'edit_path'])->name('core.paths.edit');
+                        Route::post('create_part', [Api\PathController::class, 'create_part'])->name('core.paths.create_part');
+
+                        Route::prefix('{path_part}')->group(function () {
+                            Route::middleware(Middleware\ValidatePartOwnership::class)->group(function () {
+                                Route::delete('destroy_part', [Api\PathController::class, 'destroy_part'])->name('core.paths.destroy_part');
+                                Route::patch('edit_part', [Api\PathController::class, 'edit_part'])->name('core.paths.edit_part');
+                            });
+                        });
+
+
+                    });
+
+                    Route::middleware([])->group(function () {
+                        Route::get('show', [Api\PathController::class, 'show_path'])->name('core.paths.show');
+                        Route::get('copy', [Api\PathController::class, 'copy_path'])->name('core.paths.copy');
+
+                        Route::prefix('{path_part}')->group(function () {
+                            Route::middleware(Middleware\ValidatePartOwnership::class)->group(function () {
+                                Route::get('show_part', [Api\PathController::class, 'show_part_tree'])->name('core.paths.show_part');
+                                Route::get('test_part', [Api\PathController::class, 'test_part'])->name('core.paths.test_part');
+                            });
+                        });
+
+                    });
+                });
+
+
+            }); //end paths
+
+
+            Route::prefix('links')->group(function () {
+
+                Route::prefix('phase/{working_phase}')->group(function () {
+                    Route::get('list', [Api\LinkController::class, 'list_links'])->name('core.links.list');
+
+                    Route::prefix('{element_link}')->group(function () {
+
+                        Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                            Route::delete('unlink', [Api\LinkController::class, 'unlink_link'])->name('core.links.unlink');
+                        });
+
+                        Route::middleware([])->group(function () {
+                            Route::get('show', [Api\LinkController::class, 'show_link'])->name('core.links.show');
+                        });
+                    });
+                });
+            });
+
+
+            Route::prefix('phases')->group(function () {
+
+                Route::get('list', [Api\PhaseController::class, 'list_phases'])->name('core.phases.list');
+
+                Route::prefix('{phase}')->group(function () {
+                    Route::get('show', [Api\PhaseController::class, 'show_phase'])->name('core.phases.show');
+                });
+
+            });
+
+
+            Route::prefix('waits')->group(function () {
+
+                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                    Route::post('create_master', [Api\WaitController::class, 'create_master'])->name('core.waits.create_master');
+                });
+
+                Route::middleware([])->group(function () {
+                    Route::get('list_masters', [Api\WaitController::class, 'list_masters'])->name('core.waits.list_masters');
+                    Route::get('list_semaphores', [Api\WaitController::class, 'list_semaphores'])->name('core.waits.list_semaphores');
+                    Route::get('list_waits', [Api\WaitController::class, 'list_waits'])->name('core.waits.list_waits');
+                    Route::get('list_mutexes', [Api\WaitController::class, 'list_mutexes'])->name('core.waits.list_mutexes');
+                });
+
+                Route::prefix('{element_type}')->group(function () {
+
+                    Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                        Route::post('update_master', [Api\WaitController::class, 'update_master'])->name('core.waits.update_master');
+                        Route::post('reset_semaphore', [Api\WaitController::class, 'reset_semaphore'])->name('core.waits.reset_semaphore');
+                        Route::post('ready_semaphore', [Api\WaitController::class, 'ready_semaphore'])->name('core.waits.ready_semaphore');
+                    });
+
+                    Route::middleware([])->group(function () {
+                        Route::post('run_master', [Api\WaitController::class, 'run_master'])->name('core.waits.run_master');
+                        Route::get('show_master', [Api\WaitController::class, 'show_master'])->name('core.waits.show_master');
+                        Route::get('show_master_run', [Api\WaitController::class, 'show_master_run'])->name('core.waits.show_master_run');
+                        Route::get('show_semaphore', [Api\WaitController::class, 'show_semaphore'])->name('core.waits.show_semaphore');
+                        Route::get('show_wait', [Api\WaitController::class, 'show_wait'])->name('core.waits.show_wait');
+                        Route::get('show_mutex', [Api\WaitController::class, 'show_mutex'])->name('core.waits.show_mutex');
+                        Route::post('wait_if_available', [Api\WaitController::class, 'wait_if_available'])->name('core.waits.wait_if_available');
+                        Route::post('wait_for_any', [Api\WaitController::class, 'wait_for_any'])->name('core.waits.wait_for_any');
+                        Route::post('wait_for_all', [Api\WaitController::class, 'wait_for_all'])->name('core.waits.wait_for_all');
+                        Route::post('wait_for_mutex', [Api\WaitController::class, 'wait_for_mutex'])->name('core.waits.wait_for_mutex');
+                        Route::post('wait_for_semaphore', [Api\WaitController::class, 'wait_for_semaphore'])->name('core.waits.wait_for_semaphore');
+                    });
+
+                });
+            });
+
+            Route::prefix('elements')->group(function () {
+
+                Route::prefix('phase/{working_phase}')->group(function () {
+                    Route::middleware([])->group(function () {
+                        Route::get('list', [Api\ElementController::class, 'list_elements'])->name('core.elements.list_elements');
+                    });
+
+                    Route::prefix('{element}')->group(function () {
+
+                        Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
+                            Route::patch('promote_edit', [Api\ElementController::class, 'promote_edit_element'])->name('core.elements.promote_edit');
+                            Route::delete('purge', [Api\ElementController::class, 'purge_element'])->name('core.elements.purge');
+                            Route::post('promote_set', [Api\ElementController::class, 'promote_set'])->name('core.elements.promote_set');
+                            Route::post('promote_live', [Api\ElementController::class, 'promote_live'])->name('core.elements.promote_live');
+                            Route::delete('demote_live', [Api\ElementController::class, 'demote_live'])->name('core.elements.demote_live');
+                        });
+
+                        Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                            Route::patch('change_owner', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
+                            Route::delete('destroy', [Api\ElementController::class, 'destroy_element'])->name('core.elements.destroy');
+
+                        });
+
+
+                        Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+
+                            Route::patch('write_visual', [Api\ElementController::class, 'write_visual'])->name('core.elements.write_visual');
+                            Route::post('add_live', [Api\ElementController::class, 'add_live'])->name('core.elements.add_live');
+                            Route::post('copy_live', [Api\ElementController::class, 'copy_live'])->name('core.elements.copy_live');
+                            Route::delete('remove_live', [Api\ElementController::class, 'remove_live'])->name('core.elements.remove_live');
+                            Route::delete('link', [Api\ElementController::class, 'create_link'])->name('core.elements.link');
+                            Route::post('create_set', [Api\ElementController::class, 'create_set'])->name('core.elements.create_set');
+
+                        });
+
+                        Route::middleware([])->group(function () {
+                            Route::patch('attribute_off', [Api\ElementController::class, 'attribute_off'])->name('core.elements.attribute_off');
+                            Route::patch('attribute_on', [Api\ElementController::class, 'attribute_on'])->name('core.elements.attribute_on');
+                            Route::patch('type_off', [Api\ElementController::class, 'type_off'])->name('core.elements.type_off');
+                            Route::patch('type_on', [Api\ElementController::class, 'type_on'])->name('core.elements.type_on');
+                            Route::post('ping', [Api\ElementController::class, 'ping_element'])->name('core.elements.ping');
+                            Route::get('show', [Api\ElementController::class, 'show_element'])->name('core.elements.show');
+
+                        });
+
+                        Route::get('read_attribute', [Api\ElementController::class, 'read_attribute'])->name('core.elements.read_attribute');
+                        Route::get('read_live_type', [Api\ElementController::class, 'read_live_type'])->name('core.elements.read_live_type');
+                        Route::get('read_type', [Api\ElementController::class, 'read_type'])->name('core.elements.read_type');
+                        Route::get('read_visual', [Api\ElementController::class, 'read_visual'])->name('core.elements.read_visual');
+                        Route::get('read_time', [Api\ElementController::class, 'read_time'])->name('core.elements.read_time');
+                        Route::patch('write_attribute', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
+                    });
+                });
+
+            }); //end elements
+
+
+
+            Route::prefix('sets')->group(function () {
+
+                Route::prefix('phase/{working_phase}')->group(function () {
+                    Route::get('list', [Api\SetController::class, 'list_sets'])->name('core.sets.list');
+
+                    Route::prefix('{element_set}')->group(function () {
+
+                        Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
+                            Route::post('promote_element', [Api\SetController::class, 'promote_element'])->name('core.sets.promote_element');
+                            Route::delete('purge_set', [Api\SetController::class, 'purge_set'])->name('core.sets.purge_set');
+                            Route::delete('purge_member', [Api\SetController::class, 'purge_member'])->name('core.sets.purge_member');
+                        });
+
+                        Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                            Route::delete('destroy_set', [Api\SetController::class, 'destroy_set'])->name('core.sets.destroy_set');
+
+                        });
+
+
+                        Route::middleware([])->group(function () {
+                            Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
+                            Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
+                            Route::delete('empty_set', [Api\SetController::class, 'empty_set'])->name('core.sets.empty_set');
+                            Route::patch('stick_element', [Api\SetController::class, 'stick_element'])->name('core.sets.stick_element');
+                            Route::patch('unstick_element', [Api\SetController::class, 'unstick_element'])->name('core.sets.unstick_element');
+                            Route::get('show_set', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
+                            Route::get('list_children', [Api\SetController::class, 'list_children'])->name('core.sets.list_children');
+                            Route::get('list_elements', [Api\SetController::class, 'list_elements'])->name('core.sets.list_elements');
+
+                        });
+                    });
+                });
+
+
+
+            }); //end sets
+
+
+
+            Route::prefix('types')->group(function () {
+
+
+                Route::middleware([])->group(function () {
+                    Route::get('list_published', [Api\TypeController::class, 'list_published'])->name('core.types.list_published');
+                    Route::get('list_suspended', [Api\TypeController::class, 'list_suspended'])->name('core.types.list_suspended');
+                });
+
+
+                Route::prefix('{element_type}')->group(function () {
+
+                    Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
+                        Route::patch('promote_owner', [Api\TypeController::class, 'promote_owner'])->name('core.types.promote_owner');
+                        Route::patch('purge', [Api\TypeController::class, 'purge_type'])->name('core.types.purge');
+                        Route::patch('promote_publish', [Api\TypeController::class, 'publish_type_promote'])->name('core.types.promote_publish');
+                        Route::patch('suspend', [Api\TypeController::class, 'suspend_type'])->name('core.types.suspend');
+                        Route::patch('promote_element', [Api\TypeController::class, 'promote_element'])->name('core.types.promote_element');
+                    });
+
+                    Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                        Route::patch('change_owner', [Api\TypeController::class, 'change_owner'])->name('core.types.change_owner');
+                        Route::delete('destroy_type', [Api\TypeController::class, 'destroy_type'])->name('core.types.destroy_type');
+
+                    });
+
+
+                    Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                        Route::patch('add_handle', [Api\TypeController::class, 'add_handle'])->name('core.types.add_handle');
+                        Route::patch('remove_handle', [Api\TypeController::class, 'remove_handle'])->name('core.types.remove_handle');
+                        Route::patch('add_attribute_handle', [Api\TypeController::class, 'add_attribute_handle'])->name('core.types.add_attribute_handle');
+                        Route::patch('remove_attribute_handle', [Api\TypeController::class, 'remove_attribute_handle'])->name('core.types.remove_attribute_handle');
+                        Route::post('fire_event', [Api\TypeController::class, 'fire_event'])->name('core.types.fire_event');
+                        Route::patch('publish_type', [Api\TypeController::class, 'publish_type'])->name('core.types.publish_type');
+                        Route::patch('retire', [Api\TypeController::class, 'retire_type'])->name('core.types.retire');
+                        Route::post('create_element', [Api\TypeController::class, 'create_element'])->name('core.types.create_element');
+
+                    });
+
+                    Route::middleware([])->group(function () {
+                        Route::get('show', [Api\TypeController::class, 'show_type'])->name('core.types.show');
+                        Route::get('list_live', [Api\TypeController::class, 'list_live'])->name('core.types.list_live');
+                        Route::get('list_elements', [Api\TypeController::class, 'list_elements'])->name('core.types.list_elements');
+                        Route::get('list_descendants', [Api\TypeController::class, 'list_descendants'])->name('core.types.list_descendants');
+                        Route::get('list_attribute_descendants', [Api\TypeController::class, 'list_attribute_descendants'])->name('core.types.list_attribute_descendants');
+                    });
+                });
+
+
+
+
+            }); //end types
+
+
+            Route::prefix('design')->group(function () {
+
+                Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
+                    Route::post('promote', [Api\DesignController::class, 'promote_design'])->name('core.design.promote');
+                });
+
+                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
+                    Route::post('create', [Api\DesignController::class, 'create_design'])->name('core.design.create');
+                });
+
+                Route::middleware([])->group( function () {
+                    Route::get('list', [Api\DesignController::class, 'list_designs'])->name('core.design.list');
+                });
+
+
+
+
+                Route::prefix('{element_type}')->group(function () {
+
+                    Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
+                        Route::post('promote_owner', [Api\DesignController::class, 'promote_design_owner'])->name('core.design.promote_owner');
+                        Route::delete('purge', [Api\DesignController::class, 'purge_design'])->name('core.design.purge');
+                        Route::post('promote_attribute', [Api\DesignController::class, 'promote_attribute'])->name('core.design.promote_attribute');
+                    });
+
+                    Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
+                        Route::post('change_owner', [Api\DesignController::class, 'change_design_owner'])->name('core.design.change_owner');
+                        Route::delete('destroy', [Api\DesignController::class, 'destroy_design'])->name('core.design.destroy');
+                    });
+
+
+                    Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group( function () {
+                        Route::patch('edit', [Api\DesignController::class, 'edit_design'])->name('core.design.edit');
+                        Route::post('create_attribute', [Api\DesignController::class, 'create_attribute'])->name('core.design.create_attribute');
+                        Route::delete('remove_parent', [Api\DesignController::class, 'remove_parent'])->name('core.design.remove_parent');
+                        Route::post('add_parent', [Api\DesignController::class, 'add_parent'])->name('core.design.add_parent');
+                        Route::post('add_live_rule', [Api\DesignController::class, 'add_live_rule'])->name('core.design.add_live_rule');
+                        Route::delete('remove_live_rule', [Api\DesignController::class, 'remove_live_rule'])->name('core.design.remove_live_rule');
+                        Route::post('set_time', [Api\DesignController::class, 'set_time'])->name('core.design.set_time');
+
+                        Route::prefix('attribute/{attribute}')->group(function () {
+                            Route::middleware(Middleware\ValidateAttributeOwnership::class)->group(function () {
+                                Route::delete('destroy_attribute', [Api\DesignController::class, 'destroy_attribute'])->name('core.design.destroy_attribute');
+                                Route::patch('set_attribute_location', [Api\DesignController::class, 'set_attribute_location'])->name('core.design.set_attribute_location');
+                                Route::patch('edit_attribute', [Api\DesignController::class, 'edit_attribute'])->name('core.design.edit_attribute');
+                                Route::post('create_listener', [Api\DesignController::class, 'create_listener'])->name('core.design.create_listener');
+                                Route::delete('destroy_listener', [Api\DesignController::class, 'destroy_listener'])->name('core.design.destroy_listener');
+                                Route::post('create_rule', [Api\DesignController::class, 'create_rule'])->name('core.design.create_rule');
+
+                                Route::prefix('rule/{attribute_rule}')->group(function () {
+                                    Route::middleware(Middleware\ValidateRuleOwnership::class)->group(function () {
+                                        Route::post('destroy_rule', [Api\DesignController::class, 'destroy_rule'])->name('core.design.destroy_rule');
+                                        Route::post('edit_rule', [Api\DesignController::class, 'edit_rule'])->name('core.design.edit_rule');
+                                        Route::post('test_rule', [Api\DesignController::class, 'test_rule'])->name('core.design.test_rule');
+                                    });
+                                });
+                            });
+
+                        });
+
+                    }); //end design admin
+
+
+                    Route::middleware([])->group( function () {
+                        Route::get('show', [Api\DesignController::class, 'show_design'])->name('core.design.show');
+                        Route::get('list_attributes', [Api\DesignController::class, 'list_attributes'])->name('core.design.list_attributes');
+                        Route::get('test_location', [Api\DesignController::class, 'test_location'])->name('core.design.test_location');
+                        Route::get('test_time', [Api\DesignController::class, 'test_time'])->name('core.design.test_time');
+                        Route::get('list_listeners', [Api\DesignController::class, 'list_listeners'])->name('core.design.list_listeners');
+                        Route::get('list_parents', [Api\DesignController::class, 'list_parents'])->name('core.design.list_parents');
+                        Route::get('list_live_rules', [Api\DesignController::class, 'list_live_rules'])->name('core.design.list_live_rules');
+
+
+                        Route::prefix('attribute/{attribute}')->group(function () {
+                            Route::middleware(Middleware\ValidateAttributeOwnership::class)->group(function () {
+                                Route::get('show_attribute', [Api\DesignController::class, 'show_attribute'])->name('core.design.show_attribute');
+                                Route::get('test_attribute_location', [Api\DesignController::class, 'test_attribute_location'])->name('core.design.test_attribute_location');
+                                Route::get('show_listener', [Api\DesignController::class, 'show_listener'])->name('core.design.show_listener');
+                                Route::get('test_listener', [Api\DesignController::class, 'test_listener'])->name('core.design.test_listener');
+                            });
+                        });
+
+
+                    }); //end design members
+                });
+
+            }); //end design
+
+
+
+        }); //end user namespace defined behavior
+
+
     }); //end auth protected
 
+
+
 }); //end v1
+
+
+require app()->basePath('libs/hbc-things/routes/thing_api.php');
 
 

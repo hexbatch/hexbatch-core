@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
+
+use App\Enums\Sys\TypeOfAction;
+
+use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
+/**
+ * Can destroy by using a handle to group destroy related types and elements
+ */
+class TypeDestroy extends Act\Cmd\Ty
+{
+    const UUID = '88dc4468-49e3-4949-a545-f7ebe2b0dea0';
+    const ACTION_NAME = TypeOfAction::CMD_TYPE_DESTROY;
+
+
+    const ATTRIBUTE_CLASSES = [
+
+    ];
+
+    const PARENT_CLASSES = [
+        Act\Cmd\Ty::class
+    ];
+
+    const EVENT_CLASSES = [
+        Evt\Server\TypeDeleted::class
+    ];
+
+}
+

@@ -13,7 +13,7 @@ class DeleteUser extends Command
      *
      * @var string
      */
-    protected $signature = 'hbc:delete_user {username_or_id}';
+    protected $signature = 'hex:delete_user {username_or_id}';
 
     /**
      * The console command description.
@@ -29,6 +29,7 @@ class DeleteUser extends Command
     {
         $user_id_or_name = $this->argument('username_or_id');
         try {
+            /** @var User $user */
             $user = (new User)->resolveRouteBinding($user_id_or_name);
         } catch (HexbatchNotFound $e) {
             $this->error($e->getMessage());

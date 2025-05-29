@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
+
+use App\Enums\Sys\TypeOfAction;
+use App\Sys\Res\Types\Stk\Root\Act;
+
+/*
+ * Create a listening event to the attribute
+ */
+
+class DesignListenerCreate extends Act\Cmd\Ds
+{
+    const UUID = 'dbc2ab51-47e0-4ffa-b009-3a4cfc834485';
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_LISTENER_CREATE;
+
+    const ATTRIBUTE_CLASSES = [
+    ];
+
+    const PARENT_CLASSES = [
+        Act\Cmd\Ds::class
+    ];
+
+}
+

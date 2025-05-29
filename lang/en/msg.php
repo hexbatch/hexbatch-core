@@ -14,23 +14,37 @@ return [
     'not_map_coordinate' => 'The value is not a map coordinate',
     'not_shape_coordinate' => 'The value is not a shape coordinate',
     'not_timezone' => 'The value is not a timezone',
+    'invalid_json_path' => 'The json path is not valid :ref',
+    'invalid_enum' => 'Invalid enum: was given :ref but expect :enum_list',
+    'invalid_enum_type' => 'Invalid type of enum: was given :ref',
+    'invalid_uuid' => 'Invalid uuid: was given :ref',
+    'invalid_time' => 'Invalid time: was given :ref',
+
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
     'user_not_found' => 'User not found using :ref',
     'user_not_priv' => 'Not in the admin group of this user',
+    'passthrough_data_too_big' => 'The passthrough data for this token is too big, the max is :max bytes',
+    'token_too_long_lived' => 'The token can only be created for up to :seconds seconds',
+    'no_namespace' => 'There is no namespace found in the route when asking for it, or the user is not authenticated, or the user has no default namespace',
 
-    //groups
-    'group_not_found' => 'Group not found using :ref',
-    'group_only_owner_can_delete' => 'Only the group owner can delete a group',
-    'group_can_only_be_deleted_if_not_in_use' => 'The group cannot be deleted, its in use somewhere',
-    'group_only_owner_can_change_admins' => 'Only the group owner can add or remove admins',
-    'group_only_admin_changes_membership' => 'Only an admin of the group can change its membership',
-    'group_this_member_does_not_exist' => 'This user :username is not a member in the group',
+    //namespaces
+    'namespace_not_found' => 'Namespace not found using :ref',
+    'namespace_invalid_name' => 'Namespace has invalid name :ref',
+    'namespace_not_system' => 'You are not a system namespace :ref',
+    'namespace_not_default_owner' => 'You are not the owner of the default user namespace :ref',
+    'namespace_not_owner' => 'You are not the owner of the namespace :ref',
+    'namespace_not_admin' => 'You are not an administor of the namespace :ref',
+    'namespace_not_member' => 'You are not a member of the namespace :ref',
+    'namespace_admin_not_found' => 'The namespace :ref is not an admin of :me',
+    'namespace_member_not_found' => 'The namespace :ref is not an admin of :me',
+    'namespace_cannot_delete_default' => 'The namespace :ref is the default namespace for :user_name',
+    'namespace_cannot_delete_while_in_use' => 'The namespace :ref is still in use, cannot delete',
+
 
     //bounds
     'bound_not_found' => 'Bound not found using :ref',
-    'bounds_in_use_cannot_change' => 'Bounds cannot edited or deleted because its in use',
 
     //time bounds
     'time_bound_period_must_be_with_cron' => 'Time bound must have a period defined when a cron string is defined',
@@ -45,45 +59,42 @@ return [
     'location_wrong_number_coordinates' => 'Location needs two numbers in each point to make a map, and three to make a shape',
     'location_bound_json_invalid_geo_json' => 'Location bound was not given geo json :msg',
     'location_bound_geo_json_not_polygon' => 'Location bound needs polygon or multipolygon geojson',
-    'location_bounds_needs_minimum_info' => 'Location bound needs a name and a geo json',
+    'location_bounds_needs_minimum_info' => 'Location bound needs a name and a geo json and the type of location',
+    'location_bounds_has_wrong_type' => 'Location bound needs a valid location type, :bad_type found',
     'location_bounds_only_pings_these' => 'Location bound can only ping with a polygon, a multipology or a point',
     'location_bounds_shape_is_3d' => 'Location bounds shapes must be 3d and all coordinates must have x,y,z',
     'location_bounds_map_is_2d' => 'Location bounds map must be 2d and not cross date line and be in normal numbers, and all coodrinates have lat and long',
 
     //attributes
     'attribute_not_found' => 'Attribute not found using :ref',
-    'attribute_ping_missing_data' => 'Cannot ping, check the ping type and data given for missing inputs',
-    'attribute_cannot_be_used_at_parent' => 'This attribute :ref cannot be used as a parent, you do not have permissions',
-    'attribute_schema_bounds_violation' => 'When making an attribute, each bounds type has to be in a certain key',
-    'attribute_schema_bounds_retired' => 'This bounds, ":bound_name" has been retired and cannot be added to the attribute',
-    'attribute_schema_bad_regex' => 'When making an attribute, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
-    'attribute_schema_json_no_primitive' => 'The json value cannot be a primitive',
-    'attribute_schema_improper_map_coordinate' => 'Map coodinates must have latitude and longitude properties and numbers in map ranges',
-    'attribute_schema_improper_shape_coordinate' => 'Shape coodinates must have properies of x,y,x',
-    'attribute_schema_bad_scalar_default' => 'When making an attribute, a scalar default must match the rules given in the default, and must be a scalar value',
-    'attribute_schema_unsupported_value' => 'The attribute value type :type is not supported to be cast to a resource',
-    'attribute_schema_wrong_value' => 'The attribute value type :type points to the wrong sort of resource :res',
-    'attribute_schema_pointers_string_only' => 'The attribute value type :type needs to be identified by a string (uuid or name)',
-    'attribute_schema_default_retired' => 'The resource :name is retired and cannot be added as a default value',
-    'attribute_schema_bad_meta' => 'Adding a meta requires a minimum of a type and value, language and mime is optional',
-    'attribute_schema_unsupported_meta_type' => 'Unsupported attribute meta type of :type',
-    'attribute_schema_empty_meta' => 'Meta needs a non empty value',
-    'attribute_schema_too_long_meta' => 'Meta needs to be a string and less than 255 characters',
-    'attribute_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
-    'attribute_schema_need_admin_permission_group' => 'When adding user permission groups, the person needs to be an admin for the group :group_name',
-    'attribute_schema_missing_rule_attribute' => 'When adding rules as object, need the attribute key to hold the name or id',
-    'attribute_schema_rule_bad_regex' => 'When making an attribute rule, the value regex needs to be proper for php and not use delimiters. / will be added front and back. :issue',
-    'attribute_schema_rule_retired' => 'This attribute, ":name" has been retired and new rules using this cannot be added to an attribute',
-    'attribute_in_use_cannot_change' => 'Attributes in use cannot edited or deleted. Remove dependencies and try again',
+    'attribute_cannot_be_used_as_parent' => 'This attribute :ref cannot be used as a parent, you are not an admin of its namespace',
+    'attribute_cannot_be_used_at_parent_final' => 'This attribute :ref cannot be used as a parent, it is either retired or marked to not be used for parenting',
+    'attribute_schema_must_have_name' => 'When making an attribute a name must be provided',
+    'attribute_schema_must_have_type' => 'When making an attribute it must have a type to belong',
+    'attribute_cannot_be_deleted_if_in_use' => 'Can only delete an attribute :ref if nothing uses it',
+    'attribute_owner_does_not_match_type_given' => 'The type given :type does not own the attribute :ref',
+    'attribute_unique_name_per_type' => 'Attributes in each type must have unique names',
+    'attribute_cannot_be_edited' => 'The attribute :ref cannot be edited because:  :error',
+    'attribute_parent_not_found' => 'The parent attribute was not found by using :ref',
+    'attribute_cannot_use_map' => 'Attribute :ref can only use shapes and not maps',
+    'attribute_cannot_use_design' => 'Attribute :ref can only be used for a design for :me if you are a member of its namespace and its not retired',
+
+    'rule_not_found' => 'The rule was not found by :ref',
+    'parent_rule_not_found' => 'The parent rule was not found by the uuid :ref',
+    'rule_cannot_be_deleted_if_in_use' => 'The rule :ref cannot be deleted because its in use by pending things',
+    'rule_cannot_be_edited' => 'The rule :ref cannot be edited because:  :error',
+    'rule_parent_child_be_same_chain' => 'The rules :ref and :other have to share the same attribute',
+    'rule_owner_does_not_match_attribute_given' => 'The rule given :ref is not owned by the attribute :attribute',
+    'rules_already_exist' => 'The attribute :ref already has rules, you can update them',
+
+    'event_cannot_be_edited' => 'The event cannot be edited because:  :error',
+    'event_in_use' => 'The event is currently in use and cannot be updated',
 
     //remotes
     'remote_not_found' => 'Remote not found using :ref',
     'remote_not_in_usage_group' => 'You are not allowed to use this remote :ref',
-    'remote_schema_meta_bounds_admin_group' => 'When adding meta time bounds or location as object, need to be in the admin group of the bounds :ref',
     'remote_schema_meta_map_wrong_type' => 'When adding meta map bounds, this has to be a map type :ref',
     'remote_schema_meta_empty_meta' => 'Meta needs a non empty string value when set: :ref',
-    'remote_schema_missing_permission_group' => 'When adding user permission groups as object, need the group key to hold the name or id',
-    'remote_schema_need_admin_permission_group' => 'Only group admins can add that group to be a remote usage group :group_name',
     'remote_activity_not_owned_by_your_element' => 'You cannot use this activity because you are not an admin for the element :ref',
     'remote_from_map_invalid_type' => 'Remote from mapping had an invalid type :ref',
     'remote_to_source_invalid_type' => 'Remote to source had an invalid type :ref',
@@ -98,25 +109,58 @@ return [
     'remote_invalid_cache_keys' => 'Remote cache keys can only be certain names, found :key',
     'remote_activity_not_found' => 'Remote activity not found using :ref',
     'remote_activity_only_manual_updated' => 'Can only update manual types of remotes, but not :ref',
-    'remote_map_invalid_json_path' => 'The json path is not valid :ref',
+
     'remote_map_invalid_regex' => 'The regex is not valid :ref',
-    'remote_map_invalid_name' => 'The name of the map entry should follow the same rules as the other names :ref : :error',
+    'remote_map_invalid_name' => 'The name of the map entry should follow the same rules as the other names and be less than :limit characters :ref : :error',
     'remote_map_invalid_secret' => 'Secrets can be used on strings but not objects',
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
 
 
-    //actions
-    'action_not_found' => 'Element not found using :ref',
-
     //element types
-    'element_type_not_found' => 'Element type not found using :ref',
+    'type_not_found' => 'Type not found using :ref',
+    'type_must_have_name' => 'Types need a name',
+    'type_must_have_ns' => 'Types need a namespace',
+    'type_must_have_map_bound' => 'Types can only use a map bound',
+    'parent_types_must_be_string_names' => 'A parent type must already exist and be refered to by the name or uuid, which is a string and not an object',
+    'type_descriptions_must_be_uuid' => 'A description element has to be a UUID',
+    'parent_type_is_not_inheritable' => 'The parent type must allow you to inherit, and also not be retired or final',
+    'parent_type_must_be_published' => 'The parent type must be published',
+    'type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
+    'type_only_admin_can_edit' => 'Only the admins in :ns can edit the type :ref',
+    'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements, no children',
+    'type_cannot_be_edited' => 'The type :ref cannot be edited',
+    'type_in_use' => 'The type :ref is in use, or has been published, so cannot be significantly changed',
 
     //elements
     'element_not_found' => 'Element not found using :ref',
+    'elements_must_have_owner' => 'When creating elements, an owner namespace must be defined',
+    'elements_must_have_type' => 'When creating elements, the type of element must be defined',
+
+    //sets
+    'set_not_found' => 'Set not found using :ref',
+    'set_must_have_a_defining_element' => 'Set must have a defining element',
 
     //servers
-    'server_not_found' => "Server not found using :ref"
+    'server_not_found' => "Server not found using :ref",
 
+    //paths
+    'path_not_found' => 'Path not found using :ref',
+    'path_parent_not_found' => 'Cannot find the parent path using :ref',
+    'path_needs_name' => 'Each path must be named unique to the namespace',
+    'path_part_needs_name' => 'Each path part must be named unique to the path :path',
+    'path_tree_element_permissions' => 'The path :ref is trying to use :element , but you are not in the namespace admin for that element',
+    'path_cannot_be_edited' => 'The path :ref cannot be edited because:  :error',
+    'path_owner_does_not_match_part_given' => 'The part given :ref is not owned by the path :path',
+    'path_cannot_be_changed_if_in_use' => 'The path :ref cannot be edited because its in use by pending things',
+    'part_parent_is_on_different_tree' => 'The parent given :parent is on a different path tree than this child :child',
+
+    //elsewhere
+    'not_elsewhere_owner' => "This is not the owning namespace :ref for the server :server",
+    'this_server_is_not_elsewhere' => "This is not the server you are looking for",
+
+    //thing
+    'thing_owner_does_not_match_hook_given' => 'The hook given :ref is not associated with the hook :hook',
+    'thing_owner_does_not_match_setting_given' => 'The hook given :ref is not associated with the setting :setting',
 
 
 ];

@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\HexbatchAuthException;
+use App\Exceptions\RefCodes;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 
@@ -12,6 +14,10 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        throw new HexbatchAuthException(
+            __("auth.failed"),
+            \Symfony\Component\HttpFoundation\Response::HTTP_UNAUTHORIZED,
+            RefCodes::BAD_LOGIN);
+
     }
 }

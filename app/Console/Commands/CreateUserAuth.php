@@ -14,7 +14,7 @@ class CreateUserAuth extends Command
      *
      * @var string
      */
-    protected $signature = 'hbc:create_user_auth {username_or_id} {--S|seconds=} {--N|token_name=}';
+    protected $signature = 'hex:create_user_auth {username_or_id} {--S|seconds=} {--N|token_name=}';
 
     /**
      * The console command description.
@@ -30,6 +30,7 @@ class CreateUserAuth extends Command
     {
         $user_id_or_name = $this->argument('username_or_id');
         try {
+            /** @var User $user */
             $user = (new User)->resolveRouteBinding($user_id_or_name);
         } catch (HexbatchNotFound $e) {
             $this->error($e->getMessage());
