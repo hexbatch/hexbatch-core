@@ -28,31 +28,10 @@ class DesignAttributePromote extends Act\Cmd\Ds
         Act\NoEventsTriggered::class,
     ];
 
-    public function getCreatedAttribute(): ?Attribute
-    {
-        /** @uses ActionDatum::data_attribute() */
-        return $this->action_data->data_attribute;
-    }
 
-    public function getGivenOwnerType(): ?ElementType
-    {   /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
-
-    public function getGivenParentAttribute(): ?Attribute
-    {
-        /** @uses ActionDatum::data_second_attribute() */
-        return $this->action_data->data_second_attribute;
-    }
-
-    public function getGivenDesignAttribute(): ?Attribute
-    {
-        /** @uses ActionDatum::data_third_attribute() */
-        return $this->action_data->data_third_attribute;
-    }
 
     const array ACTIVE_DATA_KEYS = ['attribute_name','owner_type_uuid','parent_attribute_uuid',
-        'design_attribute_uuid','is_final','is_abstract','is_seen_in_child_elements',
+        'design_attribute_uuid','is_final','is_abstract',
         'uuid'];
 
 
@@ -63,7 +42,6 @@ class DesignAttributePromote extends Act\Cmd\Ds
         protected ?string                $design_attribute_uuid = null,
         protected bool                $is_final = false,
         protected bool                $is_abstract = false,
-        protected bool                $is_seen_in_child_elements = false,
         protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL,
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
@@ -130,7 +108,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
             return;
         }
 
-        if (!$this->getGivenOwnerType()) {
+        if (!$this->getOwnerType()) {
             throw new \InvalidArgumentException("Need owning type before can make attribute");
         }
 
@@ -146,13 +124,12 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
             $attr->setAttributeName($this->attribute_name);
             $attr->attribute_approval = $this->attribute_approval;
-            $attr->owner_element_type_id = $this->getGivenOwnerType()->id ;
-            $attr->parent_attribute_id = $this->getGivenParentAttribute()?->id ;
-            $attr->design_attribute_id = $this->getGivenDesignAttribute()?->id ;
+            $attr->owner_element_type_id = $this->getOwnerType()->id ;
+            $attr->parent_attribute_id = $this->getParentAttribute()?->id ;
+            $attr->design_attribute_id = $this->getDesignAttribute()?->id ;
             $attr->is_system = $this->is_system ;
             $attr->is_final_attribute = $this->is_final ;
             $attr->is_abstract = $this->is_abstract ;
-            $attr->is_seen_in_child_elements = $this->is_seen_in_child_elements ;
             $attr->save();
 
 
@@ -171,7 +148,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
 
     protected function getMyData() :array {
-        return ['attribute'=>$this->getCreatedAttribute(),'parent'=>$this->getGivenParentAttribute(),'design'=>$this->getGivenDesignAttribute()];
+        return ['attribute'=>$this->getAttribute(),'parent'=>$this->getParentAttribute(),'design'=>$this->getDesignAttribute()];
     }
 
 }

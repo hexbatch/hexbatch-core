@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Helpers\Annotations\Access\TypeOfAccessMarker;
-use App\Helpers\Annotations\ApiAccessMarker;
-use App\Helpers\Annotations\ApiEventMarker;
-use App\Helpers\Annotations\ApiTypeMarker;
+use App\Annotations\Access\TypeOfAccessMarker;
+use App\Annotations\ApiAccessMarker;
+use App\Annotations\ApiEventMarker;
+use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
-
-use Symfony\Component\HttpFoundation\Response as CodeOf;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class DesignController extends Controller {
 
@@ -56,22 +55,6 @@ class DesignController extends Controller {
 
 
 
-
-    #[ApiTypeMarker( Root\Api\Design\Promotion::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/promote',
-        operationId: 'core.design.promote',
-        description: 'The system can make a new design and assign this to any owner. No events are raised',
-        summary: 'Makes a new design type with anyone as the owner ',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    public function promote_design() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 
@@ -302,44 +285,42 @@ class DesignController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/design/set_attribute_location',
-        operationId: 'core.design.set_attribute_location',
-        description: "Each attribute can have one map or shape, or none at all".
-        "\nCall this with no boundary to clear".
-        "\nThe bounds of the type as a whole is a union of the attribute maps",
-        summary: 'Gives the attribute a shape or map  ',
+        path: '/api/v1/{namespace}/design/list_locations',
+        operationId: 'core.design.list_locatations',
+        description: "Lists locations",
+        summary: 'Lists locations  ',
         parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\AttributeLocation::class)]
-    public function set_attribute_location() {
+    #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
+    public function list_locatations() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
-
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/test_attribute_location',
-        operationId: 'core.design.test_attribute_location',
-        description: "Tests the attribute bounds with geojson points and shapes, or other types and attributes".
-        "\nif the type is marked as private or the attribute is marked as private,".
-        "\n then that attribute is not testable except to the members of the owning namesapce. ".
-        "\n If using other attributes to test with, must be able to see that attribute. ",
-        summary: 'Allows testing and debugging of an attribute bounds  ',
+    #[OA\Patch(
+        path: '/api/v1/{namespace}/design/list_times',
+        operationId: 'core.design.list_times',
+        description: "Lists times",
+        summary: 'Lists times  ',
         parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\AttributeLocationTest::class)]
-    public function test_attribute_location() {
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\ListTimes::class)]
+    public function list_times() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
+
+
+
+
+
 
 
 
@@ -663,65 +644,106 @@ class DesignController extends Controller {
 
 
 
-
-
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/test_location',
-        operationId: 'core.design.test_location',
-        description: "Tests the bounds of the type with geo-json or given another type, element or set. ".
-        "\n If the type is marked as private,".
-        "\n then only testable to the members of the owning namesapce. ",
-        summary: 'Tests the type schedule  ',
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/design/time/{time_bound}/destroy',
+        operationId: 'core.design.destroy_time',
+        description: "Destroys a time resource, but only if its not used. ",
+        summary: 'Remove a time resource  ',
         parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\LocationTest::class)]
-    public function test_location() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/test_time',
-        operationId: 'core.design.test_time',
-        description: "Tests schedule of the type with any generated time string ".
-        "\n If the type is marked as private,".
-        "\n then only testable to the members of the owning namesapce. ",
-        summary: 'Tests the type schedule  ',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\TimeTest::class)]
-    public function test_time() {
+    #[ApiTypeMarker( Root\Api\Design\DestroyTime::class)]
+    public function destroy_time() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/design/set_time',
-        operationId: 'core.design.set_time',
-        description: "Sets a schedule for the type before publishing ".
-        "\n There is only one schedule, which can be overridden by this, or emptied out by using this with no data",
-        summary: 'Sets the schedule for the type  ',
+        path: '/api/v1/{namespace}/design/location_create',
+        operationId: 'core.design.location_create',
+        description: "Makes a new geo json 2d or 3d shape",
+        summary: 'Makes a new location bound',
+        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\CreateLocation::class)]
+    public function location_create() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[OA\Patch(
+        path: '/api/v1/{namespace}/design/location/{location_bound}/edit',
+        operationId: 'core.design.location_edit',
+        description: "Change visual properties of a location",
+        summary: 'Makes a new location bound',
+        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
+    public function location_edit() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+
+
+
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/design/location/{location_bound}/destroy',
+        operationId: 'core.design.destroy_location',
+        description: "Destorys a location resource if its not used ",
+        summary: 'Destroy a location  ',
+        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\DestroyLocation::class)]
+    public function destroy_location() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/design/create_time',
+        operationId: 'core.design.create_time',
+        description: "Makes a schedule that can be used in one or more attributes",
+        summary: 'Makes a new schedule',
         parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\Time::class)]
-    public function set_time() {
+    #[ApiTypeMarker( Root\Api\Design\CreateTime::class)]
+    public function create_time() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[OA\Patch(
+        path: '/api/v1/{namespace}/design/time/{time_bound}/edit',
+        operationId: 'core.design.time_edit',
+        description: "Schedules can be changed",
+        summary: 'Edits a schedule',
+        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
+    public function time_edit() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 

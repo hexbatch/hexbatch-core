@@ -36,7 +36,6 @@ enum TypeOfAction: string
     case BASE_WAIT = 'base_wait';
 
 
-    case PRAGMA_WRITE_VISUAL = 'pragma_write_visual'; //if the attribute has a shape or map, set the visual section to one or more opacity|color|border|texture
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
@@ -67,11 +66,10 @@ enum TypeOfAction: string
 
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
-    case CMD_DESIGN_PROMOTE = 'cmd_design_promote';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
     case CMD_DESIGN_PURGE = 'cmd_design_purge';
 
-    case CMD_DESIGN_TIME = 'cmd_design_time';
+
 
     case CMD_DESIGN_EDIT = 'cmd_design_edit';
 
@@ -79,13 +77,18 @@ enum TypeOfAction: string
     case CMD_DESIGN_PARENT_ADD = 'cmd_design_parent_add';
     case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
 
+    case CMD_DESIGN_TIME_CREATE = 'cmd_design_time_create';
 
+
+    case CMD_DESIGN_LOCATION_CREATE = 'cmd_design_location_create';
+    case CMD_DESIGN_LOCATION_EDIT = 'cmd_design_location_edit';
+    case CMD_DESIGN_LOCATION_DESTROY = 'cmd_design_location_destroy';
+    case CMD_DESIGN_TIME_DESTROY = 'cmd_design_time_destroy';
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
     case CMD_DESIGN_ATTRIBUTE_PROMOTE = 'cmd_design_attribute_promote';
     case CMD_DESIGN_ATTRIBUTE_DESTROY = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
-    case CMD_DESIGN_ATTRIBUTE_LOCATION = 'cmd_design_attribute_location';
     case CMD_DESIGN_LISTENER_CREATE = 'cmd_design_listener_create';
     case CMD_DESIGN_LISTENER_DESTROY = 'cmd_design_listener_destroy';
     case CMD_DESIGN_RULE_CREATE = 'cmd_design_rule_create';
@@ -99,9 +102,7 @@ enum TypeOfAction: string
 
     case CMD_DESIGN_REQUIREMENT_ADD = 'cmd_design_requirement_add';
     case CMD_DESIGN_REQUIREMENT_REMOVE = 'cmd_design_requirement_remove';
-    case CMD_DESIGN_LOCATION_TEST = 'cmd_design_location_test';
-    case CMD_DESIGN_TIME_TEST = 'cmd_design_time_test';
-    case CMD_DESIGN_ATTRIBUTE_LOCATION_TEST = 'cmd_design_attribute_location_test';
+
     case CMD_DESIGN_OWNER_CHANGE = 'cmd_design_owner_change';
     case CMD_DESIGN_OWNER_PROMOTE = 'cmd_design_owner_promote';
 

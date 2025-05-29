@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\DB;
 /**
  * Publishes the type, any referenced parent types, parent attributes, live rules, live requirements
  * are given the event of @see TypePublished and all must agree
- *
  */
 class TypePublish extends Act\Cmd\Ty
 {

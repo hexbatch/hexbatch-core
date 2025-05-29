@@ -2,9 +2,16 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Types\Stk\Root\Act;
 
+
+#[HexbatchTitle( title: "Designs can be edited")]
+#[HexbatchBlurb( blurb: "If approving parents, this is set back to pending and they are notified")]
+#[HexbatchDescription( description:'')]
 
 class DesignEdit extends Act\Cmd\Ds
 {

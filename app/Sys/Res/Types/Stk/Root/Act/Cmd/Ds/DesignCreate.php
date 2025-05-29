@@ -13,7 +13,7 @@ use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
-
+//todo add is_public_domain
 
 class DesignCreate extends Act\Cmd\Ds
 {

@@ -1,12 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace App\Helpers\Annotations\Documentation;
+namespace App\Annotations\Documentation;
 
 
 
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Exception\CommonMarkException;
-// https://commonmark.thephpleague.com/2.7/extensions/overview/
+
+
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class HexbatchDescription
 {

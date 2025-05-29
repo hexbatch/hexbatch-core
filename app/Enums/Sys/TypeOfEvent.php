@@ -62,7 +62,6 @@ enum TypeOfEvent: string
     case ATTRIBUTE_READING = 'attribute_reading';
     case ATTRIBUTE_WRITE = 'attribute_write';
 
-    case DISPLAY_WRITING = 'display_writing';
     case DISPLAY_READING = 'display_reading';
     case TIME_READING = 'time_reading';
 

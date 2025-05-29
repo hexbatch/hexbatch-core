@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Attributes\TypeOfServerAccess;
-use App\Enums\Attributes\TypeOfSetValuePolicy;
+use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Rules\TypeOfMergeLogic;
 use App\Enums\Types\TypeOfApproval;
@@ -46,19 +46,17 @@ use Illuminate\Validation\ValidationException;
  * @property int parent_attribute_id
  * @property int design_attribute_id
  * @property int attribute_location_shape_bound_id
- * @property bool is_seen_in_child_elements
  * @property bool is_system
  * @property bool is_final_attribute
- * @property bool is_abstract //todo make sure this is observed when publishing the type
+ * @property bool is_public_domain
+ * @property bool is_abstract
  * @property TypeOfServerAccess server_access_type
  * @property string ref_uuid
- * @property string value_json_path
+ * @property string read_json_path
+ * @property string validate_json_path
  * @property string attribute_name
  *
- * @property TypeOfMergeLogic popped_writing_method
- * @property TypeOfMergeLogic live_merge_method
- * @property TypeOfMergeLogic reentry_merge_method
- * @property TypeOfSetValuePolicy set_value_policy
+ * @property TypeOfElementValuePolicy set_value_policy
  * @property TypeOfApproval attribute_approval
  *
  * @property string created_at
@@ -101,11 +99,9 @@ class Attribute extends Model implements IAttribute,ISystemModel
      * @var array<string, string>
      */
     protected $casts = [
+        'is_public_domain' => 'boolean',
         'server_access_type' => TypeOfServerAccess::class,
-        'popped_writing_method' => TypeOfMergeLogic::class,
-        'live_merge_method' => TypeOfMergeLogic::class,
-        'reentry_merge_method' => TypeOfMergeLogic::class,
-        'set_value_policy' => TypeOfSetValuePolicy::class,
+        'set_value_policy' => TypeOfElementValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,
     ];
 
@@ -518,9 +514,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
             if (!$owner->isInUse()) {
 
-                if ($collect->has('is_seen_in_child_elements')) {
-                    $this->is_seen_in_child_elements = Utilities::boolishToBool($collect->get('is_seen_in_child_elements',false));
-                }
+
 
                 if ($collect->has('is_final_attribute')) {
                     $this->is_final_attribute = Utilities::boolishToBool($collect->get('is_final_attribute',false));
@@ -606,9 +600,9 @@ class Attribute extends Model implements IAttribute,ISystemModel
                     }
                 }
 
-                if ($collect->has('value_json_path')) {
-                    $this->value_json_path = $collect->get('value_json_path');
-                    Utilities::testValidJsonPath($this->value_json_path);
+                if ($collect->has('read_json_path')) {
+                    $this->read_json_path = $collect->get('read_json_path');
+                    Utilities::testValidJsonPath($this->read_json_path);
                 }
 
 
@@ -628,20 +622,12 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
 
                 if ($collect->has('set_value_policy')) {
-                    $this->set_value_policy = TypeOfSetValuePolicy::tryFromInput($collect->get('set_value_policy'));
+                    $this->set_value_policy = TypeOfElementValuePolicy::tryFromInput($collect->get('set_value_policy'));
                 }
 
-                if ($collect->has('popped_writing_method')) {
-                    $this->popped_writing_method = TypeOfMergeLogic::tryFromInput($collect->get('popped_writing_method'));
-                }
 
-                if ($collect->has('reentry_merge_method')) {
-                    $this->reentry_merge_method = TypeOfMergeLogic::tryFromInput($collect->get('reentry_merge_method'));
-                }
 
-                if ($collect->has('live_merge_method')) {
-                    $this->live_merge_method = TypeOfMergeLogic::tryFromInput($collect->get('live_merge_method'));
-                }
+
 
             }
 

@@ -7,10 +7,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
-class Promotion extends Api\DesignApi
+class CreateLocation extends Api\DesignApi
 {
-    const UUID = 'd7f78fde-0a6b-4e02-85f5-7d9f19f09747';
-    const TYPE_NAME = 'api_design_promotion';
+    const UUID = '508437a6-6307-4dba-b9f0-8ff14c91f583';
+    const TYPE_NAME = 'api_design_location_test';
 
 
 
@@ -18,7 +18,7 @@ class Promotion extends Api\DesignApi
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\Ds\DesignPromote::class,
+        Act\Cmd\Ds\DesignLocationCreate::class,
     ];
 
 }

@@ -43,15 +43,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('type_location_map_bound_id')
-                ->nullable()
-                ->default(null)
-                ->comment("The value points to a location map bounds")
-                ->index('idx_type_location_map_bound_id')
-                ->constrained('location_bounds')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
 
             $table->foreignId('type_handle_element_id')
                 ->nullable()
@@ -88,6 +79,9 @@ return new class extends Migration
 
             $table->boolean('is_final_type')->default(false)->nullable(false)
                 ->comment('if true then cannot be added as parent');
+
+            $table->boolean('is_public_domain')->default(false)->nullable(false)
+                ->comment('if true then anyone can use without asking');
 
         });
 
@@ -167,13 +161,11 @@ return new class extends Migration
             $table->dropForeign(['owner_namespace_id']);
             $table->dropForeign(['imported_from_server_id']);
             $table->dropForeign(['type_time_bound_id']);
-            $table->dropForeign(['type_location_map_bound_id']);
             $table->dropForeign(['type_handle_element_id']);
 
             $table->dropColumn('owner_namespace_id');
             $table->dropColumn('imported_from_server_id');
             $table->dropColumn('type_time_bound_id');
-            $table->dropColumn('type_location_map_bound_id');
             $table->dropColumn('type_handle_element_id');
 
             $table->dropColumn('type_name');
@@ -182,6 +174,7 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final_type');
+            $table->dropColumn('is_public_domain');
             $table->dropColumn('sum_shape_geom');
             $table->dropColumn('sum_map_geom');
             $table->dropColumn('sum_shape_bounding_box');

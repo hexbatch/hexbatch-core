@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\Bounds\TypeOfLocation;
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchCoreException;
@@ -37,10 +36,10 @@ use Illuminate\Validation\ValidationException;
  * @property int owner_namespace_id
  * @property int imported_from_server_id
  * @property int type_time_bound_id
- * @property int type_location_map_bound_id
  * @property int type_handle_element_id
  * @property bool is_system
  * @property bool is_final_type
+ * @property bool is_public_domain
  * @property string ref_uuid
  * @property string sum_shape_geom
  * @property string sum_map_geom
@@ -53,7 +52,6 @@ use Illuminate\Validation\ValidationException;
  * @property Attribute[] type_attributes
  * @property ElementType[] type_parents
  * @property ElementTypeServerLevel[] type_server_levels
- * @property LocationBound type_map
  * @property TimeBound type_time
  *
  * @property string created_at
@@ -89,6 +87,7 @@ class ElementType extends Model implements IType,ISystemModel
      * @var array<string, string>
      */
     protected $casts = [
+        'is_public_domain' => 'boolean',
         'lifecycle'=> TypeOfLifecycle::class
     ];
 
@@ -104,12 +103,6 @@ class ElementType extends Model implements IType,ISystemModel
                 }
             }
 
-            if ($type->type_location_map_bound_id) {
-                $count_times = ElementType::where('type_location_map_bound_id',$type->type_location_map_bound_id)->whereNot('id',$this->id)->count();
-                if (!$count_times) {
-                    $type->type_map->delete();
-                }
-            }
         });
     }
 
@@ -117,10 +110,6 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->belongsTo(UserNamespace::class,'owner_namespace_id');
     }
 
-    public function type_map() : BelongsTo {
-        return $this->belongsTo(LocationBound::class,'type_location_map_bound_id')
-            ->where('location_type',TypeOfLocation::MAP);
-    }
 
     public function type_time() : BelongsTo {
         return $this->belongsTo(TimeBound::class,'type_time_bound_id');
@@ -149,14 +138,13 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $id = null,
         ?string          $uuid = null,
         ?int             $owner_namespace_id = null,
-        ?int             $map_bound_id = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
     )
     : ElementType
     {
-        $ret = static::buildElementType(id:$id,uuid: $uuid,owner_namespace_id: $owner_namespace_id,map_bound_id: $map_bound_id,
+        $ret = static::buildElementType(id:$id,uuid: $uuid,owner_namespace_id: $owner_namespace_id,
             shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle)->first();
 
         if (!$ret) {
@@ -165,7 +153,6 @@ class ElementType extends Model implements IType,ISystemModel
             if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             if ($owner_namespace_id) { $arg_types[] = 'ns'; $arg_vals[] = $owner_namespace_id;}
-            if ($map_bound_id) { $arg_types[] = 'map'; $arg_vals[] = $map_bound_id;}
             if ($shape_bound_id) { $arg_types[] = 'shape'; $arg_vals[] = $shape_bound_id;}
             if ($time_bound_id) { $arg_types[] = 'time'; $arg_vals[] = $time_bound_id;}
             $arg_val = implode('|',$arg_vals);
@@ -179,7 +166,6 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $id = null,
         ?string          $uuid = null,
         ?int             $owner_namespace_id = null,
-        ?int             $map_bound_id = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
@@ -192,8 +178,8 @@ class ElementType extends Model implements IType,ISystemModel
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
 
             /** @uses ElementType::owner_namespace(), ElementType::type_attributes(), ElementType::type_server_levels() */
-            /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_map(),ElementType::type_time() */
-            ->with('owner_namespace', 'type_attributes', 'type_children', 'type_parents','type_server_levels','type_map','type_time')
+            /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_time() */
+            ->with('owner_namespace', 'type_attributes', 'type_children', 'type_parents','type_server_levels','type_time')
             ;
 
         if ($id) {
@@ -203,12 +189,9 @@ class ElementType extends Model implements IType,ISystemModel
             $build->where('element_types.owner_namespace_id', $owner_namespace_id);
         }
 
-        if ($map_bound_id) {
-            $build->where('element_types.type_location_map_bound_id', $map_bound_id);
-        }
 
         if ($time_bound_id) {
-            $build->where('element_types.type_time_bound_id', $map_bound_id);
+            $build->where('element_types.type_time_bound_id', $time_bound_id);
         }
 
         if ($lifecycle) {
@@ -520,18 +503,6 @@ class ElementType extends Model implements IType,ISystemModel
                     }
                 }
 
-                if ($collect->has('map_bound')) {
-                    $hint_location_bound = $collect->get('map_bound');
-                    if (is_string($hint_location_bound) || $hint_location_bound instanceof Collection) {
-                        $bound = LocationBound::collectLocationBound(collect: $hint_location_bound,namespace: $owner_namespace);
-                        if ($bound->location_type === TypeOfLocation::SHAPE) {
-                            throw new HexbatchNotPossibleException(__('msg.type_must_have_map_bound'),
-                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                RefCodes::TYPE_SCHEMA_ISSUE);
-                        }//todo allow either type of bound map or shape
-                        $this->type_location_map_bound_id = $bound->id;
-                    }
-                }
 
 
                 try {

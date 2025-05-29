@@ -3,9 +3,9 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\User;
 
 
-use App\Helpers\Annotations\Documentation\HexbatchBlurb;
-use App\Helpers\Annotations\Documentation\HexbatchDescription;
-use App\Helpers\Annotations\Documentation\HexbatchTitle;
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;

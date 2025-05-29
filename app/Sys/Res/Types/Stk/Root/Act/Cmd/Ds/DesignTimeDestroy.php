@@ -9,15 +9,14 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
-#[HexbatchTitle( title: "Destroy a design")]
-#[HexbatchBlurb( blurb: "Designs can be deleted without any events")]
+#[HexbatchTitle( title: "Deletes a schedule")]
+#[HexbatchBlurb( blurb: "Schdules can be removed if not used by any published type")]
 #[HexbatchDescription( description:'')]
-class DesignDestroy extends Act\Cmd\Ds
+class DesignTimeDestroy extends Act\Cmd\Ds
 {
-    const UUID = 'd21d7294-35f8-4938-bff4-3e57ffe95e55';
-    const ACTION_NAME = TypeOfAction::CMD_DESIGN_DESTROY;
-
-
+    const UUID = '1f104a48-34f4-4338-9723-a62fccbbe83a';
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_TIME_DESTROY;
+//
     const ATTRIBUTE_CLASSES = [
     ];
 

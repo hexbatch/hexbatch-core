@@ -1,5 +1,5 @@
 <?php
-namespace App\Helpers\Annotations\Access;
+namespace App\Annotations\Access;
 
 /**
  * postgres enum type_of_approval

@@ -8,15 +8,13 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Types\Stk\Root\Act;
 
-
-#[HexbatchTitle( title: "Destroy a design")]
-#[HexbatchBlurb( blurb: "Designs can be deleted without any events")]
+#[HexbatchTitle( title: "Create a location")]
+#[HexbatchBlurb( blurb: "Create a 2d map bounds or a 3d shape")]
 #[HexbatchDescription( description:'')]
-class DesignDestroy extends Act\Cmd\Ds
+class DesignLocationCreate extends Act\Cmd\Ds
 {
-    const UUID = 'd21d7294-35f8-4938-bff4-3e57ffe95e55';
-    const ACTION_NAME = TypeOfAction::CMD_DESIGN_DESTROY;
-
+    const UUID = 'f26dcdcb-09e4-41df-b435-3e7b106c6282';
+    const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION_CREATE;
 
     const ATTRIBUTE_CLASSES = [
     ];

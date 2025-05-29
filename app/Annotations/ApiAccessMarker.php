@@ -1,15 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace App\Helpers\Annotations;
+namespace App\Annotations;
 
 
+
+use App\Annotations\Access\TypeOfAccessMarker;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-class ApiEventMarker
+class ApiAccessMarker
 {
+
     /** @noinspection PhpUnused */
     public function __construct(
-        \App\Sys\Res\Types\Stk\Root\Event|string $api
+        TypeOfAccessMarker $marker
     ) {
 
     }

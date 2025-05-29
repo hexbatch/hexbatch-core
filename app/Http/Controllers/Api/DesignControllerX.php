@@ -71,10 +71,6 @@ class DesignControllerX extends Controller
             ->response()->setStatusCode(\Symfony\Component\HttpFoundation\Response::HTTP_OK);
     }
 
-    public function type_ping_map(Request $request,ElementType $element_type): JsonResponse {
-        $ret = $element_type->type_map->ping($request->get('location'));
-        return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);
-    }
     public function type_ping_time(Request $request,ElementType $element_type): JsonResponse {
         $ret = $element_type->type_time->ping($request->get('time'));
         return response()->json($ret, \Symfony\Component\HttpFoundation\Response::HTTP_OK);

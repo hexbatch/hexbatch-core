@@ -84,7 +84,7 @@ Route::prefix('v1')->group(function () {
         });
 
 
-
+        //todo this top level member check gets in the way of rules for reading and writing elements and types?
         Route::middleware(Middleware\ValidateNamespaceMember::class)->prefix('{user_namespace}')->group( function () {
 
             Route::prefix('server')->group(function () {
@@ -350,7 +350,6 @@ Route::prefix('v1')->group(function () {
 
                         Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
 
-                            Route::patch('write_visual', [Api\ElementController::class, 'write_visual'])->name('core.elements.write_visual');
                             Route::post('add_live', [Api\ElementController::class, 'add_live'])->name('core.elements.add_live');
                             Route::post('copy_live', [Api\ElementController::class, 'copy_live'])->name('core.elements.copy_live');
                             Route::delete('remove_live', [Api\ElementController::class, 'remove_live'])->name('core.elements.remove_live');
@@ -476,9 +475,6 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('design')->group(function () {
 
-                Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
-                    Route::post('promote', [Api\DesignController::class, 'promote_design'])->name('core.design.promote');
-                });
 
                 Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
                     Route::post('create', [Api\DesignController::class, 'create_design'])->name('core.design.create');
@@ -512,12 +508,10 @@ Route::prefix('v1')->group(function () {
                         Route::post('add_parent', [Api\DesignController::class, 'add_parent'])->name('core.design.add_parent');
                         Route::post('add_live_rule', [Api\DesignController::class, 'add_live_rule'])->name('core.design.add_live_rule');
                         Route::delete('remove_live_rule', [Api\DesignController::class, 'remove_live_rule'])->name('core.design.remove_live_rule');
-                        Route::post('set_time', [Api\DesignController::class, 'set_time'])->name('core.design.set_time');
 
                         Route::prefix('attribute/{attribute}')->group(function () {
                             Route::middleware(Middleware\ValidateAttributeOwnership::class)->group(function () {
                                 Route::delete('destroy_attribute', [Api\DesignController::class, 'destroy_attribute'])->name('core.design.destroy_attribute');
-                                Route::patch('set_attribute_location', [Api\DesignController::class, 'set_attribute_location'])->name('core.design.set_attribute_location');
                                 Route::patch('edit_attribute', [Api\DesignController::class, 'edit_attribute'])->name('core.design.edit_attribute');
                                 Route::post('create_listener', [Api\DesignController::class, 'create_listener'])->name('core.design.create_listener');
                                 Route::delete('destroy_listener', [Api\DesignController::class, 'destroy_listener'])->name('core.design.destroy_listener');
@@ -540,8 +534,14 @@ Route::prefix('v1')->group(function () {
                     Route::middleware([])->group( function () {
                         Route::get('show', [Api\DesignController::class, 'show_design'])->name('core.design.show');
                         Route::get('list_attributes', [Api\DesignController::class, 'list_attributes'])->name('core.design.list_attributes');
-                        Route::get('test_location', [Api\DesignController::class, 'test_location'])->name('core.design.test_location');
-                        Route::get('test_time', [Api\DesignController::class, 'test_time'])->name('core.design.test_time');
+                        Route::get('location_create', [Api\DesignController::class, 'location_create'])->name('core.design.location_create');
+                        Route::get('list_locatations', [Api\DesignController::class, 'list_locatations'])->name('core.design.list_locatations');
+                        Route::delete('location/{location_bound}/destroy', [Api\DesignController::class, 'destroy_location'])->name('core.design.destroy_location');
+                        Route::patch('location/{location_bound}/edit', [Api\DesignController::class, 'location_edit'])->name('core.design.location_edit');
+                        Route::get('time_create', [Api\DesignController::class, 'create_time'])->name('core.design.create_time');
+                        Route::get('list_times', [Api\DesignController::class, 'list_times'])->name('core.design.list_times');
+                        Route::delete('time/{time_bound}/edit', [Api\DesignController::class, 'time_edit'])->name('core.design.time_edit');
+                        Route::delete('time/{time_bound}/destroy', [Api\DesignController::class, 'destroy_time'])->name('core.design.destroy_time');
                         Route::get('list_listeners', [Api\DesignController::class, 'list_listeners'])->name('core.design.list_listeners');
                         Route::get('list_parents', [Api\DesignController::class, 'list_parents'])->name('core.design.list_parents');
                         Route::get('list_live_rules', [Api\DesignController::class, 'list_live_rules'])->name('core.design.list_live_rules');
@@ -550,7 +550,7 @@ Route::prefix('v1')->group(function () {
                         Route::prefix('attribute/{attribute}')->group(function () {
                             Route::middleware(Middleware\ValidateAttributeOwnership::class)->group(function () {
                                 Route::get('show_attribute', [Api\DesignController::class, 'show_attribute'])->name('core.design.show_attribute');
-                                Route::get('test_attribute_location', [Api\DesignController::class, 'test_attribute_location'])->name('core.design.test_attribute_location');
+
                                 Route::get('show_listener', [Api\DesignController::class, 'show_listener'])->name('core.design.show_listener');
                                 Route::get('test_listener', [Api\DesignController::class, 'test_listener'])->name('core.design.test_listener');
                             });

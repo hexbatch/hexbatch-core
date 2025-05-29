@@ -80,7 +80,7 @@ class LocationBound extends Model
         return $this->bound_name;
     }
 
-     public static function buildLocationBound(?int $id = null,?int $type_id = null,?int $attribute_id = null) : Builder {
+     public static function buildLocationBound(?int $id = null,?int $attribute_id = null) : Builder {
 
         $build =  LocationBound::select('location_bounds.*')
             ->selectRaw(" extract(epoch from  location_bounds.created_at) as created_at_ts,".
@@ -100,19 +100,6 @@ class LocationBound extends Model
              );
          }
 
-        if ($type_id) {
-
-            $build->join('element_types as bounded_type',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('time_bounds.id','=','bounded_type.type_location_map_bound_id');
-                }
-            );
-
-        }
 
         if ($id) {
             $build->where('id',$id);
