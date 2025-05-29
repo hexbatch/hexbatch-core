@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\DB;
  * @property int collection_server_id
  * @property int collection_mutual_id
  * @property int collection_phase_id
+ * @property int collection_link_id
  *
  * @property int collection_partition_flag
  * @property ActionDatum|null collection_parent
@@ -89,6 +90,9 @@ class ActionCollection extends Model
 
         /** @uses static::collection_phase() */
         Phase::class => 'collection_phase',
+
+        /** @uses static::collection_link() */
+        ElementLink::class => 'collection_link',
     ];
 
     public function collection_user() : BelongsTo {
@@ -133,6 +137,10 @@ class ActionCollection extends Model
 
     public function collection_phase() : BelongsTo {
         return $this->belongsTo(Phase::class,'collection_phase_id','id');
+    }
+
+    public function collection_link() : BelongsTo {
+        return $this->belongsTo(ElementLink::class,'collection_link_id','id');
     }
 
     /**
@@ -202,6 +210,7 @@ class ActionCollection extends Model
         Server::class => 'collection_server_id',
         Mutual::class => 'collection_mutual_id',
         Phase::class => 'collection_phase',
+        ElementLink::class => 'collection_link',
     ];
 
     public static function addUuids(ActionDatum $parent,string $class,array $uuids, int $partition_flag = 0,bool $b_check_and_throw = false)

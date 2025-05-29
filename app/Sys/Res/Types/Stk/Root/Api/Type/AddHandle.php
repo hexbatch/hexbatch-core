@@ -17,7 +17,6 @@ class AddHandle extends Api\TypeApi
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ty\TypeHandleAdd::class
     ];
 

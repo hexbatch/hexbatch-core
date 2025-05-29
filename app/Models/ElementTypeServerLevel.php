@@ -6,7 +6,7 @@ namespace App\Models;
 use App\Enums\Attributes\TypeOfServerAccess;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
@@ -20,6 +20,9 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * @property Server access_server
+ * @property ElementType type_having_access
  */
 class ElementTypeServerLevel extends Model
 {
@@ -49,5 +52,13 @@ class ElementTypeServerLevel extends Model
     protected $casts = [
         'access_type' => TypeOfServerAccess::class,
     ];
+
+    public function access_server() : BelongsTo {
+        return $this->belongsTo(Server::class,'to_server_id');
+    }
+
+    public function type_having_access() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'server_access_type_id');
+    }
 
 }

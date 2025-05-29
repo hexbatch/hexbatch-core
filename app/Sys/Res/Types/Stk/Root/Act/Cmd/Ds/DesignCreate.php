@@ -2,18 +2,37 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+
+use App\Annotations\ApiParamMarker;
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\ElementTypeServerLevel;
 use App\Models\Server;
-
+use App\Models\TimeBound;
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Actioning\Design\DesignParams;
+use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
+
+#[HexbatchTitle( title: "Design create")]
+#[HexbatchBlurb( blurb: "Types are created here")]
+#[HexbatchDescription( description: "
+## Types can be set with the following properties
+
+* type_uuid : when editing an existing type
+* type_name: has to be unique in the namespace
+* time_uuid: types can have a schedule
+* is_final: cannot be a parent
+* access: sets access across different servers
+
+")]
 
 class DesignCreate extends Act\Cmd\Ds
 {
@@ -29,31 +48,21 @@ class DesignCreate extends Act\Cmd\Ds
     ];
 
 
-    public function getCreatedType(): ?ElementType
-    {
-        /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
-
-    public function getGivenServer(): ?Server
-    {   /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
-
-    public function getGivenNamespace(): ?UserNamespace
-    {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
-    }
-
-    const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final'];
 
 
+
+
+    const array ACTIVE_DATA_KEYS = ['type_name','uuid','given_server_uuid','is_final','design_uuid',
+        'time_uuid'];
+
+
+    #[ApiParamMarker( param_class: DesignParams::class)]
     public function __construct(
         protected ?string             $type_name =null,
-        protected ?string                $owner_namespace_uuid = null,
         protected ?string                $given_server_uuid = null,
-        protected bool                $is_final = false,
+        protected ?string                $time_uuid = null,
+        protected ?string                $design_uuid = null,
+        protected ?bool                $is_final = null,
         protected ?TypeOfServerAccess $access = null,
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
@@ -63,15 +72,17 @@ class DesignCreate extends Act\Cmd\Ds
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
         if (!$this->given_server_uuid) {
             $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
         }
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init,
+            is_system: $this->is_system,
+            send_event: $this->send_event, is_async: $this->is_async,  tags: $this->tags);
     }
 
 
@@ -88,13 +99,16 @@ class DesignCreate extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_server_uuid) {
-            $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
+
+        $this->setGivenServer($this->given_server_uuid)->setGivenType($this->design_uuid);
+
+
+        if ($this->owner_namespace) {
+            $this->setGivenNamespace( $this->owner_namespace);
+        } else {
+            $this->setGivenNamespace( $this->getOwningNamespace());
         }
 
-        if ($this->owner_namespace_uuid) {
-            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->owner_namespace_uuid)->id;
-        }
 
         $this->action_data->collection_data->offsetSet('access',$this->access?->value);
         $this->action_data->save();
@@ -102,7 +116,7 @@ class DesignCreate extends Act\Cmd\Ds
         return $this->action_data;
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['access'] = $this->access?->value;
         return $ret;
@@ -112,28 +126,52 @@ class DesignCreate extends Act\Cmd\Ds
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         try {
             DB::beginTransaction();
-            $type = new ElementType();
+            $type = $this->getGivenType();
+            if (!$type) {
+                $type = new ElementType();
+            }
+
             if ($this->uuid) {
                 $type->ref_uuid = $this->uuid;
             }
 
-            $type->type_name = $this->type_name;
+            if ($this->type_name) {
+                if ($this->is_system) {
+                    $type->type_name = $this->type_name;
+                } else {
+                    $type->setTypeName(name: $this->type_name,namespace: $this->getNamespaceInUse());
+                }
 
-            $type->owner_namespace_id = $this->getGivenNamespace()?->id;
-            $type->imported_from_server_id = $this->getGivenServer()?->id;
+            }
+
+            if (!$type->owner_namespace_id) {
+                $type->owner_namespace_id = $this->getGivenNamespace()?->id;
+            }
+
+            if ($given_server_id =  $this->getGivenServer()?->id) {
+                $type->imported_from_server_id = $given_server_id;
+            }
+
             $type->is_system = $this->is_system;
-            $type->is_final_type = $this->is_final;
+
+            if ($this->is_final !== null) {
+                $type->is_final_type = $this->is_final;
+            }
+
+
+            if ($this->time_uuid) {
+                $type->type_time_bound_id = TimeBound::getThisSchedule(uuid: $this->time_uuid)->id;
+            }
+
             $type->save();
 
-            if ($this->access && $this->given_server_uuid) {
+            if ($this->access && $this->getGivenServer()) {
                 $access = new ElementTypeServerLevel();
                 $access->server_access_type_id = $type->id;
                 $access->to_server_id = $type->imported_from_server_id;
@@ -141,13 +179,10 @@ class DesignCreate extends Act\Cmd\Ds
                 $access->save();
             }
 
-            $this->action_data->data_type_id = $type->id;
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
+            $this->setGivenType($type,true);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
@@ -155,8 +190,20 @@ class DesignCreate extends Act\Cmd\Ds
 
 
 
+
+
     protected function getMyData() :array {
-        return ['type'=>$this->getCreatedType()];
+        return ['type'=>$this->getGivenType()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['type'])) {
+            $ret['type'] = new TypeResponse(given_type: $what['type']);
+        }
+        return $ret;
     }
 
 }

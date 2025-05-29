@@ -22,7 +22,7 @@ class NamespaceNameReq extends UserNameReq
     }
 
     const RESERVED_NAMES = [
-
+        'localhost',
     ];
 
 }

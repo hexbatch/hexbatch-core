@@ -13,6 +13,7 @@ class RefCodes {
     const int GEO_JSON_ISSUE = 9;
     const int INVALID_UUID = 10;
     const int INVALID_TIME = 11;
+    const int INVALID_CURSOR = 12;
 
 
     //servers start at 500
@@ -34,6 +35,7 @@ class RefCodes {
     const int NAMESPACE_NOT_FOUND = 2003;
     const int NAMESPACE_NOT_OWNER = 2004;
     const int NAMESPACE_NOT_ADMIN = 2005;
+    const int NAMESPACE_NOT_MEMBER = 2008;
     const int NAMESPACE_MEMBER_MISSING_ISSUE = 2006;
     const int NAMESPACE_CANNOT_DELETE_CORE_PARTS = 2007;
     const int NAMESPACE_SCHEMA_ISSUE = 2010;
@@ -49,10 +51,14 @@ class RefCodes {
     const int BOUND_NEEDS_MIN_INFO = 3006;
 
 
+
     const int BOUND_CANNOT_PING = 3007;
     const int BOUND_TYPE_DEF = 3008;
 
     const int BOUND_INVALID_NAME = 3010;
+
+
+    const int BOUND_IN_USE = 3020;
 
     // attributes start at 4000
     const int ATTRIBUTE_NOT_FOUND = 4001;
@@ -90,11 +96,25 @@ class RefCodes {
     const int TYPE_CANNOT_INHERIT = 7008;
 
     const int TYPE_CANNOT_EDIT = 7010;
+    const int TYPE_NEEDS_PUBLISHING = 7100;
+    const int TYPE_ALREADY_PUBLISHED = 7101;
+    const int TYPE_CANNOT_PUBLISH_ABSTRACT = 7102;
+
+
+    const int TYPE_PARENT_DENIED_DESIGN = 7200;
+    const int TYPE_PARENT_DENIED_PUBLISHING = 7250;
+    const int TYPE_PARENT_CANNOT_BE_REMOVED = 7270;
+
+    const int TYPE_GIVEN_ZERO_TO_MAKE = 7300;
+    const int TYPE_ALREADY_HAS_OWNER = 7400;
 
     //elements start at 8000
 
     const int ELEMENT_NOT_FOUND =  8001;
     const int ELEMENT_BAD_SCHEMA =  8002;
+    const int ELEMENT_NOT_IN_SET =  8003;
+    const int ELEMENTS_NOT_LISTED_TO_GIVE =  8010;
+    const int ELEMENTS_NOT_LISTED_TO_DESTROY =  8011;
 
     //sets start at 9000
     const int SET_NOT_FOUND =  9001;
@@ -108,8 +128,16 @@ class RefCodes {
     const int PATH_SCHEMA_ISSUE = 10004;
 
 
-    const int THING_HOOK_NOT_FOUND = 20001;
-    const int THING_SETTING_NOT_FOUND = 20005;
+    const int PHASE_NOT_FOUND = 20001;
+    const int PHASE_IS_DIFFERENT = 20020;
+
+
+    const int DESIGN_API_SCHEMA_ISSUE = 50000;
+
+
+    //links start at 60k
+
+    const int LINK_NOT_FOUND =  60001;
 
     /**
      * @type string[]
@@ -135,6 +163,7 @@ class RefCodes {
         self::NAMESPACE_NOT_FOUND => '',
         self::NAMESPACE_NOT_OWNER => '',
         self::NAMESPACE_NOT_ADMIN => '',
+        self::NAMESPACE_NOT_MEMBER => '',
         self::NAMESPACE_MEMBER_MISSING_ISSUE => '',
         self::NAMESPACE_CANNOT_DELETE_CORE_PARTS => '',
         self::NAMESPACE_SCHEMA_ISSUE => '',
@@ -175,9 +204,20 @@ class RefCodes {
         self::TYPE_SCHEMA_ISSUE => '',
         self::TYPE_CANNOT_INHERIT => '',
         self::TYPE_CANNOT_EDIT => '',
+        self::TYPE_NEEDS_PUBLISHING => '',
+        self::TYPE_ALREADY_PUBLISHED => '',
+        self::TYPE_CANNOT_PUBLISH_ABSTRACT => '',
+        self::TYPE_PARENT_DENIED_DESIGN => '',
+        self::TYPE_PARENT_DENIED_PUBLISHING => '',
+        self::TYPE_PARENT_CANNOT_BE_REMOVED => '',
+        self::TYPE_GIVEN_ZERO_TO_MAKE => '',
+        self::TYPE_ALREADY_HAS_OWNER => '',
 
         self::ELEMENT_NOT_FOUND => '',
         self::ELEMENT_BAD_SCHEMA => '',
+        self::ELEMENT_NOT_IN_SET => '',
+        self::ELEMENTS_NOT_LISTED_TO_GIVE => '',
+        self::ELEMENTS_NOT_LISTED_TO_DESTROY => '',
 
         self::SET_NOT_FOUND => '',
         self::SET_SCHEMA_ISSUE => '',
@@ -186,8 +226,11 @@ class RefCodes {
         self::PATH_CANNOT_EDIT => '',
         self::PATH_BAD_NAME => '',
 
-        self::THING_HOOK_NOT_FOUND => '',
-        self::THING_SETTING_NOT_FOUND => '',
+        self::PHASE_NOT_FOUND => '',
+        self::PHASE_IS_DIFFERENT => '',
+
+        self::DESIGN_API_SCHEMA_ISSUE => '',
+        self::LINK_NOT_FOUND => '',
 
     ];
 }

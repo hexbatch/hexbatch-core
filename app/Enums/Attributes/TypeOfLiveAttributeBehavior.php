@@ -3,6 +3,7 @@ namespace App\Enums\Attributes;
 /**
  * postgres enum type_of_live_attribute_behavior
  */
+
 enum TypeOfLiveAttributeBehavior : string {
 
     case NORMAL = 'normal';

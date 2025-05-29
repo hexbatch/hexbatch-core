@@ -5,14 +5,10 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Element;
-use App\Models\ElementSet;
-use App\Models\ElementType;
-use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
-
+use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
 
@@ -31,29 +27,17 @@ class NamespaceEdit extends Act\Cmd\Ns
 
     public function getEditedNamespace(): ?UserNamespace
     {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
+        return $this->getGivenNamespace();
     }
 
-    public function getGivenServer(): ?Server
-    {   /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
 
     public function getGivenUser(): ?User
     {   /** @uses ActionDatum::data_user() */
         return $this->action_data->data_user;
     }
 
-    public function getGivenSet(): ?ElementSet
-    {   /** @uses ActionDatum::data_set() */
-        return $this->action_data->data_set;
-    }
 
-    public function getGivenType(): ?ElementType
-    {   /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
+
 
     public function getGivenPublicElement(): ?Element
     {   /** @uses ActionDatum::data_second_element() */
@@ -61,8 +45,13 @@ class NamespaceEdit extends Act\Cmd\Ns
     }
 
     public function getGivenPrivateElement(): ?Element
-    {   /** @uses ActionDatum::data_element() */
-        return $this->action_data->data_element;
+    {
+        return $this->getGivenElement();
+    }
+
+    public function setGivenPrivateElement(null|Element|string $el)
+    {
+        return $this->setGivenElement($el,true);
     }
 
 
@@ -88,40 +77,27 @@ class NamespaceEdit extends Act\Cmd\Ns
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool         $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
 
-        if ($this->given_namespace_uuid) {
-            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
-        }
+        $this->setGivenNamespace( $this->given_namespace_uuid)
+            ->setGivenServer($this->given_server_uuid)
+            ->setGivenType($this->given_type_uuid)
+            ->setGivenSet($this->given_home_set_uuid)
+        ;
 
 
-        if ($this->given_server_uuid) {
-            $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
-        }
+        $this->setGivenPrivateElement($this->given_private_element_uuid);
 
-
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
-
-        if ($this->given_home_set_uuid) {
-            $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_home_set_uuid)->id;
-        }
-
-        if ($this->given_private_element_uuid) {
-            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_private_element_uuid)->id;
-        }
 
         if ($this->given_public_element_uuid) {
             $this->action_data->data_second_element_id = Element::getThisElement(uuid: $this->given_public_element_uuid)->id;
@@ -139,17 +115,15 @@ class NamespaceEdit extends Act\Cmd\Ns
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
-
+        parent::runActionInner();
         $namespace = $this->getEditedNamespace();
         if (!$namespace) {
             throw new \InvalidArgumentException("Need namespace to edit");
         }
+
+        $this->checkIfAdmin($this->getEditedNamespace());
         try {
             DB::beginTransaction();
             if ($this->is_system) {
@@ -188,21 +162,29 @@ class NamespaceEdit extends Act\Cmd\Ns
 
             $namespace->save();
 
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
+
 
 
 
     protected function getMyData() :array {
         return ['namespace'=>$this->getEditedNamespace()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['namespace'])) {
+            $ret['namespace'] = new UserNamespaceResponse(namespace:  $what['namespace']);
+        }
+
+        return $ret;
     }
 
 }

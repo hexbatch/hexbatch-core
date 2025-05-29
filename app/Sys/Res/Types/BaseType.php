@@ -4,10 +4,21 @@ namespace App\Sys\Res\Types;
 
 
 use App\Enums\Attributes\TypeOfServerAccess;
+use App\Enums\Sys\TypeOfFlag;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
+use App\Helpers\Utilities;
+use App\Models\ActionCollection;
 use App\Models\ActionDatum;
+use App\Models\Attribute;
+use App\Models\Element;
+use App\Models\ElementLink;
+use App\Models\ElementSet;
 use App\Models\ElementType;
+use App\Models\LocationBound;
+use App\Models\Phase;
+use App\Models\Server;
+use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemElements;
@@ -27,6 +38,7 @@ use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignCreate;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignParentAdd;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 
@@ -43,6 +55,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
     const SERVER_CLASS = ThisServer::class;
 
     const IS_FINAL = false;
+
 
     const TYPE_NAME = '';
     const ATTRIBUTE_CLASSES = [];
@@ -84,13 +97,13 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         try
         {
             $design = new DesignCreate(type_name: static::getHexbatchClassName(),
-                owner_namespace_uuid: $this->getISystemType()->getTypeNamespace()::getClassUuid(),
                 is_final: $this->getISystemType()::isFinal(),
-                access: TypeOfServerAccess::IS_PUBLIC, uuid: static::getClassUuid(),
-                is_system: true,send_event: false
+                access: TypeOfServerAccess::IS_PUBLIC,
+                uuid: static::getClassUuid(),
+                is_system: true, send_event: false, owner_namespace: $this->getISystemType()->getTypeNamespace()->getNamespaceObject()
             );
             $design->runAction();
-            $created_type = $design->getCreatedType();
+            $created_type = $design->getGivenType();
 
 
 
@@ -301,7 +314,6 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         protected bool           $is_system = false,
         protected bool           $send_event = true,
         protected ?bool          $is_async = null,
-        protected int            $priority = 0,
         protected array          $tags = [],
 
     )
@@ -310,6 +322,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         if ($this->b_type_init) {
             return;
         }
+
         if ($this->action_data) {  $this->restoreData(); } else {$this->initData();}
 
     }
@@ -317,4 +330,255 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
     const array ACTIVE_COLLECTION_KEYS = [];
     const array ACTIVE_DATA_KEYS = [];
 
+    protected function runActionInner(array $data = []): void {
+        Utilities::ignoreVar($data);
+    }
+
+    protected function postActionInner(array $data = []): void {
+        Utilities::ignoreVar($data);
+    }
+
+    protected function getMyData() :array { return []; }
+
+    public function getImportantValue(): mixed
+    {
+        if ($this->action_data) {
+            if ($this->action_data->collection_data?->offsetExists('important_value')) {
+                return $this->action_data->collection_data->offsetGet('important_value');
+            } else {
+                return null;
+            }
+        }
+        throw new \LogicException("Important value not set up, or action data not existing");
+    }
+
+    public function setImportantValue(mixed $what, bool $b_save = false): static
+    {
+        $this->action_data?->collection_data->offsetSet('important_value', $what);
+        if ($b_save) {$this->action_data?->save();}
+        return $this;
+    }
+
+
+    public function hasFlag(TypeOfFlag $what): bool
+    {
+        if ($this->action_data) {
+            if ($this->action_data->collection_data?->offsetExists('flag_'.$what->value)) {
+                return (bool)$this->action_data->collection_data->offsetGet('flag_'.$what->value);
+            } else {
+                return false;
+            }
+        }
+        throw new \LogicException("No action data");
+    }
+
+    public function setFlag(TypeOfFlag $what, bool $b_save = false): static
+    {
+        $this->action_data?->collection_data->offsetSet('flag_'.$what->value,true );
+        if ($b_save) {$this->action_data?->save();}
+        return $this;
+    }
+
+
+    public function getGivenType(): ?ElementType
+    {   /** @uses ActionDatum::data_type() */
+        return $this->action_data->data_type;
+    }
+
+    public function setGivenType(null|ElementType|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof ElementType) {
+            $this->action_data->data_type_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenSet(): ?ElementSet
+    {   /** @uses ActionDatum::data_set() */
+        return $this->action_data->data_set;
+    }
+
+    public function setGivenSet(null|ElementSet|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof ElementSet) {
+            $this->action_data->data_set_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+
+
+    public function getGivenElement(): ?Element
+    {   /** @uses ActionDatum::data_element() */
+        return $this->action_data->data_element;
+    }
+
+    public function setGivenElement(null|Element|string $what, bool $b_save = false ): static
+    {
+        if ($what instanceof Element) {
+            $this->action_data->data_element_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_element_id = Element::getThisElement(uuid: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenAttribute(): ?Attribute
+    {   /** @uses ActionDatum::data_attribute() */
+        return $this->action_data->data_attribute;
+    }
+
+    public function setGivenAttribute(null|Attribute|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof Attribute) {
+            $this->action_data->data_attribute_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_attribute_id = Attribute::getThisAttribute(uuid: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenServer(): ?Server
+    {   /** @uses ActionDatum::data_server() */
+        return $this->action_data->data_server;
+    }
+
+    public function setGivenServer(null|Server|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof Server) {
+            $this->action_data->data_server_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_server_id = Server::getThisServer(uuid: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenNamespace(): ?UserNamespace
+    {
+        /** @uses ActionDatum::data_namespace() */
+        return $this->action_data->data_namespace;
+    }
+
+    public function setGivenNamespace(null|UserNamespace|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof UserNamespace) {
+            $this->action_data->data_namespace_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $what)->id;
+        } else {
+            $this->action_data->data_namespace_id = null;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getOwningNamespace(): ?UserNamespace
+    {
+        /** @uses ActionDatum::data_owner_namespace() */
+        return $this->action_data->data_owner_namespace;
+    }
+
+    /** @return Element[] */
+    public function getGivenElements(): array
+    {
+        return $this->action_data->getCollectionOfType(Element::class);
+    }
+
+    /**
+     * @param Collection|Element[]$elements
+     * @return void
+     */
+    public function setGivenElements($elements) : void
+    {
+        $stored_already = $this->getGivenElements();
+        $ref_lookup = [];
+        foreach ($stored_already as $ele) {
+            $ref_lookup[$ele->ref_uuid] = $ele;
+        }
+        foreach ($elements as $ele) {
+            if (!isset($ref_lookup[$ele->ref_uuid])) {
+                $node = new ActionCollection();
+                $node->parent_action_data_id = $this->action_data->id;
+                $node->collection_element_id = $ele->id;
+                $node->save();
+            }
+        }
+    }
+
+
+    public function getGivenLink(): ?ElementLink
+    {   /** @uses ActionDatum::data_link() */
+        return $this->action_data->data_link;
+    }
+
+    public function setGivenLink(null|ElementLink|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof ElementLink) {
+            $this->action_data->data_link_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_link_id = ElementLink::resolveLink(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenTimeBound(): ?TimeBound
+    {   /** @uses ActionDatum::data_time_bound() */
+        return $this->action_data->data_time_bound;
+    }
+
+    public function setGivenTimeBound(null|TimeBound|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof TimeBound) {
+            $this->action_data->data_time_bound_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_time_bound_id = TimeBound::resolveSchedule(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenLocationBound(): ?LocationBound
+    {   /** @uses ActionDatum::data_location_bound() */
+        return $this->action_data->data_location_bound;
+    }
+
+    public function setGivenLocationBound(null|LocationBound|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof LocationBound) {
+            $this->action_data->data_location_bound_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_location_bound_id = LocationBound::resolveLocation(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenPhase(): ?Phase
+    {   /** @uses ActionDatum::$data_phase() */
+        return $this->action_data->data_phase;
+    }
+
+    public function setGivenPhase(null|Phase|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof Phase) {
+            $this->action_data->data_phase_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_phase_id = Phase::resolvePhase(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
 }
+
+

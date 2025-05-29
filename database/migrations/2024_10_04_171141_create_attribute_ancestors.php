@@ -16,8 +16,8 @@ return new class extends Migration
             $table->id();
             // A , B, Gap where A is every attribute and B is one row for each entire ancestor chain, and Gap is how many generations
 
-            $table->foreignId('owning_child_attribute_id')
-                ->nullable()->default(null)
+            $table->foreignId('child_attribute_id')
+                ->nullable(false)
                 ->comment("The attribute which has parents and/or ancestors")
                 ->index()
                 ->constrained('attributes')
@@ -25,19 +25,20 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('ancestor_attribute_id')
-                ->nullable()->default(null)
+                ->nullable(false)
                 ->comment("The attribute which is the parent or ancestor")
                 ->index()
                 ->constrained('attributes')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->integer('attribute_gap')->nullable()->default(null)
+            $table->integer('attribute_gap')->nullable(false)
                 ->comment('How many generations apart');
         });
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_owning_ancestor_attribute ON attribute_ancestors (owning_child_attribute_id,ancestor_attribute_id) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_owning_ancestor_attribute ON attribute_ancestors (child_attribute_id,ancestor_attribute_id) NULLS NOT DISTINCT;");
+
     }
 
     /**

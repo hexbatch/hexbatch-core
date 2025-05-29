@@ -21,7 +21,7 @@ return new class extends Migration
         DB::statement("DROP TYPE IF EXISTS type_of_logic;");
         DB::statement("DROP TYPE IF EXISTS type_of_merge_logic;");
         DB::statement("DROP TYPE IF EXISTS type_of_server_access;");
-        DB::statement("DROP TYPE IF EXISTS type_of_set_value_policy;");
+        DB::statement("DROP TYPE IF EXISTS type_of_element_value_policy;");
         DB::statement("DROP TYPE IF EXISTS type_of_approval;");
         DB::statement("DROP TYPE IF EXISTS type_of_lifecycle;");
         DB::statement("DROP TYPE IF EXISTS type_of_path_status;");

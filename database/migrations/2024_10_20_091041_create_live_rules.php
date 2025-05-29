@@ -31,6 +31,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+
             $table->foreignId('live_rule_about_live_type_id')
                 ->nullable(false)
                 ->comment("The live type this rule is about")

@@ -149,7 +149,11 @@ class User extends Authenticatable implements ISystemModel
             if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \LogicException("Could not find user via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.user_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::USER_NOT_FOUND
+            );
         }
         return $ret;
     }

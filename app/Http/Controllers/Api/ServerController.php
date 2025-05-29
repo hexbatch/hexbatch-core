@@ -2,32 +2,36 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\Annotations\Access\TypeOfAccessMarker;
-use App\Helpers\Annotations\ApiAccessMarker;
-use App\Helpers\Annotations\ApiEventMarker;
-use App\Helpers\Annotations\ApiTypeMarker;
+use App\Annotations\Access\TypeOfAccessMarker;
+use App\Annotations\ApiAccessMarker;
+use App\Annotations\ApiEventMarker;
+use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\Models\Server;
+use App\OpenApi\ApiResults\Server\ApiServerResponse;
 use App\Sys\Res\Types\Stk\Root;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
-use OpenApi\Attributes as OA;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class ServerController extends Controller {
 
     #[OA\Get(
-        path: '/api/v1/server/us',
-        operationId: 'core.server.us',
+        path: '/api/v1/servers/us',
+        operationId: 'core.servers.us',
         description: "Lists public information about the server: all the attributes in the About subtype will be shown, any meta attributes, and name|domain|url ",
         summary: 'Show this server information',
+        tags: ['server','public'],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response( response: 200, description: 'The server',content: new JsonContent(ref: ApiServerResponse::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::IS_PUBLIC)]
     #[ApiTypeMarker( Root\Api\Server\Show::class)]
     public function us() {
 
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+        return response()->json(new ApiServerResponse(given_server: Server::getDefaultServer(),type_level: 1,attribute_level: 1,b_show_namespace: true), CodeOf::HTTP_OK);
     }
 
 
@@ -38,6 +42,8 @@ class ServerController extends Controller {
         operationId: 'core.server.admin',
         description: "Lists private information about the server and links to edit each meta and about ",
         summary: 'Show this server private information',
+        security: [['bearerAuth' => []]],
+        tags: ['server'],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -55,6 +61,8 @@ class ServerController extends Controller {
         operationId: 'core.server.edit',
         description: "Edits only the name,domain and url. The about and the meta have to be done independ, but the admin view has the links to those",
         summary: 'Edit this server information',
+        security: [['bearerAuth' => []]],
+        tags: ['server'],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

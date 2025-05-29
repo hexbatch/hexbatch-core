@@ -3,12 +3,15 @@
 namespace App\Helpers;
 
 use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
 use App\Rules\ResourceNameReq;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
+use App\Sys\Res\Servers\Stock\ThisServer;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -212,6 +215,29 @@ class Utilities {
         return UserNamespace::getThisNamespace(uuid: ThisNamespace::getClassUuid());
     }
 
+    protected static ?Server $my_server = null;
+
+    public static function getThisServer() : Server {
+        if (static::$my_server) {return static::$my_server; }
+        static::$my_server = Server::getThisServer(uuid: ThisServer::getClassUuid());
+        return static::$my_server;
+    }
+
+
+    public static function getCurrentOrUserNamespace() : ?UserNamespace {
+        $ns = static::getCurrentNamespace();
+        if (!$ns) {
+            $ns = static::getThisUserDefaultNamespace();
+        }
+        if (!$ns) {
+            throw new HexbatchNotFound(
+                __('msg.namespace_missing'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::NAMESPACE_NOT_FOUND
+            );
+        }
+        return $ns;
+    }
     public static function getCurrentNamespace() : ?UserNamespace {
         $namespace = null;
         $what_route = Route::current();
@@ -310,11 +336,35 @@ class Utilities {
         return $step_e;
     }
 
-    public static function getVersionString() : ?string {
-        return file_get_contents(base_path() . DIRECTORY_SEPARATOR . 'version') ? : null;
+
+    public static function getComposerPath() : string {
+        $composerFile = base_path() . DIRECTORY_SEPARATOR . 'composer.json';
+        $what =  realpath($composerFile);
+        if (!$what) {
+            throw new LogicException("Composer path $composerFile does not exist");
+        }
+        return $what;
     }
 
+    public static function getComposer() : array  {
+        $composerFile = static::getComposerPath();
+        $composer = json_decode(file_get_contents($composerFile), true);
+        if (empty($composer)) {
+            throw new LogicException("Cannot convert composer.json");
+        }
+        return $composer;
+    }
 
+    public static function getVersionAsString() : string {
+        $composer = static::getComposer();
+        return $composer['version']??'';
+    }
+
+    public static function getInstallTimeStamp() : ?int {
+        $what =  filemtime(self::getComposerPath());
+        if (!$what) {return null;}
+        return $what;
+    }
 
 
 

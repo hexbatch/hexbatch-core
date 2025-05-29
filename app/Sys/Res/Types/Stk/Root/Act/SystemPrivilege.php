@@ -21,5 +21,6 @@ class SystemPrivilege extends BaseType
         BaseAction::class
     ];
 
+
 }
 

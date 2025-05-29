@@ -24,7 +24,7 @@ class ElementTypeNameReq extends ResourceNameReq
         parent::validate($attribute,$value,$fail);
 
         $working_namespace = $this->current_namespace;
-        if ($this->element_type) { $working_namespace = $this->element_type->owner_namespace;}
+        if ($this->element_type && !$working_namespace) { $working_namespace = $this->element_type->owner_namespace;}
         if (!$working_namespace) {
             throw new \LogicException("Need a namespace passed in here");
         }

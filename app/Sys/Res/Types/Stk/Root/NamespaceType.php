@@ -14,7 +14,6 @@ class NamespaceType extends BaseType
     const TYPE_NAME = 'namespace';
 
 
-
     const ATTRIBUTE_CLASSES = [
         NamespaceData::class
     ];
@@ -22,6 +21,7 @@ class NamespaceType extends BaseType
     const PARENT_CLASSES = [
         Root::class
     ];
+
 
 }
 

@@ -17,7 +17,7 @@ class PromoteSet extends Api\SetApi
 
     const PARENT_CLASSES = [
         Api\SetApi::class,
-        Act\Cmd\Ele\SetPromote::class,
+        Act\Cmd\Ele\SetCreate::class,
     ];
 
 }

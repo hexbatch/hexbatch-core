@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Api\Common;
+namespace App\OpenApi\Common;
 
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_uuid',
+    schema: 'HexbatchUuid',
     title: 'Unique reference',
     description: 'Defines a regular uuid',
     type: 'string',

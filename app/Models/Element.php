@@ -7,8 +7,10 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
 
 /*
  * Element destruction has two different modes
@@ -36,6 +38,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property UserNamespace element_namespace
  * @property ElementType element_parent_type
+ * @property Phase element_phase
  */
 class Element extends Model implements ISystemModel
 {
@@ -78,10 +81,24 @@ class Element extends Model implements ISystemModel
         return $this->belongsTo(ElementType::class,'element_parent_type_id');
     }
 
+    public function element_phase() : BelongsTo {
+        return $this->belongsTo(Phase::class,'element_phase_id');
+    }
+
 
     public static function buildElement(
         ?int    $me_id = null,
+        ?int    $type_id = null,
+        ?int    $attribute_id = null,
+        ?int    $shape_id = null,
+        ?int    $schedule_id = null,
+        ?int    $set_id = null,
+        ?int    $phase_id = null,
+        ?int    $namespace_id = null,
+        array   $in_namespace_ids = [],
+        ?bool   $is_set = null,
         ?string $uuid = null,
+        array   $given_uuids = [],
         bool    $b_do_relations = false
 
     ): Builder
@@ -102,6 +119,90 @@ class Element extends Model implements ISystemModel
             $build->where('elements.ref_uuid', $uuid);
         }
 
+        if (count($given_uuids)) {
+            $build->whereIn('elements.ref_uuid', $given_uuids);
+        }
+
+        if ($phase_id) {
+            $build->where('elements.element_phase_id', $phase_id);
+        }
+
+        if ($namespace_id) {
+            $build->where('elements.element_namespace_id', $namespace_id);
+        }
+
+        if (count($in_namespace_ids)) {
+            $build->whereIn('elements.element_namespace_id', $in_namespace_ids);
+        }
+
+        if($type_id) {
+            $build->where('elements.element_parent_type_id', $type_id);
+        }
+
+        if ($is_set !== null) {
+            if ($is_set) {
+                $build->join('element_sets s',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join)  {
+                        $join->on('s.parent_set_element_id', '=', 'elements.id');
+                    }
+                );
+            } else {
+                $build->leftJoin('element_sets s',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join)  {
+                        $join->on('s.parent_set_element_id', '=', 'elements.id');
+                    }
+                )->whereNull('s.id');
+            }
+        }
+
+        if ($schedule_id) {
+            $build->join('element_types aet',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($schedule_id) {
+                    $join->on('aet.id', '=', 'elements.element_parent_type_id')
+                        ->where('aet.type_time_bound_id', $schedule_id);
+                }
+            );
+        }
+
+        if ($set_id) {
+            $build->join('element_set_members sem',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($set_id) {
+                    $join->on('sem.member_element_id', '=', 'elements.id')
+                        ->where('sem.id', $set_id);
+                }
+            );
+        }
+
+        if ($attribute_id) {
+            $build->join('attributes att',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($attribute_id) {
+                    $join
+                        ->on('elements.element_parent_type_id','=','att.owner_element_type_id')
+                        ->where('att.id',$attribute_id);
+                }
+            );
+        }
+
+        if ($shape_id) {
+            $build->join('attributes satt',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($shape_id) {
+                    $join
+                        ->on('elements.element_parent_type_id','=','satt.owner_element_type_id')
+                        ->where('satt.attribute_shape_id',$shape_id);
+                }
+            );
+        }
+
         if ($b_do_relations) {
             /** @uses Element::element_namespace(),Element::element_parent_type() */
             $build->with('element_namespace','element_parent_type');
@@ -109,6 +210,72 @@ class Element extends Model implements ISystemModel
 
 
         return $build;
+    }
+
+    /**
+     * @param string[]|\Illuminate\Support\Collection $values
+     * @param bool $throw_exception
+     * @return Collection|Element[]
+     */
+    public static function resolveElements( $values, bool $throw_exception = true)
+    {
+
+        $refs = [];
+        foreach ($values as $val) {
+            if (!Utilities::is_uuid($val)) {
+                if ($throw_exception) {
+                    throw new HexbatchNotFound(
+                        __('msg.element_not_found',['ref'=>$val]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                        RefCodes::ELEMENT_NOT_FOUND
+                    );
+                } else {
+                    continue;
+                }
+            }
+
+            $refs[] = $val;
+
+        }
+
+       /** @var Collection|Element[] $ret */
+        $ret = static::buildElement(given_uuids:$refs)->get();
+
+        if (count($ret) !== count($values) ) {
+            if ($throw_exception) {
+                throw new HexbatchNotFound(
+                    __('msg.element_list_not_found',['ref'=>implode('|',$values)]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::ELEMENT_NOT_FOUND
+                );
+            }
+        }
+
+        return $ret;
+    }
+
+    public static function resolveElement(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+            return static::getThisElement(uuid: $value);
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.element_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ELEMENT_NOT_FOUND
+            );
+        }
+
+        return $ret;
     }
 
     public static function getThisElement(
@@ -125,7 +292,11 @@ class Element extends Model implements ISystemModel
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find element via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.element_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ELEMENT_NOT_FOUND
+            );
         }
         return $ret;
     }
@@ -139,48 +310,27 @@ class Element extends Model implements ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    //the ref
-                    $build = $this->where('ref_uuid', $value);
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = Element::buildElement(me_id:$first_id)->first();
-                }
-            }
-        } finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.element_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::ELEMENT_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
+        return static::resolveElement($value);
 
     }
 
     public function getName() :string {
-        return 'Element '.$this->element_parent_type->getName();
+        return $this->ref_uuid.' from '.$this->element_parent_type->getName();
     }
 
-    public function getValueBySet(?ElementSet $set) : ?ElementValue {
-        return ElementSetMember::buildSetMember(set_id: $set->getSetObject()->id, element_id: $this->id)->first();
-    }
 
 
     public function getUuid(): string{
         return $this->ref_uuid;
+    }
+
+    public function changeOwners(UserNamespace $namespace) {
+        $this->element_namespace_id = $namespace->id;
+        $this->save();
+    }
+
+    public function destroyElement() {
+        $this->delete();
     }
 
 

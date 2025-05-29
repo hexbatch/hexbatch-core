@@ -1,9 +1,9 @@
 <?php
 namespace App\Sys\Res;
 
-use App\Helpers\Annotations\Documentation\HexbatchBlurb;
-use App\Helpers\Annotations\Documentation\HexbatchDescription;
-use App\Helpers\Annotations\Documentation\HexbatchTitle;
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use League\CommonMark\Exception\CommonMarkException;
 
 

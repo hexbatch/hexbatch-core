@@ -23,6 +23,7 @@ class Phase extends BaseType
 
     const IS_DEFAULT_PHASE = false;
 
+
     protected \App\Models\Phase|null $phase = null;
 
 

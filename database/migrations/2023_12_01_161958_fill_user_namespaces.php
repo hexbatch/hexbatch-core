@@ -99,14 +99,11 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("optional public key used for next layer");
 
-            $table->string('namespace_name',61)
+            $table->string('namespace_name',30)
                 ->nullable(false)
-                ->index()
+                ->unique()
                 ->comment("All created by this user_token is prefixed by this name");
         });
-
-        DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_server_username ON user_namespaces (namespace_server_id,namespace_name) NULLS NOT DISTINCT;");
 
         DB::statement('ALTER TABLE user_namespaces ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 

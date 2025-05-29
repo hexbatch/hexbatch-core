@@ -18,5 +18,6 @@ class CmdNoSideEffects extends BaseType
         BaseAction::class
     ];
 
+
 }
 

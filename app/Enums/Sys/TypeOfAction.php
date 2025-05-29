@@ -36,21 +36,15 @@ enum TypeOfAction: string
     case BASE_WAIT = 'base_wait';
 
 
-    case PRAGMA_WRITE_VISUAL = 'pragma_write_visual'; //if the attribute has a shape or map, set the visual section to one or more opacity|color|border|texture
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
-    case PRAGMA_READ_TYPE = 'pragma_read_type';
-    case PRAGMA_READ_LIVE_TYPE = 'pragma_read_live_type';
 
     case PRAGMA_READ_TIME_SPAN = 'pragma_read_time_span'; //the start and stop time of the type that owns the element (current time span)
-    case PRAGMA_READ_VISUAL = 'pragma_read_visual'; //the shape of the attribute being read, includes display
 
 
 
 
-    case PRAGMA_ELEMENT_ON = 'pragma_element_on';
-    case PRAGMA_ELEMENT_OFF = 'pragma_element_off';
     case PRAGMA_TYPE_ON = 'pragma_element_type_on';
     case PRAGMA_TYPE_OFF = 'pragma_element_type_off';
 
@@ -67,11 +61,10 @@ enum TypeOfAction: string
 
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
-    case CMD_DESIGN_PROMOTE = 'cmd_design_promote';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
     case CMD_DESIGN_PURGE = 'cmd_design_purge';
 
-    case CMD_DESIGN_TIME = 'cmd_design_time';
+
 
     case CMD_DESIGN_EDIT = 'cmd_design_edit';
 
@@ -79,13 +72,18 @@ enum TypeOfAction: string
     case CMD_DESIGN_PARENT_ADD = 'cmd_design_parent_add';
     case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
 
+    case CMD_DESIGN_TIME_CREATE = 'cmd_design_time_create';
+    case CMD_DESIGN_TIME_EDIT = 'cmd_design_time_edit';
 
+
+    case CMD_DESIGN_LOCATION_CREATE = 'cmd_design_location_create';
+    case CMD_DESIGN_LOCATION_EDIT = 'cmd_design_location_edit';
+    case CMD_DESIGN_LOCATION_DESTROY = 'cmd_design_location_destroy';
+    case CMD_DESIGN_TIME_DESTROY = 'cmd_design_time_destroy';
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
-    case CMD_DESIGN_ATTRIBUTE_PROMOTE = 'cmd_design_attribute_promote';
     case CMD_DESIGN_ATTRIBUTE_DESTROY = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
-    case CMD_DESIGN_ATTRIBUTE_LOCATION = 'cmd_design_attribute_location';
     case CMD_DESIGN_LISTENER_CREATE = 'cmd_design_listener_create';
     case CMD_DESIGN_LISTENER_DESTROY = 'cmd_design_listener_destroy';
     case CMD_DESIGN_RULE_CREATE = 'cmd_design_rule_create';
@@ -99,15 +97,12 @@ enum TypeOfAction: string
 
     case CMD_DESIGN_REQUIREMENT_ADD = 'cmd_design_requirement_add';
     case CMD_DESIGN_REQUIREMENT_REMOVE = 'cmd_design_requirement_remove';
-    case CMD_DESIGN_LOCATION_TEST = 'cmd_design_location_test';
-    case CMD_DESIGN_TIME_TEST = 'cmd_design_time_test';
-    case CMD_DESIGN_ATTRIBUTE_LOCATION_TEST = 'cmd_design_attribute_location_test';
+
     case CMD_DESIGN_OWNER_CHANGE = 'cmd_design_owner_change';
     case CMD_DESIGN_OWNER_PROMOTE = 'cmd_design_owner_promote';
 
 
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
-    case CMD_TYPE_PUBLISH_PROMOTE = 'cmd_type_publish_promote';
     case CMD_TYPE_SUSPEND = 'cmd_type_suspend';
     case CMD_TYPE_RETIRE = 'cmd_type_retire';
     case CMD_TYPE_DESTROY = 'cmd_type_destroy';
@@ -118,8 +113,6 @@ enum TypeOfAction: string
     case CMD_TYPE_HANDLE_ADD = 'cmd_type_handle_add';
     case CMD_TYPE_HANDLE_REMOVE = 'cmd_type_handle_remove';
 
-    case CMD_ATTRIBUTE_HANDLE_ADD = 'cmd_attribute_handle_add';
-    case CMD_ATTRIBUTE_HANDLE_REMOVE = 'cmd_attribute_handle_remove';
 
     case CMD_PATH_CREATE = 'cmd_path_create';
     case CMD_PATH_EDIT = 'cmd_path_edit';
@@ -137,7 +130,6 @@ enum TypeOfAction: string
 
 
     case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
-    case CMD_SET_PROMOTE = 'cmd_set_promote'; //child set or top level set
     case CMD_SET_DESTROY = 'cmd_set_destroy'; //if ns-admin of definer element of set ns
 
     case CMD_SET_EMPTY = 'cmd_set_empty'; //non sticky stuff
@@ -151,20 +143,18 @@ enum TypeOfAction: string
     case CMD_SET_MEMBER_UNSTICK = 'cmd_set_member_unstick';
     case CMD_SET_MEMBER_REMOVE = 'cmd_set_member_remove';
 
-    case CMD_SET_MEMBER_PROMOTE = 'cmd_set_member_promote'; //add element to set, no events
-    case CMD_SET_MEMBER_PURGE = 'cmd_set_member_purge'; //remove element from set, no events
+    case CMD_SET_MEMBER_PURGE = 'cmd_set_member_purge';
 
 
     case CMD_ELEMENT_PING = 'cmd_element_ping';
 
 
-    case CMD_ELEMENT_PROMOTE = 'cmd_element_promote';
-    case CMD_ELEMENT_EDIT = 'cmd_element_edit';
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
+
+    case CMD_ELEMENT_EDIT = 'cmd_element_edit';
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
-    case CMD_ELEMENT_PURGE = 'cmd_element_purge'; //server admin
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
     case CMD_LIVE_TYPE_PROMOTE = 'cmd_live_type_promote';
     case CMD_LIVE_TYPE_DEMOTE = 'cmd_live_type_demote';

@@ -1,6 +1,7 @@
 <?php
 /*
-./vendor/bin/openapi app libs --version 3.1.0 -o  public/openapi.yaml
+ ./vendor/bin/openapi   app/Enums app/OpenApi app/Http libs --version 3.1.0 -o  public/openapi.yaml
+ ./vendor/bin/openapi   app/Enums app/OpenApi app/Http libs --version 3.1.0 -f json -o  public/openapi.json
 
 https://redocly.com/docs/cli/installation
  docker run --rm -v $PWD:/spec redocly/cli lint public/openapi.yaml
@@ -16,7 +17,7 @@ use OpenApi\Attributes as OA;
     security: [['bearerAuth' => []]]
 )]
 
-#[OA\Info(version: "0.1.0",
+#[OA\Info(version: "0.3.2",
     description: "Hexbatch core api",
     title: "Hexbatch core",
     termsOfService: "https://hexbatch.com/core-inspector",

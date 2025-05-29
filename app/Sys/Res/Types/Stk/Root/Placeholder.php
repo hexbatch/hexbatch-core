@@ -13,7 +13,6 @@ class Placeholder extends BaseType
     const TYPE_NAME = 'placeholder';
 
 
-
     const ATTRIBUTE_CLASSES = [
         PlaceholderAttribute::class
     ];
@@ -21,6 +20,8 @@ class Placeholder extends BaseType
     const PARENT_CLASSES = [
         Root::class
     ];
+
+
 
 }
 

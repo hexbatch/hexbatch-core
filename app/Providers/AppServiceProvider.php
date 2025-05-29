@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+
+use App\Models\UserNamespace;
 use App\Sys\Collections\SystemTypes;
 use App\Sys\Res\Types\BaseType;
 use Illuminate\Database\Eloquent\Model;
@@ -28,5 +30,7 @@ class AppServiceProvider extends ServiceProvider
         foreach (SystemTypes::loadClasses() as $class) {
             $class::registerAction();
         }
+
+        UserNamespace::registerOwner();
     }
 }

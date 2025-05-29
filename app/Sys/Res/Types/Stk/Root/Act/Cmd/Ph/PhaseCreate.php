@@ -4,13 +4,11 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
 
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
-use App\Models\ElementType;
 use App\Models\Phase;
-
 use App\Models\UserNamespace;
+use App\OpenApi\Results\Phase\PhaseResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
 class PhaseCreate extends Act\Cmd\Ph
@@ -31,16 +29,11 @@ class PhaseCreate extends Act\Cmd\Ph
         Evt\Type\PhaseAdded::class,
     ];
 
-    public function getGivenType(): ElementType
-    {
-        /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
+
 
     public function getGivenEditPhase(): ?Phase
     {
-        /** @uses ActionDatum::data_phase() */
-        return $this->action_data->data_phase;
+        return $this->getGivenPhase();
     }
 
     public function getCreatedPhase(): ?Phase
@@ -68,43 +61,36 @@ class PhaseCreate extends Act\Cmd\Ph
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
 
-        if ($this->given_edit_phase_uuid) {
-            $this->action_data->data_set_id = Phase::getThisPhase(uuid: $this->given_edit_phase_uuid)->id;
-        }
+        $this->setGivenSet($this->given_edit_phase_uuid)->setGivenType($this->given_type_uuid);
+
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
     }
 
 
-
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         if (!$this->getGivenType() || !$this->phase_name) {
             throw new \InvalidArgumentException("Need type and name");
         }
+        $this->checkIfAdmin($this->getGivenType()->owner_namespace);
 
         try {
             DB::beginTransaction();
@@ -130,22 +116,28 @@ class PhaseCreate extends Act\Cmd\Ph
                     source: $this, action_data: $this->action_data,phase_context: $phase);
             }
 
-
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
 
 
 
     protected function getMyData() :array {
         return ['phase'=>$this->getCreatedPhase(),'given_edit_phase'=>$this->getGivenEditPhase(),'given_type'=>$this->getGivenType()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['phase'])) {
+            $ret['phase'] = new PhaseResponse(given_phase:  $what['phase']);
+        }
+
+        return $ret;
     }
 
 

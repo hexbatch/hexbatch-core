@@ -3,32 +3,31 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\User;
 
 
-use App\Helpers\Annotations\Documentation\HexbatchBlurb;
-use App\Helpers\Annotations\Documentation\HexbatchDescription;
-use App\Helpers\Annotations\Documentation\HexbatchTitle;
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
-use App\OpenApi\Users\MeResponse;
-use App\OpenApi\Users\Registration\RegistrationParams;
+use App\OpenApi\ApiResults\Users\ApiMeResponse;
+use App\OpenApi\Params\Actioning\Registration\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\ICallResponse;
+use Hexbatch\Things\Interfaces\IHookCode;
 use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\Models\ThingCallback;
-use Hexbatch\Things\Models\ThingHook;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 #[HexbatchTitle( title: "Register")]
 #[HexbatchBlurb( blurb: "Creates a new user and his default namespace")]
 #[HexbatchDescription( description: "
 
   Makes a new user, his default namespace including a new type, which is used to build the home set, and public and private elements")]
-class UserRegister extends Api\UserApi
+class UserRegister extends Api\UserApi implements IHookCode
 {
     const UUID = '6608f89f-ec12-427e-a653-9edc8acc5d19';
     const TYPE_NAME = 'api_user_register';
@@ -39,16 +38,16 @@ class UserRegister extends Api\UserApi
         Act\Cmd\Us\UserRegister::class,
     ];
 
+    const int HTTP_CODE_GOOD = CodeOf::HTTP_CREATED;
+
 
     protected function setCreatedNamespace(UserNamespace $namespace) : void {
-        $this->action_data->data_namespace_id = $namespace->id;
-        $this->action_data->save();
+        $this->setGivenNamespace($namespace,true);
     }
 
     public function getCreatedNamespace(): ?UserNamespace
     {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
+        return $this->getGivenNamespace();
     }
 
 
@@ -64,43 +63,44 @@ class UserRegister extends Api\UserApi
     }
 
 
-    const array ACTIVE_DATA_KEYS = ['user_name','user_password','public_key'];
-
 
     protected function getMyData() :array {
         return ['user'=>$this->getCreatedUser(),'namespace'=>$this->getCreatedNamespace()];
     }
 
+    public function getDataSnapshot(): array|IThingBaseResponse
+    {
+        $what =  $this->getMyData();
+        return new ApiMeResponse(user:  $what['user'],show_namespace: true,thing: $this->getMyThing());
+    }
+
     public function __construct(
-        protected ?string $user_name =null,
-        protected ?string $user_password = null,
-        protected ?string $public_key = null,
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
         protected ?bool $is_async = null,
-        ?RegistrationParams $params = null,
-        protected int            $priority = 0,
+        protected ?RegistrationParams $params = null,
         protected array          $tags = []
     )
     {
-        if($params) {
-            if (!$this->user_name) { $this->user_name = $params->getUsername();}
-            if (!$this->user_password) { $this->user_password = $params->getPassword();}
-            if (!$this->public_key) { $this->public_key = $params->getPublicKey();}
-        }
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
+            is_async: $this->is_async,tags: $this->tags);
     }
+
+    protected function restoreParams(array $param_array) {
+        parent::restoreParams($param_array);
+        if(!$this->params) {
+            $this->params = new RegistrationParams();
+            $this->params->fromCollection(new Collection($param_array));
+        }
+    }
+
 
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
-
+        parent::runActionInner();
         try {
             DB::beginTransaction();
             if ($this->getCreatedUser() && $this->getCreatedNamespace()) {
@@ -117,10 +117,8 @@ class UserRegister extends Api\UserApi
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
 
 
@@ -132,13 +130,18 @@ class UserRegister extends Api\UserApi
 
         $nodes = [];
         $register = new Act\Cmd\Us\UserRegister(
-            user_name: $this->user_name, user_password: $this->user_password, is_system: false, send_event: true,
+            user_name: $this->params->getUsername(), user_password: $this->params->getPassword(),
+            is_system: false, send_event: true,
             parent_action_data: $this->action_data,tags: ['register user']);
         $nodes[] = ['id' => $register->getActionData()->id, 'parent' => -1, 'title' => $register->getType()->getName(),'action'=>$register];
 
         $namespace = new Act\Cmd\Ns\NamespaceCreate(
-            namespace_name: $this->user_name,is_system: false,send_event: true, parent_action_data: $this->action_data,tags: ['create namespace']);
+            namespace_name: $this->params->getUsername(),
+            public_key: $this->params->getPublicKey(),
+            is_system: false,send_event: true, parent_action_data: $this->action_data,tags: ['create namespace']);
         $nodes[] = ['id' => $namespace->getActionData()->id, 'parent' => -1, 'title' => $namespace->getType()->getName(),'action'=>$namespace];
+
+
 
 
 
@@ -154,6 +157,9 @@ class UserRegister extends Api\UserApi
     }
 
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void {
 
         if ($child instanceof Act\Cmd\Us\UserRegister) {
@@ -182,37 +188,6 @@ class UserRegister extends Api\UserApi
     }
 
 
-    public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
-    {
-        if ($thing->thing_status === TypeOfThingStatus::THING_SUCCESS) {
-
-            $meta = $body['thing_meta']??null;
-            $action_uuid = null;
-            if ($meta) {
-                $action_uuid = $meta['action']??null;
-            }
-
-            if ($action_uuid  ) {
-                /**
-                 * @var ActionDatum $action
-                 */
-                $action = ActionDatum::buildHexbatchData(uuid: $action_uuid)->first();
-                if ($action) {
-                    $action_id = $action->id;
-                    /** @var static  $me */
-                    $me = static::resolveAction(action_id: $action_id);
-                    $user = $me->getCreatedUser();
-                    $user->refresh();
-                    return new MeResponse(user: $user );
-                }
-
-
-            }
-            throw new \RuntimeException("Could not find action ref or make response");
-        } else {
-            return new ThingResponse(thing:$thing);
-        }
-    }
 
 
 

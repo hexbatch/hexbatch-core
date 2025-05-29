@@ -4,7 +4,6 @@
 namespace App\Http\Middleware;
 
 use App\Helpers\Utilities;
-use App\Models\UserNamespace;
 use Closure;
 use Hexbatch\Things\Interfaces\IThingOwner;
 use Illuminate\Http\Request;
@@ -16,7 +15,7 @@ class SetThingOwner
     /**
      * Handle an incoming request.
      *
-     * @param \Closure(Request): (Response) $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
