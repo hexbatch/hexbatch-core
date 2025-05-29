@@ -143,10 +143,10 @@ class Api extends BaseType implements IHookCode
         $search_params = new CallbackSearchParams(
             is_blocking: true,
             is_after: true,
-            thing_action_type: static::getHexbatchClassName(),
+            thing_action_type: static::class,
             thing_action_id: $this->getActionData()->id);
 
-        $search_params->setHookOwner(ThisNamespace::getCreatedNamespace());
+        //$search_params->setHookOwner(ThisNamespace::getCreatedNamespace());
         /** @var ThingCallback[] $maybe_callbacks */
         $maybe_callbacks = ThingCallback::buildCallback(params: $search_params)->get();
         if (count($maybe_callbacks) === 0) {
