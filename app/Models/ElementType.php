@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
-use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
@@ -18,7 +17,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -215,7 +213,7 @@ class ElementType extends Model implements IType,ISystemModel
                 function (JoinClause $join) use($shape_bound_id) {
                     $join
                         ->on('element_types.id','=','attributes.owner_element_type_id')
-                        ->where('attributes.attribute_location_shape_bound_id',$shape_bound_id);
+                        ->where('attributes.attribute_shape_id',$shape_bound_id);
                 }
             );
         }
@@ -356,180 +354,6 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
 
-    public static function collectType(Collection $collect, ?Server $parent_server = null) : ElementType {
-        try {
-            DB::beginTransaction();
-            if (is_string($collect) && Utilities::is_uuid($collect)) {
-                /**
-                 * @var ElementType
-                 */
-                return (new ElementType())->resolveRouteBinding($collect);
-            } else {
-
-                if ($collect->has('uuid')) {
-                    $maybe_uuid = $collect->get('uuid');
-                    if (is_string($maybe_uuid) &&  Utilities::is_uuid($maybe_uuid) ) {
-                        $element_type =  (new ElementType())->resolveRouteBinding($maybe_uuid);
-                    } else {
-
-                        throw new HexbatchNotFound(
-                            __('msg.type_not_found',['ref'=>(string)$maybe_uuid]),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                            RefCodes::TYPE_NOT_FOUND
-                        );
-                    }
-                } else {
-                    $element_type = new ElementType();
-                    if ($parent_server) {
-                        $element_type->imported_from_server_id = $parent_server->id;
-                    }
-                }
-
-                $element_type->editType($collect);
-            }
-
-            DB::commit();
-            return $element_type;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            if ($e instanceof HexbatchCoreException) {
-                throw $e;
-            }
-            throw new HexbatchNotPossibleException(
-                $e->getMessage(),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-
-        }
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public  function editType(Collection $collect) : void {
-        try
-        {
-            DB::beginTransaction();
-
-            if ($collect->has('is_final_type')) {
-                $this->is_final_type = Utilities::boolishToBool($collect->get('is_final_type',false));
-            }
-
-            if ($collect->has('lifecycle')) {
-                $maybe_valid_lifecycle = TypeOfLifecycle::tryFromInput($collect->get('lifecycle'));
-                 if ($this->lifecycle === TypeOfLifecycle::PUBLISHED) {
-                     if ($maybe_valid_lifecycle == TypeOfLifecycle::RETIRED) {
-                         $this->lifecycle = $maybe_valid_lifecycle;
-                     }
-                } else if ($this->lifecycle === TypeOfLifecycle::DEVELOPING || $this->lifecycle === TypeOfLifecycle::RETIRED) {
-                     if ($maybe_valid_lifecycle === TypeOfLifecycle::PUBLISHED) {
-                         //todo if publish, then check for permission for both parent attributes and child types,
-                         // required and rules for live, send to things for any listeners on each type used
-                         // in the things, those listeners get tied as child things to the publish approval. here, both attributes and types are checked
-                         // that means its possible to design stuff using items without permissions (as long as in the proper ns memberships and admins)
-                         // the lifecycle will be set to published after all is cleared
-                         // bringing back retired types will start a new publish check
-                         Utilities::ignoreVar();//linting
-                     }
-                 }
-            }
-
-
-            if ($collect->has('description_element')) {
-                $describe_hint_here = $collect->get('description_element');
-                if (!is_string($describe_hint_here) || !Utilities::is_uuid($describe_hint_here)) {
-                    throw new HexbatchNotPossibleException(__('msg.type_descriptions_must_be_uuid'),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::TYPE_SCHEMA_ISSUE);
-                }
-                /**
-                 * @var Element|null $de_element
-                 */
-                $de_element = (new Element())->resolveRouteBinding($describe_hint_here);
-                $this->type_handle_element_id = $de_element;
-            }
-
-            if (!$this->isInUse()) {
-
-
-                $this->owner_namespace_id = Utilities::getCurrentNamespace()->id;
-
-                if ($collect->has('parents')) {
-
-                    collect($collect->get('parents'))->each(function ($some_parent_hint, int $key) {
-                        Utilities::ignoreVar($key);
-                        if (!is_string($some_parent_hint)) {
-                            throw new HexbatchNotPossibleException(__('msg.parent_types_must_be_string_names'),
-                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                RefCodes::TYPE_SCHEMA_ISSUE);
-                        }
-                        /**
-                         * @var ElementType|null $some_parent
-                         */
-                        $some_parent = (new ElementType())->resolveRouteBinding($some_parent_hint);
-
-                        ElementTypeParent::addParent($some_parent, $this);
-                    });
-                }
-
-                if ($collect->has('type_name')) {
-                    try {
-                        if ($this->type_name = $collect->get('type_name')) {
-                            Validator::make(['type_name' => $this->type_name], [
-                                'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type,Utilities::getCurrentNamespace())],
-                            ])->validate();
-                        }
-                    } catch (ValidationException $v) {
-                        throw new HexbatchNotPossibleException($v->getMessage(),
-                            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::TYPE_INVALID_NAME);
-                    }
-                }
-
-                if (!$this->type_name && !$this->id) {
-                    throw new HexbatchNotPossibleException(__('msg.type_must_have_name'),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::TYPE_INVALID_NAME);
-                }
-
-                $owner_namespace = $this->owner_namespace;
-                if (!$owner_namespace) {$owner_namespace = UserNamespace::buildNamespace(me_id: $this->owner_namespace_id)->first();}
-
-                if ($collect->has('time_bound')) {
-                    $hint_time_bound = $collect->get('time_bound');
-                    if (is_string($hint_time_bound) || $hint_time_bound instanceof Collection) {
-                        $time_bound = TimeBound::collectTimeBound(collect: $hint_time_bound,namespace: $owner_namespace);
-                        $this->type_time_bound_id = $time_bound->id;
-                    }
-                }
-
-
-
-                try {
-                    $this->save();
-                } catch (\Exception $f) {
-                    throw new HexbatchNotPossibleException(
-                        __('msg.type_cannot_be_edited', ['ref' => $this->getName(), 'error' => $f->getMessage()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::TYPE_CANNOT_EDIT);
-                }
-
-                collect($collect->get('attributes'))->each(function ($some_attribute_hint, int $key) {
-                    Utilities::ignoreVar($key);
-                    if ($some_attribute_hint instanceof Collection) {
-                        Attribute::collectAttribute(collect: $some_attribute_hint, owner: $this);
-                    }
-                });
-
-                $this->sumGeoFromAttributes();
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
 
     public function checkInUse() {
         if ($this->isInUse()) {
@@ -582,6 +406,20 @@ class ElementType extends Model implements IType,ISystemModel
             if ($type->ref_uuid === $par->ref_uuid) {return true;}
         }
         return false;
+    }
+
+    function setTypeName(string $name) {
+        try {
+            if ($this->type_name = $name) {
+                Validator::make(['type_name' => $this->type_name], [
+                    'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type,Utilities::getCurrentNamespace())],
+                ])->validate();
+            }
+        } catch (ValidationException $v) {
+            throw new HexbatchNotPossibleException($v->getMessage(),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_INVALID_NAME);
+        }
     }
 
 

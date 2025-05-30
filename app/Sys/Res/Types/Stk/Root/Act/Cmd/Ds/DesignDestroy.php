@@ -9,10 +9,11 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 
+
 #[HexbatchTitle( title: "Destroy a design")]
-#[HexbatchBlurb( blurb: "Designs can be deleted without any events")]
+#[HexbatchBlurb( blurb: "Designs can be deleted by namespace admins without any events")]
 #[HexbatchDescription( description:'')]
-class DesignDestroy extends Act\Cmd\Ds
+class DesignDestroy extends DesignPurge
 {
     const UUID = 'd21d7294-35f8-4938-bff4-3e57ffe95e55';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_DESTROY;
@@ -24,6 +25,15 @@ class DesignDestroy extends Act\Cmd\Ds
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
     ];
+
+
+    public function runAction(array $data = []): void
+    {
+        parent::runAction($data);
+
+        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+    }
+
 
 }
 

@@ -87,8 +87,8 @@ class ElementTypeParent extends Model
     /**
      * @throws \Exception
      */
-    public static function addParent(ElementType $parent, ElementType $child,TypeOfApproval $init_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL
-        ,bool $check_parent_published = true)
+    public static function addOrUpdateParent(ElementType $parent, ElementType $child, TypeOfApproval $approval = TypeOfApproval::PENDING_DESIGN_APPROVAL
+        , bool                                           $check_parent_published = true)
     :ElementTypeParent
     {
 
@@ -123,7 +123,7 @@ class ElementTypeParent extends Model
             $par->upsert([
                 'child_type_id' => $child->id,
                 'parent_type_id' => $parent->id,
-                'parent_type_approval' => $init_approval,
+                'parent_type_approval' => $approval,
                 'parent_rank' => $current_step + 1,
             ], ['parent_type_id', 'child_type_id']);
 

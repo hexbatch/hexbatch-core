@@ -15,6 +15,7 @@ use Carbon\Exceptions\InvalidFormatException;
 use Carbon\Exceptions\InvalidTimeZoneException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
@@ -47,6 +48,7 @@ use InvalidArgumentException;
  * @property int updated_at_ts
  * @property TimeBoundSpan[] time_spans
  * @property AttributeRule[] time_attributes
+ * @property UserNamespace schedule_namespace
  *
  */
 class TimeBound extends Model
@@ -83,6 +85,10 @@ class TimeBound extends Model
             ->orderBy('span_start');
     }
 
+
+    public function schedule_namespace() : BelongsTo {
+        return $this->belongsTo(UserNamespace::class,'location_bound_namespace_id');
+    }
     public function getName() {
         return $this->bound_name;
     }
@@ -171,11 +177,13 @@ class TimeBound extends Model
     }
 
 
-    public static function buildTimeBound(?int $id = null,?int $type_id = null,?int $attribute_id = null) : Builder {
+    public static function buildTimeBound(?int $me_id = null, ?int $type_id = null, ?int $attribute_id = null, ?string $uuid = null)
+    : Builder
+    {
         $build =  TimeBound::select('time_bounds.*')
             ->selectRaw(" extract(epoch from  time_bounds.bound_start) as bound_start_ts,  extract(epoch from  time_bounds.bound_stop) as bound_stop_ts")
-            /** @uses TimeBound::time_spans(),TimeBound::time_attributes() */
-            ->with('time_spans','time_attributes');
+            /** @uses TimeBound::time_spans(),TimeBound::time_attributes(),static::schedule_namespace() */
+            ->with('time_spans','time_attributes','schedule_namespace');
 
 
 
@@ -206,11 +214,34 @@ class TimeBound extends Model
 
         }
 
-       if ($id) {
-           $build->where('id',$id);
+       if ($me_id) {
+           $build->where('time_bounds.id',$me_id);
+       }
+
+       if ($uuid) {
+           $build->where('time_bounds.ref_uuid',$uuid);
        }
 
        return $build;
+    }
+
+    public static function getThisSchedule(
+        ?int             $id = null,
+        ?string          $uuid = null
+    )
+    : TimeBound
+    {
+        $ret = static::buildTimeBound(me_id:$id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = []; $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new InvalidArgumentException("Could not find time bounds via $arg_type : $arg_val");
+        }
+        return $ret;
     }
 
 
@@ -343,7 +374,7 @@ class TimeBound extends Model
             if ($build) {
                 $first_id = (int)$build->value('id');
                 if ($first_id) {
-                    $first_build = TimeBound::buildTimeBound(id: $first_id);
+                    $first_build = TimeBound::buildTimeBound(me_id: $first_id);
                     $ret = $first_build->first();
                 }
             }
@@ -366,82 +397,94 @@ class TimeBound extends Model
     /**
      * @throws \Exception
      */
-    public static function collectTimeBound(Collection|string $collect, UserNamespace $namespace) : TimeBound {
+    public static function collectTimeBound(Collection|string $collect, ?UserNamespace $namespace = null,?TimeBound $bound = null)
+    : TimeBound
+    {
         try {
             DB::beginTransaction();
-            if (is_string($collect) && Utilities::is_uuid($collect)) {
-                $bound = (new TimeBound())->resolveRouteBinding($collect);
+
+            if (is_string($collect) && Utilities::is_uuid($collect) && !$bound) {
+                /** @var TimeBound $bound */
+                $bound = (new LocationBound())->resolveRouteBinding($collect);
             } else {
-                $bound = new TimeBound();
+                if (!$bound) {
+                    $bound = new TimeBound();
+                }
+            }
+
+            if ($namespace) {
                 $bound->time_bound_namespace_id = $namespace->id;
-                if ($collect->has('bound_name')) {
-                    $name = $collect->get('bound_name');
-                    if (is_string($name) && Str::trim($name)) {
-                        try {
-                            Validator::make(['time_bound_name' => $name], [
-                                'time_bound_name' => ['required', 'string', new BoundNameReq()],
-                            ])->validate();
-                        } catch (ValidationException $v) {
-                            throw new HexbatchNotPossibleException($v->getMessage(),
-                                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                RefCodes::BOUND_INVALID_NAME);
-                        }
-                        $bound->bound_name = Str::trim($name);
-                    }
-                }
-                if (!$bound->isInUse()) {
-                    if ($collect->has('bound_start')) {
-                        $test = $collect->get('bound_start');
-                        if (is_string($test) && Str::trim($test)) {
-                            $bound->bound_start = Str::trim($test);
-                        }
-                    }
+            }
 
-                    if ($collect->has('bound_stop')) {
-                        $test = $collect->get('bound_stop');
-                        if (is_string($test) && Str::trim($test)) {
-                            $bound->bound_stop = Str::trim($test);
-                        }
-                    }
 
-                    if ($collect->has('bound_cron')) {
-                        $test = $collect->get('bound_cron');
-                        if (is_string($test) && Str::trim($test)) {
-                            $bound->bound_cron = Str::trim($test);
-                        }
-                    }
-
-                    if ($collect->has('bound_cron_timezone')) {
-                        $test = $collect->get('bound_cron_timezone');
-                        if (is_string($test) && Str::trim($test)) {
-                            $bound->bound_cron_timezone = Str::trim($test);
-                        }
-                    }
-
-                    if ($collect->has('bound_period_length')) {
-                        $test = $collect->get('bound_period_length');
-                        if (intval($test) && intval($test) > 0) {
-                            $bound->bound_period_length = intval($test);
-                        }
-                    }
-
-                    if (!$bound->bound_name || !$bound->bound_stop || !$bound->bound_start) {
-                        throw new HexbatchCoreException(__("msg.time_bounds_needs_minimum_info"),
+            if ($collect->has('bound_name')) {
+                $name = $collect->get('bound_name');
+                if (is_string($name) && Str::trim($name)) {
+                    try {
+                        Validator::make(['time_bound_name' => $name], [
+                            'time_bound_name' => ['required', 'string', new BoundNameReq()],
+                        ])->validate();
+                    } catch (ValidationException $v) {
+                        throw new HexbatchNotPossibleException($v->getMessage(),
                             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                            RefCodes::BOUND_NEEDS_MIN_INFO);
+                            RefCodes::BOUND_INVALID_NAME);
                     }
-
-                    //this saves too
-                    $bound->setTimes(start: $bound->bound_start, stop: $bound->bound_stop,
-                        bound_cron: $bound->bound_cron, period_length: $bound->bound_period_length,
-                        bound_cron_timezone: $bound->bound_cron_timezone); //saves and processes
+                    $bound->bound_name = Str::trim($name);
+                }
+            }
+            if (!$bound->isInUse()) {
+                if ($collect->has('bound_start')) {
+                    $test = $collect->get('bound_start');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_start = Str::trim($test);
+                    }
                 }
 
-                $bound->refresh();
+                if ($collect->has('bound_stop')) {
+                    $test = $collect->get('bound_stop');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_stop = Str::trim($test);
+                    }
+                }
 
-                $bound = TimeBound::buildTimeBound(id: $bound->id)->first();
+                if ($collect->has('bound_cron')) {
+                    $test = $collect->get('bound_cron');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_cron = Str::trim($test);
+                    }
+                }
 
-            }//end else
+                if ($collect->has('bound_cron_timezone')) {
+                    $test = $collect->get('bound_cron_timezone');
+                    if (is_string($test) && Str::trim($test)) {
+                        $bound->bound_cron_timezone = Str::trim($test);
+                    }
+                }
+
+                if ($collect->has('bound_period_length')) {
+                    $test = $collect->get('bound_period_length');
+                    if (intval($test) && intval($test) > 0) {
+                        $bound->bound_period_length = intval($test);
+                    }
+                }
+
+                if (!$bound->bound_name || !$bound->bound_stop || !$bound->bound_start) {
+                    throw new HexbatchCoreException(__("msg.time_bounds_needs_minimum_info"),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::BOUND_NEEDS_MIN_INFO);
+                }
+
+                //this saves too
+                $bound->setTimes(start: $bound->bound_start, stop: $bound->bound_stop,
+                    bound_cron: $bound->bound_cron, period_length: $bound->bound_period_length,
+                    bound_cron_timezone: $bound->bound_cron_timezone); //saves and processes
+            }
+
+            $bound->refresh();
+
+            $bound = TimeBound::buildTimeBound(me_id: $bound->id)->first();
+
+
 
 
 

@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root;
 
 
 
+use App\Models\ActionDatum;
 use App\Sys\Res\Atr\Stk\Event\Scope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ChainScope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ElementScope;
@@ -33,6 +34,12 @@ class Event extends BaseType
     const PARENT_CLASSES = [
         Root::class
     ];
+
+    protected function initData(bool $b_save = true) : ActionDatum {
+        parent::initData(b_save: false);
+        $this->is_public_domain = true;
+        return $this->action_data;
+    }
 
 }
 

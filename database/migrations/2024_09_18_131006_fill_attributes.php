@@ -48,11 +48,11 @@ return new class extends Migration
 
 
 
-            $table->foreignId('attribute_location_shape_bound_id')
+            $table->foreignId('attribute_shape_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The value points to a location shape bounds")
-                ->index('idx_attribute_location_shape_bound_id')
+                ->index()
                 ->constrained('location_bounds')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -115,7 +115,7 @@ return new class extends Migration
 
             );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN set_value_policy type_of_element_value_policy NOT NULL default 'static';");
+        DB::statement("ALTER TABLE attributes Add COLUMN value_policy type_of_element_value_policy NOT NULL default 'static';");
 
 
         DB::statement("CREATE TYPE type_of_approval AS ENUM (
@@ -166,12 +166,12 @@ return new class extends Migration
             $table->dropForeign(['parent_attribute_id']);
             $table->dropForeign(['design_attribute_id']);
             $table->dropForeign(['owner_element_type_id']);
-            $table->dropForeign(['attribute_location_shape_bound_id']);
+            $table->dropForeign(['attribute_shape_id']);
 
             $table->dropColumn('parent_attribute_id');
             $table->dropColumn('design_attribute_id');
             $table->dropColumn('owner_element_type_id');
-            $table->dropColumn('attribute_location_shape_bound_id');
+            $table->dropColumn('attribute_shape_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_final_attribute');
             $table->dropColumn('is_abstract');
@@ -182,7 +182,7 @@ return new class extends Migration
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
             $table->dropColumn('server_access_type');
-            $table->dropColumn('set_value_policy');
+            $table->dropColumn('value_policy');
             $table->dropColumn('attribute_approval');
 
         });

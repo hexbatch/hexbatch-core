@@ -90,7 +90,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
                 is_system: true,send_event: false
             );
             $design->runAction();
-            $created_type = $design->getCreatedType();
+            $created_type = $design->getDesignType();
 
 
 
@@ -299,6 +299,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         protected ?UserNamespace $owner_namespace = null,
         protected bool           $b_type_init = false,
         protected bool           $is_system = false,
+        protected ?bool          $is_public_domain = null,
         protected bool           $send_event = true,
         protected ?bool          $is_async = null,
         protected int            $priority = 0,

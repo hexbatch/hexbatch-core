@@ -6,12 +6,26 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
+use App\Models\ActionDatum;
 
+use App\Models\TimeBound;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
+use Hexbatch\Things\Enums\TypeOfThingStatus;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Create a schedule")]
 #[HexbatchBlurb( blurb: "Create a schedule using time rules")]
-#[HexbatchDescription( description:'')]
+#[HexbatchDescription( description:'
+# create a time bound
+* bound_uuid if editing
+* bound_name
+* bound_start
+* bound_stop
+* bound_cron_timezone
+* bound_period_length
+')]
 class DesignTimeCreate extends Act\Cmd\Ds
 {
     const UUID = '777c5080-dc81-40f8-8017-1a3a8a831a07';
@@ -24,6 +38,103 @@ class DesignTimeCreate extends Act\Cmd\Ds
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
     ];
+
+
+    const array ACTIVE_DATA_KEYS = ['bound_name','given_time_uuid','bound_start','bound_stop','bound_cron_timezone','bound_period_length','is_deleting'];
+
+
+    public function __construct(
+        protected ?string           $bound_name =null,
+        protected ?string           $given_time_uuid = null,
+        protected ?string           $bound_start = null,
+        protected ?string           $bound_stop = null,
+        protected ?string           $bound_cron_timezone = null,
+        protected ?string           $bound_period_length = null,
+        protected bool              $is_deleting = false,
+        protected bool              $is_system = false,
+        protected bool              $send_event = true,
+        protected ?bool             $is_async = null,
+        protected ?ActionDatum      $action_data = null,
+        protected ?ActionDatum      $parent_action_data = null,
+        protected ?UserNamespace    $owner_namespace = null,
+        protected bool                $b_type_init = false,
+        protected int            $priority = 0,
+        protected array          $tags = []
+    )
+    {
+
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+    }
+
+
+
+    /**
+     * @throws \Exception
+     */
+    public function runAction(array $data = []): void
+    {
+        parent::runAction($data);
+        if ($this->isActionComplete()) {
+            return;
+        }
+
+        if ($this->getGivenTimeBound()) {
+            $this->checkIfAdmin($this->getGivenTimeBound()->schedule_namespace);
+            if ($this->is_deleting) {
+
+                if ($this->getGivenTimeBound()->isInUse()) {
+                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+                } else {
+                    try {
+                        DB::beginTransaction();
+                        $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+                        DB::commit();
+                    } catch (\Exception $e) {
+                        DB::rollBack();
+                        $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
+                        throw $e;
+                    }
+                }
+                return;
+            }
+        }
+        try {
+            DB::beginTransaction();
+
+            $collect = new Collection(
+                [
+                    'bound_name' => $this->bound_name,
+                    'bound_start' => $this->bound_start,
+                    'bound_stop' => $this->bound_stop,
+                    'bound_cron_timezone' => $this->bound_cron_timezone,
+                    'bound_period_length' => $this->bound_period_length,
+                ]
+            );
+            if ($bound = $this->getGivenTimeBound()) {
+                TimeBound::collectTimeBound(collect: $collect,bound: $bound);
+            } else {
+                $bound = TimeBound::collectTimeBound(collect: $collect,namespace: $this->getOwningNamespace());
+                $this->given_time_uuid = $bound->ref_uuid;
+                $this->initData();
+            }
+
+            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            $this->action_data->refresh();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
+            throw $e;
+        }
+
+    }
+
+
+
+    protected function getMyData() :array {
+        return ['bound'=>$this->getGivenTimeBound()];
+    }
 
 }
 

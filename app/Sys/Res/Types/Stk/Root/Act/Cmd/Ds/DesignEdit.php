@@ -10,10 +10,10 @@ use App\Sys\Res\Types\Stk\Root\Act;
 
 
 #[HexbatchTitle( title: "Designs can be edited")]
-#[HexbatchBlurb( blurb: "If approving parents, this is set back to pending and they are notified")]
-#[HexbatchDescription( description:'')]
+#[HexbatchBlurb( blurb: "If approving parents, they can review when this is published")]
+#[HexbatchDescription( description:'See create design')]
 
-class DesignEdit extends Act\Cmd\Ds
+class DesignEdit extends DesignCreate
 {
     const UUID = '9f0285dc-0af5-4176-b82d-ac930d93b132';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_EDIT;

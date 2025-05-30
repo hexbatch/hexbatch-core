@@ -6,6 +6,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Models\ActionDatum;
+use App\Models\Attribute;
 use App\Models\ElementType;
 
 use App\Models\ElementTypeParent;
@@ -40,6 +41,16 @@ class TypePublish extends Act\Cmd\Ty
         Evt\Server\TypePublished::class
     ];
 
+
+
+    protected function getPublishingChildAttributeFromParentUiid(?string $uuid) :?Attribute
+    {
+        if (!$uuid) {return null;}
+        foreach ($this->getGivenType()?->type_attributes as $attr) {
+            if ($attr->attribute_parent?->ref_uuid === $uuid) {return $attr->attribute_parent;}
+        }
+        return null;
+    }
 
     public function getPublishingType(): ?ElementType
     {
@@ -90,6 +101,8 @@ class TypePublish extends Act\Cmd\Ty
         if (!$target) {
             throw new \InvalidArgumentException("Need type before can publish");
         }
+
+        $this->checkIfAdmin($target->owner_namespace);
         $target->refresh();
 
         if ($target->lifecycle === TypeOfLifecycle::PUBLISHED) {
@@ -104,7 +117,7 @@ class TypePublish extends Act\Cmd\Ty
             }
             throw new \RuntimeException(sprintf(" %s type cannot be published, its lifecycle is %s, its parents are %s. Parent count of %s",
                 $target->getName(),$target->lifecycle->value,implode('|',$parent_stuff_array) ,
-                count($target->type_parents) //todo put after in else and only if publishing status is not set
+                count($target->type_parents)
             ));
         }
         try {
@@ -116,7 +129,34 @@ class TypePublish extends Act\Cmd\Ty
                     /** @uses ElementTypeParent::parent_type() */
                     ElementTypeParent::updateParentStatus(parent: $parent->parent_type, child: $target, approval: $this->publishing_status);
                 }
+
+                foreach ($target->type_attributes as $attr) {
+                    if ($attr->attribute_parent) {
+                        $attr->attribute_approval = $this->publishing_status;
+                        $attr->save();
+                    }
+
+                }
+            } else {
+                //public domain are automatically ok to publish
+                foreach ($target->type_parents as $parent) {
+                    if ($parent->is_public_domain) {
+                        /** @uses ElementTypeParent::parent_type() */
+                        ElementTypeParent::updateParentStatus(parent: $parent->parent_type, child: $target, approval: TypeOfApproval::PUBLISHING_APPROVED);
+                    }
+                }
+
+                foreach ($target->type_attributes as $attr) {
+                    if ($attr->attribute_parent) {
+                        if ($attr->attribute_parent->is_public_domain) {
+                            $attr->attribute_approval = TypeOfApproval::PUBLISHING_APPROVED;
+                            $attr->save();
+                        }
+                    }
+                }
             }
+
+
 
 
             //check to see if all parents have approved this design, if so then success, else fail
@@ -124,12 +164,26 @@ class TypePublish extends Act\Cmd\Ty
             $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $target->id)->get();
             $my_status = TypeOfThingStatus::THING_SUCCESS;
             foreach ($check_parents as $checker) {
-                if ($checker->parent_type_approval === TypeOfApproval::PUBLISHING_DENIED) {
+                if ($checker->parent_type_approval !== TypeOfApproval::PUBLISHING_APPROVED) {
                     $my_status = TypeOfThingStatus::THING_FAIL;
                     break;
                 }
             }
-            $target->lifecycle = TypeOfLifecycle::PUBLISHED;
+
+            foreach ($target->type_attributes as $attr) {
+                if ($attr->attribute_parent) {
+                    if ($attr->attribute_approval !== TypeOfApproval::PUBLISHING_APPROVED) {
+                        $my_status = TypeOfThingStatus::THING_FAIL;
+                        break;
+                    }
+                }
+
+            }
+
+            if($my_status === TypeOfThingStatus::THING_SUCCESS) {
+                $target->lifecycle = TypeOfLifecycle::PUBLISHED;
+            }
+
             $target->save();
             $this->setActionStatus($my_status);
             $this->wakeLinkedThings();
@@ -185,8 +239,23 @@ class TypePublish extends Act\Cmd\Ty
             $events = [];
             $nodes = [];
             foreach ($this->getPublishingType()->type_parents as $parent) {
-                $events =  Evt\Server\TypePublished::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
+                if (!$parent->is_public_domain) {
+                    $some_events = Evt\Server\TypePublished::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
+                    $events =  array_merge($some_events,$events);
+                }
+
             }
+
+            foreach ($this->getPublishingType()->type_attributes as $attribute) {
+                if($attribute->attribute_parent) {
+                    if (!$attribute->attribute_parent->is_public_domain) {
+                        $some_events = Evt\Server\TypePublished::makeEventActions(source: $this, action_data: $this->action_data,attribute_context: $attribute);
+                        $events =  array_merge($some_events,$events);
+                    }
+                }
+            }
+
+
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
             }
@@ -216,7 +285,14 @@ class TypePublish extends Act\Cmd\Ty
                         ElementTypeParent::updateParentStatus(parent: $child->getParentType(),
                             child: $child->getAskedAboutType(),approval: $child->getApprovalStatus());
                     }
+
+                    if($attr = $this->getPublishingChildAttributeFromParentUiid(uuid: $child->getParentAttribute()?->ref_uuid))
+                    {
+                        $attr->attribute_approval = $child->getApprovalStatus();
+                        $attr->save();
+                    }
                 }
+
             }
         }
 

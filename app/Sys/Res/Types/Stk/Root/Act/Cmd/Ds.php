@@ -6,6 +6,8 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\ElementType;
+use App\Models\LocationBound;
+use App\Models\TimeBound;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 
@@ -28,9 +30,11 @@ class Ds extends Cmd
         return $this->action_data->data_attribute;
     }
 
-    public function getOwnerType(): ?ElementType
-    {   /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
+
+
+    public function getDesignType(): ?ElementType
+    {
+        return $this->getGivenType();
     }
 
     public function getParentAttribute(): ?Attribute
@@ -43,6 +47,18 @@ class Ds extends Cmd
     {
         /** @uses ActionDatum::data_third_attribute() */
         return $this->action_data->data_third_attribute;
+    }
+
+    protected ?string           $given_location_uuid = null;
+    public function getGivenLocationBound() : ?LocationBound {
+        if (!$this->given_location_uuid) { return null;}
+        return LocationBound::getThisLocation(uuid: $this->given_location_uuid);
+    }
+
+    protected ?string           $given_time_uuid = null;
+    public function getGivenTimeBound() : ?TimeBound {
+        if (!$this->given_time_uuid) { return null;}
+        return TimeBound::getThisSchedule(uuid: $this->given_time_uuid);
     }
 
 

@@ -34,6 +34,7 @@ class RefCodes {
     const int NAMESPACE_NOT_FOUND = 2003;
     const int NAMESPACE_NOT_OWNER = 2004;
     const int NAMESPACE_NOT_ADMIN = 2005;
+    const int NAMESPACE_NOT_MEMBER = 2008;
     const int NAMESPACE_MEMBER_MISSING_ISSUE = 2006;
     const int NAMESPACE_CANNOT_DELETE_CORE_PARTS = 2007;
     const int NAMESPACE_SCHEMA_ISSUE = 2010;
@@ -135,6 +136,7 @@ class RefCodes {
         self::NAMESPACE_NOT_FOUND => '',
         self::NAMESPACE_NOT_OWNER => '',
         self::NAMESPACE_NOT_ADMIN => '',
+        self::NAMESPACE_NOT_MEMBER => '',
         self::NAMESPACE_MEMBER_MISSING_ISSUE => '',
         self::NAMESPACE_CANNOT_DELETE_CORE_PARTS => '',
         self::NAMESPACE_SCHEMA_ISSUE => '',

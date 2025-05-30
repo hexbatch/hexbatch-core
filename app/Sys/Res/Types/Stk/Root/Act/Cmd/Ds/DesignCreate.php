@@ -2,6 +2,10 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
@@ -9,11 +13,25 @@ use App\Models\ElementType;
 use App\Models\ElementTypeServerLevel;
 use App\Models\Server;
 
+use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
-//todo add is_public_domain
+
+#[HexbatchTitle( title: "Design create")]
+#[HexbatchBlurb( blurb: "Types are created here")]
+#[HexbatchDescription( description: "
+## Types can be set with the following properties
+
+* type_uuid : when editing an existing type
+* type_name: has to be unique in the namespace
+* time_uuid: types can have a schedule
+* is_final: cannot be a parent
+* is_public_domain: if true, anyone can include as parent or in type without asking
+* access: sets access across different servers
+
+")]
 
 class DesignCreate extends Act\Cmd\Ds
 {
@@ -29,31 +47,21 @@ class DesignCreate extends Act\Cmd\Ds
     ];
 
 
-    public function getCreatedType(): ?ElementType
-    {
-        /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
 
-    public function getGivenServer(): ?Server
-    {   /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
 
-    public function getGivenNamespace(): ?UserNamespace
-    {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
-    }
 
-    const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final'];
+
+    const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final','given_type_uuid','time_uuid'];
 
 
     public function __construct(
         protected ?string             $type_name =null,
+        protected ?string                $given_type_uuid = null,
         protected ?string                $owner_namespace_uuid = null,
         protected ?string                $given_server_uuid = null,
-        protected bool                $is_final = false,
+        protected ?string                $time_uuid = null,
+        protected ?bool                $is_final = null,
+        protected ?bool                $is_public_domain = null,
         protected ?TypeOfServerAccess $access = null,
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
@@ -96,6 +104,10 @@ class DesignCreate extends Act\Cmd\Ds
             $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->owner_namespace_uuid)->id;
         }
 
+        if ($this->given_type_uuid) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
+        }
+
         $this->action_data->collection_data->offsetSet('access',$this->access?->value);
         $this->action_data->save();
         $this->action_data->refresh();
@@ -120,17 +132,41 @@ class DesignCreate extends Act\Cmd\Ds
         }
         try {
             DB::beginTransaction();
-            $type = new ElementType();
+            $type = $this->getDesignType();
+            if (!$type) {
+                $type = new ElementType();
+            }
+
             if ($this->uuid) {
                 $type->ref_uuid = $this->uuid;
             }
 
-            $type->type_name = $this->type_name;
+            if ($this->type_name) {
+                $this->type->setTypeName(name: $this->type_name);
+            }
 
-            $type->owner_namespace_id = $this->getGivenNamespace()?->id;
-            $type->imported_from_server_id = $this->getGivenServer()?->id;
+            if (!$type->owner_namespace_id) {
+                $type->owner_namespace_id = $this->getGivenNamespace()?->id;
+            }
+
+            if ($given_server_id =  $this->getGivenServer()?->id) {
+                $type->imported_from_server_id = $given_server_id;
+            }
+
             $type->is_system = $this->is_system;
-            $type->is_final_type = $this->is_final;
+
+            if ($this->is_final !== null) {
+                $type->is_final_type = $this->is_final;
+            }
+
+            if ($this->is_public_domain !== null) {
+                $type->is_public_domain = $this->is_public_domain;
+            }
+
+            if ($this->time_uuid) {
+                $type->type_time_bound_id = TimeBound::getThisSchedule(uuid: $this->time_uuid)->id;
+            }
+
             $type->save();
 
             if ($this->access && $this->given_server_uuid) {
@@ -156,7 +192,7 @@ class DesignCreate extends Act\Cmd\Ds
 
 
     protected function getMyData() :array {
-        return ['type'=>$this->getCreatedType()];
+        return ['type'=>$this->getDesignType()];
     }
 
 }

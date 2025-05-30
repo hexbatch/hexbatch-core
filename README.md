@@ -40,23 +40,24 @@ The project has totally changed, a major rewrite. This is a release of work in p
 
 
 
-[DesignAttributeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeCreate.php)
-[DesignAttributeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeDestroy.php)
-[DesignAttributeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeEdit.php)
-[DesignDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignDestroy.php)
-[DesignEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignEdit.php)
-[DesignOwnerChange.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerChange.php)
-[DesignParentRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentRemove.php)
+[DesignAttributeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeCreate.php)  draft
+[DesignAttributeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeDestroy.php) draft
+[DesignAttributeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeEdit.php) draft
+[DesignDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignDestroy.php) draft
+[DesignPurge.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignPurge.php) draft
+[DesignEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignEdit.php) draft
+[DesignOwnerChange.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerChange.php) draft
+[DesignParentRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentRemove.php) draft
 
-[DesignTimeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeCreate.php)
-[DesignTimeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeDestroy.php)
-[DesignTimeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeEdit.php)
-[DesignLocationCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationCreate.php)
-[DesignLocationDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationDestroy.php)
-[DesignLocationEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationEdit.php)
+[DesignTimeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeCreate.php) draft
+[DesignTimeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeDestroy.php) draft
+[DesignTimeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeEdit.php) draft
+[DesignLocationCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationCreate.php) draft
+[DesignLocationDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationDestroy.php) draft
+[DesignLocationEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationEdit.php) draft
 
 
-* make readable and writable checks in the types
+
 * start moving all comments to the doc attr
 
 # Links

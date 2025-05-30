@@ -3,6 +3,9 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
 use App\Models\ActionDatum;
@@ -17,7 +20,9 @@ use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
-
+#[HexbatchTitle( title: "Add a parent to the type")]
+#[HexbatchBlurb( blurb: "Parents can be given to types in design mode. Some parents have to agree")]
+#[HexbatchDescription( description:'')]
 class DesignParentAdd extends Act\Cmd\Ds
 {
     const UUID = '362a3cdf-f013-4bc0-afce-315cba179544';
@@ -109,6 +114,8 @@ class DesignParentAdd extends Act\Cmd\Ds
             throw new \InvalidArgumentException("Need type before can add parents to it");
         }
 
+        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+
         try {
             DB::beginTransaction();
             if ( $this->approval && $this->approval !== TypeOfApproval::APPROVAL_NOT_SET ) {
@@ -124,7 +131,15 @@ class DesignParentAdd extends Act\Cmd\Ds
                     }
                     $b_check_parent = true;
                     if ($this->is_system && !$this->send_event) { $b_check_parent = false;}
-                    ElementTypeParent::addParent(parent: $parent, child: $this->getDesignType(), init_approval: $this->approval,check_parent_published: $b_check_parent);
+                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getDesignType(), approval: $this->approval,check_parent_published: $b_check_parent);
+                }
+            }
+
+
+            //public domain parents are automatically approved for the design
+            foreach ($this->getParents() as $parent) {
+                if ($parent->is_public_domain) {
+                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getDesignType(),approval: TypeOfApproval::DESIGN_APPROVED);
                 }
             }
 
@@ -193,7 +208,10 @@ class DesignParentAdd extends Act\Cmd\Ds
             $events = [];
             $nodes = [];
             foreach ($this->getParents() as $parent) {
-                $events =  Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
+                if (!$parent->is_public_domain) {
+                    $events =  Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
+                }
+
             }
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
@@ -222,19 +240,25 @@ class DesignParentAdd extends Act\Cmd\Ds
             }
             else {
                 if ($this->given_type_uuid === $child->getAskedAboutType()?->ref_uuid) {
-                    if(in_array($child->getParentType()->ref_uuid,$this->given_parent_uuids)) {
-                        if (!$this->is_system) {
-                            if (is_subclass_of($child->getParentType() , Act\SystemPrivilege::class )) {
-                                throw new \RuntimeException("Non system types cannot have system-privilege as a parent"); //
+                    if ($child->isActionSuccess()) {
+                        if (in_array($child->getParentType()->ref_uuid, $this->given_parent_uuids)) {
+                            if (!$this->is_system) {
+                                if (is_subclass_of($child->getParentType(), Act\SystemPrivilege::class)) {
+                                    throw new \RuntimeException("Non system types cannot have system-privilege as a parent"); //
+                                }
+                                if (is_subclass_of($child->getParentType(), Act\NoEventsTriggered::class)) {
+                                    throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
+                                }
                             }
-                            if (is_subclass_of($child->getParentType() , Act\NoEventsTriggered::class )) {
-                                throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
-                            }
-                        }
 
-                        ElementTypeParent::addParent(
-                            parent: $child->getParentType(), child: $this->getDesignType(), init_approval: $child->getApprovalStatus());
+                            ElementTypeParent::addOrUpdateParent(
+                                parent: $child->getParentType(), child: $this->getDesignType(), approval: $child->getApprovalStatus());
+                        }
+                    } else if($child->isActionFail()) {
+                        ElementTypeParent::addOrUpdateParent(
+                            parent: $child->getParentType(), child: $this->getDesignType(), approval: TypeOfApproval::DESIGN_DENIED);
                     }
+
                 }
             }
         } //end if this is design pending
@@ -243,8 +267,8 @@ class DesignParentAdd extends Act\Cmd\Ds
             if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             } else if($child->isActionSuccess()) {
-                if ($child->getCreatedType()) {
-                    $this->setDesignType(type: $child->getCreatedType());
+                if ($child->getGivenType()) {
+                    $this->setDesignType(type: $child->getGivenType());
                 }
             }
         }

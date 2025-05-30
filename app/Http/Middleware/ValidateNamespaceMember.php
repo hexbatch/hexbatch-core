@@ -15,7 +15,7 @@ class ValidateNamespaceMember extends ValidateNamespaceBase
         if (!$user_namespace->isUserMember(Utilities::getTypeCastedAuthUser())  ) {
             throw new HexbatchPermissionException(__("msg.namespace_not_member",['ref'=>$user_namespace->getName()]),
                 Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
+                RefCodes::NAMESPACE_NOT_MEMBER);
         }
     }
 }

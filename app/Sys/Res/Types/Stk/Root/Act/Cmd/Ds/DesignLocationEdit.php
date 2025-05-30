@@ -9,9 +9,9 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 #[HexbatchTitle( title: "Edit location bounds")]
-#[HexbatchBlurb( blurb: "Can edit if not used in any published types")]
+#[HexbatchBlurb( blurb: "Can edit all if not used in any published types, otherwise only display")]
 #[HexbatchDescription( description:'')]
-class DesignLocationEdit extends Act\Cmd\Ds
+class DesignLocationEdit extends DesignLocationCreate
 {
     const UUID = '28057dde-2273-4a28-a07d-ecf9b8934c08';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION_EDIT;

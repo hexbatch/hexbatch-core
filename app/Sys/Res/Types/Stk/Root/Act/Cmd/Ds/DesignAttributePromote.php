@@ -42,6 +42,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
         protected ?string                $design_attribute_uuid = null,
         protected bool                $is_final = false,
         protected bool                $is_abstract = false,
+        protected ?bool                $is_public_domain = true,
         protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL,
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
@@ -108,7 +109,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
             return;
         }
 
-        if (!$this->getOwnerType()) {
+        if (!$this->getDesignType()) {
             throw new \InvalidArgumentException("Need owning type before can make attribute");
         }
 
@@ -124,12 +125,13 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
             $attr->setAttributeName($this->attribute_name);
             $attr->attribute_approval = $this->attribute_approval;
-            $attr->owner_element_type_id = $this->getOwnerType()->id ;
+            $attr->owner_element_type_id = $this->getDesignType()->id ;
             $attr->parent_attribute_id = $this->getParentAttribute()?->id ;
             $attr->design_attribute_id = $this->getDesignAttribute()?->id ;
             $attr->is_system = $this->is_system ;
             $attr->is_final_attribute = $this->is_final ;
             $attr->is_abstract = $this->is_abstract ;
+            $attr->is_public_domain = $this->is_public_domain ;
             $attr->save();
 
 

@@ -11,7 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Act;
 #[HexbatchTitle( title: "Edit schedule")]
 #[HexbatchBlurb( blurb: "Schedules can be fully edited while in design phase without events, or if published without approving parents")]
 #[HexbatchDescription( description:'')]
-class DesignTimeEdit extends Act\Cmd\Ds
+class DesignTimeEdit extends DesignTimeCreate
 {
     const UUID = '3e223f14-621b-4ba2-8d93-4822c07f727d';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION_EDIT;

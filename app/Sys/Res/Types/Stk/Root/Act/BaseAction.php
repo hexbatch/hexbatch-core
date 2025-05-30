@@ -5,6 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Act;
 use App\Enums\Sys\TypeOfAction;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
+use App\Models\ElementType;
+use App\Models\Server;
 use App\Models\UserNamespace;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 use App\Sys\Res\IAction;
@@ -53,6 +55,32 @@ class BaseAction extends BaseType implements IAction
     {
         return static::EVENT_CLASSES;
     }
+
+
+
+    public function getGivenType(): ?ElementType
+    {   /** @uses ActionDatum::data_type() */
+        return $this->action_data->data_type;
+    }
+
+    public function getGivenServer(): ?Server
+    {   /** @uses ActionDatum::data_server() */
+        return $this->action_data->data_server;
+    }
+
+    public function getGivenNamespace(): ?UserNamespace
+    {
+        /** @uses ActionDatum::data_namespace() */
+        return $this->action_data->data_namespace;
+    }
+
+    public function getOwningNamespace(): ?UserNamespace
+    {
+        /** @uses ActionDatum::data_owner_namespace() */
+        return $this->action_data->data_owner_namespace;
+    }
+
+
 
 
 }
