@@ -16,7 +16,6 @@ use App\Models\Server;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Design create")]
@@ -51,7 +50,8 @@ class DesignCreate extends Act\Cmd\Ds
 
 
 
-    const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final','given_type_uuid','time_uuid'];
+    const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final',
+        'given_type_uuid','time_uuid','is_public_domain'];
 
 
     public function __construct(
@@ -71,15 +71,16 @@ class DesignCreate extends Act\Cmd\Ds
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
         if (!$this->given_server_uuid) {
             $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
         }
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,
+            b_type_init: $this->b_type_init,
+            is_system: $this->is_system,
+            is_public_domain: $this->is_public_domain, send_event: $this->send_event, is_async: $this->is_async,  tags: $this->tags);
     }
 
 
@@ -124,12 +125,10 @@ class DesignCreate extends Act\Cmd\Ds
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         try {
             DB::beginTransaction();
             $type = $this->getDesignType();
@@ -142,7 +141,12 @@ class DesignCreate extends Act\Cmd\Ds
             }
 
             if ($this->type_name) {
-                $this->type->setTypeName(name: $this->type_name);
+                if ($this->is_system) {
+                    $type->type_name = $this->type_name;
+                } else {
+                    $type->setTypeName(name: $this->type_name,namespace: $this->getNamespaceInUse());
+                }
+
             }
 
             if (!$type->owner_namespace_id) {
@@ -178,16 +182,15 @@ class DesignCreate extends Act\Cmd\Ds
             }
 
             $this->action_data->data_type_id = $type->id;
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
     }
+
+
 
 
 

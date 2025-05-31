@@ -5,6 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
+use App\Exceptions\HexbatchFailException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\ElementType;
@@ -65,10 +67,11 @@ class TypePublish extends Act\Cmd\Ty
     }
 
 
-    const array ACTIVE_DATA_KEYS = ['given_type_uuid'];
+    const array ACTIVE_DATA_KEYS = ['given_type_uuid','check_permission'];
 
     public function __construct(
         protected ?string              $given_type_uuid =null,
+        protected bool                $check_permission = true,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
         protected ?bool                $is_async = null,
@@ -77,49 +80,64 @@ class TypePublish extends Act\Cmd\Ty
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
         protected TypeOfApproval $publishing_status = TypeOfApproval::APPROVAL_NOT_SET,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
-
 
 
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
-        $target = $this->getPublishingType();
+        parent::runActionInner();
 
-        if (!$target) {
-            throw new \InvalidArgumentException("Need type before can publish");
-        }
+        try {
+            $target = $this->getPublishingType();
 
-        $this->checkIfAdmin($target->owner_namespace);
-        $target->refresh();
-
-        if ($target->lifecycle === TypeOfLifecycle::PUBLISHED) {
-            throw new \RuntimeException("Type already published");
-        }
-
-        if (!$target->canBePublished() && ($this->publishing_status === TypeOfApproval::APPROVAL_NOT_SET)) {
-            $parent_stuff_array = [];
-            /** @var ElementTypeParent $parent */
-            foreach ($target->type_parents as $parent) {
-                $parent_stuff_array[] = sprintf(" %s -> %s ",$parent->parent_type->getName(),$parent->parent_type_approval->value);
+            if (!$target) {
+                throw new \InvalidArgumentException("Need type before can publish");
             }
-            throw new \RuntimeException(sprintf(" %s type cannot be published, its lifecycle is %s, its parents are %s. Parent count of %s",
-                $target->getName(),$target->lifecycle->value,implode('|',$parent_stuff_array) ,
-                count($target->type_parents)
-            ));
+
+            $target->refresh();
+
+            if ($target->lifecycle === TypeOfLifecycle::PUBLISHED) {
+                throw new \RuntimeException("Type already published");
+            }
+
+            if (!$target->canBePublished() && ($this->publishing_status === TypeOfApproval::APPROVAL_NOT_SET)) {
+                $parent_stuff_array = [];
+
+                foreach ($target->type_parents as $parent) {
+                    if ($parent->parent_type_approval !== TypeOfApproval::DESIGN_APPROVED) {
+                        $parent_stuff_array[] =  $parent->getName();
+                    }
+                }
+
+                foreach ($target->type_attributes as $attr) {
+                    if ($attr->attribute_approval !== TypeOfApproval::DESIGN_APPROVED) {
+                        $parent_stuff_array[] =  $attr->getName();
+                    }
+                }
+
+                throw new HexbatchFailException( __('msg.design_parents_did_not_approve_design',['ref'=>implode('|',$parent_stuff_array),
+                    'child'=>$this->getPublishingType()->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::TYPE_PARENT_DENIED_DESIGN);
+            }
+        } catch (\Exception $e) {
+            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
+            throw $e;
         }
+
+        if ($this->check_permission) {
+            $this->checkIfAdmin($target->owner_namespace);
+        }
+
+
         try {
 
             DB::beginTransaction();
@@ -138,9 +156,9 @@ class TypePublish extends Act\Cmd\Ty
 
                 }
             } else {
-                //public domain are automatically ok to publish
+                //public domain and if in same admin group are automatically ok to publish
                 foreach ($target->type_parents as $parent) {
-                    if ($parent->is_public_domain) {
+                    if ($this->is_system || $parent->is_public_domain || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())) {
                         /** @uses ElementTypeParent::parent_type() */
                         ElementTypeParent::updateParentStatus(parent: $parent->parent_type, child: $target, approval: TypeOfApproval::PUBLISHING_APPROVED);
                     }
@@ -148,7 +166,10 @@ class TypePublish extends Act\Cmd\Ty
 
                 foreach ($target->type_attributes as $attr) {
                     if ($attr->attribute_parent) {
-                        if ($attr->attribute_parent->is_public_domain) {
+                        if ($this->is_system || $attr->attribute_parent->is_public_domain || !$this->check_permission ||
+                            $attr->attribute_parent->type_owner->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())
+                        )
+                        {
                             $attr->attribute_approval = TypeOfApproval::PUBLISHING_APPROVED;
                             $attr->save();
                         }
@@ -162,35 +183,38 @@ class TypePublish extends Act\Cmd\Ty
             //check to see if all parents have approved this design, if so then success, else fail
             /** @var ElementTypeParent[] $check_parents */
             $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $target->id)->get();
-            $my_status = TypeOfThingStatus::THING_SUCCESS;
+
+            $parent_rejected_array = [];
+
             foreach ($check_parents as $checker) {
                 if ($checker->parent_type_approval !== TypeOfApproval::PUBLISHING_APPROVED) {
-                    $my_status = TypeOfThingStatus::THING_FAIL;
-                    break;
+                    $parent_rejected_array[] =  $checker->parent_type->getName();
+
                 }
             }
 
             foreach ($target->type_attributes as $attr) {
                 if ($attr->attribute_parent) {
                     if ($attr->attribute_approval !== TypeOfApproval::PUBLISHING_APPROVED) {
-                        $my_status = TypeOfThingStatus::THING_FAIL;
-                        break;
+                        $parent_rejected_array[] =  $attr->getName();
                     }
                 }
 
             }
 
-            if($my_status === TypeOfThingStatus::THING_SUCCESS) {
-                $target->lifecycle = TypeOfLifecycle::PUBLISHED;
+            if (count($parent_rejected_array)) {
+                throw new HexbatchFailException( __('msg.design_parents_did_not_approve_publishing',['ref'=>implode('|',$parent_rejected_array),
+                    'child'=>$this->getPublishingType()->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::TYPE_PARENT_DENIED_PUBLISHING);
             }
 
+            $target->lifecycle = TypeOfLifecycle::PUBLISHED;
             $target->save();
-            $this->setActionStatus($my_status);
-            $this->wakeLinkedThings();
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
@@ -239,17 +263,29 @@ class TypePublish extends Act\Cmd\Ty
             $events = [];
             $nodes = [];
             foreach ($this->getPublishingType()->type_parents as $parent) {
-                if (!$parent->is_public_domain) {
-                    $some_events = Evt\Server\TypePublished::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
+                if (!(
+                    $this->is_system || $parent->is_public_domain || !$this->check_permission
+                    ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())
+                )
+                )
+                {
+                    $some_events = Evt\Server\TypePublished::makeEventActions(
+                        source: $this, action_data: $this->action_data,type_context: $parent);
                     $events =  array_merge($some_events,$events);
                 }
 
             }
 
-            foreach ($this->getPublishingType()->type_attributes as $attribute) {
-                if($attribute->attribute_parent) {
-                    if (!$attribute->attribute_parent->is_public_domain) {
-                        $some_events = Evt\Server\TypePublished::makeEventActions(source: $this, action_data: $this->action_data,attribute_context: $attribute);
+            foreach ($this->getPublishingType()->type_attributes as $attr) {
+                if($attr->attribute_parent) {
+                    if (!
+                    ($this->is_system || $attr->attribute_parent->is_public_domain || !$this->check_permission ||
+                        $attr->attribute_parent->type_owner->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())
+                    )
+                    )
+                    {
+                        $some_events = Evt\Server\TypePublished::makeEventActions(source: $this,
+                            action_data: $this->action_data,attribute_context: $attr);
                         $events =  array_merge($some_events,$events);
                     }
                 }
@@ -271,6 +307,9 @@ class TypePublish extends Act\Cmd\Ty
         return null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void {
 
 

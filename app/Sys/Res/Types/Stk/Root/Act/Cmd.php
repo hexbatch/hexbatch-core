@@ -7,6 +7,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Models\UserNamespace;
+use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Symfony\Component\HttpFoundation\Response;
 
 
@@ -23,16 +24,23 @@ class Cmd extends BaseAction
 
     public function getNamespaceInUse(): ?UserNamespace
     {
+        if (!$this->action_data?->data_owner_namespace) {
+            $this->action_data?->data_owner_namespace?->refresh();
+        }
         return $this->action_data?->data_owner_namespace;
     }
 
-    protected function checkIfAdmin(UserNamespace $target) {
 
-        if (!$target->isNamespaceAdmin($this->getNamespaceInUse())  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target->getName()]),
+    protected function checkIfAdmin(?UserNamespace $target) {
+
+        if ($this->is_system) {return; }
+        if (!$target?->isNamespaceAdmin($this->getNamespaceInUse())  ) {
+            $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target?->getName()]),
                 Response::HTTP_FORBIDDEN,
                 RefCodes::NAMESPACE_NOT_ADMIN);
         }
+
     }
 
     protected function checkIfMember(UserNamespace $target) {

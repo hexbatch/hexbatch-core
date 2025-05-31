@@ -239,7 +239,11 @@ class TimeBound extends Model
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new InvalidArgumentException("Could not find time bounds via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.time_bound_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::BOUND_NOT_FOUND
+            );
         }
         return $ret;
     }

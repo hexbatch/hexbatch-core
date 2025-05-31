@@ -21,6 +21,7 @@ use Hexbatch\Things\Models\Thing;
 use Hexbatch\Things\Models\ThingCallback;
 use Hexbatch\Things\Models\ThingHook;
 use Hexbatch\Things\OpenApi\Callbacks\CallbackSearchParams;
+use Hexbatch\Things\OpenApi\Errors\ThingErrorCollectionResponse;
 use Hexbatch\Things\OpenApi\Errors\ThingErrorResponse;
 use Hexbatch\Things\OpenApi\Hooks\HookParams;
 use Hexbatch\Things\OpenApi\Hooks\HookSearchParams;
@@ -37,7 +38,7 @@ class Api extends BaseType implements IHookCode
     const UUID = 'd314149a-0f51-4b1e-b954-590a890e7c44';
     const TYPE_NAME = 'api';
 
-
+    const bool IS_PUBLIC_DOMAIN = false;
 
 
     const PARENT_CLASSES = [
@@ -65,9 +66,9 @@ class Api extends BaseType implements IHookCode
         protected ?UserNamespace $owner_namespace = null,
         protected bool           $b_type_init = false,
         protected bool           $is_system = false,
+        protected ?bool          $is_public_domain = null,
         protected bool           $send_event = true,
         protected ?bool           $is_async = null,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
@@ -84,9 +85,12 @@ class Api extends BaseType implements IHookCode
             $this->owner_namespace = Utilities::getSystemNamespace();
         }
 
+
+
         // always the top of the food chain, so never has a parent data structure
         parent::__construct(action_data: $this->action_data, owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system,is_public_domain: $this->is_public_domain,
+            send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
 
     }
 
@@ -137,7 +141,8 @@ class Api extends BaseType implements IHookCode
 
 
     public function getCallbackResponse(?int &$http_status = null)
-    : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse|ThingResponse|ErrorResponse
+    : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse|ThingResponse|
+    ErrorResponse|ThingErrorCollectionResponse
     {
         if (!$this->getActionData()) {return null;}
         $search_params = new CallbackSearchParams(
@@ -154,7 +159,14 @@ class Api extends BaseType implements IHookCode
             $http_status = CodeOf::HTTP_OK;
             try {
                 $thing = Thing::getThing(action_type_id: $this->getActionId(), action_type: $this->getActionType());
-                return new ThingResponse(thing: $thing);
+                if ($thing->isSuccess() || !$thing->isComplete()) {
+                    return new ThingResponse(thing: $thing);
+                } else if($thing->isFailedOrError()) {
+                    return new ThingErrorCollectionResponse(thing: $thing);
+                } else {
+                    return new ThingResponse(thing: $thing); //punt in case missed something
+                }
+
             } catch (\Exception $e) {
                 Log::warning(sprintf("Could not find thing for %s / %s of ",$this->getActionType(),$this->getActionId()) );
                 return ErrorResponse::fromException(e: $e);

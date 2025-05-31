@@ -4,6 +4,9 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
 use App\Enums\Sys\TypeOfAction;
 
+use App\Exceptions\HexbatchNothingDoneException;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Element;
 
@@ -118,32 +121,24 @@ class ElementCreate extends Act\Cmd\Ele
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool         $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
 
     }
 
 
 
-    /*
-     * type the design
-     * array uuid fo parent
-     *
-     */
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         if ($this->b_must_have_namespace && !$this->getNamespaceUsed()) {
             throw new \InvalidArgumentException("Need namespace before can make element");
         }
@@ -152,11 +147,22 @@ class ElementCreate extends Act\Cmd\Ele
             throw new \InvalidArgumentException("Need template type before can make element");
         }
 
-        if (!$this->getTemplateType()->isPublished() ) {
-            throw new \InvalidArgumentException(sprintf("Template type %s needs to be published before making element",$this->getTemplateType()->getName() ));
+        if (!$this->getTemplateType()->isPublished()) {
+            throw new HexbatchNotPossibleException(__("msg.type_must_be_published_before_making_elements",
+                ['ref' => $this->getTemplateType()->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_NEEDS_PUBLISHING);
         }
 
-        if ($this->number_to_create <= 0) {return;}
+
+        if ($this->number_to_create <= 0) {
+            throw new HexbatchNothingDoneException(__("msg.type_given_zero_elements_to_make",
+                ['ref' => $this->getTemplateType()->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_GIVEN_ZERO_TO_MAKE);
+        }
+
+
         $post_actions = [];
         $post_events = [];
         try {
@@ -164,8 +170,6 @@ class ElementCreate extends Act\Cmd\Ele
             $uuid_index = 0;
 
             DB::beginTransaction();
-
-
 
             for ($set_index = 0; $set_index < $this->number_to_create; $set_index++) {
                 $this->makeElement(loop_number: $uuid_index++);
@@ -177,7 +181,7 @@ class ElementCreate extends Act\Cmd\Ele
                     $this->post_events_to_send =
                         Evt\Element\ElementRecievedBatch::makeEventActions(source: $this, action_data: $this->action_data);
                 }
-            } else {
+            } else if(count($this->created_element_uuids) === 1) {
                 if ($this->send_event) {
                     $this->post_events_to_send =
                         Evt\Element\ElementRecieved::makeEventActions(source: $this, action_data: $this->action_data);
@@ -187,9 +191,6 @@ class ElementCreate extends Act\Cmd\Ele
 
 
             $this->saveCollectionKeys();
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->wakeLinkedThings();
-            $this->action_data->refresh();
             if ($this->send_event) {
                 $this->post_events_to_send = array_merge($post_actions,$post_events);
             }
@@ -197,11 +198,11 @@ class ElementCreate extends Act\Cmd\Ele
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
     }
+
 
     private function makeElement(int $loop_number) : void
     {
@@ -285,6 +286,9 @@ class ElementCreate extends Act\Cmd\Ele
         return null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void {
 
 
@@ -308,7 +312,7 @@ class ElementCreate extends Act\Cmd\Ele
 
 
         if ($child instanceof TypePublish) {
-            if ($child->isActionError()) {
+            if ($child->isActionError() || $child->isActionFail()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
             else if($child->isActionSuccess() && $child->getPublishingType()) {

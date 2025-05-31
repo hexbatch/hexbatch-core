@@ -52,11 +52,11 @@ use Illuminate\Validation\ValidationException;
  *
  * //links
  * @property User owner_user
- * @property ElementType user_base_type
+ * @property ElementType namespace_base_type
  * @property Server namespace_home_server
  * @property Element public_element
- * @property Element user_private_element
- * @property ElementSet user_home_set
+ * @property Element private_element
+ * @property ElementSet home_set
  * @property UserNamespace[] namespace_members
  * @property UserNamespace[] namespace_admins
  */
@@ -91,7 +91,7 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return $this->belongsTo(User::class,'namespace_user_id');
     }
 
-    public function user_base_type() : BelongsTo {
+    public function namespace_base_type() : BelongsTo {
         return $this->belongsTo(ElementType::class,'namespace_type_id');
     }
 
@@ -103,12 +103,12 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return $this->belongsTo(Element::class,'public_element_id');
     }
 
-    public function user_private_element() : BelongsTo {
+    public function private_element() : BelongsTo {
         return $this->belongsTo(Element::class,'private_element_id');
     }
 
 
-    public function user_home_set() : BelongsTo {
+    public function home_set() : BelongsTo {
         return $this->belongsTo(ElementSet::class,'namespace_home_set_id');
     }
 
@@ -151,13 +151,13 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 
 
         if ($b_relations) {
-            /** @uses UserNamespace::owner_user(),UserNamespace::user_base_type(),UserNamespace::namespace_home_server(),
-             * @uses UserNamespace::public_element(),UserNamespace::user_private_element(),
-             * @uses UserNamespace::user_home_set()
+            /** @uses UserNamespace::owner_user(),UserNamespace::namespace_base_type(),UserNamespace::namespace_home_server(),
+             * @uses UserNamespace::public_element(),UserNamespace::private_element(),
+             * @uses UserNamespace::home_set()
              */
             $build->
-            with('owner_user', 'user_base_type', 'namespace_home_server', 'public_element', 'user_private_element',
-                'user_home_set');
+            with('owner_user', 'namespace_base_type', 'namespace_home_server', 'public_element', 'private_element',
+                'home_set');
         }
 
         if ($me_id) {
@@ -414,7 +414,11 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find namespace via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.namespace_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::NAMESPACE_NOT_FOUND
+            );
         }
         return $ret;
     }

@@ -50,10 +50,14 @@ class RefCodes {
     const int BOUND_NEEDS_MIN_INFO = 3006;
 
 
+
     const int BOUND_CANNOT_PING = 3007;
     const int BOUND_TYPE_DEF = 3008;
 
     const int BOUND_INVALID_NAME = 3010;
+
+
+    const int BOUND_IN_USE = 3020;
 
     // attributes start at 4000
     const int ATTRIBUTE_NOT_FOUND = 4001;
@@ -91,6 +95,12 @@ class RefCodes {
     const int TYPE_CANNOT_INHERIT = 7008;
 
     const int TYPE_CANNOT_EDIT = 7010;
+    const int TYPE_NEEDS_PUBLISHING = 7100;
+
+    const int TYPE_PARENT_DENIED_DESIGN = 7200;
+    const int TYPE_PARENT_DENIED_PUBLISHING = 7250;
+
+    const int TYPE_GIVEN_ZERO_TO_MAKE = 7300;
 
     //elements start at 8000
 
@@ -109,8 +119,7 @@ class RefCodes {
     const int PATH_SCHEMA_ISSUE = 10004;
 
 
-    const int THING_HOOK_NOT_FOUND = 20001;
-    const int THING_SETTING_NOT_FOUND = 20005;
+    const int PHASE_NOT_FOUND = 20001;
 
     /**
      * @type string[]
@@ -177,6 +186,10 @@ class RefCodes {
         self::TYPE_SCHEMA_ISSUE => '',
         self::TYPE_CANNOT_INHERIT => '',
         self::TYPE_CANNOT_EDIT => '',
+        self::TYPE_NEEDS_PUBLISHING => '',
+        self::TYPE_PARENT_DENIED_DESIGN => '',
+        self::TYPE_PARENT_DENIED_PUBLISHING => '',
+        self::TYPE_GIVEN_ZERO_TO_MAKE => '',
 
         self::ELEMENT_NOT_FOUND => '',
         self::ELEMENT_BAD_SCHEMA => '',
@@ -188,8 +201,7 @@ class RefCodes {
         self::PATH_CANNOT_EDIT => '',
         self::PATH_BAD_NAME => '',
 
-        self::THING_HOOK_NOT_FOUND => '',
-        self::THING_SETTING_NOT_FOUND => '',
+        self::PHASE_NOT_FOUND => ''
 
     ];
 }

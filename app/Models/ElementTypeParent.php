@@ -97,14 +97,14 @@ class ElementTypeParent extends Model
         try {
             DB::beginTransaction();
             if ( $parent->is_final_type) {
-                throw new HexbatchNotPossibleException(__('msg.parent_type_is_not_inheritable'),
+                throw new HexbatchNotPossibleException(__('msg.parent_type_is_not_inheritable',['ref'=>$parent->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::TYPE_CANNOT_INHERIT);
             }
 
             if ($check_parent_published) {
                 if ($parent->lifecycle !== TypeOfLifecycle::PUBLISHED) {
-                    throw new HexbatchNotPossibleException(__('msg.parent_type_must_be_published'),
+                    throw new HexbatchNotPossibleException(__('msg.parent_type_must_be_published',['ref'=>$parent->getName()]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::TYPE_CANNOT_INHERIT);
                 }

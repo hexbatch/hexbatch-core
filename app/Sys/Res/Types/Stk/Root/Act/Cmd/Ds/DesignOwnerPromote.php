@@ -10,7 +10,6 @@ use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Change a design owner")]
@@ -40,13 +39,15 @@ class DesignOwnerPromote extends Act\Cmd\Ds
         protected ?ActionDatum   $action_data = null,
         protected ?ActionDatum   $parent_action_data = null,
         protected ?UserNamespace $owner_namespace = null,
-        protected bool           $b_type_init = false,protected int $priority = 0,
+        protected bool                     $is_system = false,
+        protected bool                     $send_event = true,
+        protected bool           $b_type_init = false,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
@@ -69,12 +70,9 @@ class DesignOwnerPromote extends Act\Cmd\Ds
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
 
         if (!$this->getDesignType()) {
             throw new \InvalidArgumentException("Need type before can change type owner");
@@ -84,21 +82,17 @@ class DesignOwnerPromote extends Act\Cmd\Ds
             throw new \InvalidArgumentException("Need namespace before can change type owner");
         }
 
-
         try {
             DB::beginTransaction();
             $this->getDesignType()->owner_namespace_id = $this->getGivenNamespace()->id ;
             $this->getDesignType()->save();
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
+
 
 
 

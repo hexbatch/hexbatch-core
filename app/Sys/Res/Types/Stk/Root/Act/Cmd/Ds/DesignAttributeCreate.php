@@ -10,6 +10,8 @@ use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\ElementType;
@@ -87,16 +89,18 @@ class DesignAttributeCreate extends Act\Cmd\Ds
         protected ?TypeOfElementValuePolicy $value_policy = null,
 
         protected ?bool                    $is_async = null,
+        protected bool                     $is_system = false,
+        protected bool                     $send_event = true,
         protected ?ActionDatum             $action_data = null,
         protected ?ActionDatum             $parent_action_data = null,
         protected ?UserNamespace           $owner_namespace = null,
-        protected bool                     $b_type_init = false,protected int $priority = 0,
+        protected bool                     $b_type_init = false,
         protected array                    $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
@@ -166,31 +170,33 @@ class DesignAttributeCreate extends Act\Cmd\Ds
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
-    {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+    protected function runActionInner(array $data = []): void {
+        parent::runActionInner();
 
         if (!$this->getAttribute() && !$this->getDesignType()) {
             throw new \InvalidArgumentException("Need owning type before can make attribute");
         }
 
-        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
-
         if ($this->getDesignType()->lifecycle === TypeOfLifecycle::PUBLISHED) {
-            throw new \InvalidArgumentException("Cannot add new attributes to published types");
+
+            throw new HexbatchNotPossibleException(__('msg.design_cannot_add_attribute_to_published',['ref'=>$this->getDesignType()->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_SCHEMA_ISSUE);
         }
 
-        if (!$this->getAttribute()&& !$this->attribute_name) {
-            throw new \InvalidArgumentException("Need attr name given before can make attribute");
+        if (!$this->getAttribute() && !$this->attribute_name) {
+            throw new HexbatchNotPossibleException(__('msg.attribute_schema_must_have_name'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
         }
 
         $shape_id = null;
         if ($this->shape_uuid) {
             $shape_id = LocationBound::getThisLocation(uuid: $this->shape_uuid)->id;
         }
+
+        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+
         try {
             DB::beginTransaction();
             $attr = $this->getAttribute();
@@ -212,7 +218,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds
             }
 
             if( $this->getDesignAttribute()) {
-                if (!$this->getDesignAttribute()->is_public_domain) {
+                if (!($this->is_system || $this->getDesignAttribute()->is_public_domain) ) {
                     $this->checkIfMember($this->getDesignAttribute()->type_owner->owner_namespace);
                 }
                 $attr->design_attribute_id = $this->getDesignAttribute()->id ;
@@ -237,7 +243,16 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
             //public domain parents can be automatically approved
             if ($this->parent_attribute_uuid) {
-                $attr->attribute_approval = $this->getParentAttribute()->is_public_domain ? TypeOfApproval::DESIGN_APPROVED: $this->attribute_approval;
+                $par_attr = $this->getParentAttribute();
+                if ($this->is_system || $par_attr->is_public_domain ||
+                    $par_attr->type_owner->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())
+                )
+                {
+                    $attr->attribute_approval =  TypeOfApproval::DESIGN_APPROVED;
+                } else {
+                    $attr->attribute_approval = $this->attribute_approval;
+                }
+
             }
 
             if ($this->is_final !== null ) {
@@ -261,12 +276,10 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
 
             $this->action_data->data_attribute_id = $attr->id;
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 

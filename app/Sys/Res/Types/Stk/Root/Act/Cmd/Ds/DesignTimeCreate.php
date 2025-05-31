@@ -6,6 +6,8 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 
 use App\Models\TimeBound;
@@ -58,41 +60,38 @@ class DesignTimeCreate extends Act\Cmd\Ds
         protected ?ActionDatum      $parent_action_data = null,
         protected ?UserNamespace    $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
-
 
 
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
 
         if ($this->getGivenTimeBound()) {
             $this->checkIfAdmin($this->getGivenTimeBound()->schedule_namespace);
             if ($this->is_deleting) {
 
                 if ($this->getGivenTimeBound()->isInUse()) {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+                    throw new HexbatchNotPossibleException (
+                        __('msg.bound_in_use',['ref'=>$this->getGivenTimeBound()->getName()]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::BOUND_IN_USE);
                 } else {
                     try {
                         DB::beginTransaction();
-                        $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+                        $this->getGivenTimeBound()->delete();
                         DB::commit();
                     } catch (\Exception $e) {
                         DB::rollBack();
-                        $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
                         throw $e;
                     }
                 }
@@ -120,7 +119,6 @@ class DesignTimeCreate extends Act\Cmd\Ds
             }
 
             $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -129,6 +127,7 @@ class DesignTimeCreate extends Act\Cmd\Ds
         }
 
     }
+
 
 
 

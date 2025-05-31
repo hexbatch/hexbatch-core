@@ -91,30 +91,28 @@ class SetCreate extends Act\Cmd\St
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace ,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
-
 
 
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
 
         if (!$this->getGivenElement()) {
             throw new \InvalidArgumentException("Need element");
         }
+        $namespace_to_use = $this->getGivenElement()->element_namespace;
+        if (!$namespace_to_use) { $namespace_to_use = $this->getNamespaceInUse();} //maybe being built for a new namespace
+        $this->checkIfAdmin($namespace_to_use);
 
         try {
             DB::beginTransaction();
@@ -146,18 +144,14 @@ class SetCreate extends Act\Cmd\St
                 }
             }
 
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->wakeLinkedThings();
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
-    }
 
+    }
 
 
     protected function getMyData() :array {
@@ -181,6 +175,9 @@ class SetCreate extends Act\Cmd\St
     }
 
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void {
 
 

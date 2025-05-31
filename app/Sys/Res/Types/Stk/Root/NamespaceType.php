@@ -13,7 +13,7 @@ class NamespaceType extends BaseType
     const UUID = 'f6952b0a-cf14-46c6-9695-36f489fbc732';
     const TYPE_NAME = 'namespace';
 
-
+    const bool IS_PUBLIC_DOMAIN = false;
 
     const ATTRIBUTE_CLASSES = [
         NamespaceData::class
@@ -22,6 +22,7 @@ class NamespaceType extends BaseType
     const PARENT_CLASSES = [
         Root::class
     ];
+
 
 }
 

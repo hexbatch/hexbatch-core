@@ -202,8 +202,7 @@ return new class extends Migration
 
             $table->boolean('is_async')->default(true)->nullable(false)->comment("if true then this is asyncronous");
 
-            $table->integer('data_priority')->default(0)->nullable(false)
-                ->comment('sets the priority of the action and thus thing');
+
 
             $table->integer('action_wait_timeout_seconds')->default(null)->nullable()
                 ->comment('when action sets the timeout its recorded here');

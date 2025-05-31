@@ -141,7 +141,6 @@ class SetMemberAdd extends Act\Cmd\St
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool         $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
@@ -149,28 +148,27 @@ class SetMemberAdd extends Act\Cmd\St
             $this->allowed_element_uuids = $this->given_element_uuids;
         }
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
-    /*
-     * type the design
-     * array uuid fo parent
-     *
-     */
+
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         if (!$this->getSetUsed()) {
             throw new \InvalidArgumentException("Need set before can add member");
         }
 
+        foreach ($this->getElementsAllowed() as $ele) {
+            $namespace_to_use = $ele->element_namespace;
+            if (!$namespace_to_use) { $namespace_to_use = $this->getNamespaceInUse();} //maybe being built for a new namespace
+            $this->checkIfAdmin($namespace_to_use);
+        }
         try {
             DB::beginTransaction();
             foreach ($this->getElementsAllowed() as $element) {
@@ -178,16 +176,14 @@ class SetMemberAdd extends Act\Cmd\St
                 $this->added_element_uuids[] = $element->ref_uuid;
             }
             $this->saveCollectionKeys();
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
     }
+
 
 
 
@@ -229,6 +225,9 @@ class SetMemberAdd extends Act\Cmd\St
         return null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void {
 
 

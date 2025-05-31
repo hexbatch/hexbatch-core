@@ -3,7 +3,6 @@
 
 namespace App\Sys\Res\Types\Stk\Root;
 
-use App\Models\ActionDatum;
 use App\Sys\Res\Atr\Stk\Media\DownloadableUrl;
 use App\Sys\Res\Atr\Stk\Media\MediaType;
 use App\Sys\Res\Atr\Stk\Media\MediaUrl;
@@ -30,10 +29,5 @@ class Media extends BaseType
         Root::class,
     ];
 
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-        $this->is_public_domain = true;
-        return $this->action_data;
-    }
 
 }

@@ -12,7 +12,6 @@ use App\Models\UserNamespace;
 
 use App\Sys\Res\Types\Stk\Root\Act;
 
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -85,13 +84,12 @@ class ServerPromote extends Act\Cmd\Server
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
@@ -128,18 +126,12 @@ class ServerPromote extends Act\Cmd\Server
     }
 
 
-
-
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
-
+        parent::runActionInner();
         try {
             DB::beginTransaction();
             $server = new Server();
@@ -173,15 +165,11 @@ class ServerPromote extends Act\Cmd\Server
                     source: $this, action_data: $this->action_data,elsewhere_context: $server);
             }
 
-
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
 
 

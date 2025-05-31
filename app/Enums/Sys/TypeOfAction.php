@@ -78,6 +78,7 @@ enum TypeOfAction: string
     case CMD_DESIGN_PARENT_REMOVE = 'cmd_design_parent_remove';
 
     case CMD_DESIGN_TIME_CREATE = 'cmd_design_time_create';
+    case CMD_DESIGN_TIME_EDIT = 'cmd_design_time_edit';
 
 
     case CMD_DESIGN_LOCATION_CREATE = 'cmd_design_location_create';

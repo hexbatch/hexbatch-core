@@ -141,6 +141,10 @@ return new class extends Migration
             $table->rawColumn('validate_json_path','jsonpath')->nullable()->default(null)
                 ->comment("if set the value has to match this before being written");
 
+            $table->jsonb('attribute_default_value')
+                ->nullable()->default(null)
+                ->comment("value given to new elements");
+
             $table->string('attribute_name',128)->nullable()->index()
                 ->comment("The unique name of the attribute, using the naming rules");
         });
@@ -178,6 +182,8 @@ return new class extends Migration
             $table->dropColumn('is_public_domain');
             $table->dropColumn('is_system');
             $table->dropColumn('read_json_path');
+            $table->dropColumn('validate_json_path');
+            $table->dropColumn('attribute_default_value');
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');

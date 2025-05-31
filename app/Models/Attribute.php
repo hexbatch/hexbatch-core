@@ -13,7 +13,9 @@ use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
 use App\Sys\Res\Atr\IAttribute;
 use App\Sys\Res\ISystemModel;
+use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -49,6 +51,7 @@ use Illuminate\Validation\ValidationException;
  * @property string ref_uuid
  * @property string read_json_path
  * @property string validate_json_path
+ * @property ArrayObject attribute_default_value
  * @property string attribute_name
  *
  * @property TypeOfElementValuePolicy value_policy
@@ -98,6 +101,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
         'server_access_type' => TypeOfServerAccess::class,
         'value_policy' => TypeOfElementValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,
+        'attribute_default_value' => AsArrayObject::class,
     ];
 
 
@@ -285,7 +289,11 @@ class Attribute extends Model implements IAttribute,ISystemModel
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find attribute via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.attribute_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ATTRIBUTE_NOT_FOUND
+            );
         }
         return $ret;
     }

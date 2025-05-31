@@ -32,12 +32,16 @@ class DesignOwnerChange extends DesignOwnerPromote
         Evt\Server\TypeOwnerChange::class
     ];
 
-    public function runAction(array $data = []): void
-    {
-        parent::runAction($data);
 
+    /**
+     * @throws \Exception
+     */
+    protected function runActionInner(array $data = []): void
+    {
+        parent::runActionInner();
         $this->checkIfAdmin($this->getDesignType()->owner_namespace);
     }
+
 
 
     public function getChildrenTree(): ?Tree
@@ -67,6 +71,9 @@ class DesignOwnerChange extends DesignOwnerPromote
         return null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void
     {
 

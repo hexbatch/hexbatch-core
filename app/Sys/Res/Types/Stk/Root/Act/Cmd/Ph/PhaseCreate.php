@@ -10,7 +10,6 @@ use App\Models\Phase;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
 class PhaseCreate extends Act\Cmd\Ph
@@ -68,13 +67,12 @@ class PhaseCreate extends Act\Cmd\Ph
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
     protected function initData(bool $b_save = true) : ActionDatum {
@@ -92,19 +90,17 @@ class PhaseCreate extends Act\Cmd\Ph
     }
 
 
-
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         if (!$this->getGivenType() || !$this->phase_name) {
             throw new \InvalidArgumentException("Need type and name");
         }
+        $this->checkIfAdmin($this->getGivenType()->owner_namespace);
 
         try {
             DB::beginTransaction();
@@ -130,16 +126,11 @@ class PhaseCreate extends Act\Cmd\Ph
                     source: $this, action_data: $this->action_data,phase_context: $phase);
             }
 
-
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
 
 

@@ -23,6 +23,8 @@ class Phase extends BaseType
 
     const IS_DEFAULT_PHASE = false;
 
+    const bool IS_PUBLIC_DOMAIN = false;
+
     protected \App\Models\Phase|null $phase = null;
 
 

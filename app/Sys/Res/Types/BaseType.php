@@ -6,6 +6,7 @@ namespace App\Sys\Res\Types;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
@@ -43,6 +44,8 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
     const SERVER_CLASS = ThisServer::class;
 
     const IS_FINAL = false;
+
+    const bool IS_PUBLIC_DOMAIN = true;
 
     const TYPE_NAME = '';
     const ATTRIBUTE_CLASSES = [];
@@ -86,8 +89,8 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
             $design = new DesignCreate(type_name: static::getHexbatchClassName(),
                 owner_namespace_uuid: $this->getISystemType()->getTypeNamespace()::getClassUuid(),
                 is_final: $this->getISystemType()::isFinal(),
-                access: TypeOfServerAccess::IS_PUBLIC, uuid: static::getClassUuid(),
-                is_system: true,send_event: false
+                is_public_domain: static::IS_PUBLIC_DOMAIN, access: TypeOfServerAccess::IS_PUBLIC,
+                uuid: static::getClassUuid(), is_system: true, send_event: false
             );
             $design->runAction();
             $created_type = $design->getDesignType();
@@ -302,7 +305,6 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         protected ?bool          $is_public_domain = null,
         protected bool           $send_event = true,
         protected ?bool          $is_async = null,
-        protected int            $priority = 0,
         protected array          $tags = [],
 
     )
@@ -311,6 +313,8 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         if ($this->b_type_init) {
             return;
         }
+        if ($this->is_public_domain === null) { $this->is_public_domain = true;}
+
         if ($this->action_data) {  $this->restoreData(); } else {$this->initData();}
 
     }
@@ -318,4 +322,10 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
     const array ACTIVE_COLLECTION_KEYS = [];
     const array ACTIVE_DATA_KEYS = [];
 
+    protected function runActionInner(array $data = []): void {
+        Utilities::ignoreVar($data);
+    }
+
 }
+
+

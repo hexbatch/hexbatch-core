@@ -155,7 +155,11 @@ class ElementType extends Model implements IType,ISystemModel
             if ($time_bound_id) { $arg_types[] = 'time'; $arg_vals[] = $time_bound_id;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find type via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.type_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::TYPE_NOT_FOUND
+            );
         }
         return $ret;
     }
@@ -408,11 +412,14 @@ class ElementType extends Model implements IType,ISystemModel
         return false;
     }
 
-    function setTypeName(string $name) {
+    function setTypeName(string $name,? UserNamespace $namespace = null) {
+        if (!$namespace) {
+            $namespace = Utilities::getCurrentNamespace();
+        }
         try {
             if ($this->type_name = $name) {
                 Validator::make(['type_name' => $this->type_name], [
-                    'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type,Utilities::getCurrentNamespace())],
+                    'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type,$namespace)],
                 ])->validate();
             }
         } catch (ValidationException $v) {

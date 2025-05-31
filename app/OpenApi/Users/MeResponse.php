@@ -27,7 +27,7 @@ class MeResponse implements  JsonSerializable,ICallResponse
 
 
     #[OA\Property(title: 'Namespace uuid',type: HexbatchUuid::class)]
-    public string $namespace_uuid = '';
+    public ?string $namespace_uuid = '';
 
 
 

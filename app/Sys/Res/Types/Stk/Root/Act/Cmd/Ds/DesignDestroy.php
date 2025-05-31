@@ -27,10 +27,13 @@ class DesignDestroy extends DesignPurge
     ];
 
 
-    public function runAction(array $data = []): void
-    {
-        parent::runAction($data);
 
+    /**
+     * @throws \Exception
+     */
+    protected function runActionInner(array $data = []): void
+    {
+        parent::runActionInner();
         $this->checkIfAdmin($this->getDesignType()->owner_namespace);
     }
 

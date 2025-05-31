@@ -39,7 +39,6 @@ class DesignLocationDestroy extends DesignLocationCreate
         protected ?ActionDatum      $parent_action_data = null,
         protected ?UserNamespace    $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
@@ -48,7 +47,7 @@ class DesignLocationDestroy extends DesignLocationCreate
             is_system: $this->is_system, send_event: $this->send_event,
             is_async: $this->is_async,
             action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, priority: $this->priority, tags: $this->tags);
+            b_type_init: $this->b_type_init,  tags: $this->tags);
     }
 
 }

@@ -123,9 +123,10 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
                owner_type_uuid: static::getClassOwningSystemType()::getDictionaryObject()->getTypeObject()->getUuid(),
                parent_attribute_uuid: $parent_uuid, is_final: $this->getISystemAttribute()::isFinal(),
                is_abstract: static::IS_ABSTRACT,
+               is_public_domain: true,
                attribute_approval: TypeOfApproval::PUBLISHING_APPROVED,
                uuid: static::getClassUuid(),
-               is_system: $this->getISystemAttribute()::isSystem(),send_event: false
+               is_system: $this->getISystemAttribute()::isSystem(), send_event: false
            );
            $creator->runAction();
 

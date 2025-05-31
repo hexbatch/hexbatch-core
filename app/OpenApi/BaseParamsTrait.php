@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api;
+namespace App\OpenApi;
 
 use App\Exceptions\HexbatchInvalidException;
 use App\Exceptions\RefCodes;
@@ -60,7 +60,7 @@ trait BaseParamsTrait
 
         foreach ($ret_not_empty as $tt) {
             if (!Utilities::is_uuid($tt)) {
-                throw new HexbatchInvalidException(__('messages.invalid_uuid',['ref'=>$tt]),
+                throw new HexbatchInvalidException(__('msg.invalid_uuid',['ref'=>$tt]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::INVALID_UUID);
             }
@@ -73,7 +73,7 @@ trait BaseParamsTrait
         if (empty($what))  { return null;}
 
         if (!Utilities::is_uuid($what)) {
-            throw new HexbatchInvalidException(__('messages.invalid_uuid',['ref'=>$what]),
+            throw new HexbatchInvalidException(__('msg.invalid_uuid',['ref'=>$what]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::INVALID_UUID);
         }
@@ -92,6 +92,7 @@ trait BaseParamsTrait
 
     public function toArray() : array {
         $arr = [];
+        /** @noinspection PhpLoopCanBeConvertedToArrayMapInspection */
         foreach ($this as $key => $val) {
             $arr[$key] = $val;
         }

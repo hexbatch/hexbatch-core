@@ -8,6 +8,8 @@ use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
+use App\Exceptions\HexbatchFailException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
@@ -68,7 +70,7 @@ class DesignParentAdd extends Act\Cmd\Ds
         return $this->action_data->getCollectionOfType(ElementType::class);
     }
 
-    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_parent_uuids'];
+    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_parent_uuids','check_permission'];
 
     const array ACTIVE_COLLECTION_KEYS = ['given_parent_uuids'=>ElementType::class];
     public function __construct(
@@ -78,6 +80,7 @@ class DesignParentAdd extends Act\Cmd\Ds
          */
         protected array               $given_parent_uuids = [],
         protected ?TypeOfApproval     $approval = null,
+        protected bool                $check_permission = true,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
         protected ?ActionDatum        $action_data = null,
@@ -85,36 +88,31 @@ class DesignParentAdd extends Act\Cmd\Ds
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
         protected ?bool                $is_async = null,
-        protected int                   $priority = 0,
         protected array             $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
 
-  /*
-   * type the design
-   * array uuid fo parent
-   *
-   */
+
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
         if (!$this->getDesignType()) {
             throw new \InvalidArgumentException("Need type before can add parents to it");
         }
 
-        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+        if ($this->check_permission) {
+            $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+        }
+
 
         try {
             DB::beginTransaction();
@@ -128,6 +126,10 @@ class DesignParentAdd extends Act\Cmd\Ds
                         if (is_subclass_of($parent , Act\NoEventsTriggered::class )) {
                             throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
                         }
+
+                        if (is_subclass_of($parent , Act\CmdNoSideEffects::class )) {
+                            throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
+                        }
                     }
                     $b_check_parent = true;
                     if ($this->is_system && !$this->send_event) { $b_check_parent = false;}
@@ -138,8 +140,9 @@ class DesignParentAdd extends Act\Cmd\Ds
 
             //public domain parents are automatically approved for the design
             foreach ($this->getParents() as $parent) {
-                if ($parent->is_public_domain) {
-                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getDesignType(),approval: TypeOfApproval::DESIGN_APPROVED);
+                if ($this->is_system ||$parent->is_public_domain || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())) {
+                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getDesignType(),
+                        approval: TypeOfApproval::DESIGN_APPROVED,check_parent_published:!$this->is_system );
                 }
             }
 
@@ -147,22 +150,26 @@ class DesignParentAdd extends Act\Cmd\Ds
             //check to see if all parents have approved this design, if so then success, else fail
             /** @var ElementTypeParent[] $check_parents */
             $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $this->getDesignType()->id)->get();
-            $my_status = TypeOfThingStatus::THING_SUCCESS;
+
             foreach ($check_parents as $checker) {
                 if ($checker->parent_type_approval === TypeOfApproval::DESIGN_DENIED) {
-                    $my_status = TypeOfThingStatus::THING_FAIL;
-                    break;
+
+                    throw new HexbatchFailException( __('msg.design_parents_did_not_approve_design',['ref'=>$checker->getName(),
+                        'child'=>$this->getDesignType()->getName()]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::TYPE_PARENT_DENIED_DESIGN);
                 }
             }
-            $this->setActionStatus($my_status);
+
             DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
-            throw $e;
         }
 
+        catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
+
 
 
 
@@ -208,7 +215,11 @@ class DesignParentAdd extends Act\Cmd\Ds
             $events = [];
             $nodes = [];
             foreach ($this->getParents() as $parent) {
-                if (!$parent->is_public_domain) {
+                if (
+                    !
+                    ($this->is_system || $parent->is_public_domain || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())  )
+                )
+                {
                     $events =  Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
                 }
 

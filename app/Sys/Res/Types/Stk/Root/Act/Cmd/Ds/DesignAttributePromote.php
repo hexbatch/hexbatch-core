@@ -4,12 +4,13 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
 
@@ -31,7 +32,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
 
     const array ACTIVE_DATA_KEYS = ['attribute_name','owner_type_uuid','parent_attribute_uuid',
-        'design_attribute_uuid','is_final','is_abstract',
+        'design_attribute_uuid','is_final','is_abstract','is_public_domain',
         'uuid'];
 
 
@@ -51,13 +52,15 @@ class DesignAttributePromote extends Act\Cmd\Ds
         protected ?ActionDatum        $action_data = null,
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
-        protected bool                $b_type_init = false,protected int            $priority = 0,
+        protected bool                $b_type_init = false,
         protected array          $tags = []
     )
     {
-
+        if ($this->is_public_domain === null) { $this->is_public_domain = true;}
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system,
+            is_public_domain: $this->is_public_domain,
+            send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
@@ -102,20 +105,20 @@ class DesignAttributePromote extends Act\Cmd\Ds
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
 
         if (!$this->getDesignType()) {
             throw new \InvalidArgumentException("Need owning type before can make attribute");
         }
 
         if (!$this->attribute_name) {
-            throw new \InvalidArgumentException("Need attr name given before can make attribute");
+            throw new HexbatchNotPossibleException(__('msg.attribute_schema_must_have_name'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
         }
+
         try {
             DB::beginTransaction();
             $attr = new Attribute();
@@ -132,20 +135,18 @@ class DesignAttributePromote extends Act\Cmd\Ds
             $attr->is_final_attribute = $this->is_final ;
             $attr->is_abstract = $this->is_abstract ;
             $attr->is_public_domain = $this->is_public_domain ;
+
             $attr->save();
 
 
             $this->action_data->data_attribute_id = $attr->id;
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
+
 
 
 

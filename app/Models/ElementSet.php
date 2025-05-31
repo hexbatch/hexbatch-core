@@ -119,7 +119,11 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find set via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.set_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SET_NOT_FOUND
+            );
         }
         return $ret;
     }

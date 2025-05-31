@@ -210,7 +210,11 @@ class Server extends Model implements IServer,ISystemModel
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             if ($type_id) { $arg_types[] = 'type_id'; $arg_vals[] = $type_id;}
             $arg_val = implode('|',$arg_vals); $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find server via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.server_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SERVER_NOT_FOUND
+            );
         }
         return $ret;
     }

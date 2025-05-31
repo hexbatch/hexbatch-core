@@ -21,5 +21,6 @@ class NoEventsTriggered extends BaseType
         BaseAction::class
     ];
 
+
 }
 
