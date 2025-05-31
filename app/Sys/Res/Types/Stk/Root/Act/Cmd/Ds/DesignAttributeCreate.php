@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\DB;
 * value_policy: determines if the attribute can have multiple values for the same or all elements that use it
 * read_json_path: if this is used, when the attribute value is always filtered by this
 * validate_json_path: if this is used, when the attribute value is validated before being set
+* default_value : if set, this is the default value before writing
 * attribute_name: has to be unique in the namespace
 * unset_parent : when editing an existing attribute and want to remove any parent
 ")]
@@ -68,7 +69,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
     const array ACTIVE_DATA_KEYS = ['attribute_name','owner_type_uuid','parent_attribute_uuid',
         'design_attribute_uuid','is_final','is_abstract','is_public_domain','uuid','unset_parent',
-        'read_json_path','validate_json_path'];
+        'read_json_path','validate_json_path','default_value'];
 
     protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
 
@@ -85,6 +86,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds
         protected ?bool                     $is_public_domain = null,
         protected ?string                     $read_json_path = null,
         protected ?string                     $validate_json_path = null,
+        protected array                     $default_value = [],
         protected ?TypeOfServerAccess       $access = null,
         protected ?TypeOfElementValuePolicy $value_policy = null,
 
@@ -238,6 +240,10 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
             if ($this->validate_json_path) {
                 $attr->validate_json_path = $this->validate_json_path ;
+            }
+
+            if (!empty($this->default_value)) {
+                $attr->setDefaultValue($this->default_value);
             }
 
 

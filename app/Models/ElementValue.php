@@ -92,4 +92,21 @@ class ElementValue extends Model
         return $build;
     }
 
+    public static function maybeAssignStaticValue(Attribute $att) :void
+    {
+
+        if (empty($att->attribute_default_value?->getArrayCopy())) {
+            return;
+        }
+
+        ElementValue::insertOrIgnore(
+            [
+                'horde_type_id' => $att->owner_element_type_id,
+                'horde_originating_type_id' => $att->owner_element_type_id,
+                'horde_attribute_id' => $att->id,
+                'element_value' => $att->attribute_default_value->getArrayCopy(),
+            ]
+        );
+    }
+
 }

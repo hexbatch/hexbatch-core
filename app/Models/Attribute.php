@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
@@ -474,6 +475,40 @@ class Attribute extends Model implements IAttribute,ISystemModel
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
         }
+    }
+
+    public function setDefaultValue(array $default_value) : void
+    {
+        //must pass write validation and return something in the read
+        $b_ok_val = true;
+        if ($this->validate_json_path) {
+            $b_ok_val = DB::selectOne("SELECT jsonb_path_exists(:jsonb_data, :json_path) as da_validation",
+                ['jsonb_data'=>$default_value,'json_path'=>$this->validate_json_path])->da_validation;
+        }
+
+        $b_ok_read = true;
+        if ($this->read_json_path) {
+            $b_ok_read = DB::selectOne("SELECT jsonb_path_exists(:jsonb_data, :json_path) as da_read",
+                ['jsonb_data'=>$default_value,'json_path'=>$this->read_json_path])->da_read;
+        }
+
+       if (!$b_ok_val && !$b_ok_read) {
+            $msg = 'attribute_has_invalid_default';
+        } else if(!$b_ok_val) {
+            $msg = 'attribute_has_invalid_default_validation';
+        }
+        else if(!$b_ok_read) {
+            $msg = 'attribute_has_invalid_default_read';
+        } else {
+            $this->attribute_default_value = $default_value;
+            return;
+        }
+
+        throw new HexbatchNotPossibleException(
+            __($msg,['ref'=>$this->getName()]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+            RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+
     }
 
 

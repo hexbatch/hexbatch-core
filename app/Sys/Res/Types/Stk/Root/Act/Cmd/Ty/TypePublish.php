@@ -12,6 +12,7 @@ use App\Models\Attribute;
 use App\Models\ElementType;
 
 use App\Models\ElementTypeParent;
+use App\Models\ElementValue;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Server\TypePublished;
@@ -189,7 +190,6 @@ class TypePublish extends Act\Cmd\Ty
             foreach ($check_parents as $checker) {
                 if ($checker->parent_type_approval !== TypeOfApproval::PUBLISHING_APPROVED) {
                     $parent_rejected_array[] =  $checker->parent_type->getName();
-
                 }
             }
 
@@ -211,6 +211,10 @@ class TypePublish extends Act\Cmd\Ty
 
             $target->lifecycle = TypeOfLifecycle::PUBLISHED;
             $target->save();
+
+            foreach ($target->type_attributes as $att) {
+                ElementValue::maybeAssignStaticValue(att: $att);
+            }
 
             DB::commit();
         } catch (\Exception $e) {

@@ -84,6 +84,9 @@ return [
     'attribute_parent_not_found' => 'The parent attribute was not found by using :ref',
     'attribute_cannot_use_map' => 'Attribute :ref can only use shapes and not maps',
     'attribute_cannot_use_design' => 'Attribute :ref can only be used for a design for :me if you are a member of its namespace and its not retired',
+    'attribute_has_invalid_default' => 'Attribute :ref was set with a default value that did not pass the validation or read json_path',
+    'attribute_has_invalid_default_read' => 'Attribute :ref was set with a default value that did not pass the read json_path',
+    'attribute_has_invalid_default_validation' => 'Attribute :ref was set with a default value that did not pass the validationjson_path',
 
     'rule_not_found' => 'The rule was not found by :ref',
     'parent_rule_not_found' => 'The parent rule was not found by the uuid :ref',

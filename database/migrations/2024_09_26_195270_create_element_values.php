@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -54,7 +55,7 @@ return new class extends Migration
             $table->foreignId('element_set_member_id')
                 ->nullable()->default(null)
                 ->comment("The element/set these values are about")
-                ->unique()
+                ->index()
                 ->constrained('element_set_members')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -97,10 +98,17 @@ return new class extends Migration
 
 
 
-            $table->unique(['horde_type_id','horde_originating_type_id','horde_attribute_id']);
+            $table->unique(
+                ['horde_type_id','horde_originating_type_id','horde_attribute_id','element_set_member_id']
+                , 'udx_type_org_attr_member'
+            );
 
         });
 
+        //nulls need to be included in the unique condition here to set static (not belonging to a set) values
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_type_org_attr_member ON element_values
+            (horde_type_id,horde_originating_type_id,horde_attribute_id,element_set_member_id) NULLS NOT DISTINCT;");
 
 
     }

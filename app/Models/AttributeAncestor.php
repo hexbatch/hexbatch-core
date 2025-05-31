@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
- * @property int owning_child_attribute_id
+ * @property int child_attribute_id
  * @property int ancestor_attribute_id
  * @property int attribute_gap
  *

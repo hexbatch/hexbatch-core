@@ -299,7 +299,7 @@ class ElementCreate extends Act\Cmd\Ele
 
             else if($child->isActionSuccess()) {
                 if ($child->getAskedAboutType() === $this->getTemplateType()) {
-                    if ($this->getTemplateType()->isParentOfThis($child->getParentType())) //todo change to or ancestor later when doing element_type_ancestors
+                    if ($this->getTemplateType()->isParentOfThis($child->getParentType()))
                     if ($child instanceof Evt\Type\ElementCreationBatch) {
                         $number_allowed = $child->getNumberAllowed();
                         if (null !== $number_allowed) {
