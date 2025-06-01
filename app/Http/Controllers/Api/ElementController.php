@@ -204,26 +204,6 @@ class ElementController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/read_visual',
-        operationId: 'core.elements.read_visual',
-        description: "Can read pathed elements' geometry and maps due to design and live types ".
-        "\n its up to the attribute access, the type access and the event handlers to decide who can ",
-        summary: 'Read the locations of one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
-    #[ApiEventMarker( Evt\Element\ReadingVisual::class)]
-    #[ApiTypeMarker( Root\Api\Element\ReadVisual::class)]
-    public function read_visual() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-    #[OA\Get(
         path: '/api/v1/{namespace}/elements/read_time',
         operationId: 'core.elements.read_time',
         description: "Can read current or next time span of the element's type, its parents and applied live ".
@@ -362,33 +342,6 @@ class ElementController extends Controller {
     public function destroy_element() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
-
-
-
-
-
-
-
-
-
-
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/promote_edit',
-        operationId: 'core.elements.promote_edit_element',
-        description: "System can update elements not needing permissions. No events created when doing this",
-        summary: 'Changes owner or value of or phase of one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Element\PromoteEdit::class)]
-    public function promote_edit_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
 
 
 

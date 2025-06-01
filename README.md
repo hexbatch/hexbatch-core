@@ -23,19 +23,20 @@ The project has totally changed, a major rewrite. This is a release of work in p
 [ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementChangeOwner.php)
 [ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php)
 [ElementEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementEdit.php)
-[ElementOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOff.php)
-[ElementOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOn.php)
-[ElementPing.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementPing.php)
-[ElementPurge.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementPurge.php)
+
 [LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php)
 [LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php)
-[Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php)
-[ReadLiveType.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ReadLiveType.php)
+
+
+
 [ReadTimeSpan.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ReadTimeSpan.php)
-[ReadType.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ReadType.php)
-[ReadVisual.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ReadVisual.php)
+
+[ElementOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOff.php)
+[ElementOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOn.php)
 [TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php)
 [TypeOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOn.php)
+
+[Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php)
 [Write.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Write.php)
 
 

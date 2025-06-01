@@ -334,7 +334,6 @@ Route::prefix('v1')->group(function () {
                     Route::prefix('{element}')->group(function () {
 
                         Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
-                            Route::patch('promote_edit', [Api\ElementController::class, 'promote_edit_element'])->name('core.elements.promote_edit');
                             Route::delete('purge', [Api\ElementController::class, 'purge_element'])->name('core.elements.purge');
                             Route::post('promote_set', [Api\ElementController::class, 'promote_set'])->name('core.elements.promote_set');
                             Route::post('promote_live', [Api\ElementController::class, 'promote_live'])->name('core.elements.promote_live');
@@ -371,7 +370,6 @@ Route::prefix('v1')->group(function () {
                         Route::get('read_attribute', [Api\ElementController::class, 'read_attribute'])->name('core.elements.read_attribute');
                         Route::get('read_live_type', [Api\ElementController::class, 'read_live_type'])->name('core.elements.read_live_type');
                         Route::get('read_type', [Api\ElementController::class, 'read_type'])->name('core.elements.read_type');
-                        Route::get('read_visual', [Api\ElementController::class, 'read_visual'])->name('core.elements.read_visual');
                         Route::get('read_time', [Api\ElementController::class, 'read_time'])->name('core.elements.read_time');
                         Route::patch('write_attribute', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
                     });

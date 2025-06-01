@@ -43,7 +43,6 @@ enum TypeOfAction: string
     case PRAGMA_READ_LIVE_TYPE = 'pragma_read_live_type';
 
     case PRAGMA_READ_TIME_SPAN = 'pragma_read_time_span'; //the start and stop time of the type that owns the element (current time span)
-    case PRAGMA_READ_VISUAL = 'pragma_read_visual'; //the shape of the attribute being read, includes display
 
 
 
@@ -139,7 +138,6 @@ enum TypeOfAction: string
 
 
     case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
-    case CMD_SET_PROMOTE = 'cmd_set_promote'; //child set or top level set
     case CMD_SET_DESTROY = 'cmd_set_destroy'; //if ns-admin of definer element of set ns
 
     case CMD_SET_EMPTY = 'cmd_set_empty'; //non sticky stuff
@@ -160,13 +158,11 @@ enum TypeOfAction: string
     case CMD_ELEMENT_PING = 'cmd_element_ping';
 
 
-    case CMD_ELEMENT_PROMOTE = 'cmd_element_promote';
     case CMD_ELEMENT_EDIT = 'cmd_element_edit';
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
-    case CMD_ELEMENT_PURGE = 'cmd_element_purge'; //server admin
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
     case CMD_LIVE_TYPE_PROMOTE = 'cmd_live_type_promote';
     case CMD_LIVE_TYPE_DEMOTE = 'cmd_live_type_demote';

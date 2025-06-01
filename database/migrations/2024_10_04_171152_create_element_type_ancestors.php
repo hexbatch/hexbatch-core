@@ -49,7 +49,7 @@ return new class extends Migration
 
 
 
-                IF true THEN
+                IF NEW.parent_type_approval = 'publishing_approved' THEN
                     INSERT INTO element_type_ancestors(owning_child_type_id,ancestor_type_id,type_gap )
 
                         with recursive type_descendants as

@@ -19,7 +19,7 @@ class PromoteElement extends Api\ElementApi
     const PARENT_CLASSES = [
         Api\ElementApi::class,
         Act\Cmd\Pa\Search::class,
-        Act\Cmd\Ty\ElementPromote::class,
+        Act\Cmd\Ty\ElementCreate::class,
     ];
 
 }

@@ -98,11 +98,6 @@ return new class extends Migration
 
 
 
-            $table->unique(
-                ['horde_type_id','horde_originating_type_id','horde_attribute_id','element_set_member_id']
-                , 'udx_type_org_attr_member'
-            );
-
         });
 
         //nulls need to be included in the unique condition here to set static (not belonging to a set) values

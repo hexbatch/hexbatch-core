@@ -46,7 +46,7 @@ return new class extends Migration
 
                 DELETE FROM attribute_ancestors a WHERE a.child_attribute_id = NEW.id;
 
-                IF NEW.parent_attribute_id IS NOT NULL THEN
+                IF NEW.parent_attribute_id IS NOT NULL AND NEW.attribute_approval = 'publishing_approved' THEN
                     INSERT INTO attribute_ancestors(child_attribute_id,ancestor_attribute_id,attribute_gap )
 
                         with recursive attr_descendants as

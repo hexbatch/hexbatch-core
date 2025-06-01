@@ -31,9 +31,6 @@ use Illuminate\Support\Facades\DB;
  * Creation can be blocked by the following
  * @see Evt\Type\ElementOwnerChange,Evt\Type\ElementRecieved,Evt\Type\ElementRecievedBatch,Evt\Type\ElementOwnerChangeBatch
  *
- * it can access a list of sets from a child to create one per set (and put them in the set)
- *  if no set provided, it will put new element in the caller's home set.
- *  the set the element is going to will be provided as context info for any event handlers
  *
  * if more than one element created, the batch version of the handler is called instead
  *
