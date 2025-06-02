@@ -39,16 +39,12 @@ enum TypeOfAction: string
 
     case PRAGMA_WRITE = 'pragma_write'; //to the element attribute
     case PRAGMA_READ = 'pragma_read'; //from the element attribute
-    case PRAGMA_READ_TYPE = 'pragma_read_type';
-    case PRAGMA_READ_LIVE_TYPE = 'pragma_read_live_type';
 
     case PRAGMA_READ_TIME_SPAN = 'pragma_read_time_span'; //the start and stop time of the type that owns the element (current time span)
 
 
 
 
-    case PRAGMA_ELEMENT_ON = 'pragma_element_on';
-    case PRAGMA_ELEMENT_OFF = 'pragma_element_off';
     case PRAGMA_TYPE_ON = 'pragma_element_type_on';
     case PRAGMA_TYPE_OFF = 'pragma_element_type_off';
 

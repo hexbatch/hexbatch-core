@@ -10,8 +10,11 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
+use App\Models\AttributeAncestor;
 use App\Models\ElementType;
 
+use App\Models\ElementTypeAncestor;
+use App\Models\ElementTypeExposedAttribute;
 use App\Models\ElementTypeParent;
 use App\Models\ElementValue;
 use App\Models\UserNamespace;
@@ -222,11 +225,15 @@ class TypePublish extends Act\Cmd\Ty
 
             $target->lifecycle = TypeOfLifecycle::PUBLISHED;
             $target->save();
+            $target->refresh();
 
             foreach ($target->type_attributes as $att) {
                 ElementValue::maybeAssignStaticValue(att: $att);
             }
 
+            ElementTypeExposedAttribute::makeRecords(type: $target);
+            AttributeAncestor::makeRecordsForType(type: $target);
+            ElementTypeAncestor::makeRecordsForType(type: $target);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -344,7 +351,7 @@ class TypePublish extends Act\Cmd\Ty
             else if($child->isActionSuccess()) {
 
                 if ($this->given_type_uuid === $child->getAskedAboutType()?->ref_uuid) {
-                    if(in_array($child->getParentType()->ref_uuid,$this->getPublishingType()->getParentUuids())) {
+                    if(in_array($child->getParentType()->ref_uuid,$this->getPublishingType()->getTopParentUuids())) {
                         ElementTypeParent::updateParentStatus(parent: $child->getParentType(),
                             child: $child->getAskedAboutType(),approval: $child->getApprovalStatus());
                     }

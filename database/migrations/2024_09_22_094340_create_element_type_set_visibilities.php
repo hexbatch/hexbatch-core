@@ -31,35 +31,38 @@ return new class extends Migration
                 ->cascadeOnDelete()
                 ->cascadeOnDelete();
 
-            //make this visibility_set_id nullable when its top level set visibility by type
-            $table->foreignId('visibility_set_id')
+            //make this visible_set_member_id nullable when its top level set visibility by type
+            $table->foreignId('visible_set_member_id')
                 ->nullable()
                 ->comment("The set this type is matched for, null for top level set")
                 ->index()
-                ->constrained('element_sets')
+                ->constrained('element_set_members')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->boolean('is_visible')->default(true)->nullable(false)
-                ->comment('if true all the other bools need to be true also, otherwise false, updated via trigger');
+            $table->rawColumn('is_visible','boolean GENERATED ALWAYS AS (is_visible_for_location AND is_visible_for_schedule AND is_turned_on) STORED')
+                ->comment("calculated boolean that is true when all the other columns are true");
 
-            $table->boolean('is_visible_for_map')->default(true)->nullable(false)
+
+            $table->boolean('is_visible_for_location')->default(true)->nullable(false)
                 ->comment('if true this is visible because the set overlaps the type map');
 
-            $table->boolean('is_visible_for_time')->default(true)->nullable(false)
+            $table->boolean('is_visible_for_schedule')->default(true)->nullable(false)
                 ->comment('if true this is visible after a time check');
 
-            $table->boolean('is_time_sensitive')->default(false)->nullable(false)
-                ->comment('if true this should be checked next tick');
 
             $table->boolean('is_turned_on')->default(true)->nullable(false)
-                ->comment('if false this all the attributes are off for this type which are used in the child or descendant type');
+                ->comment('if false then all the attributes are off for this type in this set context');
 
 
             $table->timestamps();
 
-            $table->unique(['visible_type_id','visibility_set_id']);
+            $table->unique(['visible_type_id','visible_set_member_id']);
         });
+
+        DB::statement(
+            "CREATE UNIQUE INDEX udx_visible_type_member ON element_type_set_visibilities
+                    (visible_type_id,visible_set_member_id) NULLS NOT DISTINCT;");
 
         DB::statement("ALTER TABLE element_type_set_visibilities ALTER COLUMN created_at SET DEFAULT NOW();");
 

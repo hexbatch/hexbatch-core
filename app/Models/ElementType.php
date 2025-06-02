@@ -175,7 +175,8 @@ class ElementType extends Model implements IType,ISystemModel
     {
 
         $build = ElementType::select('element_types.*')
-            ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts,  extract(epoch from  element_types.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts")
+            ->selectRaw("extract(epoch from  element_types.updated_at) as updated_at_ts")
 
             /** @uses ElementType::owner_namespace(), ElementType::type_attributes(), ElementType::type_server_levels() */
             /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_time() */
@@ -324,7 +325,7 @@ class ElementType extends Model implements IType,ISystemModel
         $attr_hash = [];
         foreach ($this->type_parents as $parent) {
             foreach ($parent->parent_type->getInheritedAttributes() as $att) {
-                if ($parent->parent_type->is_system && $att->is_abstract) {
+                if ($att->is_abstract) {
                     continue;
                 }
                 $attr_hash[$att->ref_uuid] = $att;
@@ -333,20 +334,58 @@ class ElementType extends Model implements IType,ISystemModel
         return array_values($attr_hash);
     }
 
+
     /**
      * @return Attribute[]
      */
-    public function getAllAttributes() {
-        $attr_hash = [];
-        foreach ($this->getInheritedAttributes() as $att) {
-            $attr_hash[$att->ref_uuid] = $att;
-        }
+    public function getParentUuids() :array  {
+        $query_parents = DB::table("element_type_parents as desc_a")
+                ->selectRaw('desc_a.id as par_id, 0 as level')->where('desc_a.child_type_id', $this->id)
 
+            ->unionAll(
+                DB::table('element_type_parents as desc_b')
+                    ->selectRaw('desc_b.id as par_id, level + 1 as level')
+                    ->join('query_parents', 'query_parents.parent_type_id', '=', 'desc_b.child_type_id')
+            );
+
+
+        $laravel_parent_uuids = DB::table("element_type_parents")
+            ->selectRaw("element_type_parents.id, query_parents.level, parent.ref_uuid as parent_ref_uuid")
+            ->join('query_parents', 'query_parents.par_id', '=', 'element_type_parents.id')
+            ->join('element_types as parent','parent.id','=','element_type_parents.parent_type_id')
+            ->orderBy('level','desc')
+            ;
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        $laravel_parent_uuids->withRecursiveExpression('query_parents',$query_parents);
+
+
+        return $laravel_parent_uuids->pluck('parent_ref_uuid')->toArray();
+    }
+
+    /**
+     * Gets non-abstract attributes
+     * @return Attribute[]
+     */
+    public function getAllAttributes() {
+
+        $attr_hash = $this->getAllAttributeHash();
         foreach ($this->type_attributes as $att) {
+            if ($att->is_abstract) {
+                continue;
+            }
             $attr_hash[$att->ref_uuid] = $att;
         }
 
         return array_values($attr_hash);
+    }
+
+    protected function getAllAttributeHash() : array {
+        $attr_hash = [];
+        foreach ($this->getInheritedAttributes() as $att) {
+            $attr_hash[$att->ref_uuid] = $att;
+        }
+        return $attr_hash;
     }
 
     /**
@@ -449,16 +488,6 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->lifecycle === TypeOfLifecycle::PUBLISHED;
     }
 
-    /**
-     * @return string[]
-     */
-    public function getParentUuids() : array {
-        $ret = [];
-        foreach ($this->type_parents as $par) {
-            $ret[] = $par->parent_type->ref_uuid;
-        }
-        return $ret;
-    }
 
     public function isParentOfThis(ElementType $type) {
         foreach ($this->type_parents as $par) {
@@ -482,6 +511,32 @@ class ElementType extends Model implements IType,ISystemModel
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::TYPE_INVALID_NAME);
         }
+    }
+
+    public function hasType(ElementType $element_type) : bool {
+        if ($this->getUuid() === $element_type->getUuid()) {return true; } //has itself
+        $parent_uuids = $this->getParentUuids();
+        return in_array($element_type->getUuid(),$parent_uuids);
+    }
+
+    /**
+     * @return ElementType[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function getAncestorsAsFlat() {
+        $parent_uuids = $this->getParentUuids();
+        if (empty($parent_uuids)) {return [];}
+        return ElementType::buildElementType(only_uuids: $parent_uuids)->get();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getTopParentUuids() : array {
+        $ret = [];
+        foreach ($this->type_parents as $par) {
+            $ret[] = $par->parent_type->ref_uuid;
+        }
+        return $ret;
     }
 
 

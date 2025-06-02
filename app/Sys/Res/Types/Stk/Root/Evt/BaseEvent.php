@@ -61,6 +61,7 @@ class BaseEvent extends Event implements IEvent
         /**  todo use the @see \App\Models\ServerEvent to see if any waiting action chains, if so get them **/
         if (!$system_type) {throw new \InvalidArgumentException("cannot resolve event by uuid of ".static::UUID);}
         return  [];
+        //todo sometimes when getting a tree, need to ask its own parents or nodes and get more from them (for all events)
     }
 
     public function getAskedAboutType(): ?ElementType

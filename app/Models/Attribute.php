@@ -70,7 +70,6 @@ use Illuminate\Validation\ValidationException;
  * @property TimeBound attribute_time_bound
  * @property LocationBound attribute_shape_bound
  * @property ServerEvent attached_event
- * @property ElementValue original_element_value
  */
 class Attribute extends Model implements IAttribute,ISystemModel
 {
@@ -126,12 +125,6 @@ class Attribute extends Model implements IAttribute,ISystemModel
             ->with('top_rule');
     }
 
-    public function original_element_value() : HasOne {
-        return $this->hasOne(ElementValue::class,'horde_attribute_id')
-            ->where('horde_type_id',$this->owner_element_type_id)
-            ->where('horde_originating_type_id',$this->owner_element_type_id)
-            ->whereNull('horde_set_member_id');
-    }
 
 
 
@@ -237,9 +230,9 @@ class Attribute extends Model implements IAttribute,ISystemModel
         if ($b_do_relations)
         {
             /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound() */
-            /** @uses Attribute::attached_event(),Attribute::original_element_value() */
+            /** @uses Attribute::attached_event() */
             $build->
-                with('attribute_parent', 'type_owner', 'attribute_shape_bound', 'attached_event', 'original_element_value');
+                with('attribute_parent', 'type_owner', 'attribute_shape_bound', 'attached_event');
         }
 
 

@@ -28,13 +28,8 @@ The project has totally changed, a major rewrite. This is a release of work in p
 [LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php)
 
 
-
-[ReadTimeSpan.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ReadTimeSpan.php)
-
-[ElementOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOff.php)
-[ElementOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOn.php)
-[TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php)
-[TypeOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOn.php)
+[TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php) draft
+[TypeOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOn.php) draft
 
 [Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php) draft
 [Write.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Write.php) draft

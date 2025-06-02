@@ -24,11 +24,11 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('horde_originating_type_id')
+            $table->foreignId('horde_live_attributes_id')
                 ->nullable(false)
-                ->comment("The type where the attribute came from. This can from be a design child or the type itself, or a live type added onto the element")
+                ->comment("From a live type added onto the element")
                 ->index()
-                ->constrained('element_types')
+                ->constrained('live_attributes')
                 ->restrictOnDelete()
                 ->cascadeOnDelete();
 
@@ -42,13 +42,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('horde_live_attribute_id')
-                ->nullable()->default(null)
-                ->comment("If a live type added this attribute")
-                ->index()
-                ->constrained('live_attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
 
             $table->foreignId('horde_element_id')
@@ -80,21 +73,6 @@ return new class extends Migration
 
 
 
-
-            $table->foreignId('type_set_visibility_id')
-                ->nullable()->default(null)
-                ->comment("About if the type the attribute belongs to is visible or not in this set")
-                ->index()
-                ->constrained('element_type_set_visibilities')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
-
-
-
-
-
-
-
             $table->foreignId('parent_element_value_id')
                 ->nullable()->default(null)
                 ->comment("when in push pop context, this is where the last value is")
@@ -105,12 +83,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->boolean('is_on')->default(true)->nullable(false)
-                ->comment('if off, then not seen by any rules. This can be local to the set');
 
-
-            $table->timestamp('value_changed_at')->default(null)->nullable()
-                ->comment('Updated when the value is updated here, otherwise null');
 
             $table->jsonb('element_value')
                 ->nullable()->default(null)->comment("The value of the attribute in this row");
@@ -122,7 +95,7 @@ return new class extends Migration
         //nulls need to be included in the unique condition here to set static (not belonging to a set) values
         DB::statement(/** @lang text */
             "CREATE UNIQUE INDEX udx_type_org_attr_member ON element_values
-            (horde_type_id,horde_originating_type_id,horde_attribute_id,horde_element_id,horde_set_id,horde_set_member_id) NULLS NOT DISTINCT;");
+            (horde_type_id,horde_attribute_id,horde_element_id,horde_set_id,horde_set_member_id) NULLS NOT DISTINCT;");
 
 
     }

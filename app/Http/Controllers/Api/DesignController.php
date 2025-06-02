@@ -742,7 +742,7 @@ class DesignController extends Controller {
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
+    #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
     public function time_edit() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }

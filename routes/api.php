@@ -358,8 +358,6 @@ Route::prefix('v1')->group(function () {
                         });
 
                         Route::middleware([])->group(function () {
-                            Route::patch('attribute_off', [Api\ElementController::class, 'attribute_off'])->name('core.elements.attribute_off');
-                            Route::patch('attribute_on', [Api\ElementController::class, 'attribute_on'])->name('core.elements.attribute_on');
                             Route::patch('type_off', [Api\ElementController::class, 'type_off'])->name('core.elements.type_off');
                             Route::patch('type_on', [Api\ElementController::class, 'type_on'])->name('core.elements.type_on');
                             Route::post('ping', [Api\ElementController::class, 'ping_element'])->name('core.elements.ping');

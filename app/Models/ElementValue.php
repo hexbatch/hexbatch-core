@@ -10,37 +10,24 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 
-/*
- * This is the only place where the data is stored for the types, elements, attributes
- * Row added when the attribute is made
- * Then extra rows are only made when there is a value written to an attribute for an element,
- *    or the value is allowed to change for each set, and the attribute of the element written to in a new set
- *    or the attribute is sometimes off (type_set_visibility_id or toggled is_on)
- *
- * if row set but type_set_visibility_id is missing, then the attribute is always visible (unless its off)
- */
+
 
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder
  * @property int id
  * @property int horde_type_id
- * @property int horde_originating_type_id
  * @property int horde_attribute_id
- * @property int horde_live_attribute_id
  * @property int horde_set_id
  * @property int horde_element_id
  * @property int horde_set_member_id
  * @property int element_horde_id
- * @property int type_set_visibility_id
 
  * @property int parent_element_value_id
- * @property bool is_on
  *
 
  * @property ArrayObject element_value
  *
- * @property string value_changed_at
  *
  * @property string created_at
  * @property string updated_at
@@ -79,7 +66,6 @@ class ElementValue extends Model
     public static function buildElementValue(
         ?int $me_id = null,
         ?int $horde_type_id = null,
-        ?int $horde_originating_type_id = null,
         ?int $horde_attribute_id = null,
 
 
@@ -89,6 +75,7 @@ class ElementValue extends Model
 
         ?TypeOfElementValuePolicy $policy = null,
         ?string $json_path = null,
+        bool $read_nearest = false
 
     )
     : Builder
@@ -116,10 +103,6 @@ class ElementValue extends Model
 
         if ($horde_type_id) {
             $build->where('element_values.horde_type_id', $horde_type_id);
-        }
-
-        if ($horde_originating_type_id) {
-            $build->where('element_values.horde_originating_type_id', $horde_originating_type_id);
         }
 
         if ($horde_attribute_id) {
@@ -161,6 +144,12 @@ class ElementValue extends Model
             }
         }
 
+        if ($read_nearest) {
+            Utilities::ignoreVar($read_nearest);
+            //todo get nearest inherited attr in set chain if its per child, get nearest default if its per set or per element
+        }
+
+
 
         return $build;
     }
@@ -175,8 +164,10 @@ class ElementValue extends Model
         ElementValue::insertOrIgnore(
             [
                 'horde_type_id' => $att->owner_element_type_id,
-                'horde_originating_type_id' => $att->owner_element_type_id,
                 'horde_attribute_id' => $att->id,
+                'horde_element_id' => null,
+                'horde_set_id' => null,
+                'horde_set_member_id' => null,
                 'element_value' => $att->attribute_default_value->getArrayCopy(),
             ]
         );
@@ -186,7 +177,6 @@ class ElementValue extends Model
         ElementSetMember $member,
         Attribute $att,
         ElementType $type,
-        ?ElementType $originating_type = null,
         ?array $value = null
     ) :void
     {
@@ -204,13 +194,18 @@ class ElementValue extends Model
         } elseif ($att->value_policy === TypeOfElementValuePolicy::PER_SET) {
             $member_id = null;
         }
+
+        $exposed_and_visible = ElementTypeExposedAttribute::getExposedAndVisible(
+            exposed_type_id: $type->id,exposed_attribute_id: $att->id, in_set_member_id:   $member->id
+        );
+        if (!$exposed_and_visible) {return;}
+
         //check if value passes validation
         $att->checkValidation($value);
 
         ElementValue::upsert(
             [
                 'horde_type_id' => $type->id,
-                'horde_originating_type_id' => $originating_type? $originating_type->id: $type->id,
                 'horde_attribute_id' => $att->id,
                 'horde_element_id' => $element_id,
                 'horde_set_id' => $set_id,
@@ -218,7 +213,7 @@ class ElementValue extends Model
                 'element_value' => $value,
             ],
             [
-                'horde_type_id','horde_originating_type_id','horde_attribute_id','horde_element_id','horde_set_id','horde_set_member_id'
+                'horde_type_id','horde_attribute_id','horde_element_id','horde_set_id','horde_set_member_id'
             ],
             [
                 'element_value' => $value
@@ -229,24 +224,26 @@ class ElementValue extends Model
     public static function readContextValue(
         ElementSetMember $member,
         Attribute $att,
-        ElementType $type,
-        ?ElementType $originating_type = null,
+        ElementType $type
     ) : string|array|null
     {
 
+        $exposed_and_visible = ElementTypeExposedAttribute::getExposedAndVisible(
+            exposed_type_id: $type->id,exposed_attribute_id: $att->id, in_set_member_id:   $member->id
+        );
+        if (!$exposed_and_visible) {return null;}
 
-        //todo read nearest inherited attr if the base is not available, if flag set
 
         /** @var static[] $valrows */
         $valrows = static::buildElementValue(
             horde_type_id: $type->id,
-            horde_originating_type_id: $originating_type? $originating_type->id: $type->id,
             horde_attribute_id: $att->id,
             horde_element_id: $member->member_element_id,
             horde_set_id: $member->holder_set_id,
             horde_set_member_id: $member->id,
             policy: $att->value_policy,
-            json_path: $att->read_json_path
+            json_path: $att->read_json_path,
+            read_nearest: true
 
         )
             ->orderBy('id','desc')
@@ -259,7 +256,6 @@ class ElementValue extends Model
                 //try to get default value if not static, because we would already have that value, if set, if it were static
                 $vally = static::buildElementValue(
                     horde_type_id: $type->id,
-                    horde_originating_type_id: $originating_type? $originating_type->id: $type->id,
                     horde_attribute_id: $att->id,
                     horde_element_id: $member->member_element_id,
                     horde_set_id: $member->holder_set_id,

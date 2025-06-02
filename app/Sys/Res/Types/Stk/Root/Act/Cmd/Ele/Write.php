@@ -122,7 +122,8 @@ class Write extends Act\Cmd\Ele
             DB::beginTransaction();
             //if there were write handlers , the value is updated now
             ElementValue::writeContextValue(
-                member: $member, att: $this->getGivenAttribute(), type: $this->getGivenElement()->element_parent_type, value: $this->getImportantValue());
+                member: $member, att: $this->getGivenAttribute(), type: $this->getGivenElement()->element_parent_type,
+                value: $this->getImportantValue());
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

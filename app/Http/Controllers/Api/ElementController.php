@@ -36,46 +36,6 @@ class ElementController extends Controller {
 
 
 
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/attribute_off',
-        operationId: 'core.elements.attribute_off',
-        description: "Element admin group turn off attributes of elements in sets given by a path ",
-        summary: 'Turn off an attribute of elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Set\ElementAttributeOff::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Element\AttributeOff::class)]
-    public function attribute_off() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/attribute_on',
-        operationId: 'core.elements.attribute_on',
-        description: "Element admin group turn on attributes of elements in sets given by a path ",
-        summary: 'Turn on an attribute of elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Set\ElementAttributeOn::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Element\AttributeOn::class)]
-    public function attribute_on() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
 
 
     #[OA\Patch(

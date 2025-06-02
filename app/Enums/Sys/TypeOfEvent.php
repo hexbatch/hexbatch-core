@@ -65,8 +65,6 @@ enum TypeOfEvent: string
     case DISPLAY_READING = 'display_reading';
     case TIME_READING = 'time_reading';
 
-    case ELEMENT_ATTRIBUTE_OFF = 'element_attribute_off';
-    case ELEMENT_ATTRIBUTE_ON = 'element_attribute_on';
     case ELEMENT_TYPE_OFF = 'element_type_turned_off';
     case ELEMENT_TYPE_ON = 'element_type_turned_on';
 
