@@ -55,11 +55,8 @@ class DesignOwnerPromote extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
 
-        $this->setGivenNamespace( $this->given_namespace_uuid);
+        $this->setGivenNamespace( $this->given_namespace_uuid)->setGivenType($this->given_type_uuid);
 
         $this->action_data->save();
         $this->action_data->refresh();

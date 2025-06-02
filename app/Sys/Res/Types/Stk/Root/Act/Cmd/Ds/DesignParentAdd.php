@@ -46,14 +46,13 @@ class DesignParentAdd extends Act\Cmd\Ds
 
     public function getDesignType(): ?ElementType
     {
-        return $this->action_data->data_type;
+        return $this->getGivenType();
     }
 
     protected function setDesignType(ElementType $type) : void {
-        $this->action_data->data_type_id = $type->id;
         $this->given_type_uuid = $type->ref_uuid;
         $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
+        $this->setGivenType($type,true);;
     }
 
     protected function addToParents(ElementType $type) : void {
@@ -204,10 +203,7 @@ class DesignParentAdd extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
-
+        $this->setGivenType($this->given_type_uuid);
         $this->action_data->collection_data->offsetSet('approval',$this->approval?->value);
         $this->action_data->save();
         $this->action_data->refresh();

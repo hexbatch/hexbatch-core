@@ -375,6 +375,17 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         return $this->action_data->data_type;
     }
 
+    public function setGivenType(null|ElementType|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof ElementType) {
+            $this->action_data->data_type_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_type_id = ElementType::getElementType(uuid: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
     public function getGivenSet(): ?ElementSet
     {   /** @uses ActionDatum::data_set() */
         return $this->action_data->data_set;
@@ -403,7 +414,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         if ($what instanceof Element) {
             $this->action_data->data_element_id = $what->id;
         } else if ($what) {
-            $this->action_data->data_element_id = ElementType::getElementType(uuid: $what)->id;
+            $this->action_data->data_element_id = Element::getThisElement(uuid: $what)->id;
         }
         if ($b_save) {$this->action_data->save();}
         return $this;
@@ -452,7 +463,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         if ($what instanceof UserNamespace) {
             $this->action_data->data_namespace_id = $what->id;
         } else if ($what) {
-            $this->action_data->data_namespace_id = Server::getThisServer(uuid: $what)->id;
+            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $what)->id;
         } else {
             $this->action_data->data_namespace_id = null;
         }

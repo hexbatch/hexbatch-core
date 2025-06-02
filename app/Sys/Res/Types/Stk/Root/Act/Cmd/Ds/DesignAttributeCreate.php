@@ -68,12 +68,13 @@ class DesignAttributeCreate extends Act\Cmd\Ds
     }
 
     const array ACTIVE_DATA_KEYS = ['attribute_name','owner_type_uuid','parent_attribute_uuid',
-        'design_attribute_uuid','location_uuid','is_final','is_abstract','uuid','unset_parent',
+        'design_attribute_uuid','location_uuid','is_final','is_abstract','uuid','given_attribute_uuid','unset_parent',
         'read_json_path','validate_json_path','default_value'];
 
     protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
 
     public function __construct(
+        protected ?string                  $given_attribute_uuid = null, //for creating and assigning a uuid
         protected ?string                  $uuid = null, //for editing
         protected bool                     $unset_parent = false,  //for editing
         protected ?string                  $attribute_name = null,
@@ -83,7 +84,6 @@ class DesignAttributeCreate extends Act\Cmd\Ds
         protected ?string                  $location_uuid = null,
         protected ?bool                     $is_final = null,
         protected ?bool                     $is_abstract = null,
-        protected ?bool                     $is_public_domain = null,
         protected ?string                     $read_json_path = null,
         protected ?string                     $validate_json_path = null,
         protected array                     $default_value = [],
@@ -132,11 +132,9 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->owner_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->owner_type_uuid)->id;
-        }
 
-        $this->setGivenAttribute($this->uuid);
+
+        $this->setGivenAttribute($this->given_attribute_uuid)->setGivenType($this->owner_type_uuid);
 
 
         if ($this->parent_attribute_uuid) {
@@ -207,7 +205,14 @@ class DesignAttributeCreate extends Act\Cmd\Ds
         try {
             DB::beginTransaction();
             $attr = $this->getAttribute();
-            if (!$attr) { $attr = new Attribute();}
+            if (!$attr) {
+                $attr = new Attribute();
+                if ($this->uuid) {
+                    $attr->ref_uuid = $this->uuid;
+                }
+            }
+
+
 
             if ($this->attribute_name) {
                 $attr->setAttributeName($this->attribute_name);

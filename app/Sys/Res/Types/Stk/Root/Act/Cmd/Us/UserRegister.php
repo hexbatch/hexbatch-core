@@ -173,17 +173,5 @@ class UserRegister extends Act\Cmd\Us
 
     }
 
-    public function getDataSnapshot(): array
-    {
-        $what =  $this->getMyData();
-        if (isset($what['user'])) {
-            $what['user'] = new MeResponse(user: $what['user']);
-        }
-
-
-        return $what;
-    }
-
-
 }
 

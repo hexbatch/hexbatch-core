@@ -89,13 +89,12 @@ class NamespaceCreate extends Act\Cmd\Ns
     }
 
     public function getBaseType(): ?ElementType
-    {   /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
+    {
+        return $this->getGivenType();
     }
 
     protected function changeBaseType(ElementType $type) : void {
-        $this->action_data->data_type_id = $type->id;
-        $this->action_data->save();
+        $this->setGivenType($type,true);
     }
 
     public function getGeneratedPublicElement(): ?Element

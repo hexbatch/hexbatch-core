@@ -59,14 +59,13 @@ class TypePublish extends Act\Cmd\Ty
 
     public function getPublishingType(): ?ElementType
     {
-        return $this->action_data->data_type;
+        return $this->getGivenType();
     }
 
     protected function setPublishingType(ElementType $type) : void {
-        $this->action_data->data_type_id = $type->id;
         $this->given_type_uuid = $type->ref_uuid;
         $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
+        $this->setGivenType($type,true);
     }
 
 
@@ -257,9 +256,7 @@ class TypePublish extends Act\Cmd\Ty
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
+        $this->setGivenType($this->given_type_uuid);
         $this->action_data->collection_data->offsetSet('publishing_status',$this->publishing_status->value);
         $this->action_data->save();
         $this->action_data->refresh();

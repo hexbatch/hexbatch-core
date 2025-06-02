@@ -86,7 +86,6 @@ enum TypeOfAction: string
     case CMD_DESIGN_TIME_DESTROY = 'cmd_design_time_destroy';
 
     case CMD_DESIGN_ATTRIBUTE_CREATE = 'cmd_design_attribute_create';
-    case CMD_DESIGN_ATTRIBUTE_PROMOTE = 'cmd_design_attribute_promote';
     case CMD_DESIGN_ATTRIBUTE_DESTROY = 'cmd_design_attribute_remove';
     case CMD_DESIGN_ATTRIBUTE_EDIT = 'cmd_design_attribute_edit';
     case CMD_DESIGN_LISTENER_CREATE = 'cmd_design_listener_create';

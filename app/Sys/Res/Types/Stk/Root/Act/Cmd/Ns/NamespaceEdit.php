@@ -93,15 +93,13 @@ class NamespaceEdit extends Act\Cmd\Ns
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
 
-        $this->setGivenNamespace( $this->given_namespace_uuid)->setGivenServer($this->given_server_uuid);
+        $this->setGivenNamespace( $this->given_namespace_uuid)
+            ->setGivenServer($this->given_server_uuid)
+            ->setGivenType($this->given_type_uuid)
+            ->setGivenSet($this->given_home_set_uuid)
+        ;
 
 
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
-
-
-        $this->setGivenSet($this->given_home_set_uuid);
         $this->setGivenPrivateElement($this->given_private_element_uuid);
 
 

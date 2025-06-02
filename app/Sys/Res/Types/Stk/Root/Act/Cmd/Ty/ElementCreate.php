@@ -77,15 +77,14 @@ class ElementCreate extends Act\Cmd\Ele
     }
 
     protected function setTemplateType(ElementType $type) : void {
-        $this->action_data->data_type_id = $type->id;
         $this->given_type_uuid = $type->ref_uuid;
         $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
+        $this->setGivenType($type,true);
     }
 
     public function getTemplateType(): ?ElementType
     {
-        return $this->action_data->data_type;
+        return $this->getGivenType();
     }
 
     public function setNumberToMake(int $number_allowed) : void {
@@ -246,11 +245,8 @@ class ElementCreate extends Act\Cmd\Ele
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id =ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
-        $this->setGivenNamespace( $this->given_namespace_uuid);
 
+        $this->setGivenNamespace( $this->given_namespace_uuid)->setGivenType($this->given_type_uuid);
 
         if ($this->given_phase_uuid) {
             $this->action_data->data_phase_id = Phase::getThisPhase(uuid: $this->given_phase_uuid)->id;

@@ -3,7 +3,8 @@
 namespace App\Sys\Res\Atr;
 
 
-use App\Enums\Types\TypeOfApproval;
+use App\Enums\Attributes\TypeOfElementValuePolicy;
+use App\Enums\Attributes\TypeOfServerAccess;
 use App\Exceptions\HexbatchInitException;
 use App\Models\Attribute;
 use App\Models\UserNamespace;
@@ -13,7 +14,7 @@ use App\Sys\Res\DocumentTrait;
 use App\Sys\Res\IDocument;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\ISystemType;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributePromote;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignAttributeCreate;
 
 
 abstract class BaseAttribute implements ISystemAttribute, IDocument
@@ -118,14 +119,18 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
                $parent_uuid = static::getClassParentSystemAttribute()::getDictionaryObject()->getAttributeObject()?->getUuid();
            }
 
-           $creator = new DesignAttributePromote(
+           $creator = new DesignAttributeCreate(
+               uuid: static::getClassUuid(),
                attribute_name: $this->getISystemAttribute()->getAttributeName(),
                owner_type_uuid: static::getClassOwningSystemType()::getDictionaryObject()->getTypeObject()->getUuid(),
-               parent_attribute_uuid: $parent_uuid, is_final: $this->getISystemAttribute()::isFinal(),
+               parent_attribute_uuid: $parent_uuid,
+               is_final: $this->getISystemAttribute()::isFinal(),
                is_abstract: static::IS_ABSTRACT,
-               attribute_approval: TypeOfApproval::PUBLISHING_APPROVED,
-               uuid: static::getClassUuid(),
-               is_system: $this->getISystemAttribute()::isSystem(), send_event: false
+               access: TypeOfServerAccess::IS_PUBLIC_DOMAIN,
+
+               value_policy: TypeOfElementValuePolicy::PER_CHILD,
+               is_system: true,
+               send_event: false
            );
            $creator->runAction();
 

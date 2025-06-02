@@ -51,12 +51,11 @@ class DesignCreate extends Act\Cmd\Ds
 
 
     const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final',
-        'given_type_uuid','time_uuid'];
+        'time_uuid'];
 
 
     public function __construct(
         protected ?string             $type_name =null,
-        protected ?string                $given_type_uuid = null,
         protected ?string                $owner_namespace_uuid = null,
         protected ?string                $given_server_uuid = null,
         protected ?string                $time_uuid = null,
@@ -106,9 +105,6 @@ class DesignCreate extends Act\Cmd\Ds
             $this->setGivenNamespace( $this->getOwningNamespace());
         }
 
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
 
         $this->action_data->collection_data->offsetSet('access',$this->access?->value);
         $this->action_data->save();
@@ -179,7 +175,7 @@ class DesignCreate extends Act\Cmd\Ds
                 $access->save();
             }
 
-            $this->action_data->data_type_id = $type->id;
+            $this->setGivenType($type,true);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
