@@ -8,24 +8,16 @@ First update to master in some time, combines about 300 commits from the last ye
 The project has totally changed, a major rewrite. This is a release of work in progress
 
 # Branch plans
+[SetMemberRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetMemberRemove.php)
 
-* Make user create/edit design attributes, try it out in api
-* figure out default attribute values, or not, and if we are using json path or not at this stage, or later
-   * in many cases the attribute value is not a constant, but from the read event, 
-     so the element values may not be usable here, the value can just be null. 
-   * the element values is only for static values
-* Implement the element values, when element is created, fill out the table per attribute
-* when an element is added to a set, do not a row until element is updated in the set, 
-* and then only if the attribute has a policy of values per set or child. 
-* when the element is removed from the set, remove set specific rows
-* fill out 
+[SetDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetDestroy.php)
+[SetEmpty.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetEmpty.php)
 
 [ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementChangeOwner.php)
 [ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php)
-[ElementEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementEdit.php)
 
-[LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php)
-[LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php)
+[LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php) draft
+[LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php) draft
 
 
 [TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php) draft

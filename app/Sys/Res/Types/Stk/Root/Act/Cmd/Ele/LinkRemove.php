@@ -7,7 +7,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
-class LinkRemove extends Act\Cmd\Ele
+class LinkRemove extends LinkAdd
 {
     const UUID = 'c0f2f5b9-3030-4e60-9bd0-742299a6b83b';
     const ACTION_NAME = TypeOfAction::CMD_LINK_REMOVE;
@@ -23,6 +23,10 @@ class LinkRemove extends Act\Cmd\Ele
     const EVENT_CLASSES = [
         Evt\Server\LinkDestroyed::class
     ];
+
+    const EVENT_CLASS = Evt\Server\LinkDestroyed::class;
+
+    const bool IS_ADDING = false;
 
 }
 

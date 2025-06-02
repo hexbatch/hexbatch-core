@@ -15,6 +15,8 @@ use App\Models\ElementTypeSetVisibility;
 
 use App\Models\UserNamespace;
 use App\OpenApi\Elements\ElementResponse;
+use App\OpenApi\Set\SetResponse;
+use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -148,8 +150,7 @@ class TypeOff extends Act\Cmd\Ele
         return [
             'element'=>$this->getGivenElement(),
             'set'=>$this->getGivenSet(),
-            'attribute'=>$this->getGivenAttribute(),
-            'value'=>$this->getImportantValue()
+            'type'=>$this->getGivenType()
         ];
     }
 
@@ -161,9 +162,14 @@ class TypeOff extends Act\Cmd\Ele
             $ret['element'] = new ElementResponse(given_element:  $what['element']);
         }
 
-        if (isset($what['value'])) {
-            $ret['value'] = $what['value'];
+        if (isset($what['set'])) {
+            $ret['set'] = new SetResponse(given_set:  $what['set']);
         }
+
+        if (isset($what['type'])) {
+            $ret['type'] = new TypeResponse(given_type:  $what['type']);
+        }
+
         return $ret;
     }
 
@@ -185,7 +191,7 @@ class TypeOff extends Act\Cmd\Ele
     public function getChildrenTree(): ?Tree
     {
 
-        if ($this->send_event && $this->getGivenSet() && $this->getGivenAttribute() && $this->getGivenElement()) {
+        if ($this->send_event && $this->getGivenSet() && $this->getGivenType() && $this->getGivenElement()) {
 
             $nodes = [];
             $events = static::getEventClass()::makeEventActions(
@@ -225,7 +231,7 @@ class TypeOff extends Act\Cmd\Ele
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
             else if($child->isActionSuccess()) {
-                $this->setImportantValue($child->getImportantValue() )->setFlag(TypeOfFlag::CAN_WRITE,true);
+                $this->setFlag(TypeOfFlag::CAN_WRITE,true);
             }
         }
 
