@@ -8,6 +8,8 @@ use App\Models\Element;
 use App\Models\Phase;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Bounds\ScheduleResponse;
+use App\OpenApi\Elements\ElementResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 
@@ -96,13 +98,21 @@ class ElementEdit extends Act\Cmd\Ele
         return ['element'=>$this->getEditedElement(),'changed_phase'=>$this->getChangedPhase()];
     }
 
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['element'])) {
+            $ret['element'] = new ElementResponse(given_element:  $what['element']);
+        }
+        return $ret;
+    }
+
 
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_element_uuid) {
-            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
-        }
+        $this->setGivenElement($this->given_element_uuid);
 
         if ($this->change_phase_uuid) {
             $this->action_data->data_phase_id = Phase::getThisPhase(uuid: $this->change_phase_uuid)->id;

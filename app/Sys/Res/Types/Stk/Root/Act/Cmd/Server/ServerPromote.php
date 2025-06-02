@@ -10,6 +10,8 @@ use App\Models\ElementType;
 use App\Models\Server;
 use App\Models\UserNamespace;
 
+use App\OpenApi\Phase\PhaseResponse;
+use App\OpenApi\Servers\ServerResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 use Illuminate\Support\Carbon;
@@ -38,22 +40,10 @@ class ServerPromote extends Act\Cmd\Server
     ];
 
 
-    public function getGivenType(): ?ElementType
-    {
-        /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
 
     public function getCreatedServer(): Server
     {
-        /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
-
-    public function getGivenNamespace(): ?UserNamespace
-    {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
+       return $this->getGivenServer();
     }
 
 
@@ -99,9 +89,7 @@ class ServerPromote extends Act\Cmd\Server
         if ($this->given_type_uuid) {
             $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
         }
-        if ($this->given_namespace_uuid) {
-            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
-        }
+        $this->setGivenNamespace( $this->given_namespace_uuid);
 
         $this->action_data->collection_data->offsetSet('server_status',$this->server_status->value);
         $this->action_data->save();
@@ -157,8 +145,7 @@ class ServerPromote extends Act\Cmd\Server
 
 
             $server->save();
-            $this->action_data->data_server_id = $server->id;
-            $this->action_data->save();
+            $this->setGivenServer($server,true);
             $this->action_data->refresh();
             if ($this->send_event) {
                 $this->post_events_to_send = Evt\Elsewhere\ServerRegistered::makeEventActions(
@@ -176,6 +163,17 @@ class ServerPromote extends Act\Cmd\Server
 
     protected function getMyData() :array {
         return ['server'=>$this->getCreatedServer(),'given_namespace'=>$this->getGivenNamespace(),'given_type'=>$this->getGivenType()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['server'])) {
+            $ret['server'] = new ServerResponse(given_server:  $what['server']);
+        }
+
+        return $ret;
     }
 
 }

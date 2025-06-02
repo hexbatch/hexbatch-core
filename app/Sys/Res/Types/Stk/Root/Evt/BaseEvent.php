@@ -50,7 +50,9 @@ class BaseEvent extends Event implements IEvent
                                             ?Attribute $attribute_context = null,
                                             ?ElementSet $set_context = null,
                                      ?Element        $element_context = null,
-                                     ?Server         $elsewhere_context = null,?Phase $phase_context = null
+                                     ?Server         $elsewhere_context = null,
+                                            ?Phase $phase_context = null,
+                                            mixed $important_value = null
 
     ) : array
     {

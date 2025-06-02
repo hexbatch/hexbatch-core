@@ -36,8 +36,8 @@ The project has totally changed, a major rewrite. This is a release of work in p
 [TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php)
 [TypeOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOn.php)
 
-[Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php)
-[Write.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Write.php)
+[Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php) draft
+[Write.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Write.php) draft
 
 
 

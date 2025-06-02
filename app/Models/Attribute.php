@@ -46,7 +46,6 @@ use Illuminate\Validation\ValidationException;
  * @property int attribute_shape_id
  * @property bool is_system
  * @property bool is_final_attribute
- * @property bool is_public_domain
  * @property bool is_abstract
  * @property TypeOfServerAccess server_access_type
  * @property string ref_uuid
@@ -65,6 +64,7 @@ use Illuminate\Validation\ValidationException;
  * @property int updated_at_ts
  *
  * @property Attribute attribute_parent
+ * @property Attribute attribute_design
  * @property ElementType type_owner
  *
  * @property TimeBound attribute_time_bound
@@ -98,7 +98,6 @@ class Attribute extends Model implements IAttribute,ISystemModel
      * @var array<string, string>
      */
     protected $casts = [
-        'is_public_domain' => 'boolean',
         'server_access_type' => TypeOfServerAccess::class,
         'value_policy' => TypeOfElementValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,
@@ -131,7 +130,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
         return $this->hasOne(ElementValue::class,'horde_attribute_id')
             ->where('horde_type_id',$this->owner_element_type_id)
             ->where('horde_originating_type_id',$this->owner_element_type_id)
-            ->whereNull('element_set_member_id');
+            ->whereNull('horde_set_member_id');
     }
 
 
@@ -141,6 +140,10 @@ class Attribute extends Model implements IAttribute,ISystemModel
     public function attribute_shape_bound() : BelongsTo {
         return $this->belongsTo(LocationBound::class,'attribute_location_bound_id')
             ->where('location_type',TypeOfLocation::SHAPE);
+    }
+
+    public function attribute_design() : BelongsTo {
+        return $this->belongsTo(Attribute::class,'design_attribute_id');
     }
 
     const ATTRIBUTE_FAMILY_SEPERATOR = '\\';
@@ -477,6 +480,20 @@ class Attribute extends Model implements IAttribute,ISystemModel
         }
     }
 
+    public function checkValidation(?array $data)  {
+        if ($data && $this->validate_json_path) {
+            $b_ok_val = DB::selectOne("SELECT jsonb_path_exists(:jsonb_data, :json_path) as da_validation",
+                ['jsonb_data'=>$data,'json_path'=>$this->validate_json_path])->da_validation;
+
+            if (!$b_ok_val) {
+                throw new HexbatchNotPossibleException(
+                    __('attribute_validation_failed',['ref'=>$this->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            }
+        }
+    }
+
     public function setDefaultValue(array $default_value) : void
     {
         //must pass write validation and return something in the read
@@ -509,6 +526,10 @@ class Attribute extends Model implements IAttribute,ISystemModel
             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
             RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
 
+    }
+
+    public function isPublicDomain() {
+        return $this->server_access_type === TypeOfServerAccess::IS_PUBLIC_DOMAIN;
     }
 
 

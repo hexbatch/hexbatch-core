@@ -9,6 +9,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
+use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 
@@ -58,9 +59,8 @@ class DesignOwnerPromote extends Act\Cmd\Ds
             $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
         }
 
-        if ($this->given_namespace_uuid) {
-            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
-        }
+        $this->setGivenNamespace( $this->given_namespace_uuid);
+
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
@@ -98,6 +98,16 @@ class DesignOwnerPromote extends Act\Cmd\Ds
 
     protected function getMyData() :array {
         return ['type'=>$this->getGivenType(),'namespace'=>$this->getGivenNamespace()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['type'])) {
+            $ret['type'] = new TypeResponse(given_type: $what['type']);
+        }
+        return $ret;
     }
 
 }

@@ -11,6 +11,7 @@ use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
 
+use App\OpenApi\UserNamespaces\UserNamespaceResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 
@@ -30,29 +31,17 @@ class NamespaceEdit extends Act\Cmd\Ns
 
     public function getEditedNamespace(): ?UserNamespace
     {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
+        return $this->getGivenNamespace();
     }
 
-    public function getGivenServer(): ?Server
-    {   /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
 
     public function getGivenUser(): ?User
     {   /** @uses ActionDatum::data_user() */
         return $this->action_data->data_user;
     }
 
-    public function getGivenSet(): ?ElementSet
-    {   /** @uses ActionDatum::data_set() */
-        return $this->action_data->data_set;
-    }
 
-    public function getGivenType(): ?ElementType
-    {   /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
+
 
     public function getGivenPublicElement(): ?Element
     {   /** @uses ActionDatum::data_second_element() */
@@ -60,8 +49,13 @@ class NamespaceEdit extends Act\Cmd\Ns
     }
 
     public function getGivenPrivateElement(): ?Element
-    {   /** @uses ActionDatum::data_element() */
-        return $this->action_data->data_element;
+    {
+        return $this->getGivenElement();
+    }
+
+    public function setGivenPrivateElement(null|Element|string $el)
+    {
+        return $this->setGivenElement($el,true);
     }
 
 
@@ -99,27 +93,17 @@ class NamespaceEdit extends Act\Cmd\Ns
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
 
-        if ($this->given_namespace_uuid) {
-            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
-        }
-
-
-        if ($this->given_server_uuid) {
-            $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
-        }
+        $this->setGivenNamespace( $this->given_namespace_uuid)->setGivenServer($this->given_server_uuid);
 
 
         if ($this->given_type_uuid) {
             $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
         }
 
-        if ($this->given_home_set_uuid) {
-            $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_home_set_uuid)->id;
-        }
 
-        if ($this->given_private_element_uuid) {
-            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_private_element_uuid)->id;
-        }
+        $this->setGivenSet($this->given_home_set_uuid);
+        $this->setGivenPrivateElement($this->given_private_element_uuid);
+
 
         if ($this->given_public_element_uuid) {
             $this->action_data->data_second_element_id = Element::getThisElement(uuid: $this->given_public_element_uuid)->id;
@@ -196,6 +180,17 @@ class NamespaceEdit extends Act\Cmd\Ns
 
     protected function getMyData() :array {
         return ['namespace'=>$this->getEditedNamespace()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['namespace'])) {
+            $ret['namespace'] = new UserNamespaceResponse(namespace:  $what['namespace']);
+        }
+
+        return $ret;
     }
 
 }

@@ -36,6 +36,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property UserNamespace element_namespace
  * @property ElementType element_parent_type
+ * @property Phase element_phase
  */
 class Element extends Model implements ISystemModel
 {
@@ -76,6 +77,10 @@ class Element extends Model implements ISystemModel
     }
     public function element_parent_type() : BelongsTo {
         return $this->belongsTo(ElementType::class,'element_parent_type_id');
+    }
+
+    public function element_phase() : BelongsTo {
+        return $this->belongsTo(Phase::class,'element_phase_id');
     }
 
 
@@ -175,12 +180,9 @@ class Element extends Model implements ISystemModel
     }
 
     public function getName() :string {
-        return 'Element '.$this->element_parent_type->getName();
+        return $this->ref_uuid.' from '.$this->element_parent_type->getName();
     }
 
-    public function getValueBySet(?ElementSet $set) : ?ElementValue {
-        return ElementSetMember::buildSetMember(set_id: $set->getSetObject()->id, element_id: $this->id)->first();
-    }
 
 
     public function getUuid(): string{

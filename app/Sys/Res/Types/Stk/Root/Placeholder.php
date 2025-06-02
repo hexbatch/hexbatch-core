@@ -12,7 +12,6 @@ class Placeholder extends BaseType
     const UUID = '4d1910aa-c16f-4fca-b8c0-e84094d2d76a';
     const TYPE_NAME = 'placeholder';
 
-    const bool IS_PUBLIC_DOMAIN = false;
 
     const ATTRIBUTE_CLASSES = [
         PlaceholderAttribute::class

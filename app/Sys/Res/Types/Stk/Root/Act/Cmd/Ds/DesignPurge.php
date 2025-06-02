@@ -10,6 +10,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
+use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 
@@ -86,10 +87,21 @@ class DesignPurge extends Act\Cmd\Ds
         }
 
     }
-    //todo make system types public domain except some
+
 
     protected function getMyData() :array {
-        return ['attribute'=>$this->getAttribute()];
+        return ['type'=>$this->getGivenType()];
+    }
+
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['type'])) {
+            $ret['type'] = new TypeResponse(given_type: $what['type'],parent_levels: 1);
+        }
+        return $ret;
     }
 
 

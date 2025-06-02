@@ -51,14 +51,33 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-
-            $table->foreignId('element_set_member_id')
+            $table->foreignId('horde_element_id')
                 ->nullable()->default(null)
-                ->comment("The element/set these values are about")
+                ->comment("The value policy per element, the element these values are about")
+                ->index()
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('horde_set_id')
+                ->nullable()->default(null)
+                ->comment("The value policy per set, the set these values are about")
+                ->index()
+                ->constrained('elements')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('horde_set_member_id')
+                ->nullable()->default(null)
+                ->comment("When value policy is allowing child sets, the element per set these values are about")
                 ->index()
                 ->constrained('element_set_members')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
+
+
+
 
 
 
@@ -103,7 +122,7 @@ return new class extends Migration
         //nulls need to be included in the unique condition here to set static (not belonging to a set) values
         DB::statement(/** @lang text */
             "CREATE UNIQUE INDEX udx_type_org_attr_member ON element_values
-            (horde_type_id,horde_originating_type_id,horde_attribute_id,element_set_member_id) NULLS NOT DISTINCT;");
+            (horde_type_id,horde_originating_type_id,horde_attribute_id,horde_element_id,horde_set_id,horde_set_member_id) NULLS NOT DISTINCT;");
 
 
     }

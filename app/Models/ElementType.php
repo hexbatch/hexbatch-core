@@ -37,7 +37,6 @@ use Illuminate\Validation\ValidationException;
  * @property int type_handle_element_id
  * @property bool is_system
  * @property bool is_final_type
- * @property bool is_public_domain
  * @property string ref_uuid
  * @property string sum_shape_geom
  * @property string sum_map_geom
@@ -48,7 +47,7 @@ use Illuminate\Validation\ValidationException;
  *
  * @property UserNamespace owner_namespace
  * @property Attribute[] type_attributes
- * @property ElementType[] type_parents
+ * @property ElementTypeParent[] type_parents
  * @property ElementTypeServerLevel[] type_server_levels
  * @property TimeBound type_time
  *
@@ -85,7 +84,6 @@ class ElementType extends Model implements IType,ISystemModel
      * @var array<string, string>
      */
     protected $casts = [
-        'is_public_domain' => 'boolean',
         'lifecycle'=> TypeOfLifecycle::class
     ];
 
@@ -308,15 +306,72 @@ class ElementType extends Model implements IType,ISystemModel
         return false;
     }
 
-    public function checkCurrentEditAbility() :void {
-        if (!$this->owner_namespace->isUserAdmin(Utilities::getCurrentNamespace())) {
 
-            throw new HexbatchNotFound(
-                __('msg.type_only_admin_can_edit',['ref'=>$this->getName(),'ns'=>$this->owner_namespace->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::TYPE_CANNOT_EDIT
-            );
+    public function isPublicDomain() : bool {
+        $atts = $this->getAllAttributes();
+        if (count($atts) === 0) {return false;}
+
+        foreach ($atts as $att) {
+            if (!$att->isPublicDomain()) {return false;}
         }
+        return true;
+    }
+
+    /**
+     * @return Attribute[]
+     */
+    public function getInheritedAttributes() :array  {
+        $attr_hash = [];
+        foreach ($this->type_parents as $parent) {
+            foreach ($parent->parent_type->getInheritedAttributes() as $att) {
+                if ($parent->parent_type->is_system && $att->is_abstract) {
+                    continue;
+                }
+                $attr_hash[$att->ref_uuid] = $att;
+            }
+        }
+        return array_values($attr_hash);
+    }
+
+    /**
+     * @return Attribute[]
+     */
+    public function getAllAttributes() {
+        $attr_hash = [];
+        foreach ($this->getInheritedAttributes() as $att) {
+            $attr_hash[$att->ref_uuid] = $att;
+        }
+
+        foreach ($this->type_attributes as $att) {
+            $attr_hash[$att->ref_uuid] = $att;
+        }
+
+        return array_values($attr_hash);
+    }
+
+    /**
+     * @return Attribute[]
+     */
+    public function getChildlessAbstractAttributes() {
+        $all = $this->getAllAttributes();
+        $parent_hash = [];
+        foreach ( $all as $att) {
+
+            if ($att->attribute_parent) {
+                $parent_hash[$att->attribute_parent->ref_uuid] = $att->attribute_parent;
+            }
+        }
+
+        $fails = [];
+        foreach ($all as $att) {
+            if ($att->is_abstract) {
+                if (!isset($parent_hash[$att->ref_uuid])) {
+                    $fails[$att->is_abstract] = $att;
+                }
+            }
+        }
+
+        return array_values($fails);
     }
 
 
@@ -400,14 +455,14 @@ class ElementType extends Model implements IType,ISystemModel
     public function getParentUuids() : array {
         $ret = [];
         foreach ($this->type_parents as $par) {
-            $ret[] = $par->ref_uuid;
+            $ret[] = $par->parent_type->ref_uuid;
         }
         return $ret;
     }
 
     public function isParentOfThis(ElementType $type) {
         foreach ($this->type_parents as $par) {
-            if ($type->ref_uuid === $par->ref_uuid) {return true;}
+            if ($type->ref_uuid === $par->parent_type->ref_uuid) {return true;}
         }
         return false;
     }

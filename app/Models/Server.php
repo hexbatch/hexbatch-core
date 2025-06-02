@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string access_token_expires_at
  *
  * @property UserNamespace owning_namespace
+ * @property ElementType server_type
  *
  *  @property string created_at
  *  @property string updated_at
@@ -107,6 +108,10 @@ class Server extends Model implements IServer,ISystemModel
 
     public function owning_namespace() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'owning_namespace_id');
+    }
+
+    public function server_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'server_type_id');
     }
 
 

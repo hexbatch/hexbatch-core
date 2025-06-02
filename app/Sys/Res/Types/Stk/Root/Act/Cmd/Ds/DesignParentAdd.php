@@ -6,6 +6,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchFailException;
@@ -15,6 +16,7 @@ use App\Models\ElementType;
 use App\Models\ElementTypeParent;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -140,7 +142,8 @@ class DesignParentAdd extends Act\Cmd\Ds
 
             //public domain parents are automatically approved for the design
             foreach ($this->getParents() as $parent) {
-                if ($this->is_system ||$parent->is_public_domain || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())) {
+                if ($this->is_system ||$parent->isPublicDomain()
+                    || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())) {
                     ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getDesignType(),
                         approval: TypeOfApproval::DESIGN_APPROVED,check_parent_published:!$this->is_system );
                 }
@@ -175,6 +178,16 @@ class DesignParentAdd extends Act\Cmd\Ds
 
     protected function getMyData() :array {
         return ['type'=>$this->getDesignType()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['type'])) {
+            $ret['type'] = new TypeResponse(given_type: $what['type'],parent_levels: 1);
+        }
+        return $ret;
     }
 
     protected function restoreData(array $data = []) {
@@ -217,7 +230,7 @@ class DesignParentAdd extends Act\Cmd\Ds
             foreach ($this->getParents() as $parent) {
                 if (
                     !
-                    ($this->is_system || $parent->is_public_domain || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())  )
+                    ($this->is_system || $parent->isPublicDomain() || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())  )
                 )
                 {
                     $events =  Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);

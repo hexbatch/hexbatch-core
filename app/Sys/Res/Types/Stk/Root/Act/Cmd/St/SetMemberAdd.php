@@ -8,6 +8,7 @@ use App\Models\Element;
 use App\Models\ElementSet;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -189,6 +190,17 @@ class SetMemberAdd extends Act\Cmd\St
 
     protected function getMyData() :array {
         return ['set'=>$this->getSetUsed(),'elements_added'=>$this->getElementsAdded(),'elements_given'=>$this->getElementsGiven()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['set'])) {
+            $ret['set'] = new SetResponse(given_set:  $what['set'],show_elements: true);
+        }
+
+        return $ret;
     }
 
 

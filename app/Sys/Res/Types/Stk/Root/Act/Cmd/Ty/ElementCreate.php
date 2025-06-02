@@ -14,6 +14,7 @@ use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
 
+use App\OpenApi\Elements\ElementCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -66,7 +67,7 @@ class ElementCreate extends Act\Cmd\Ele
 
     public function getNamespaceUsed(): ?UserNamespace
     {
-        return $this->action_data->data_namespace;
+        return $this->getGivenNamespace();
     }
 
     public function getPhaseUsed(): ?Phase
@@ -230,6 +231,17 @@ class ElementCreate extends Act\Cmd\Ele
             'namespace_used'=>$this->getNamespaceUsed(),'phase_used'=>$this->getPhaseUsed()];
     }
 
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['created_elements'])) {
+            $ret['created_elements'] = new ElementCollectionResponse(given_elements:  $what['created_elements']);
+        }
+
+        return $ret;
+    }
+
 
 
     protected function initData(bool $b_save = true) : ActionDatum {
@@ -237,10 +249,7 @@ class ElementCreate extends Act\Cmd\Ele
         if ($this->given_type_uuid) {
             $this->action_data->data_type_id =ElementType::getElementType(uuid: $this->given_type_uuid)->id;
         }
-
-        if ($this->given_namespace_uuid) {
-            $this->action_data->data_namespace_id =UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
-        }
+        $this->setGivenNamespace( $this->given_namespace_uuid);
 
 
         if ($this->given_phase_uuid) {
@@ -296,13 +305,15 @@ class ElementCreate extends Act\Cmd\Ele
 
             else if($child->isActionSuccess()) {
                 if ($child->getAskedAboutType() === $this->getTemplateType()) {
-                    if ($this->getTemplateType()->isParentOfThis($child->getParentType()))
-                    if ($child instanceof Evt\Type\ElementCreationBatch) {
-                        $number_allowed = $child->getNumberAllowed();
-                        if (null !== $number_allowed) {
-                            $this->setNumberToMake($number_allowed);
+                    if ($this->getTemplateType()->isParentOfThis($child->getParentType())) {
+                        if ($child instanceof Evt\Type\ElementCreationBatch) {
+                            $number_allowed = $child->getNumberAllowed();
+                            if (null !== $number_allowed) {
+                                $this->setNumberToMake($number_allowed);
+                            }
                         }
                     }
+
                 }
             }
         }

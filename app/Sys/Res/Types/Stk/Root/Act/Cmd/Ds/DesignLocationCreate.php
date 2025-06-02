@@ -10,6 +10,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
+use App\OpenApi\Bounds\LocationResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Collection;
@@ -155,6 +156,16 @@ class DesignLocationCreate extends Act\Cmd\Ds
 
     protected function getMyData() :array {
         return ['bound'=>$this->getGivenLocationBound()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['bound'])) {
+            $ret['bound'] = new LocationResponse(given_location: $what['bound']);
+        }
+        return $ret;
     }
 
 }

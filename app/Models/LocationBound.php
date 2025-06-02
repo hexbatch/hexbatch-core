@@ -454,4 +454,14 @@ class LocationBound extends Model
         return false;
     }
 
+    public function getBoundingBox(): ?array
+    {
+        if ($this->location_type === TypeOfLocation::MAP) {
+            return Utilities::maybeDecodeJson($this->map_bounding_box);
+        }
+
+        return Utilities::maybeDecodeJson($this->shape_bounding_box);
+
+    }
+
 }

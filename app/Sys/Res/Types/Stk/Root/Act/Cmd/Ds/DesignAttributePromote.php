@@ -10,6 +10,7 @@ use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
+use App\OpenApi\Attributes\AttributeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 
@@ -32,7 +33,7 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
 
     const array ACTIVE_DATA_KEYS = ['attribute_name','owner_type_uuid','parent_attribute_uuid',
-        'design_attribute_uuid','is_final','is_abstract','is_public_domain',
+        'design_attribute_uuid','is_final','is_abstract',
         'uuid'];
 
 
@@ -43,7 +44,6 @@ class DesignAttributePromote extends Act\Cmd\Ds
         protected ?string                $design_attribute_uuid = null,
         protected bool                $is_final = false,
         protected bool                $is_abstract = false,
-        protected ?bool                $is_public_domain = true,
         protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL,
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
@@ -56,10 +56,9 @@ class DesignAttributePromote extends Act\Cmd\Ds
         protected array          $tags = []
     )
     {
-        if ($this->is_public_domain === null) { $this->is_public_domain = true;}
+
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
             b_type_init: $this->b_type_init, is_system: $this->is_system,
-            is_public_domain: $this->is_public_domain,
             send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
@@ -134,12 +133,10 @@ class DesignAttributePromote extends Act\Cmd\Ds
             $attr->is_system = $this->is_system ;
             $attr->is_final_attribute = $this->is_final ;
             $attr->is_abstract = $this->is_abstract ;
-            $attr->is_public_domain = $this->is_public_domain ;
 
             $attr->save();
 
-
-            $this->action_data->data_attribute_id = $attr->id;
+            $this->setGivenAttribute($attr,true);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -152,6 +149,16 @@ class DesignAttributePromote extends Act\Cmd\Ds
 
     protected function getMyData() :array {
         return ['attribute'=>$this->getAttribute(),'parent'=>$this->getParentAttribute(),'design'=>$this->getDesignAttribute()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['attribute'])) {
+            $ret['attribute'] = new AttributeResponse(given_attribute: $what['attribute']);
+        }
+        return $ret;
     }
 
 }

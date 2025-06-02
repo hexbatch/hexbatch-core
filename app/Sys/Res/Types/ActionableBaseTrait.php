@@ -270,7 +270,7 @@ trait ActionableBaseTrait
         $this->restoreCollectionKeys();
     }
 
-    protected function getMyData() :array { return []; }
+
 
     public function getActionResult(): array
     {

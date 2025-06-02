@@ -9,7 +9,6 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
-use App\OpenApi\UserNamespaces\UserNamespaceResponse;
 use App\OpenApi\Users\MeResponse;
 use App\OpenApi\Users\Registration\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -42,14 +41,12 @@ class UserRegister extends Api\UserApi
 
 
     protected function setCreatedNamespace(UserNamespace $namespace) : void {
-        $this->action_data->data_namespace_id = $namespace->id;
-        $this->action_data->save();
+        $this->setGivenNamespace($namespace);
     }
 
     public function getCreatedNamespace(): ?UserNamespace
     {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
+        return $this->getGivenNamespace();
     }
 
 
@@ -70,6 +67,17 @@ class UserRegister extends Api\UserApi
 
     protected function getMyData() :array {
         return ['user'=>$this->getCreatedUser(),'namespace'=>$this->getCreatedNamespace()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['user'])) {
+            $ret['user'] = new MeResponse(user:  $what['user'],show_namespace: true);
+        }
+
+        return $ret;
     }
 
     public function __construct(
@@ -216,19 +224,6 @@ class UserRegister extends Api\UserApi
         }
     }
 
-    public function getDataSnapshot(): array
-    {
-        $what =  $this->getMyData();
-        if (isset($what['user'])) {
-            $what['user'] = new MeResponse(user: $what['user']);
-        }
-
-        if (isset($what['namespace'])) {
-            $what['namespace'] = new UserNamespaceResponse(namespace: $what['namespace']);
-        }
-
-        return $what;
-    }
 
 }
 

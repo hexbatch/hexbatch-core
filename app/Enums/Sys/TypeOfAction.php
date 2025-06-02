@@ -108,7 +108,6 @@ enum TypeOfAction: string
 
 
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
-    case CMD_TYPE_PUBLISH_PROMOTE = 'cmd_type_publish_promote';
     case CMD_TYPE_SUSPEND = 'cmd_type_suspend';
     case CMD_TYPE_RETIRE = 'cmd_type_retire';
     case CMD_TYPE_DESTROY = 'cmd_type_destroy';

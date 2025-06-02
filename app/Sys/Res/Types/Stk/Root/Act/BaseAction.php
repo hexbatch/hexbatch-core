@@ -3,8 +3,12 @@
 namespace App\Sys\Res\Types\Stk\Root\Act;
 
 use App\Enums\Sys\TypeOfAction;
+use App\Enums\Types\TypeOfApproval;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
+use App\Models\Attribute;
+use App\Models\Element;
+use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\Server;
 use App\Models\UserNamespace;
@@ -19,7 +23,6 @@ class BaseAction extends BaseType implements IAction
     const UUID = 'ebdcbddd-c746-44dc-84b0-cf1f8f174b2b';
     const ACTION_NAME = TypeOfAction::BASE_ACTION;
 
-    const bool IS_PUBLIC_DOMAIN = false;
 
     public function __construct(
         protected ?ActionDatum   $action_data = null,
@@ -27,7 +30,6 @@ class BaseAction extends BaseType implements IAction
         protected ?UserNamespace $owner_namespace = null,
         protected bool           $b_type_init = false,
         protected bool           $is_system = false,
-        protected ?bool          $is_public_domain = null,
         protected bool           $send_event = true,
         protected ?bool           $is_async = null,
         protected array          $tags = []
@@ -36,7 +38,7 @@ class BaseAction extends BaseType implements IAction
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,
             owner_namespace: $this->owner_namespace, b_type_init: $this->b_type_init,
-            is_system: $this->is_system,is_public_domain: $this->is_public_domain,
+            is_system: $this->is_system,
             send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
         Utilities::ignoreVar(static::ACTION_NAME,static::getHexbatchClassName());
     }
@@ -62,27 +64,7 @@ class BaseAction extends BaseType implements IAction
 
 
 
-    public function getGivenType(): ?ElementType
-    {   /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
 
-    public function getGivenServer(): ?Server
-    {   /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
-
-    public function getGivenNamespace(): ?UserNamespace
-    {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
-    }
-
-    public function getOwningNamespace(): ?UserNamespace
-    {
-        /** @uses ActionDatum::data_owner_namespace() */
-        return $this->action_data->data_owner_namespace;
-    }
 
 
 

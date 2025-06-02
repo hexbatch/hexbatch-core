@@ -8,6 +8,7 @@ use App\Models\ElementType;
 use App\Models\Phase;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Phase\PhaseResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Illuminate\Support\Facades\DB;
@@ -30,11 +31,7 @@ class PhaseCreate extends Act\Cmd\Ph
         Evt\Type\PhaseAdded::class,
     ];
 
-    public function getGivenType(): ElementType
-    {
-        /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
+
 
     public function getGivenEditPhase(): ?Phase
     {
@@ -81,9 +78,8 @@ class PhaseCreate extends Act\Cmd\Ph
             $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
         }
 
-        if ($this->given_edit_phase_uuid) {
-            $this->action_data->data_set_id = Phase::getThisPhase(uuid: $this->given_edit_phase_uuid)->id;
-        }
+        $this->setGivenSet($this->given_edit_phase_uuid);
+
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
@@ -137,6 +133,17 @@ class PhaseCreate extends Act\Cmd\Ph
 
     protected function getMyData() :array {
         return ['phase'=>$this->getCreatedPhase(),'given_edit_phase'=>$this->getGivenEditPhase(),'given_type'=>$this->getGivenType()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['phase'])) {
+            $ret['phase'] = new PhaseResponse(given_phase:  $what['phase']);
+        }
+
+        return $ret;
     }
 
 

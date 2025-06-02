@@ -86,7 +86,9 @@ return [
     'attribute_cannot_use_design' => 'Attribute :ref can only be used for a design for :me if you are a member of its namespace and its not retired',
     'attribute_has_invalid_default' => 'Attribute :ref was set with a default value that did not pass the validation or read json_path',
     'attribute_has_invalid_default_read' => 'Attribute :ref was set with a default value that did not pass the read json_path',
-    'attribute_has_invalid_default_validation' => 'Attribute :ref was set with a default value that did not pass the validationjson_path',
+    'attribute_has_invalid_default_validation' => 'Attribute :ref was set with a default value that did not pass the validation json_path',
+    'attribute_validation_failed' => 'Attribute :ref was set with a value that did not pass the validation',
+    'attribute_parent_is_final' => 'Attribute :ref cannot be used as a parent because it is final',
 
     'rule_not_found' => 'The rule was not found by :ref',
     'parent_rule_not_found' => 'The parent rule was not found by the uuid :ref',
@@ -142,6 +144,8 @@ return [
     'type_in_use' => 'The type :ref is in use, or has been published, so cannot be significantly changed',
     'type_must_be_published_before_making_elements' => "Type :ref needs to be published before making element",
     'type_given_zero_elements_to_make' => "Type :ref was told to make 0 elements",
+    'type_is_already_published' => "Type :ref is already published",
+    'type_has_abstract_attributes' => 'The type :ref cannot be published because it has one or more abstract attribute :issues that do not have children attribute',
 
     //elements
     'element_not_found' => 'Element not found using :ref',
@@ -153,6 +157,7 @@ return [
     'set_not_found' => 'Set not found using :ref',
     'set_not_found_by' => 'Set not found using :types : :values ',
     'set_must_have_a_defining_element' => 'Set must have a defining element',
+    'set_does_not_have_element' => 'Set :ref does not have the element :ele',
 
     //servers
     'server_not_found' => "Server not found using :ref",

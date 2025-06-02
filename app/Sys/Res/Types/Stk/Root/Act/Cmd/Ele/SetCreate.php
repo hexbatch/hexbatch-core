@@ -11,6 +11,8 @@ use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\ElementSetChild;
 use App\Models\UserNamespace;
+use App\OpenApi\Elements\ElementResponse;
+use App\OpenApi\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
@@ -48,18 +50,6 @@ class SetCreate extends Act\Cmd\St
     ];
 
 
-    public function getGivenElement(): ?Element
-    {
-        /** @uses ActionDatum::data_element() */
-        return $this->action_data->data_element;
-    }
-
-    public function setGivenElement(Element $element) : void {
-        $this->action_data->data_element_id = $element->id;
-        $this->given_element_uuid = $element->ref_uuid;
-        $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
-    }
 
     public function getGivenParent(): ?ElementSet
     {
@@ -158,17 +148,23 @@ class SetCreate extends Act\Cmd\St
         return ['element'=>$this->getGivenElement(),'given_parent'=>$this->getGivenParent(),'set'=>$this->getCreatedSet()];
     }
 
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['set'])) {
+            $ret['set'] = new SetResponse(given_set:  $what['set']);
+        }
+
+        return $ret;
+    }
+
 
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_element_uuid) {
-            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
-        }
+        $this->setGivenElement($this->given_element_uuid)->setGivenSet($this->given_parent_set_uuid);
 
-        if ($this->given_parent_set_uuid) {
-            $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_parent_set_uuid)->id;
-        }
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
@@ -188,7 +184,7 @@ class SetCreate extends Act\Cmd\St
             }
             else if($child->isActionSuccess()) {
                 if (count($child->getElementsCreated()  ) === 1) {
-                    $this->setGivenElement(element: $child->getElementsCreated()[0]);
+                    $this->setGivenElement($child->getElementsCreated()[0],true);
                 }
             }
         }

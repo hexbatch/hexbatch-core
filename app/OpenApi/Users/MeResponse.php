@@ -4,6 +4,7 @@ namespace App\OpenApi\Users;
 
 use App\Api\Common\HexbatchUuid;
 use App\Models\User;
+use App\OpenApi\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
 use Hexbatch\Things\Interfaces\ICallResponse;
 use JsonSerializable;
@@ -29,15 +30,22 @@ class MeResponse implements  JsonSerializable,ICallResponse
     #[OA\Property(title: 'Namespace uuid',type: HexbatchUuid::class)]
     public ?string $namespace_uuid = '';
 
+    #[OA\Property(title: 'Namespace',type: HexbatchUuid::class)]
+    public ?UserNamespaceResponse $namespace = null;
 
 
-    public function __construct(protected ?User $user = null)
+
+    public function __construct(protected ?User $user = null, bool $show_namespace = false)
     {
         if ($user) {
             $this->uuid = $user->ref_uuid;
             $this->username = $user->username;
-            $this->registered_at = $user->created_at? Carbon::parse($user->created_at,config('app.timezone'))->toIso8601String():null;
+            $this->registered_at = $user->created_at? Carbon::parse($user->created_at,'UTC')->timezone(config('app.timezone'))->toIso8601String():null;
             $this->namespace_uuid = $user->default_namespace?->ref_uuid;
+        }
+
+        if ($this->user && $show_namespace) {
+            $this->namespace = new UserNamespaceResponse(namespace: $this->user->default_namespace,show_homeset: true);
         }
 
     }
@@ -50,6 +58,10 @@ class MeResponse implements  JsonSerializable,ICallResponse
         $ret['username'] = $this->username;
         $ret['registered_at'] = $this->registered_at;
         $ret['namespace_uuid'] = $this->namespace_uuid;
+
+        if ($this->namespace) {
+            $ret['namespace'] = $this->namespace;
+        }
         return $ret;
     }
 

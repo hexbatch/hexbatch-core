@@ -96,6 +96,8 @@ class RefCodes {
 
     const int TYPE_CANNOT_EDIT = 7010;
     const int TYPE_NEEDS_PUBLISHING = 7100;
+    const int TYPE_ALREADY_PUBLISHED = 7101;
+    const int TYPE_CANNOT_PUBLISH_ABSTRACT = 7102;
 
     const int TYPE_PARENT_DENIED_DESIGN = 7200;
     const int TYPE_PARENT_DENIED_PUBLISHING = 7250;
@@ -106,6 +108,7 @@ class RefCodes {
 
     const int ELEMENT_NOT_FOUND =  8001;
     const int ELEMENT_BAD_SCHEMA =  8002;
+    const int ELEMENT_NOT_IN_SET =  8003;
 
     //sets start at 9000
     const int SET_NOT_FOUND =  9001;
@@ -187,12 +190,15 @@ class RefCodes {
         self::TYPE_CANNOT_INHERIT => '',
         self::TYPE_CANNOT_EDIT => '',
         self::TYPE_NEEDS_PUBLISHING => '',
+        self::TYPE_ALREADY_PUBLISHED => '',
+        self::TYPE_CANNOT_PUBLISH_ABSTRACT => '',
         self::TYPE_PARENT_DENIED_DESIGN => '',
         self::TYPE_PARENT_DENIED_PUBLISHING => '',
         self::TYPE_GIVEN_ZERO_TO_MAKE => '',
 
         self::ELEMENT_NOT_FOUND => '',
         self::ELEMENT_BAD_SCHEMA => '',
+        self::ELEMENT_NOT_IN_SET => '',
 
         self::SET_NOT_FOUND => '',
         self::SET_SCHEMA_ISSUE => '',

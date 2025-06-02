@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
 /**
@@ -28,6 +29,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property ElementSetMember[] element_members
  * @property Element defining_element
+ * @property ElementSet parent_set
+ * @property ElementSet[] children_sets
  *
  */
 class ElementSet extends Model implements ISet,ISystemModel
@@ -75,6 +78,14 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
 
     public function defining_element() : BelongsTo {
         return $this->belongsTo(Element::class,'parent_set_element_id');
+    }
+
+    public function children_sets() : HasMany {
+        return $this->hasMany(ElementSetChild::class,'parent_set_id','id');
+    }
+
+    public function parent_set() : HasOne {
+        return $this->hasOne(ElementSetChild::class,'child_set_id','id');
     }
 
     public static function buildSet(
@@ -184,10 +195,10 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         $node->member_element_id = $ele->id;
         $node->is_sticky = $is_sticky;
         $node->save();
-        return $node; //todo make code to  include the element_values and related
+        return $node;
     }
 
     public function getName(): string {
-        return 'Set from '.$this->defining_element->getName();
+        return $this->ref_uuid.' from '.$this->defining_element->getName();
     }
 }

@@ -14,7 +14,6 @@ class Server extends BaseType
 {
     const UUID = '4c1a7519-0f23-4f0a-a168-1fabcbe2c1ec';
     const TYPE_NAME = 'server';
-    const bool IS_PUBLIC_DOMAIN = false;
 
 
     const ATTRIBUTE_CLASSES = [

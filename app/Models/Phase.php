@@ -9,6 +9,7 @@ use App\Exceptions\RefCodes;
 use App\Rules\NamespaceNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -29,6 +30,9 @@ use Illuminate\Validation\ValidationException;
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * @property ElementType phase_type
+ * @property Phase edited_by_phase
  *
  */
 class Phase extends Model
@@ -56,7 +60,19 @@ class Phase extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'is_default_phase'=>'boolean',
+        'is_system'=>'boolean'
+    ];
+
+
+    public function phase_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'phase_type_id');
+    }
+
+    public function edited_by_phase() : BelongsTo {
+        return $this->belongsTo(Phase::class,'edited_by_phase_id');
+    }
 
     public static function getDefaultPhase() : ?Phase {
         return Phase::where('is_default_phase',true)->first();

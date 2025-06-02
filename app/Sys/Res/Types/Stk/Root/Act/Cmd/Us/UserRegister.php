@@ -124,6 +124,17 @@ class UserRegister extends Act\Cmd\Us
         return ['user'=>$this->getCreatedUser()];
     }
 
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['user'])) {
+            $ret['user'] = new MeResponse(user:  $what['user']);
+        }
+
+        return $ret;
+    }
+
 
     public function getChildrenTree(): ?Tree
     {

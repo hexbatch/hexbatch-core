@@ -80,8 +80,6 @@ return new class extends Migration
             $table->boolean('is_final_type')->default(false)->nullable(false)
                 ->comment('if true then cannot be added as parent');
 
-            $table->boolean('is_public_domain')->default(false)->nullable(false)
-                ->comment('if true then anyone can use without asking');
 
         });
 
@@ -174,7 +172,6 @@ return new class extends Migration
             $table->dropColumn('updated_at');
             $table->dropColumn('is_system');
             $table->dropColumn('is_final_type');
-            $table->dropColumn('is_public_domain');
             $table->dropColumn('sum_shape_geom');
             $table->dropColumn('sum_map_geom');
             $table->dropColumn('sum_shape_bounding_box');

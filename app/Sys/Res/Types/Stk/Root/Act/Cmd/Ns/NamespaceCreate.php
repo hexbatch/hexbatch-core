@@ -13,6 +13,8 @@ use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
 
+use App\OpenApi\Elements\ElementResponse;
+use App\OpenApi\UserNamespaces\UserNamespaceResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use App\Sys\Res\Types\Stk\Root\Namespace\BasePerNamespace;
@@ -68,13 +70,9 @@ class NamespaceCreate extends Act\Cmd\Ns
 
     public function getCreatedNamespace(): ?UserNamespace
     {
-        return $this->action_data->data_namespace;
+        return $this->getGivenNamespace();
     }
 
-    public function getGivenServer(): ?Server
-    {   /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
 
     public function getGivenUser(): ?User
     {   /** @uses ActionDatum::data_user() */
@@ -87,8 +85,7 @@ class NamespaceCreate extends Act\Cmd\Ns
     }
 
     protected function changeHomeSet(ElementSet $set) : void {
-        $this->action_data->data_set_id = $set->id;
-        $this->action_data->save();
+        $this->setGivenSet($set,true);
     }
 
     public function getBaseType(): ?ElementType
@@ -119,8 +116,7 @@ class NamespaceCreate extends Act\Cmd\Ns
 
     protected function changePrivateElement(Element $el): void
     {
-        $this->action_data->data_element_id = $el->id;
-        $this->action_data->save();
+        $this->setGivenElement($el,true);
     }
 
 
@@ -163,10 +159,7 @@ class NamespaceCreate extends Act\Cmd\Ns
             $this->action_data->data_user_id = User::getUser(uuid: $this->given_user_uuid)->id;
         }
 
-
-        if ($this->given_server_uuid) {
-            $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
-        }
+        $this->setGivenServer($this->given_server_uuid);
 
         $this->action_data->save();
         $this->action_data->refresh();
@@ -251,7 +244,7 @@ class NamespaceCreate extends Act\Cmd\Ns
 
 
         $public_type = new Act\Cmd\Ds\DesignCreate(type_name: $this->namespace_name.$this->getPublicTypePostfix(),
-            is_public_domain: false, access: TypeOfServerAccess::IS_PUBLIC, parent_action_data: $public_type_parent->getActionData(),
+             access: TypeOfServerAccess::IS_PUBLIC, parent_action_data: $public_type_parent->getActionData(),
             tags: ['create public type']
         );
 
@@ -272,7 +265,7 @@ class NamespaceCreate extends Act\Cmd\Ns
 
         $private_type = new Act\Cmd\Ds\DesignCreate(
             type_name: $this->namespace_name.$this->getPrivateTypePostfix(),
-            is_public_domain: false, access: TypeOfServerAccess::IS_PRIVATE, parent_action_data: $private_type_parent->getActionData(),
+             access: TypeOfServerAccess::IS_PRIVATE, parent_action_data: $private_type_parent->getActionData(),
             tags: ['create private type']
         );
 
@@ -289,7 +282,7 @@ class NamespaceCreate extends Act\Cmd\Ns
 
         $base_type = new Act\Cmd\Ds\DesignCreate(
             type_name: $this->namespace_name.$this->getBaseTypePostfix(),
-            is_public_domain: false, access: TypeOfServerAccess::IS_PROTECTED,
+             access: TypeOfServerAccess::IS_PROTECTED,
             parent_action_data: $base_type_parent->getActionData(),
             tags: ['create base type']
         );
@@ -311,7 +304,7 @@ class NamespaceCreate extends Act\Cmd\Ns
 
         $home_type = new Act\Cmd\Ds\DesignCreate(
             type_name: $this->namespace_name.$this->getHomeTypePostfix(),
-            is_public_domain: false, access: TypeOfServerAccess::IS_PRIVATE, parent_action_data: $home_type_parent->getActionData(),
+             access: TypeOfServerAccess::IS_PRIVATE, parent_action_data: $home_type_parent->getActionData(),
             tags: ['create home type']
         );
 
@@ -415,8 +408,7 @@ class NamespaceCreate extends Act\Cmd\Ns
                 public_key: $this->public_key, is_system: $this->is_system
             );
 
-
-            $this->action_data->data_namespace_id = $created_namespace->id;
+            $this->setGivenNamespace($created_namespace);
 
             if ($this->getGeneratedPrivateElement()) {
                 $this->getGeneratedPrivateElement()->element_namespace_id = $created_namespace->id;
@@ -467,6 +459,18 @@ class NamespaceCreate extends Act\Cmd\Ns
 
     protected function getMyData() :array {
         return ['namespace'=>$this->getCreatedNamespace()];
+    }
+
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['namespace'])) {
+            $ret['namespace'] = new UserNamespaceResponse(namespace:  $what['namespace']);
+        }
+
+        return $ret;
     }
 
 }

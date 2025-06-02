@@ -11,6 +11,7 @@ use App\Models\ActionDatum;
 use App\Models\Attribute;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Attributes\AttributeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 use Illuminate\Support\Facades\DB;
@@ -53,9 +54,8 @@ class DesignAttributeDestroy extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_attribute_uuid) {
-            $this->action_data->data_attribute_id = Attribute::getThisAttribute(uuid: $this->given_attribute_uuid)->id;
-        }
+        $this->setGivenAttribute($this->given_attribute_uuid);
+
         $this->action_data->save();
         $this->action_data->refresh();
         return $this->action_data;
@@ -92,7 +92,15 @@ class DesignAttributeDestroy extends Act\Cmd\Ds
         return ['attribute'=>$this->getAttribute()];
     }
 
-
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['attribute'])) {
+            $ret['attribute'] = new AttributeResponse(given_attribute: $what['attribute']);
+        }
+        return $ret;
+    }
 
 
 }

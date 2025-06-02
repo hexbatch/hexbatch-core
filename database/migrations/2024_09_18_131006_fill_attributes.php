@@ -74,8 +74,6 @@ return new class extends Migration
             $table->boolean('is_final_attribute')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
 
-            $table->boolean('is_public_domain')->default(false)->nullable(false)
-                ->comment('if true then anyone can use without asking');
 
             $table->boolean('is_abstract')->default(false)->nullable(false)
                 ->comment('if true then child must have attribute that inherits from this');
@@ -98,12 +96,11 @@ return new class extends Migration
         DB::statement("CREATE TYPE type_of_server_access AS ENUM (
             'is_private',
             'is_public',
+            'is_public_domain',
             'is_protected'
             );");
 
         DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'is_private';");
-
-
 
 
 
@@ -179,7 +176,6 @@ return new class extends Migration
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_final_attribute');
             $table->dropColumn('is_abstract');
-            $table->dropColumn('is_public_domain');
             $table->dropColumn('is_system');
             $table->dropColumn('read_json_path');
             $table->dropColumn('validate_json_path');

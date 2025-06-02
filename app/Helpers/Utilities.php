@@ -5,10 +5,12 @@ namespace App\Helpers;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
 use App\Rules\ResourceNameReq;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
+use App\Sys\Res\Servers\Stock\ThisServer;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -210,6 +212,10 @@ class Utilities {
 
     public static function getSystemNamespace() : UserNamespace {
         return UserNamespace::getThisNamespace(uuid: ThisNamespace::getClassUuid());
+    }
+
+    public static function getThisServer() : Server {
+        return Server::getThisServer(uuid: ThisServer::getClassUuid());
     }
 
     public static function getCurrentNamespace() : ?UserNamespace {

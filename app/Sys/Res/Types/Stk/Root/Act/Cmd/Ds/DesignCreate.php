@@ -15,6 +15,7 @@ use App\Models\Server;
 
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
+use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,6 @@ use Illuminate\Support\Facades\DB;
 * type_name: has to be unique in the namespace
 * time_uuid: types can have a schedule
 * is_final: cannot be a parent
-* is_public_domain: if true, anyone can include as parent or in type without asking
 * access: sets access across different servers
 
 ")]
@@ -51,7 +51,7 @@ class DesignCreate extends Act\Cmd\Ds
 
 
     const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final',
-        'given_type_uuid','time_uuid','is_public_domain'];
+        'given_type_uuid','time_uuid'];
 
 
     public function __construct(
@@ -61,7 +61,6 @@ class DesignCreate extends Act\Cmd\Ds
         protected ?string                $given_server_uuid = null,
         protected ?string                $time_uuid = null,
         protected ?bool                $is_final = null,
-        protected ?bool                $is_public_domain = null,
         protected ?TypeOfServerAccess $access = null,
         protected ?string             $uuid = null,
         protected bool                $is_system = false,
@@ -80,7 +79,7 @@ class DesignCreate extends Act\Cmd\Ds
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,
             b_type_init: $this->b_type_init,
             is_system: $this->is_system,
-            is_public_domain: $this->is_public_domain, send_event: $this->send_event, is_async: $this->is_async,  tags: $this->tags);
+            send_event: $this->send_event, is_async: $this->is_async,  tags: $this->tags);
     }
 
 
@@ -97,12 +96,14 @@ class DesignCreate extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_server_uuid) {
-            $this->action_data->data_server_id = Server::getThisServer(uuid: $this->given_server_uuid)->id;
-        }
+
+        $this->setGivenServer($this->given_server_uuid);
+
 
         if ($this->owner_namespace_uuid) {
-            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->owner_namespace_uuid)->id;
+            $this->setGivenNamespace( $this->owner_namespace_uuid);
+        } else {
+            $this->setGivenNamespace( $this->getOwningNamespace());
         }
 
         if ($this->given_type_uuid) {
@@ -163,9 +164,6 @@ class DesignCreate extends Act\Cmd\Ds
                 $type->is_final_type = $this->is_final;
             }
 
-            if ($this->is_public_domain !== null) {
-                $type->is_public_domain = $this->is_public_domain;
-            }
 
             if ($this->time_uuid) {
                 $type->type_time_bound_id = TimeBound::getThisSchedule(uuid: $this->time_uuid)->id;
@@ -173,7 +171,7 @@ class DesignCreate extends Act\Cmd\Ds
 
             $type->save();
 
-            if ($this->access && $this->given_server_uuid) {
+            if ($this->access && $this->getGivenServer()) {
                 $access = new ElementTypeServerLevel();
                 $access->server_access_type_id = $type->id;
                 $access->to_server_id = $type->imported_from_server_id;
@@ -196,6 +194,16 @@ class DesignCreate extends Act\Cmd\Ds
 
     protected function getMyData() :array {
         return ['type'=>$this->getDesignType()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['type'])) {
+            $ret['type'] = new TypeResponse(given_type: $what['type']);
+        }
+        return $ret;
     }
 
 }
