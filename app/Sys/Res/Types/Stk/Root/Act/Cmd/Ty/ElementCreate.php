@@ -2,18 +2,18 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-
 use App\Exceptions\HexbatchNothingDoneException;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Element;
-
 use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
-
 use App\OpenApi\Elements\ElementCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -22,21 +22,37 @@ use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
-/**
- * if no handler for element creation, then only the type owner members can create
- *
- * This can create one or many elements at once
- * it can access a list of ns from a child to create one element per ns. This can be any ns.
- *  if no list, then the caller will be the element owner
- *
- * Creation can be blocked by the following
- * @see Evt\Type\ElementOwnerChange,Evt\Type\ElementRecieved,Evt\Type\ElementRecievedBatch,Evt\Type\ElementOwnerChangeBatch
- *
- *
- * if more than one element created, the batch version of the handler is called instead
- *
- */
 
+#[HexbatchTitle( title: "Create elements")]
+#[HexbatchBlurb( blurb: "Create one or more elements from a type")]
+#[HexbatchDescription( description: /** @lang markdown */
+    '
+# Create elements
+
+  This can create one or many elements at once, must be from the same type.
+
+  If no handler for element creation, then only the type admin members can create
+
+
+  Creation can be blocked by the following:
+
+  By the type owners who get
+
+  * [ElementCreation.php](../../../Evt/Type/ElementCreation.php)
+
+  By the recipients who get
+
+   * [ElementOwnerChange](../../../Evt/Type/ElementOwnerChange.php)
+
+
+
+
+  After element creation the recipent gets a notice
+
+  * [ElementRecieved](../../../Evt/Type/ElementRecieved.php)
+
+
+')]
 class ElementCreate extends Act\Cmd\Ele
 {
     const UUID = 'c21c5d03-685f-467b-afce-3ec449197eda';
@@ -52,9 +68,9 @@ class ElementCreate extends Act\Cmd\Ele
 
     const EVENT_CLASSES = [
         Evt\Type\ElementCreation::class,
-        Evt\Type\ElementCreationBatch::class,
-        Evt\Element\ElementRecieved::class,
-        Evt\Element\ElementRecievedBatch::class
+        Evt\Type\ElementOwnerChange::class,
+        Evt\Type\ElementRecieved::class,
+        Evt\Type\ElementRecievedBatch::class
     ];
 
     /**
@@ -160,8 +176,7 @@ class ElementCreate extends Act\Cmd\Ele
         }
 
 
-        $post_actions = [];
-        $post_events = [];
+
         try {
             $this->created_element_uuids = [];
             $uuid_index = 0;
@@ -176,21 +191,20 @@ class ElementCreate extends Act\Cmd\Ele
             if (count($this->created_element_uuids) > 1 ) {
                 if ($this->send_event) {
                     $this->post_events_to_send =
-                        Evt\Element\ElementRecievedBatch::makeEventActions(source: $this, action_data: $this->action_data);
+                        Evt\Type\ElementRecievedBatch::makeEventActions(
+                            source: $this, action_data: $this->action_data,important_array: $this->getElementsCreated());
                 }
             } else if(count($this->created_element_uuids) === 1) {
                 if ($this->send_event) {
                     $this->post_events_to_send =
-                        Evt\Element\ElementRecieved::makeEventActions(source: $this, action_data: $this->action_data);
+                        Evt\Type\ElementRecieved::makeEventActions(
+                            source: $this, action_data: $this->action_data,important_array: $this->getElementsCreated());
                 }
             }
 
 
 
             $this->saveCollectionKeys();
-            if ($this->send_event) {
-                $this->post_events_to_send = array_merge($post_actions,$post_events);
-            }
 
             DB::commit();
         } catch (\Exception $e) {
@@ -264,13 +278,14 @@ class ElementCreate extends Act\Cmd\Ele
 
         if ($this->send_event && !$this->is_system) {
             $nodes = [];
-            if (count($this->getElementsCreated()) > 1) {
-                $events = Evt\Type\ElementCreationBatch::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getTemplateType());
-            } else {
-                $events = Evt\Type\ElementCreation::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getTemplateType());
-            }
+
+            $creation_events = Evt\Type\ElementCreation::makeEventActions(source: $this, action_data: $this->action_data,
+                type_context: $this->getTemplateType());
+
+            $owner_events = Evt\Type\ElementOwnerChange::makeEventActions(source: $this, action_data: $this->action_data,
+                type_context: $this->getTemplateType());
+
+            $events = array_merge($creation_events,$owner_events);
 
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
@@ -294,23 +309,22 @@ class ElementCreate extends Act\Cmd\Ele
     public function setChildActionResult(IThingAction $child): void {
 
 
-        if ($child instanceof Evt\Type\ElementCreationBatch || $child instanceof Evt\Type\ElementCreation) {
+        if ($child instanceof Evt\Type\ElementCreation) {
             if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
 
             else if($child->isActionSuccess()) {
                 if ($child->getAskedAboutType() === $this->getTemplateType()) {
-                    if ($this->getTemplateType()->isParentOfThis($child->getParentType())) {
-                        if ($child instanceof Evt\Type\ElementCreationBatch) {
-                            $number_allowed = $child->getNumberAllowed();
-                            if (null !== $number_allowed) {
-                                $this->setNumberToMake($number_allowed);
-                            }
-                        }
-                    }
-
+                    $this->setNumberToMake($child->getNumberAllowed());
                 }
+            }
+        }
+
+
+        if ($child instanceof Evt\Type\ElementOwnerChange ) {
+            if ($child->isActionError() || $child->isActionFail()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
         }
 

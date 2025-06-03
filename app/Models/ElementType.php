@@ -340,11 +340,11 @@ class ElementType extends Model implements IType,ISystemModel
      */
     public function getParentUuids() :array  {
         $query_parents = DB::table("element_type_parents as desc_a")
-                ->selectRaw('desc_a.id as par_id, 0 as level')->where('desc_a.child_type_id', $this->id)
+                ->selectRaw('desc_a.id as par_id, 0 as level,desc_a.parent_type_id')->where('desc_a.child_type_id', $this->id)
 
             ->unionAll(
                 DB::table('element_type_parents as desc_b')
-                    ->selectRaw('desc_b.id as par_id, level + 1 as level')
+                    ->selectRaw('desc_b.id as par_id, level + 1 as level,desc_b.parent_type_id')
                     ->join('query_parents', 'query_parents.parent_type_id', '=', 'desc_b.child_type_id')
             );
 

@@ -7,11 +7,11 @@ use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
-use App\Models\Element;
+
 use App\Models\ElementSet;
 use App\Models\ElementSetChild;
 use App\Models\UserNamespace;
-use App\OpenApi\Elements\ElementResponse;
+
 use App\OpenApi\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -51,11 +51,6 @@ class SetCreate extends Act\Cmd\St
 
 
 
-    public function getGivenParent(): ?ElementSet
-    {
-        /** @uses ActionDatum::data_set() */
-        return $this->action_data->data_set;
-    }
 
     public function getCreatedSet(): ?ElementSet
     {
@@ -122,9 +117,9 @@ class SetCreate extends Act\Cmd\St
                 $this->post_events_to_send = Evt\Server\SetCreated::makeEventActions(source: $this, action_data: $this->action_data,set_context: $set);
             }
 
-            if ($this->getGivenParent()) {
+            if ($this->getGivenSet()) {
                 $rel = new ElementSetChild();
-                $rel->parent_set_id = $this->getGivenParent()->id;
+                $rel->parent_set_id = $this->getGivenSet()->id;
                 $rel->child_set_id = $set->id;
                 $rel->save();
                 if ($this->send_event) {
@@ -145,7 +140,7 @@ class SetCreate extends Act\Cmd\St
 
 
     protected function getMyData() :array {
-        return ['element'=>$this->getGivenElement(),'given_parent'=>$this->getGivenParent(),'set'=>$this->getCreatedSet()];
+        return ['element'=>$this->getGivenElement(),'given_parent'=>$this->getGivenSet(),'set'=>$this->getCreatedSet()];
     }
 
     public function getDataSnapshot(): array

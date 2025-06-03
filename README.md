@@ -13,8 +13,8 @@ The project has totally changed, a major rewrite. This is a release of work in p
 [SetDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetDestroy.php)
 [SetEmpty.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetEmpty.php)
 
-[ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementChangeOwner.php)
-[ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php)
+[ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOwnerChange.php) draft
+[ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php) draft
 
 [LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php) draft
 [LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php) draft

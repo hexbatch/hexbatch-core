@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Evt\Element;
+namespace App\Sys\Res\Types\Stk\Root\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;

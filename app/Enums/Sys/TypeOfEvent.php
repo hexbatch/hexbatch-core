@@ -122,14 +122,12 @@ enum TypeOfEvent: string
 
     case ELEMENT_CREATION = 'element_creation'; //type or type ancestor ns admin, this event has the ns of the element owner, and can reject based on that.
                                                 //can access the placeholder for the new element owner ns
-    case ELEMENT_CREATION_BATCH = 'element_creation_batch'; //type or type ancestor ns admin, these elements do not have owners yet
 
     case ELEMENT_DESTRUCTION = 'element_destruction'; //type or type ancestor ns admin
-    case ELEMENT_DESTRUCTION_BATCH = 'element_destruction_batch'; //type or type ancestor ns admin
+    case ELEMENT_DESTROYED = 'element_destroyed'; //after the face
 
 
     case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
-    case ELEMENT_OWNER_CHANGE_BATCH = 'element_owner_change_batch'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
 
     case PHASE_REMOVED = 'phase_removed';
     case PHASE_ADDED = 'phase_added';

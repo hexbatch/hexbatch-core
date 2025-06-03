@@ -40,7 +40,7 @@ class LinkAdd extends Act\Cmd\Ele
 
     const bool IS_ADDING = true;
 
-    protected static function getEventClass() : Evt\ScopeSet|string  { return static::EVENT_CLASS; }
+    public static function getEventClass() : Evt\ScopeSet|string  { return static::EVENT_CLASS; }
 
 
     const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','check_permission','link_uuid'];
@@ -199,7 +199,7 @@ class LinkAdd extends Act\Cmd\Ele
     public function setChildActionResult(IThingAction $child): void {
 
 
-        if ($child instanceof static::EVENT_CLASS ) {
+        if ($child instanceof (static::getEventClass()) ) {
             if ($child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }

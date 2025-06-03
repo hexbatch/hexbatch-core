@@ -21,40 +21,45 @@ use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
-/*
-
- */
-#[HexbatchTitle( title: "Destroy an element")]
-#[HexbatchBlurb( blurb: "Can destroy one or more elements of different types")]
+#[HexbatchTitle( title: "Change element ownership")]
+#[HexbatchBlurb( blurb: "Give one or more elements to a new owner, they can be mixed types")]
 #[HexbatchDescription( description: /** @lang markdown */
     '
-# Destory elements
+# Create elements
 
-One or more elements can be destroyed here, they can be of mixed types.
+  This changes the ownership of one or more elements, these can be from different types.
 
-If no event handler to handle deletion is set the type or owner ,
-   then only the element admin members can destroy.
+  If no event handler to give permission to change ownership is set the type or owner ,
+   then only the element admin members can create.
 
-  Either the type owner or new owner can have event handlers to block destruction. Only one needs to fail this.
+  Either the type owner or new owner can have event handlers to block ownership change. Only one needs to fail this.
 
 
-  Deletion can be blocked by the following:
+  Change can be blocked by the following:
 
 
   By the recipients (or type owner) who get
 
-   * [ElementDestruction](../../../Evt/Type/ElementDestruction.php)
+   * [ElementOwnerChange](../../../Evt/Type/ElementOwnerChange.php)
 
-Once destroyed, there is a notice given to the user and the type owner
-* [ElementDestroyed](../../../Evt/Type/ElementDestroyed.php)
+Either all the elements are accepted, or none accepted.
+Any event handler to cancel the operation.
 
- It is ok if an element is destroyed while things are working on it. They will fail, or they will finish without it.
+
+  After element ownership change, the recipent and type owner gets a notice
+
+  * [ElementRecieved](../../../Evt/Type/ElementRecieved.php)
+
+
+if more than one element created, the batch version of the handler is called instead
+
+
 
 ')]
-class ElementDestroy extends Act\Cmd\Ele
+class ElementOwnerChange extends Act\Cmd\Ele
 {
-    const UUID = '557bbc2e-f589-4874-91f0-5d5e96fe115f';
-    const ACTION_NAME = TypeOfAction::CMD_ELEMENT_DESTROY;
+    const UUID = '829b1a2d-8ed9-4950-8883-570c3517cfeb';
+    const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CHANGE_OWNER;
 
     const ATTRIBUTE_CLASSES = [
 
@@ -65,12 +70,12 @@ class ElementDestroy extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Type\ElementDestruction::class,
-        Evt\Type\ElementDestroyed::class
+        Evt\Type\ElementOwnerChange::class,
+        Evt\Type\ElementRecieved::class,
     ];
 
     /** @return Element[] */
-    public function getElementsToDestroy(): array
+    public function getElementsToGive(): array
     {
         return $this->action_data->getCollectionOfType(Element::class);
     }
@@ -84,6 +89,7 @@ class ElementDestroy extends Act\Cmd\Ele
 
     public function __construct(
         protected array          $given_element_uuids = [],
+        protected ?string        $given_new_namespace_uuid = null,
 
         protected bool           $is_system = false,
         protected bool           $send_event = true,
@@ -111,17 +117,17 @@ class ElementDestroy extends Act\Cmd\Ele
         parent::runActionInner();
 
 
-        if (count($this->getElementsToDestroy())  <= 0) {
-            throw new HexbatchNothingDoneException(__("msg.elements_mising_from_destroy_list"),
+        if (count($this->getElementsToGive())  <= 0) {
+            throw new HexbatchNothingDoneException(__("msg.elements_mising_from_give_list"),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ELEMENTS_NOT_LISTED_TO_DESTROY);
+                RefCodes::ELEMENTS_NOT_LISTED_TO_GIVE);
         }
 
 
         if (!$this->hasFlag(TypeOfFlag::CAN_WRITE)) {
-            foreach ($this->getElementsToDestroy() as $element)
-                //element admin check only
-                $this->checkIfAdmin($element->element_namespace);
+            foreach ($this->getElementsToGive() as $element)
+            //element admin check only
+            $this->checkIfAdmin($element->element_namespace);
         }
 
 
@@ -129,15 +135,15 @@ class ElementDestroy extends Act\Cmd\Ele
 
             DB::beginTransaction();
 
-            foreach ($this->getElementsToDestroy() as $element) {
-                $element->destroyElement();
+            foreach ($this->getElementsToGive() as $element) {
+                $element->changeOwners(namespace: $this->getGivenNamespace());
             }
 
 
             if ($this->send_event) {
                 $this->post_events_to_send =
-                    Evt\Type\ElementDestroyed::makeEventActions(
-                        source: $this, action_data: $this->action_data,important_array: $this->getElementsToDestroy());
+                    Evt\Type\ElementRecieved::makeEventActions(
+                        source: $this, action_data: $this->action_data,important_array: $this->getElementsToGive());
             }
 
 
@@ -153,7 +159,8 @@ class ElementDestroy extends Act\Cmd\Ele
 
     protected function getMyData() :array {
         return [
-            'destroyed_elements'=>$this->getElementsToDestroy()
+            'given_elements'=>$this->getElementsToGive(),
+            'namespace_used'=>$this->getGivenNamespace()
         ];
     }
 
@@ -161,8 +168,8 @@ class ElementDestroy extends Act\Cmd\Ele
     {
         $what =  $this->getMyData();
         $ret = [];
-        if (isset($what['destroyed_elements'])) {
-            $ret['destroyed_elements'] = new ElementCollectionResponse(given_elements:  $what['given_elements']);
+        if (isset($what['given_elements'])) {
+            $ret['given_elements'] = new ElementCollectionResponse(given_elements:  $what['given_elements']);
         }
 
         return $ret;
@@ -170,13 +177,23 @@ class ElementDestroy extends Act\Cmd\Ele
 
 
 
+    protected function initData(bool $b_save = true) : ActionDatum {
+        parent::initData(b_save: false);
+
+        $this->setGivenNamespace( $this->given_new_namespace_uuid);
+
+        $this->action_data->save();
+        $this->action_data->refresh();
+        return $this->action_data;
+    }
+
     public function getChildrenTree(): ?Tree
     {
 
         if ($this->send_event && !$this->is_system) {
             $nodes = [];
-            $owner_events = Evt\Type\ElementDestruction::makeEventActions(source: $this, action_data: $this->action_data,
-                important_array: $this->getElementsToDestroy());
+            $owner_events = Evt\Type\ElementOwnerChange::makeEventActions(source: $this, action_data: $this->action_data,
+                important_array: $this->getElementsToGive());
 
 
             foreach ($owner_events as $event) {
@@ -199,7 +216,7 @@ class ElementDestroy extends Act\Cmd\Ele
     public function setChildActionResult(IThingAction $child): void {
 
 
-        if ($child instanceof Evt\Type\ElementDestruction) {
+        if ($child instanceof Evt\Type\ElementOwnerChange) {
             if ($child->isActionError() || $child->isActionFail()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             } else if ($child->isActionSuccess()) {

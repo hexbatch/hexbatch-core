@@ -189,5 +189,14 @@ class Element extends Model implements ISystemModel
         return $this->ref_uuid;
     }
 
+    public function changeOwners(UserNamespace $namespace) {
+        $this->element_namespace_id = $namespace->id;
+        $this->save();
+    }
+
+    public function destroyElement() {
+        $this->delete();
+    }
+
 
 }

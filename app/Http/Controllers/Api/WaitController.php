@@ -30,7 +30,6 @@ class WaitController extends Controller {
     #[ApiEventMarker( Evt\Server\DesignPending::class)]
     #[ApiEventMarker( Evt\Server\TypePublished::class)]
     #[ApiEventMarker( Evt\Type\ElementCreation::class)]
-    #[ApiEventMarker( Evt\Type\ElementCreationBatch::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[ApiTypeMarker( Root\Api\Waiting\CreateMaster::class)]
     public function create_master() {

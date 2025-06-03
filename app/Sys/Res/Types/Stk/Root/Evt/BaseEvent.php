@@ -52,7 +52,8 @@ class BaseEvent extends Event implements IEvent
                                      ?Element        $element_context = null,
                                      ?Server         $elsewhere_context = null,
                                             ?Phase $phase_context = null,
-                                            mixed $important_value = null
+                                            mixed $important_value = null,
+                                            array $important_array = []
 
     ) : array
     {
@@ -67,6 +68,11 @@ class BaseEvent extends Event implements IEvent
     public function getAskedAboutType(): ?ElementType
     {
         return $this->action_data?->data_type;
+    }
+
+    public function getNumberAllowed(): int
+    {
+        return 0; //todo stub
     }
 
     public function getParentType(): ?ElementType

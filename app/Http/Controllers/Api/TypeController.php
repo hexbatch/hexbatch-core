@@ -452,11 +452,8 @@ class TypeController extends Controller {
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
-    #[ApiEventMarker( Evt\Element\ElementRecieved::class)]
-    #[ApiEventMarker( Evt\Element\ElementRecievedBatch::class)]
-    #[ApiEventMarker( Evt\Type\ElementOwnerChangeBatch::class)]
+    #[ApiEventMarker( Evt\Type\ElementRecieved::class)]
     #[ApiEventMarker( Evt\Type\ElementCreation::class)]
-    #[ApiEventMarker( Evt\Type\ElementCreationBatch::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
 
     #[ApiTypeMarker( Root\Api\Type\CreateElement::class)]

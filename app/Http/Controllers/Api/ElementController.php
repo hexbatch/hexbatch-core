@@ -25,7 +25,7 @@ class ElementController extends Controller {
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
-    #[ApiEventMarker( Evt\Type\ElementOwnerChangeBatch::class)]
+    #[ApiEventMarker( Evt\Type\ElementRecieved::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_OWNER)]
     #[ApiTypeMarker( Root\Api\Element\ChangeOwner::class)]
     public function change_owner() {
@@ -296,7 +296,7 @@ class ElementController extends Controller {
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementDestruction::class)]
-    #[ApiEventMarker( Evt\Type\ElementDestructionBatch::class)]
+    #[ApiEventMarker( Evt\Type\ElementDestroyed::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Destroy::class)]
     public function destroy_element() {

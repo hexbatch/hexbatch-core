@@ -152,6 +152,8 @@ return [
     'element_not_found_by' => 'Element not found using :types : :values ',
     'elements_must_have_owner' => 'When creating elements, an owner namespace must be defined',
     'elements_must_have_type' => 'When creating elements, the type of element must be defined',
+    'elements_mising_from_give_list' => 'When changing owners, there were no elements listed to give',
+    'elements_mising_from_destroy_list' => 'When deleting elements, there were no elements listed',
 
     //sets
     'set_not_found' => 'Set not found using :ref',

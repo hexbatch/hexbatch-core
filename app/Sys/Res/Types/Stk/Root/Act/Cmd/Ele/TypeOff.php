@@ -223,7 +223,7 @@ class TypeOff extends Act\Cmd\Ele
     public function setChildActionResult(IThingAction $child): void {
 
 
-        if ($child instanceof static::EVENT_CLASS ) {
+        if ($child instanceof (static::getEventClass()) ) {
             if ($child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
