@@ -8,7 +8,6 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 
 use App\Models\ActionDatum;
-use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -32,10 +31,11 @@ class DesignPurge extends Act\Cmd\Ds
         Act\SystemPrivilege::class
     ];
 
+    const CHECK_PERMISSION = false;
+
     const array ACTIVE_DATA_KEYS = ['given_type_uuid'];
     public function __construct(
         protected ?string        $given_type_uuid = null,
-
         protected ?bool          $is_async = null,
         protected ?ActionDatum   $action_data = null,
         protected ?ActionDatum   $parent_action_data = null,
@@ -74,6 +74,9 @@ class DesignPurge extends Act\Cmd\Ds
             throw new \InvalidArgumentException("Need type before can delete it");
         }
 
+        if (static::CHECK_PERMISSION) {
+            $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+        }
 
         try {
             DB::beginTransaction();

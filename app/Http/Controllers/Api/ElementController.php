@@ -48,7 +48,8 @@ class ElementController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\ElementTypeOff::class)]
+    #[ApiEventMarker( Evt\Set\ElementTypeTurningOff::class)]
+    #[ApiEventMarker( Evt\Set\ElementTypeTurnedOff::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiTypeMarker( Root\Api\Element\TypeOff::class)]
     public function type_off() {
@@ -67,7 +68,8 @@ class ElementController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\ElementTypeOn::class)]
+    #[ApiEventMarker( Evt\Set\ElementTypeTurningOn::class)]
+    #[ApiEventMarker( Evt\Set\ElementTypeTurnedOn::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiTypeMarker( Root\Api\Element\TypeOn::class)]
     public function type_on() {
@@ -337,6 +339,7 @@ class ElementController extends Controller {
         ]
     )]
     #[ApiEventMarker( Evt\Server\LinkCreated::class)]
+    #[ApiEventMarker( Evt\Server\LinkCreating::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Link::class)]
     public function create_link() {

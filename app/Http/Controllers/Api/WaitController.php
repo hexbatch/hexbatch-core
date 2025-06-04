@@ -25,7 +25,7 @@ class WaitController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Server\TypeOwnerChange::class)]
+    #[ApiEventMarker( Evt\Server\TypeOwnerChanging::class)]
     #[ApiEventMarker( Evt\Server\SetCreated::class)]
     #[ApiEventMarker( Evt\Server\DesignPending::class)]
     #[ApiEventMarker( Evt\Server\TypePublished::class)]

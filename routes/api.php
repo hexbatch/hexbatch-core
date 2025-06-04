@@ -384,24 +384,22 @@ Route::prefix('v1')->group(function () {
 
                     Route::prefix('{element_set}')->group(function () {
 
-                        Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
-                            Route::post('promote_element', [Api\SetController::class, 'promote_element'])->name('core.sets.promote_element');
+                        Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                            Route::delete('destroy_set', [Api\SetController::class, 'destroy_set'])->name('core.sets.destroy_set');
                             Route::delete('purge_set', [Api\SetController::class, 'purge_set'])->name('core.sets.purge_set');
                             Route::delete('purge_member', [Api\SetController::class, 'purge_member'])->name('core.sets.purge_member');
-                        });
-
-                        Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
-                            Route::delete('destroy_set', [Api\SetController::class, 'destroy_set'])->name('core.sets.destroy_set');
-
-                        });
-
-
-                        Route::middleware([])->group(function () {
-                            Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
-                            Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
                             Route::delete('empty_set', [Api\SetController::class, 'empty_set'])->name('core.sets.empty_set');
                             Route::patch('stick_element', [Api\SetController::class, 'stick_element'])->name('core.sets.stick_element');
                             Route::patch('unstick_element', [Api\SetController::class, 'unstick_element'])->name('core.sets.unstick_element');
+                            Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
+                            Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
+                        });
+
+
+
+                        Route::middleware([])->group(function () {
+
+
                             Route::get('show_set', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
                             Route::get('list_children', [Api\SetController::class, 'list_children'])->name('core.sets.list_children');
                             Route::get('list_elements', [Api\SetController::class, 'list_elements'])->name('core.sets.list_elements');

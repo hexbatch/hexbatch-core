@@ -14,7 +14,6 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
-use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
 use App\OpenApi\Attributes\AttributeResponse;
@@ -44,6 +43,13 @@ use Illuminate\Support\Facades\DB;
 * default_value : if set, this is the default value before writing
 * attribute_name: has to be unique in the namespace
 * unset_parent : when editing an existing attribute and want to remove any parent
+
+the type owner of the optional attribute parent will get a notice before creation
+
+* [ElementTypeTurningOn](../../../Evt/Server/DesignPending.php)
+
+This can decide to accept the new design using the parent or not, if they deny, the attribute is still created,
+ but without the parent being approved, and it will be impossible to publish until this is changed
 ")]
 
 class DesignAttributeCreate extends Act\Cmd\Ds
@@ -68,14 +74,14 @@ class DesignAttributeCreate extends Act\Cmd\Ds
     }
 
     const array ACTIVE_DATA_KEYS = ['attribute_name','owner_type_uuid','parent_attribute_uuid',
-        'design_attribute_uuid','location_uuid','is_final','is_abstract','uuid','given_attribute_uuid','unset_parent',
+        'design_attribute_uuid','location_uuid','is_final','is_abstract','uuid','given_design_uuid','unset_parent',
         'read_json_path','validate_json_path','default_value'];
 
     protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
 
     public function __construct(
-        protected ?string                  $given_attribute_uuid = null, //for creating and assigning a uuid
-        protected ?string                  $uuid = null, //for editing
+        protected ?string                  $given_design_uuid = null, //for editing an existing design
+        protected ?string                  $uuid = null, //for assigning a uuid to a new type
         protected bool                     $unset_parent = false,  //for editing
         protected ?string                  $attribute_name = null,
         protected ?string                  $owner_type_uuid = null,
@@ -118,6 +124,11 @@ class DesignAttributeCreate extends Act\Cmd\Ds
                 }
             }
 
+            if ($this->action_data->collection_data?->offsetExists('attribute_approval')) {
+                $access_string = $this->action_data->collection_data->offsetGet('attribute_approval');
+                $this->attribute_approval = TypeOfApproval::tryFromInput($access_string);
+            }
+
             if ($this->action_data->collection_data?->offsetExists('value_policy')) {
                 $policy_string = $this->action_data->collection_data->offsetGet('value_policy');
                 if ($policy_string) {
@@ -134,7 +145,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds
         parent::initData(b_save: false);
 
 
-        $this->setGivenAttribute($this->given_attribute_uuid)->setGivenType($this->owner_type_uuid);
+        $this->setGivenAttribute($this->given_design_uuid)->setGivenType($this->owner_type_uuid);
 
 
         if ($this->parent_attribute_uuid) {
@@ -143,11 +154,6 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
         if ($this->design_attribute_uuid) {
             $this->action_data->data_third_attribute = Attribute::getThisAttribute(uuid: $this->design_attribute_uuid)->id;
-        }
-
-        if ($this->action_data->collection_data?->offsetExists('attribute_approval')) {
-            $access_string = $this->action_data->collection_data->offsetGet('attribute_approval');
-            $this->attribute_approval = TypeOfApproval::tryFromInput($access_string);
         }
 
         $this->action_data->collection_data->offsetSet('access',$this->access?->value);

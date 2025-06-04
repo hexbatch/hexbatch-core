@@ -27,6 +27,7 @@ class LinkController extends Controller {
         ]
     )]
     #[ApiEventMarker( Evt\Server\LinkDestroyed::class)]
+    #[ApiEventMarker( Evt\Server\LinkDestroying::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::LINK_OWNER)]
     #[ApiTypeMarker( Root\Api\Element\UnLink::class)]
     public function unlink_link() {

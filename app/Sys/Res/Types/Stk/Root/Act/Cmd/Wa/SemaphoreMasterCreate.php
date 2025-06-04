@@ -36,7 +36,7 @@ class SemaphoreMasterCreate extends Act\Cmd\Wa
     const EVENT_CLASSES = [
         Evt\Type\ElementCreation::class,
         Evt\Server\SetCreated::class,
-        Evt\Server\TypeOwnerChange::class,
+        Evt\Server\TypeOwnerChanging::class,
         Evt\Server\DesignPending::class,
         Evt\Server\TypePublished::class,
     ];

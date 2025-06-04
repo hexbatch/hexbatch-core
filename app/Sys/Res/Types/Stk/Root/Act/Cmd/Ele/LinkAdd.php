@@ -2,6 +2,9 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 
 use App\Enums\Sys\TypeOfFlag;
@@ -19,6 +22,29 @@ use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
+
+#[HexbatchTitle( title: "Add a link")]
+#[HexbatchBlurb( blurb: "Can link a set with an element")]
+#[HexbatchDescription( description: /** @lang markdown */
+    '
+# Linking sets
+
+Creates groups of sets or organize and do batch actions.
+
+Any set can be linked, if no event handler for the element,
+then only permission check is that the calling namespace is in element admin group
+
+The element and type owners will recieve a
+
+   * [LinkCreating](../../../Evt/Server/LinkCreating.php)
+
+If all report back ok, then the link is made.
+
+Once the link is made, the element and type owners will get an event
+   * [LinkCreated](../../../Evt/Server/LinkCreated.php)
+
+
+')]
 class LinkAdd extends Act\Cmd\Ele
 {
     const UUID = '6eaef3f7-a458-459f-85aa-75d863677101';
@@ -33,14 +59,17 @@ class LinkAdd extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\LinkCreated::class
+        Evt\Server\LinkCreated::class,
+        Evt\Server\LinkCreating::class,
     ];
 
-    const EVENT_CLASS = Evt\Server\LinkCreated::class;
+    const PRE_EVENT_CLASS = Evt\Server\LinkCreating::class;
+    const POST_EVENT_CLASS = Evt\Server\LinkCreated::class;
 
     const bool IS_ADDING = true;
 
-    public static function getEventClass() : Evt\ScopeSet|string  { return static::EVENT_CLASS; }
+    public static function getPreEventClass() : Evt\ScopeSet|string  { return static::PRE_EVENT_CLASS; }
+    public static function getPostEventClass() : Evt\ScopeSet|string  { return static::POST_EVENT_CLASS; }
 
 
     const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','check_permission','link_uuid'];
@@ -113,7 +142,15 @@ class LinkAdd extends Act\Cmd\Ele
                 $link = ElementLink::destroyLink(el: $this->getGivenElement(),set: $this->getGivenSet());
             }
             $this->setCreatedLink(link: $link);
-
+            if ($this->send_event) {
+                $this->post_events_to_send = static::getPostEventClass()::makeEventActions(
+                    source: $this, action_data: $this->action_data,
+                    type_context: $this->getGivenType(),
+                    set_context: $this->getGivenSet(),
+                    element_context: $this->getGivenElement(),
+                    link_context: $link
+                );
+            }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -170,7 +207,7 @@ class LinkAdd extends Act\Cmd\Ele
         if ($this->send_event && $this->getGivenSet() &&  $this->getGivenElement()) {
 
             $nodes = [];
-            $events = static::getEventClass()::makeEventActions(
+            $events = static::getPreEventClass()::makeEventActions(
                 source: $this, action_data: $this->action_data,
                 type_context: $this->getGivenType(),
                 set_context: $this->getGivenSet(),
@@ -199,7 +236,7 @@ class LinkAdd extends Act\Cmd\Ele
     public function setChildActionResult(IThingAction $child): void {
 
 
-        if ($child instanceof (static::getEventClass()) ) {
+        if ($child instanceof (static::getPreEventClass()) ) {
             if ($child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }

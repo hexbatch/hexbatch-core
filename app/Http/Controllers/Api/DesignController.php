@@ -17,7 +17,8 @@ class DesignController extends Controller {
 
 
     #[ApiTypeMarker( Root\Api\Design\ChangeOwner::class)]
-    #[ApiEventMarker( Evt\Server\TypeOwnerChange::class)]
+    #[ApiEventMarker( Evt\Server\TypeOwnerChanging::class)]
+    #[ApiEventMarker( Evt\Server\TypeOwnerChanged::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[OA\Post(
         path: '/api/v1/{namespace}/design/change_owner',

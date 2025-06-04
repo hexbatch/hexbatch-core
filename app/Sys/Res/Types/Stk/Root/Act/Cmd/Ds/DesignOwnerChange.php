@@ -15,7 +15,24 @@ use Hexbatch\Things\Interfaces\IThingAction;
 
 #[HexbatchTitle( title: "Change the ownership of a design")]
 #[HexbatchBlurb( blurb: "Unpublished designs have their ownership changed here, this can be refused by the otherwise new owner")]
-#[HexbatchDescription( description:'')]
+#[HexbatchDescription( description: /** @lang markdown */
+    '
+
+   # Design ownership changed
+
+    A design can be given to some other namespace
+
+    The future type owner will get an event, and the admin group to the type has start this
+
+
+   * [ElementTypeTurningOff](../../../Evt/Server/TypeOwnerChanging.php)
+
+   if the new owner agress, or does not have an event handler set, then the ownership is changed
+
+   and the older and new type owners and type owners gets the following
+
+   * [ElementTypeTurnedOff](../../../Evt/Server/TypeOwnerChanged.php)
+')]
 class DesignOwnerChange extends DesignOwnerPromote
 {
     const UUID = '3baa3285-5dff-42b5-bd22-071ad39101db';
@@ -29,7 +46,8 @@ class DesignOwnerChange extends DesignOwnerPromote
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\TypeOwnerChange::class
+        Evt\Server\TypeOwnerChanging::class,
+        Evt\Server\TypeOwnerChanged::class
     ];
 
 
@@ -40,6 +58,17 @@ class DesignOwnerChange extends DesignOwnerPromote
     {
         parent::runActionInner();
         $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+
+
+    }
+
+    protected function postActionInner(array $data = []): void {
+        if ($this->send_event) {
+            $this->post_events_to_send = Evt\Server\TypeOwnerChanged::makeEventActions(
+                source: $this, action_data: $this->action_data,
+                type_context: $this->getGivenType()
+            );
+        }
     }
 
 
@@ -51,7 +80,7 @@ class DesignOwnerChange extends DesignOwnerPromote
         $events = [];
         if ($this->getGivenType() && $this->getGivenNamespace()) {
             if ($this->getGivenType()->ref_uuid !== $this->getGivenNamespace()->ref_uuid) {
-                $events = Evt\Server\TypeOwnerChange::makeEventActions(source: $this, action_data: $this->action_data,
+                $events = Evt\Server\TypeOwnerChanging::makeEventActions(source: $this, action_data: $this->action_data,
                     type_context: $this->getDesignType(),namespace_context: $this->getGivenNamespace());
             }
 
@@ -78,7 +107,7 @@ class DesignOwnerChange extends DesignOwnerPromote
     {
 
 
-        if ($child instanceof Evt\Server\TypeOwnerChange) {
+        if ($child instanceof Evt\Server\TypeOwnerChanging) {
 
             if ($child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);

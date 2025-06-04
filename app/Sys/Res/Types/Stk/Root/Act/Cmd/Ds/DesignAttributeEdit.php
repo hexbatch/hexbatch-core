@@ -11,7 +11,18 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 
 #[HexbatchTitle( title: "Edit an attribute")]
 #[HexbatchBlurb( blurb: "Change an existing attribute, no events are created. Reviews by others can be done when publishing")]
-#[HexbatchDescription( description:' identify this with the uuid, see create attribute for options')]
+#[HexbatchDescription( description:'
+# Editing an attribute.
+
+The only time an attribute is editable is in design mode.
+
+see  [DesignAttributeCreate](DesignAttributeCreate.php) for the argument list
+
+Extra argument here is
+
+* design_attribute_uuid : identify the attribute to be edited with the uuid
+
+')]
 class DesignAttributeEdit extends DesignAttributeCreate
 {
     const UUID = 'b5dc244c-d966-48fd-9c42-ed53cceb827f';

@@ -65,8 +65,10 @@ enum TypeOfEvent: string
     case DISPLAY_READING = 'display_reading';
     case TIME_READING = 'time_reading';
 
-    case ELEMENT_TYPE_OFF = 'element_type_turned_off';
-    case ELEMENT_TYPE_ON = 'element_type_turned_on';
+    case ELEMENT_TYPE_TURNING_OFF = 'element_type_turning_off';
+    case ELEMENT_TYPE_TURNED_OFF = 'element_type_turned_off';
+    case ELEMENT_TYPE_TURNING_ON = 'element_type_turning_on';
+    case ELEMENT_TYPE_TURNED_ON = 'element_type_turned_on';
 
 
 
@@ -80,6 +82,7 @@ enum TypeOfEvent: string
     case SET_CREATED = 'set_created';
 
     case SET_DESTROYED = 'set_destroyed';
+    case SET_DESTROYING = 'set_destroying';
 
 
 
@@ -144,6 +147,8 @@ enum TypeOfEvent: string
 
     case SERVER_EDITED = 'server_edited';
     case LINK_CREATED = 'link_created';
+    case LINK_CREATING = 'link_creating';
+    case LINK_DESTROYING = 'link_destroying';
     case LINK_DESTROYED = 'link_destroyed';
 
 
@@ -156,7 +161,8 @@ enum TypeOfEvent: string
     case PATH_HANDLE_ADDED = 'path_handle_added';
     case PATH_HANDLE_REMOVED = 'path_handle_removed';
 
-    case TYPE_OWNER_CHANGE = 'type_owner_change'; //type given different ownership from what it started as, parents can block
+    case TYPE_OWNER_CHANGING = 'type_owner_changing'; //type given different ownership from what it started as, parents can block
+    case TYPE_OWNER_CHANGED = 'type_owner_changed'; //after type given different ownership
 
     case DESIGN_PENDING = 'design_pending'; //when a design uses a base attribute or parent type. Goes to all listeners in the inheritance chain
     case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
@@ -194,7 +200,7 @@ enum TypeOfEvent: string
    _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
    "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
     */
-    //system wide server stuff
+    //system-wide server stuff
 
 
     case SERVER_REGISTERED = 'server_registered';

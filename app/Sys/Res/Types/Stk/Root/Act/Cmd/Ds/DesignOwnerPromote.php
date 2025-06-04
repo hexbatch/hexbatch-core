@@ -7,7 +7,6 @@ use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
-use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -15,7 +14,9 @@ use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Change a design owner")]
 #[HexbatchBlurb( blurb: "System can change any design owner")]
-#[HexbatchDescription( description:'')]
+#[HexbatchDescription( description:'
+    There are no permission checks and no events raised
+')]
 class DesignOwnerPromote extends Act\Cmd\Ds
 {
     const UUID = '3feda9e3-e732-41b0-88c6-3d3f45e83bf4';

@@ -6,10 +6,10 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-class ElementTypeOn extends Evt\ScopeSet
+class ElementTypeTurningOn extends Evt\ScopeSet
 {
     const UUID = '96b76741-e3ff-46ad-bf59-d05cc03366e8';
-    const EVENT_NAME = TypeOfEvent::ELEMENT_TYPE_ON;
+    const EVENT_NAME = TypeOfEvent::ELEMENT_TYPE_TURNING_ON;
 
 
 

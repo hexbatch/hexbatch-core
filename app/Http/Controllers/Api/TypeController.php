@@ -279,7 +279,8 @@ class TypeController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Server\TypeOwnerChange::class)]
+    #[ApiEventMarker( Evt\Server\TypeOwnerChanging::class)]
+    #[ApiEventMarker( Evt\Server\TypeOwnerChanged::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[ApiTypeMarker( Root\Api\Type\ChangeOwner::class)]
     public function change_owner() {

@@ -328,6 +328,10 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         Utilities::ignoreVar($data);
     }
 
+    protected function postActionInner(array $data = []): void {
+        Utilities::ignoreVar($data);
+    }
+
     protected function getMyData() :array { return []; }
 
     public function getImportantValue(): mixed

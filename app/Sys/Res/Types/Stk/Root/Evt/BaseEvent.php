@@ -7,6 +7,7 @@ use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\Element;
+use App\Models\ElementLink;
 use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\Phase;
@@ -52,6 +53,7 @@ class BaseEvent extends Event implements IEvent
                                      ?Element        $element_context = null,
                                      ?Server         $elsewhere_context = null,
                                             ?Phase $phase_context = null,
+                                            ?ElementLink $link_context = null,
                                             mixed $important_value = null,
                                             array $important_array = []
 

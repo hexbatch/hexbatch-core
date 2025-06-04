@@ -22,7 +22,8 @@ class TypeOwnerChange extends Act\Cmd\Ty
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\TypeOwnerChange::class
+        Evt\Server\TypeOwnerChanging::class,
+        Evt\Server\TypeOwnerChanged::class
     ];
 
 }

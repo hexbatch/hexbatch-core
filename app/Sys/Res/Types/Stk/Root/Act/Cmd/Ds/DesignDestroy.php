@@ -11,8 +11,14 @@ use App\Sys\Res\Types\Stk\Root\Act;
 
 
 #[HexbatchTitle( title: "Destroy a design")]
-#[HexbatchBlurb( blurb: "Designs can be deleted by namespace admins without any events")]
-#[HexbatchDescription( description:'')]
+#[HexbatchBlurb( blurb: "Designs can be deleted by type admins without any events")]
+#[HexbatchDescription( description:'
+# Destroy a design
+
+    The admin group of a type can destroy it without any events raised
+
+
+')]
 class DesignDestroy extends DesignPurge
 {
     const UUID = 'd21d7294-35f8-4938-bff4-3e57ffe95e55';
@@ -26,16 +32,8 @@ class DesignDestroy extends DesignPurge
         Act\Cmd\Ds::class
     ];
 
+    const CHECK_PERMISSION = true;
 
-
-    /**
-     * @throws \Exception
-     */
-    protected function runActionInner(array $data = []): void
-    {
-        parent::runActionInner();
-        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
-    }
 
 
 }

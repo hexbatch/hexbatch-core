@@ -8,7 +8,7 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 
 use App\Models\ActionDatum;
-use App\Models\Attribute;
+
 
 use App\Models\UserNamespace;
 use App\OpenApi\Attributes\AttributeResponse;
@@ -17,8 +17,15 @@ use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Destroys an attribute")]
-#[HexbatchBlurb( blurb: "Attributes can be destroyed while in design phase. If type has approving parents, this is set back to pending and they are notified")]
-#[HexbatchDescription( description:'')]
+#[HexbatchBlurb( blurb: "Attributes can be destroyed while in design phase. No events are raised")]
+#[HexbatchDescription( description:'
+# Destroy an attribute in design mode
+
+The only time an attribute can be destroyed is before publishing a type.
+The attribute and type parents are not notified when this is destroyed. They will have a chance to see this when the publishing is made.
+
+
+')]
 class DesignAttributeDestroy extends Act\Cmd\Ds
 {
     const UUID = '079cfc62-0fa2-47f1-84c0-df0fa90441c5';

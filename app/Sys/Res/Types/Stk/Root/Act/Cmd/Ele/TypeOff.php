@@ -27,8 +27,27 @@ use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Turn off a type in an element")]
 #[HexbatchBlurb( blurb: "Turns off all the attributes of a subtype in an element")]
-#[HexbatchDescription( description:'
-  When attributes are toggled off
+#[HexbatchDescription( description: '
+  # When attributes are toggled off
+
+  Attributes are organized by type, and subtypes of an element can be turned on and off for that element.
+  This command turns off a type in an element
+
+  If no event handlers, then the element admin group AND
+  a check for the caller being associated with each attribute in the type.
+
+   * if the attribute is public domain no check
+   * if attribute public or protected then must be a member of the type
+   * if attribute private then must be an admin of the type
+
+   But, event handling can be used. Each element owner and type owner is sent
+   * [ElementTypeTurningOff](../../../Evt/Set/ElementTypeTurningOff.php)
+
+   if all agree, then the type is turned off for that element
+
+   and the element owner and type owners, and anyone else listening gets the following
+
+   * [ElementTypeTurnedOff](../../../Evt/Set/ElementTypeTurnedOff.php)
 ')]
 
 class TypeOff extends Act\Cmd\Ele
@@ -46,14 +65,17 @@ class TypeOff extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\ElementTypeOff::class,
+        Evt\Set\ElementTypeTurningOff::class,
+        Evt\Set\ElementTypeTurnedOff::class,
     ];
 
     const bool MAKING_VISIBLE = false;
 
-    const EVENT_CLASS = Evt\Set\ElementTypeOff::class;
+    const PRE_EVENT_CLASS = Evt\Set\ElementTypeTurningOff::class;
+    const POST_EVENT_CLASS = Evt\Set\ElementTypeTurnedOff::class;
 
-    protected static function getEventClass() : Evt\ScopeSet|string  { return static::EVENT_CLASS; }
+    protected static function getPreEventClass() : Evt\ScopeSet|string  { return static::PRE_EVENT_CLASS; }
+    protected static function getPostEventClass() : Evt\ScopeSet|string  { return static::POST_EVENT_CLASS; }
 
 
     const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','given_type_uuid','check_permission'];
@@ -111,8 +133,11 @@ class TypeOff extends Act\Cmd\Ele
                 //we do not check the permission for the element owner, just all the attributes in the element
                 foreach ($this->getGivenType()->getAllAttributes() as $att)
                 {
+
                     switch ($att->server_access_type) {
-                        case TypeOfServerAccess::IS_PUBLIC_DOMAIN:
+                        case TypeOfServerAccess::IS_PUBLIC_DOMAIN: {
+                            break;
+                        }
                         case TypeOfServerAccess::IS_PUBLIC:
                         case TypeOfServerAccess::IS_PROTECTED: {
                             $this->checkIfMember($att->type_owner->owner_namespace);
@@ -124,6 +149,8 @@ class TypeOff extends Act\Cmd\Ele
                         }
                     }
                 }
+
+                $this->checkIfAdmin($this->getGivenElement()->element_namespace);
             }
         }
 
@@ -136,6 +163,14 @@ class TypeOff extends Act\Cmd\Ele
             ElementTypeSetVisibility::stateVisibility(
                 visible_type_id: $this->getGivenType()->id,visible_set_member_id: $member->id,is_turned_on: static::MAKING_VISIBLE);
 
+            if ($this->send_event) {
+                $this->post_events_to_send = static::getPostEventClass()::makeEventActions(
+                    source: $this, action_data: $this->action_data,
+                    type_context: $this->getGivenType(),
+                    set_context: $this->getGivenSet(),
+                    element_context: $this->getGivenElement()
+                );
+            }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -194,7 +229,7 @@ class TypeOff extends Act\Cmd\Ele
         if ($this->send_event && $this->getGivenSet() && $this->getGivenType() && $this->getGivenElement()) {
 
             $nodes = [];
-            $events = static::getEventClass()::makeEventActions(
+            $events = static::getPreEventClass()::makeEventActions(
                 source: $this, action_data: $this->action_data,
                 type_context: $this->getGivenType(),
                 set_context: $this->getGivenSet(),
@@ -223,7 +258,7 @@ class TypeOff extends Act\Cmd\Ele
     public function setChildActionResult(IThingAction $child): void {
 
 
-        if ($child instanceof (static::getEventClass()) ) {
+        if ($child instanceof (static::getPreEventClass()) ) {
             if ($child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }

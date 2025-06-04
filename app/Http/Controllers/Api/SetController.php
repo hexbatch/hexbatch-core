@@ -39,30 +39,6 @@ class SetController extends Controller {
     }
 
 
-    #[OA\Post(
-        path: '/api/v1/{namespace}/sets/promote_element',
-        operationId: 'core.sets.promote_element',
-        description: "System can add any element to any set without permission or events ",
-        summary: 'System can add elements to sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Set\PromoteMember::class)]
-    public function promote_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -77,6 +53,7 @@ class SetController extends Controller {
         ]
     )]
     #[ApiEventMarker( Evt\Server\SetDestroyed::class)]
+    #[ApiEventMarker( Evt\Server\SetDestroying::class)]
     #[ApiEventMarker( Evt\Set\SetChildDestroyed::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_OWNER)]
     #[ApiTypeMarker( Root\Api\Set\DestroySet::class)]
@@ -123,13 +100,6 @@ class SetController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
-    #[ApiEventMarker(Evt\Set\ShapeLeave::class)]
-    #[ApiEventMarker(Evt\Set\MapLeave::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingEnd::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Set\EmptySet::class)]
     public function empty_set() {

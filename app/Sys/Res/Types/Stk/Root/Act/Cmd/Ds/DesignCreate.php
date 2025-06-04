@@ -51,7 +51,7 @@ class DesignCreate extends Act\Cmd\Ds
 
 
     const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final',
-        'time_uuid'];
+        'time_uuid','design_type_uuid'];
 
 
     public function __construct(

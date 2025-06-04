@@ -237,6 +237,8 @@ trait ActionableBaseTrait
             throw $e;
         }
 
+        $this->postActionInner(data: $data);
+
     }
 
 
@@ -336,7 +338,10 @@ trait ActionableBaseTrait
     }
 
     public function getMoreSiblingActions(): array {
-        return $this->post_events_to_send;
+        if ($this->isActionSuccess()) {
+            return $this->post_events_to_send;
+        }
+        return [];
     }
 
     public function addDataBeforeRun(array $data): void

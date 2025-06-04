@@ -11,7 +11,19 @@ use App\Sys\Res\Types\Stk\Root\Act;
 
 #[HexbatchTitle( title: "Designs can be edited")]
 #[HexbatchBlurb( blurb: "If approving parents, they can review when this is published")]
-#[HexbatchDescription( description:'See create design')]
+#[HexbatchDescription( description:'
+# Editing a type
+
+The only time a type is editable is in design mode.
+
+see  [DesignCreate](DesignCreate.php) for the argument list
+
+Extra argument here is
+
+* given_design_uuid : identify the type to be edited with the uuid
+
+
+')]
 
 class DesignEdit extends DesignCreate
 {

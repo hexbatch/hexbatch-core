@@ -8,10 +8,6 @@ First update to master in some time, combines about 300 commits from the last ye
 The project has totally changed, a major rewrite. This is a release of work in progress
 
 # Branch plans
-[SetMemberRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetMemberRemove.php)
-
-[SetDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetDestroy.php)
-[SetEmpty.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetEmpty.php)
 
 [ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOwnerChange.php) draft
 [ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php) draft
@@ -46,7 +42,6 @@ The project has totally changed, a major rewrite. This is a release of work in p
 
 
 
-* start moving all comments to the doc attr
 
 # Links
 
