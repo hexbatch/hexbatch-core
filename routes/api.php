@@ -470,7 +470,7 @@ Route::prefix('v1')->group(function () {
             Route::prefix('design')->group(function () {
 
 
-                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
+                Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group( function () {
                     Route::post('create', [Api\DesignController::class, 'create_design'])->name('core.design.create');
                 });
 

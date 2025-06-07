@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -15,9 +16,11 @@ use App\Models\Server;
 
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
+use App\OpenApi\Types\DesignParams;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
+
 
 #[HexbatchTitle( title: "Design create")]
 #[HexbatchBlurb( blurb: "Types are created here")]
@@ -50,15 +53,16 @@ class DesignCreate extends Act\Cmd\Ds
 
 
 
-    const array ACTIVE_DATA_KEYS = ['type_name','owner_namespace_uuid','uuid','given_server_uuid','is_final',
-        'time_uuid','design_type_uuid'];
+    const array ACTIVE_DATA_KEYS = ['type_name','uuid','given_server_uuid','is_final','design_uuid',
+        'time_uuid'];
 
 
+    #[ApiParamMarker( param_class: DesignParams::class)]
     public function __construct(
         protected ?string             $type_name =null,
-        protected ?string                $owner_namespace_uuid = null,
         protected ?string                $given_server_uuid = null,
         protected ?string                $time_uuid = null,
+        protected ?string                $design_uuid = null,
         protected ?bool                $is_final = null,
         protected ?TypeOfServerAccess $access = null,
         protected ?string             $uuid = null,
@@ -75,6 +79,7 @@ class DesignCreate extends Act\Cmd\Ds
         if (!$this->given_server_uuid) {
             $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
         }
+
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,
             b_type_init: $this->b_type_init,
             is_system: $this->is_system,
@@ -96,11 +101,11 @@ class DesignCreate extends Act\Cmd\Ds
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
 
-        $this->setGivenServer($this->given_server_uuid);
+        $this->setGivenServer($this->given_server_uuid)->setGivenType($this->design_uuid);
 
 
-        if ($this->owner_namespace_uuid) {
-            $this->setGivenNamespace( $this->owner_namespace_uuid);
+        if ($this->owner_namespace) {
+            $this->setGivenNamespace( $this->owner_namespace);
         } else {
             $this->setGivenNamespace( $this->getOwningNamespace());
         }
@@ -112,7 +117,7 @@ class DesignCreate extends Act\Cmd\Ds
         return $this->action_data;
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['access'] = $this->access?->value;
         return $ret;

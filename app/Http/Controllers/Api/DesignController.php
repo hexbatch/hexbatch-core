@@ -7,10 +7,19 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Types\DesignParams;
+use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root;
+use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class DesignController extends Controller {
@@ -97,8 +106,9 @@ class DesignController extends Controller {
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[ApiTypeMarker( Root\Api\Design\Create::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[OA\Post(
@@ -106,13 +116,28 @@ class DesignController extends Controller {
         operationId: 'core.design.create',
         description: 'A namespace can make a new design, they are the owner. No events are raised',
         summary: 'Makes a new design type ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParams::class)),
         parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function create_design() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function create_design(Request $request) {
+        $params = new DesignParams(namespace: Utilities::getCurrentOrUserNamespace());
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\Create(params: $params, is_async: false, tags: ['registration-by-web','api-top']); //todo change to true
+        $thing = $api->createThingTree(tags: ['registration']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 

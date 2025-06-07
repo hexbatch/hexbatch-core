@@ -280,7 +280,7 @@ class TypePublish extends Act\Cmd\Ty
         }
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['publishing_status'] = $this->publishing_status?->value;
         return $ret;

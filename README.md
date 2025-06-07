@@ -41,7 +41,14 @@ The project has totally changed, a major rewrite. This is a release of work in p
 [DesignLocationEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationEdit.php) draft
 
 
-
+Making api for 
+[DesignCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignCreate.php)
+[DesignOwnerPromote.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerPromote.php)
+[DesignParentAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentAdd.php)
+[SetCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/SetCreate.php)
+[SetMemberAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetMemberAdd.php)
+[ElementCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/ElementCreate.php)
+[TypePublish.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/TypePublish.php)
 
 # Links
 

@@ -91,10 +91,10 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         try
         {
             $design = new DesignCreate(type_name: static::getHexbatchClassName(),
-                owner_namespace_uuid: $this->getISystemType()->getTypeNamespace()::getClassUuid(),
                 is_final: $this->getISystemType()::isFinal(),
                 access: TypeOfServerAccess::IS_PUBLIC,
-                uuid: static::getClassUuid(), is_system: true, send_event: false
+                uuid: static::getClassUuid(),
+                is_system: true, send_event: false, owner_namespace: $this->getISystemType()->getTypeNamespace()
             );
             $design->runAction();
             $created_type = $design->getDesignType();

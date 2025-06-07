@@ -2,10 +2,10 @@
 
 namespace App\OpenApi\Users\CreateToken;
 
-use App\Api\BaseParamsTrait;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
+use App\OpenApi\BaseParamsTrait;
 use OpenApi\Attributes as OA;
 
 /**

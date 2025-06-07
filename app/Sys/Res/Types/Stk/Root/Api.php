@@ -39,7 +39,6 @@ class Api extends BaseType implements IHookCode
     const TYPE_NAME = 'api';
 
 
-
     const PARENT_CLASSES = [
         Root::class
     ];
@@ -59,6 +58,7 @@ class Api extends BaseType implements IHookCode
         Api\UserApi::class,
         Api\WaitingApi::class
     ];
+
 
     public function __construct(
         protected ?ActionDatum   $action_data = null,
@@ -186,6 +186,31 @@ class Api extends BaseType implements IHookCode
             if ($callback->callback_http_code > $http_status) { $http_status = $callback->callback_http_code;}
         }
         return new HexbatchCallbackCollectionResponse(given_callbacks: $maybe_callbacks);
+    }
+
+
+    public function getInitialConstantData(): array {
+        $ret = parent::getInitialConstantData();
+        if (property_exists($this, 'params')) {
+            $interfaces = class_implements($this->params);
+
+            if (isset($interfaces['App\Sys\Res\Types\Stk\Root\Api\IApiParam'])) {
+                $ret['api_params'] = $this->params;
+            }
+        }
+        return $ret;
+    }
+
+    protected function restoreParams(array $param_array) {
+
+    }
+
+    protected function restoreData(array $data = []) {
+        parent::restoreData($data);
+        if ($this->action_data->collection_data?->offsetExists('api_params')) {
+            $param_array = $this->action_data->collection_data->offsetGet('api_params');
+            $this->restoreParams($param_array);
+        }
     }
 
 }

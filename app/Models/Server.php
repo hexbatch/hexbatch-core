@@ -119,7 +119,8 @@ class Server extends Model implements IServer,ISystemModel
         ?int            $me_id = null,
         ?int            $type_id = null,
         ?string         $uuid = null,
-        ?bool           $is_system = null
+        ?bool           $is_system = null,
+        ?string           $server_name = null,
     )
     : Builder
     {
@@ -141,6 +142,10 @@ class Server extends Model implements IServer,ISystemModel
             $build->where('servers.ref_uuid', $uuid);
         }
 
+        if ($server_name) {
+            $build->where('servers.server_name', $server_name);
+        }
+
         if ($is_system !== null) {
             $build->where('is_system',$is_system);
         }
@@ -153,6 +158,31 @@ class Server extends Model implements IServer,ISystemModel
         return $build;
     }
 
+    public static function resolveServer(string $value, bool $throw_exception = true) : ?Server {
+        $build = null;
+        if (Utilities::is_uuid($value)) {
+            $build = static::buildServer(uuid: $value);
+        } else {
+            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+
+            if (count($parts) === 1) {
+                //by name
+                $ns_name = $parts[0];
+                $build = static::buildServer(server_name: $ns_name);
+
+            }
+        }
+        $server = $build?->first();
+        if (empty($server) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.server_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SERVER_NOT_FOUND
+            );
+        }
+
+        return $server;
+    }
     /**
      * Retrieve the model for a bound value.
      *
@@ -162,42 +192,7 @@ class Server extends Model implements IServer,ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    $build = $this->where('ref_uuid', $value);
-                } else {
-                    if (is_string($value)) {
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-                        if (count($parts) === 1) {
-                            $s_name = $parts[0];
-                            $build = $this->where('server_name', $s_name);
-                        }
-                    }
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = Server::buildServer(me_id:$first_id)->first();
-                }
-            }
-        } finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.server_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::SERVER_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
-
+        return static::resolveServer($value);
     }
 
     public static function getThisServer(
@@ -240,12 +235,15 @@ class Server extends Model implements IServer,ISystemModel
         return $this->ref_uuid;
     }
 
+    protected static ?Server $default_server = null;
     public static function getDefaultServer(bool $b_throw_on_missing = true) : ?Server {
+        if (static::$default_server) { return static::$default_server;}
+
         $server = Server::buildServer(is_system: true)->first();
         if (!$server && $b_throw_on_missing) {
             throw new \LogicException("No system server made");
         }
-        return $server;
+        return static::$default_server = $server;
     }
 
 

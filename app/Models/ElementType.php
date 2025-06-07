@@ -140,7 +140,7 @@ class ElementType extends Model implements IType,ISystemModel
     )
     : ElementType
     {
-        $ret = static::buildElementType(id:$id,uuid: $uuid,owner_namespace_id: $owner_namespace_id,
+        $ret = static::buildElementType(id:$id,uuid: $uuid, namespace_id: $owner_namespace_id,
             shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle)->first();
 
         if (!$ret) {
@@ -165,7 +165,8 @@ class ElementType extends Model implements IType,ISystemModel
     public static function buildElementType(
         ?int             $id = null,
         ?string          $uuid = null,
-        ?int             $owner_namespace_id = null,
+        ?int             $namespace_id = null,
+        ?string             $name = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
@@ -186,8 +187,12 @@ class ElementType extends Model implements IType,ISystemModel
         if ($id) {
             $build->where('element_types.id', $id);
         }
-        if ($owner_namespace_id) {
-            $build->where('element_types.owner_namespace_id', $owner_namespace_id);
+        if ($namespace_id) {
+            $build->where('element_types.owner_namespace_id', $namespace_id);
+        }
+
+        if ($name) {
+            $build->where('element_types.type_name', $name);
         }
 
 
@@ -224,6 +229,51 @@ class ElementType extends Model implements IType,ISystemModel
         return $build;
     }
 
+
+    public static function resolveType(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+            $build = static::buildElementType(uuid: $value);
+        } else {
+
+            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            if (count($parts) === 2) {
+                $owner_hint = $parts[0];
+                $maybe_name = $parts[1];
+                /**
+                 * @var UserNamespace $owner
+                 */
+                $owner = UserNamespace::resolveNamespace($owner_hint);
+                $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
+            }
+
+            if (count($parts) === 3) {
+                $server_hint = $parts[0];
+                $namespace_hint = $parts[1];
+                $maybe_name = $parts[2];
+                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
+                $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
+            }
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.type_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::TYPE_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
+
     /**
      * Retrieve the model for a bound value.
      *
@@ -233,62 +283,7 @@ class ElementType extends Model implements IType,ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    //the ref
-                    $build = $this->where('ref_uuid', $value);
-                } else {
-                    if (is_string($value)) {
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-                        if (count($parts) === 2) {
-                            $owner_hint = $parts[0];
-                            $maybe_name = $parts[1];
-                            /**
-                             * @var UserNamespace $owner
-                             */
-                            $owner = (new UserNamespace())->resolveRouteBinding($owner_hint);
-                            $build = $this->where('owner_namespace_id', $owner?->id)->where('type_name', $maybe_name);
-                        }
-
-                        if (count($parts) === 3) {
-                            $server_hint = $parts[0];
-                            $namespace_hint = $parts[1];
-                            $maybe_name = $parts[2];
-                            /**
-                             * @var UserNamespace $owner
-                             */
-                            $owner = (new UserNamespace())->resolveRouteBinding($server_hint.UserNamespace::NAMESPACE_SEPERATOR.$namespace_hint);
-                            $build = $this->where('owner_namespace_id', $owner?->id)->where('type_name', $maybe_name);
-                        }
-                    }
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = ElementType::buildElementType(id:$first_id)->first();
-                }
-            }
-        }
-        catch (\Exception $e) {
-            Log::warning('Element Type resolving: '. $e->getMessage());
-        }
-        finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.type_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::TYPE_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
+        return static::resolveType($value);
 
     }
 
@@ -496,21 +491,21 @@ class ElementType extends Model implements IType,ISystemModel
         return false;
     }
 
-    function setTypeName(string $name,? UserNamespace $namespace = null) {
-        if (!$namespace) {
-            $namespace = Utilities::getCurrentNamespace();
-        }
+    public static function validateTypeName(string $name,UserNamespace $namespace,?ElementType $me = null) {
         try {
-            if ($this->type_name = $name) {
-                Validator::make(['type_name' => $this->type_name], [
-                    'type_name' => ['required', 'string', new ElementTypeNameReq($this->current_type,$namespace)],
-                ])->validate();
-            }
+            Validator::make(['type_name' => $name], [
+                'type_name' => ['required', 'string', new ElementTypeNameReq(element_type: $me ,current_namespace: $namespace)],
+            ])->validate();
         } catch (ValidationException $v) {
             throw new HexbatchNotPossibleException($v->getMessage(),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::TYPE_INVALID_NAME);
         }
+    }
+
+    function setTypeName(string $name,? UserNamespace $namespace = null) {
+       static::validateTypeName(name:$name,namespace: $this->owner_namespace?: $namespace,me: $this);
+       $this->type_name = $name;
     }
 
     public function hasType(ElementType $element_type) : bool {

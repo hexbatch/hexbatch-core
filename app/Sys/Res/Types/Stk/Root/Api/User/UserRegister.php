@@ -41,7 +41,7 @@ class UserRegister extends Api\UserApi
 
 
     protected function setCreatedNamespace(UserNamespace $namespace) : void {
-        $this->setGivenNamespace($namespace);
+        $this->setGivenNamespace($namespace,true);
     }
 
     public function getCreatedNamespace(): ?UserNamespace
@@ -62,8 +62,6 @@ class UserRegister extends Api\UserApi
     }
 
 
-    const array ACTIVE_DATA_KEYS = ['user_name','user_password','public_key'];
-
 
     protected function getMyData() :array {
         return ['user'=>$this->getCreatedUser(),'namespace'=>$this->getCreatedNamespace()];
@@ -81,23 +79,23 @@ class UserRegister extends Api\UserApi
     }
 
     public function __construct(
-        protected ?string $user_name =null,
-        protected ?string $user_password = null,
-        protected ?string $public_key = null,
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
         protected ?bool $is_async = null,
-        ?RegistrationParams $params = null,
+        protected ?RegistrationParams $params = null,
         protected array          $tags = []
     )
     {
-        if($params) {
-            if (!$this->user_name) { $this->user_name = $params->getUsername();}
-            if (!$this->user_password) { $this->user_password = $params->getPassword();}
-            if (!$this->public_key) { $this->public_key = $params->getPublicKey();}
-        }
         parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
             is_async: $this->is_async,tags: $this->tags);
+    }
+
+    protected function restoreParams(array $param_array) {
+        parent::restoreParams($param_array);
+        if(!$this->params) {
+            $this->params = new RegistrationParams();
+            $this->params->fromArray($param_array);
+        }
     }
 
 
@@ -136,16 +134,18 @@ class UserRegister extends Api\UserApi
 
         $nodes = [];
         $register = new Act\Cmd\Us\UserRegister(
-            user_name: $this->user_name, user_password: $this->user_password, is_system: false, send_event: true,
+            user_name: $this->params->getUsername(), user_password: $this->params->getPassword(),
+            is_system: false, send_event: true,
             parent_action_data: $this->action_data,tags: ['register user']);
         $nodes[] = ['id' => $register->getActionData()->id, 'parent' => -1, 'title' => $register->getType()->getName(),'action'=>$register];
 
         $namespace = new Act\Cmd\Ns\NamespaceCreate(
-            namespace_name: $this->user_name,is_system: false,send_event: true, parent_action_data: $this->action_data,tags: ['create namespace']);
+            namespace_name: $this->params->getUsername(),
+            public_key: $this->params->getPublicKey(),
+            is_system: false,send_event: true, parent_action_data: $this->action_data,tags: ['create namespace']);
         $nodes[] = ['id' => $namespace->getActionData()->id, 'parent' => -1, 'title' => $namespace->getType()->getName(),'action'=>$namespace];
 
 
-      //  $nodes[] = ['id' => $namespace->getActionData()->id. '-waiter', 'parent' => $register->getActionData()->id, 'title' => $namespace->getType()->getName(),'action'=>$namespace,'is_waiting'=>true,'extra_tags'=>['waiter']];
 
 
 

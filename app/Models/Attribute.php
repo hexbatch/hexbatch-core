@@ -21,20 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-/*
- * if an attribute has a shape, then its value can contain a key for how the shape looks for opacity|border color|fill color|skin url\z-ordering
- * this is not enforced by the code here, but is a well known key for browsers and apps rendering the shape
- * the shape appearance can be adjusted by rules writing to this key
- * if no key for appearance, the browser will use some defaults
- *
- * if attribute needs some protection from read or write using namespaces or other, use rules
- *
- */
 
 /**
  * @mixin Builder
@@ -200,18 +189,6 @@ class Attribute extends Model implements IAttribute,ISystemModel
         }
     }
 
-    public static function getLastNameWithoutType(string $attr_name, bool $verify = true) : string {
-
-        $attribute_parts = explode(static::ATTRIBUTE_FAMILY_SEPERATOR, $attr_name);
-        $last_attribute_name_full = $attribute_parts[count($attribute_parts) - 1];
-        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR,$last_attribute_name_full);
-        if (count($parts) === 1) {
-            return $parts[0];
-        }
-        if ($verify) { static::verifyNameString($attr_name);}
-        return $parts[1];
-    }
-
 
     public static function buildAttribute(
         ?int    $me_id = null,
@@ -219,13 +196,15 @@ class Attribute extends Model implements IAttribute,ISystemModel
         ?int    $type_id = null,
         ?int    $shape_id = null,
         ?string $uuid = null,
-        bool    $b_do_relations = false
+        bool    $b_do_relations = false,
+        ?string $name = null
     )
     : Builder
     {
         /** @var Builder $build */
         $build =  Attribute::select('attributes.*')
-            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts,  extract(epoch from  attributes.updated_at) as updated_at_ts");
+            ->selectRaw(" extract(epoch from  attributes.created_at) as created_at_ts")
+            ->selectRaw("  extract(epoch from  attributes.updated_at) as updated_at_ts");
 
         if ($b_do_relations)
         {
@@ -250,6 +229,10 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
         if ($shape_id) {
             $build->where('attributes.attribute_shape_id',$shape_id);
+        }
+
+        if ($name) {
+            $build->where('attributes.attribute_name',$name);
         }
 
         if ($namespace_id) {
@@ -295,6 +278,60 @@ class Attribute extends Model implements IAttribute,ISystemModel
         return $ret;
     }
 
+    public static function resolveAttribute(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+            $build = static::buildAttribute(uuid: $value);
+        } else {
+
+            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            if (count($parts) === 2) {
+                $owner_hint = $parts[0];
+                $attr_name = $parts[1];
+                /**
+                 * @var UserNamespace $owner
+                 */
+                $owner = UserNamespace::resolveNamespace($owner_hint);
+                $build = static::buildAttribute(namespace_id: $owner->id,name: $attr_name);
+            }
+
+            if (count($parts) === 3) {
+                $server_hint = $parts[0];
+                $namespace_hint = $parts[1];
+                $attr_name = $parts[2];
+                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
+                $build = static::buildAttribute(namespace_id: $owner->id,name: $attr_name);
+            }
+
+            if (count($parts) === 4) {
+                $server_hint = $parts[0];
+                $namespace_hint = $parts[1];
+                $attr_name = $parts[2];
+                $type_name = $parts[3];
+                $namespace = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
+                $type = ElementType::resolveType("$server_hint.$namespace_hint.$type_name");
+                $build = static::buildAttribute(namespace_id: $namespace->id, type_id: $type->id, name: $attr_name);
+            }
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.attribute_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ATTRIBUTE_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
+
     /**
      * Retrieve the model for a bound value.
      *
@@ -304,102 +341,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $use_verification = true;
-        if ($field === true) {
-            $use_verification = false;
-            $field = null;
-        }
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    //the ref
-                    $build = $this->where('ref_uuid', $value);
-                } else {
-                    if (is_string($value)) {
-                        //the name, but scope to the user id of the owner
-                        //if this user is not the owner, then the group owner id can be scoped
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-
-                        $what_route =  Route::current();
-                        $owner_name = $what_route->originalParameter('element_type');
-                        if($owner_name && count($parts) === 1) {
-                            $attr_name_raw = $parts[0];
-                            $attribute_name = static::getLastNameWithoutType($attr_name_raw,$use_verification);
-                            /** @var ElementType $owner */
-                            $owner = (new ElementType)->resolveRouteBinding($owner_name);
-                            $build = $this->where('owner_element_type_id', $owner?->id)
-                                ->where('attribute_name', $attribute_name);
-                        }
-                        else if (count($parts) === 2) {
-                            //here we do not call the helper functions, the resolve attr path will only call this
-                            $type_string = $parts[0];
-                            $attr_name_raw = $parts[1];
-                            $attribute_name = static::getLastNameWithoutType($attr_name_raw,$use_verification);
-                            /** @var ElementType $owner */
-                            $owner = (new ElementType)->resolveRouteBinding($type_string);
-                            $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
-                        } else if (count($parts) === 3) {
-                                $namespace_string = $parts[0];
-                                $type_string = $parts[1];
-                                $attr_name_raw = $parts[2];
-                                $attribute_name = static::getLastNameWithoutType($attr_name_raw,$use_verification);
-                                /** @var UserNamespace $da_namespace */
-                                $da_namespace = (new UserNamespace())->resolveRouteBinding($namespace_string);
-
-                                /** @var ElementType $owner */
-                                $owner = (new ElementType)->resolveRouteBinding($da_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
-                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
-
-                        } else if (count($parts) === 4) {
-                                $server_string = $parts[0];
-                                $namespace_string = $parts[1];
-                                $type_string = $parts[2];
-                                $attr_name_raw = $parts[3]; //can be split by attribute family separator
-                                $attribute_name = static::getLastNameWithoutType($attr_name_raw);
-
-
-                                /** @var UserNamespace $user_namespace */
-                                $user_namespace = (new UserNamespace())->resolveRouteBinding($server_string . UserNamespace::NAMESPACE_SEPERATOR . $namespace_string);
-
-                                /** @var ElementType $owner */
-                                $owner = (new ElementType)->resolveRouteBinding($user_namespace->ref_uuid . UserNamespace::NAMESPACE_SEPERATOR . $type_string);
-
-                                $build = $this->where('owner_element_type_id', $owner?->id)->where('attribute_name', $attribute_name);
-
-                        }
-
-                    }
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-
-                    $first_build = Attribute::buildAttribute(me_id: $first_id);
-                    $ret = $first_build->first();
-
-                }
-            }
-        }
-        catch (\Exception $e) {
-            Log::warning('Attribute resolving: '. $e->getMessage());
-        }
-        finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.attribute_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::ATTRIBUTE_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
-
+        return static::resolveAttribute($value);
     }
 
 

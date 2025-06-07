@@ -44,7 +44,7 @@ class MeResponse implements  JsonSerializable,ICallResponse
             $this->namespace_uuid = $user->default_namespace?->ref_uuid;
         }
 
-        if ($this->user && $show_namespace) {
+        if ($this->user?->default_namespace && $show_namespace) {
             $this->namespace = new UserNamespaceResponse(namespace: $this->user->default_namespace,show_homeset: true);
         }
 

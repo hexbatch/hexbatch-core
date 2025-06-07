@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -47,7 +46,7 @@ use InvalidArgumentException;
  * @property int created_at_ts
  * @property int updated_at_ts
  * @property TimeBoundSpan[] time_spans
- * @property AttributeRule[] time_attributes
+ * @property ElementType[] scheduled_types
  * @property UserNamespace schedule_namespace
  *
  */
@@ -73,8 +72,8 @@ class TimeBound extends Model
     const MAKE_REPEAT_SECONDS = 60*30;
 
 
-    public function time_attributes() : HasMany {
-        return $this->hasMany(Attribute::class,'attribute_time_bound_id','id')
+    public function scheduled_types() : HasMany {
+        return $this->hasMany(Attribute::class,'type_time_bound_id','id')
             ->orderBy('span_start');
     }
 
@@ -177,27 +176,35 @@ class TimeBound extends Model
     }
 
 
-    public static function buildTimeBound(?int $me_id = null, ?int $type_id = null, ?int $attribute_id = null, ?string $uuid = null)
+    public static function buildTimeBound(?int $me_id = null, ?int $type_id = null,  ?string $uuid = null,
+                                        ?int $namespace_id = null,?string $name = null,
+                                        bool $with_namespace = false, bool $with_spans = false, bool $with_types = false
+    )
     : Builder
     {
+        /** @var Builder $build */
         $build =  TimeBound::select('time_bounds.*')
-            ->selectRaw(" extract(epoch from  time_bounds.bound_start) as bound_start_ts,  extract(epoch from  time_bounds.bound_stop) as bound_stop_ts")
-            /** @uses TimeBound::time_spans(),TimeBound::time_attributes(),static::schedule_namespace() */
-            ->with('time_spans','time_attributes','schedule_namespace');
+            ->selectRaw(" extract(epoch from  time_bounds.bound_start) as bound_start_ts")
+            ->selectRaw("extract(epoch from  time_bounds.bound_stop) as bound_stop_ts");
 
-
-
-        if ($attribute_id) {
-            $build->join('attributes as bounded_attr',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join)  {
-                    $join
-                        ->on('time_bounds.id','=','bounded_attr.attribute_time_bound_id');
-                }
-            );
+        if ($with_types) {
+            /** @uses TimeBound::scheduled_types() */
+            $build->with('scheduled_types');
         }
+
+        if ($with_namespace) {
+            /** @uses static::schedule_namespace() */
+            $build->with('schedule_namespace');
+        }
+
+        if ($with_spans) {
+            /** @uses TimeBound::time_spans() */
+            $build->with('time_spans');
+        }
+
+
+
+
 
         if ($type_id) {
 
@@ -220,6 +227,14 @@ class TimeBound extends Model
 
        if ($uuid) {
            $build->where('time_bounds.ref_uuid',$uuid);
+       }
+
+       if ($namespace_id) {
+           $build->where('time_bounds.time_bound_namespace_id',$namespace_id);
+       }
+
+       if ($name) {
+           $build->where('time_bounds.bound_name',$build);
        }
 
        return $build;
@@ -337,65 +352,53 @@ class TimeBound extends Model
         return null;
     }
 
+    public static function resolveSchedule(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+            $build = static::buildTimeBound(uuid: $value);
+        } else {
+
+            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            if (count($parts) === 2) {
+                $owner_hint = $parts[0];
+                $maybe_name = $parts[1];
+                /**
+                 * @var UserNamespace $owner
+                 */
+                $owner = UserNamespace::resolveNamespace($owner_hint);
+                $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name);
+            }
+
+            if (count($parts) === 3) {
+                $server_hint = $parts[0];
+                $namespace_hint = $parts[1];
+                $maybe_name = $parts[2];
+                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
+                $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name);
+            }
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.bound_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::BOUND_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
 
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        try {
-            if ($field) {
-                $ret = $this->where($field, $value)->first();
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    $build = $this->where('ref_uuid', $value);
-                } else {
-                    if (is_string($value)) {
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-                        if (count($parts) === 2) {
-                            $owner_hint = $parts[0];
-                            $maybe_name = $parts[1];
-                            /**
-                             * @var UserNamespace $owner
-                             */
-                            $owner = (new UserNamespace())->resolveRouteBinding($owner_hint);
-                            $build = $this->where('time_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
-                        }
-
-                        if (count($parts) === 3) {
-                            $server_hint = $parts[0];
-                            $namespace_hint = $parts[1];
-                            $maybe_name = $parts[2];
-                            /**
-                             * @var UserNamespace $owner
-                             */
-                            $owner = (new UserNamespace())->resolveRouteBinding($server_hint.UserNamespace::NAMESPACE_SEPERATOR.$namespace_hint);
-                            $build = $this->where('time_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
-                        }
-                    }
-                }
-            }
-
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $first_build = TimeBound::buildTimeBound(me_id: $first_id);
-                    $ret = $first_build->first();
-                }
-            }
-        }
-        catch (\Exception $e) {
-            Log::warning('TimeBound resolving: '. $e->getMessage());
-        }
-        finally {
-            if (empty($ret)) {
-                throw new HexbatchNotFound(
-                    __('msg.bound_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::BOUND_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
+        return static::resolveSchedule($value);
     }
 
     /**

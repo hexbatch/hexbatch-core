@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -131,8 +130,10 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         ?int            $me_id = null,
         ?int            $user_id = null,
         ?string         $uuid = null,
-        int             $id_is_member_of_namespace = null,
-        int             $id_is_admin_of_namespace = null,
+        ?int             $id_is_member_of_namespace = null,
+        ?int             $id_is_admin_of_namespace = null,
+        ?int             $server_id = null,
+        ?string         $namespace_name = null,
         bool            $b_relations = false
     )
     : Builder
@@ -168,6 +169,14 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
             $build->where('user_namespaces.namespace_user_id', $user_id);
         }
 
+        if ($server_id) {
+            $build->where('user_namespaces.namespace_server_id', $server_id);
+        }
+
+        if ($namespace_name) {
+            $build->where('user_namespaces.namespace_name', $namespace_name);
+        }
+
         if ($uuid) {
             $build->where('user_namespaces.ref_uuid', $uuid);
         }
@@ -200,65 +209,45 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return $build;
     }
 
+    public static function resolveNamespace(string $value, bool $throw_exception = true) : ?UserNamespace {
+        $build = null;
+        if (Utilities::is_uuid($value)) {
+            $build = static::buildNamespace(uuid: $value);
+        } else {
+            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+
+            if (count($parts) === 1) {
+                //it is the group name, scoped the namespace
+                $ns_name = $parts[0];
+                /** @var Server $system_server */
+                $system_server = Server::getDefaultServer();
+                $build = static::buildNamespace(server_id: $system_server->id,namespace_name: $ns_name);
+
+            } else if (count($parts) === 2) {
+                // first should be a server
+                $server_name = $parts[0];
+                $ns_name = $parts[1];
+                /** @var Server $owner */
+                $owner = Server::resolveServer($server_name);
+                $build = static::buildNamespace(server_id: $owner->id,namespace_name: $ns_name);
+            }
+        }
+
+        $ret =  $build?->first();
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.namespace_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::NAMESPACE_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
+
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    $build = $this->where('ref_uuid', $value);
-                } else {
-                    if (is_string($value)) {
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-
-                        if (count($parts) === 1) {
-                            //it is the group name, scoped the namespace
-                            $ns_name = $parts[0];
-                            /** @var Server $system_server */
-                            $system_server = Server::buildServer(is_system: true)->first();
-                            $build = $this->where('namespace_name', $ns_name);
-                            if ($system_server) {
-                                $build->where('namespace_server_id',$system_server->id);
-                            } else {
-                                $build->whereNull('namespace_server_id');
-                            }
-
-                        } else if (count($parts) === 2) {
-                            // first should be a server
-                            $server_name = $parts[0];
-                            $namespace_name = $parts[1];
-                            /** @var Server $owner */
-                            $owner = (new Server())->resolveRouteBinding($server_name);
-                            $build = $this->where('namespace_server_id', $owner?->id)->where('namespace_name', $namespace_name);
-                        }
-                    }
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = UserNamespace::buildNamespace(me_id:$first_id)->first();
-                }
-            }
-        }
-        catch (\Exception $e) {
-            Log::warning('User Type resolving: '. $e->getMessage());
-        }
-        finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.namespace_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::NAMESPACE_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
-
+        return static::resolveNamespace($value);
     }
 
     const NAMESPACE_SEPERATOR = '.';

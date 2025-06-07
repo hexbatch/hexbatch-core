@@ -27,7 +27,7 @@ class ElementResponse implements  JsonSerializable
     public string $phase_uuid = '';
 
     #[OA\Property(title: 'Namespace uuid',type: HexbatchUuid::class)]
-    public string $namespace_uuid = '';
+    public ?string $namespace_uuid = null;
 
     #[OA\Property(title: 'Phase',type: HexbatchUuid::class)]
     public ?PhaseResponse $phase = null;
@@ -63,7 +63,7 @@ class ElementResponse implements  JsonSerializable
         $this->phase_uuid = $given_element->element_phase->ref_uuid;
 
         /** @uses  Element::element_namespace() */
-        $this->namespace_uuid = $given_element->element_namespace->ref_uuid;
+        $this->namespace_uuid = $given_element->element_namespace?->ref_uuid;
 
 
         $this->created_at = $given_element->created_at? Carbon::parse($given_element->created_at,'UTC')

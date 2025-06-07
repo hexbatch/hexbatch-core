@@ -31,6 +31,7 @@ return [
     'no_namespace' => 'There is no namespace found in the route when asking for it, or the user is not authenticated, or the user has no default namespace',
 
     //namespaces
+    'namespace_missing' => 'Namespace not found from path or user',
     'namespace_not_found' => 'Namespace not found using :ref',
     'namespace_not_found_by' => 'Namespace not found using :types : :values ',
     'namespace_invalid_name' => 'Namespace has invalid name :ref',

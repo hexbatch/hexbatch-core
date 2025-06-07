@@ -164,7 +164,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds
         return $this->action_data;
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['access'] = $this->access?->value;
         $ret['value_policy'] = $this->value_policy?->value;

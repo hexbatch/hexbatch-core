@@ -88,7 +88,7 @@ class DesignLocationCreate extends Act\Cmd\Ds
         return $this->action_data;
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['location_type'] = $this->location_type?->value;
         return $ret;

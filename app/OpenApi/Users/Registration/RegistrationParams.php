@@ -6,9 +6,10 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
-use App\OpenApi\Users\HexbatchUserName;
+use App\OpenApi\Users\HexbatchName;
 use App\Rules\UserNameReq;
-use Illuminate\Http\Request;
+use App\Sys\Res\Types\Stk\Root\Api\ApiParamBase;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -21,9 +22,9 @@ use OpenApi\Attributes as OA;
     example: [new OA\Examples(summary: "Registration Example", value: ["username"=>"will","password"=>"xamp"])]
 )]
 
-class RegistrationParams
+class RegistrationParams extends ApiParamBase
 {
-    #[OA\Property(title: 'User Name',type: HexbatchUserName::class,
+    #[OA\Property(title: 'User Name',type: HexbatchName::class,
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]
 
     )]
@@ -40,11 +41,11 @@ class RegistrationParams
     )]
     protected string $public_key;
 
-    public function fromRequest(Request $request)
+    public function fromCollection(Collection $col, bool $do_validation = true)
     {
-        $this->username = $request->request->getString('username');
-        $this->password = $request->request->getString('password');
-        $this->public_key = (string)$request->request->get('public_key');
+        $this->username = (string)$col->get('username');
+        $this->password = (string)$col->get('password');
+        $this->public_key = (string)$col->get('public_key');
         try {
             Validator::make(
                 ['username' => $this->username,'password'=>$this->password],
@@ -60,6 +61,16 @@ class RegistrationParams
                 RefCodes::BAD_REGISTRATION);
         }
 
+    }
+
+    public function toArray(): array
+    {
+        $ret = parent::toArray();
+
+        $ret['username'] = $this->username;
+        $ret['password'] = $this->password;
+        $ret['public_key'] = $this->public_key;
+        return $ret;
     }
 
     public function getUsername(): string

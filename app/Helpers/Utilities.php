@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\Exceptions\HexbatchCoreException;
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\Server;
@@ -218,6 +219,20 @@ class Utilities {
         return Server::getThisServer(uuid: ThisServer::getClassUuid());
     }
 
+    public static function getCurrentOrUserNamespace() : ?UserNamespace {
+        $ns = static::getCurrentNamespace();
+        if (!$ns) {
+            $ns = static::getThisUserDefaultNamespace();
+        }
+        if (!$ns) {
+            throw new HexbatchNotFound(
+                __('msg.namespace_missing'),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::NAMESPACE_NOT_FOUND
+            );
+        }
+        return $ns;
+    }
     public static function getCurrentNamespace() : ?UserNamespace {
         $namespace = null;
         $what_route = Route::current();

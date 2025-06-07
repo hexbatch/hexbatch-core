@@ -105,7 +105,7 @@ class ServerPromote extends Act\Cmd\Server
         }
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['server_status'] = $this->server_status?->value;
         return $ret;

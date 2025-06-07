@@ -26,7 +26,6 @@ use Illuminate\Database\Query\JoinClause;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -109,13 +108,28 @@ class LocationBound extends Model
         return $ret;
     }
 
-     public static function buildLocationBound(?int $me_id = null, ?int $attribute_id = null, ?string $uuid = null ) : Builder {
+     public static function buildLocationBound(
+         ?int $me_id = null, ?int $attribute_id = null, ?string $uuid = null
+         ,?int $namespace_id = null,?string $name = null,
+         bool $with_attributes = false, bool $with_namespace = false
+     ) : Builder {
 
+        /** @var Builder $build */
         $build =  LocationBound::select('location_bounds.*')
-            ->selectRaw(" extract(epoch from  location_bounds.created_at) as created_at_ts,".
-                "  extract(epoch from  location_bounds.updated_at) as updated_at_ts,ST_AsGeoJSON(geom) as geom_as_geo_json")
-            /** @uses LocationBound::location_attributes(),static::location_namespace() */
-            ->with('location_attributes','location_namespace');
+            ->selectRaw(" extract(epoch from  location_bounds.created_at) as created_at_ts")
+            ->selectRaw("  extract(epoch from  location_bounds.updated_at) as updated_at_ts")
+            ->selectRaw("ST_AsGeoJSON(geom) as geom_as_geo_json");
+
+            if ($with_namespace) {
+                /** @uses static::location_namespace() */
+                $build->with('location_namespace');
+            }
+
+            if ($with_attributes) {
+                /** @uses LocationBound::location_attributes() */
+                $build->with('location_attributes');
+            }
+
 
         if ($uuid) {
             $build->where('location_bounds.ref_uuid',$uuid);
@@ -134,9 +148,19 @@ class LocationBound extends Model
         }
 
 
+
+
         if ($me_id) {
             $build->where('location_bounds.id',$me_id);
         }
+
+         if ($namespace_id) {
+             $build->where('location_bounds.location_bound_namespace_id',$namespace_id);
+         }
+
+         if ($name) {
+             $build->where('location_bounds.bound_name',$build);
+         }
 
         return $build;
     }
@@ -291,64 +315,53 @@ class LocationBound extends Model
         return false;
     }
 
+    public static function resolveLocation(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+            $build = static::buildLocationBound(uuid: $value);
+        } else {
+
+            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            if (count($parts) === 2) {
+                $owner_hint = $parts[0];
+                $maybe_name = $parts[1];
+                /**
+                 * @var UserNamespace $owner
+                 */
+                $owner = UserNamespace::resolveNamespace($owner_hint);
+                $build = static::buildLocationBound(namespace_id: $owner->id,name: $maybe_name);
+            }
+
+            if (count($parts) === 3) {
+                $server_hint = $parts[0];
+                $namespace_hint = $parts[1];
+                $maybe_name = $parts[2];
+                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
+                $build = static::buildLocationBound(namespace_id: $owner->id,name: $maybe_name);
+            }
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.bound_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::BOUND_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
+
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        try {
-            if ($field) {
-                $ret = $this->where($field, $value)->first();
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    $build = $this->where('ref_uuid', $value);
-                } else {
-                    if (is_string($value)) {
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-                        if (count($parts) === 2) {
-                            $owner_hint = $parts[0];
-                            $maybe_name = $parts[1];
-                            /**
-                             * @var UserNamespace $owner
-                             */
-                            $owner = (new UserNamespace())->resolveRouteBinding($owner_hint);
-                            $build = $this->where('location_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
-                        }
-
-                        if (count($parts) === 3) {
-                            $server_hint = $parts[0];
-                            $namespace_hint = $parts[1];
-                            $maybe_name = $parts[2];
-                            /**
-                             * @var UserNamespace $owner
-                             */
-                            $owner = (new UserNamespace())->resolveRouteBinding($server_hint.UserNamespace::NAMESPACE_SEPERATOR.$namespace_hint);
-                            $build = $this->where('location_bound_namespace_id', $owner?->id)->where('bound_name', $maybe_name);
-                        }
-                    }
-                }
-            }
-
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $first_build = LocationBound::buildLocationBound(me_id: $first_id);
-                    $ret = $first_build->first();
-                }
-            }
-        }
-        catch (\Exception $e) {
-            Log::warning('Location Bound resolving: '. $e->getMessage());
-        }
-        finally {
-            if (empty($ret)) {
-                throw new HexbatchNotFound(
-                    __('msg.bound_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::BOUND_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
+       return static::resolveLocation($value);
     }
 
     /**

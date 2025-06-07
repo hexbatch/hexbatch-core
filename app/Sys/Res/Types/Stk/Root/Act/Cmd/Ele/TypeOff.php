@@ -27,7 +27,8 @@ use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Turn off a type in an element")]
 #[HexbatchBlurb( blurb: "Turns off all the attributes of a subtype in an element")]
-#[HexbatchDescription( description: '
+#[HexbatchDescription( description: /** @lang markdown */
+    '
   # When attributes are toggled off
 
   Attributes are organized by type, and subtypes of an element can be turned on and off for that element.

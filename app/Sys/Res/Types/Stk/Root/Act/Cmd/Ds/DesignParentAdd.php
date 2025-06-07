@@ -210,7 +210,7 @@ class DesignParentAdd extends Act\Cmd\Ds
         return $this->action_data;
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['approval'] = $this->approval?->value;
         return $ret;

@@ -3,8 +3,6 @@
 namespace App\OpenApi\Types;
 
 use App\Api\Common\HexbatchUuid;
-use App\Enums\Attributes\TypeOfServerAccess;
-use App\Helpers\Utilities;
 use App\Models\ElementType;
 use App\OpenApi\Attributes\AttributeResponse;
 use App\OpenApi\Bounds\ScheduleResponse;
@@ -56,7 +54,8 @@ class TypeResponse implements  JsonSerializable
 
 
     #[OA\Property( title: 'Access')]
-    public ?TypeOfServerAccess $access = null ;
+    /** @var AccessLevelResponse[] $access */
+    public array $access = [] ;
 
     #[OA\Property( title: 'Schedule')]
     public ?ScheduleResponse $schedule = null ;
@@ -86,9 +85,7 @@ class TypeResponse implements  JsonSerializable
         }
 
         foreach ($given_type->type_server_levels as $access_obj) {
-            if ($access_obj->server_access_type_id === Utilities::getThisServer()->id) {
-                $this->access = $access_obj->access_type;
-            }
+            $this->access[] = new AccessLevelResponse(given_server_level: $access_obj);
         }
 
 
@@ -117,7 +114,7 @@ class TypeResponse implements  JsonSerializable
         $ret = [];
         $ret['uuid'] = $this->uuid;
         $ret['name'] = $this->name;
-        $ret['access'] = $this->access->value;
+        $ret['access'] = $this->access;
 
         if (count($this->parents)) {
             $ret['parents'] = $this->parents;

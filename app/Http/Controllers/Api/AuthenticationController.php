@@ -8,6 +8,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Exceptions\HexbatchAuthException;
+use App\Exceptions\HexbatchCodeRollbackException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
@@ -115,13 +116,28 @@ class AuthenticationController extends Controller
     public function register(Request $request): JsonResponse
     {
 
-        $params = new RegistrationParams();
-        $params->fromRequest($request);
-        $api = new Api\User\UserRegister(is_async: false, params: $params,tags:['registration-by-web','api-top']);
-        $thing = $api->createThingTree(tags: ['registration']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $what = null;
+        try {
+            DB::beginTransaction();
+            $params = new RegistrationParams();
+            $params->fromCollection(new Collection($request->all()));
+            $api = new Api\User\UserRegister(is_async: false, params: $params, tags: ['registration-by-web', 'api-top']);
+            $thing = $api->createThingTree(tags: ['registration']);
+            Utilities::ignoreVar($thing);
+            $data_out = $api->getCallbackResponse($http_code);
+            if ($http_code > 299) {throw new HexbatchCodeRollbackException("Registration Failed");}
+            $what =  response()->json(['response' => $data_out], $http_code);
+            DB::commit();
+            return $what;
+        }
+        catch (HexbatchCodeRollbackException) {
+            DB::rollBack();
+            return $what;
+        }
+        catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
 
     }
 

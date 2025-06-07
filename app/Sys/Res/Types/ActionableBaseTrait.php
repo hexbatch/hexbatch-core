@@ -320,7 +320,7 @@ trait ActionableBaseTrait
 
 
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = [];
         foreach (static::ACTIVE_DATA_KEYS as $key) {
             $ret[$key] = $this->$key;

@@ -11,10 +11,10 @@ use OpenApi\Attributes as OA;
     type: 'string',
     maxLength: 30,
     minLength: 3,
-    pattern: '^\p{L}[\p{L}0-9_]{2,}$',
+    pattern: '^\p{L}[\p{L}0-9_]{2,29}$',
     example: [new OA\Examples(summary: "No capital letters, no punctuation, underscores allowed, numbers allowed after first letter", value:'my_first_user221') ]
 )]
-class HexbatchUserName
+class HexbatchName
 {
 
 
