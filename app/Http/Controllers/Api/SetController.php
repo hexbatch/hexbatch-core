@@ -7,6 +7,8 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
+
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -20,7 +22,7 @@ class SetController extends Controller {
         operationId: 'core.sets.add_element',
         description: "Element namespace members can put element into any set that allows that ",
         summary: 'Change the element owner',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -47,7 +49,7 @@ class SetController extends Controller {
         operationId: 'core.sets.destroy_set',
         description: "Set owners can destroy their sets, bypassing the leave event, can be blocked by handlers on the type ",
         summary: 'Destroys the set, keeps the element',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -69,7 +71,7 @@ class SetController extends Controller {
         operationId: 'core.sets.remove_element',
         description: "Element namespace members can put element into any set that allows that ",
         summary: 'Change the element owner',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -95,7 +97,7 @@ class SetController extends Controller {
         operationId: 'core.sets.empty_set',
         description: "Element namespace members can clear out sticky elements. Event handlers can block their elements from leaving ",
         summary: 'Removes all elements except sticky ones',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -112,7 +114,7 @@ class SetController extends Controller {
         operationId: 'core.sets.stick_element',
         description: "Set namespace members can make sticky elements in those sets ",
         summary: 'Makes element sticky in set operations',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -129,7 +131,7 @@ class SetController extends Controller {
         operationId: 'core.sets.unstick_element',
         description: "Set namespace members can unstick elements in those sets ",
         summary: 'Unsticks one or more elements in one or more sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -148,7 +150,7 @@ class SetController extends Controller {
         operationId: 'core.sets.purge_set',
         description: "System can remove sets without events or permission ",
         summary: 'System can delete any set',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -166,7 +168,7 @@ class SetController extends Controller {
         operationId: 'core.sets.purge_member',
         description: "System can remove elements without events from any set ",
         summary: 'System can remove set contents',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -186,7 +188,7 @@ class SetController extends Controller {
         operationId: 'core.sets.show_set',
         description: "Shows information about a set to set members ",
         summary: 'Gives information about a set',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -224,7 +226,7 @@ class SetController extends Controller {
         operationId: 'core.sets.list_children',
         description: "Set namespace members can get a list of children sets ",
         summary: 'List child sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -243,7 +245,7 @@ class SetController extends Controller {
         operationId: 'core.sets.list_elements',
         description: "Set namespace members can get a list of set contents ",
         summary: 'list elements in a set',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -260,7 +262,7 @@ class SetController extends Controller {
         operationId: 'core.sets.list',
         description: "Lists all sets this is a member, admin or owner  ",
         summary: 'list sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

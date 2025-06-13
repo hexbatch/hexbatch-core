@@ -146,6 +146,7 @@ return [
     'type_must_be_published_before_making_elements' => "Type :ref needs to be published before making element",
     'type_given_zero_elements_to_make' => "Type :ref was told to make 0 elements",
     'type_is_already_published' => "Type :ref is already published",
+    'type_already_owned_by_namespace' => "Type :ref already has :ns owner",
     'type_has_abstract_attributes' => 'The type :ref cannot be published because it has one or more abstract attribute :issues that do not have children attribute',
 
     //elements
@@ -161,6 +162,7 @@ return [
     'set_not_found_by' => 'Set not found using :types : :values ',
     'set_must_have_a_defining_element' => 'Set must have a defining element',
     'set_does_not_have_element' => 'Set :ref does not have the element :ele',
+    'set_has_different_phase_than_element_entering' => 'Set :ref has phase :set_phase, but element :ele has phase :ele_phase',
 
     //servers
     'server_not_found' => "Server not found using :ref",
@@ -194,5 +196,12 @@ return [
 
     //phase
     'phase_not_found_by' => 'Phase not found using :types : :values ',
+
+    //params
+    'params_missing_namespace' => "Missing namespace in the api call",
+    'params_bad_namespace' => "Namespace provided not found",
+    'params_missing_type' => "Missing type in the api call",
+    'params_bad_type' => "Type provided not found",
+
 
 ];

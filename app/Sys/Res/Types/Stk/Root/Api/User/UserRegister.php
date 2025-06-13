@@ -9,26 +9,24 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Registration\RegistrationParams;
 use App\OpenApi\Users\MeResponse;
-use App\OpenApi\Users\Registration\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\ICallResponse;
+use Hexbatch\Things\Interfaces\IHookCode;
 use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\Models\ThingCallback;
-use Hexbatch\Things\Models\ThingHook;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 #[HexbatchTitle( title: "Register")]
 #[HexbatchBlurb( blurb: "Creates a new user and his default namespace")]
 #[HexbatchDescription( description: "
 
   Makes a new user, his default namespace including a new type, which is used to build the home set, and public and private elements")]
-class UserRegister extends Api\UserApi
+class UserRegister extends Api\UserApi implements IHookCode
 {
     const UUID = '6608f89f-ec12-427e-a653-9edc8acc5d19';
     const TYPE_NAME = 'api_user_register';
@@ -38,6 +36,8 @@ class UserRegister extends Api\UserApi
         Api\UserApi::class,
         Act\Cmd\Us\UserRegister::class,
     ];
+
+    const int HTTP_CODE_GOOD = CodeOf::HTTP_CREATED;
 
 
     protected function setCreatedNamespace(UserNamespace $namespace) : void {
@@ -94,7 +94,7 @@ class UserRegister extends Api\UserApi
         parent::restoreParams($param_array);
         if(!$this->params) {
             $this->params = new RegistrationParams();
-            $this->params->fromArray($param_array);
+            $this->params->fromCollection(new Collection($param_array));
         }
     }
 
@@ -192,37 +192,7 @@ class UserRegister extends Api\UserApi
     }
 
 
-    public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
-    {
-        if ($thing->thing_status === TypeOfThingStatus::THING_SUCCESS) {
 
-            $meta = $body['thing_meta']??null;
-            $action_uuid = null;
-            if ($meta) {
-                $action_uuid = $meta['action']??null;
-            }
-
-            if ($action_uuid  ) {
-                /**
-                 * @var ActionDatum $action
-                 */
-                $action = ActionDatum::buildHexbatchData(uuid: $action_uuid)->first();
-                if ($action) {
-                    $action_id = $action->id;
-                    /** @var static  $me */
-                    $me = static::resolveAction(action_id: $action_id);
-                    $user = $me->getCreatedUser();
-                    $user->refresh();
-                    return new MeResponse(user: $user );
-                }
-
-
-            }
-            throw new \RuntimeException("Could not find action ref or make response");
-        } else {
-            return new ThingResponse(thing:$thing);
-        }
-    }
 
 
 }

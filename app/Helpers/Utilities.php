@@ -215,9 +215,14 @@ class Utilities {
         return UserNamespace::getThisNamespace(uuid: ThisNamespace::getClassUuid());
     }
 
+    protected static ?Server $my_server = null;
+
     public static function getThisServer() : Server {
-        return Server::getThisServer(uuid: ThisServer::getClassUuid());
+        if (static::$my_server) {return static::$my_server; }
+        static::$my_server = Server::getThisServer(uuid: ThisServer::getClassUuid());
+        return static::$my_server;
     }
+
 
     public static function getCurrentOrUserNamespace() : ?UserNamespace {
         $ns = static::getCurrentNamespace();

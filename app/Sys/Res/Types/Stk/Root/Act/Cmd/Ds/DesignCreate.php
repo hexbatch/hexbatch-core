@@ -13,10 +13,9 @@ use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\ElementTypeServerLevel;
 use App\Models\Server;
-
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Types\DesignParams;
+use App\OpenApi\Params\Design\DesignParams;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;

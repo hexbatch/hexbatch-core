@@ -390,16 +390,18 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 
     public static function getThisNamespace(
         ?int             $id = null,
-        ?string          $uuid = null
+        ?string          $uuid = null,
+        ?string          $name = null,
     )
     : UserNamespace
     {
-        $ret = static::buildNamespace(me_id:$id,uuid: $uuid)->first();
+        $ret = static::buildNamespace(me_id:$id,uuid: $uuid,namespace_name: $name)->first();
 
         if (!$ret) {
             $arg_types = [];
             $arg_vals = [];
             if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($name) { $arg_types[] = 'name'; $arg_vals[] = $name;}
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);

@@ -2,12 +2,16 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
+use App\Exceptions\HexbatchFailException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Design\DesignOwnershipParams;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +37,9 @@ class DesignOwnerPromote extends Act\Cmd\Ds
     ];
 
     const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid'];
+
+
+    #[ApiParamMarker( param_class: DesignOwnershipParams::class)]
     public function __construct(
         protected ?string        $given_type_uuid = null,
         protected ?string        $given_namespace_uuid = null,
@@ -78,6 +85,13 @@ class DesignOwnerPromote extends Act\Cmd\Ds
 
         if (!$this->getGivenNamespace()) {
             throw new \InvalidArgumentException("Need namespace before can change type owner");
+        }
+
+        if ($this->getGivenNamespace()->id === $this->getDesignType()->owner_namespace_id) {
+            throw new HexbatchFailException( __('msg.type_already_owned_by_namespace',
+                ['ref'=>$this->getDesignType()->getName(),'ns'=>$this->getDesignType()->owner_namespace->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_ALREADY_HAS_OWNER);
         }
 
         try {

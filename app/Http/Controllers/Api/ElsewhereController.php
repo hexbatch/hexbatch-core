@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Illuminate\Http\JsonResponse;
@@ -59,7 +60,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.give_credentials',
         description: "The elsewhere gave us credentials to use on their server. This will replace the older ones",
         summary: 'Servers can renew credentials',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -79,7 +80,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.push_credentials',
         description: "Can send new credentials to regisered server . This can be blocked by event",
         summary: 'Servers can have credentials renewed without them asking',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -98,7 +99,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.change_status',
         description: "Can change the server status to allowed|blocked|paused|pending. Events can block",
         summary: 'System can change server status',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -120,7 +121,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.give_namespace',
         description: "Servers can combine many namespaces at once to avoid extra http calls. Events can filter or block this",
         summary: 'A new namespace is given from elsewhere',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -138,7 +139,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.give_set',
         description: "Servers can combine many sets at once to avoid extra http calls. Events can filter or block this",
         summary: 'A new set is given from elsewhere',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -158,7 +159,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.give_type',
         description: "Servers can combine many types at once to avoid extra http calls. Events can filter or block this",
         summary: 'A new type is given from elsewhere',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -177,7 +178,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.give_event',
         description: "The event runs if the type has setup the listener to be run by that server. Can be blocked before the listener is run",
         summary: 'An event to run is given from elsewhere',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -196,7 +197,7 @@ class ElsewhereController extends Controller {
         description: "Servers can combine many element at once to avoid extra http calls. Events can filter or block this ".
         "\n Elements that have the same guid and type as here are considered re-entered",
         summary: 'A new element is given from elsewhere',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -216,7 +217,7 @@ class ElsewhereController extends Controller {
         description: "Server A wants to give Server B the element that we gave them earlier. ".
         "\n The response here will give B that element unless blocked ",
         summary: 'Server wants to share element we gave them',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -239,7 +240,7 @@ class ElsewhereController extends Controller {
                 "\nOnce the elements are talked about, will ask for the other stuff related, if missing. ".
                 "\nEvents can block this request ",
         summary: 'Try to get element from another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -258,7 +259,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.ask_type',
         description: "System can initiate transfer for types. Can be many in one request ",
         summary: 'Try to get type from another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -277,7 +278,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.ask_set',
         description: "System can initiate transfer for sets. Can be many in one request ",
         summary: 'Try to get set from another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -295,7 +296,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.ask_namespace',
         description: "System can initiate transfer for namespaces. Can be many in one request ",
         summary: 'Try to get namespace from another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -316,7 +317,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.push_element',
         description: "System can send elements to server ",
         summary: 'Push element to another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -334,7 +335,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.push_set',
         description: "System can send a set with its elements to server ",
         summary: 'Push a set to another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -352,7 +353,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.push_namespace',
         description: "System can send a namespace to server ",
         summary: 'Push a namespace to another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -371,7 +372,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.push_type',
         description: "System can send a type to server ",
         summary: 'Push a type to another server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -391,7 +392,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.push_event',
         description: "System can send registered events to the other server ",
         summary: 'Push an event to another server to complete',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -411,7 +412,7 @@ class ElsewhereController extends Controller {
         description: "We do record keeping, so if this element is recorded as sent to that server, event is called. ".
         " \nThis is notification after the fact and up to us how to handle it ",
         summary: 'Server reports it destroyed an element we gave them',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -432,7 +433,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.suspended_type',
         description: "The other server can suspend a type we gave them, or they gave us. Its up to here how to handle it, can be blocked by events ",
         summary: 'Server suspended type we share with them',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -453,7 +454,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.purge_elsewhere',
         description: "System can remove all associated types,elements,namespaces,sets and designs based on that. No events raised",
         summary: 'System can remove server and all its associated',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -472,7 +473,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.list_servers',
         description: "Anyone can filter servers with a path, and get a paginated list",
         summary: 'List the servers',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -490,7 +491,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.show',
         description: "Anyone can see public information about a server",
         summary: 'Information about a server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -507,7 +508,7 @@ class ElsewhereController extends Controller {
         operationId: 'core.elsewhere.admin_elsewhere',
         description: "Provides links and detailed information about a particular server",
         summary: 'System has private details about a server',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

@@ -2,10 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
+use App\OpenApi\Params\Design\DesignOwnershipParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -33,6 +35,7 @@ use Hexbatch\Things\Interfaces\IThingAction;
 
    * [ElementTypeTurnedOff](../../../Evt/Server/TypeOwnerChanged.php)
 ')]
+#[ApiParamMarker( param_class: DesignOwnershipParams::class)]
 class DesignOwnerChange extends DesignOwnerPromote
 {
     const UUID = '3baa3285-5dff-42b5-bd22-071ad39101db';

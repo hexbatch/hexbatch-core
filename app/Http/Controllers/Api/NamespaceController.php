@@ -8,6 +8,8 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
+
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -20,7 +22,7 @@ class NamespaceController extends Controller {
         description: "Namespace members can run this to see the owner, the name, the count of admins, members, types, elements ".
         "\n Will show a list of the first admins (not a complete list)",
         summary: 'Shows a summary of the namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -59,7 +61,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.list',
         description: "Will show owned, admin and member status of all namespaces this caller is part of. Can filter by handle or namespace name",
         summary: 'Shows all the namespaces this caller is part of',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -81,7 +83,7 @@ class NamespaceController extends Controller {
             "\n can set new homesets, public and private elements, source server,name ".
             "\n can change ownership",
         summary: 'Allows the system to set namespace data',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -102,7 +104,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.destroy',
         description: "User can destroy any namespace they own except their default namespace ",
         summary: 'The owner can destroy a namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -124,7 +126,7 @@ class NamespaceController extends Controller {
         description: "user make new namespace. ".
         "\n can set new homesets, public and private elements, source server,name, user, other data ",
         summary: 'The user creates a new namespace with themself as the owner',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -144,7 +146,7 @@ class NamespaceController extends Controller {
         description: "The selected namespaces are given to another user as long as they were processed in the starting transfer step as a safety check ".
         "\n The event is sent after the fact. If this is a transfer of a default ns, then a new default ns is made for that user giving it up ",
         summary: 'The user gives the namespace(s) to another user',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -164,7 +166,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.start_transfer',
         description: "The selected namespaces are marked as allowed for transfer. Event can stop this. Not transferred yet. ",
         summary: 'The user gives permission for the transfer of the namespace(s)',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -185,7 +187,7 @@ class NamespaceController extends Controller {
         description: "System make new namespaces and assign anyone as the owner. ".
         "\n can set new homesets, public and private elements, source server,name, user, other data ",
         summary: 'Allows the system to make a new namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -205,7 +207,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.purge',
         description: "System can destroy any namespaces without events going off ",
         summary: 'Allows the system to destroy any namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -220,13 +222,13 @@ class NamespaceController extends Controller {
 
 
 
-//'#/components/parameters/namespace'
+//HexbatchResource::class
     #[OA\Post(
         path: '/api/v1/{namespace}/namespaces/add_admin',
         operationId: 'core.namespaces.add_admin',
         description: "Owner can add a new administrator (who will also be a member).Event goes to handle ",
         summary: 'Add a new admin to the namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -246,7 +248,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.list_admins',
         description: "Any member can use this to get a full list of all the admins (includes owner). Can filter by handle or admin uuid or name",
         summary: 'Shows a list of all the admins from this namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -266,7 +268,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.remove_admin',
         description: "Owner can remove administrator (who will still be a member).Event goes to handle ",
         summary: 'Remove admin privs from a member in the namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -289,7 +291,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.purge_admin',
         description: "System can remove any admin from any group without raising events (person is still member) ",
         summary: 'System can remove admins from namespaces',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -308,7 +310,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.promote_admin',
         description: "System can add anyone to be admin in group without raising events ",
         summary: 'System can add admins to namespaces',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -326,7 +328,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.add_member',
         description: "Admin can add any other namespace as a member. Event goes to handle",
         summary: 'Add a member to the namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -346,7 +348,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.remove_member',
         description: "Admin can remove member who is not administrator. Event goes to handle ",
         summary: 'Remove member from the namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -367,7 +369,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.promote_member',
         description: "System can add any member from group without raising events ",
         summary: 'System can add members to namespaces',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -387,7 +389,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.purge_member',
         description: "System can remove any member from any group without raising events ",
         summary: 'System can remove members from namespaces',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -407,7 +409,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.list_members',
         description: "Any member can use this to get a full list of all the members. Can filter by handle or member uuid/name",
         summary: 'Shows a list of all the members from this namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -424,7 +426,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.add_handle',
         description: "Namespaces can be grouped, organized and controlled together",
         summary: 'Add element handle to a namespace',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -442,7 +444,7 @@ class NamespaceController extends Controller {
         operationId: 'core.namespaces.remove_handle',
         description: "Handles can be removed at any time, and left empty or new ones added",
         summary: 'Remove element handle from a namespaces',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

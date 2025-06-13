@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -21,7 +22,7 @@ class TypeController extends Controller {
         operationId: 'core.types.show',
         description: "See information about a type if one is a member, admin or owner ",
         summary: 'Show information about a type',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -56,7 +57,7 @@ class TypeController extends Controller {
         operationId: 'core.types.list_published',
         description: "Can see any published types where one is a member, admin or owner ",
         summary: 'List published types',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -74,7 +75,7 @@ class TypeController extends Controller {
         operationId: 'core.types.list_suspended',
         description: "Can see any suspended types where one is a member, admin or owner ",
         summary: 'List suspended types',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -113,7 +114,7 @@ class TypeController extends Controller {
         operationId: 'core.types.list_live',
         description: "Members can see all the currently applied live using this type",
         summary: 'Show live types made from this type',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -133,7 +134,7 @@ class TypeController extends Controller {
         operationId: 'core.types.list_elements',
         description: "Members can see all the elements created. Use the element show command to get information about element",
         summary: 'Show elements made from this type',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -154,7 +155,7 @@ class TypeController extends Controller {
         operationId: 'core.types.list_descendants',
         description: "Members can see how this type is being inherited by other types.",
         summary: 'Show type inheritance',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -172,7 +173,7 @@ class TypeController extends Controller {
         operationId: 'core.types.list_attribute_descendants',
         description: "Members can see how this type's attributes are being used in other types.",
         summary: 'Show attribute inheritance',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -195,7 +196,7 @@ class TypeController extends Controller {
         operationId: 'core.types.add_handle',
         description: "Types can be grouped, organized and controlled together",
         summary: 'Add element handle to a type',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -215,7 +216,7 @@ class TypeController extends Controller {
         operationId: 'core.types.remove_handle',
         description: "Handles can be removed at any time, and be empty or new ones added",
         summary: 'Remove element handle from a type',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -235,7 +236,7 @@ class TypeController extends Controller {
         operationId: 'core.types.add_attribute_handle',
         description: "Attributes can be grouped, organized and controlled together by an attribute handle. This can also be used for displaying debugging info",
         summary: 'Add attribute handle to an attribute',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -254,7 +255,7 @@ class TypeController extends Controller {
         operationId: 'core.types.remove_attribute_handle',
         description: "Handles can be removed at any time, and be empty or new ones added",
         summary: 'Remove attribute handle from an attribute',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -274,7 +275,7 @@ class TypeController extends Controller {
         operationId: 'core.types.change_owner',
         description: "The type owner can give the type to any other namespace",
         summary: 'Changes the type owner',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -294,7 +295,7 @@ class TypeController extends Controller {
         operationId: 'core.types.promote_owner',
         description: "Type owners can be changed by the system without events or permission",
         summary: 'System can change the type owner',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -313,7 +314,7 @@ class TypeController extends Controller {
         operationId: 'core.types.destroy_type',
         description: "The type owner destroy the type, inheritied types and event on this type can block",
         summary: 'Changes the type owner',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -331,7 +332,7 @@ class TypeController extends Controller {
         operationId: 'core.types.purge',
         description: "System can delete types, and all their elements and sets, without events or permission",
         summary: 'System can delete types',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -351,7 +352,7 @@ class TypeController extends Controller {
         operationId: 'core.types.fire_event',
         description: "Custom events can be fired, their scope depends on what they inherit, smallest scope wins if multiple ancestors of mixed scope",
         summary: 'Fires a custom event',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -371,7 +372,7 @@ class TypeController extends Controller {
         operationId: 'core.types.publish',
         description: "Type admins do unpublished design and mark it as ready for use. Events from inherited types and attributes can block",
         summary: 'Publishes a design',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -390,7 +391,7 @@ class TypeController extends Controller {
         operationId: 'core.types.promote_publish',
         description: "System can publish any design. This overrules any rules denying it (those events do not fire) ",
         summary: 'System publishes a design',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -409,7 +410,7 @@ class TypeController extends Controller {
                 "\n Suspended types do not listen to events ".
                 "\n Can be blocked by events (system only listeners block, others listen to after the fact)",
         summary: 'Suspends a design',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -429,7 +430,7 @@ class TypeController extends Controller {
         description: "Type admins retire a type. Events from inherited types and attributes can block. ".
                     "\nUnpublished types using this after acceptance can still use it",
         summary: 'Retires a design',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -447,7 +448,7 @@ class TypeController extends Controller {
         operationId: 'core.types.create_element',
         description: "Type admin can create one or more elements going to one or more namespaces. The namespace can reject. The inherited types can reject",
         summary: 'Creates one or more new elements from a type',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -468,7 +469,7 @@ class TypeController extends Controller {
         operationId: 'core.types.promote_element',
         description: "System can make elements out of any types, not needing permissions. No events created when doing this",
         summary: 'Creates one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

@@ -291,28 +291,29 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
             $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
             if (count($parts) === 2) {
-                $owner_hint = $parts[0];
+                $type_hint = $parts[0];
                 $attr_name = $parts[1];
                 /**
                  * @var UserNamespace $owner
                  */
-                $owner = UserNamespace::resolveNamespace($owner_hint);
-                $build = static::buildAttribute(namespace_id: $owner->id,name: $attr_name);
+                $owner = ElementType::resolveType($type_hint);
+                $build = static::buildAttribute(type_id: $owner->id,name: $attr_name);
             }
 
             if (count($parts) === 3) {
                 $server_hint = $parts[0];
-                $namespace_hint = $parts[1];
+                $type_hint = $parts[1];
                 $attr_name = $parts[2];
-                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
-                $build = static::buildAttribute(namespace_id: $owner->id,name: $attr_name);
+                $owner = ElementType::resolveType("$server_hint..$type_hint");
+                $build = static::buildAttribute(type_id: $owner->id,name: $attr_name);
             }
 
             if (count($parts) === 4) {
                 $server_hint = $parts[0];
                 $namespace_hint = $parts[1];
-                $attr_name = $parts[2];
-                $type_name = $parts[3];
+                $type_name = $parts[2];
+                $attr_name = $parts[3];
+
                 $namespace = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
                 $type = ElementType::resolveType("$server_hint.$namespace_hint.$type_name");
                 $build = static::buildAttribute(namespace_id: $namespace->id, type_id: $type->id, name: $attr_name);

@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-use App\OpenApi\Types\DesignParams;
+use App\OpenApi\Params\Design\DesignParams;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;

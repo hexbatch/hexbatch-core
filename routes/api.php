@@ -486,7 +486,10 @@ Route::prefix('v1')->group(function () {
                     Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group( function () {
                         Route::post('promote_owner', [Api\DesignController::class, 'promote_design_owner'])->name('core.design.promote_owner');
                         Route::delete('purge', [Api\DesignController::class, 'purge_design'])->name('core.design.purge');
-                        Route::post('promote_attribute', [Api\DesignController::class, 'promote_attribute'])->name('core.design.promote_attribute');
+
+                        Route::prefix('attribute/{attribute}')->group(function () {
+                            Route::post('promote', [Api\DesignController::class, 'promote_attribute'])->name('core.design.promote_attribute');
+                        });
                     });
 
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
@@ -505,8 +508,8 @@ Route::prefix('v1')->group(function () {
 
                         Route::prefix('attribute/{attribute}')->group(function () {
                             Route::middleware(Middleware\ValidateAttributeOwnership::class)->group(function () {
-                                Route::delete('destroy_attribute', [Api\DesignController::class, 'destroy_attribute'])->name('core.design.destroy_attribute');
-                                Route::patch('edit_attribute', [Api\DesignController::class, 'edit_attribute'])->name('core.design.edit_attribute');
+                                Route::delete('destroy', [Api\DesignController::class, 'destroy_attribute'])->name('core.design.destroy_attribute');
+                                Route::patch('edit', [Api\DesignController::class, 'edit_attribute'])->name('core.design.edit_attribute');
                                 Route::post('create_listener', [Api\DesignController::class, 'create_listener'])->name('core.design.create_listener');
                                 Route::delete('destroy_listener', [Api\DesignController::class, 'destroy_listener'])->name('core.design.destroy_listener');
                                 Route::post('create_rule', [Api\DesignController::class, 'create_rule'])->name('core.design.create_rule');
@@ -543,7 +546,7 @@ Route::prefix('v1')->group(function () {
 
                         Route::prefix('attribute/{attribute}')->group(function () {
                             Route::middleware(Middleware\ValidateAttributeOwnership::class)->group(function () {
-                                Route::get('show_attribute', [Api\DesignController::class, 'show_attribute'])->name('core.design.show_attribute');
+                                Route::get('show', [Api\DesignController::class, 'show_attribute'])->name('core.design.show_attribute');
 
                                 Route::get('show_listener', [Api\DesignController::class, 'show_listener'])->name('core.design.show_listener');
                                 Route::get('test_listener', [Api\DesignController::class, 'test_listener'])->name('core.design.test_listener');

@@ -7,6 +7,8 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
+
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -21,7 +23,7 @@ class LinkController extends Controller {
         operationId: 'core.links.unlink',
         description: "Link admin can remove one or more links they control",
         summary: 'Destroys one or more links',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -41,7 +43,7 @@ class LinkController extends Controller {
         operationId: 'core.links.list',
         description: "Link members can see all the links owned by namespaces they belong",
         summary: 'Shows a list of links',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -58,7 +60,7 @@ class LinkController extends Controller {
         operationId: 'core.links.show',
         description: "Link member can see information about a particular link",
         summary: 'Show a link',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

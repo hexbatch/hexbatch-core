@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Exceptions\HexbatchDifferentPhase;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -190,6 +191,14 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
 
 
     public function addElement(Element $ele, bool $is_sticky = false) : ElementSetMember {
+        // see if element is same phase as set
+        if ($ele->element_phase_id !== $this->defining_element->element_phase_id) {
+            throw new HexbatchDifferentPhase(__("msg.set_has_different_phase_than_element_entering",
+                ['ref'=>$this->getName(),'ele'=>$ele->getName(),'set_phase'=>$this->defining_element->element_phase->getName(),
+                    'ele_phase'=>$ele->element_phase->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::PHASE_IS_DIFFERENT);
+        }
         $node = new ElementSetMember();
         $node->holder_set_id = $this->id;
         $node->member_element_id = $ele->id;

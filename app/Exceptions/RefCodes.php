@@ -103,6 +103,7 @@ class RefCodes {
     const int TYPE_PARENT_DENIED_PUBLISHING = 7250;
 
     const int TYPE_GIVEN_ZERO_TO_MAKE = 7300;
+    const int TYPE_ALREADY_HAS_OWNER = 7400;
 
     //elements start at 8000
 
@@ -125,6 +126,10 @@ class RefCodes {
 
 
     const int PHASE_NOT_FOUND = 20001;
+    const int PHASE_IS_DIFFERENT = 20020;
+
+
+    const int DESIGN_API_SCHEMA_ISSUE = 50000;
 
     /**
      * @type string[]
@@ -197,6 +202,7 @@ class RefCodes {
         self::TYPE_PARENT_DENIED_DESIGN => '',
         self::TYPE_PARENT_DENIED_PUBLISHING => '',
         self::TYPE_GIVEN_ZERO_TO_MAKE => '',
+        self::TYPE_ALREADY_HAS_OWNER => '',
 
         self::ELEMENT_NOT_FOUND => '',
         self::ELEMENT_BAD_SCHEMA => '',
@@ -211,7 +217,10 @@ class RefCodes {
         self::PATH_CANNOT_EDIT => '',
         self::PATH_BAD_NAME => '',
 
-        self::PHASE_NOT_FOUND => ''
+        self::PHASE_NOT_FOUND => '',
+        self::PHASE_IS_DIFFERENT => '',
+
+        self::DESIGN_API_SCHEMA_ISSUE => '',
 
     ];
 }

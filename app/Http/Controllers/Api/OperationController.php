@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -20,7 +21,7 @@ class OperationController extends Controller {
         operationId: 'core.operations.unshift',
         description: "namespace members of the sets can select one or more elements from one set to be unshifted to another ",
         summary: 'Add elements to the front of the set',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -51,7 +52,7 @@ class OperationController extends Controller {
         operationId: 'core.operations.combine',
         description: "namespace members of the sets can adjust set contents using logic operations ",
         summary: 'Add or remove elements between sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -82,7 +83,7 @@ class OperationController extends Controller {
         operationId: 'core.operations.mutual',
         description: "Any sets and elements can have mutuals made from the readable attributes ",
         summary: 'Make a mutual from one or more sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -101,7 +102,7 @@ class OperationController extends Controller {
         operationId: 'core.operations.pop',
         description: "Namespace members of the sets can pop off elements to another set ",
         summary: 'Pops elements from sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -132,7 +133,7 @@ class OperationController extends Controller {
         operationId: 'core.operations.push',
         description: "Namespace members of the sets can push elements on the top positions of target sets ",
         summary: 'Push elements to sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -165,7 +166,7 @@ class OperationController extends Controller {
         operationId: 'core.operations.shift',
         description: "Namespace members of the sets can remove elements from the bottom positions of target sets ",
         summary: 'shift elements from sets',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

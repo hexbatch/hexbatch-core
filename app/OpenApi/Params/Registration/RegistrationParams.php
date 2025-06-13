@@ -1,12 +1,12 @@
 <?php
 
-namespace App\OpenApi\Users\Registration;
+namespace App\OpenApi\Params\Registration;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
-use App\OpenApi\Users\HexbatchName;
+use App\OpenApi\Resources\HexbatchResourceName;
 use App\Rules\UserNameReq;
 use App\Sys\Res\Types\Stk\Root\Api\ApiParamBase;
 use Illuminate\Support\Collection;
@@ -24,7 +24,7 @@ use OpenApi\Attributes as OA;
 
 class RegistrationParams extends ApiParamBase
 {
-    #[OA\Property(title: 'User Name',type: HexbatchName::class,
+    #[OA\Property(title: 'User Name',type: HexbatchResourceName::class,
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]
 
     )]

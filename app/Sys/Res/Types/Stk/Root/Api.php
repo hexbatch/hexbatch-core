@@ -15,8 +15,8 @@ use App\Sys\Res\Types\Stk\Root;
 use Hexbatch\Things\Enums\TypeOfCallback;
 use Hexbatch\Things\Enums\TypeOfCallbackStatus;
 use Hexbatch\Things\Enums\TypeOfHookMode;
+use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\ICallResponse;
-use Hexbatch\Things\Interfaces\IHookCode;
 use Hexbatch\Things\Models\Thing;
 use Hexbatch\Things\Models\ThingCallback;
 use Hexbatch\Things\Models\ThingHook;
@@ -33,7 +33,7 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
 /**
  * all descendants have the same uuid across all servers but have a different parent (this)
  */
-class Api extends BaseType implements IHookCode
+class Api extends BaseType implements ICallResponse
 {
     const UUID = 'd314149a-0f51-4b1e-b954-590a890e7c44';
     const TYPE_NAME = 'api';
@@ -93,15 +93,18 @@ class Api extends BaseType implements IHookCode
     }
 
 
-    public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
-    {
-        return new ThingResponse(thing:$thing);
-    }
+
 
     public function onNextStepB(): void
     {
         parent::onNextStepB();
         if (in_array(static::class,static::FAMILY_CLASSES)) {return;}
+        //see if implements hook
+        $interfaces = class_implements($this);
+
+        if (!isset($interfaces['Hexbatch\Things\Interfaces\IHookCode'])) {
+            return;
+        }
 
         $search_params = new HookSearchParams(action_type: static::class, is_blocking: true, is_after: true);
         $maybe_hook = ThingHook::buildHook(params: $search_params)->first();
@@ -154,14 +157,22 @@ class Api extends BaseType implements IHookCode
         $maybe_callbacks = ThingCallback::buildCallback(params: $search_params)->get();
         if (count($maybe_callbacks) === 0) {
             //find the thing tied to this api
-            $http_status = CodeOf::HTTP_OK;
+
             try {
                 $thing = Thing::getThing(action_type_id: $this->getActionId(), action_type: $this->getActionType());
-                if ($thing->isSuccess() || !$thing->isComplete()) {
+                if ($thing->isSuccess()) {
+                    $http_status = static::HTTP_CODE_GOOD;
                     return new ThingResponse(thing: $thing);
-                } else if($thing->isFailedOrError()) {
+                }
+                else if($thing->isError()) {
+                    $http_status = static::HTTP_CODE_ERROR;
+                    return new ThingErrorCollectionResponse(thing: $thing);
+                }
+                else if($thing->isFailedOrError()) {
+                    $http_status = static::HTTP_CODE_BAD;
                     return new ThingErrorCollectionResponse(thing: $thing);
                 } else {
+                    $http_status = static::HTTP_CODE_PENDING;
                     return new ThingResponse(thing: $thing); //punt in case missed something
                 }
 
@@ -213,5 +224,66 @@ class Api extends BaseType implements IHookCode
         }
     }
 
+    const int HTTP_CODE_GOOD = CodeOf::HTTP_ACCEPTED;
+    const int HTTP_CODE_ERROR = CodeOf::HTTP_UNPROCESSABLE_ENTITY;
+    const int HTTP_CODE_SHORT = CodeOf::HTTP_GONE;
+    const int HTTP_CODE_PENDING = CodeOf::HTTP_OK;
+    const int HTTP_CODE_BAD = CodeOf::HTTP_BAD_REQUEST;
+    public function getCode(): int
+    {
+        switch ($this->getActionStatus()) {
+            case TypeOfThingStatus::THING_SUCCESS: {
+                return static::HTTP_CODE_GOOD;
+            }
+
+            case TypeOfThingStatus::THING_SHORT_CIRCUITED:
+            {
+                return static::HTTP_CODE_SHORT;
+            }
+            case TypeOfThingStatus::THING_INVALID:
+            case TypeOfThingStatus::THING_FAIL:
+            {
+                return static::HTTP_CODE_BAD;
+            }
+
+            case TypeOfThingStatus::THING_BUILDING:
+            case TypeOfThingStatus::THING_RUNNING:
+            case TypeOfThingStatus::THING_WAITING:
+            case TypeOfThingStatus::THING_PENDING:
+            {
+                return static::HTTP_CODE_PENDING;
+            }
+
+            case TypeOfThingStatus::THING_ERROR: {
+                return static::HTTP_CODE_ERROR;
+            }
+        }
+        throw new \LogicException("Unknown status: ". $this->getActionStatus()->value);
+
+    }
+
+    public function getData(): ?array
+    {
+        if ($this->isActionSuccess()) {
+            return $this->getDataSnapshot();
+        } else if ($this->isActionFail() || $this->isActionError()) {
+            return $this->getDataSnapshot();
+        }
+
+       return null;
+    }
+
+    public function getWaitTimeoutInSeconds(): ?int
+    {
+        return null;
+    }
+
+    public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
+    {
+        Utilities::ignoreVar($callback,$hook,$header,$body);
+        /** @var static $me */
+        $me = $thing->getAction();
+        return $me;
+    }
 }
 

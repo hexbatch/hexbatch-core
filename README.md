@@ -42,13 +42,29 @@ The project has totally changed, a major rewrite. This is a release of work in p
 
 
 Making api for 
-[DesignCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignCreate.php)
-[DesignOwnerPromote.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerPromote.php)
+[DesignCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignCreate.php) done
+[DesignOwnerPromote.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerPromote.php) draft
 [DesignParentAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentAdd.php)
+[DesignAttributeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeCreate.php)  
+[DesignAttributeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeDestroy.php) 
+[DesignAttributeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeEdit.php) 
+[DesignDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignDestroy.php)  draft
+[DesignPurge.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignPurge.php)  draft
+[DesignEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignEdit.php)  draft
+[DesignOwnerChange.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerChange.php)  draft
+[DesignParentRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentRemove.php) 
 [SetCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/SetCreate.php)
 [SetMemberAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetMemberAdd.php)
 [ElementCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/ElementCreate.php)
 [TypePublish.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/TypePublish.php)
+[ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOwnerChange.php) 
+[ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php)
+[LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php) 
+[LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php)
+[TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php) 
+[TypeOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOn.php)
+[Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php) 
+[Write.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Write.php) 
 
 # Links
 

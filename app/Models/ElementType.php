@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -134,19 +133,21 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $id = null,
         ?string          $uuid = null,
         ?int             $owner_namespace_id = null,
+        ?string          $type_name = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
     )
     : ElementType
     {
-        $ret = static::buildElementType(id:$id,uuid: $uuid, namespace_id: $owner_namespace_id,
+        $ret = static::buildElementType(id:$id,uuid: $uuid, namespace_id: $owner_namespace_id,name: $type_name,
             shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle)->first();
 
         if (!$ret) {
             $arg_types = [];
             $arg_vals = [];
             if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($type_name) { $arg_types[] = 'name'; $arg_vals[] = $type_name;}
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             if ($owner_namespace_id) { $arg_types[] = 'ns'; $arg_vals[] = $owner_namespace_id;}
             if ($shape_bound_id) { $arg_types[] = 'shape'; $arg_vals[] = $shape_bound_id;}
@@ -230,8 +231,10 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
 
-    public static function resolveType(string $value, bool $throw_exception = true)
-    : static
+    public static function resolveType(
+        string $value, ?string $context_namespace_uuid = null, bool $throw_exception = true
+    )
+    : null|static
     {
 
         /** @var Builder $build */
@@ -242,6 +245,20 @@ class ElementType extends Model implements IType,ISystemModel
         } else {
 
             $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+
+            if (count($parts) === 1) {
+                if ($context_namespace_uuid) {
+                    $owner_hint = $context_namespace_uuid;
+                    $maybe_name = $parts[0];
+                    /**
+                     * @var UserNamespace $owner
+                     */
+                    $owner = UserNamespace::resolveNamespace($owner_hint);
+                    $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
+                }
+
+            }
+
             if (count($parts) === 2) {
                 $owner_hint = $parts[0];
                 $maybe_name = $parts[1];
@@ -256,6 +273,11 @@ class ElementType extends Model implements IType,ISystemModel
                 $server_hint = $parts[0];
                 $namespace_hint = $parts[1];
                 $maybe_name = $parts[2];
+
+                if ($server_hint && !$namespace_hint) {
+                    $server = Server::resolveServer($server_hint);
+                    $namespace_hint = $server->owning_namespace->ref_uuid;
+                }
                 $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
                 $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
             }

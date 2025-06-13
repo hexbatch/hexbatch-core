@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -19,7 +20,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.change_owner',
         description: "Element owner can give ownership to another namespace at any time. Any number of elements can be included with a path ",
         summary: 'Change the element owner',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -43,7 +44,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.type_off',
         description: "Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path ",
         summary: 'Turn off all the subtype attributes of elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -63,7 +64,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.type_on',
         description: "Element admin group turn on all parent type attributes. The types, elements and sets given by a path ",
         summary: 'Turn on all the attributes of a parent type in elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -84,7 +85,7 @@ class ElementController extends Controller {
         description: "Can select the same attribute(s) in elements(s) to read, ".
                     "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the same attributes in one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -103,7 +104,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.read_live_type',
         description: "This is the same as core.elements.read_type but looks at the live and ignores the inherited",
         summary: 'Read all the attributes of a type in one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -123,7 +124,7 @@ class ElementController extends Controller {
         description:  "Can select the same type(s) in elements(s) to read, will either succeed if can read all of them or fail if one cannot be read ".
             "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read all the attributes of a live type in one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -149,7 +150,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.write_attribute',
         description: "Write one or more elements found in a path, that have the same attributes. If one can. ",
         summary: 'Write json to the same attributes of one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -171,7 +172,7 @@ class ElementController extends Controller {
         description: "Can read current or next time span of the element's type, its parents and applied live ".
         "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the locations of one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -196,7 +197,7 @@ class ElementController extends Controller {
         description: "If can read any attribute on a type, can add it as a live part to one or more elements in a search path.".
                 "\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  ",
         summary: 'Add a live type to one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -222,7 +223,7 @@ class ElementController extends Controller {
         description: "If can read any attribute on both the source and destination type, can copy its and its state to a new element.".
         "\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  ",
         summary: 'Copy a live type and its state to one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -247,7 +248,7 @@ class ElementController extends Controller {
         description: "If can read any attribute on the live type, can remove its and its state to a new element.".
         "\n If not part of the element ns, can still remove it if part of the type ns and event listeners allow  ",
         summary: 'Remove a live type from one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -269,7 +270,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.ping',
         description: "Element ns can use that to ping elements to target sets.",
         summary: 'Ping one or more elements to a set',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -292,7 +293,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.destroy_element',
         description: "Element admin can destroy one or more elements, the type or parent types can reject this",
         summary: 'Destroys one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -313,7 +314,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.purge_element',
         description: "System can destroy one or more elements without permission",
         summary: 'System Destroy one or more elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -333,7 +334,7 @@ class ElementController extends Controller {
         description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set ".
         "\n The link can be assigned to another namespace, they can reject that. The linked set can reject the link",
         summary: 'Makes a link between an element and a set',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -356,7 +357,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.show_element',
         description: "Element members can see details about an element",
         summary: 'Shows the value and information about an element',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -373,7 +374,7 @@ class ElementController extends Controller {
         operationId: 'core.elements.list_elements',
         description: "Element members can see a list of all the elements of namespaces they belong",
         summary: 'Shows list of elements',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

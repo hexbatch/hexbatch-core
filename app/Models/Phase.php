@@ -151,4 +151,8 @@ class Phase extends Model
         $this->phase_name = $name;
     }
 
+    public function getName() : string {
+        return $this->phase_name;
+    }
+
 }

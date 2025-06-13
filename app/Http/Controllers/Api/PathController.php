@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\OpenApi\Resources\HexbatchNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -21,7 +22,7 @@ class PathController extends Controller {
         operationId: 'core.paths.publish',
         description: "Paths can be used in other api calls after publishing",
         summary: 'Publish a path, marking it as workable',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -37,7 +38,7 @@ class PathController extends Controller {
         operationId: 'core.paths.add_handle',
         description: "Paths can be grouped, organized and controlled together",
         summary: 'Add element handle to a path',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -55,7 +56,7 @@ class PathController extends Controller {
         operationId: 'core.paths.remove_handle',
         description: "Handles can be removed at any time, and left empty or new ones added",
         summary: 'Remove element handle from a path',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -74,7 +75,7 @@ class PathController extends Controller {
         operationId: 'core.paths.list',
         description: "Can filter by handle or see all paths",
         summary: 'Lists the paths this namespace is a member of',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -91,7 +92,7 @@ class PathController extends Controller {
         operationId: 'core.paths.show',
         description: "Members can see times and what uses a path",
         summary: 'Shows a path',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -108,7 +109,7 @@ class PathController extends Controller {
         operationId: 'core.paths.copy',
         description: "Paths can be complicated to make and test, copying them for other use and editing those can be helpful. The new path is unpublished",
         summary: 'Copies a path, with the caller the owner of the new path',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -125,7 +126,7 @@ class PathController extends Controller {
         operationId: 'core.paths.create',
         description: "The caller is the path owner. The name and phase is set",
         summary: 'Creates a new empty path that is unpublished',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -145,7 +146,7 @@ class PathController extends Controller {
         operationId: 'core.paths.edit',
         description: "Handles can be removed at any time, and left empty or new ones added",
         summary: 'Change the path name and phase',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -166,7 +167,7 @@ class PathController extends Controller {
         operationId: 'core.paths.destry',
         description: "No events when destroying, but if used for something will generate an error",
         summary: 'Destroys a path',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -184,7 +185,7 @@ class PathController extends Controller {
         operationId: 'core.paths.create_part',
         description: "Add a single part, or a tree of parts, and that can be attached to the unoccupied root, or to a leaf",
         summary: 'Creates a part or part tree attached to the root or existing rule',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -201,7 +202,7 @@ class PathController extends Controller {
         operationId: 'core.paths.destroy_part',
         description: "The part tree can be trimmed by deleting one rule and its children. This can also delete the root (and all the parts)",
         summary: 'Removed a single part and all its children',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -218,7 +219,7 @@ class PathController extends Controller {
         operationId: 'core.paths.edit_part',
         description: "The part tree can be edited by changing one rule and its children. This can also edit the root (and all the parts)",
         summary: 'Edits a single part and all its children',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -238,7 +239,7 @@ class PathController extends Controller {
         operationId: 'core.paths.show_part',
         description: "Show a part by itself or a tree, if it has children.",
         summary: 'Shows a part and its tree',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -257,7 +258,7 @@ class PathController extends Controller {
         operationId: 'core.paths.test_part',
         description: "Test a part by itself or a tree, if it has children. The tree (or part) will pretend to be the entire search. No events called",
         summary: 'Test a path tree',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -276,7 +277,7 @@ class PathController extends Controller {
         operationId: 'core.paths.search',
         description: "If handle is set, event will be called. Handle can filter, augment or refine",
         summary: 'Search with a path',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -294,7 +295,7 @@ class PathController extends Controller {
         operationId: 'core.paths.test',
         description: "Used before a path is published, can test to see how the parts are working out, no events called",
         summary: 'Test a search',
-        parameters: [new OA\PathParameter(  ref: '#/components/parameters/namespace' )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

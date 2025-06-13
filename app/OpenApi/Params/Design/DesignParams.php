@@ -1,6 +1,6 @@
 <?php
 
-namespace App\OpenApi\Types;
+namespace App\OpenApi\Params\Design;
 
 
 use App\Enums\Attributes\TypeOfServerAccess;
@@ -8,10 +8,10 @@ use App\Helpers\Utilities;
 use App\Models\ElementType;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Users\HexbatchName;
+use App\OpenApi\Resources\HexbatchResource;
+use App\OpenApi\Resources\HexbatchResourceName;
 use App\Sys\Res\Types\Stk\Root\Api\ApiParamBase;
 use Illuminate\Support\Collection;
-
 use OpenApi\Attributes as OA;
 
 /**
@@ -20,20 +20,20 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'DesignParams')]
 class DesignParams extends ApiParamBase
 {
-    #[OA\Property(title: 'Type name', type: HexbatchName::class,
+    #[OA\Property(title: 'Type name', type: HexbatchResourceName::class,
         example: [new OA\Examples(summary: "name example", value:'he312345') ]
 
     )]
     protected ?string $type_name = null;
 
-    #[OA\Property(title: 'Schedule name or uuid', type: HexbatchName::class, nullable: true)]
+    #[OA\Property(title: 'Schedule name or uuid', type:  HexbatchResource::class, nullable: true)]
     protected ?string $schedule = null;
 
 
-    #[OA\Property(title: 'Is this a final type?', type: HexbatchName::class, default: false)]
+    #[OA\Property(title: 'Is this a final type?', default: false)]
     protected bool $is_final = false;
 
-    #[OA\Property(title: 'Is this a final type?', type: HexbatchName::class, default: TypeOfServerAccess::IS_PUBLIC)]
+    #[OA\Property(title: 'Is this a final type?', default: TypeOfServerAccess::IS_PUBLIC)]
     protected TypeOfServerAccess $access = TypeOfServerAccess::IS_PUBLIC;
 
 
