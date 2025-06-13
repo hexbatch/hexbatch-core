@@ -15,6 +15,8 @@ use OpenApi\Attributes as OA;
             new OA\Schema(ref: HexbatchUuid::class)
         ],
     ),
+    maxLength: 36,
+    minLength: 3,
     example: [
         new OA\Examples(summary: "A name by itself", value:'my_first_user221'),
         new OA\Examples(summary: "A uuid by itself", value:'3fabcde3-e732-41b0-88c6-3d3f45e83bf4')

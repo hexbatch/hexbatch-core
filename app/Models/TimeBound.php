@@ -373,14 +373,6 @@ class TimeBound extends Model
                 $owner = UserNamespace::resolveNamespace($owner_hint);
                 $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name);
             }
-
-            if (count($parts) === 3) {
-                $server_hint = $parts[0];
-                $namespace_hint = $parts[1];
-                $maybe_name = $parts[2];
-                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
-                $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name);
-            }
         }
 
         $ret = $build?->first();

@@ -121,6 +121,7 @@ class Server extends Model implements IServer,ISystemModel
         ?string         $uuid = null,
         ?bool           $is_system = null,
         ?string           $server_name = null,
+        ?string           $server_domain = null
     )
     : Builder
     {
@@ -146,6 +147,10 @@ class Server extends Model implements IServer,ISystemModel
             $build->where('servers.server_name', $server_name);
         }
 
+        if ($server_domain) {
+            $build->where('servers.server_domain', $server_domain);
+        }
+
         if ($is_system !== null) {
             $build->where('is_system',$is_system);
         }
@@ -167,8 +172,8 @@ class Server extends Model implements IServer,ISystemModel
 
             if (count($parts) === 1) {
                 //by name
-                $ns_name = $parts[0];
-                $build = static::buildServer(server_name: $ns_name);
+                $domain = mb_strtolower($parts[0]);
+                $build = static::buildServer(server_domain: $domain);
 
             }
         }

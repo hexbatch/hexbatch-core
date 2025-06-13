@@ -210,18 +210,25 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
     }
 
     public static function resolveNamespace(string $value, bool $throw_exception = true) : ?UserNamespace {
-        $build = null;
+
+        /** @var UserNamespace|null $ns */
+        $ns = null;
         if (Utilities::is_uuid($value)) {
-            $build = static::buildNamespace(uuid: $value);
+            $ns = static::buildNamespace(uuid: $value)->first();
         } else {
             $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
 
             if (count($parts) === 1) {
-                //it is the group name, scoped the namespace
-                $ns_name = $parts[0];
-                /** @var Server $system_server */
-                $system_server = Server::getDefaultServer();
-                $build = static::buildNamespace(server_id: $system_server->id,namespace_name: $ns_name);
+                $ns_name_or_domain = $parts[0];
+                //does this have a dot?
+                if (str_contains($ns_name_or_domain,static::NAMESPACE_SEPERATOR) || mb_strtolower($ns_name_or_domain) === 'localhost') {
+                    $server = Server::resolveServer($ns_name_or_domain);
+                    $ns = $server->owning_namespace;
+                } else {
+                    $ns = static::buildNamespace(namespace_name: $ns_name_or_domain)->first();
+                }
+
+
 
             } else if (count($parts) === 2) {
                 // first should be a server
@@ -229,12 +236,11 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
                 $ns_name = $parts[1];
                 /** @var Server $owner */
                 $owner = Server::resolveServer($server_name);
-                $build = static::buildNamespace(server_id: $owner->id,namespace_name: $ns_name);
+                $ns = static::buildNamespace(server_id: $owner->id,namespace_name: $ns_name)->first();
             }
         }
 
-        $ret =  $build?->first();
-        if (empty($ret) && $throw_exception) {
+        if (empty($ns) && $throw_exception) {
             throw new HexbatchNotFound(
                 __('msg.namespace_not_found',['ref'=>$value]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
@@ -242,7 +248,7 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
             );
         }
 
-        return $ret;
+        return $ns;
     }
 
     public function resolveRouteBinding($value, $field = null)
@@ -250,7 +256,7 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return static::resolveNamespace($value);
     }
 
-    const NAMESPACE_SEPERATOR = '.';
+    const NAMESPACE_SEPERATOR = ':';
     public function getName() : string {
         if ($this->namespace_server_id) {
             //do not show the server part if belongs to this server

@@ -268,19 +268,6 @@ class ElementType extends Model implements IType,ISystemModel
                 $owner = UserNamespace::resolveNamespace($owner_hint);
                 $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
             }
-
-            if (count($parts) === 3) {
-                $server_hint = $parts[0];
-                $namespace_hint = $parts[1];
-                $maybe_name = $parts[2];
-
-                if ($server_hint && !$namespace_hint) {
-                    $server = Server::resolveServer($server_hint);
-                    $namespace_hint = $server->owning_namespace->ref_uuid;
-                }
-                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
-                $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
-            }
         }
 
         $ret = $build?->first();

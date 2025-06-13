@@ -14,14 +14,14 @@ use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     schema: 'hexbatch_attribute',
-    title: 'Attribute that is defined by a namespace.type.attribute in name or uuid parts ',
+    title: 'Attribute that is defined by a namespace:type:attribute in name or uuid parts ',
     description: 'Names an attribute',
     type: 'string',
     items: new OA\Items(
         oneOf: [
 
             new OA\Schema(ref: HexbatchNamespacedUuid::class),
-            new OA\Schema(ref: HexbatchUuidSpacedUuid::class),
+            new OA\Schema(ref: HexbatchUuidUuid::class),
             new OA\Schema(ref: HexbatchNamespacedName::class),
 
 
@@ -35,19 +35,21 @@ use OpenApi\Attributes as OA;
             new OA\Schema(ref: HexbatchUuidUuidUuid::class)
         ],
     ),
+    maxLength: 36 + 1 + 36 + 1 + 36,
+    minLength: 3 + 1 + 3 + 1 + 3,
     example: [
-        new OA\Examples(summary: "A type with a dot then a uuid", value:'cats.3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
-        new OA\Examples(summary: "A uuid with a dot then an attribute", value:'3fabcde3-aaaa-41b0-88c6-3d3f45e83bf4.3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
-        new OA\Examples(summary: "A type with a dot then an attribute", value:'cats.first_kittens99'),
+        new OA\Examples(summary: "A type with a colon then a uuid", value:'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
+        new OA\Examples(summary: "A uuid with a colon then an attribute", value:'3fabcde3-aaaa-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
+        new OA\Examples(summary: "A type with a colon then an attribute", value:'cats:first_kittens99'),
 
-        new OA\Examples(summary: "A  namespace with a dot then a type name  with a dot then an attribute", value:'cats.feral.color'),
-        new OA\Examples(summary: "A  namespace with a dot then a type name  with a dot then a uuid", value:'cats.feral.3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
-        new OA\Examples(summary: "A  namespace with a dot then a uuid  with a dot then an attribute", value:'cats.3fabcde3-e732-41b0-88c6-3d3f45e83bf4.color'),
-        new OA\Examples(summary: "A  namespace with a dot then a uuid with a dot then a uuid", value:'cats.4feda9e3-e732-41b0-88c6-3d3f45e83bf4.3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
-        new OA\Examples(summary: "A uuid  with a dot then a type name  with a dot then an attribute", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4.feral.color'),
-        new OA\Examples(summary: "A uuid with a dot then a type name  with a dot then a uuid", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4.feral.3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
-        new OA\Examples(summary: "A uuid with a dot then a uuid  with a dot then an attribute", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4.3fabcde3-e732-41b0-88c6-3d3f45e83bf4.color'),
-        new OA\Examples(summary: "A uuid with a dot then a uuid with a dot then a uuid", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4.4feda9e3-e732-41b0-88c6-3d3f45e83bf4.3fabcde3-e732-41b0-88c6-3d3f45e83bf4')
+        new OA\Examples(summary: "A  namespace with a colon then a type name  with a colon then an attribute", value:'cats:feral:color'),
+        new OA\Examples(summary: "A  namespace with a colon then a type name  with a colon then a uuid", value:'cats:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
+        new OA\Examples(summary: "A  namespace with a colon then a uuid  with a colon then an attribute", value:'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'),
+        new OA\Examples(summary: "A  namespace with a colon then a uuid with a colon then a uuid", value:'cats:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
+        new OA\Examples(summary: "A uuid  with a colon then a type name  with a colon then an attribute", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:color'),
+        new OA\Examples(summary: "A uuid with a colon then a type name  with a colon then a uuid", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'),
+        new OA\Examples(summary: "A uuid with a colon then a uuid  with a colon then an attribute", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'),
+        new OA\Examples(summary: "A uuid with a colon then a uuid with a colon then a uuid", value:'5feda9e3-e732-41b0-88c6-3d3f45e83bf4:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4')
 
 
 

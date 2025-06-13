@@ -327,6 +327,7 @@ class LocationBound extends Model
         } else {
 
             $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+
             if (count($parts) === 2) {
                 $owner_hint = $parts[0];
                 $maybe_name = $parts[1];
@@ -337,13 +338,6 @@ class LocationBound extends Model
                 $build = static::buildLocationBound(namespace_id: $owner->id,name: $maybe_name);
             }
 
-            if (count($parts) === 3) {
-                $server_hint = $parts[0];
-                $namespace_hint = $parts[1];
-                $maybe_name = $parts[2];
-                $owner = UserNamespace::resolveNamespace("$server_hint.$namespace_hint");
-                $build = static::buildLocationBound(namespace_id: $owner->id,name: $maybe_name);
-            }
         }
 
         $ret = $build?->first();
