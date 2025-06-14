@@ -131,7 +131,7 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\Purge::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     public function purge_design(Request $request,ElementType $type) {
-        $params = new DesignDestroyParams(destroy_type: $type);
+        $params = new DesignDestroyParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Purge(params: $params, is_async: false, tags: ['purge-design-by-web','api-top']); //todo change to true
         $thing = $api->createThingTree(tags: ['change-owner']);
@@ -166,7 +166,7 @@ class DesignController extends Controller {
         ]
     )]
     public function destroy_design(Request $request,ElementType $type) {
-        $params = new DesignDestroyParams(destroy_type: $type);
+        $params = new DesignDestroyParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Destroy(params: $params, is_async: false, tags: ['destroy-design-by-web','api-top']); //todo change to true
         $thing = $api->createThingTree(tags: ['change-owner']);
