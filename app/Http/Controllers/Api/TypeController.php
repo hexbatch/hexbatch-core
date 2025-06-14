@@ -231,41 +231,6 @@ class TypeController extends Controller {
 
 
 
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/types/add_attribute_handle',
-        operationId: 'core.types.add_attribute_handle',
-        description: "Attributes can be grouped, organized and controlled together by an attribute handle. This can also be used for displaying debugging info",
-        summary: 'Add attribute handle to an attribute',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Server\AttributeHandleAdded::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Type\AddHandleAttribute::class)]
-    public function add_attribute_handle() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/types/remove_attribute_handle',
-        operationId: 'core.types.remove_attribute_handle',
-        description: "Handles can be removed at any time, and be empty or new ones added",
-        summary: 'Remove attribute handle from an attribute',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Server\AttributeHandleRemoved::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Type\RemoveHandleAttribute::class)]
-    public function remove_attribute_handle() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 

@@ -155,8 +155,6 @@ enum TypeOfEvent: string
     case TYPE_HANDLE_ADDED = 'type_handle_added';
     case TYPE_HANDLE_REMOVED = 'type_handle_removed';
 
-    case ATTRIBUTE_HANDLE_ADDED = 'attribute_handle_added';
-    case ATTRIBUTE_HANDLE_REMOVED = 'attribute_handle_removed';
 
     case PATH_HANDLE_ADDED = 'path_handle_added';
     case PATH_HANDLE_REMOVED = 'path_handle_removed';

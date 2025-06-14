@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
+use App\Annotations\ApiParamMarker;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
@@ -18,6 +19,7 @@ use App\Models\ElementTypeExposedAttribute;
 use App\Models\ElementTypeParent;
 use App\Models\ElementValue;
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Type\TypeParams;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt\Server\TypePublished;
@@ -74,6 +76,7 @@ class TypePublish extends Act\Cmd\Ty
 
     const array ACTIVE_DATA_KEYS = ['given_type_uuid','check_permission'];
 
+    #[ApiParamMarker( param_class: TypeParams::class)]
     public function __construct(
         protected ?string              $given_type_uuid =null,
         protected bool                $check_permission = true,

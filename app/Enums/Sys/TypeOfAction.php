@@ -113,8 +113,6 @@ enum TypeOfAction: string
     case CMD_TYPE_HANDLE_ADD = 'cmd_type_handle_add';
     case CMD_TYPE_HANDLE_REMOVE = 'cmd_type_handle_remove';
 
-    case CMD_ATTRIBUTE_HANDLE_ADD = 'cmd_attribute_handle_add';
-    case CMD_ATTRIBUTE_HANDLE_REMOVE = 'cmd_attribute_handle_remove';
 
     case CMD_PATH_CREATE = 'cmd_path_create';
     case CMD_PATH_EDIT = 'cmd_path_edit';

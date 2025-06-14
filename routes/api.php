@@ -443,8 +443,6 @@ Route::prefix('v1')->group(function () {
                     Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
                         Route::patch('add_handle', [Api\TypeController::class, 'add_handle'])->name('core.types.add_handle');
                         Route::patch('remove_handle', [Api\TypeController::class, 'remove_handle'])->name('core.types.remove_handle');
-                        Route::patch('add_attribute_handle', [Api\TypeController::class, 'add_attribute_handle'])->name('core.types.add_attribute_handle');
-                        Route::patch('remove_attribute_handle', [Api\TypeController::class, 'remove_attribute_handle'])->name('core.types.remove_attribute_handle');
                         Route::post('fire_event', [Api\TypeController::class, 'fire_event'])->name('core.types.fire_event');
                         Route::patch('publish_type', [Api\TypeController::class, 'publish_type'])->name('core.types.publish_type');
                         Route::patch('retire', [Api\TypeController::class, 'retire_type'])->name('core.types.retire');

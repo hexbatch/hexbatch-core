@@ -20,7 +20,6 @@ class CreateElement extends Api\ElementApi
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ty\ElementCreate::class,
     ];
 
