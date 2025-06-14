@@ -30,7 +30,9 @@ class Purge extends Destroy
 
         $nodes = [];
         $creator = new Act\Cmd\Ds\DesignPurge(
-            given_type_uuid: $this->params->getTypeUuid(),tags: ['deleting design']);
+            given_type_uuid: $this->params->getTypeUuid(),
+            parent_action_data: $this->action_data,
+            tags: ['deleting design']);
 
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 

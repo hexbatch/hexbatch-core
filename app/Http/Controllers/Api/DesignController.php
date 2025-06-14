@@ -14,6 +14,7 @@ use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Params\Design\DesignDestroyParams;
 use App\OpenApi\Params\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Design\DesignParams;
+use App\OpenApi\Params\Design\DesignParentParams;
 use App\OpenApi\Resources\HexbatchAttribute;
 use App\OpenApi\Resources\HexbatchNamespace;
 use App\OpenApi\Resources\HexbatchResource;
@@ -58,8 +59,8 @@ class DesignController extends Controller {
                 content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function change_design_owner(Request $request) {
-        $params = new DesignOwnershipParams();
+    public function change_design_owner(Request $request,ElementType $type) {
+        $params = new DesignOwnershipParams(type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ChangeOwner(params: $params, is_async: false, tags: ['change-owner-by-web','api-top']); //todo change to true
         $thing = $api->createThingTree(tags: ['change-owner']);
@@ -93,8 +94,8 @@ class DesignController extends Controller {
                 content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function promote_design_owner(Request $request) {
-        $params = new DesignOwnershipParams();
+    public function promote_design_owner(Request $request,ElementType $type) {
+        $params = new DesignOwnershipParams(type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\PromoteOwner(params: $params, is_async: true, tags: ['promote-owner-by-web','api-top']);
         $thing = $api->createThingTree(tags: ['promote-owner']);
@@ -622,8 +623,9 @@ class DesignController extends Controller {
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Delete(
         path: '/api/v1/{namespace}/design/{element_type}/remove_parent',
         operationId: 'core.design.remove_parent',
@@ -631,20 +633,36 @@ class DesignController extends Controller {
         "\nThis can be removed regardless of the approval status ".
         "\nParents need approval to use, but do not notify the inheritance chain of design changes when dropping that parent",
         summary: 'Removes a parent',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParentParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\RemoveParent::class)]
-    public function remove_parent() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function remove_parent(Request $request,ElementType $type) {
+        $params = new DesignParentParams(given_type: $type);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\AddParent(params: $params, is_async: false, tags: ['add-parent-by-web','api-top']); //todo change to true
+        $thing = $api->createThingTree(tags: ['change-owner']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Post(
         path: '/api/v1/{namespace}/design/{element_type}/add_parent',
         operationId: 'core.design.add_parent',
@@ -653,16 +671,30 @@ class DesignController extends Controller {
         "\n If a parent is declared retired or suspended before publishing, then this type cannot be published until that is changed".
         "\nParents need approval to use in the design, and later to publish, to look over any conflicts after the design allowed",
         summary: 'Adds a parent',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParentParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents added', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiEventMarker( Evt\Server\DesignPending::class)]
     #[ApiTypeMarker( Root\Api\Design\AddParent::class)]
-    public function add_parent() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function add_parent(Request $request,ElementType $type) {
+        $params = new DesignParentParams(given_type: $type);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\RemoveParent(params: $params, is_async: false, tags: ['remove-parent-by-web','api-top']); //todo change to true
+        $thing = $api->createThingTree(tags: ['change-owner']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 

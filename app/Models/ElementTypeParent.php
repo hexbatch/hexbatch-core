@@ -143,7 +143,8 @@ class ElementTypeParent extends Model
         ?int    $me_id = null,
         ?string $uuid = null,
         ?int $child_type_id = null,
-        ?int $parent_type_id = null
+        ?int $parent_type_id = null,
+        array $parent_ids = []
 
     ): Builder
     {
@@ -170,6 +171,10 @@ class ElementTypeParent extends Model
 
         if ($parent_type_id) {
             $build->where('element_type_parents.parent_type_id', $parent_type_id);
+        }
+
+        if (count($parent_ids)) {
+            $build->whereIn('element_type_parents.parent_type_id', $parent_ids);
         }
 
 

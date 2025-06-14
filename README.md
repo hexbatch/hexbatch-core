@@ -44,7 +44,9 @@ The project has totally changed, a major rewrite. This is a release of work in p
 Making api for 
 [DesignCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignCreate.php) done
 [DesignOwnerPromote.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerPromote.php) draft
-[DesignParentAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentAdd.php)
+[DesignParentAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentAdd.php) draft
+[DesignParentRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentRemove.php) draft
+
 [DesignAttributeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeCreate.php)  
 [DesignAttributeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeDestroy.php) 
 [DesignAttributeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeEdit.php) 
@@ -52,7 +54,7 @@ Making api for
 [DesignPurge.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignPurge.php)  draft
 [DesignEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignEdit.php)  draft
 [DesignOwnerChange.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerChange.php)  draft
-[DesignParentRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentRemove.php) 
+
 [SetCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/SetCreate.php)
 [SetMemberAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetMemberAdd.php)
 [ElementCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/ElementCreate.php)

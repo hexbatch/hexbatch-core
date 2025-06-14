@@ -79,7 +79,9 @@ class Destroy extends Api\DesignApi implements IHookCode
 
         $nodes = [];
         $creator = new Act\Cmd\Ds\DesignDestroy(
-            given_type_uuid: $this->params->getTypeUuid(),tags: ['deleting design']);
+            given_type_uuid: $this->params->getTypeUuid(), parent_action_data: $this->action_data,
+            tags: ['deleting design']
+        );
 
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 

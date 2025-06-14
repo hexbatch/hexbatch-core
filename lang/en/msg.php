@@ -138,6 +138,7 @@ return [
     'type_descriptions_must_be_uuid' => 'A description element has to be a UUID',
     'parent_type_is_not_inheritable' => 'The parent type :ref must allow you to inherit, and also not be retired or final',
     'parent_type_must_be_published' => 'The parent :ref type must be published',
+    'parent_type_is_invalid_cannot_remove' => 'The type :ref does not have all the given as parents, so cannot remove these as parents',
     'type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
     'type_only_admin_can_edit' => 'Only the admins in :ns can edit the type :ref',
     'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements, no children',

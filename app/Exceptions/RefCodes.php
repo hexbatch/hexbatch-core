@@ -99,8 +99,10 @@ class RefCodes {
     const int TYPE_ALREADY_PUBLISHED = 7101;
     const int TYPE_CANNOT_PUBLISH_ABSTRACT = 7102;
 
+
     const int TYPE_PARENT_DENIED_DESIGN = 7200;
     const int TYPE_PARENT_DENIED_PUBLISHING = 7250;
+    const int TYPE_PARENT_CANNOT_BE_REMOVED = 7270;
 
     const int TYPE_GIVEN_ZERO_TO_MAKE = 7300;
     const int TYPE_ALREADY_HAS_OWNER = 7400;
@@ -201,6 +203,7 @@ class RefCodes {
         self::TYPE_CANNOT_PUBLISH_ABSTRACT => '',
         self::TYPE_PARENT_DENIED_DESIGN => '',
         self::TYPE_PARENT_DENIED_PUBLISHING => '',
+        self::TYPE_PARENT_CANNOT_BE_REMOVED => '',
         self::TYPE_GIVEN_ZERO_TO_MAKE => '',
         self::TYPE_ALREADY_HAS_OWNER => '',
 

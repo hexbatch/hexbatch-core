@@ -3,10 +3,10 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
-use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchFailException;
@@ -16,6 +16,7 @@ use App\Models\ElementType;
 use App\Models\ElementTypeParent;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Design\DesignParentParams;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -52,7 +53,7 @@ class DesignParentAdd extends Act\Cmd\Ds
     protected function setDesignType(ElementType $type) : void {
         $this->given_type_uuid = $type->ref_uuid;
         $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->setGivenType($type,true);;
+        $this->setGivenType($type,true);
     }
 
     protected function addToParents(ElementType $type) : void {
@@ -74,6 +75,8 @@ class DesignParentAdd extends Act\Cmd\Ds
     const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_parent_uuids','check_permission'];
 
     const array ACTIVE_COLLECTION_KEYS = ['given_parent_uuids'=>ElementType::class];
+
+    #[ApiParamMarker( param_class: DesignParentParams::class)]
     public function __construct(
         protected ?string              $given_type_uuid = null,
         /**

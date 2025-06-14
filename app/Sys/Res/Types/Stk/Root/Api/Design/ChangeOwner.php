@@ -83,7 +83,9 @@ class ChangeOwner extends Api\DesignApi implements IHookCode
 
         $nodes = [];
         $creator = new Act\Cmd\Ds\DesignOwnerChange(
-            given_type_uuid: $this->params->getTypeUuid(), given_namespace_uuid: $this->params->getNamespaceUuid(),tags: ['changing owner from api']);
+            given_type_uuid: $this->params->getTypeUuid(), given_namespace_uuid: $this->params->getNamespaceUuid(),
+            parent_action_data: $this->action_data,
+            tags: ['changing owner from api']);
 
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 
