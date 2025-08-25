@@ -2,10 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
+use App\OpenApi\Params\Design\DesignAttributeParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -23,6 +25,7 @@ Extra argument here is
 * design_attribute_uuid : identify the attribute to be edited with the uuid
 
 ')]
+#[ApiParamMarker( param_class: DesignAttributeParams::class)]
 class DesignAttributeEdit extends DesignAttributeCreate
 {
     const UUID = 'b5dc244c-d966-48fd-9c42-ed53cceb827f';

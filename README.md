@@ -47,9 +47,9 @@ Making api for
 [DesignParentAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentAdd.php) draft
 [DesignParentRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignParentRemove.php) draft
 
-[DesignAttributeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeCreate.php)  
-[DesignAttributeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeDestroy.php) 
-[DesignAttributeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeEdit.php) 
+[DesignAttributeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeCreate.php)  draft
+[DesignAttributeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeDestroy.php) draft
+[DesignAttributeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignAttributeEdit.php)  draft
 [DesignDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignDestroy.php)  draft
 [DesignPurge.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignPurge.php)  draft
 [DesignEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignEdit.php)  draft

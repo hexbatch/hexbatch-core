@@ -32,7 +32,7 @@ class DesignParentParams extends ApiParamBase
         protected array $parents = []
     )
     {
-       $this->type_uuid = $this->given_type->ref_uuid;
+       $this->type_uuid = $this->given_type?->ref_uuid;
     }
 
 

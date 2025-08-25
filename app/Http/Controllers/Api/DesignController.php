@@ -9,8 +9,12 @@ use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
+use App\Models\Attribute;
 use App\Models\ElementType;
+use App\OpenApi\Attributes\AttributeResponse;
 use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Params\Design\DesignAttributeDestroyParams;
+use App\OpenApi\Params\Design\DesignAttributeParams;
 use App\OpenApi\Params\Design\DesignDestroyParams;
 use App\OpenApi\Params\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Design\DesignParams;
@@ -302,64 +306,78 @@ class DesignController extends Controller {
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Delete(
         path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/destroy',
         operationId: 'core.design.destroy_attribute',
         description: "Destroys an attribute. Attributes cannot be deleted after a type is published ".
         "\nRemoving design attributes does not generate any event",
         summary: 'Delete an attribute',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\DestroyAttribute::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    public function destroy_attribute() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function destroy_attribute(Request $request,Attribute $attribute) {
+        $params = new DesignAttributeDestroyParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\DestroyAttribute(params: $params, is_async: true, tags: ['registration-by-web','api-top']);
+        $thing = $api->createThingTree(tags: ['create-attribute']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
 
 
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/promote',
-        operationId: 'core.design.promote_attribute',
-        description: "System can create a new attribute using any parent chain for any design owned by anyone ".
-        "\nThis does not generate any events",
-        summary: 'Creates a new attribute on a design for any design or namespace',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiTypeMarker( Root\Api\Design\AttributePromotion::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    public function promote_attribute() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
+    /**
+     * @throws \Exception
+     */
     #[ApiTypeMarker( Root\Api\Design\CreateAttribute::class)]
     #[ApiEventMarker( Evt\Server\DesignPending::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[OA\Post(
         path: '/api/v1/{namespace}/design/{element_type}/create_attribute',
         operationId: 'core.design.create_attribute',
         description: "Namespace admin group can create a new attribute using any parent chain for any design owned by anyone ".
         "\nBut the design can only be published if the inheritance chain does not block this using the design_pending event",
         summary: 'Creates a new attribute on a design',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function create_attribute() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function create_attribute(Request $request,ElementType $type) {
+        $params = new DesignAttributeParams(given_type: $type,namespace: Utilities::getCurrentOrUserNamespace());
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\CreateAttribute(params: $params, is_async: true, tags: ['registration-by-web','api-top']);
+        $thing = $api->createThingTree(tags: ['create-attribute']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
@@ -421,29 +439,39 @@ class DesignController extends Controller {
     }
 
 
-
-
-
-
-
-
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/edit',
         operationId: 'core.design.edit_attribute',
         description: "Owner admin group can set the following properties to an attribute: ".
         "\nparent, boolean properties, merge methods, access, value policy, value rules, initial value",
         summary: 'Edits the properites of an unpublished attribute  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditAttribute::class)]
-    public function edit_attribute() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function edit_attribute(Request $request,Attribute $attribute) {
+        $params = new DesignAttributeParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\EditAttribute(params: $params, is_async: true, tags: ['registration-by-web','api-top']);
+        $thing = $api->createThingTree(tags: ['create-attribute']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 

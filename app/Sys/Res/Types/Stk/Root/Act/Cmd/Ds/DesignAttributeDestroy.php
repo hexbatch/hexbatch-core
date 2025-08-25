@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -12,6 +13,8 @@ use App\Models\ActionDatum;
 
 use App\Models\UserNamespace;
 use App\OpenApi\Attributes\AttributeResponse;
+use App\OpenApi\Params\Design\DesignAttributeDestroyParams;
+use App\OpenApi\Params\Design\DesignAttributeParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 
 use Illuminate\Support\Facades\DB;
@@ -26,6 +29,7 @@ The attribute and type parents are not notified when this is destroyed. They wil
 
 
 ')]
+
 class DesignAttributeDestroy extends Act\Cmd\Ds
 {
     const UUID = '079cfc62-0fa2-47f1-84c0-df0fa90441c5';
@@ -39,6 +43,9 @@ class DesignAttributeDestroy extends Act\Cmd\Ds
     ];
 
     const array ACTIVE_DATA_KEYS = ['given_attribute_uuid'];
+
+
+    #[ApiParamMarker( param_class: DesignAttributeDestroyParams::class)]
     public function __construct(
         protected ?string                  $given_attribute_uuid = null,
 

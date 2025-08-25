@@ -486,7 +486,7 @@ Route::prefix('v1')->group(function () {
                         Route::delete('purge', [Api\DesignController::class, 'purge_design'])->name('core.design.purge');
 
                         Route::prefix('attribute/{attribute}')->group(function () {
-                            Route::post('promote', [Api\DesignController::class, 'promote_attribute'])->name('core.design.promote_attribute');
+                            Route::post('promote', [Api\DesignController::class, 'create_attribute'])->name('core.design.promote_attribute');
                         });
                     });
 

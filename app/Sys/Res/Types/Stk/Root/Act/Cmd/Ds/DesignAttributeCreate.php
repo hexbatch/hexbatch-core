@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -17,6 +18,7 @@ use App\Models\Attribute;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
 use App\OpenApi\Attributes\AttributeResponse;
+use App\OpenApi\Params\Design\DesignAttributeParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -30,19 +32,19 @@ use Illuminate\Support\Facades\DB;
 ## Attributes can be set with the following properties
 
 * uuid : when editing an existing attribute
-* type_uuid: each attribute is defined as part of a type, but can be inheritied by attributes elsewhere
+* type_uuid: each attribute is defined as part of a type, but can be inherited by attributes elsewhere
 * design_uuid: visually represents the attribute
 * parent_uuid: this is set to pending, and the parent is notified to approve. If setting new parent, that one is asked to approve if not public domain
 * location_uuid: attributes can have a shape
 * is_final: cannot be a parent
 * is_abstract: not usable by itself, must have a child
-* access sets access across different servers
+* access:  sets access across different servers
 * value_policy: determines if the attribute can have multiple values for the same or all elements that use it
 * read_json_path: if this is used, when the attribute value is always filtered by this
 * validate_json_path: if this is used, when the attribute value is validated before being set
 * default_value : if set, this is the default value before writing
 * attribute_name: has to be unique in the namespace
-* unset_parent : when editing an existing attribute and want to remove any parent
+* unset_parent : when editing an existing attribute and want to remove the parent
 
 the type owner of the optional attribute parent will get a notice before creation
 
@@ -79,6 +81,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
     protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
 
+    #[ApiParamMarker( param_class: DesignAttributeParams::class)]
     public function __construct(
         protected ?string                  $given_design_uuid = null, //for editing an existing design
         protected ?string                  $uuid = null, //for assigning a uuid to a new type
