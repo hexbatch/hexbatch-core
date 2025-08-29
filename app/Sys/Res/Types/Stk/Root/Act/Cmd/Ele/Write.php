@@ -49,12 +49,13 @@ class Write extends Act\Cmd\Ele
     ];
 
 
-    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','given_attribute_uuid','important_value','check_permission'];
+    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','given_attribute_uuid','important_value','check_permission','given_phase_uuid'];
 
     public function __construct(
         protected ?string              $given_set_uuid =null, //writes need a set
         protected ?string              $given_element_uuid =null, //writes need an element
         protected ?string              $given_attribute_uuid =null, //writes need an attribute
+        protected ?string              $given_phase_uuid =null,
         protected ?array              $important_value =null,
         protected bool                $check_permission = true,
         protected bool                $is_system = false,
@@ -123,7 +124,7 @@ class Write extends Act\Cmd\Ele
             //if there were write handlers , the value is updated now
             ElementValue::writeContextValue(
                 member: $member, att: $this->getGivenAttribute(), type: $this->getGivenElement()->element_parent_type,
-                value: $this->getImportantValue());
+                value: $this->getImportantValue(),phase: $this->getGivenPhase());
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -139,7 +140,8 @@ class Write extends Act\Cmd\Ele
             'element'=>$this->getGivenElement(),
             'set'=>$this->getGivenSet(),
             'attribute'=>$this->getGivenAttribute(),
-            'value'=>$this->getImportantValue()
+            'value'=>$this->getImportantValue(),
+            'phase'=>$this->getGivenPhase()
         ];
     }
 
@@ -163,6 +165,7 @@ class Write extends Act\Cmd\Ele
         parent::initData(b_save: false);
         $this->setGivenSet($this->given_set_uuid)
             ->setGivenElement($this->given_element_uuid)
+            ->setGivenPhase($this->given_phase_uuid)
             ->setGivenAttribute($this->given_attribute_uuid);
 
         $this->action_data->save();

@@ -152,12 +152,13 @@ class ElementTypeExposedAttribute extends Model
     }
 
     public static function getExposedAndVisible(
-        int $exposed_type_id ,int $exposed_attribute_id , int $in_set_member_id
+        int $exposed_type_id ,int $exposed_attribute_id , int $in_set_member_id, ?int $phase_id = null
     )
     : static|null
     {
         /** @var static|null $ret */
-        return static::buildExposed(exposed_type_id: $exposed_type_id,exposed_attribute_id: $exposed_attribute_id, in_set_member_id: $in_set_member_id)
+        return static::buildExposed(exposed_type_id: $exposed_type_id,exposed_attribute_id: $exposed_attribute_id,
+            in_set_member_id: $in_set_member_id,phase_id: $phase_id)
             ->first();
 
     }
@@ -166,6 +167,7 @@ class ElementTypeExposedAttribute extends Model
 
     public static function buildExposed(?int $exposed_type_id = null,?int $exposed_attribute_id = null,
                                         ?int $in_set_member_id = null,
+                                        ?int $phase_id = null,
                                         bool $with_exposed_attribute = false,bool $with_exposed_type = false,
                                         bool $with_exposed_inheritance = false
     )
@@ -186,7 +188,7 @@ class ElementTypeExposedAttribute extends Model
         }
 
         if ($in_set_member_id && $exposed_type_id) {
-            ElementTypeSetVisibility::buildVisibles(visible_type_id: $exposed_type_id, visible_set_member_id: $in_set_member_id,
+            ElementTypeSetVisibility::buildVisibles(visible_type_id: $exposed_type_id, visible_set_member_id: $in_set_member_id,phase_id: $phase_id,
                 use_builder: $build, must_be_visible_in_scope: true);
         }
 

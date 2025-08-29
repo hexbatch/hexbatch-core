@@ -9,7 +9,7 @@ use OpenApi\Attributes as OA;
 /**
  * A collection of elements
  */
-#[OA\Schema(schema: 'ElementCollectionResponse',title: "Hooks")]
+#[OA\Schema(schema: 'ElementCollectionResponse')]
 class ElementCollectionResponse implements  JsonSerializable
 {
 

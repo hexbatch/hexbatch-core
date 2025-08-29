@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -54,16 +55,22 @@ class ElementTypeSetVisibility extends Model
     protected $casts = [];
 
     public static function stateVisibility(int $visible_type_id,?int $visible_set_member_id,
-        ?bool $is_visible_for_location = null, ?bool $is_visible_for_schedule = null, ?bool $is_turned_on = null
+        ?bool $is_visible_for_location = null, ?bool $is_visible_for_schedule = null,
+        ?int $phase_id = null, ?bool $is_turned_on = null
     )
     :void
     {
 
         $starting = [
             'visible_type_id' => $visible_type_id,
-            'visible_set_member_id' => $visible_set_member_id,
         ];
         $ending = [];
+        $unique_by = [ 'visible_type_id' ];
+
+        if ($visible_set_member_id !== null) {
+            $starting['visible_set_member_id'] = $visible_set_member_id;
+            $unique_by[] = 'visible_set_member_id';
+        }
 
         if ($is_visible_for_location !== null) {
             $starting['is_visible_for_location'] = $is_visible_for_location;
@@ -80,11 +87,27 @@ class ElementTypeSetVisibility extends Model
             $ending['is_turned_on'] = $is_turned_on;
         }
 
-        static::upsert($starting, ['visible_type_id','visible_set_member_id'],$ending);
+        if ($phase_id) {
+            static::join('element_set_members as mems','mems.id','=','element_type_set_visibilities.visible_set_member_id');
+            static::join('elements as els',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($phase_id) {
+                    $join
+                        ->on('els.id', '=', 'mems.member_element_id')
+                        ->where('els.element_phase_id', $phase_id);
+                }
+            )::upsert($starting, $unique_by,$ending);
+        } else {
+            static::upsert($starting, $unique_by,$ending);
+        }
+
     }
 
     public static function buildVisibles(?int     $visible_type_id = null,
                                          ?int     $visible_set_member_id = null,
+                                         ?int     $phase_id = null,
                                          ?Builder $use_builder = null,
                                          bool     $must_be_visible_in_scope = false
 
@@ -108,6 +131,20 @@ class ElementTypeSetVisibility extends Model
 
         if ($visible_set_member_id) {
             $build->where('element_type_set_visibilities.visibility_set_id',$visible_set_member_id);
+        }
+
+        if ($phase_id) {
+            $build->join('element_set_members as mems','mems.id','=','element_type_set_visibilities.visible_set_member_id');
+            $build->join('elements as els',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($phase_id) {
+                    $join
+                        ->on('els.id', '=', 'mems.member_element_id')
+                        ->where('els.element_phase_id', $phase_id);
+                }
+            );
         }
 
         if ($must_be_visible_in_scope) {

@@ -3,9 +3,14 @@
 namespace App\Models;
 
 
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 
 /**
@@ -57,7 +62,7 @@ class ElementLink extends Model
         return $this->belongsTo(ElementSet::class,'link_to_set_id');
     }
 
-    public static function buildLinks(
+    public static function buildLink(
         ?int            $me_id = null,
         ?string         $uuid = null,
         ?int         $linking_element_id = null,
@@ -109,8 +114,20 @@ class ElementLink extends Model
 
     public static function makeLink(Element $el,ElementSet $set) : static {
 
-        $maybe_exists = static::buildLinks(linking_element_id: $el->id,linked_set_id: $set->id)->first();
+        $maybe_exists = static::buildLink(linking_element_id: $el->id,linked_set_id: $set->id)->first();
         if ($maybe_exists) {return $maybe_exists;}
+
+        if ($el->element_phase_id !== $set->defining_element->element_phase_id) {
+            throw new HexbatchNotPossibleException(
+                __("msg.set_has_different_phase_than_linking_element"
+                    ,   [
+                        'set_phase'=>$set->defining_element->element_phase->getName(),
+                        'other_phase'=>$el->defining_element->element_phase->getName(),
+                    ]
+                ),
+                CodeOf::HTTP_NOT_FOUND,
+                RefCodes::PHASE_IS_DIFFERENT);
+        }
 
         $node = new ElementLink();
         $node->link_to_set_id = $set->id;
@@ -123,9 +140,71 @@ class ElementLink extends Model
     public static function destroyLink(Element $el,ElementSet $set) : ?static {
 
         /** @var static|null $maybe_exists */
-        $maybe_exists = static::buildLinks(linking_element_id: $el->id,linked_set_id: $set->id)->first();
+        $maybe_exists = static::buildLink(linking_element_id: $el->id,linked_set_id: $set->id)->first();
          $maybe_exists?->delete();
         return $maybe_exists;
+
+    }
+
+
+    public static function getThisLink(
+        ?int             $id = null,
+        ?string          $uuid = null
+    )
+    : ElementLink
+    {
+        $ret = static::buildLink(me_id:$id,uuid: $uuid)->first();
+
+        if (!$ret) {
+            $arg_types = []; $arg_vals = [];
+            if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
+            if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
+            $arg_val = implode('|',$arg_vals);
+            $arg_type = implode('|',$arg_types);
+            throw new HexbatchNotFound(
+                __('msg.link_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                CodeOf::HTTP_NOT_FOUND,
+                RefCodes::LINK_NOT_FOUND
+            );
+        }
+        return $ret;
+    }
+
+    public static function resolveLink(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+            return static::getThisLink(uuid: $value);
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.link_not_found',['ref'=>$value]),
+                CodeOf::HTTP_NOT_FOUND,
+                RefCodes::LINK_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
+
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return static::resolveLink($value);
 
     }
 

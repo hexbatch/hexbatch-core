@@ -35,8 +35,7 @@ class PhaseCreate extends Act\Cmd\Ph
 
     public function getGivenEditPhase(): ?Phase
     {
-        /** @uses ActionDatum::data_phase() */
-        return $this->action_data->data_phase;
+        return $this->getGivenPhase();
     }
 
     public function getCreatedPhase(): ?Phase

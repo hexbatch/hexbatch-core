@@ -10,16 +10,22 @@ use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Element;
 
+use App\Models\ElementSet;
 use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
 
+use App\OpenApi\Elements\ElementActionResponse;
 use App\OpenApi\Elements\ElementCollectionResponse;
 use App\OpenApi\Params\Element\ChangeElementOwnerParams;
+use App\OpenApi\Params\Element\ElementSelectParams;
+use App\OpenApi\Params\Element\LinkCreateParams;
 use App\OpenApi\Params\Set\SetCreateParams;
 use App\OpenApi\Resources\HexbatchNamespace;
 use App\OpenApi\Resources\HexbatchResource;
+use App\OpenApi\Set\LinkResponse;
 use App\OpenApi\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use App\Sys\Res\Types\Stk\Root\Phase;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -66,51 +72,83 @@ class ElementController extends Controller {
     }
 
 
-
-
-
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/elements/type_off',
         operationId: 'core.elements.type_off',
         description: "Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path ",
         summary: 'Turn off all the subtype attributes of elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type on', content: new JsonContent(ref: ElementActionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Set\ElementTypeTurningOff::class)]
     #[ApiEventMarker( Evt\Set\ElementTypeTurnedOff::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\TypeOff::class)]
-    public function type_off() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function type_off(\App\Models\Phase $working_phase,Request $request) {
+        $params = new ElementSelectParams(given_phase: $working_phase);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['type-off']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/elements/type_on',
         operationId: 'core.elements.type_on',
         description: "Element admin group turn on all parent type attributes. The types, elements and sets given by a path ",
         summary: 'Turn on all the attributes of a parent type in elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type off', content: new JsonContent(ref: ElementActionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Set\ElementTypeTurningOn::class)]
     #[ApiEventMarker( Evt\Set\ElementTypeTurnedOn::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\TypeOn::class)]
-    public function type_on() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function type_on(\App\Models\Phase $working_phase,Request $request) {
+        $params = new ElementSelectParams(given_phase: $working_phase);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['type-on']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
         path: '/api/v1/{namespace}/elements/read_attribute',
         operationId: 'core.elements.read_attribute',
@@ -126,8 +164,14 @@ class ElementController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
     #[ApiTypeMarker( Root\Api\Element\ReadAttribute::class)]
-    public function read_attribute() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function read_attribute(\App\Models\Phase $working_phase,Element $element,Request $request) {
+        $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['read-attribute']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
@@ -170,29 +214,40 @@ class ElementController extends Controller {
     }
 
 
-
-
-
-
-
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/elements/write_attribute',
         operationId: 'core.elements.write_attribute',
         description: "Write one or more elements found in a path, that have the same attributes. If one can. ",
         summary: 'Write json to the same attributes of one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Write attribute', content: new JsonContent(ref: ElementActionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Set\AttributeWrite::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
     #[ApiTypeMarker( Root\Api\Element\WriteAttribute::class)]
-    public function write_attribute() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function write_attribute(\App\Models\Phase $working_phase,Element $element,Request $request) {
+        $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['write-attribute']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
@@ -314,69 +369,113 @@ class ElementController extends Controller {
     }
 
 
-
-
-
-
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Delete(
         path: '/api/v1/{namespace}/elements/destroy',
         operationId: 'core.elements.destroy_element',
         description: "Element admin can destroy one or more elements, the type or parent types can reject this",
         summary: 'Destroys one or more elements',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements destroyed', content: new JsonContent(ref: ElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementDestruction::class)]
     #[ApiEventMarker( Evt\Type\ElementDestroyed::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Destroy::class)]
-    public function destroy_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function destroy_element(Request $request) {
+        $params = new ElementSelectParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\Destroy(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['destroy-elements']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Delete(
         path: '/api/v1/{namespace}/elements/purge',
         operationId: 'core.elements.purge_element',
-        description: "System can destroy one or more elements without permission",
+        description: "System can destroy one or more elements without permission or events",
         summary: 'System Destroy one or more elements',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements purged', content: new JsonContent(ref: ElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[ApiTypeMarker( Root\Api\Element\Purge::class)]
-    public function purge_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function purge_element(Request $request) {
+        $params = new ElementSelectParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\Purge(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['purge-elements']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Post(
         path: '/api/v1/{namespace}/elements/link',
         operationId: 'core.elements.link',
         description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set ".
         "\n The link can be assigned to another namespace, they can reject that. The linked set can reject the link",
         summary: 'Makes a link between an element and a set',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: LinkResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Server\LinkCreated::class)]
     #[ApiEventMarker( Evt\Server\LinkCreating::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Link::class)]
-    public function create_link() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function create_link(Request $request,Element $element,ElementSet $set) {
+        $params = new LinkCreateParams(given_element: $element,given_set: $set);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\Link(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['create-link']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
@@ -443,7 +542,7 @@ class ElementController extends Controller {
         description: "Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets",
         summary: 'Create a set from element',
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: SetResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',

@@ -2,11 +2,13 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 
+use App\OpenApi\Params\Element\ElementSelectParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -35,6 +37,7 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 
    * [ElementTypeTurnedOn](../../../Evt/Set/ElementTypeTurnedOn.php)
 ')]
+#[ApiParamMarker( param_class: ElementSelectParams::class)]
 class TypeOn extends TypeOff
 {
     const UUID = '2d0a931a-be5a-4cab-b177-c9e9ec78e432';

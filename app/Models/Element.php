@@ -220,34 +220,7 @@ class Element extends Model implements ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    //the ref
-                    $build = $this->where('ref_uuid', $value);
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = Element::buildElement(me_id:$first_id)->first();
-                }
-            }
-        } finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.element_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::ELEMENT_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
+        return static::resolveElement($value);
 
     }
 

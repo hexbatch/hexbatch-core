@@ -31,7 +31,7 @@ abstract class ValidatePhaseOfElement extends ValidatePhase
                     ]
                 ),
                 CodeOf::HTTP_NOT_FOUND,
-                RefCodes::SET_NOT_FOUND);
+                RefCodes::PHASE_IS_DIFFERENT);
         }
     }
     protected  function getValidatedTarget(Request $request) {

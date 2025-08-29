@@ -95,8 +95,7 @@ class ElementCreate extends Act\Cmd\Ele
 
     public function getPhaseUsed(): ?Phase
     {
-        /** @uses ActionDatum::data_phase() */
-        return $this->action_data->data_phase;
+        return $this->getGivenPhase();
     }
 
     protected function setTemplateType(ElementType $type) : void {
@@ -270,10 +269,12 @@ class ElementCreate extends Act\Cmd\Ele
         $this->setGivenNamespace( $this->given_namespace_uuid)->setGivenType($this->given_type_uuid);
 
         if ($this->given_phase_uuid) {
-            $this->action_data->data_phase_id = Phase::getThisPhase(uuid: $this->given_phase_uuid)->id;
+            $phase = Phase::getThisPhase(uuid: $this->given_phase_uuid);
         } else {
-            $this->action_data->data_phase_id = Phase::getDefaultPhase()?->id;
+            $phase = Phase::getDefaultPhase()?->id;
         }
+
+        $this->setGivenPhase($phase);
 
         $this->action_data->save();
         $this->action_data->refresh();

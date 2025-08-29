@@ -2,16 +2,16 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-
 use App\Enums\Sys\TypeOfFlag;
 use App\Models\ActionDatum;
-
 use App\Models\ElementLink;
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Element\LinkCreateParams;
 use App\OpenApi\Set\LinkerCollectionResponse;
 use App\OpenApi\Set\LinkResponse;
 use App\OpenApi\Set\SetResponse;
@@ -30,6 +30,9 @@ use Illuminate\Support\Facades\DB;
 # Linking sets
 
 Creates groups of sets or organize and do batch actions.
+
+given_set_uuid: the set being the target
+given_element_uuid: the element being the anchor
 
 Any set can be linked, if no event handler for the element,
 then only permission check is that the calling namespace is in element admin group
@@ -72,20 +75,11 @@ class LinkAdd extends Act\Cmd\Ele
     public static function getPostEventClass() : Evt\ScopeSet|string  { return static::POST_EVENT_CLASS; }
 
 
-    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','check_permission','link_uuid'];
+    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','check_permission'];
 
-    public function getCreatedLink() : ?ElementLink {
-        if (!$this->link_uuid) {return null;}
-        return ElementLink::buildLinks(uuid: $this->link_uuid)->first();
-    }
 
-    public function setCreatedLink(ElementLink $link) : static {
-        $this->link_uuid = $link->ref_uuid;
-        $this->action_data->collection_data->offsetSet('link_uuid',$link->ref_uuid);
-        $this->action_data->save();
-        return ElementLink::buildLinks(uuid: $this->link_uuid)->first();
-    }
-    protected ?string $link_uuid = null;
+
+    #[ApiParamMarker( param_class: LinkCreateParams::class)]
     public function __construct(
         protected ?string              $given_set_uuid =null,
         protected ?string              $given_element_uuid =null,
@@ -141,7 +135,7 @@ class LinkAdd extends Act\Cmd\Ele
             } else {
                 $link = ElementLink::destroyLink(el: $this->getGivenElement(),set: $this->getGivenSet());
             }
-            $this->setCreatedLink(link: $link);
+            $this->setGivenLink(what: $link,b_save: true);
             if ($this->send_event) {
                 $this->post_events_to_send = static::getPostEventClass()::makeEventActions(
                     source: $this, action_data: $this->action_data,
@@ -164,7 +158,7 @@ class LinkAdd extends Act\Cmd\Ele
     protected function getMyData() :array {
         return [
             'element'=>$this->getGivenElement(),
-            'link'=>$this->getCreatedLink(),
+            'link'=>$this->getGivenLink(),
             'set'=>$this->getGivenSet()
         ];
     }

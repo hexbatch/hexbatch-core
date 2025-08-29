@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -14,7 +15,10 @@ use App\Models\ElementSetMember;
 use App\Models\ElementTypeSetVisibility;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Elements\ElementActionResponse;
 use App\OpenApi\Elements\ElementResponse;
+use App\OpenApi\Params\Element\ElementSelectParams;
+use App\OpenApi\Phase\PhaseResponse;
 use App\OpenApi\Set\SetResponse;
 use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -33,6 +37,11 @@ use Illuminate\Support\Facades\DB;
 
   Attributes are organized by type, and subtypes of an element can be turned on and off for that element.
   This command turns off a type in an element
+
+    given_set_uuid : optional to restrict this to one set
+    given_element_uuid : optional to restrict to one element
+    given_phase_uuid: optional to restrict to a phase
+    given_type_uuid: required type to switch
 
   If no event handlers, then the element admin group AND
   a check for the caller being associated with each attribute in the type.
@@ -79,12 +88,13 @@ class TypeOff extends Act\Cmd\Ele
     protected static function getPostEventClass() : Evt\ScopeSet|string  { return static::POST_EVENT_CLASS; }
 
 
-    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','given_type_uuid','check_permission'];
-
+    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','given_type_uuid','given_phase_uuid','check_permission'];
+    #[ApiParamMarker( param_class: ElementSelectParams::class)]
     public function __construct(
         protected ?string              $given_set_uuid =null,
         protected ?string              $given_element_uuid =null,
         protected ?string              $given_type_uuid =null,
+        protected ?string              $given_phase_uuid =null,
 
         protected bool                $check_permission = true,
         protected bool                $is_system = false,
@@ -109,23 +119,21 @@ class TypeOff extends Act\Cmd\Ele
     {
         parent::runActionInner();
 
-        if (!$this->getGivenSet()) {
-            throw new \InvalidArgumentException("Need given set before turning off");
-        }
 
         if (!$this->getGivenType()) {
             throw new \InvalidArgumentException("Need given type before turning off");
         }
 
-        if (!$this->getGivenElement()) {
-            throw new \InvalidArgumentException("Need given element before turning off");
-        }
 
-        if (!$this->getGivenElement()->element_parent_type->hasType(element_type: $this->getGivenType())) {
+        if ($this->getGivenElement() && !$this->getGivenElement()->element_parent_type->hasType(element_type: $this->getGivenType())) {
             throw new \InvalidArgumentException("Given element does not have the type");
         }
 
-        $member = ElementSetMember::getMember(set:$this->getGivenSet(),element: $this->getGivenElement() );
+        $member = null;
+        if ($this->getGivenSet() && $this->getGivenElement()) {
+            $member = ElementSetMember::getMember(set:$this->getGivenSet(),element: $this->getGivenElement() );
+        }
+
 
 
         if ($this->check_permission) {
@@ -150,8 +158,7 @@ class TypeOff extends Act\Cmd\Ele
                         }
                     }
                 }
-
-                $this->checkIfAdmin($this->getGivenElement()->element_namespace);
+                // do not check element level permissions, type can decide when it gets turned off regardless of who owns the element
             }
         }
 
@@ -162,7 +169,9 @@ class TypeOff extends Act\Cmd\Ele
 
             DB::beginTransaction();
             ElementTypeSetVisibility::stateVisibility(
-                visible_type_id: $this->getGivenType()->id,visible_set_member_id: $member->id,is_turned_on: static::MAKING_VISIBLE);
+                visible_type_id: $this->getGivenType()->id,visible_set_member_id: $member?->id,
+                phase_id: $this->getGivenPhase()?->id ,
+                is_turned_on: static::MAKING_VISIBLE);
 
             if ($this->send_event) {
                 $this->post_events_to_send = static::getPostEventClass()::makeEventActions(
@@ -186,27 +195,17 @@ class TypeOff extends Act\Cmd\Ele
         return [
             'element'=>$this->getGivenElement(),
             'set'=>$this->getGivenSet(),
+            'phase'=>$this->getGivenPhase(),
             'type'=>$this->getGivenType()
         ];
     }
 
     public function getDataSnapshot(): array
     {
-        $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['element'])) {
-            $ret['element'] = new ElementResponse(given_element:  $what['element']);
-        }
-
-        if (isset($what['set'])) {
-            $ret['set'] = new SetResponse(given_set:  $what['set']);
-        }
-
-        if (isset($what['type'])) {
-            $ret['type'] = new TypeResponse(given_type:  $what['type']);
-        }
-
-        return $ret;
+        $ret =  $this->getMyData();
+        $what = [];
+        $what['action'] = new ElementActionResponse(given_element: $ret['element'],given_set: $ret['set'],given_type: $ret['type'],given_phase: $ret['phase']);
+        return $what;
     }
 
 
@@ -215,6 +214,7 @@ class TypeOff extends Act\Cmd\Ele
         parent::initData(b_save: false);
         $this->setGivenSet($this->given_set_uuid)
             ->setGivenElement($this->given_element_uuid)
+            ->setGivenPhase($this->given_phase_uuid)
             ->setGivenType($this->given_type_uuid);
 
         $this->action_data->save();

@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -14,6 +15,7 @@ use App\Models\ElementSetMember;
 use App\Models\ElementValue;
 use App\Models\UserNamespace;
 use App\OpenApi\Elements\ElementResponse;
+use App\OpenApi\Params\Element\ElementSelectParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -48,12 +50,14 @@ class Read extends Act\Cmd\Ele
         Evt\Set\Reading::class
     ];
 
-    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','given_attribute_uuid','check_permission'];
+    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','given_attribute_uuid','given_phase_uuid','check_permission'];
 
+    #[ApiParamMarker( param_class: ElementSelectParams::class)]
     public function __construct(
         protected ?string              $given_set_uuid =null, //reads need a set
         protected ?string              $given_element_uuid =null, //reads need an element
         protected ?string              $given_attribute_uuid =null, //reads need an attribute
+        protected ?string              $given_phase_uuid =null,
         protected bool                $check_permission = true,
         protected bool                $is_system = false,
         protected bool                $send_event = true,
@@ -122,7 +126,8 @@ class Read extends Act\Cmd\Ele
             $val = ElementValue::readContextValue(
                 member: $member,
                 att: $this->getGivenAttribute(),
-                type: $this->getGivenElement()->element_parent_type);
+                type: $this->getGivenElement()->element_parent_type,
+                phase: $this->getGivenPhase());
             $this->setImportantValue($val,true);
             DB::commit();
         } catch (\Exception $e) {
@@ -135,7 +140,9 @@ class Read extends Act\Cmd\Ele
 
 
     protected function getMyData() :array {
-        return ['element'=>$this->getGivenElement(),'set'=>$this->getGivenSet(),'value'=>$this->getImportantValue()];
+        return ['element'=>$this->getGivenElement(),
+                'attribute'=>$this->getGivenAttribute(),
+            'set'=>$this->getGivenSet(),'value'=>$this->getImportantValue()];
     }
 
 
@@ -157,6 +164,7 @@ class Read extends Act\Cmd\Ele
         parent::initData(b_save: false);
         $this->setGivenSet($this->given_set_uuid)
             ->setGivenElement($this->given_element_uuid)
+            ->setGivenPhase($this->given_phase_uuid)
             ->setGivenAttribute($this->given_attribute_uuid);
 
         $this->action_data->save();

@@ -55,7 +55,7 @@ class LinkerCollectionResponse implements  JsonSerializable
         }
 
         /** @var ElementSet[] $sets */
-        $links = ElementLink::buildLinks(linking_element_id: $linker_element->id, with_linker_element: true, with_linked_set: true)->get();
+        $links = ElementLink::buildLink(linking_element_id: $linker_element->id, with_linker_element: true, with_linked_set: true)->get();
         foreach ($links as $link) {
             $this->links[] = new LinkResponse(linker: $link, show_linker: $show_linker, show_set: $show_set,
                 show_elements: $show_elements, show_definer: $show_definer, show_parent: $show_parent, definer_type_level: $definer_type_level,

@@ -2,11 +2,13 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 
+use App\OpenApi\Params\Element\LinkSelectParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -33,6 +35,7 @@ Once the link is removed, the element and type owners will get an event
 
 
 ')]
+#[ApiParamMarker( param_class: LinkSelectParams::class)]
 class LinkRemove extends LinkAdd
 {
     const UUID = 'c0f2f5b9-3030-4e60-9bd0-742299a6b83b';

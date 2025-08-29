@@ -168,6 +168,7 @@ return [
     'set_must_have_a_defining_element' => 'Set must have a defining element',
     'set_does_not_have_element' => 'Set :ref does not have the element :ele',
     'set_has_different_phase_than_element_entering' => 'Set :ref has phase :set_phase, but element :ele has phase :ele_phase',
+    'set_has_different_phase_than_linking_element   ' => 'Cannot link: set :ref has phase :set_phase, but element :ele has phase :ele_phase',
     'set_not_in_phase' => 'Set :ref has phase :set_phase, which is different from  :other_phase',
 
     //servers
@@ -210,6 +211,10 @@ return [
     'params_bad_namespace' => "Namespace provided not found",
     'params_missing_type' => "Missing type in the api call",
     'params_bad_type' => "Type provided not found",
+
+    //links
+    'link_not_found_by' => 'Link not found using :types : :values ',
+    'link_not_found' => 'Link not found using :ref',
 
 
 ];

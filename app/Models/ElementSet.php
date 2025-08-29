@@ -173,34 +173,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    $build = $this->where('ref_uuid', $value);
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = ElementSet::buildSet(me_id:$first_id)->first();
-                }
-            }
-        } finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.set_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::SET_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
-
+        return static::resolveSet($value);
     }
 
 

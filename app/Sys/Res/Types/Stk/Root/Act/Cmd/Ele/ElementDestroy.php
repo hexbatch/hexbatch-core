@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -14,6 +15,7 @@ use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\UserNamespace;
 use App\OpenApi\Elements\ElementCollectionResponse;
+use App\OpenApi\Params\Element\ElementSelectParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -31,6 +33,8 @@ use Illuminate\Support\Facades\DB;
 # Destory elements
 
 One or more elements can be destroyed here, they can be of mixed types.
+
+given_element_uuids: array of element uuids
 
 If no event handler to handle deletion is set the type or owner ,
    then only the element admin members can destroy.
@@ -82,6 +86,7 @@ class ElementDestroy extends Act\Cmd\Ele
     const array ACTIVE_DATA_KEYS = ['given_element_uuids','given_new_namespace_uuid'];
 
 
+    #[ApiParamMarker( param_class: ElementSelectParams::class)]
     public function __construct(
         protected array          $given_element_uuids = [],
 

@@ -9,7 +9,7 @@ use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -177,7 +177,8 @@ class ElementValue extends Model
         ElementSetMember $member,
         Attribute $att,
         ElementType $type,
-        ?array $value = null
+        ?array $value = null,
+        ?Phase $phase = null
     ) :void
     {
         if ($att->is_abstract) {return;} //does not have state
@@ -196,7 +197,7 @@ class ElementValue extends Model
         }
 
         $exposed_and_visible = ElementTypeExposedAttribute::getExposedAndVisible(
-            exposed_type_id: $type->id,exposed_attribute_id: $att->id, in_set_member_id:   $member->id
+            exposed_type_id: $type->id,exposed_attribute_id: $att->id, in_set_member_id:   $member->id,phase_id: $phase?->id
         );
         if (!$exposed_and_visible) {return;}
 
@@ -224,8 +225,9 @@ class ElementValue extends Model
     public static function readContextValue(
         ElementSetMember $member,
         Attribute $att,
-        ElementType $type
-    ) : string|array|null
+        ElementType $type,
+        ?Phase $phase = null
+    ) : string|int|array|null
     {
 
         $exposed_and_visible = ElementTypeExposedAttribute::getExposedAndVisible(
@@ -235,7 +237,7 @@ class ElementValue extends Model
 
 
         /** @var static[] $valrows */
-        $valrows = static::buildElementValue(
+        $valrows_build = static::buildElementValue(
             horde_type_id: $type->id,
             horde_attribute_id: $att->id,
             horde_element_id: $member->member_element_id,
@@ -246,8 +248,23 @@ class ElementValue extends Model
             read_nearest: true
 
         )
-            ->orderBy('id','desc')
-            ->get();
+            ->orderBy('id','desc');
+
+        if ($phase) {
+            $valrows_build->join('elements as els',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($phase) {
+                    $join
+                        ->on('els.id', '=', 'element_values.horde_element_id')
+                        ->where('els.element_phase_id', $phase->id);
+                }
+            );
+        }
+
+        $valrows  =    $valrows_build->get();
+
         if (count($valrows) ) {
             $value_json = $valrows[0]->da_json_value;
             return Utilities::maybeDecodeJson($value_json,true);

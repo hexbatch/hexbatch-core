@@ -65,13 +65,22 @@ Making api for
 [SetCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/SetCreate.php) draft
 
 [ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOwnerChange.php) draft
-[ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php)
-[LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php) 
-[LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php)
-[TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php) 
-[TypeOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOn.php)
-[Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php) 
-[Write.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Write.php) 
+[ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php) draft
+[LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php)  draft
+[LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php) draft
+[TypeOff.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOff.php) draft
+[TypeOn.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/TypeOn.php) draft
+[Read.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Read.php)  draft
+[Write.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/Write.php)  draft
+
+
+
+[DesignTimeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeCreate.php)
+[DesignTimeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeDestroy.php)
+[DesignTimeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeEdit.php)
+[DesignLocationCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationCreate.php)
+[DesignLocationDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationDestroy.php)
+[DesignLocationEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationEdit.php)
 
 # Links
 

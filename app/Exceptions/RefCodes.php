@@ -133,6 +133,11 @@ class RefCodes {
 
     const int DESIGN_API_SCHEMA_ISSUE = 50000;
 
+
+    //links start at 60k
+
+    const int LINK_NOT_FOUND =  60001;
+
     /**
      * @type string[]
      */
@@ -224,6 +229,7 @@ class RefCodes {
         self::PHASE_IS_DIFFERENT => '',
 
         self::DESIGN_API_SCHEMA_ISSUE => '',
+        self::LINK_NOT_FOUND => '',
 
     ];
 }

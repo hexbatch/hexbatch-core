@@ -176,6 +176,16 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+
+            $table->foreignId('data_link_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Data has a link")
+                ->index()
+                ->constrained('element_links')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->foreignId('data_phase_id')
                 ->nullable()
                 ->default(null)

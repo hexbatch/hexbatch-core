@@ -12,8 +12,10 @@ use App\Models\ActionCollection;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\Element;
+use App\Models\ElementLink;
 use App\Models\ElementSet;
 use App\Models\ElementType;
+use App\Models\Phase;
 use App\Models\Server;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemAttributes;
@@ -508,6 +510,39 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
                 $node->save();
             }
         }
+    }
+
+
+    public function getGivenLink(): ?ElementLink
+    {   /** @uses ActionDatum::data_link() */
+        return $this->action_data->data_link;
+    }
+
+    public function setGivenLink(null|ElementLink|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof ElementLink) {
+            $this->action_data->data_link_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_link_id = ElementLink::resolveLink(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenPhase(): ?Phase
+    {   /** @uses ActionDatum::data_link() */
+        return $this->action_data->data_phase;
+    }
+
+    public function setGivenPhase(null|Phase|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof Phase) {
+            $this->action_data->data_phase_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_phase_id = Phase::resolvePhase(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
     }
 
 }
