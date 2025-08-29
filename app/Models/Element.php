@@ -7,6 +7,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -87,6 +88,7 @@ class Element extends Model implements ISystemModel
     public static function buildElement(
         ?int    $me_id = null,
         ?string $uuid = null,
+        array  $given_uuids = [],
         bool    $b_do_relations = false
 
     ): Builder
@@ -107,6 +109,10 @@ class Element extends Model implements ISystemModel
             $build->where('elements.ref_uuid', $uuid);
         }
 
+        if (count($given_uuids)) {
+            $build->whereIn('elements.ref_uuid', $given_uuids);
+        }
+
         if ($b_do_relations) {
             /** @uses Element::element_namespace(),Element::element_parent_type() */
             $build->with('element_namespace','element_parent_type');
@@ -114,6 +120,72 @@ class Element extends Model implements ISystemModel
 
 
         return $build;
+    }
+
+    /**
+     * @param string[]|\Illuminate\Support\Collection $values
+     * @param bool $throw_exception
+     * @return Collection|Element[]
+     */
+    public static function resolveElements( $values, bool $throw_exception = true)
+    {
+
+        $refs = [];
+        foreach ($values as $val) {
+            if (!Utilities::is_uuid($val)) {
+                if ($throw_exception) {
+                    throw new HexbatchNotFound(
+                        __('msg.element_not_found',['ref'=>$val]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                        RefCodes::ELEMENT_NOT_FOUND
+                    );
+                } else {
+                    continue;
+                }
+            }
+
+            $refs[] = $val;
+
+        }
+
+       /** @var Collection|Element[] $ret */
+        $ret = static::buildElement(given_uuids:$refs)->get();
+
+        if (count($ret) !== count($values) ) {
+            if ($throw_exception) {
+                throw new HexbatchNotFound(
+                    __('msg.element_list_not_found',['ref'=>implode('|',$values)]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                    RefCodes::ELEMENT_NOT_FOUND
+                );
+            }
+        }
+
+        return $ret;
+    }
+
+    public static function resolveElement(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+            return static::getThisElement(uuid: $value);
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.element_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ELEMENT_NOT_FOUND
+            );
+        }
+
+        return $ret;
     }
 
     public static function getThisElement(

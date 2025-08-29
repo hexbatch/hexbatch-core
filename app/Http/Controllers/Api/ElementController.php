@@ -6,31 +6,63 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
+use App\Models\Element;
+
+use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
+
+use App\OpenApi\Elements\ElementCollectionResponse;
+use App\OpenApi\Params\Element\ChangeElementOwnerParams;
+use App\OpenApi\Params\Set\SetCreateParams;
 use App\OpenApi\Resources\HexbatchNamespace;
+use App\OpenApi\Resources\HexbatchResource;
+use App\OpenApi\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class ElementController extends Controller {
 
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/elements/change_owner',
         operationId: 'core.elements.change_owner',
         description: "Element owner can give ownership to another namespace at any time. Any number of elements can be included with a path ",
         summary: 'Change the element owner',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ChangeElementOwnerParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Owner changed', content: new JsonContent(ref: ElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
     #[ApiEventMarker( Evt\Type\ElementRecieved::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_OWNER)]
     #[ApiTypeMarker( Root\Api\Element\ChangeOwner::class)]
-    public function change_owner() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function change_owner(Request $request) {
+        $params = new ChangeElementOwnerParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['change-element-owner']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
@@ -402,21 +434,40 @@ class ElementController extends Controller {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[OA\Post(
         path: '/api/v1/{namespace}/elements/create_set',
         operationId: 'core.elements.create_set',
         description: "Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets",
         summary: 'Create a set from element',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: SetResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Server\SetCreated::class)]
     #[ApiEventMarker( Evt\Set\SetChildCreated::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\CreateSet::class)]
-    public function create_set() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function create_set(Request $request,Element $element) {
+        $params = new SetCreateParams(given_element: $element,namespace: Utilities::getCurrentOrUserNamespace());
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\CreateSet(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['create-set']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 

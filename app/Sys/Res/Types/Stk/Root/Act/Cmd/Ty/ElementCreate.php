@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -15,6 +16,7 @@ use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
 use App\OpenApi\Elements\ElementCollectionResponse;
+use App\OpenApi\Params\Type\CreateElementParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -32,6 +34,11 @@ use Illuminate\Support\Facades\DB;
   This can create one or many elements at once, must be from the same type.
 
   If no handler for element creation, then only the type admin members can create
+
+  given_type_uuid: uuid of the type
+  given_namespace_uuid: uuid of the namespace to put the element into, if not given, the same namespace as the call will be used
+  given_phase_uuid: uuid of the phase, if not given, the default will be used
+  number_to_create: if missing will be one
 
 
   Creation can be blocked by the following:
@@ -119,7 +126,7 @@ class ElementCreate extends Act\Cmd\Ele
     const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid','given_phase_uuid',
         'number_to_create','preassinged_uuids','b_must_have_namespace'];
 
-
+    #[ApiParamMarker( param_class: CreateElementParams::class)]
     public function __construct(
         protected ?string       $given_type_uuid = null,
         protected ?string       $given_namespace_uuid = null,

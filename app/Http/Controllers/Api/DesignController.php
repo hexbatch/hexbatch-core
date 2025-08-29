@@ -66,7 +66,7 @@ class DesignController extends Controller {
     public function change_design_owner(Request $request,ElementType $type) {
         $params = new DesignOwnershipParams(type: $type);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ChangeOwner(params: $params, is_async: false, tags: ['change-owner-by-web','api-top']); //todo change to true
+        $api = new Api\Design\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['change-owner']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
@@ -101,7 +101,7 @@ class DesignController extends Controller {
     public function promote_design_owner(Request $request,ElementType $type) {
         $params = new DesignOwnershipParams(type: $type);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\PromoteOwner(params: $params, is_async: true, tags: ['promote-owner-by-web','api-top']);
+        $api = new Api\Design\PromoteOwner(params: $params, is_async: true, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['promote-owner']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
@@ -137,8 +137,8 @@ class DesignController extends Controller {
     public function purge_design(Request $request,ElementType $type) {
         $params = new DesignDestroyParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Purge(params: $params, is_async: false, tags: ['purge-design-by-web','api-top']); //todo change to true
-        $thing = $api->createThingTree(tags: ['change-owner']);
+        $api = new Api\Design\Purge(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['purge-design']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
@@ -172,8 +172,8 @@ class DesignController extends Controller {
     public function destroy_design(Request $request,ElementType $type) {
         $params = new DesignDestroyParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Destroy(params: $params, is_async: false, tags: ['destroy-design-by-web','api-top']); //todo change to true
-        $thing = $api->createThingTree(tags: ['change-owner']);
+        $api = new Api\Design\Destroy(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['destroy-design']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
@@ -207,7 +207,7 @@ class DesignController extends Controller {
     public function create_design(Request $request) {
         $params = new DesignParams(namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Create(params: $params, is_async: true, tags: ['registration-by-web','api-top']);
+        $api = new Api\Design\Create(params: $params, is_async: true, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['create-design']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
@@ -228,13 +228,21 @@ class DesignController extends Controller {
         summary: 'Edits the name, final type, access ',
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     public function edit_design(Request $request,ElementType $type) {
         $params = new DesignParams(edit_type: $type, namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Edit(params: $params, is_async: true, tags: ['edit-design-by-web','api-top']);
+        $api = new Api\Design\Edit(params: $params, is_async: true, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['edit-design']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
@@ -334,8 +342,8 @@ class DesignController extends Controller {
     public function destroy_attribute(Request $request,Attribute $attribute) {
         $params = new DesignAttributeDestroyParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\DestroyAttribute(params: $params, is_async: true, tags: ['registration-by-web','api-top']);
-        $thing = $api->createThingTree(tags: ['create-attribute']);
+        $api = new Api\Design\DestroyAttribute(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['destroy-attribute']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
@@ -373,7 +381,7 @@ class DesignController extends Controller {
     public function create_attribute(Request $request,ElementType $type) {
         $params = new DesignAttributeParams(given_type: $type,namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\CreateAttribute(params: $params, is_async: true, tags: ['registration-by-web','api-top']);
+        $api = new Api\Design\CreateAttribute(params: $params, is_async: true, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['create-attribute']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
@@ -467,8 +475,8 @@ class DesignController extends Controller {
     public function edit_attribute(Request $request,Attribute $attribute) {
         $params = new DesignAttributeParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\EditAttribute(params: $params, is_async: true, tags: ['registration-by-web','api-top']);
-        $thing = $api->createThingTree(tags: ['create-attribute']);
+        $api = new Api\Design\EditAttribute(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['edit-attribute']);
         Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
@@ -681,8 +689,8 @@ class DesignController extends Controller {
     public function remove_parent(Request $request,ElementType $type) {
         $params = new DesignParentParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\AddParent(params: $params, is_async: false, tags: ['add-parent-by-web','api-top']); //todo change to true
-        $thing = $api->createThingTree(tags: ['change-owner']); Utilities::ignoreVar($thing);
+        $api = new Api\Design\AddParent(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['remove-parent']); Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -719,8 +727,8 @@ class DesignController extends Controller {
     public function add_parent(Request $request,ElementType $type) {
         $params = new DesignParentParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\RemoveParent(params: $params, is_async: false, tags: ['remove-parent-by-web','api-top']); //todo change to true
-        $thing = $api->createThingTree(tags: ['change-owner']); Utilities::ignoreVar($thing);
+        $api = new Api\Design\RemoveParent(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['add-parent']); Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }

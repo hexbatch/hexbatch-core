@@ -2,12 +2,17 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 
+use App\Annotations\ApiParamMarker;
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Set\AddElementParams;
 use App\OpenApi\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -16,6 +21,38 @@ use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
+#[HexbatchTitle( title: "Add elements to set")]
+#[HexbatchBlurb( blurb: "Add one or more elements to a set")]
+#[HexbatchDescription( description: /** @lang markdown */
+    '
+# Create elements
+
+  This adds elements to a set, the set and elements must be already existing.
+
+
+  given_set_uuid: uuid of the set
+  given_element_uuids: array of one or more element uuids to put into the set
+  is_sticky: if the elements are sticky, remaining after the remove command
+
+  Creation can be blocked by the following:
+
+  By the set
+
+  * [SetEnter.php](../../../Evt/Set/SetEnter.php)
+
+
+  After the elements are added, the following notices are given
+
+   * [SetEnter.php](../../../Evt/Set/SetEnter.php)
+   * [ShapeEnter.php](../../../Evt/Set/ShapeEnter.php)
+   * [MapEnter.php](../../../Evt/Set/MapEnter.php)
+   * [TypeMapEnclosedStart.php](../../../Evt/Set/TypeMapEnclosedStart.php)
+   * [TypeMapEnclosingStart.php](../../../Evt/Set/TypeMapEnclosingStart.php)
+   * [TypeShapeEnclosedStart.php](../../../Evt/Set/TypeShapeEnclosedStart.php)
+   * [TypeShapeEnclosingStart.php](../../../Evt/Set/TypeShapeEnclosingStart.php)
+
+
+')]
 class SetMemberAdd extends Act\Cmd\St
 {
     const UUID = 'ebd1275e-ecc6-486e-89cb-69e14ae4a44c';
@@ -127,6 +164,8 @@ class SetMemberAdd extends Act\Cmd\St
         'added_element_uuids'=>['class'=>Element::class,'partition'=>2] ,
         'allowed_element_uuids'=>['class'=>Element::class,'partition'=>1] ,
     ];
+
+    #[ApiParamMarker( param_class: AddElementParams::class)]
     public function __construct(
         protected ?string       $given_set_uuid = null ,
         /**

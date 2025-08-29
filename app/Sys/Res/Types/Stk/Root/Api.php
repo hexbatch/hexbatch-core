@@ -281,8 +281,8 @@ class Api extends BaseType implements ICallResponse
     public static function runHook(ThingCallback $callback,Thing $thing,ThingHook $hook,array $header, array $body): ICallResponse
     {
         Utilities::ignoreVar($callback,$hook,$header,$body);
-        /** @var static $me */
         $me = $thing->getAction();
+        /** @type ICallResponse */
         return $me;
     }
 }

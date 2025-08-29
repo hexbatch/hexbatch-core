@@ -75,7 +75,7 @@ class EditAttribute extends CreateAttribute
             }
             else {
                 if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenType($child->getGivenType());
+                    $this->setGivenAttribute($child->getGivenAttribute());
                     $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
                 } else {
                     $this->setActionStatus(TypeOfThingStatus::THING_FAIL);

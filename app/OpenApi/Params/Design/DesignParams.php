@@ -15,7 +15,7 @@ use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 /**
- * Type Design
+ *
  */
 #[OA\Schema(schema: 'DesignParams')]
 class DesignParams extends ApiParamBase
@@ -43,13 +43,12 @@ class DesignParams extends ApiParamBase
     public function __construct(
         protected ?string $bound_uuid = null,
         protected ?string $namespace_uuid = null,
-        protected ?string $edit_uuid = null,
         protected ?ElementType $edit_type = null,
         protected ? UserNamespace $namespace = null
     )
     {
         $this->namespace_uuid = $this->namespace?->getUuid();
-        $this->edit_uuid = $this->edit_type?->getUuid();
+
     }
 
 
@@ -88,7 +87,7 @@ class DesignParams extends ApiParamBase
 
         $ret['namespace_uuid'] = $this->namespace_uuid;
         $ret['bound_uuid'] = $this->bound_uuid;
-        $ret['edit_uuid'] = $this->edit_uuid;
+        $ret['edit_uuid'] = $this->edit_type?->ref_uuid;
         return $ret;
     }
 
@@ -101,11 +100,6 @@ class DesignParams extends ApiParamBase
     public function getScheduleUuid(): ?string
     {
         return $this->bound_uuid;
-    }
-
-    public function getEditUuid(): ?string
-    {
-        return $this->edit_uuid;
     }
 
     public function getNamespaceUuid(): ?string

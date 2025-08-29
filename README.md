@@ -55,11 +55,16 @@ Making api for
 [DesignEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignEdit.php)  draft
 [DesignOwnerChange.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignOwnerChange.php)  draft
 
-[SetCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/SetCreate.php)
-[SetMemberAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetMemberAdd.php)
-[ElementCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/ElementCreate.php)
-[TypePublish.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/TypePublish.php)
-[ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOwnerChange.php) 
+
+
+[ElementCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/ElementCreate.php) draft
+[TypePublish.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ty/TypePublish.php) draft
+
+
+[SetMemberAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/St/SetMemberAdd.php) draft
+[SetCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/SetCreate.php) draft
+
+[ElementChangeOwner.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementOwnerChange.php) draft
 [ElementDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/ElementDestroy.php)
 [LinkAdd.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkAdd.php) 
 [LinkRemove.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ele/LinkRemove.php)

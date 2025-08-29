@@ -152,18 +152,23 @@ return [
 
     //elements
     'element_not_found' => 'Element not found using :ref',
+    'element_not_given' => 'Element not given in route or api data',
+    'element_list_not_found' => 'All the elements from the list were not found using :ref',
     'element_not_found_by' => 'Element not found using :types : :values ',
     'elements_must_have_owner' => 'When creating elements, an owner namespace must be defined',
     'elements_must_have_type' => 'When creating elements, the type of element must be defined',
     'elements_mising_from_give_list' => 'When changing owners, there were no elements listed to give',
     'elements_mising_from_destroy_list' => 'When deleting elements, there were no elements listed',
+    'element_not_in_phase' => 'Element :ref has phase :set_phase, which is different from  :other_phase',
 
     //sets
     'set_not_found' => 'Set not found using :ref',
+    'set_not_given' => 'Set not given in route or api data',
     'set_not_found_by' => 'Set not found using :types : :values ',
     'set_must_have_a_defining_element' => 'Set must have a defining element',
     'set_does_not_have_element' => 'Set :ref does not have the element :ele',
     'set_has_different_phase_than_element_entering' => 'Set :ref has phase :set_phase, but element :ele has phase :ele_phase',
+    'set_not_in_phase' => 'Set :ref has phase :set_phase, which is different from  :other_phase',
 
     //servers
     'server_not_found' => "Server not found using :ref",
@@ -197,6 +202,8 @@ return [
 
     //phase
     'phase_not_found_by' => 'Phase not found using :types : :values ',
+    'phase_not_found' => 'Phase not found',
+    'no_phase_given' => 'Phase not given',
 
     //params
     'params_missing_namespace' => "Missing namespace in the api call",

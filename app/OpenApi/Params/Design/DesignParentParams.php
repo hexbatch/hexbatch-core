@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 /**
- * Type Design
+ *
  */
 #[OA\Schema(schema: 'DesignParentParams')]
 class DesignParentParams extends ApiParamBase

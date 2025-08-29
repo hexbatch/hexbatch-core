@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -14,6 +15,7 @@ use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\UserNamespace;
 use App\OpenApi\Elements\ElementCollectionResponse;
+use App\OpenApi\Params\Element\ChangeElementOwnerParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -31,6 +33,9 @@ use Illuminate\Support\Facades\DB;
 
   If no event handler to give permission to change ownership is set the type or owner ,
    then only the element admin members can create.
+
+   * given_element_uuids : an array of uuid of the elements
+   * given_new_namespace_uuid : the new element owner
 
   Either the type owner or new owner can have event handlers to block ownership change. Only one needs to fail this.
 
@@ -87,6 +92,7 @@ class ElementOwnerChange extends Act\Cmd\Ele
     const array ACTIVE_DATA_KEYS = ['given_element_uuids','given_new_namespace_uuid'];
 
 
+    #[ApiParamMarker( param_class: ChangeElementOwnerParams::class)]
     public function __construct(
         protected array          $given_element_uuids = [],
         protected ?string        $given_new_namespace_uuid = null,

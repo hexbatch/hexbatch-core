@@ -117,6 +117,30 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         return $build;
     }
 
+    public static function resolveSet(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+           return static::getThisSet(uuid: $value);
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.set_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SET_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
+
     public static function getThisSet(
         ?int             $id = null,
         ?string          $uuid = null

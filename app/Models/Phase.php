@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Rules\NamespaceNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -107,6 +108,33 @@ class Phase extends Model
         }
 
         return $build;
+    }
+
+
+    public static function resolvePhase(string $value, bool $throw_exception = true)
+    : ?static
+    {
+
+        $ret = null;
+        if (Utilities::is_uuid($value)) {
+            $ret =  static::getThisPhase(uuid: $value);
+        } else {
+            //maybe type name
+            $given_type = ElementType::resolveType(value: $value,throw_exception: false);
+            if ($given_type) {
+                $ret = static::getThisPhase(type_id: $given_type->id);
+            }
+        }
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.phase_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SET_NOT_FOUND
+            );
+        }
+
+        return $ret;
     }
 
     public static function getThisPhase(

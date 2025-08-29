@@ -6,25 +6,50 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
+use App\Models\ElementSet;
+use App\Models\ElementType;
+use App\Models\Phase;
+use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Elements\ElementCollectionResponse;
+use App\OpenApi\Params\Set\AddElementParams;
+use App\OpenApi\Params\Type\CreateElementParams;
 use App\OpenApi\Resources\HexbatchNamespace;
 
+use App\OpenApi\Resources\HexbatchResource;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class SetController extends Controller {
 
 
+    /**
+     * @throws \Exception
+     */
     #[OA\Post(
         path: '/api/v1/{namespace}/sets/add_element',
         operationId: 'core.sets.add_element',
         description: "Element namespace members can put element into any set that allows that ",
         summary: 'Change the element owner',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Set\SetEnter::class)]
@@ -34,10 +59,16 @@ class SetController extends Controller {
     #[ApiEventMarker(Evt\Set\TypeMapEnclosingStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosingStart::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\AddElement::class)]
-    public function add_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function add_element(Request $request,ElementSet $set) {
+        $params = new AddElementParams(given_set: $set);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Set\AddElement(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['add-elements']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 

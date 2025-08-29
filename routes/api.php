@@ -326,6 +326,10 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('elements')->group(function () {
 
+                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                    Route::patch('change_owner', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
+                });
+
                 Route::prefix('phase/{working_phase}')->group(function () {
                     Route::middleware([])->group(function () {
                         Route::get('list', [Api\ElementController::class, 'list_elements'])->name('core.elements.list_elements');
@@ -333,43 +337,43 @@ Route::prefix('v1')->group(function () {
 
                     Route::prefix('{element}')->group(function () {
 
-                        Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
-                            Route::delete('purge', [Api\ElementController::class, 'purge_element'])->name('core.elements.purge');
-                            Route::post('promote_set', [Api\ElementController::class, 'promote_set'])->name('core.elements.promote_set');
-                            Route::post('promote_live', [Api\ElementController::class, 'promote_live'])->name('core.elements.promote_live');
-                            Route::delete('demote_live', [Api\ElementController::class, 'demote_live'])->name('core.elements.demote_live');
+                        Route::middleware(Middleware\ValidatePhaseOfElement::class)->group(function () {
+                            Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
+                                Route::delete('purge', [Api\ElementController::class, 'purge_element'])->name('core.elements.purge');
+                                Route::post('promote_set', [Api\ElementController::class, 'promote_set'])->name('core.elements.promote_set');
+                                Route::post('promote_live', [Api\ElementController::class, 'promote_live'])->name('core.elements.promote_live');
+                                Route::delete('demote_live', [Api\ElementController::class, 'demote_live'])->name('core.elements.demote_live');
+                            });
+
+                            Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+                                Route::delete('destroy', [Api\ElementController::class, 'destroy_element'])->name('core.elements.destroy');
+                            });
+
+
+                            Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+
+                                Route::post('add_live', [Api\ElementController::class, 'add_live'])->name('core.elements.add_live');
+                                Route::post('copy_live', [Api\ElementController::class, 'copy_live'])->name('core.elements.copy_live');
+                                Route::delete('remove_live', [Api\ElementController::class, 'remove_live'])->name('core.elements.remove_live');
+                                Route::delete('link', [Api\ElementController::class, 'create_link'])->name('core.elements.link');
+                                Route::post('create_set', [Api\ElementController::class, 'create_set'])->name('core.elements.create_set');
+
+                            });
+
+                            Route::middleware([])->group(function () {
+                                Route::patch('type_off', [Api\ElementController::class, 'type_off'])->name('core.elements.type_off');
+                                Route::patch('type_on', [Api\ElementController::class, 'type_on'])->name('core.elements.type_on');
+                                Route::post('ping', [Api\ElementController::class, 'ping_element'])->name('core.elements.ping');
+                                Route::get('show', [Api\ElementController::class, 'show_element'])->name('core.elements.show');
+
+                            });
+
+                            Route::get('read_attribute', [Api\ElementController::class, 'read_attribute'])->name('core.elements.read_attribute');
+                            Route::get('read_live_type', [Api\ElementController::class, 'read_live_type'])->name('core.elements.read_live_type');
+                            Route::get('read_type', [Api\ElementController::class, 'read_type'])->name('core.elements.read_type');
+                            Route::get('read_time', [Api\ElementController::class, 'read_time'])->name('core.elements.read_time');
+                            Route::patch('write_attribute', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
                         });
-
-                        Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
-                            Route::patch('change_owner', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
-                            Route::delete('destroy', [Api\ElementController::class, 'destroy_element'])->name('core.elements.destroy');
-
-                        });
-
-
-                        Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
-
-                            Route::post('add_live', [Api\ElementController::class, 'add_live'])->name('core.elements.add_live');
-                            Route::post('copy_live', [Api\ElementController::class, 'copy_live'])->name('core.elements.copy_live');
-                            Route::delete('remove_live', [Api\ElementController::class, 'remove_live'])->name('core.elements.remove_live');
-                            Route::delete('link', [Api\ElementController::class, 'create_link'])->name('core.elements.link');
-                            Route::post('create_set', [Api\ElementController::class, 'create_set'])->name('core.elements.create_set');
-
-                        });
-
-                        Route::middleware([])->group(function () {
-                            Route::patch('type_off', [Api\ElementController::class, 'type_off'])->name('core.elements.type_off');
-                            Route::patch('type_on', [Api\ElementController::class, 'type_on'])->name('core.elements.type_on');
-                            Route::post('ping', [Api\ElementController::class, 'ping_element'])->name('core.elements.ping');
-                            Route::get('show', [Api\ElementController::class, 'show_element'])->name('core.elements.show');
-
-                        });
-
-                        Route::get('read_attribute', [Api\ElementController::class, 'read_attribute'])->name('core.elements.read_attribute');
-                        Route::get('read_live_type', [Api\ElementController::class, 'read_live_type'])->name('core.elements.read_live_type');
-                        Route::get('read_type', [Api\ElementController::class, 'read_type'])->name('core.elements.read_type');
-                        Route::get('read_time', [Api\ElementController::class, 'read_time'])->name('core.elements.read_time');
-                        Route::patch('write_attribute', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
                     });
                 });
 
@@ -383,27 +387,27 @@ Route::prefix('v1')->group(function () {
                     Route::get('list', [Api\SetController::class, 'list_sets'])->name('core.sets.list');
 
                     Route::prefix('{element_set}')->group(function () {
-
-                        Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
-                            Route::delete('destroy_set', [Api\SetController::class, 'destroy_set'])->name('core.sets.destroy_set');
-                            Route::delete('purge_set', [Api\SetController::class, 'purge_set'])->name('core.sets.purge_set');
-                            Route::delete('purge_member', [Api\SetController::class, 'purge_member'])->name('core.sets.purge_member');
-                            Route::delete('empty_set', [Api\SetController::class, 'empty_set'])->name('core.sets.empty_set');
-                            Route::patch('stick_element', [Api\SetController::class, 'stick_element'])->name('core.sets.stick_element');
-                            Route::patch('unstick_element', [Api\SetController::class, 'unstick_element'])->name('core.sets.unstick_element');
-                            Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
-                            Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
-                        });
-
-
-
-                        Route::middleware([])->group(function () {
+                        Route::middleware(Middleware\ValidatePhaseOfSet::class)->group(function () {
+                            Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                                Route::delete('destroy_set', [Api\SetController::class, 'destroy_set'])->name('core.sets.destroy_set');
+                                Route::delete('purge_set', [Api\SetController::class, 'purge_set'])->name('core.sets.purge_set');
+                                Route::delete('purge_member', [Api\SetController::class, 'purge_member'])->name('core.sets.purge_member');
+                                Route::delete('empty_set', [Api\SetController::class, 'empty_set'])->name('core.sets.empty_set');
+                                Route::patch('stick_element', [Api\SetController::class, 'stick_element'])->name('core.sets.stick_element');
+                                Route::patch('unstick_element', [Api\SetController::class, 'unstick_element'])->name('core.sets.unstick_element');
+                                Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
+                                Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
+                            });
 
 
-                            Route::get('show_set', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
-                            Route::get('list_children', [Api\SetController::class, 'list_children'])->name('core.sets.list_children');
-                            Route::get('list_elements', [Api\SetController::class, 'list_elements'])->name('core.sets.list_elements');
+                            Route::middleware([])->group(function () {
 
+
+                                Route::get('show_set', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
+                                Route::get('list_children', [Api\SetController::class, 'list_children'])->name('core.sets.list_children');
+                                Route::get('list_elements', [Api\SetController::class, 'list_elements'])->name('core.sets.list_elements');
+
+                            });
                         });
                     });
                 });

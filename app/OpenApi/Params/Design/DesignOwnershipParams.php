@@ -16,7 +16,7 @@ use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 /**
- * Type Design
+ *
  */
 #[OA\Schema(schema: 'DesignOwnershipParams')]
 class DesignOwnershipParams extends ApiParamBase

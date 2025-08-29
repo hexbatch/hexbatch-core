@@ -6,11 +6,25 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
+use App\Models\ElementType;
+use App\OpenApi\Attributes\AttributeResponse;
+use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Elements\ElementCollectionResponse;
+use App\OpenApi\Params\Design\DesignAttributeParams;
+use App\OpenApi\Params\Type\CreateElementParams;
+use App\OpenApi\Params\Type\TypeParams;
 use App\OpenApi\Resources\HexbatchNamespace;
+use App\OpenApi\Resources\HexbatchResource;
+use App\OpenApi\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 
@@ -317,9 +331,18 @@ class TypeController extends Controller {
         operationId: 'core.types.fire_event',
         description: "Custom events can be fired, their scope depends on what they inherit, smallest scope wins if multiple ancestors of mixed scope",
         summary: 'Fires a custom event',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Server\CustomEventFired::class)]
@@ -330,23 +353,39 @@ class TypeController extends Controller {
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/types/publish',
         operationId: 'core.types.publish',
         description: "Type admins do unpublished design and mark it as ready for use. Events from inherited types and attributes can block",
         summary: 'Publishes a design',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Server\TypePublished::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Type\Publish::class)]
-    public function publish_type() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function publish_type(Request $request,ElementType $type) {
+        $params = new TypeParams(given_type: $type);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Type\Publish(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['publish-type']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 
@@ -408,14 +447,26 @@ class TypeController extends Controller {
     }
 
 
+    /**
+     * @throws \Exception
+     */
     #[OA\Post(
         path: '/api/v1/{namespace}/types/create_element',
         operationId: 'core.types.create_element',
         description: "Type admin can create one or more elements going to one or more namespaces. The namespace can reject. The inherited types can reject",
         summary: 'Creates one or more new elements from a type',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: CreateElementParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements created', content: new JsonContent(ref: ElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
@@ -424,8 +475,14 @@ class TypeController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
 
     #[ApiTypeMarker( Root\Api\Type\CreateElement::class)]
-    public function create_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function create_element(Request $request,ElementType $type) {
+        $params = new CreateElementParams(given_type: $type);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Type\CreateElement(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['create-elements']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
 

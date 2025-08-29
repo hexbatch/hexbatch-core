@@ -8,6 +8,7 @@ use App\Enums\Sys\TypeOfFlag;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
 use App\Helpers\Utilities;
+use App\Models\ActionCollection;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\Element;
@@ -33,6 +34,7 @@ use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignCreate;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignParentAdd;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 
@@ -481,7 +483,32 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         return $this->action_data->data_owner_namespace;
     }
 
+    /** @return Element[] */
+    public function getGivenElements(): array
+    {
+        return $this->action_data->getCollectionOfType(Element::class);
+    }
 
+    /**
+     * @param Collection|Element[]$elements
+     * @return void
+     */
+    public function setGivenElements($elements) : void
+    {
+        $stored_already = $this->getGivenElements();
+        $ref_lookup = [];
+        foreach ($stored_already as $ele) {
+            $ref_lookup[$ele->ref_uuid] = $ele;
+        }
+        foreach ($elements as $ele) {
+            if (!isset($ref_lookup[$ele->ref_uuid])) {
+                $node = new ActionCollection();
+                $node->parent_action_data_id = $this->action_data->id;
+                $node->collection_element_id = $ele->id;
+                $node->save();
+            }
+        }
+    }
 
 }
 
