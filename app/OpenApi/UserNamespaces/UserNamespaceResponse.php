@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\UserNamespaces;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 use App\Models\UserNamespace;
 use App\OpenApi\Set\SetResponse;
 use Carbon\Carbon;

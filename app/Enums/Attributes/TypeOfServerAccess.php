@@ -1,9 +1,10 @@
 <?php
 namespace App\Enums\Attributes;
-
+use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_server_access
  */
+#[OA\Schema(schema: 'TypeOfServerAccess',title: "Server access policy")]
 enum TypeOfServerAccess : string {
 
     case IS_PRIVATE = 'is_private';

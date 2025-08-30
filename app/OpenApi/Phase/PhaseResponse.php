@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Phase;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 
 use App\Models\Phase;
 use App\OpenApi\Types\TypeResponse;

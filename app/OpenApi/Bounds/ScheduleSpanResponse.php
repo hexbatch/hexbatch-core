@@ -2,10 +2,8 @@
 
 namespace App\OpenApi\Bounds;
 
-use App\Api\Common\HexbatchUuid;
-use App\Enums\Bounds\TypeOfLocation;
-use App\Helpers\Utilities;
-use App\Models\LocationBound;
+use App\OpenApi\Common\HexbatchUuid;
+
 use App\Models\TimeBoundSpan;
 use Carbon\Carbon;
 use JsonSerializable;

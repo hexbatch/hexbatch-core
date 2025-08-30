@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -11,6 +12,7 @@ use App\Models\ActionDatum;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
 use App\OpenApi\Bounds\LocationResponse;
+use App\OpenApi\Params\Design\DesignTimeParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Collection;
@@ -43,7 +45,7 @@ class DesignLocationCreate extends Act\Cmd\Ds
 
     const array ACTIVE_DATA_KEYS = ['bound_name','given_location_uuid','location_type','geo_json','display','is_deleting'];
 
-
+    #[ApiParamMarker( param_class: DesignTimeParams::class)]
     public function __construct(
         protected ?string           $bound_name =null,
         protected ?string           $given_location_uuid = null,
@@ -81,7 +83,7 @@ class DesignLocationCreate extends Act\Cmd\Ds
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-
+        $this->setGivenLocationBound($this->given_location_uuid);
         $this->action_data->collection_data->offsetSet('location_type',$this->location_type?->value);
         $this->action_data->save();
         $this->action_data->refresh();

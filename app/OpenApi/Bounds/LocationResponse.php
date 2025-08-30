@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Bounds;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Helpers\Utilities;
 use App\Models\LocationBound;

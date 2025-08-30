@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Bounds;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 use App\Models\TimeBound;
 use Carbon\Carbon;
 use JsonSerializable;

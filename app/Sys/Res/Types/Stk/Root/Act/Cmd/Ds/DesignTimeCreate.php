@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
+use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
@@ -12,8 +13,8 @@ use App\Models\ActionDatum;
 
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Bounds\LocationResponse;
 use App\OpenApi\Bounds\ScheduleResponse;
+use App\OpenApi\Params\Design\DesignTimeParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Collection;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\DB;
 * bound_name
 * bound_start
 * bound_stop
+* bound_cron
 * bound_cron_timezone
 * bound_period_length
 ')]
@@ -46,12 +48,13 @@ class DesignTimeCreate extends Act\Cmd\Ds
 
     const array ACTIVE_DATA_KEYS = ['bound_name','given_time_uuid','bound_start','bound_stop','bound_cron_timezone','bound_period_length','is_deleting'];
 
-
+    #[ApiParamMarker( param_class: DesignTimeParams::class)]
     public function __construct(
         protected ?string           $bound_name =null,
         protected ?string           $given_time_uuid = null,
         protected ?string           $bound_start = null,
         protected ?string           $bound_stop = null,
+        protected ?string           $bound_cron = null,
         protected ?string           $bound_cron_timezone = null,
         protected ?string           $bound_period_length = null,
         protected bool              $is_deleting = false,
@@ -108,6 +111,7 @@ class DesignTimeCreate extends Act\Cmd\Ds
                     'bound_name' => $this->bound_name,
                     'bound_start' => $this->bound_start,
                     'bound_stop' => $this->bound_stop,
+                    'bound_cron' => $this->bound_cron,
                     'bound_cron_timezone' => $this->bound_cron_timezone,
                     'bound_period_length' => $this->bound_period_length,
                 ]
@@ -130,7 +134,12 @@ class DesignTimeCreate extends Act\Cmd\Ds
 
     }
 
-
+    protected function initData(bool $b_save = true) : ActionDatum {
+        parent::initData(b_save: false);
+        $this->setGivenTimeBound($this->given_time_uuid);
+        $this->action_data->refresh();
+        return $this->action_data;
+    }
 
 
     protected function getMyData() :array {

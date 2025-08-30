@@ -374,8 +374,8 @@ class TypePublish extends Act\Cmd\Ty
             if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             } else if($child->isActionSuccess()) {
-                if ($child->getDesignType()) {
-                    $this->setPublishingType(type: $child->getDesignType());
+                if ($child->getGivenType()) {
+                    $this->setPublishingType(type: $child->getGivenType());
                 }
             }
         }

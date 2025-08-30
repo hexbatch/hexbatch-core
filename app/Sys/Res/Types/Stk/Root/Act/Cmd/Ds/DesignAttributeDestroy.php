@@ -103,7 +103,7 @@ class DesignAttributeDestroy extends Act\Cmd\Ds
 
 
     protected function getMyData() :array {
-        return ['attribute'=>$this->getAttribute()];
+        return ['attribute'=>$this->getGivenAttribute()];
     }
 
     public function getDataSnapshot(): array

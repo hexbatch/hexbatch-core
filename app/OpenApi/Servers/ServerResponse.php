@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Servers;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 
 use App\Enums\Server\TypeOfServerStatus;
 use App\Models\Phase;

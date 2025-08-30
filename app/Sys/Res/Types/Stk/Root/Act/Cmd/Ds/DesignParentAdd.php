@@ -45,7 +45,7 @@ class DesignParentAdd extends Act\Cmd\Ds
         Evt\Server\DesignPending::class
     ];
 
-    public function getDesignType(): ?ElementType
+    public function getGivenType(): ?ElementType
     {
         return $this->getGivenType();
     }
@@ -109,12 +109,12 @@ class DesignParentAdd extends Act\Cmd\Ds
     protected function runActionInner(array $data = []): void
     {
         parent::runActionInner();
-        if (!$this->getDesignType()) {
+        if (!$this->getGivenType()) {
             throw new \InvalidArgumentException("Need type before can add parents to it");
         }
 
         if ($this->check_permission) {
-            $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+            $this->checkIfAdmin($this->getGivenType()->owner_namespace);
         }
 
 
@@ -137,7 +137,7 @@ class DesignParentAdd extends Act\Cmd\Ds
                     }
                     $b_check_parent = true;
                     if ($this->is_system && !$this->send_event) { $b_check_parent = false;}
-                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getDesignType(), approval: $this->approval,check_parent_published: $b_check_parent);
+                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getGivenType(), approval: $this->approval,check_parent_published: $b_check_parent);
                 }
             }
 
@@ -146,7 +146,7 @@ class DesignParentAdd extends Act\Cmd\Ds
             foreach ($this->getParents() as $parent) {
                 if ($this->is_system ||$parent->isPublicDomain()
                     || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())) {
-                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getDesignType(),
+                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getGivenType(),
                         approval: TypeOfApproval::DESIGN_APPROVED,check_parent_published:!$this->is_system );
                 }
             }
@@ -154,13 +154,13 @@ class DesignParentAdd extends Act\Cmd\Ds
 
             //check to see if all parents have approved this design, if so then success, else fail
             /** @var ElementTypeParent[] $check_parents */
-            $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $this->getDesignType()->id)->get();
+            $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $this->getGivenType()->id)->get();
 
             foreach ($check_parents as $checker) {
                 if ($checker->parent_type_approval === TypeOfApproval::DESIGN_DENIED) {
 
                     throw new HexbatchFailException( __('msg.design_parents_did_not_approve_design',['ref'=>$checker->getName(),
-                        'child'=>$this->getDesignType()->getName()]),
+                        'child'=>$this->getGivenType()->getName()]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::TYPE_PARENT_DENIED_DESIGN);
                 }
@@ -179,7 +179,7 @@ class DesignParentAdd extends Act\Cmd\Ds
 
 
     protected function getMyData() :array {
-        return ['type'=>$this->getDesignType()];
+        return ['type'=>$this->getGivenType()];
     }
 
     public function getDataSnapshot(): array
@@ -275,11 +275,11 @@ class DesignParentAdd extends Act\Cmd\Ds
                             }
 
                             ElementTypeParent::addOrUpdateParent(
-                                parent: $child->getParentType(), child: $this->getDesignType(), approval: $child->getApprovalStatus());
+                                parent: $child->getParentType(), child: $this->getGivenType(), approval: $child->getApprovalStatus());
                         }
                     } else if($child->isActionFail()) {
                         ElementTypeParent::addOrUpdateParent(
-                            parent: $child->getParentType(), child: $this->getDesignType(), approval: TypeOfApproval::DESIGN_DENIED);
+                            parent: $child->getParentType(), child: $this->getGivenType(), approval: TypeOfApproval::DESIGN_DENIED);
                     }
 
                 }

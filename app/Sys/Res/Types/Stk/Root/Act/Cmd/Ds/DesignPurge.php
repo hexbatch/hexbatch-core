@@ -73,17 +73,17 @@ class DesignPurge extends Act\Cmd\Ds
     {
         parent::runActionInner();
 
-        if (!$this->getDesignType()) {
+        if (!$this->getGivenType()) {
             throw new \InvalidArgumentException("Need type before can delete it");
         }
 
         if (static::CHECK_PERMISSION) {
-            $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+            $this->checkIfAdmin($this->getGivenType()->owner_namespace);
         }
 
         try {
             DB::beginTransaction();
-            $this->getDesignType()->delete();
+            $this->getGivenType()->delete();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

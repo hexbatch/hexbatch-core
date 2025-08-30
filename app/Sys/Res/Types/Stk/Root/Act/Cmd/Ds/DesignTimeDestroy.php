@@ -28,19 +28,19 @@ class DesignTimeDestroy extends DesignTimeCreate
 
 
     public function __construct(
-        protected ?string           $given_location_uuid = null,
-        protected bool              $is_system = false,
-        protected bool              $send_event = true,
-        protected ?bool             $is_async = null,
-        protected ?ActionDatum      $action_data = null,
-        protected ?ActionDatum      $parent_action_data = null,
-        protected ?UserNamespace    $owner_namespace = null,
-        protected bool                $b_type_init = false,
+        protected ?string        $given_time_uuid = null,
+        protected bool           $is_system = false,
+        protected bool           $send_event = true,
+        protected ?bool          $is_async = null,
+        protected ?ActionDatum   $action_data = null,
+        protected ?ActionDatum   $parent_action_data = null,
+        protected ?UserNamespace $owner_namespace = null,
+        protected bool           $b_type_init = false,
         protected array          $tags = []
     )
     {
 
-        parent::__construct(given_time_uuid: $this->given_location_uuid, is_deleting: true,
+        parent::__construct(given_time_uuid: $this->given_time_uuid, is_deleting: true,
             is_system: $this->is_system, send_event: $this->send_event,
             is_async: $this->is_async,
             action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,

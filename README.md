@@ -75,12 +75,12 @@ Making api for
 
 
 
-[DesignTimeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeCreate.php)
-[DesignTimeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeDestroy.php)
-[DesignTimeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeEdit.php)
-[DesignLocationCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationCreate.php)
-[DesignLocationDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationDestroy.php)
-[DesignLocationEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationEdit.php)
+[DesignTimeCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeCreate.php) draft
+[DesignTimeDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeDestroy.php) draft
+[DesignTimeEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignTimeEdit.php) draft
+[DesignLocationCreate.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationCreate.php) draft
+[DesignLocationDestroy.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationDestroy.php) draft
+[DesignLocationEdit.php](app/Sys/Res/Types/Stk/Root/Act/Cmd/Ds/DesignLocationEdit.php) draft
 
 # Links
 

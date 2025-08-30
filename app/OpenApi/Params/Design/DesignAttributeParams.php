@@ -14,7 +14,7 @@ use App\Sys\Res\Types\Stk\Root\Api\ApiParamBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
-/**
+/*
  * Attribute Design
  *  uuid : when editing an existing attribute
  *  type_uuid: each attribute is defined as part of a type, but can be inherited by attributes elsewhere
@@ -72,7 +72,7 @@ class DesignAttributeParams extends ApiParamBase
     /** @var mixed[] $default_value */
     protected array $default_value = [];
 
-    #[OA\Property(title: 'Attribute name')]
+    #[OA\Property(title: 'Attribute name',maxLength: 40,minLength: 3)]
     protected ?string $attribute_name = null;
 
 

@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Types;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Models\ElementTypeServerLevel;
 use App\OpenApi\Servers\ServerResponse;

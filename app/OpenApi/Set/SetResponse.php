@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Set;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 
 use App\Models\Element;
 use App\Models\ElementSet;

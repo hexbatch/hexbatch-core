@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Types;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 use App\Models\ElementType;
 use App\OpenApi\Attributes\AttributeResponse;
 use App\OpenApi\Bounds\ScheduleResponse;

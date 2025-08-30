@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Callbacks;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 use App\Models\User;
 use Carbon\Carbon;
 use Hexbatch\Things\Interfaces\ICallResponse;

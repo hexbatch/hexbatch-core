@@ -134,7 +134,7 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
            );
            $creator->runAction();
 
-           $what =  $creator->getAttribute();
+           $what =  $creator->getGivenAttribute();
            $this->b_did_create_model = true;
            return $what;
        } catch (\Exception $e) {

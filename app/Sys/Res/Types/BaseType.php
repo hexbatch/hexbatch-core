@@ -15,8 +15,10 @@ use App\Models\Element;
 use App\Models\ElementLink;
 use App\Models\ElementSet;
 use App\Models\ElementType;
+use App\Models\LocationBound;
 use App\Models\Phase;
 use App\Models\Server;
+use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemAttributes;
 use App\Sys\Collections\SystemElements;
@@ -101,7 +103,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
                 is_system: true, send_event: false, owner_namespace: $this->getISystemType()->getTypeNamespace()
             );
             $design->runAction();
-            $created_type = $design->getDesignType();
+            $created_type = $design->getGivenType();
 
 
 
@@ -529,8 +531,40 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
         return $this;
     }
 
+    public function getGivenTimeBound(): ?TimeBound
+    {   /** @uses ActionDatum::data_time_bound() */
+        return $this->action_data->data_time_bound;
+    }
+
+    public function setGivenTimeBound(null|TimeBound|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof TimeBound) {
+            $this->action_data->data_time_bound_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_time_bound_id = TimeBound::resolveSchedule(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
+    public function getGivenLocationBound(): ?LocationBound
+    {   /** @uses ActionDatum::data_location_bound() */
+        return $this->action_data->data_location_bound;
+    }
+
+    public function setGivenLocationBound(null|LocationBound|string $what, bool $b_save = false): static
+    {
+        if ($what instanceof LocationBound) {
+            $this->action_data->data_location_bound_id = $what->id;
+        } else if ($what) {
+            $this->action_data->data_location_bound_id = LocationBound::resolveLocation(value: $what)->id;
+        }
+        if ($b_save) {$this->action_data->save();}
+        return $this;
+    }
+
     public function getGivenPhase(): ?Phase
-    {   /** @uses ActionDatum::data_link() */
+    {   /** @uses ActionDatum::$data_phase() */
         return $this->action_data->data_phase;
     }
 

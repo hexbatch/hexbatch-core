@@ -1,10 +1,11 @@
 <?php
 namespace App\Enums\Types;
 use Illuminate\Support\Collection;
-
+use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_approval
  */
+#[OA\Schema(schema: 'TypeOfApproval',title: "Approval stage")]
 enum TypeOfApproval : string {
 
     case APPROVAL_NOT_SET = 'approval_not_set';

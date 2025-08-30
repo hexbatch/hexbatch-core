@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\Common;
+namespace App\OpenApi\Common;
 
 use OpenApi\Attributes as OA;
 

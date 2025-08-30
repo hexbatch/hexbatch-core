@@ -181,18 +181,18 @@ class DesignAttributeCreate extends Act\Cmd\Ds
     protected function runActionInner(array $data = []): void {
         parent::runActionInner();
 
-        if (!$this->getAttribute() && !$this->getDesignType()) {
+        if (!$this->getGivenAttribute() && !$this->getGivenType()) {
             throw new \InvalidArgumentException("Need owning type before can make attribute");
         }
 
-        if ($this->getDesignType()->lifecycle === TypeOfLifecycle::PUBLISHED) {
+        if ($this->getGivenType()->lifecycle === TypeOfLifecycle::PUBLISHED) {
 
-            throw new HexbatchNotPossibleException(__('msg.design_cannot_add_attribute_to_published',['ref'=>$this->getDesignType()->getName()]),
+            throw new HexbatchNotPossibleException(__('msg.design_cannot_add_attribute_to_published',['ref'=>$this->getGivenType()->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::TYPE_SCHEMA_ISSUE);
         }
 
-        if (!$this->getAttribute() && !$this->attribute_name) {
+        if (!$this->getGivenAttribute() && !$this->attribute_name) {
             throw new HexbatchNotPossibleException(__('msg.attribute_schema_must_have_name'),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
@@ -209,11 +209,11 @@ class DesignAttributeCreate extends Act\Cmd\Ds
             $shape_id = LocationBound::getThisLocation(uuid: $this->location_uuid)->id;
         }
 
-        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+        $this->checkIfAdmin($this->getGivenType()->owner_namespace);
 
         try {
             DB::beginTransaction();
-            $attr = $this->getAttribute();
+            $attr = $this->getGivenAttribute();
             if (!$attr) {
                 $attr = new Attribute();
                 if ($this->uuid) {
@@ -227,15 +227,15 @@ class DesignAttributeCreate extends Act\Cmd\Ds
                 $attr->setAttributeName($this->attribute_name);
             }
 
-            if (!$this->getAttribute()) {
-                $attr->owner_element_type_id = $this->getDesignType()->id ;
+            if (!$this->getGivenAttribute()) {
+                $attr->owner_element_type_id = $this->getGivenType()->id ;
                 if (!$this->getParentAttribute()) {
                     $attr->attribute_approval = TypeOfApproval::DESIGN_APPROVED;
                 }
             }
 
             if ($parent = $this->getParentAttribute()) {
-                if ($this->getAttribute()?->parent_attribute_id !== $parent->id) {
+                if ($this->getGivenAttribute()?->parent_attribute_id !== $parent->id) {
                     $attr->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
                 }
                 $attr->parent_attribute_id = $parent->id ;
@@ -319,7 +319,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds
 
 
     protected function getMyData() :array {
-        return ['attribute'=>$this->getAttribute(),'parent'=>$this->getParentAttribute(),'design'=>$this->getDesignAttribute()];
+        return ['attribute'=>$this->getGivenAttribute(),'parent'=>$this->getParentAttribute(),'design'=>$this->getDesignAttribute()];
     }
 
     public function getDataSnapshot(): array
@@ -338,17 +338,17 @@ class DesignAttributeCreate extends Act\Cmd\Ds
         if (!$this->send_event) {return null;}
         $nodes = [];
         $events = [];
-        if ($this->getAttribute() && !$this->unset_parent) {
-            if ($this->parent_attribute_uuid !== $this->getAttribute()->attribute_parent->ref_uuid) {
+        if ($this->getGivenAttribute() && !$this->unset_parent) {
+            if ($this->parent_attribute_uuid !== $this->getGivenAttribute()->attribute_parent->ref_uuid) {
                 if ($this->parent_attribute_uuid && !$this->getParentAttribute()->isPublicDomain()) {
                     $events = Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,
-                        type_context: $this->getDesignType(),attribute_context: $this->getParentAttribute());
+                        type_context: $this->getGivenType(),attribute_context: $this->getParentAttribute());
                 }
             }
         } else {
             if ( $this->parent_attribute_uuid && !$this->getParentAttribute()->isPublicDomain()) {
                 $events = Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getDesignType(),attribute_context: $this->getParentAttribute());
+                    type_context: $this->getGivenType(),attribute_context: $this->getParentAttribute());
 
             }
         }

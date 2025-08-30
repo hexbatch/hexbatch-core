@@ -60,7 +60,7 @@ class DesignOwnerChange extends DesignOwnerPromote
     protected function runActionInner(array $data = []): void
     {
         parent::runActionInner();
-        $this->checkIfAdmin($this->getDesignType()->owner_namespace);
+        $this->checkIfAdmin($this->getGivenType()->owner_namespace);
 
 
     }
@@ -84,7 +84,7 @@ class DesignOwnerChange extends DesignOwnerPromote
         if ($this->getGivenType() && $this->getGivenNamespace()) {
             if ($this->getGivenType()->ref_uuid !== $this->getGivenNamespace()->ref_uuid) {
                 $events = Evt\Server\TypeOwnerChanging::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getDesignType(),namespace_context: $this->getGivenNamespace());
+                    type_context: $this->getGivenType(),namespace_context: $this->getGivenNamespace());
             }
 
         }

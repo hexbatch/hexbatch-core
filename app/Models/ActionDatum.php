@@ -34,6 +34,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int data_path_id
  * @property int data_phase_id
  * @property int data_link_id
+ * @property int data_time_bound_id
+ * @property int data_location_bound_id
  * @property int data_second_phase_id
  * @property int data_user_id
  * @property int data_server_id
@@ -134,6 +136,14 @@ class ActionDatum extends Model
 
     public function data_link() : BelongsTo {
         return $this->belongsTo(ElementLink::class,'data_link_id','id');
+    }
+
+    public function data_location_bound() : BelongsTo {
+        return $this->belongsTo(LocationBound::class,'data_location_bound_id','id');
+    }
+
+    public function data_time_bound() : BelongsTo {
+        return $this->belongsTo(TimeBound::class,'data_time_bound_id','id');
     }
 
     public function data_second_phase() : BelongsTo {

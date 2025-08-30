@@ -79,7 +79,7 @@ class DesignOwnerPromote extends Act\Cmd\Ds
     {
         parent::runActionInner();
 
-        if (!$this->getDesignType()) {
+        if (!$this->getGivenType()) {
             throw new \InvalidArgumentException("Need type before can change type owner");
         }
 
@@ -87,17 +87,17 @@ class DesignOwnerPromote extends Act\Cmd\Ds
             throw new \InvalidArgumentException("Need namespace before can change type owner");
         }
 
-        if ($this->getGivenNamespace()->id === $this->getDesignType()->owner_namespace_id) {
+        if ($this->getGivenNamespace()->id === $this->getGivenType()->owner_namespace_id) {
             throw new HexbatchFailException( __('msg.type_already_owned_by_namespace',
-                ['ref'=>$this->getDesignType()->getName(),'ns'=>$this->getDesignType()->owner_namespace->getName()]),
+                ['ref'=>$this->getGivenType()->getName(),'ns'=>$this->getGivenType()->owner_namespace->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::TYPE_ALREADY_HAS_OWNER);
         }
 
         try {
             DB::beginTransaction();
-            $this->getDesignType()->owner_namespace_id = $this->getGivenNamespace()->id ;
-            $this->getDesignType()->save();
+            $this->getGivenType()->owner_namespace_id = $this->getGivenNamespace()->id ;
+            $this->getGivenType()->save();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

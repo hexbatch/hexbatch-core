@@ -1,8 +1,11 @@
 <?php
 namespace App\Enums\Attributes;
+use OpenApi\Attributes as OA;
+
 /**
  * postgres enum type_of_element_value_policy
  */
+#[OA\Schema(schema: 'TypeOfElementValuePolicy',title: "Element value policy")]
 enum TypeOfElementValuePolicy : string {
     case STATIC = 'static';
 

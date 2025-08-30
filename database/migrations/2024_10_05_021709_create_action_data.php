@@ -186,6 +186,24 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('data_time_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Data has a time bound")
+                ->index()
+                ->constrained('time_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->foreignId('data_location_bound_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Data has a location bound")
+                ->index()
+                ->constrained('location_bounds')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->foreignId('data_phase_id')
                 ->nullable()
                 ->default(null)

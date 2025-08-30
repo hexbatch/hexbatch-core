@@ -132,7 +132,7 @@ class DesignCreate extends Act\Cmd\Ds
 
         try {
             DB::beginTransaction();
-            $type = $this->getDesignType();
+            $type = $this->getGivenType();
             if (!$type) {
                 $type = new ElementType();
             }
@@ -193,7 +193,7 @@ class DesignCreate extends Act\Cmd\Ds
 
 
     protected function getMyData() :array {
-        return ['type'=>$this->getDesignType()];
+        return ['type'=>$this->getGivenType()];
     }
 
     public function getDataSnapshot(): array

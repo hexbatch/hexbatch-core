@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Attributes;
 
-use App\Api\Common\HexbatchUuid;
+use App\OpenApi\Common\HexbatchUuid;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfApproval;

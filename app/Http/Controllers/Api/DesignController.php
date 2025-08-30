@@ -11,14 +11,20 @@ use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\ElementType;
+use App\Models\LocationBound;
+use App\Models\TimeBound;
 use App\OpenApi\Attributes\AttributeResponse;
+use App\OpenApi\Bounds\LocationResponse;
+use App\OpenApi\Bounds\ScheduleResponse;
 use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Params\Design\DesignAttributeDestroyParams;
 use App\OpenApi\Params\Design\DesignAttributeParams;
 use App\OpenApi\Params\Design\DesignDestroyParams;
+use App\OpenApi\Params\Design\DesignLocationParams;
 use App\OpenApi\Params\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Design\DesignParams;
 use App\OpenApi\Params\Design\DesignParentParams;
+use App\OpenApi\Params\Design\DesignTimeParams;
 use App\OpenApi\Resources\HexbatchAttribute;
 use App\OpenApi\Resources\HexbatchNamespace;
 use App\OpenApi\Resources\HexbatchResource;
@@ -812,110 +818,213 @@ class DesignController extends Controller {
     }
 
 
-
-
-    #[OA\Delete(
-        path: '/api/v1/{namespace}/design/time/{time_bound}/destroy',
-        operationId: 'core.design.destroy_time',
-        description: "Destroys a time resource, but only if its not used. ",
-        summary: 'Remove a time resource  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\DestroyTime::class)]
-    public function destroy_time() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/location_create',
-        operationId: 'core.design.location_create',
-        description: "Makes a new geo json 2d or 3d shape",
-        summary: 'Makes a new location bound',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\CreateLocation::class)]
-    public function location_create() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/design/location/{location_bound}/edit',
-        operationId: 'core.design.location_edit',
-        description: "Change visual properties of a location",
-        summary: 'Makes a new location bound',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
-    public function location_edit() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-
-
-    #[OA\Delete(
-        path: '/api/v1/{namespace}/design/location/{location_bound}/destroy',
-        operationId: 'core.design.destroy_location',
-        description: "Destorys a location resource if its not used ",
-        summary: 'Destroy a location  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\DestroyLocation::class)]
-    public function destroy_location() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Post(
         path: '/api/v1/{namespace}/design/create_time',
         operationId: 'core.design.create_time',
         description: "Makes a schedule that can be used in one or more attributes",
         summary: 'Makes a new schedule',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignTimeParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule created', content: new JsonContent(ref: ScheduleResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateTime::class)]
-    public function create_time() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function create_time(Request $request) {
+        $params = new DesignTimeParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Design\CreateTime(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['create-schedule']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
 
+
+
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/design/time/{time_bound}/edit',
         operationId: 'core.design.time_edit',
         description: "Schedules can be changed",
         summary: 'Edits a schedule',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignTimeParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: ScheduleResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
-    public function time_edit() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function time_edit(TimeBound $bound, Request $request) {
+        $params = new DesignTimeParams(given_bound: $bound);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Design\EditTime(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['edit-schedule']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
     }
+
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/design/time/{time_bound}/destroy',
+        operationId: 'core.design.destroy_time',
+        description: "Destroys a time resource, but only if its not used. ",
+        summary: 'Remove a time resource  ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignTimeParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule destroyed', content: new JsonContent(ref: ScheduleResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\DestroyTime::class)]
+    public function destroy_time(TimeBound $bound, Request $request) {
+        $params = new DesignTimeParams(given_bound: $bound);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Design\DestroyTime(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['destroy-schedule']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Post(
+        path: '/api/v1/{namespace}/design/location_create',
+        operationId: 'core.design.location_create',
+        description: "Makes a new geo json 2d or 3d shape",
+        summary: 'Makes a new location bound',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: LocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\CreateLocation::class)]
+    public function location_create(Request $request) {
+        $params = new DesignLocationParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['create-location']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Patch(
+        path: '/api/v1/{namespace}/design/location/{location_bound}/edit',
+        operationId: 'core.design.location_edit',
+        description: "Change visual properties of a location",
+        summary: 'Makes a new location bound',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: LocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
+    public function location_edit(LocationBound $bound,Request $request) {
+        $params = new DesignLocationParams(given_bound: $bound);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['edit-location']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/design/location/{location_bound}/destroy',
+        operationId: 'core.design.destroy_location',
+        description: "Destorys a location resource if its not used ",
+        summary: 'Destroy a location  ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: LocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\DestroyLocation::class)]
+    public function destroy_location(LocationBound $bound,Request $request) {
+        $params = new DesignLocationParams(given_bound: $bound);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Design\DestroyLocation(params: $params, is_async: true, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['destroy-location']); Utilities::ignoreVar($thing);
+        $data_out = $api->getCallbackResponse($http_code);
+        return  response()->json(['response'=>$data_out],$http_code);
+    }
+
+
+
+
+
 
 
 }
