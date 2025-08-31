@@ -10,10 +10,9 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
-
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Set\AddElementParams;
-use App\OpenApi\Set\SetResponse;
+use App\OpenApi\Params\Actioning\Set\AddElementParams;
+use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;

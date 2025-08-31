@@ -12,9 +12,7 @@ use App\Models\ElementType;
 use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
-
-use App\OpenApi\Elements\ElementResponse;
-use App\OpenApi\UserNamespaces\UserNamespaceResponse;
+use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use App\Sys\Res\Types\Stk\Root\Namespace\BasePerNamespace;

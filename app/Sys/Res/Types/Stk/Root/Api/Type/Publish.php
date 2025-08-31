@@ -4,9 +4,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-
-use App\OpenApi\Params\Type\TypeParams;
-use App\OpenApi\Set\SetResponse;
+use App\OpenApi\Params\Actioning\Type\TypeParams;
+use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;

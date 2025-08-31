@@ -150,6 +150,8 @@ enum TypeOfAction: string
 
 
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
+
+    case CMD_ELEMENT_EDIT = 'cmd_element_edit';
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
 
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';

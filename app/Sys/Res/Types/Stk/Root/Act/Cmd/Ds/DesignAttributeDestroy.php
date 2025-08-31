@@ -7,17 +7,13 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-
 use App\Models\ActionDatum;
-
-
 use App\Models\UserNamespace;
-use App\OpenApi\Attributes\AttributeResponse;
-use App\OpenApi\Params\Design\DesignAttributeDestroyParams;
-use App\OpenApi\Params\Design\DesignAttributeParams;
+use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
+use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
-
 use Illuminate\Support\Facades\DB;
+
 
 #[HexbatchTitle( title: "Destroys an attribute")]
 #[HexbatchBlurb( blurb: "Attributes can be destroyed while in design phase. No events are raised")]

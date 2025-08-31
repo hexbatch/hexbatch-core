@@ -8,13 +8,11 @@ use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
-
 use App\Models\ElementSet;
 use App\Models\ElementSetChild;
 use App\Models\UserNamespace;
-
-use App\OpenApi\Params\Set\SetCreateParams;
-use App\OpenApi\Set\SetResponse;
+use App\OpenApi\Params\Actioning\Set\SetCreateParams;
+use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\Enums\TypeOfThingStatus;

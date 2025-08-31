@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Exceptions\HexbatchNotFound;
-use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\Element;
 use App\Models\Phase;

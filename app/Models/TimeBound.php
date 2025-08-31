@@ -176,9 +176,15 @@ class TimeBound extends Model
     }
 
 
-    public static function buildTimeBound(?int $me_id = null, ?int $type_id = null,  ?string $uuid = null,
-                                        ?int $namespace_id = null,?string $name = null,
-                                        bool $with_namespace = false, bool $with_spans = false, bool $with_types = false
+    public static function buildTimeBound(?int                   $me_id = null, ?int $type_id = null, ?string $uuid = null,
+                                          ?int                   $namespace_id = null, ?string $name = null,
+                                          null|string|int|Carbon $after_when = null,
+                                          null|string|int|Carbon $before_when = null,
+                                          null|string|int|Carbon $during_when = null,
+                                          bool                   $with_namespace = false,
+                                          bool                   $with_spans = false,
+                                          bool                   $with_types = false
+
     )
     : Builder
     {
@@ -236,6 +242,48 @@ class TimeBound extends Model
        if ($name) {
            $build->where('time_bounds.bound_name',$build);
        }
+
+        if ($after_when) {
+            $date_string = Carbon::parse($after_when)->timezone('UTC')->toIso8601String();
+            $build->join('time_bound_spans',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($date_string) {
+                    $join
+                        ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
+                        ->where('time_bound_spans.time_slice_range','>',$date_string);
+                }
+            );
+        }
+
+        if ($before_when) {
+            $date_string = Carbon::parse($before_when)->timezone('UTC')->toIso8601String();
+            $build->join('time_bound_spans',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($date_string) {
+                    $join
+                        ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
+                        ->where('time_bound_spans.time_slice_range','<',$date_string);
+                }
+            );
+        }
+
+        if ($during_when) {
+            $date_string = Carbon::parse($during_when)->timezone('UTC')->toIso8601String();
+            $build->join('time_bound_spans',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($date_string) {
+                    $join
+                        ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
+                        ->where('time_bound_spans.time_slice_range','@>',$date_string);
+                }
+            );
+        }
 
        return $build;
     }

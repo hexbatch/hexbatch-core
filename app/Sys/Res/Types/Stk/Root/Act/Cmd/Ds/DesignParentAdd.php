@@ -14,10 +14,9 @@ use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
-
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Design\DesignParentParams;
-use App\OpenApi\Types\TypeResponse;
+use App\OpenApi\Params\Actioning\Design\DesignParentParams;
+use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;

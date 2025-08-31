@@ -7,8 +7,7 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-
-use App\OpenApi\Params\Element\ElementSelectParams;
+use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 

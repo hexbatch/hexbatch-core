@@ -5,9 +5,9 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-use App\OpenApi\Params\Design\DesignOwnershipParams;
-use App\OpenApi\Types\TypeResponse;
-use App\OpenApi\UserNamespaces\UserNamespaceResponse;
+use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
+use App\OpenApi\Results\Types\TypeResponse;
+use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;

@@ -5,9 +5,6 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
-use App\Models\ElementType;
-use App\Models\LocationBound;
-use App\Models\TimeBound;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 

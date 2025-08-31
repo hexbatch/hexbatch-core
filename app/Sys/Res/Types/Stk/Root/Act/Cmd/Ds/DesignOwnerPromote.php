@@ -11,8 +11,8 @@ use App\Exceptions\HexbatchFailException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Design\DesignOwnershipParams;
-use App\OpenApi\Types\TypeResponse;
+use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
+use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 

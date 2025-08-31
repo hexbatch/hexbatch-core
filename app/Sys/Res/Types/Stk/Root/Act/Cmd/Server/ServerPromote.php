@@ -5,18 +5,13 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Server;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
-use App\Models\ElementType;
-
 use App\Models\Server;
 use App\Models\UserNamespace;
-
-use App\OpenApi\Phase\PhaseResponse;
-use App\OpenApi\Servers\ServerResponse;
+use App\OpenApi\Results\Servers\ServerResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
-
+use App\Sys\Res\Types\Stk\Root\Evt;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * asking elsewhere for new credentials

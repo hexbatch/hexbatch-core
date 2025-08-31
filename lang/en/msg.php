@@ -19,6 +19,9 @@ return [
     'invalid_enum_type' => 'Invalid type of enum: was given :ref',
     'invalid_uuid' => 'Invalid uuid: was given :ref',
     'invalid_time' => 'Invalid time: was given :ref',
+    'invalid_time_with_message' => 'Invalid time: was given :ref : :msg',
+    'invalid_cursor' => 'Invalid cursor was given:  :ref',
+    'invalid_encryption_with_msg' => 'Invalid encrypted string was given: :msg :ref ',
 
 
     //users

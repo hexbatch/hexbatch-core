@@ -4,7 +4,7 @@ namespace App\Annotations;
 
 
 
-use App\Sys\Res\Types\Stk\Root\Api\IApiParam;
+use App\OpenApi\IApiParam;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class ApiParamMarker

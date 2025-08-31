@@ -13,22 +13,24 @@ use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
-use App\OpenApi\Attributes\AttributeResponse;
-use App\OpenApi\Bounds\LocationResponse;
-use App\OpenApi\Bounds\ScheduleResponse;
-use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
-use App\OpenApi\Params\Design\DesignAttributeDestroyParams;
-use App\OpenApi\Params\Design\DesignAttributeParams;
-use App\OpenApi\Params\Design\DesignDestroyParams;
-use App\OpenApi\Params\Design\DesignLocationParams;
-use App\OpenApi\Params\Design\DesignOwnershipParams;
-use App\OpenApi\Params\Design\DesignParams;
-use App\OpenApi\Params\Design\DesignParentParams;
-use App\OpenApi\Params\Design\DesignTimeParams;
-use App\OpenApi\Resources\HexbatchAttribute;
-use App\OpenApi\Resources\HexbatchNamespace;
-use App\OpenApi\Resources\HexbatchResource;
-use App\OpenApi\Types\TypeResponse;
+use App\OpenApi\Common\Resources\HexbatchAttribute;
+use App\OpenApi\Common\Resources\HexbatchNamespace;
+use App\OpenApi\Common\Resources\HexbatchResource;
+use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
+use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
+use App\OpenApi\Params\Actioning\Design\DesignDestroyParams;
+use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
+use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
+use App\OpenApi\Params\Actioning\Design\DesignParams;
+use App\OpenApi\Params\Actioning\Design\DesignParentParams;
+use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Params\Listing\Design\ListScheduleParams;
+use App\OpenApi\Results\Attributes\AttributeResponse;
+use App\OpenApi\Results\Bounds\LocationResponse;
+use App\OpenApi\Results\Bounds\ScheduleCollectionResponse;
+use App\OpenApi\Results\Bounds\ScheduleResponse;
+use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -436,20 +438,33 @@ class DesignController extends Controller {
     }
 
 
+    /**
+     * @throws \Exception
+     */
     #[OA\Patch(
         path: '/api/v1/{namespace}/design/list_times',
         operationId: 'core.design.list_times',
         description: "Lists times",
         summary: 'Lists times  ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListScheduleParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ScheduleCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\ListTimes::class)]
-    public function list_times() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    #[ApiTypeMarker( Root\Api\Design\ListSchedules::class)]
+    public function list_times(Request $request) {
+        $params = new ListScheduleParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\ListSchedules(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-schedules']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 

@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-use App\OpenApi\Bounds\ScheduleResponse;
-use App\OpenApi\Params\Design\DesignTimeParams;
+use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;

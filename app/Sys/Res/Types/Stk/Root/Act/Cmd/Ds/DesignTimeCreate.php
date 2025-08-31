@@ -10,11 +10,10 @@ use App\Enums\Sys\TypeOfAction;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
-
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Bounds\ScheduleResponse;
-use App\OpenApi\Params\Design\DesignTimeParams;
+use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Collection;

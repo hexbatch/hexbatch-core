@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
-use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Pa\Search;
 use App\Sys\Res\Types\Stk\Root\Api;
 

@@ -6,9 +6,9 @@ namespace App\Sys\Res\Types\Stk\Root;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
-use App\OpenApi\Callbacks\HexbatchCallbackCollectionResponse;
-use App\OpenApi\Callbacks\HexbatchCallbackResponse;
 use App\OpenApi\ErrorResponse;
+use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Results\Callbacks\HexbatchCallbackResponse;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
@@ -229,6 +229,7 @@ class Api extends BaseType implements ICallResponse
     const int HTTP_CODE_SHORT = CodeOf::HTTP_GONE;
     const int HTTP_CODE_PENDING = CodeOf::HTTP_OK;
     const int HTTP_CODE_BAD = CodeOf::HTTP_BAD_REQUEST;
+
     public function getCode(): int
     {
         switch ($this->getActionStatus()) {
@@ -284,6 +285,13 @@ class Api extends BaseType implements ICallResponse
         $me = $thing->getAction();
         /** @type ICallResponse */
         return $me;
+    }
+
+    const PRIMARY_SNAPSHOT_KEY = 'override_me';
+
+    public function getOwnResponse() :mixed {
+        $data = $this->getDataSnapshot();
+        return $data[static::PRIMARY_SNAPSHOT_KEY]??null;
     }
 }
 

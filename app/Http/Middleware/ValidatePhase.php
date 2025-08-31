@@ -4,8 +4,6 @@ namespace App\Http\Middleware;
 
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
-use App\Models\Element;
-use App\Models\ElementSet;
 use App\Models\Phase;
 use Closure;
 use Illuminate\Http\Request;

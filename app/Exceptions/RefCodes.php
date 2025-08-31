@@ -13,6 +13,7 @@ class RefCodes {
     const int GEO_JSON_ISSUE = 9;
     const int INVALID_UUID = 10;
     const int INVALID_TIME = 11;
+    const int INVALID_CURSOR = 12;
 
 
     //servers start at 500

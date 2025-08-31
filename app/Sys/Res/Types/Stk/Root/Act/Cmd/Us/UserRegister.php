@@ -6,9 +6,8 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\User;
-
 use App\Models\UserNamespace;
-use App\OpenApi\Users\MeResponse;
+use App\OpenApi\Results\Users\MeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;

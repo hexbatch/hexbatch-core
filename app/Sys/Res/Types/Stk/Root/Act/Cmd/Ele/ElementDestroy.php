@@ -7,15 +7,14 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-
 use App\Enums\Sys\TypeOfFlag;
 use App\Exceptions\HexbatchNothingDoneException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\UserNamespace;
-use App\OpenApi\Elements\ElementCollectionResponse;
-use App\OpenApi\Params\Element\ElementSelectParams;
+use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
+use App\OpenApi\Results\Elements\ElementCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;

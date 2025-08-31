@@ -7,15 +7,14 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-
 use App\Exceptions\HexbatchFailException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Design\DesignParentParams;
-use App\OpenApi\Types\TypeResponse;
+use App\OpenApi\Params\Actioning\Design\DesignParentParams;
+use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
 

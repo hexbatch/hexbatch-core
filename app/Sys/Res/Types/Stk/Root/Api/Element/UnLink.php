@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-use App\OpenApi\Params\Element\LinkSelectParams;
-use App\OpenApi\Set\LinkResponse;
+use App\OpenApi\Params\Actioning\Element\LinkSelectParams;
+use App\OpenApi\Results\Set\LinkResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;

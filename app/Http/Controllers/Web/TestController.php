@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Web;
 
 
 use App\Models\ElementType;
-use App\OpenApi\Types\TypeResponse;
+use App\OpenApi\Results\Types\TypeResponse;
 
 class TestController
 {

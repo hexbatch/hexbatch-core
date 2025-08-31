@@ -4,7 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Annotations\ApiParamMarker;
-use App\OpenApi\Params\Design\DesignLocationParams;
+use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;

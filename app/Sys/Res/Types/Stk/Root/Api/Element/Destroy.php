@@ -5,9 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-use App\OpenApi\Elements\ElementCollectionResponse;
-use App\OpenApi\Params\Element\ElementSelectParams;
-use App\OpenApi\Params\Set\AddElementParams;
+use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
+use App\OpenApi\Results\Elements\ElementCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
