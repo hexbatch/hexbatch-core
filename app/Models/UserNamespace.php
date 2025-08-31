@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -57,6 +58,7 @@ use Illuminate\Validation\ValidationException;
  * @property Element private_element
  * @property ElementSet home_set
  * @property UserNamespace[] namespace_members
+ * @property UserNamespace[] namespaces_member_of
  * @property UserNamespace[] namespace_admins
  */
 class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
@@ -116,6 +118,17 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
             /** @uses UserNamespaceMember::namespace_member */
             ->with('member_user')
             ->orderBy('created_at');
+    }
+
+    public function namespaces_member_of() : HasManyThrough {
+        return $this->hasManyThrough(
+            UserNamespace::class, //what is returned
+            UserNamespaceMember::class, //the connecting class
+            'parent_namespace_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'member_namespace_id' // Local key on the connecting table...
+        );
     }
 
     public function namespace_admins() : HasMany {

@@ -2,6 +2,7 @@
 
 namespace App\OpenApi\Results\Bounds;
 
+use App\Models\TimeBound;
 use App\OpenApi\Results\ResultDataBase;
 use Illuminate\Pagination\AbstractCursorPaginator;
 use OpenApi\Attributes as OA;
@@ -21,13 +22,13 @@ class ScheduleCollectionResponse extends ResultDataBase
     public array $schedules = [];
 
     /**
-     * @param ScheduleResponse[]|AbstractCursorPaginator $given_schedules
+     * @param TimeBound[]|AbstractCursorPaginator $given_types
      */
-    public function __construct($given_schedules,int $number_spans = 3)
+    public function __construct($given_types, int $number_spans = 3)
     {
-        parent::__construct($given_schedules);
+        parent::__construct($given_types);
         $this->schedules = [];
-        foreach ($given_schedules as $schedule) {
+        foreach ($given_types as $schedule) {
             $this->schedules[] = new ScheduleResponse(given_time: $schedule,number_spans: $number_spans);
         }
 

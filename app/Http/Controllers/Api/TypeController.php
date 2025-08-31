@@ -14,6 +14,8 @@ use App\OpenApi\Common\Resources\HexbatchResource;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
 use App\OpenApi\Params\Actioning\Type\CreateElementParams;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
+use App\OpenApi\Params\Listing\Design\ListDesignParams;
+use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Results\Elements\ElementCollectionResponse;
 use App\OpenApi\Results\Types\TypeResponse;
@@ -30,20 +32,33 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
 class TypeController extends Controller {
 
 
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
         path: '/api/v1/{namespace}/types/show',
         operationId: 'core.types.show',
         description: "See information about a type if one is a member, admin or owner ",
         summary: 'Show information about a type',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowDesignParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: TypeResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Type\Show::class)]
-    public function show_type() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    #[ApiTypeMarker( Root\Api\Type\ShowType::class)]
+    public function show_type(Request $request) {
+        $params = new ShowDesignParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Type\ShowType(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['show-type']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 
@@ -64,39 +79,63 @@ class TypeController extends Controller {
     }
 
 
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
         path: '/api/v1/{namespace}/types/list_published',
         operationId: 'core.types.list_published',
         description: "Can see any published types where one is a member, admin or owner ",
         summary: 'List published types',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Type\ListPublished::class)]
-    public function list_published() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function list_published(Request $request) {
+        $params = new ListDesignParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Type\ListPublished(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-published']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
         path: '/api/v1/{namespace}/types/list_suspended',
         operationId: 'core.types.list_suspended',
         description: "Can see any suspended types where one is a member, admin or owner ",
         summary: 'List suspended types',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Type\ListSuspended::class)]
-    public function list_suspended() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function list_suspended(Request $request) {
+        $params = new ListDesignParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Type\ListSuspended(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-suspended']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 

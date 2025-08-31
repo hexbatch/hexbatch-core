@@ -24,7 +24,10 @@ use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Actioning\Design\DesignParams;
 use App\OpenApi\Params\Actioning\Design\DesignParentParams;
 use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Params\Listing\Design\ListDesignParams;
+use App\OpenApi\Params\Listing\Design\ListLocationParams;
 use App\OpenApi\Params\Listing\Design\ListScheduleParams;
+use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\OpenApi\Results\Bounds\LocationResponse;
 use App\OpenApi\Results\Bounds\ScheduleCollectionResponse;
@@ -234,7 +237,7 @@ class DesignController extends Controller {
         description: "The owner or their admin group can change, before publishing, the name of the type, final status and access level ".
                         "\nNo events are raised",
         summary: 'Edits the name, final type, access ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: TypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -258,11 +261,9 @@ class DesignController extends Controller {
     }
 
 
-
-
-
-    #[ApiTypeMarker( Root\Api\Design\Show::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
         path: '/api/v1/{namespace}/design/{element_type}/show',
         operationId: 'core.design.show',
@@ -270,32 +271,56 @@ class DesignController extends Controller {
         "\nIf the design type is set to public access, then any namespace can use this to see the information. Otherwise only the members of the owner namepace can ".
         "\nTo see more detail about any one of these, use the show api for that reference",
         summary: 'Shows information about a type ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowDesignParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: TypeResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function show_design() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    #[ApiTypeMarker( Root\Api\Design\ShowDesign::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    public function show_design(Request $request) {
+        $params = new ShowDesignParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\ShowDesign(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['show-design']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 
-
-    #[ApiTypeMarker( Root\Api\Design\ListDesigns::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
         path: '/api/v1/{namespace}/design/list',
         operationId: 'core.design.list',
         description: "See a list of all the designs this namespace either owns or has admin rights, is a member. Once a type is published, it is not seen here".
                 "\nCan see the name, uuid, the status and how many attributes, listeners, requirements and rules there are",
         summary: 'Lists all the designed owned or managed  ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function list_designs() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    #[ApiTypeMarker( Root\Api\Design\ListDesigns::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    public function list_designs(Request $request) {
+        $params = new ListDesignParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\ListDesigns(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-designs']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 
@@ -420,52 +445,6 @@ class DesignController extends Controller {
 
 
 
-
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/design/list_locations',
-        operationId: 'core.design.list_locatations',
-        description: "Lists locations",
-        summary: 'Lists locations  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
-    public function list_locatations() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    #[OA\Patch(
-        path: '/api/v1/{namespace}/design/list_times',
-        operationId: 'core.design.list_times',
-        description: "Lists times",
-        summary: 'Lists times  ',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListScheduleParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ScheduleCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\ListSchedules::class)]
-    public function list_times(Request $request) {
-        $params = new ListScheduleParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ListSchedules(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-schedules']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
-        return  response()->json(['response'=>$data_out],$api->getCode());
-    }
 
 
     /**
@@ -1034,6 +1013,66 @@ class DesignController extends Controller {
         $thing = $api->createThingTree(tags: ['destroy-location']); Utilities::ignoreVar($thing);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Patch(
+        path: '/api/v1/{namespace}/design/list_locations',
+        operationId: 'core.design.list_locatations',
+        description: "Lists locations",
+        summary: 'Lists locations  ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListLocationParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: ScheduleCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
+    public function list_locatations(Request $request) {
+        $params = new ListLocationParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\ListLocations(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-locations']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Patch(
+        path: '/api/v1/{namespace}/design/list_times',
+        operationId: 'core.design.list_times',
+        description: "Lists times",
+        summary: 'Lists times  ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListScheduleParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ScheduleCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ListSchedules::class)]
+    public function list_times(Request $request) {
+        $params = new ListScheduleParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\ListSchedules(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-schedules']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 

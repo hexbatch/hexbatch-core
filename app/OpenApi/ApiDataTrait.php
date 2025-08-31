@@ -11,11 +11,17 @@ use Illuminate\Support\Collection;
 
 trait ApiDataTrait
 {
-    public static function intRefFromCollection(Collection $collection,string $param_name) : ?int {
+    public static function intFromCollection(Collection $collection, string $param_name) : ?int {
         if (!$collection->has($param_name)) {return null;}
         $what  = (int)$collection->get($param_name);
         if (!$what)  { return null;}
         return $what;
+    }
+
+    public static function naturalFromCollection(Collection $collection, string $param_name) : ?int {
+       $what = static::intFromCollection(collection: $collection,param_name: $param_name);
+       if ($what < 0) { $what = 0;}
+       return $what;
     }
 
     public static function stringFromCollection(Collection $collection,string $param_name) : ?string {

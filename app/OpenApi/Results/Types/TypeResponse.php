@@ -7,6 +7,7 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\OpenApi\Results\ResultBase;
+use App\OpenApi\Results\ResultDataBase;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
 use OpenApi\Attributes as OA;
@@ -16,7 +17,7 @@ use OpenApi\Attributes as OA;
  * Show details about a type
  */
 #[OA\Schema(schema: 'TypeResponse')]
-class TypeResponse extends ResultBase
+class TypeResponse extends ResultDataBase
 {
     #[OA\Property(title: 'Type uuid',type: HexbatchUuid::class)]
     public string $uuid = '';

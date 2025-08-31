@@ -177,7 +177,9 @@ class TimeBound extends Model
 
 
     public static function buildTimeBound(?int                   $me_id = null, ?int $type_id = null, ?string $uuid = null,
-                                          ?int                   $namespace_id = null, ?string $name = null,
+                                          ?int                   $namespace_id = null,
+                                          array                  $in_namespace_ids = [],
+                                          ?string                $name = null,
                                           null|string|int|Carbon $after_when = null,
                                           null|string|int|Carbon $before_when = null,
                                           null|string|int|Carbon $during_when = null,
@@ -237,6 +239,10 @@ class TimeBound extends Model
 
        if ($namespace_id) {
            $build->where('time_bounds.time_bound_namespace_id',$namespace_id);
+       }
+
+       if (count($in_namespace_ids) ) {
+           $build->whereIn('time_bounds.time_bound_namespace_id',$in_namespace_ids);
        }
 
        if ($name) {

@@ -167,6 +167,7 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $id = null,
         ?string          $uuid = null,
         ?int             $namespace_id = null,
+        array                  $in_namespace_ids = [],
         ?string             $name = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
@@ -190,6 +191,10 @@ class ElementType extends Model implements IType,ISystemModel
         }
         if ($namespace_id) {
             $build->where('element_types.owner_namespace_id', $namespace_id);
+        }
+
+        if (count($in_namespace_ids)) {
+            $build->whereIn('element_types.owner_namespace_id', $in_namespace_ids);
         }
 
         if ($name) {

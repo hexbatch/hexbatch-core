@@ -483,11 +483,29 @@ Route::prefix('v1')->group(function () {
 
                 Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group( function () {
                     Route::post('create', [Api\DesignController::class, 'create_design'])->name('core.design.create');
+
+                    Route::prefix('schedules')->group(function () {
+                        Route::get('list', [Api\DesignController::class, 'list_times'])->name('core.design.schedules.list');
+                        Route::get('create', [Api\DesignController::class, 'create_time'])->name('core.design.schedules.create');
+                        Route::prefix('{time_bound}')->group(function () {
+                            Route::delete('edit', [Api\DesignController::class, 'time_edit'])->name('core.design.schedules.edit');
+                            Route::delete('destroy', [Api\DesignController::class, 'destroy_time'])->name('core.design.schedules.destroy');
+                        });
+                    });
+
+                    Route::prefix('locations')->group(function () {
+                        Route::get('list', [Api\DesignController::class, 'list_locatations'])->name('core.design.locations.list');
+                        Route::get('create', [Api\DesignController::class, 'location_create'])->name('core.design.locations.create');
+                        Route::prefix('{location_bound}')->group(function () {
+                            Route::delete('destroy', [Api\DesignController::class, 'destroy_location'])->name('core.design.locations.destroy');
+                            Route::patch('edit', [Api\DesignController::class, 'location_edit'])->name('core.design.locations.edit');
+                        });
+                    });
+
                 });
 
-                Route::middleware([])->group( function () {
-                    Route::get('list', [Api\DesignController::class, 'list_designs'])->name('core.design.list');
-                });
+                Route::get('list_attributes', [Api\DesignController::class, 'list_attributes'])->name('core.design.list_attributes');
+                Route::get('list', [Api\DesignController::class, 'list_designs'])->name('core.design.list');
 
 
 
@@ -541,15 +559,7 @@ Route::prefix('v1')->group(function () {
 
                     Route::middleware([])->group( function () {
                         Route::get('show', [Api\DesignController::class, 'show_design'])->name('core.design.show');
-                        Route::get('list_attributes', [Api\DesignController::class, 'list_attributes'])->name('core.design.list_attributes');
-                        Route::get('location_create', [Api\DesignController::class, 'location_create'])->name('core.design.location_create');
-                        Route::get('list_locatations', [Api\DesignController::class, 'list_locatations'])->name('core.design.list_locatations');
-                        Route::delete('location/{location_bound}/destroy', [Api\DesignController::class, 'destroy_location'])->name('core.design.destroy_location');
-                        Route::patch('location/{location_bound}/edit', [Api\DesignController::class, 'location_edit'])->name('core.design.location_edit');
-                        Route::get('time_create', [Api\DesignController::class, 'create_time'])->name('core.design.create_time');
-                        Route::get('list_times', [Api\DesignController::class, 'list_times'])->name('core.design.list_times');
-                        Route::delete('time/{time_bound}/edit', [Api\DesignController::class, 'time_edit'])->name('core.design.time_edit');
-                        Route::delete('time/{time_bound}/destroy', [Api\DesignController::class, 'destroy_time'])->name('core.design.destroy_time');
+
                         Route::get('list_listeners', [Api\DesignController::class, 'list_listeners'])->name('core.design.list_listeners');
                         Route::get('list_parents', [Api\DesignController::class, 'list_parents'])->name('core.design.list_parents');
                         Route::get('list_live_rules', [Api\DesignController::class, 'list_live_rules'])->name('core.design.list_live_rules');
@@ -567,6 +577,9 @@ Route::prefix('v1')->group(function () {
 
                     }); //end design members
                 });
+
+
+
 
             }); //end design
 

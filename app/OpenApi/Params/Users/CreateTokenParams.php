@@ -35,7 +35,7 @@ class CreateTokenParams
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::BAD_LOGIN);
         }
-        $this->seconds = $this->intRefFromCollection($collection,'seconds_to_live');
+        $this->seconds = $this->intFromCollection($collection,'seconds_to_live');
         if ($this->seconds > HexbatchSecondsToLive::MAX_SECONDS || $this->seconds < 1) {
             throw new HexbatchNotPossibleException(__("msg.token_too_long_lived",['seconds'=>HexbatchSecondsToLive::MAX_SECONDS]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,

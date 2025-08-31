@@ -20,7 +20,7 @@ use OpenApi\Attributes as OA;
 class ListScheduleParams extends ListDataBaseParams
 {
 
-    #[OA\Property(title: 'Namespace',description: 'The schedule is in this namespace. Can be uuid or name. If missing will use calling namespace')]
+    #[OA\Property(title: 'Namespace',description: 'The schedule is in this namespace. Can be uuid or name.')]
     protected ?string $namespace_ref = null;
 
 
