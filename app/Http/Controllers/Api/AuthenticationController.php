@@ -53,7 +53,7 @@ class AuthenticationController extends Controller
     public function me(Request $request) {
         $user = User::buildUser($request->user()->id)->first();
 
-        return response()->json(new MeResponse(user: $user), CodeOf::HTTP_OK);
+        return response()->json(new MeResponse(user: $user,show_namespace: true), CodeOf::HTTP_OK);
     }
 
 

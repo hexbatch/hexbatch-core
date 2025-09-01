@@ -64,7 +64,7 @@ class ListLocations extends Api\DesignApi
         $what =  $this->getMyData();
         $ret = [];
         if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new LocationCollectionResponse(given_types:  $what[static::PRIMARY_SNAPSHOT_KEY]);
+            $ret[static::PRIMARY_SNAPSHOT_KEY] = new LocationCollectionResponse(given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY]);
         }
         return $ret;
     }

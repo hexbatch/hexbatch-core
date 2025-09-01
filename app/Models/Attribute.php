@@ -193,6 +193,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
     public static function buildAttribute(
         ?int    $me_id = null,
         ?int    $namespace_id = null,
+        array    $in_namespace_ids = [],
         ?int    $type_id = null,
         ?int    $shape_id = null,
         ?string $uuid = null,
@@ -238,14 +239,29 @@ class Attribute extends Model implements IAttribute,ISystemModel
         if ($namespace_id) {
 
 
-            $build->join('element_types',
+            $build->join('element_types ots',
                 /**
                  * @param JoinClause $join
                  */
                 function (JoinClause $join) use($namespace_id) {
                     $join
-                        ->on('element_types.id','=','attributes.owner_element_type_id')
-                    ->where('owner_namespace_id',$namespace_id);
+                        ->on('ots.id','=','attributes.owner_element_type_id')
+                    ->where('ots.owner_namespace_id',$namespace_id);
+                }
+            );
+        }
+
+        if (count($in_namespace_ids)) {
+
+
+            $build->join('element_types as ets',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($in_namespace_ids) {
+                    $join
+                        ->on('ets.id','=','attributes.owner_element_type_id')
+                    ->whereIn('ets.owner_namespace_id',$in_namespace_ids);
                 }
             );
         }

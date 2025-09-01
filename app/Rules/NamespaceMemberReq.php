@@ -17,7 +17,7 @@ class NamespaceMemberReq implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-
+        if (!$value) {return;}
         if ($value instanceof UserNamespace) {
             $this->processed_namespace = $value;
         } else {

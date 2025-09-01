@@ -22,13 +22,13 @@ class LocationCollectionResponse extends ResultDataBase
     public array $locations = [];
 
     /**
-     * @param LocationBound[]|AbstractCursorPaginator $given_types
+     * @param LocationBound[]|AbstractCursorPaginator $given_attributes
      */
-    public function __construct($given_types)
+    public function __construct($given_attributes)
     {
-        parent::__construct($given_types);
+        parent::__construct($given_attributes);
         $this->locations = [];
-        foreach ($given_types as $loc) {
+        foreach ($given_attributes as $loc) {
             $this->locations[] = new LocationResponse(given_location: $loc);
         }
 

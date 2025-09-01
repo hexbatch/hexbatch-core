@@ -22,15 +22,15 @@ class TypeCollectionResponse extends ResultDataBase
     public array $types = [];
 
     /**
-     * @param ElementType[]|AbstractCursorPaginator $given_types
+     * @param ElementType[]|AbstractCursorPaginator $given_attributes
      */
-    public function __construct($given_types, int $namespace_levels = 0,int $parent_levels = 0,
+    public function __construct($given_attributes, int $namespace_levels = 0, int $parent_levels = 0,
                                 int $attribute_levels = 0, int $inherited_attribute_levels = 0,
                                 int $number_time_spans = 1)
     {
-        parent::__construct($given_types);
+        parent::__construct($given_attributes);
         $this->types = [];
-        foreach ($given_types as $a_type) {
+        foreach ($given_attributes as $a_type) {
             $this->types[] = new TypeResponse(given_type: $a_type,
                 namespace_levels: $namespace_levels,
                 parent_levels: $parent_levels,

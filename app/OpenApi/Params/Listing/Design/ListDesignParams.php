@@ -6,7 +6,6 @@ namespace App\OpenApi\Params\Listing\Design;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Listing\ListDataBaseParams;
 use App\Rules\NamespaceMemberReq;
 
 use Illuminate\Support\Collection;
@@ -37,7 +36,7 @@ class ListDesignParams extends ShowDesignParams
 
         if (!$this->given_namespace) {
             $this->namespace_ref = static::stringFromCollection(collection: $col,param_name: 'namespace_ref');
-            $this->given_namespace = UserNamespace::resolveNamespace(value: $col->get('namespace_ref'));
+            $this->given_namespace = UserNamespace::resolveNamespace(value: $this->namespace_ref);
             $this->namespace_ref = $this->given_namespace->ref_uuid;
         }
 

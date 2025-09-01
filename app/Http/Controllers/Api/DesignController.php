@@ -24,10 +24,13 @@ use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Actioning\Design\DesignParams;
 use App\OpenApi\Params\Actioning\Design\DesignParentParams;
 use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Params\Listing\Design\ListAttributeParams;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
 use App\OpenApi\Params\Listing\Design\ListLocationParams;
 use App\OpenApi\Params\Listing\Design\ListScheduleParams;
+use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
+use App\OpenApi\Results\Attributes\AttributeCollectionResponse;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\OpenApi\Results\Bounds\LocationResponse;
 use App\OpenApi\Results\Bounds\ScheduleCollectionResponse;
@@ -282,8 +285,8 @@ class DesignController extends Controller {
     )]
     #[ApiTypeMarker( Root\Api\Design\ShowDesign::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function show_design(Request $request) {
-        $params = new ShowDesignParams();
+    public function show_design(Request $request,ElementType $type) {
+        $params = new ShowDesignParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ShowDesign(params: $params, is_async: false, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['show-design']);
@@ -324,8 +327,9 @@ class DesignController extends Controller {
     }
 
 
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
         path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/show',
         operationId: 'core.design.show_attribute',
@@ -334,16 +338,56 @@ class DesignController extends Controller {
                     "\nif the type is marked as public, and the attribute is marked as public then any namespace can use this, ".
                     " \notherwise the members of the owning namesapce can ",
         summary: 'Information about a single attribute on a type  ',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowAttributeParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class),
             new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchAttribute::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\ShowAttribute::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function show_attribute() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function show_attribute(Request $request,Attribute $attribute) {
+        $params = new ShowAttributeParams(given_attribute: $attribute);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\ShowAttribute(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['show-attribute']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Get(
+        path: '/api/v1/{namespace}/design/list_attributes',
+        operationId: 'core.design.list_attributes',
+        description: "See a list of attributes in namespaces that one belongs to",
+        summary: 'Lists attributes with optional search',
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListAttributeParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class)],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ListAttributes::class)]
+    public function list_attributes(Request $request) {
+        $params = new ListAttributeParams();
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Api\Design\ListAttributes(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-attributes']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 
@@ -423,30 +467,6 @@ class DesignController extends Controller {
 
 
 
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/{element_type}/list_attributes',
-        operationId: 'core.design.list_attributes',
-        description: "See a list of all the attributes the type uses".
-        "\nShows information about its ancestors".
-        "\nif the type is marked as private or the attribute is marked as private,".
-        "\n then that attribute is not shown except to the members of the owning namesapce",
-        summary: 'Lists the attributes of a type  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\ListAttributes::class)]
-    public function list_attributes() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-
     /**
      * @throws \Exception
      */
@@ -486,177 +506,6 @@ class DesignController extends Controller {
 
 
 
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/create_listener',
-        operationId: 'core.design.create_listener',
-        description: "Each attribute can have zero or one listeners. If replacing, then earlier must be destroyed. " .
-                        "\nOwner admin group can create a listener on each attribute, as long as the type is not published ".
-                        "\nIf inheriting from a parent, and that has a listener, then the listener must be for the same event type ",
-        summary: 'Makes a new event listener for an attribute on the design ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\CreateListener::class)]
-    public function create_listener() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-    #[OA\Delete(
-        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/destroy_listener',
-        operationId: 'core.design.destroy_listener',
-        description: "Owner admin group can can remove the event listener from the attribute, before publishing ",
-        summary: 'Makes a new event listener for an attribute on the design ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\DestroyListener::class)]
-    public function destroy_listener() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/{element_type}/list_listeners',
-        operationId: 'core.design.list_listeners',
-        description: "Lists all the listeners, and the attributes that hold them, and the events listened ".
-        "\n To see the rules then use the show listener. Any member can see",
-        summary: 'Allows testing and debugging of an attribute bounds  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\ListListeners::class)]
-    public function list_listeners() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/{element_type}/show_listener',
-        operationId: 'core.design.show_listener',
-        description: "Shows the information about the listener, including the rules it uses ".
-        "\n This is only shown to the owning namespace members",
-        summary: 'Shows information about a specific listener',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\ShowListener::class)]
-    public function show_listener() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/create_rule',
-        operationId: 'core.design.create_rule',
-        description: "Each listener can have a tree of rules with a single top root, but can have any number of branches or leaves " .
-        "\nOwner admin group can add a single rule, or a tree of rules, and that can be attached to the unoccupied root, or to a leaf ",
-        summary: 'Creates a rule or rule tree attached to the root or existing rule ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\CreateListenerRule::class)]
-    public function create_rule() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-    #[OA\Delete(
-        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/rule/{attribute_rule}/destroy_rule',
-        operationId: 'core.design.destroy_rule',
-        description: "The listener tree can be edited by deleting parts of it. " .
-        "\nOwner admin group can prune the tree by branches or leaves ",
-        summary: 'Removes a single rule and all its children ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\DestroyListenerRule::class)]
-    public function destroy_rule() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/{element_type}/rule/{attribute_rule}/edit_rule',
-        operationId: 'core.design.edit_rule',
-        description: "The listener tree can be edited by changing one rule and its children " .
-        "\n For existing rules can change the phase,path,rank,logic, merge method and filter ".
-        "\n Owner admin group edit each leaf or branches or the entire tree ",
-        summary: 'Edits a single rule and all its children ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\EditListenerRule::class)]
-    public function edit_rule() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/{element_type}/rule/{attribute_rule}/test_rule',
-        operationId: 'core.design.test_rule',
-        description: "Can test part of the listener tree to figure out bugs ",
-        summary: 'Test a rule (or a rule tree) ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\EditListenerRule::class)]
-    public function test_rule() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/{element_type}/test_listener',
-        operationId: 'core.design.test_listener',
-        description: "A listener can be tested against a simulated event " .
-        "\n The tester provides the set, element, event, as long as the namespace using this can see the set and/or element, can test ",
-        summary: 'Test a rule tree against  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\TestListener::class)]
-    public function test_listener() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
     /**
@@ -735,81 +584,6 @@ class DesignController extends Controller {
 
 
 
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/{element_type}/list_parents',
-        operationId: 'core.design.list_parents',
-        description: "Lists the parents the type (published or any other state) uses. ".
-        "\nLists the status of each parent, both their own lifecycle and the approval status being used here".
-        "\n If the type has public access, then any namespace can see this. Otherwise its members of the owning namespace ",
-        summary: 'Lists the parents of a type  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\ListParents::class)]
-    public function list_parents() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-
-    #[OA\Get(
-        path: '/api/v1/{namespace}/design/{element_type}/list_live_rules',
-        operationId: 'core.design.list_live_rules',
-        description: "Lists the live rules defined for this type. ".
-        "\n If the type has public access, then any namespace can see this. Otherwise its members of the owning namespace ",
-        summary: 'Lists live rules for the type  ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Design\ListLiveRules::class)]
-    public function list_live_rules() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-    #[OA\Post(
-        path: '/api/v1/{namespace}/design/{element_type}/add_live_rule',
-        operationId: 'core.design.add_live_rule',
-        description: "Owner admin group can add live rules to be applied after the publishing and making sets out of this " ,
-        summary: 'Adds a new live rule to the type before its published ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\AddLiveRule::class)]
-    public function add_live_rule() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-    #[OA\Delete(
-        path: '/api/v1/{namespace}/design/{element_type}/remove_live_rule',
-        operationId: 'core.design.remove_live_rule',
-        description: "Owner admin group can remove a live rule before its published " ,
-        summary: 'Removes a live rule ',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\RemoveLiveRule::class)]
-    public function remove_live_rule() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
     /**
@@ -1079,6 +853,261 @@ class DesignController extends Controller {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/create_listener',
+        operationId: 'core.design.create_listener',
+        description: "Each attribute can have zero or one listeners. If replacing, then earlier must be destroyed. " .
+        "\nOwner admin group can create a listener on each attribute, as long as the type is not published ".
+        "\nIf inheriting from a parent, and that has a listener, then the listener must be for the same event type ",
+        summary: 'Makes a new event listener for an attribute on the design ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\CreateListener::class)]
+    public function create_listener() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/destroy_listener',
+        operationId: 'core.design.destroy_listener',
+        description: "Owner admin group can can remove the event listener from the attribute, before publishing ",
+        summary: 'Makes a new event listener for an attribute on the design ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\DestroyListener::class)]
+    public function destroy_listener() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+
+    #[OA\Get(
+        path: '/api/v1/{namespace}/design/{element_type}/list_listeners',
+        operationId: 'core.design.list_listeners',
+        description: "Lists all the listeners, and the attributes that hold them, and the events listened ".
+        "\n To see the rules then use the show listener. Any member can see",
+        summary: 'Allows testing and debugging of an attribute bounds  ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ListListeners::class)]
+    public function list_listeners() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+
+    #[OA\Get(
+        path: '/api/v1/{namespace}/design/{element_type}/show_listener',
+        operationId: 'core.design.show_listener',
+        description: "Shows the information about the listener, including the rules it uses ".
+        "\n This is only shown to the owning namespace members",
+        summary: 'Shows information about a specific listener',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ShowListener::class)]
+    public function show_listener() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/create_rule',
+        operationId: 'core.design.create_rule',
+        description: "Each listener can have a tree of rules with a single top root, but can have any number of branches or leaves " .
+        "\nOwner admin group can add a single rule, or a tree of rules, and that can be attached to the unoccupied root, or to a leaf ",
+        summary: 'Creates a rule or rule tree attached to the root or existing rule ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\CreateListenerRule::class)]
+    public function create_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/design/{element_type}/attribute/{attribute}/rule/{attribute_rule}/destroy_rule',
+        operationId: 'core.design.destroy_rule',
+        description: "The listener tree can be edited by deleting parts of it. " .
+        "\nOwner admin group can prune the tree by branches or leaves ",
+        summary: 'Removes a single rule and all its children ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\DestroyListenerRule::class)]
+    public function destroy_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/design/{element_type}/rule/{attribute_rule}/edit_rule',
+        operationId: 'core.design.edit_rule',
+        description: "The listener tree can be edited by changing one rule and its children " .
+        "\n For existing rules can change the phase,path,rank,logic, merge method and filter ".
+        "\n Owner admin group edit each leaf or branches or the entire tree ",
+        summary: 'Edits a single rule and all its children ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\EditListenerRule::class)]
+    public function edit_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/design/{element_type}/rule/{attribute_rule}/test_rule',
+        operationId: 'core.design.test_rule',
+        description: "Can test part of the listener tree to figure out bugs ",
+        summary: 'Test a rule (or a rule tree) ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\EditListenerRule::class)]
+    public function test_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+    #[OA\Get(
+        path: '/api/v1/{namespace}/design/{element_type}/test_listener',
+        operationId: 'core.design.test_listener',
+        description: "A listener can be tested against a simulated event " .
+        "\n The tester provides the set, element, event, as long as the namespace using this can see the set and/or element, can test ",
+        summary: 'Test a rule tree against  ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\TestListener::class)]
+    public function test_listener() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+    #[OA\Get(
+        path: '/api/v1/{namespace}/design/{element_type}/list_live_rules',
+        operationId: 'core.design.list_live_rules',
+        description: "Lists the live rules defined for this type. ".
+        "\n If the type has public access, then any namespace can see this. Otherwise its members of the owning namespace ",
+        summary: 'Lists live rules for the type  ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ListLiveRules::class)]
+    public function list_live_rules() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+    #[OA\Post(
+        path: '/api/v1/{namespace}/design/{element_type}/add_live_rule',
+        operationId: 'core.design.add_live_rule',
+        description: "Owner admin group can add live rules to be applied after the publishing and making sets out of this " ,
+        summary: 'Adds a new live rule to the type before its published ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\AddLiveRule::class)]
+    public function add_live_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
+
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/design/{element_type}/remove_live_rule',
+        operationId: 'core.design.remove_live_rule',
+        description: "Owner admin group can remove a live rule before its published " ,
+        summary: 'Removes a live rule ',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\RemoveLiveRule::class)]
+    public function remove_live_rule() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
 
 
 }

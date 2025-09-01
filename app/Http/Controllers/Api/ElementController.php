@@ -10,15 +10,19 @@ use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Element;
 use App\Models\ElementSet;
+use App\Models\Phase;
 use App\OpenApi\Common\Resources\HexbatchNamespace;
 use App\OpenApi\Common\Resources\HexbatchResource;
 use App\OpenApi\Params\Actioning\Element\ChangeElementOwnerParams;
 use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
 use App\OpenApi\Params\Actioning\Set\SetCreateParams;
+use App\OpenApi\Params\Listing\Elements\ListElementParams;
+use App\OpenApi\Params\Listing\Elements\ShowElementParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Results\Elements\ElementActionResponse;
 use App\OpenApi\Results\Elements\ElementCollectionResponse;
+use App\OpenApi\Results\Elements\ElementResponse;
 use App\OpenApi\Results\Set\LinkResponse;
 use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root;
@@ -73,7 +77,7 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/type_off',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/type_off',
         operationId: 'core.elements.type_off',
         description: "Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path ",
         summary: 'Turn off all the subtype attributes of elements',
@@ -95,7 +99,7 @@ class ElementController extends Controller {
     #[ApiEventMarker( Evt\Set\ElementTypeTurnedOff::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\TypeOff::class)]
-    public function type_off(\App\Models\Phase $working_phase,Request $request) {
+    public function type_off(Phase $working_phase, Request $request) {
         $params = new ElementSelectParams(given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
@@ -110,7 +114,7 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/type_on',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/type_on',
         operationId: 'core.elements.type_on',
         description: "Element admin group turn on all parent type attributes. The types, elements and sets given by a path ",
         summary: 'Turn on all the attributes of a parent type in elements',
@@ -132,7 +136,7 @@ class ElementController extends Controller {
     #[ApiEventMarker( Evt\Set\ElementTypeTurnedOn::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\TypeOn::class)]
-    public function type_on(\App\Models\Phase $working_phase,Request $request) {
+    public function type_on(Phase $working_phase, Request $request) {
         $params = new ElementSelectParams(given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
@@ -147,12 +151,12 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/read_attribute',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_attribute',
         operationId: 'core.elements.read_attribute',
         description: "Can select the same attribute(s) in elements(s) to read, ".
                     "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the same attributes in one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -161,7 +165,7 @@ class ElementController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
     #[ApiTypeMarker( Root\Api\Element\ReadAttribute::class)]
-    public function read_attribute(\App\Models\Phase $working_phase,Element $element,Request $request) {
+    public function read_attribute(Phase $working_phase, Element $element, Request $request) {
         $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
@@ -173,11 +177,11 @@ class ElementController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/read_live_type',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_live_type',
         operationId: 'core.elements.read_live_type',
         description: "This is the same as core.elements.read_type but looks at the live and ignores the inherited",
         summary: 'Read all the attributes of a type in one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -192,12 +196,12 @@ class ElementController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/read_type',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_type',
         operationId: 'core.elements.read_type',
         description:  "Can select the same type(s) in elements(s) to read, will either succeed if can read all of them or fail if one cannot be read ".
             "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read all the attributes of a live type in one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -215,7 +219,7 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/write_attribute',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/write_attribute',
         operationId: 'core.elements.write_attribute',
         description: "Write one or more elements found in a path, that have the same attributes. If one can. ",
         summary: 'Write json to the same attributes of one or more elements',
@@ -237,7 +241,7 @@ class ElementController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
     #[ApiTypeMarker( Root\Api\Element\WriteAttribute::class)]
-    public function write_attribute(\App\Models\Phase $working_phase,Element $element,Request $request) {
+    public function write_attribute(Phase $working_phase, Element $element, Request $request) {
         $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
@@ -251,12 +255,12 @@ class ElementController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/read_time',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_time',
         operationId: 'core.elements.read_time',
         description: "Can read current or next time span of the element's type, its parents and applied live ".
         "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the locations of one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -276,12 +280,12 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/add_live',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/add',
         operationId: 'core.elements.add_live',
         description: "If can read any attribute on a type, can add it as a live part to one or more elements in a search path.".
                 "\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  ",
         summary: 'Add a live type to one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -302,12 +306,13 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/copy_live',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/{live_type}/copy',
         operationId: 'core.elements.copy_live',
         description: "If can read any attribute on both the source and destination type, can copy its and its state to a new element.".
         "\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  ",
         summary: 'Copy a live type and its state to one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),
+            new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -327,12 +332,13 @@ class ElementController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/elements/remove_live',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/{live_type}/remove',
         operationId: 'core.elements.remove_live',
         description: "If can read any attribute on the live type, can remove its and its state to a new element.".
         "\n If not part of the element ns, can still remove it if part of the type ns and event listeners allow  ",
         summary: 'Remove a live type from one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),
+            new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -347,14 +353,48 @@ class ElementController extends Controller {
 
 
 
+    #[OA\Post(
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/promote',
+        operationId: 'core.elements.promote_live',
+        description: "System can add live types without permisision. No events ",
+        summary: 'System adds live types',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiTypeMarker( Root\Api\Element\PromoteLive::class)]
+    public function promote_live() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[OA\Delete(
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/demote',
+        operationId: 'core.elements.demote_live',
+        description: "System can remove live types from elements without permisision. No events ",
+        summary: 'System subtracts live types',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiTypeMarker( Root\Api\Element\DemoteLive::class)]
+    public function demote_live() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+
+
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/ping',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/ping',
         operationId: 'core.elements.ping',
         description: "Element ns can use that to ping elements to target sets.",
         summary: 'Ping one or more elements to a set',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -442,13 +482,14 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/link',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/link/{element_set}',
         operationId: 'core.elements.link',
         description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set ".
         "\n The link can be assigned to another namespace, they can reject that. The linked set can reject the link",
         summary: 'Makes a link between an element and a set',
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),
+            new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: LinkResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -476,41 +517,63 @@ class ElementController extends Controller {
     }
 
 
-
-
-
-
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/show',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/show',
         operationId: 'core.elements.show_element',
         description: "Element members can see details about an element",
         summary: 'Shows the value and information about an element',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowElementParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Element info returned', content: new JsonContent(ref: ElementResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Element\Show::class)]
-    public function show_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    #[ApiTypeMarker( Root\Api\Element\ShowElement::class)]
+    public function show_element(Element $element,Request $request) {
+        $params = new ShowElementParams(given_element: $element);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\ShowElement(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['show-element']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 
+    /**
+     * @throws \Exception
+     */
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/list',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/list',
         operationId: 'core.elements.list_elements',
         description: "Element members can see a list of all the elements of namespaces they belong",
         summary: 'Shows list of elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements', content: new JsonContent(ref: ElementCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiTypeMarker( Root\Api\Element\ListElements::class)]
-    public function list_elements() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function list_elements(Phase $working_phase,Request $request) {
+        $params = new ListElementParams(working_phase: $working_phase);
+        $params->fromCollection(new Collection($request->all()));
+        $api = new Root\Api\Element\ListElements(params: $params, is_async: false, tags: ['api-top']);
+        $thing = $api->createThingTree(tags: ['list-elements']);
+        Utilities::ignoreVar($thing);
+        $data_out = $api->getOwnResponse();
+        return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
 
@@ -534,7 +597,7 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/create_set',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/create_set',
         operationId: 'core.elements.create_set',
         description: "Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets",
         summary: 'Create a set from element',
@@ -568,10 +631,11 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/promote_set',
+        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/promote_set',
         operationId: 'core.elements.promote_set',
         description: "System can make sets from any element without permisision. No events ",
         summary: 'System can make sets',
+        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -584,35 +648,7 @@ class ElementController extends Controller {
 
 
 
-    #[OA\Post(
-        path: '/api/v1/{namespace}/elements/promote_live',
-        operationId: 'core.elements.promote_live',
-        description: "System can add live types without permisision. No events ",
-        summary: 'System adds live types',
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Element\PromoteLive::class)]
-    public function promote_live() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
-    #[OA\Delete(
-        path: '/api/v1/{namespace}/elements/promote_live',
-        operationId: 'core.elements.promote_live',
-        description: "System can remove live types from elements without permisision. No events ",
-        summary: 'System subtracts live types',
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Element\DemoteLive::class)]
-    public function demote_live() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 }

@@ -1,30 +1,29 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Api\Design;
-
+namespace App\Sys\Res\Types\Stk\Root\Api\Set;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
-use App\OpenApi\Results\Attributes\AttributeResponse;
+use App\OpenApi\Params\Listing\Set\ShowSetParams;
+use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 
-#[ApiParamMarker( param_class: ShowAttributeParams::class)]
-class ShowAttribute extends Api\DesignApi
+#[ApiParamMarker( param_class: ShowSetParams::class)]
+class ShowSet extends Api\SetApi
 {
-    const UUID = '681e3f6e-9410-4356-a157-4d99580c0232';
-    const TYPE_NAME = 'api_design_show_attribute';
+    const UUID = 'b71a08ad-ca4f-40fa-9aac-9973a45cb44d';
+    const TYPE_NAME = 'api_set_show';
 
     const PARENT_CLASSES = [
-        Api\DesignApi::class
+        Api\SetApi::class
     ];
 
 
     public function __construct(
-        protected ?ShowAttributeParams $params = null,
+        protected ?ShowSetParams $params = null,
 
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
@@ -40,16 +39,17 @@ class ShowAttribute extends Api\DesignApi
     protected function restoreParams(array $param_array) {
         parent::restoreParams($param_array);
         if(!$this->params) {
-            $this->params = new ShowAttributeParams();
+            $this->params = new ShowSetParams();
             $this->params->fromCollection(new Collection($param_array),false);
         }
     }
 
-    const PRIMARY_SNAPSHOT_KEY = 'attribute';
+    const PRIMARY_SNAPSHOT_KEY = 'set';
     const int HTTP_CODE_GOOD = CodeOf::HTTP_OK;
 
+
     protected function getMyData() :array {
-        return [static::PRIMARY_SNAPSHOT_KEY=>$this->params->getGivenAttribute()];
+        return [static::PRIMARY_SNAPSHOT_KEY=>$this->params->getGivenSet()];
     }
 
 
@@ -57,11 +57,14 @@ class ShowAttribute extends Api\DesignApi
     {
         $ret = [];
         if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new AttributeResponse(
-                given_attribute:  $this->params->getGivenAttribute(),
-                attribute_levels:  $this->params->getAttributeLevels(),
-                owning_type_levels :  $this->params->getOwningTypeLevels(),
-                design_levels:  $this->params->getDesignLevels(),
+            $ret[static::PRIMARY_SNAPSHOT_KEY] = new SetResponse(
+                given_set:  $this->params->getGivenSet(),
+                show_definer:  $this->params->isShowDefiner(),
+                show_parent :  $this->params->isShowParent(),
+                show_elements :  $this->params->isShowElements(),
+                definer_type_level:  $this->params->getDefinerTypeLevel(),
+                children_set_level:  $this->params->getChildrenSetLevel(),
+                parent_set_level:  $this->params->getParentSetLevel(),
             );
         }
         return $ret;

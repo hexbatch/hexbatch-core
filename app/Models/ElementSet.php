@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -91,7 +92,14 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
 
     public static function buildSet(
         ?int            $me_id = null,
-        ?string         $uuid = null
+        ?string         $uuid = null,
+        ?int            $parent_set_id = null,
+        ?int            $type_id = null,
+        ?int            $phase_id = null,
+        ?int            $namespace_id = null,
+        array           $in_namespace_ids = [],
+        bool            $b_do_relations = false
+
     )
     : Builder
     {
@@ -111,8 +119,61 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
             $build->where('element_sets.ref_uuid', $uuid);
         }
 
-        /** @uses ElementSet::element_members(),ElementSet::defining_element(),ElementSetMember::of_element() */
-        $build->with('element_members','defining_element','element_members.of_element');
+        if ($parent_set_id ) {
+            $build->join('element_set_members sim',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($parent_set_id) {
+                    $join->on('sim.child_set_id', '=', 'element_sets.id')
+                        ->where('sim.parent_set_id',$parent_set_id);
+                }
+            );
+        }
+
+        if ($namespace_id ) {
+            $build->join('elements e_one',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($namespace_id) {
+                    $join->on('e_one.id', '=', 'element_sets.parent_set_element_id')
+                    ->where('e_one.element_namespace_id',$namespace_id);
+                }
+            );
+        }
+
+        if (count($in_namespace_ids) ) {
+            $build->join('elements e_two',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($in_namespace_ids) {
+                    $join->on('e_two.id', '=', 'element_sets.parent_set_element_id')
+                        ->whereIn('e_two.element_namespace_id',$in_namespace_ids);
+                }
+            );
+        }
+
+        if ($phase_id ) {
+            $build->join('elements e_phase',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($phase_id) {
+                    $join->on('e_phase.id', '=', 'element_sets.parent_set_element_id')
+                        ->whereIn('e_phase.element_phase_id',$phase_id);
+                }
+            );
+        }
+
+        if ($type_id ) {
+            $build->join('elements e_type',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($type_id) {
+                    $join->on('e_type.id', '=', 'element_sets.parent_set_element_id')
+                        ->where('e_type.element_parent_type_id',$type_id);
+                }
+            );
+        }
+
+        if ($b_do_relations) {
+            /** @uses ElementSet::element_members(),ElementSet::defining_element(),ElementSetMember::of_element() */
+            $build->with('element_members','defining_element','element_members.of_element');
+        }
+
 
         return $build;
     }

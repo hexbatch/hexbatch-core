@@ -7,7 +7,6 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\OpenApi\Results\ResultBase;
-use App\OpenApi\Results\ResultDataBase;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
 use OpenApi\Attributes as OA;
@@ -17,7 +16,7 @@ use OpenApi\Attributes as OA;
  * Show details about a type
  */
 #[OA\Schema(schema: 'TypeResponse')]
-class TypeResponse extends ResultDataBase
+class TypeResponse extends ResultBase
 {
     #[OA\Property(title: 'Type uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
@@ -52,6 +51,10 @@ class TypeResponse extends ResultDataBase
 
     #[OA\Property(title: 'Type created at',format: 'date-time')]
     public ?string $type_created_at = '';
+
+
+    #[OA\Property(title: 'Final type')]
+    public ?bool $is_final = null;
 
 
     #[OA\Property( title: 'Access')]
@@ -101,6 +104,8 @@ class TypeResponse extends ResultDataBase
                 $this->attributes[] = new AttributeResponse(given_attribute: $att, attribute_levels:$inherited_attribute_levels);
             }
         }
+
+        $this->is_final = $given_type->is_final_type;
 
         $this->schedule = null;
         if ($given_type->type_time) {

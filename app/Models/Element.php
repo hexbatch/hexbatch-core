@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
 
 /*
  * Element destruction has two different modes
@@ -87,8 +88,17 @@ class Element extends Model implements ISystemModel
 
     public static function buildElement(
         ?int    $me_id = null,
+        ?int    $type_id = null,
+        ?int    $attribute_id = null,
+        ?int    $shape_id = null,
+        ?int    $schedule_id = null,
+        ?int    $set_id = null,
+        ?int    $phase_id = null,
+        ?int    $namespace_id = null,
+        array   $in_namespace_ids = [],
+        ?bool   $is_set = null,
         ?string $uuid = null,
-        array  $given_uuids = [],
+        array   $given_uuids = [],
         bool    $b_do_relations = false
 
     ): Builder
@@ -111,6 +121,86 @@ class Element extends Model implements ISystemModel
 
         if (count($given_uuids)) {
             $build->whereIn('elements.ref_uuid', $given_uuids);
+        }
+
+        if ($phase_id) {
+            $build->where('elements.element_phase_id', $phase_id);
+        }
+
+        if ($namespace_id) {
+            $build->where('elements.element_namespace_id', $namespace_id);
+        }
+
+        if (count($in_namespace_ids)) {
+            $build->whereIn('elements.element_namespace_id', $in_namespace_ids);
+        }
+
+        if($type_id) {
+            $build->where('elements.element_parent_type_id', $type_id);
+        }
+
+        if ($is_set !== null) {
+            if ($is_set) {
+                $build->join('element_sets s',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join)  {
+                        $join->on('s.parent_set_element_id', '=', 'elements.id');
+                    }
+                );
+            } else {
+                $build->leftJoin('element_sets s',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join)  {
+                        $join->on('s.parent_set_element_id', '=', 'elements.id');
+                    }
+                )->whereNull('s.id');
+            }
+        }
+
+        if ($schedule_id) {
+            $build->join('element_types aet',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($schedule_id) {
+                    $join->on('aet.id', '=', 'elements.element_parent_type_id')
+                        ->where('aet.type_time_bound_id', $schedule_id);
+                }
+            );
+        }
+
+        if ($set_id) {
+            $build->join('element_set_members sem',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($set_id) {
+                    $join->on('sem.member_element_id', '=', 'elements.id')
+                        ->where('sem.id', $set_id);
+                }
+            );
+        }
+
+        if ($attribute_id) {
+            $build->join('attributes att',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($attribute_id) {
+                    $join
+                        ->on('elements.element_parent_type_id','=','att.owner_element_type_id')
+                        ->where('att.id',$attribute_id);
+                }
+            );
+        }
+
+        if ($shape_id) {
+            $build->join('attributes satt',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($shape_id) {
+                    $join
+                        ->on('elements.element_parent_type_id','=','satt.owner_element_type_id')
+                        ->where('satt.attribute_shape_id',$shape_id);
+                }
+            );
         }
 
         if ($b_do_relations) {

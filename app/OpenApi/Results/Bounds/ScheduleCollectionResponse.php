@@ -22,13 +22,13 @@ class ScheduleCollectionResponse extends ResultDataBase
     public array $schedules = [];
 
     /**
-     * @param TimeBound[]|AbstractCursorPaginator $given_types
+     * @param TimeBound[]|AbstractCursorPaginator $given_attributes
      */
-    public function __construct($given_types, int $number_spans = 3)
+    public function __construct($given_attributes, int $number_spans = 3)
     {
-        parent::__construct($given_types);
+        parent::__construct($given_attributes);
         $this->schedules = [];
-        foreach ($given_types as $schedule) {
+        foreach ($given_attributes as $schedule) {
             $this->schedules[] = new ScheduleResponse(given_time: $schedule,number_spans: $number_spans);
         }
 

@@ -78,7 +78,7 @@ class ListDesigns extends Api\DesignApi
     {
         $what =  $this->getMyData();
         $ret[static::PRIMARY_SNAPSHOT_KEY] = new TypeCollectionResponse(
-            given_types:  $what[static::PRIMARY_SNAPSHOT_KEY],
+            given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],
             namespace_levels:  $this->params->getNamespaceLevels(),
             parent_levels:  $this->params->getParentLevels(),
             attribute_levels:  $this->params->getAttributeLevels(),

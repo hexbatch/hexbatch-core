@@ -4,9 +4,11 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Annotations\ApiParamMarker;
+use App\Enums\Types\TypeOfLifecycle;
 use App\Models\ActionDatum;
 
 
+use App\Models\ElementType;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 
 use App\OpenApi\Results\Types\TypeResponse;
@@ -51,18 +53,22 @@ class ShowDesign extends Api\DesignApi
     const PRIMARY_SNAPSHOT_KEY = 'type';
     const int HTTP_CODE_GOOD = CodeOf::HTTP_OK;
 
+    const FILTER_OF_LIFECYCLE = TypeOfLifecycle::DEVELOPING;
+
     protected function getMyData() :array {
-        return [static::PRIMARY_SNAPSHOT_KEY=>$this->params->getGivenType()];
+        $type = ElementType::buildElementType(id: $this->params->getGivenType()?->id??-1,lifecycle: static::FILTER_OF_LIFECYCLE)->first();
+        return [static::PRIMARY_SNAPSHOT_KEY=>$type];
     }
 
 
     public function getDataSnapshot(): array
     {
         $what =  $this->getMyData();
+        $type = $what[static::PRIMARY_SNAPSHOT_KEY]??null;
         $ret = [];
         if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
             $ret[static::PRIMARY_SNAPSHOT_KEY] = new TypeResponse(
-                given_type:  $this->params->getGivenType(),
+                given_type:  $type,
                 namespace_levels:  $this->params->getNamespaceLevels(),
                 parent_levels:  $this->params->getParentLevels(),
                 attribute_levels:  $this->params->getAttributeLevels(),

@@ -47,10 +47,9 @@ class ListScheduleParams extends ListDataBaseParams
         parent::fromCollection($col,$do_validation);
 
         if (!$this->given_namespace) {
-            if ($col->has('namespace_ref') && $col->get('namespace_ref')) {
-                $this->given_namespace = UserNamespace::resolveNamespace(value: $col->get('namespace_ref'));
-                $this->namespace_ref = $this->given_namespace->ref_uuid;
-            }
+            $this->namespace_ref = static::stringFromCollection(collection: $col,param_name: 'namespace_ref');
+            $this->given_namespace = UserNamespace::resolveNamespace(value: $col->get('namespace_ref'));
+            $this->namespace_ref = $this->given_namespace->ref_uuid;
         }
 
 

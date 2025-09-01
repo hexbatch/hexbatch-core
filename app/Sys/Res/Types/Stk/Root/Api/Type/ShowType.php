@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
+use App\Enums\Types\TypeOfLifecycle;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
@@ -14,6 +15,8 @@ class ShowType extends Api\Design\ShowDesign
     const PARENT_CLASSES = [
         Api\TypeApi::class
     ];
+
+    const FILTER_OF_LIFECYCLE = TypeOfLifecycle::PUBLISHED;
 
 }
 

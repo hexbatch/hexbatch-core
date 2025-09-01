@@ -25,12 +25,18 @@ class ElementCollectionResponse extends ResultDataBase
     /**
      * @param Element[] $given_elements
      */
-    public function __construct($given_elements)
+    public function __construct($given_elements,int $type_level = 0,int $attribute_level = 0,int $namespace_level = 0, int $phase_level = 0)
     {
         parent::__construct($given_elements);
         $this->elements = [];
         foreach ($given_elements as $ele) {
-            $this->elements[] = new ElementResponse(given_element: $ele);
+            $this->elements[] = new ElementResponse(
+                given_element: $ele,
+                type_level: $type_level,
+                attribute_level: $attribute_level,
+                namespace_level: $namespace_level,
+                phase_level: $phase_level
+            );
         }
 
     }
