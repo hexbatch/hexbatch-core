@@ -16,7 +16,7 @@ use OpenApi\Attributes as OA;
     security: [['bearerAuth' => []]]
 )]
 
-#[OA\Info(version: "0.1.0",
+#[OA\Info(version: "0.3.2",
     description: "Hexbatch core api",
     title: "Hexbatch core",
     termsOfService: "https://hexbatch.com/core-inspector",
