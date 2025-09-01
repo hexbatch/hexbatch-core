@@ -7,8 +7,6 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
-use App\OpenApi\Common\Resources\HexbatchNamespace;
-use App\OpenApi\Common\Resources\HexbatchResource;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;

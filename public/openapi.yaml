@@ -8963,7 +8963,12 @@ components:
       description: 'Show details about an element'
       properties:
         element:
-          $ref: '#/components/schemas/ElementResponse'
+          oneOf:
+            -
+              $ref: '#/components/schemas/ElementResponse'
+            -
+              type: 'null'
+          title: Element
         set:
           oneOf:
             -

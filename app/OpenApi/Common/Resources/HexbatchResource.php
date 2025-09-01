@@ -3,7 +3,7 @@
 namespace App\OpenApi\Common\Resources;
 
 use OpenApi\Attributes as OA;
-use App\OpenApi\Common\HexbatchUuid;
+
 #[OA\Schema(
     schema: 'HexbatchResource',
     title: 'Resource Name or uuid that can be namespaced ',

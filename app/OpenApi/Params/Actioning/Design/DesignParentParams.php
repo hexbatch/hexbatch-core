@@ -7,7 +7,6 @@ use App\Exceptions\HexbatchBadParamException;
 use App\Exceptions\RefCodes;
 use App\Models\ElementType;
 use App\OpenApi\ApiDataBase;
-use App\OpenApi\Common\Resources\HexbatchResource;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 

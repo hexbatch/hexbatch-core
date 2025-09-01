@@ -2,7 +2,6 @@
 
 namespace App\OpenApi\Results\Users;
 
-use App\OpenApi\Common\HexbatchToken;
 use App\OpenApi\Results\ResultBase;
 use OpenApi\Attributes as OA;
 

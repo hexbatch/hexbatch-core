@@ -6,7 +6,6 @@ namespace App\OpenApi\Params\Users;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\OpenApi\ApiDataTrait;
-use App\OpenApi\Common\Resources\HexbatchResourceName;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes as OA;

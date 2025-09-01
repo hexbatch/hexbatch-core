@@ -1,6 +1,5 @@
 <?php
 namespace App\Enums\Paths;
-use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_path_status
  */

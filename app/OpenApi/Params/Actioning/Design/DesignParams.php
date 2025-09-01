@@ -10,7 +10,6 @@ use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use App\OpenApi\ApiDataBase;
 use App\OpenApi\Common\Resources\HexbatchResource;
-use App\OpenApi\Common\Resources\HexbatchResourceName;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 

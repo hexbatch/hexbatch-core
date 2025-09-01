@@ -1,6 +1,5 @@
 <?php
 namespace App\Enums\Types;
-use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_intersection_category
  */

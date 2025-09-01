@@ -9,8 +9,6 @@ use App\Annotations\ApiTypeMarker;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementType;
-use App\OpenApi\Common\Resources\HexbatchNamespace;
-use App\OpenApi\Common\Resources\HexbatchResource;
 use App\OpenApi\Params\Actioning\Type\CreateElementParams;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;

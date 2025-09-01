@@ -13,7 +13,6 @@ use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
-use App\OpenApi\Common\Resources\HexbatchAttribute;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
 use App\OpenApi\Params\Actioning\Design\DesignLocationParams;

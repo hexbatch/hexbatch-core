@@ -13,7 +13,6 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\OpenApi\Common\HexbatchSecondsToLive;
 use App\OpenApi\ErrorResponse;
 use App\OpenApi\Params\Actioning\Registration\RegistrationParams;
 use App\OpenApi\Params\Users\CreateTokenParams;

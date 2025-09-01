@@ -11,8 +11,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\Phase;
-use App\OpenApi\Common\Resources\HexbatchNamespace;
-use App\OpenApi\Common\Resources\HexbatchResource;
 use App\OpenApi\Params\Actioning\Element\ChangeElementOwnerParams;
 use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;

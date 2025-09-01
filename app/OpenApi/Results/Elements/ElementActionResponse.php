@@ -28,7 +28,7 @@ class ElementActionResponse extends ResultBase
 
     public function __construct(
         #[OA\Property(title: 'Element')]
-        public ElementResponse $element  ,
+        public ?ElementResponse $element = null  ,
 
         #[OA\Property(title: 'Set')]
         public ?SetResponse $set  = null,

@@ -2,18 +2,6 @@
 
 namespace App\OpenApi\Common\Resources;
 
-use App\OpenApi\Common\Resources\Attributes\HexbatchDomainTypeAttribute;
-use App\OpenApi\Common\Resources\Attributes\HexbatchDomainTypeUuid;
-use App\OpenApi\Common\Resources\Attributes\HexbatchDomainUuidAttribute;
-use App\OpenApi\Common\Resources\Attributes\HexbatchDomainUuidUuid;
-use App\OpenApi\Common\Resources\Attributes\HexbatchNamespaceTypeAttribute;
-use App\OpenApi\Common\Resources\Attributes\HexbatchNamespaceTypeUuid;
-use App\OpenApi\Common\Resources\Attributes\HexbatchNamespaceUuidAttribute;
-use App\OpenApi\Common\Resources\Attributes\HexbatchNamespaceUuidUuid;
-use App\OpenApi\Common\Resources\Attributes\HexbatchUuidTypeAttribute;
-use App\OpenApi\Common\Resources\Attributes\HexbatchUuidTypeUuid;
-use App\OpenApi\Common\Resources\Attributes\HexbatchUuidUuidAttribute;
-use App\OpenApi\Common\Resources\Attributes\HexbatchUuidUuidUuid;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(

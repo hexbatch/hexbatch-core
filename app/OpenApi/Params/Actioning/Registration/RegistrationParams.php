@@ -7,7 +7,6 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
 use App\OpenApi\ApiDataBase;
-use App\OpenApi\Common\Resources\HexbatchResourceName;
 use App\Rules\UserNameReq;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;

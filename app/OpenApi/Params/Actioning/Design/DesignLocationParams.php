@@ -7,7 +7,6 @@ use App\Enums\Bounds\TypeOfLocation;
 use App\Helpers\Utilities;
 use App\Models\LocationBound;
 use App\OpenApi\ApiDataBase;
-use App\OpenApi\Common\Resources\HexbatchResourceName;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
