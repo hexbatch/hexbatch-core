@@ -11,7 +11,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ElementType;
 use App\OpenApi\Common\Resources\HexbatchNamespace;
 use App\OpenApi\Common\Resources\HexbatchResource;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
 use App\OpenApi\Params\Actioning\Type\CreateElementParams;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
@@ -19,6 +18,7 @@ use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Results\Elements\ElementCollectionResponse;
+use App\OpenApi\Results\Types\TypeCollectionResponse;
 use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -37,12 +37,21 @@ class TypeController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/types/{element_type}/show',
+        path: '/api/v1/{user_namespace}/types/{element_type}/show',
         operationId: 'core.types.show',
         description: "See information about a type if one is a member, admin or owner ",
         summary: 'Show information about a type',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowDesignParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: TypeResponse::class)),
 
@@ -69,7 +78,13 @@ class TypeController extends Controller {
         operationId: 'core.types.show_public',
         description: "Anyone can see public information including about and meta, name and current status ",
         summary: 'Show public data for a type',
-        parameters: [new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['type','public'],
+        parameters: [
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -85,14 +100,19 @@ class TypeController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/types/list_published',
+        path: '/api/v1/{user_namespace}/types/list_published',
         operationId: 'core.types.list_published',
         description: "Can see any published types where one is a member, admin or owner ",
         summary: 'List published types',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -115,14 +135,20 @@ class TypeController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/types/list_suspended',
+        path: '/api/v1/{user_namespace}/types/list_suspended',
         operationId: 'core.types.list_suspended',
         description: "Can see any suspended types where one is a member, admin or owner ",
         summary: 'List suspended types',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+        ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -149,6 +175,7 @@ class TypeController extends Controller {
         operationId: 'core.types.list_all_suspended',
         description: "Public can see any suspended types ",
         summary: 'List all suspended types',
+        tags: ['type','public'],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -164,11 +191,20 @@ class TypeController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/types/{element_type}/list_live',
+        path: '/api/v1/{user_namespace}/types/{element_type}/list_live',
         operationId: 'core.types.list_live',
         description: "Members can see all the currently applied live using this type",
         summary: 'Show live types made from this type',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -184,12 +220,21 @@ class TypeController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/types/{element_type}/list_elements',
+        path: '/api/v1/{user_namespace}/types/{element_type}/list_elements',
         operationId: 'core.types.list_elements',
         description: "Members can see all the elements created. Use the element show command to get information about element",
         summary: 'Show elements made from this type',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['type','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements of this type', content: new JsonContent(ref: ElementCollectionResponse::class)),
 
@@ -215,11 +260,20 @@ class TypeController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/types/{element_type}/list_descendants',
+        path: '/api/v1/{user_namespace}/types/{element_type}/list_descendants',
         operationId: 'core.types.list_descendants',
         description: "Members can see how this type is being inherited by other types.",
         summary: 'Show type inheritance',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -233,11 +287,20 @@ class TypeController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/types/{element_type}/list_attribute_descendants',
+        path: '/api/v1/{user_namespace}/types/{element_type}/list_attribute_descendants',
         operationId: 'core.types.list_attribute_descendants',
         description: "Members can see how this type's attributes are being used in other types.",
         summary: 'Show attribute inheritance',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type','attribute'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -256,11 +319,20 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/add_handle',
+        path: '/api/v1/{user_namespace}/types/{element_type}/add_handle',
         operationId: 'core.types.add_handle',
         description: "Types can be grouped, organized and controlled together",
         summary: 'Add element handle to a type',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -276,11 +348,20 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/remove_handle',
+        path: '/api/v1/{user_namespace}/types/{element_type}/remove_handle',
         operationId: 'core.types.remove_handle',
         description: "Handles can be removed at any time, and be empty or new ones added",
         summary: 'Remove element handle from a type',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -300,11 +381,20 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/change_owner',
+        path: '/api/v1/{user_namespace}/types/{element_type}/change_owner',
         operationId: 'core.types.change_owner',
         description: "The type owner can give the type to any other namespace",
         summary: 'Changes the type owner',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -320,11 +410,20 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/promote_owner',
+        path: '/api/v1/{user_namespace}/types/{element_type}/promote_owner',
         operationId: 'core.types.promote_owner',
         description: "Type owners can be changed by the system without events or permission",
         summary: 'System can change the type owner',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -339,11 +438,20 @@ class TypeController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/types/{element_type}/destroy_type',
+        path: '/api/v1/{user_namespace}/types/{element_type}/destroy_type',
         operationId: 'core.types.destroy_type',
         description: "The type owner destroy the type, inheritied types and event on this type can block",
         summary: 'Changes the type owner',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -357,11 +465,20 @@ class TypeController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/types/{element_type}/purge',
+        path: '/api/v1/{user_namespace}/types/{element_type}/purge',
         operationId: 'core.types.purge',
         description: "System can delete types, and all their elements and sets, without events or permission",
         summary: 'System can delete types',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -377,12 +494,20 @@ class TypeController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/types/{element_type}/fire_event',
+        path: '/api/v1/{user_namespace}/types/{element_type}/fire_event',
         operationId: 'core.types.fire_event',
         description: "Custom events can be fired, their scope depends on what they inherit, smallest scope wins if multiple ancestors of mixed scope",
         summary: 'Fires a custom event',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type','event'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: TypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -407,12 +532,21 @@ class TypeController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/publish',
+        path: '/api/v1/{user_namespace}/types/{element_type}/publish',
         operationId: 'core.types.publish',
         description: "Type admins do unpublished design and mark it as ready for use. Events from inherited types and attributes can block",
         summary: 'Publishes a design',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: TypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -441,11 +575,20 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/promote_publish',
+        path: '/api/v1/{user_namespace}/types/{element_type}/promote_publish',
         operationId: 'core.types.promote_publish',
         description: "System can publish any design. This overrules any rules denying it (those events do not fire) ",
         summary: 'System publishes a design',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -458,13 +601,22 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/suspend',
+        path: '/api/v1/{user_namespace}/types/{element_type}/suspend',
         operationId: 'core.types.suspend',
         description: "System can suspend a type. New elements cannot be created, but existing ones are left alone. ".
                 "\n Suspended types do not listen to events ".
                 "\n Can be blocked by events (system only listeners block, others listen to after the fact)",
         summary: 'Suspends a design',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -479,12 +631,21 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/types/{element_type}/retire',
+        path: '/api/v1/{user_namespace}/types/{element_type}/retire',
         operationId: 'core.types.retire',
         description: "Type admins retire a type. Events from inherited types and attributes can block. ".
                     "\nUnpublished types using this after acceptance can still use it",
         summary: 'Retires a design',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -501,12 +662,21 @@ class TypeController extends Controller {
      * @throws \Exception
      */
     #[OA\Post(
-        path: '/api/v1/{namespace}/types/{element_type}/create_element',
+        path: '/api/v1/{user_namespace}/types/{element_type}/create_element',
         operationId: 'core.types.create_element',
         description: "Type admin can create one or more elements going to one or more namespaces. The namespace can reject. The inherited types can reject",
         summary: 'Creates one or more new elements from a type',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: CreateElementParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['type','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements created', content: new JsonContent(ref: ElementCollectionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -537,11 +707,20 @@ class TypeController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/types/{element_type}/promote_element',
+        path: '/api/v1/{user_namespace}/types/{element_type}/promote_element',
         operationId: 'core.types.promote_element',
         description: "System can make elements out of any types, not needing permissions. No events created when doing this",
         summary: 'Creates one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['type','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

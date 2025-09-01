@@ -17,11 +17,16 @@ class OperationController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/operations/unshift',
+        path: '/api/v1/{user_namespace}/operations/unshift',
         operationId: 'core.operations.unshift',
         description: "namespace members of the sets can select one or more elements from one set to be unshifted to another ",
         summary: 'Add elements to the front of the set',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['operation'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -48,11 +53,16 @@ class OperationController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/operations/combine',
+        path: '/api/v1/{user_namespace}/operations/combine',
         operationId: 'core.operations.combine',
         description: "namespace members of the sets can adjust set contents using logic operations ",
         summary: 'Add or remove elements between sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['operation'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -79,11 +89,16 @@ class OperationController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/operations/mutual',
+        path: '/api/v1/{user_namespace}/operations/mutual',
         operationId: 'core.operations.mutual',
         description: "Any sets and elements can have mutuals made from the readable attributes ",
         summary: 'Make a mutual from one or more sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['operation'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -98,11 +113,16 @@ class OperationController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/operations/pop',
+        path: '/api/v1/{user_namespace}/operations/pop',
         operationId: 'core.operations.pop',
         description: "Namespace members of the sets can pop off elements to another set ",
         summary: 'Pops elements from sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['operation'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -129,11 +149,16 @@ class OperationController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/operations/push',
+        path: '/api/v1/{user_namespace}/operations/push',
         operationId: 'core.operations.push',
         description: "Namespace members of the sets can push elements on the top positions of target sets ",
         summary: 'Push elements to sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['operation'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -162,11 +187,16 @@ class OperationController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/operations/shift',
+        path: '/api/v1/{user_namespace}/operations/shift',
         operationId: 'core.operations.shift',
         description: "Namespace members of the sets can remove elements from the bottom positions of target sets ",
         summary: 'shift elements from sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['operation'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

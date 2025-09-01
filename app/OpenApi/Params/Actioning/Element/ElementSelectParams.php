@@ -19,7 +19,7 @@ class ElementSelectParams extends ApiDataBase
 {
 
     #[OA\Property(title: 'Elements',description: 'The elements to select. ')]
-    /** string[] $elements */
+    /** @var string[] $element_refs */
     protected array $element_refs = [];
 
 

@@ -13,7 +13,7 @@ use OpenApi\Attributes as OA;
 /**
  * Show details about the sets linked together by an element
  */
-#[OA\Schema(schema: 'LinkerCollectionResponse')]
+#[OA\Schema(schema: 'LinkResponse')]
 class LinkResponse extends ResultBase
 {
     #[OA\Property(title: 'Link uuid',type: HexbatchUuid::class)]

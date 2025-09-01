@@ -1,8 +1,10 @@
 <?php
 namespace App\Enums\Paths;
+use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_path_status
  */
+
 enum TypeOfPathStatus : string {
 
   case DESIGN = 'design';

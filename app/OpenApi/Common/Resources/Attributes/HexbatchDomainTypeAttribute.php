@@ -5,7 +5,6 @@ namespace App\OpenApi\Common\Resources\Attributes;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_domain_type_attribute',
     title: 'Attribute',
     description: 'Defines a domain:type:attribute',
     type: 'string',

@@ -1,10 +1,11 @@
 <?php
 namespace App\Enums\Server;
 use Illuminate\Support\Collection;
-
+use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_server_status
  */
+#[OA\Schema(title: "Server status")]
 enum TypeOfServerStatus : string {
 
   case UNKNOWN_SERVER = 'unknown_server';

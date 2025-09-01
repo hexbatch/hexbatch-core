@@ -5,7 +5,7 @@ namespace App\OpenApi\Common\Resources;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_resource_name',
+    schema: 'HexbatchResourceName',
     title: 'Resource Name',
     description: 'Defines a resource name by itself',
     type: 'string',

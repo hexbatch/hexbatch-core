@@ -5,7 +5,7 @@ namespace App\OpenApi\Common\Resources;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_domained_uuid',
+    schema: 'HexbatchDomainedUuid',
     title: 'Domained uuid',
     description: 'Defines a domain:uuid',
     type: 'string',

@@ -24,7 +24,7 @@ class CreateTokenParams
     /** @var mixed[] $response */
     protected array $passthrough;
 
-    #[OA\Property(ref: HexbatchSecondsToLive::class, title: 'Seconds to live', nullable: true)]
+    #[OA\Property(ref: '#/components/schemas/HexbatchSecondsToLive', title: 'Seconds to live',description: "leave empty to not have an expiration date", nullable: true)]
     protected ?int $seconds = null;
 
 

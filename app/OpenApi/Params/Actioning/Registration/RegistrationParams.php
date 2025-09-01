@@ -24,13 +24,13 @@ use OpenApi\Attributes as OA;
 
 class RegistrationParams extends ApiDataBase
 {
-    #[OA\Property(title: 'User Name',type: HexbatchResourceName::class,
+    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'User Name',
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]
 
     )]
     protected string $username;
 
-    #[OA\Property(  title: 'Password',type: 'password',minLength: 10,
+    #[OA\Property(  title: 'Password',type: 'string',minLength: 10,
         example: [new OA\Examples(summary: "password set up in the registration", value:'beans_r_88good') ]
     )]
     protected string $password;

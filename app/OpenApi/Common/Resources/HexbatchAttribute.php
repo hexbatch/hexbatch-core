@@ -17,33 +17,10 @@ use App\OpenApi\Common\Resources\Attributes\HexbatchUuidUuidUuid;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_attribute',
+    schema: 'HexbatchAttribute',
     title: 'Attribute that is defined by a namespace:type:attribute in name or uuid parts ',
     description: 'Names an attribute',
     type: 'string',
-    items: new OA\Items(
-        oneOf: [
-
-            new OA\Schema(ref: HexbatchNamespacedUuid::class),
-            new OA\Schema(ref: HexbatchUuidUuid::class),
-            new OA\Schema(ref: HexbatchNamespacedName::class),
-
-
-            new OA\Schema(ref: HexbatchNamespaceTypeAttribute::class),
-            new OA\Schema(ref: HexbatchNamespaceTypeUuid::class),
-            new OA\Schema(ref: HexbatchNamespaceUuidAttribute::class),
-            new OA\Schema(ref: HexbatchNamespaceUuidUuid::class),
-            new OA\Schema(ref: HexbatchUuidTypeAttribute::class),
-            new OA\Schema(ref: HexbatchUuidTypeUuid::class),
-            new OA\Schema(ref: HexbatchUuidUuidAttribute::class),
-            new OA\Schema(ref: HexbatchUuidUuidUuid::class),
-
-            new OA\Schema(ref: HexbatchDomainTypeAttribute::class),
-            new OA\Schema(ref: HexbatchDomainTypeUuid::class),
-            new OA\Schema(ref: HexbatchDomainUuidAttribute::class),
-            new OA\Schema(ref: HexbatchDomainUuidUuid::class),
-        ],
-    ),
     maxLength: 253 + 1 + 36 + 1 + 36,
     minLength: 3 + 1 + 3 + 1 + 3,
     example: [
@@ -66,6 +43,27 @@ use OpenApi\Attributes as OA;
         new OA\Examples(summary: "A domain with a colon then a uuid  with a colon then an attribute", value:'top.example.com:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'),
         new OA\Examples(summary: "A domain with a colon then a uuid with a colon then a uuid", value:'top.example.com:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4')
 
+    ],
+    oneOf: [
+
+        new OA\Schema(ref: '#/components/schemas/HexbatchNamespacedUuid'),
+        new OA\Schema( ref: '#/components/schemas/HexbatchUuidUuid'),
+        new OA\Schema(ref: '#/components/schemas/HexbatchNamespacedName'),
+
+
+        new OA\Schema(ref: '#/components/schemas/HexbatchNamespaceTypeAttribute'),
+        new OA\Schema(ref: '#/components/schemas/HexbatchNamespaceTypeUuid' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchNamespaceUuidAttribute' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchNamespaceUuidUuid' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchUuidTypeAttribute' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchUuidTypeUuid' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchUuidUuidAttribute' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchUuidUuidUuid' ),
+
+        new OA\Schema(ref: '#/components/schemas/HexbatchDomainTypeAttribute' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchDomainTypeUuid' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchDomainUuidAttribute' ),
+        new OA\Schema(ref: '#/components/schemas/HexbatchDomainUuidUuid' ),
     ]
 )]
 class HexbatchAttribute

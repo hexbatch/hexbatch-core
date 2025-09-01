@@ -28,7 +28,7 @@ class ElementActionResponse extends ResultBase
 
     public function __construct(
         #[OA\Property(title: 'Element')]
-        public ?ElementResponse $element = null ,
+        public ElementResponse $element  ,
 
         #[OA\Property(title: 'Set')]
         public ?SetResponse $set  = null,
@@ -42,8 +42,9 @@ class ElementActionResponse extends ResultBase
         #[OA\Property(title: 'Phase')]
         public ?PhaseResponse $phase = null,
 
-        #[OA\Property(title: 'Value')]
-        public null|int|string|array $value = null,
+        #[OA\Property(title: 'Value', items: new OA\Items(), nullable: true)]
+        /** @var mixed[] $value */
+        public array $value = [],
 
         protected ?Element $given_element = null,
         protected ?ElementSet $given_set = null,

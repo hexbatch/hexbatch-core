@@ -36,12 +36,24 @@ class SetController extends Controller {
      * @throws \Exception
      */
     #[OA\Post(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/add_element',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/add_element',
         operationId: 'core.sets.add_element',
         description: "Element namespace members can put element into any set that allows that ",
         summary: 'Change the element owner',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['set','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ElementCollectionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -78,11 +90,23 @@ class SetController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/destroy',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/destroy',
         operationId: 'core.sets.destroy_set',
         description: "Set owners can destroy their sets, bypassing the leave event, can be blocked by handlers on the type ",
         summary: 'Destroys the set, keeps the element',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -100,11 +124,23 @@ class SetController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/remove_element',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/remove_element',
         operationId: 'core.sets.remove_element',
         description: "Element namespace members can put element into any set that allows that ",
         summary: 'Change the element owner',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -126,11 +162,23 @@ class SetController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/empty_set',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/empty_set',
         operationId: 'core.sets.empty_set',
         description: "Element namespace members can clear out sticky elements. Event handlers can block their elements from leaving ",
         summary: 'Removes all elements except sticky ones',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -143,11 +191,23 @@ class SetController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/stick_element',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/stick_element',
         operationId: 'core.sets.stick_element',
         description: "Set namespace members can make sticky elements in those sets ",
         summary: 'Makes element sticky in set operations',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -160,11 +220,23 @@ class SetController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/unstick_element',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/unstick_element',
         operationId: 'core.sets.unstick_element',
         description: "Set namespace members can unstick elements in those sets ",
         summary: 'Unsticks one or more elements in one or more sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -179,11 +251,23 @@ class SetController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/purge_set',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/purge_set',
         operationId: 'core.sets.purge_set',
         description: "System can remove sets without events or permission ",
         summary: 'System can delete any set',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -197,18 +281,30 @@ class SetController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/purge_member',
-        operationId: 'core.sets.purge_member',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/purge_members',
+        operationId: 'core.sets.purge_members',
         description: "System can remove elements without events from any set ",
         summary: 'System can remove set contents',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[ApiTypeMarker( Root\Api\Set\PurgeMember::class)]
-    public function purge_member() {
+    public function purge_members() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
@@ -217,12 +313,24 @@ class SetController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/show',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/show',
         operationId: 'core.sets.show_set',
         description: "Shows information about a set to set members ",
         summary: 'Gives information about a set',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowSetParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Set info returned', content: new JsonContent(ref: SetResponse::class)),
 
@@ -250,6 +358,7 @@ class SetController extends Controller {
         operationId: 'core.sets.show_public',
         description: "Anyone can see public information ",
         summary: 'Shows a public view of this set',
+        tags: ['set','public'],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -265,11 +374,23 @@ class SetController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/list_children',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/list_children',
         operationId: 'core.sets.list_children',
         description: "Set namespace members can get a list of children sets ",
         summary: 'List child sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -285,12 +406,24 @@ class SetController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/set/{element_set}/list_elements',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/list_elements',
         operationId: 'core.sets.list_elements',
         description: "Can search in the element list of a set ",
         summary: 'list elements in a set',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['set','element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ElementCollectionResponse::class)),
 
@@ -315,12 +448,21 @@ class SetController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/sets/phase/{working_phase}/list',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/list',
         operationId: 'core.sets.list',
         description: "Lists all sets this is a member, admin or owner  ",
         summary: 'list sets',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListSetParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed sets', content: new JsonContent(ref: SetCollectionResponse::class)),
 

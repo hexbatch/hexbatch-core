@@ -14,6 +14,7 @@ use App\OpenApi\Common\Resources\HexbatchResource;
 use App\OpenApi\Params\Actioning\Element\LinkSelectParams;
 use App\OpenApi\Params\Actioning\Set\SetCreateParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
+use App\OpenApi\Results\Set\LinkerCollectionResponse;
 use App\OpenApi\Results\Set\LinkResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -31,12 +32,24 @@ class LinkController extends Controller {
      * @throws \Exception
      */
     #[OA\Delete(
-        path: '/api/v1/{namespace}/links/unlink',
+        path: '/api/v1/{user_namespace}/links/phase/{working_phase}/link/{element_link}/unlink',
         operationId: 'core.links.unlink',
         description: "Link admin can remove a links they control",
         summary: 'Destroys a link',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LinkSelectParams::class)),
+        tags: ['link'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase used",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_link', description: "The link",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Unlinked', content: new JsonContent(ref: LinkResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -66,12 +79,22 @@ class LinkController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/links/list',
+        path: '/api/v1/{user_namespace}/links/phase/{working_phase}/list',
         operationId: 'core.links.list',
         description: "Link members can see all the links owned by namespaces they belong",
         summary: 'Shows a list of links',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['link'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase used",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: LinkerCollectionResponse::class)),
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
@@ -83,11 +106,23 @@ class LinkController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/links/show',
+        path: '/api/v1/{user_namespace}/links/phase/{working_phase}/link/{element_link}/show',
         operationId: 'core.links.show',
         description: "Link member can see information about a particular link",
         summary: 'Show a link',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['link'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase used",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_link', description: "The link",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Found link', content: new JsonContent(ref: LinkResponse::class)),
 

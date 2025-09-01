@@ -5,7 +5,7 @@ namespace App\OpenApi\Common\Resources;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_namespaced_name',
+    schema: 'HexbatchNamespacedName',
     title: 'Namespaced name',
     description: 'Defines a namespace:name',
     type: 'string',

@@ -13,7 +13,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'DesignTimeParams')]
 class DesignTimeParams extends ApiDataBase
 {
-    #[OA\Property(title: 'Name',description: 'Name of the bound',type: HexbatchResourceName::class)]
+    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Name', description: 'Name of the bound')]
     protected ?string $bound_name = null;
 
 

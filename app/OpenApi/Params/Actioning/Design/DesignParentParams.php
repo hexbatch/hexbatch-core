@@ -28,7 +28,7 @@ class DesignParentParams extends ApiDataBase
     public function __construct(
         protected ?ElementType $given_type = null,
 
-        #[OA\Property( title:"Parents",items:  new OA\Items(ref: HexbatchResource::class),nullable: true)]
+        #[OA\Property( title:"Parents",items:  new OA\Items(ref: '#/components/schemas/HexbatchResource'),nullable: true)]
         protected array $parents = []
     )
     {

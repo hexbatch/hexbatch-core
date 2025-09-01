@@ -4,7 +4,7 @@ use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_location
  */
-#[OA\Schema(schema: 'TypeOfLocation',title: "Location type")]
+#[OA\Schema(title: "Location type")]
 enum TypeOfLocation : string {
     case MAP = 'map';
     case SHAPE = 'shape';

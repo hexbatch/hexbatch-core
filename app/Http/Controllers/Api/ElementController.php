@@ -40,12 +40,20 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/change_owner',
+        path: '/api/v1/{user_namespace}/elements/{element}/change_owner',
         operationId: 'core.elements.change_owner',
         description: "Element owner can give ownership to another namespace at any time. Any number of elements can be included with a path ",
         summary: 'Change the element owner',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ChangeElementOwnerParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Owner changed', content: new JsonContent(ref: ElementCollectionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -77,12 +85,21 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/type_off',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/type_off',
         operationId: 'core.elements.type_off',
         description: "Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path ",
         summary: 'Turn off all the subtype attributes of elements',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type on', content: new JsonContent(ref: ElementActionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -114,12 +131,21 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/type_on',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/type_on',
         operationId: 'core.elements.type_on',
         description: "Element admin group turn on all parent type attributes. The types, elements and sets given by a path ",
         summary: 'Turn on all the attributes of a parent type in elements',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type off', content: new JsonContent(ref: ElementActionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -151,12 +177,24 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_attribute',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_attribute',
         operationId: 'core.elements.read_attribute',
         description: "Can select the same attribute(s) in elements(s) to read, ".
                     "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the same attributes in one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -177,11 +215,23 @@ class ElementController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_live_type',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_live_type',
         operationId: 'core.elements.read_live_type',
         description: "This is the same as core.elements.read_type but looks at the live and ignores the inherited",
         summary: 'Read all the attributes of a type in one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -196,12 +246,24 @@ class ElementController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_type',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_type',
         operationId: 'core.elements.read_type',
         description:  "Can select the same type(s) in elements(s) to read, will either succeed if can read all of them or fail if one cannot be read ".
             "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read all the attributes of a live type in one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -219,12 +281,24 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/write_attribute',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/write_attribute',
         operationId: 'core.elements.write_attribute',
         description: "Write one or more elements found in a path, that have the same attributes. If one can. ",
         summary: 'Write json to the same attributes of one or more elements',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Write attribute', content: new JsonContent(ref: ElementActionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -255,12 +329,24 @@ class ElementController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/read_time',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_time',
         operationId: 'core.elements.read_time',
         description: "Can read current or next time span of the element's type, its parents and applied live ".
         "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the locations of one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -280,12 +366,24 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/add',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/live/add',
         operationId: 'core.elements.add_live',
         description: "If can read any attribute on a type, can add it as a live part to one or more elements in a search path.".
                 "\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  ",
         summary: 'Add a live type to one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -306,13 +404,27 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/{live_type}/copy',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/live/{live_type}/copy',
         operationId: 'core.elements.copy_live',
         description: "If can read any attribute on both the source and destination type, can copy its and its state to a new element.".
         "\n If not part of the element ns, can still add it if part of the type ns and event listeners allow  ",
         summary: 'Copy a live type and its state to one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),
-            new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'live_type', description: "The live type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -332,13 +444,27 @@ class ElementController extends Controller {
 
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/{live_type}/remove',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/live/{live_type}/remove',
         operationId: 'core.elements.remove_live',
         description: "If can read any attribute on the live type, can remove its and its state to a new element.".
         "\n If not part of the element ns, can still remove it if part of the type ns and event listeners allow  ",
         summary: 'Remove a live type from one or more elements',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),
-            new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'live_type', description: "The live type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -354,11 +480,24 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/promote',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/live/promote',
         operationId: 'core.elements.promote_live',
         description: "System can add live types without permisision. No events ",
         summary: 'System adds live types',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -370,11 +509,26 @@ class ElementController extends Controller {
     }
 
     #[OA\Delete(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/live/demote',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/live/{live_type}/demote',
         operationId: 'core.elements.demote_live',
         description: "System can remove live types from elements without permisision. No events ",
         summary: 'System subtracts live types',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'live_type', description: "The live type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -390,11 +544,23 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/ping',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/ping',
         operationId: 'core.elements.ping',
         description: "Element ns can use that to ping elements to target sets.",
         summary: 'Ping one or more elements to a set',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -410,12 +576,21 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Delete(
-        path: '/api/v1/{namespace}/elements/destroy',
+        path: '/api/v1/{user_namespace}/elements/{element}/destroy',
         operationId: 'core.elements.destroy_element',
         description: "Element admin can destroy one or more elements, the type or parent types can reject this",
         summary: 'Destroys one or more elements',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements destroyed', content: new JsonContent(ref: ElementCollectionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -447,12 +622,21 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Delete(
-        path: '/api/v1/{namespace}/elements/purge',
+        path: '/api/v1/{user_namespace}/elements/{element}/purge',
         operationId: 'core.elements.purge_element',
         description: "System can destroy one or more elements without permission or events",
         summary: 'System Destroy one or more elements',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements purged', content: new JsonContent(ref: ElementCollectionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -482,14 +666,28 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/link/{element_set}',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/link/{element_set}',
         operationId: 'core.elements.link',
         description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set ".
         "\n The link can be assigned to another namespace, they can reject that. The linked set can reject the link",
         summary: 'Makes a link between an element and a set',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),
-            new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LinkCreateParams::class)),
+        tags: ['element','set','link'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: LinkResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -521,12 +719,24 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/show',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/show',
         operationId: 'core.elements.show_element',
         description: "Element members can see details about an element",
         summary: 'Shows the value and information about an element',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowElementParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Element info returned', content: new JsonContent(ref: ElementResponse::class)),
 
@@ -551,12 +761,21 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/list',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/list',
         operationId: 'core.elements.list_elements',
         description: "Element members can see a list of all the elements of namespaces they belong",
         summary: 'Shows list of elements',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements', content: new JsonContent(ref: ElementCollectionResponse::class)),
 
@@ -583,6 +802,8 @@ class ElementController extends Controller {
         operationId: 'core.elements.show_public',
         description: "Anyone can see public information about an element, attributes that are marked as public will show their data.",
         summary: 'Shows public information about an element',
+        security: [['bearerAuth' => []]],
+        tags: ['element','public'],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -597,12 +818,24 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/create_set',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/create_set',
         operationId: 'core.elements.create_set',
         description: "Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets",
         summary: 'Create a set from element',
+        security: [['bearerAuth' => []]],
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        tags: ['element','set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: SetResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
@@ -631,11 +864,23 @@ class ElementController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/elements/phase/{working_phase}/element/{element}/promote_set',
+        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/promote_set',
         operationId: 'core.elements.promote_set',
         description: "System can make sets from any element without permisision. No events ",
         summary: 'System can make sets',
-        parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
+        security: [['bearerAuth' => []]],
+        tags: ['element','set'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+            new OA\PathParameter(  name: 'element', description: "The element",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

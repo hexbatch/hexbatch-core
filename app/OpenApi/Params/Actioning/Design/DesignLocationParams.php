@@ -15,12 +15,12 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'DesignLocationParams')]
 class DesignLocationParams extends ApiDataBase
 {
-    #[OA\Property(title: 'Name',description: 'Name of the bound',type: HexbatchResourceName::class, nullable: true)]
+    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Name', description: 'Name of the bound', nullable: true)]
     protected ?string $bound_name = null;
 
 
-    #[OA\Property( title: 'Location type',description: "Locations are maps or shapes", nullable: true)]
-    protected ?TypeOfLocation $location_type = null;
+    #[OA\Property( title: 'Location type',description: "Locations are maps or shapes")]
+    protected TypeOfLocation $location_type ;
 
     #[OA\Property( title: 'Geo Json',description: "Geo json supported", nullable: true)]
     /** @var mixed[] $geo_json */

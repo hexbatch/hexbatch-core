@@ -58,10 +58,10 @@ class DesignAttributeParams extends ApiDataBase
     protected bool $unset_parent = false;
 
     #[OA\Property(title: 'Access Policy',description:'Sets data visibility')]
-    protected ?TypeOfServerAccess $access = null;
+    protected TypeOfServerAccess $access ;
 
     #[OA\Property(title: 'Value Policy',description:'Sets data visibility')]
-    protected ?TypeOfElementValuePolicy $value_policy = null;
+    protected TypeOfElementValuePolicy $value_policy ;
 
     #[OA\Property(title: 'Read Filter',description:'When reading data set by this attribute, use this conversion or filter')]
     protected ?string $read_json_path = null;

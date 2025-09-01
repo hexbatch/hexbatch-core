@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
-#[OA\Schema(schema: 'ShowAttributeParams')]
+#[OA\Schema(schema: 'ShowElementParams')]
 class ShowElementParams extends ListDataBaseParams
 {
 

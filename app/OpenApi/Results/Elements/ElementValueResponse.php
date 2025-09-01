@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
 /**
  * Show details about an element
  */
-#[OA\Schema(schema: 'ElementResponse')]
+#[OA\Schema(schema: 'ElementValueResponse')]
 class ElementValueResponse extends ResultBase
 {
     #[OA\Property(title: 'Attribute uuid',type: HexbatchUuid::class)]

@@ -12,12 +12,7 @@ use App\OpenApi\ApiDataBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
-/*
- * Add element params
-  given_set_uuid: uuid of the set
-  given_element_uuids: array of one or more element uuids to put into the set
-  is_sticky: if the elements are sticky, remaining after the remove command
- */
+
 #[OA\Schema(schema: 'ChangeElementOwnerParams')]
 class ChangeElementOwnerParams extends ApiDataBase
 {
@@ -26,7 +21,7 @@ class ChangeElementOwnerParams extends ApiDataBase
     protected ?string $namespace_ref = null;
 
     #[OA\Property(title: 'Elements',description: 'The elements to add to the set. This is uuid ')]
-    /** string[] $elements */
+    /** @var string[] $element_refs */
     protected array $element_refs = [];
 
 

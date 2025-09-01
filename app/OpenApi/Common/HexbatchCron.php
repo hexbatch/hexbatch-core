@@ -5,7 +5,7 @@ namespace App\OpenApi\Common;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_cron',
+    schema: 'HexbatchCron',
     title: 'Linux crontab schedule',
     description: 'Defines the cron format',
     type: 'string',

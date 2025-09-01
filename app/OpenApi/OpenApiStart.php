@@ -1,6 +1,6 @@
 <?php
 /*
-./vendor/bin/openapi app libs --version 3.1.0 -o  public/openapi.yaml
+ ./vendor/bin/openapi   app/Enums app/OpenApi app/Http libs --version 3.1.0 -o  public/openapi.yaml
 
 https://redocly.com/docs/cli/installation
  docker run --rm -v $PWD:/spec redocly/cli lint public/openapi.yaml

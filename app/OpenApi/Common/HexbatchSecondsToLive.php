@@ -5,7 +5,7 @@ namespace App\OpenApi\Common;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_seconds_to_live',
+    schema: 'HexbatchSecondsToLive',
     title: 'Seconds to live',
     description: 'When needing to give a length in seconds up to a year',
     type: 'integer',

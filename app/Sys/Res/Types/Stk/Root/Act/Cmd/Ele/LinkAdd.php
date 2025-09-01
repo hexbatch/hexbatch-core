@@ -12,7 +12,7 @@ use App\Models\ActionDatum;
 use App\Models\ElementLink;
 use App\Models\UserNamespace;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Results\Set\LinkerCollectionResponse;
+use App\OpenApi\Results\Elements\ElementResponse;
 use App\OpenApi\Results\Set\LinkResponse;
 use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -168,7 +168,7 @@ class LinkAdd extends Act\Cmd\Ele
         $what =  $this->getMyData();
         $ret = [];
         if (isset($what['element'])) {
-            $ret['element'] = new LinkerCollectionResponse(linker_element:  $what['element']);
+            $ret['element'] = new ElementResponse(given_element:  $what['element']);
         }
 
         if (isset($what['link'])) {

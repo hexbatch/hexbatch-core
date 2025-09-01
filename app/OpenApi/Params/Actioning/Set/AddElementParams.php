@@ -25,7 +25,7 @@ class AddElementParams extends ApiDataBase
     protected ?string $set_ref = null;
 
     #[OA\Property(title: 'Elements',description: 'The elements to add to the set. This is uuid ')]
-    /** string[] $elements */
+    /** @var string[] $element_refs */
     protected array $element_refs = [];
 
     #[OA\Property(title: 'Has events',description: 'A set can choose to turn off events fired when an element enters or leaves it. Cannot be changed later.')]

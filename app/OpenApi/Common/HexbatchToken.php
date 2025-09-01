@@ -5,7 +5,7 @@ namespace App\OpenApi\Common;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'hexbatch_token',
+    schema: 'HexbatchToken',
     title: 'A token used to authenticate',
     description: 'Defines a regular uuid',
     type: 'string',

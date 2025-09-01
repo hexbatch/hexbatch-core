@@ -15,6 +15,7 @@ use OpenApi\Attributes as OA;
 class TypeParams extends ApiDataBase
 {
 
+    #[OA\Property(title: 'Type',description: 'The type. Can be uuid or name')]
     protected ?string $type_uuid = null;
     public function __construct(
         protected ?ElementType $given_type = null

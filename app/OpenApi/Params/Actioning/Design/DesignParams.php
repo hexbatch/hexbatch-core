@@ -20,7 +20,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'DesignParams')]
 class DesignParams extends ApiDataBase
 {
-    #[OA\Property(title: 'Type name', type: HexbatchResourceName::class,
+    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Type name',
         example: [new OA\Examples(summary: "name example", value:'he312345') ]
 
     )]

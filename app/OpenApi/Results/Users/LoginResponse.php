@@ -16,7 +16,7 @@ class LoginResponse extends ResultBase
     #[OA\Property(title: 'Message')]
     public string $message;
 
-    #[OA\Property(ref: HexbatchToken::class, title: 'Auth Token', type: 'password')]
+    #[OA\Property(ref: '#/components/schemas/HexbatchToken', title: 'Auth Token', type: 'password')]
     public string $auth_token;
 
     /**

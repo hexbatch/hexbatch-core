@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes as OA;
 
 
-#[OA\Schema(schema: 'ListScheduleParams')]
+#[OA\Schema(schema: 'ListLocationParams')]
 class ListLocationParams extends ListDataBaseParams
 {
 

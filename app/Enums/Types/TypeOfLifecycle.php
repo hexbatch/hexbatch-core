@@ -1,10 +1,11 @@
 <?php
 namespace App\Enums\Types;
 use Illuminate\Support\Collection;
-
+use OpenApi\Attributes as OA;
 /**
  * postgres enum type_of_lifecycle
  */
+
 enum TypeOfLifecycle : string {
 
   case DEVELOPING = 'developing';
