@@ -100,7 +100,7 @@ abstract class BaseType implements ISystemType, IThingAction, IDocument
                 is_final: $this->getISystemType()::isFinal(),
                 access: TypeOfServerAccess::IS_PUBLIC,
                 uuid: static::getClassUuid(),
-                is_system: true, send_event: false, owner_namespace: $this->getISystemType()->getTypeNamespace()
+                is_system: true, send_event: false, owner_namespace: $this->getISystemType()->getTypeNamespace()->getNamespaceObject()
             );
             $design->runAction();
             $created_type = $design->getGivenType();

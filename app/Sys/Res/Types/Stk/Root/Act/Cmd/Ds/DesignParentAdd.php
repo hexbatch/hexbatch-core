@@ -44,10 +44,6 @@ class DesignParentAdd extends Act\Cmd\Ds
         Evt\Server\DesignPending::class
     ];
 
-    public function getGivenType(): ?ElementType
-    {
-        return $this->getGivenType();
-    }
 
     protected function setDesignType(ElementType $type) : void {
         $this->given_type_uuid = $type->ref_uuid;

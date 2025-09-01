@@ -12,13 +12,15 @@ use OpenApi\Attributes as OA;
 /**
  * Any data in the body is set to the passthrough data for the token
  */
-
+#[OA\Schema(schema: 'CreateTokenParams',example: [
+    new OA\Examples(summary: "Create token example", value: ["seconds"=>"180000","passthrough"=>'{"apples":5}']) ,
+])]
 class CreateTokenParams
 {
     use ApiDataTrait;
     const int|float MAX_PASSTHROUGH_SIZE = 1024*20; //20k
 
-    #[OA\Property( title: "Passthrough data (optional)", items: new OA\Items(), nullable: true)]
+    #[OA\Property( title: "Passthrough data (optional)",  nullable: true)]
     /** @var mixed[] $response */
     protected array $passthrough;
 

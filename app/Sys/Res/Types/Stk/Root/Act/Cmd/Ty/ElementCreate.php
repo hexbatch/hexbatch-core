@@ -271,7 +271,7 @@ class ElementCreate extends Act\Cmd\Ele
         if ($this->given_phase_uuid) {
             $phase = Phase::getThisPhase(uuid: $this->given_phase_uuid);
         } else {
-            $phase = Phase::getDefaultPhase()?->id;
+            $phase = Phase::getDefaultPhase();
         }
 
         $this->setGivenPhase($phase);

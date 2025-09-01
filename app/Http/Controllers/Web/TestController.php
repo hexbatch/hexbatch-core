@@ -6,12 +6,12 @@ namespace App\Http\Controllers\Web;
 
 use App\Models\ElementType;
 use App\OpenApi\Results\Types\TypeResponse;
+use App\Sys\Build\SystemResources;
 
 class TestController
 {
 
     public function test() {
-        $type = ElementType::getElementType(id:585);
-        return response()->json(new TypeResponse(given_type: $type));
+        SystemResources::build();
     }
 }

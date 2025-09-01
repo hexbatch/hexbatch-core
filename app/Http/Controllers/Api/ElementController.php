@@ -51,7 +51,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
@@ -88,7 +88,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
@@ -125,7 +125,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
@@ -230,7 +230,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
@@ -421,7 +421,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
@@ -458,7 +458,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
@@ -495,7 +495,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
@@ -608,7 +608,7 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Success but other callbacks',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
                 content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
