@@ -9,7 +9,7 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignDestroyParams;
+use App\OpenApi\Params\Actioning\Type\TypeParams;
 use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 #[HexbatchTitle( title: "Deletes a design by system")]
 #[HexbatchBlurb( blurb: "No permission checks, no events raised")]
 #[HexbatchDescription( description:'')]
-#[ApiParamMarker( param_class: DesignDestroyParams::class)]
+#[ApiParamMarker( param_class: TypeParams::class)]
 class DesignPurge extends Act\Cmd\Ds
 {
     const UUID = '39693e91-d477-4a68-a8ba-7b8a41e94718';

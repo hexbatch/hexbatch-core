@@ -18,12 +18,12 @@ use App\OpenApi\Common\Resources\HexbatchNamespace;
 use App\OpenApi\Common\Resources\HexbatchResource;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
-use App\OpenApi\Params\Actioning\Design\DesignDestroyParams;
 use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
 use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Actioning\Design\DesignParams;
 use App\OpenApi\Params\Actioning\Design\DesignParentParams;
 use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Params\Actioning\Type\TypeParams;
 use App\OpenApi\Params\Listing\Design\ListAttributeParams;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
 use App\OpenApi\Params\Listing\Design\ListLocationParams;
@@ -132,7 +132,7 @@ class DesignController extends Controller {
         operationId: 'core.design.purge',
         description: 'The system can delete any design, owned by anyone, before publishing, without raising any events',
         summary: 'Purges an unpublished type ',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignDestroyParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: TypeResponse::class)),
@@ -149,7 +149,7 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\Purge::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     public function purge_design(Request $request,ElementType $type) {
-        $params = new DesignDestroyParams(given_type: $type);
+        $params = new TypeParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Purge(params: $params, is_async: true, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['purge-design']);
@@ -169,7 +169,7 @@ class DesignController extends Controller {
         operationId: 'core.design.destroy',
         description: 'A namespace can delete a new design, before publishing, without raising any events',
         summary: 'Deletes an unpublished type ',
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignDestroyParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
         parameters: [new OA\PathParameter(  ref: HexbatchNamespace::class ),new OA\PathParameter(  ref: HexbatchResource::class )],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: TypeResponse::class)),
@@ -184,7 +184,7 @@ class DesignController extends Controller {
         ]
     )]
     public function destroy_design(Request $request,ElementType $type) {
-        $params = new DesignDestroyParams(given_type: $type);
+        $params = new TypeParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Destroy(params: $params, is_async: true, tags: ['api-top']);
         $thing = $api->createThingTree(tags: ['destroy-design']);

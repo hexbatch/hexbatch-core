@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
-use App\OpenApi\Params\Actioning\Design\DesignDestroyParams;
+use App\OpenApi\Params\Actioning\Type\TypeParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -15,7 +15,7 @@ use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Collection;
 
 
-#[ApiParamMarker( param_class: DesignDestroyParams::class)]
+#[ApiParamMarker( param_class: TypeParams::class)]
 class Destroy extends Api\DesignApi implements IHookCode
 {
     const UUID = '74ff2b6e-4b93-4db1-b8fe-c3eb672cc16b';
@@ -32,7 +32,7 @@ class Destroy extends Api\DesignApi implements IHookCode
 
 
     public function __construct(
-        protected ?DesignDestroyParams $params = null,
+        protected ?TypeParams $params = null,
 
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
@@ -48,7 +48,7 @@ class Destroy extends Api\DesignApi implements IHookCode
     protected function restoreParams(array $param_array) {
         parent::restoreParams($param_array);
         if(!$this->params) {
-            $this->params = new DesignDestroyParams();
+            $this->params = new TypeParams();
             $this->params->fromCollection(new Collection($param_array),false);
         }
     }
