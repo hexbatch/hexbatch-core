@@ -4914,17 +4914,21 @@ paths:
       security:
         -
           bearerAuth: []
-  /api/v1/server/us:
+  /api/v1/servers/us:
     get:
       tags:
         - server
         - public
       summary: 'Show this server information'
       description: 'Lists public information about the server: all the attributes in the About subtype will be shown, any meta attributes, and name|domain|url '
-      operationId: core.server.us
+      operationId: core.servers.us
       responses:
-        '501':
-          description: 'Not yet implemented'
+        '200':
+          description: 'The server'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerResponse'
   /api/v1/server/admin:
     get:
       tags:
@@ -9160,6 +9164,11 @@ components:
             - string
             - 'null'
           format: date-time
+        server_version:
+          title: 'Server version'
+          type:
+            - string
+            - 'null'
       type: object
     LinkResponse:
       description: 'Show details about the sets linked together by an element'

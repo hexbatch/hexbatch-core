@@ -336,11 +336,35 @@ class Utilities {
         return $step_e;
     }
 
-    public static function getVersionString() : ?string {
-        return file_get_contents(base_path() . DIRECTORY_SEPARATOR . 'version') ? : null;
+
+    public static function getComposerPath() : string {
+        $composerFile = base_path() . DIRECTORY_SEPARATOR . 'composer.json';
+        $what =  realpath($composerFile);
+        if (!$what) {
+            throw new \LogicException("Composer path $composerFile does not exist");
+        }
+        return $what;
     }
 
+    public static function getComposer() : array  {
+        $composerFile = static::getComposerPath();
+        $composer = json_decode(file_get_contents($composerFile), true);
+        if (empty($composer)) {
+            throw new \LogicException("Cannot convert composer.json");
+        }
+        return $composer;
+    }
 
+    public static function getVersionAsString() : string {
+        $composer = static::getComposer();
+        return $composer['version']??'';
+    }
+
+    public static function getInstallTimeStamp() : ?int {
+        $what =  filemtime(self::getComposerPath());
+        if (!$what) {return null;}
+        return $what;
+    }
 
 
 

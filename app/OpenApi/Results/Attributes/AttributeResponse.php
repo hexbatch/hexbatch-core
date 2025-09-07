@@ -33,7 +33,7 @@ class AttributeResponse extends ResultBase
     public string $owning_type_uuid = '';
 
     #[OA\Property(title: 'Owning type')]
-    public ?TypeResponse $owner_type ;
+    public ?TypeResponse $owner_type = null;
 
     #[OA\Property(title: 'Parent')]
     public ?AttributeResponse $parent = null;
@@ -115,7 +115,7 @@ class AttributeResponse extends ResultBase
         }
         $this->is_system = $given_attribute->is_system;
         $this->is_abstract = $given_attribute->is_abstract;
-        $this->is_final = $given_attribute->is_final;
+        $this->is_final = $given_attribute->is_final_attribute;
         $this->access = $given_attribute->server_access_type;
         $this->value_policy = $given_attribute->value_policy;
         $this->approval = $given_attribute->attribute_approval;

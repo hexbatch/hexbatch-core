@@ -3,6 +3,7 @@
 namespace App\OpenApi\Results\Servers;
 
 use App\Enums\Server\TypeOfServerStatus;
+use App\Helpers\Utilities;
 use App\Models\Server;
 use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
@@ -49,7 +50,8 @@ class ServerResponse extends ResultBase
     #[OA\Property(title: 'Server created at',format: 'date-time')]
     public ?string $created_at = '';
 
-
+    #[OA\Property(title: 'Server version')]
+    public ?string $server_version  ;
 
 
 
@@ -79,6 +81,8 @@ class ServerResponse extends ResultBase
         $this->created_at = $given_server->created_at? Carbon::parse($given_server->created_at,'UTC')
             ->timezone(config('app.timezone'))->toIso8601String():null;
 
+        $this->server_version = Utilities::getVersionAsString();
+
     }
 
 
@@ -92,6 +96,7 @@ class ServerResponse extends ResultBase
         $ret['server_status'] = $this->server_status;
         $ret['type_uuid'] = $this->type_uuid;
         $ret['created_at'] = $this->created_at;
+        $ret['server_version'] = $this->server_version;
 
 
 

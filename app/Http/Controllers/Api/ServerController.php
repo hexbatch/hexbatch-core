@@ -7,28 +7,32 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
+use App\Models\Server;
+use App\OpenApi\Results\Servers\ServerResponse;
+use App\OpenApi\Results\Users\MeResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class ServerController extends Controller {
 
     #[OA\Get(
-        path: '/api/v1/server/us',
-        operationId: 'core.server.us',
+        path: '/api/v1/servers/us',
+        operationId: 'core.servers.us',
         description: "Lists public information about the server: all the attributes in the About subtype will be shown, any meta attributes, and name|domain|url ",
         summary: 'Show this server information',
         tags: ['server','public'],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response( response: 200, description: 'The server',content: new JsonContent(ref: ServerResponse::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::IS_PUBLIC)]
     #[ApiTypeMarker( Root\Api\Server\Show::class)]
     public function us() {
 
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+        return response()->json(new ServerResponse(given_server: Server::getDefaultServer(),type_level: 1,attribute_level: 1,b_show_namespace: true), CodeOf::HTTP_OK);
     }
 
 

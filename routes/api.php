@@ -15,7 +15,7 @@ Route::prefix('v1')->group(function () {
 
 
     Route::prefix('servers')->group(function () {
-        Route::get('us', [Api\ServerController::class, 'us'])->name('core.server.us');
+        Route::get('us', [Api\ServerController::class, 'us'])->name('core.servers.us');
     });
 
     Route::prefix('elements')->group(function () {
