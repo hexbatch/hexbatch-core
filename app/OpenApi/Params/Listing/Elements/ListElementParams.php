@@ -74,19 +74,19 @@ class ListElementParams extends ShowElementParams
         if (!$this->given_namespace) {
             $this->namespace_ref = static::stringFromCollection(collection: $col,param_name: 'namespace_ref');
             $this->given_namespace = UserNamespace::resolveNamespace(value: $this->namespace_ref);
-            $this->namespace_ref = $this->given_namespace->ref_uuid;
+            $this->namespace_ref = $this->given_namespace?->ref_uuid;
         }
 
         if (!$this->given_location) {
             $this->shape_ref = static::stringFromCollection(collection: $col,param_name: 'shape_ref');
             $this->given_location = LocationBound::resolveLocation(value: $this->shape_ref);
-            $this->shape_ref = $this->given_location->ref_uuid;
+            $this->shape_ref = $this->given_location?->ref_uuid;
         }
 
         if (!$this->given_schedule) {
             $this->schedule_ref = static::stringFromCollection(collection: $col,param_name: 'shape_ref');
             $this->given_schedule = TimeBound::resolveSchedule(value: $this->schedule_ref);
-            $this->schedule_ref = $this->given_schedule->ref_uuid;
+            $this->schedule_ref = $this->given_schedule?->ref_uuid;
         }
 
         if (!$this->given_attribute) {
@@ -98,13 +98,13 @@ class ListElementParams extends ShowElementParams
         if (!$this->given_type) {
             $this->type_ref = static::stringFromCollection(collection: $col,param_name: 'type_ref');
             $this->given_type = ElementType::resolveType(value: $this->type_ref);
-            $this->type_ref = $this->given_type->ref_uuid;
+            $this->type_ref = $this->given_type?->ref_uuid;
         }
 
         if (!$this->given_set) {
             $this->set_ref = static::stringFromCollection(collection: $col,param_name: 'set_ref');
             $this->given_set = ElementType::resolveType(value: $this->set_ref);
-            $this->set_ref = $this->given_set->ref_uuid;
+            $this->set_ref = $this->given_set?->ref_uuid;
         }
 
         $this->is_set = static::boolFromCollection(collection: $col,param_name: 'is_set');

@@ -7,6 +7,8 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\Elements\ElementResponse;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -16,6 +18,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'LinkResponse')]
 class LinkResponse extends ResultBase
 {
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Link uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -42,8 +45,9 @@ class LinkResponse extends ResultBase
     public function __construct(ElementLink $linker,bool $show_linker = false,
                                 bool        $show_set = false,bool $show_elements = false,
                                 bool        $show_definer = false, bool $show_parent = false,
-                                int         $definer_type_level = 0,int $children_set_level = 0,int $parent_set_level = 0)
+                                int         $definer_type_level = 0,int $children_set_level = 0,int $parent_set_level = 0,?Thing $thing = null)
     {
+        parent::__construct(thing: $thing);
         $this->uuid = $linker->ref_uuid;
         $this->linking_element_uuid = $linker->linking_element->ref_uuid;
         $this->linked_set_uuid = $linker->linked_set->ref_uuid;

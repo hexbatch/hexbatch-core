@@ -12,6 +12,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 #[ApiParamMarker( param_class: DesignTimeParams::class)]
@@ -53,15 +54,10 @@ class CreateTime extends Api\DesignApi
         return ['bound'=>$this->getGivenTimeBound()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['bound'])) {
-            $ret['bound'] = new ScheduleResponse(given_time:  $what['bound']);
-        }
-
-        return $ret;
+        return new ScheduleResponse(given_time:  $what['bound'],thing: $this->getMyThing());
     }
 
 

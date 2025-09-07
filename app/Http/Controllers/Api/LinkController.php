@@ -6,7 +6,6 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
-use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementLink;
 use App\OpenApi\Params\Actioning\Element\LinkSelectParams;
@@ -67,8 +66,8 @@ class LinkController extends Controller {
         $params = new LinkSelectParams(given_link: $link);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\UnLink(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['unlink']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['unlink']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }

@@ -6,12 +6,14 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
+use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IHookCode;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 
@@ -57,15 +59,9 @@ class Destroy extends Api\DesignApi implements IHookCode
         return ['type_uuid'=>$this->params->getTypeUuid()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
-        $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['type_uuid'])) {
-            $ret['type_uuid'] = $what['type_uuid'];
-        }
-
-        return $ret;
+        return new TypeResponse(given_type: $this->params->getGivenType(),thing: $this->getMyThing());
     }
 
 

@@ -4,7 +4,7 @@ namespace App\OpenApi\Params\Actioning\Design;
 
 use App\Models\Attribute;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
  *
  */
 #[OA\Schema(schema: 'DesignAttributeDestroyParams')]
-class DesignAttributeDestroyParams extends ApiDataBase
+class DesignAttributeDestroyParams extends ApiThingBase
 {
     #[OA\Property(title: 'Attribute',description: 'Attribute can be the full name or uuid')]
     protected ?string $attribute_reference = null;
@@ -23,7 +23,7 @@ class DesignAttributeDestroyParams extends ApiDataBase
 
     )
     {
-
+        parent::__construct();
     }
 
     public function fromCollection(Collection $col, bool $do_validation = true)

@@ -7,6 +7,7 @@ use App\Models\ActionDatum;
 use App\OpenApi\Params\Listing\Set\ShowSetParams;
 use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -53,21 +54,17 @@ class ShowSet extends Api\SetApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
-        $ret = [];
-        if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new SetResponse(
-                given_set:  $this->params->getGivenSet(),
-                show_definer:  $this->params->isShowDefiner(),
-                show_parent :  $this->params->isShowParent(),
-                show_elements :  $this->params->isShowElements(),
-                definer_type_level:  $this->params->getDefinerTypeLevel(),
-                children_set_level:  $this->params->getChildrenSetLevel(),
-                parent_set_level:  $this->params->getParentSetLevel(),
-            );
-        }
-        return $ret;
+        return new SetResponse(
+            given_set:  $this->params->getGivenSet(),
+            show_definer:  $this->params->isShowDefiner(),
+            show_parent :  $this->params->isShowParent(),
+            show_elements :  $this->params->isShowElements(),
+            definer_type_level:  $this->params->getDefinerTypeLevel(),
+            children_set_level:  $this->params->getChildrenSetLevel(),
+            parent_set_level:  $this->params->getParentSetLevel(),thing: $this->getMyThing()
+        );
     }
 
 }

@@ -17,6 +17,7 @@ use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IHookCode;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
@@ -67,15 +68,10 @@ class UserRegister extends Api\UserApi implements IHookCode
         return ['user'=>$this->getCreatedUser(),'namespace'=>$this->getCreatedNamespace()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['user'])) {
-            $ret['user'] = new MeResponse(user:  $what['user'],show_namespace: true);
-        }
-
-        return $ret;
+        return new MeResponse(user:  $what['user'],show_namespace: true,thing: $this->getMyThing());
     }
 
     public function __construct(

@@ -6,7 +6,6 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
-use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementType;
 use App\OpenApi\Params\Actioning\Type\CreateElementParams;
@@ -63,9 +62,9 @@ class TypeController extends Controller {
         $params = new ShowDesignParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Type\ShowType(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['show-type']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['show-type']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -122,9 +121,9 @@ class TypeController extends Controller {
         $params = new ListDesignParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Type\ListPublished(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-published']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-published']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -158,9 +157,9 @@ class TypeController extends Controller {
         $params = new ListDesignParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Type\ListSuspended(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-suspended']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-suspended']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -246,9 +245,9 @@ class TypeController extends Controller {
         $params = new ListElementParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Type\ListElementsOfType(params: $params, given_type: $type, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-elements']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-elements']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -564,8 +563,8 @@ class TypeController extends Controller {
         $params = new TypeParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Type\Publish(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['publish-type']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['publish-type']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -697,8 +696,8 @@ class TypeController extends Controller {
         $params = new CreateElementParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Type\CreateElement(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['create-elements']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['create-elements']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }

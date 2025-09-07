@@ -18,9 +18,9 @@ trait ApiDataTrait
         return $what;
     }
 
-    public static function naturalFromCollection(Collection $collection, string $param_name) : ?int {
+    public static function naturalFromCollection(Collection $collection, string $param_name) : int {
        $what = static::intFromCollection(collection: $collection,param_name: $param_name);
-       if ($what < 0) { $what = 0;}
+       if (!$what || $what < 0) { $what = 0;}
        return $what;
     }
 

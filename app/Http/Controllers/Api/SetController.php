@@ -6,7 +6,6 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
-use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementSet;
 use App\Models\Phase;
@@ -77,8 +76,8 @@ class SetController extends Controller {
         $params = new AddElementParams(given_set: $set);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Set\AddElement(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['add-elements']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['add-elements']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -342,9 +341,9 @@ class SetController extends Controller {
         $params = new ShowSetParams(given_set: $set);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Set\ShowSet(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['show-set']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['show-set']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -435,9 +434,9 @@ class SetController extends Controller {
         $params = new ListElementParams(given_set: $set);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Set\ListMembers(params: $params, given_set: $set, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-members']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-members']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -474,9 +473,9 @@ class SetController extends Controller {
         $params = new ListSetParams(working_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Set\ListSets(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-sets']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-sets']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 

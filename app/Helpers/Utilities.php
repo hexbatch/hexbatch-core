@@ -341,7 +341,7 @@ class Utilities {
         $composerFile = base_path() . DIRECTORY_SEPARATOR . 'composer.json';
         $what =  realpath($composerFile);
         if (!$what) {
-            throw new \LogicException("Composer path $composerFile does not exist");
+            throw new LogicException("Composer path $composerFile does not exist");
         }
         return $what;
     }
@@ -350,7 +350,7 @@ class Utilities {
         $composerFile = static::getComposerPath();
         $composer = json_decode(file_get_contents($composerFile), true);
         if (empty($composer)) {
-            throw new \LogicException("Cannot convert composer.json");
+            throw new LogicException("Cannot convert composer.json");
         }
         return $composer;
     }

@@ -3,14 +3,16 @@
 namespace App\OpenApi;
 
 
+
 use Illuminate\Support\Collection;
 
-abstract class ApiDataBase implements IApiParam,\JsonSerializable
+abstract class ApiCollectionBase implements IApiParam,\JsonSerializable
 {
     use ApiDataTrait;
     public function fromCollection(Collection $col, bool $do_validation = true) {
 
     }
+
 
 
     public  function toArray() : array  {

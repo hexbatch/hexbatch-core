@@ -44,13 +44,13 @@ class ListAttributeParams extends ShowAttributeParams
         if (!$this->given_namespace) {
             $this->namespace_ref = static::stringFromCollection(collection: $col,param_name: 'namespace_ref');
             $this->given_namespace = UserNamespace::resolveNamespace(value: $col->get('namespace_ref'));
-            $this->namespace_ref = $this->given_namespace->ref_uuid;
+            $this->namespace_ref = $this->given_namespace?->ref_uuid;
         }
 
         if (!$this->given_location) {
             $this->shape_ref = static::stringFromCollection(collection: $col,param_name: 'shape_ref');
             $this->given_location = LocationBound::resolveLocation(value: $this->shape_ref);
-            $this->shape_ref = $this->given_location->ref_uuid;
+            $this->shape_ref = $this->given_location?->ref_uuid;
         }
 
 

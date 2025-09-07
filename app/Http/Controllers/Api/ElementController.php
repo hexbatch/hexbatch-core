@@ -72,8 +72,8 @@ class ElementController extends Controller {
         $params = new ChangeElementOwnerParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['change-element-owner']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['change-element-owner']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -118,8 +118,8 @@ class ElementController extends Controller {
         $params = new ElementSelectParams(given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['type-off']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['type-off']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -164,8 +164,8 @@ class ElementController extends Controller {
         $params = new ElementSelectParams(given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['type-on']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['type-on']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -205,8 +205,8 @@ class ElementController extends Controller {
         $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['read-attribute']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['read-attribute']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -317,8 +317,8 @@ class ElementController extends Controller {
         $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['write-attribute']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['write-attribute']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -609,8 +609,8 @@ class ElementController extends Controller {
         $params = new ElementSelectParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\Destroy(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['destroy-elements']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['destroy-elements']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -653,8 +653,8 @@ class ElementController extends Controller {
         $params = new ElementSelectParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\Purge(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['purge-elements']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['purge-elements']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -706,8 +706,8 @@ class ElementController extends Controller {
         $params = new LinkCreateParams(given_element: $element,given_set: $set);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\Link(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['create-link']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['create-link']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -748,9 +748,9 @@ class ElementController extends Controller {
         $params = new ShowElementParams(given_element: $element);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\ShowElement(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['show-element']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['show-element']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -787,9 +787,9 @@ class ElementController extends Controller {
         $params = new ListElementParams(working_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\ListElements(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-elements']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-elements']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -854,8 +854,8 @@ class ElementController extends Controller {
         $params = new SetCreateParams(given_element: $element,namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Element\CreateSet(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['create-set']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['create-set']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }

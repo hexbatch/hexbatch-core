@@ -12,6 +12,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 #[ApiParamMarker( param_class: DesignParams::class)]
@@ -56,15 +57,10 @@ class Create extends Api\DesignApi
         return ['type'=>$this->getGivenType()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['type'])) {
-            $ret['type'] = new TypeResponse(given_type:  $what['type']);
-        }
-
-        return $ret;
+        return new TypeResponse(given_type:  $what['type'],thing: $this->getMyThing());
     }
 
 

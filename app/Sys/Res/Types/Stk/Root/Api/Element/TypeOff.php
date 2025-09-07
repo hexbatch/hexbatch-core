@@ -12,6 +12,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 
@@ -58,12 +59,11 @@ class TypeOff extends Api\ElementApi
         ];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $ret =  $this->getMyData();
-        $what = [];
-        $what['action'] = new ElementActionResponse(given_element: $ret['element'],given_set: $ret['set'],given_type: $ret['type'],given_phase: $ret['phase']);
-        return $what;
+        return new ElementActionResponse(given_element: $ret['element'],given_set: $ret['set'],
+            given_type: $ret['type'],given_phase: $ret['phase'],thing: $this->getMyThing());
     }
 
 

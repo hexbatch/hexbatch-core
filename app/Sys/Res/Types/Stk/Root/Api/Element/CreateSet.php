@@ -11,6 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 
@@ -55,15 +56,10 @@ class CreateSet extends Api\SetApi
         return ['set'=>$this->getGivenSet()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['set'])) {
-            $ret['set'] = new SetResponse(given_set:  $what['set']);
-        }
-
-        return $ret;
+        return new SetResponse(given_set:  $what['set'],thing: $this->getMyThing());
     }
 
 

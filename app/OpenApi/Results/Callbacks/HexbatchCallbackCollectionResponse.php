@@ -2,7 +2,7 @@
 
 namespace App\OpenApi\Results\Callbacks;
 
-use App\OpenApi\Results\ResultDataBase;
+use App\OpenApi\Results\ResultThingBase;
 use Hexbatch\Things\Models\ThingCallback;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 
@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
  * A collection of hooks
  */
 #[OA\Schema(schema: 'HexbatchCallbackCollectionResponse',title: "Callbacks")]
-class HexbatchCallbackCollectionResponse extends ResultDataBase
+class HexbatchCallbackCollectionResponse extends ResultThingBase
 {
 
 

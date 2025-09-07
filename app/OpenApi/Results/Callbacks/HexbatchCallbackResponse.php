@@ -15,7 +15,7 @@ class HexbatchCallbackResponse extends ResultBase
 
     public function __construct(protected ThingCallback $callback)
     {
-
+        parent::__construct(thing: $this->callback->thing_source);
     }
 
 

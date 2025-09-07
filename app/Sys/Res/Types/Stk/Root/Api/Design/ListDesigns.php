@@ -13,6 +13,7 @@ use App\Models\UserNamespace;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
 use App\OpenApi\Results\Types\TypeCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -74,18 +75,17 @@ class ListDesigns extends Api\DesignApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret[static::PRIMARY_SNAPSHOT_KEY] = new TypeCollectionResponse(
+        return new TypeCollectionResponse(
             given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],
             namespace_levels:  $this->params->getNamespaceLevels(),
             parent_levels:  $this->params->getParentLevels(),
             attribute_levels:  $this->params->getAttributeLevels(),
             inherited_attribute_levels:  $this->params->getInheritedAttributeLevels(),
-            number_time_spans:  $this->params->getNumberTimeSpans()
+            number_time_spans:  $this->params->getNumberTimeSpans(),thing: $this->getMyThing()
         );
-        return $ret;
     }
 
 }

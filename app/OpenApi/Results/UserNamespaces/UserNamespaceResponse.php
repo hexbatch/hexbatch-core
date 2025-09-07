@@ -7,6 +7,8 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Set\SetResponse;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -16,11 +18,15 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'UserNamespaceResponse')]
 class UserNamespaceResponse extends ResultBase
 {
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'User namespace uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
     #[OA\Property(title: 'Home set uuid',type: HexbatchUuid::class)]
     public string $home_set_uuid = '';
+
+    #[OA\Property(title: 'Namespace name')]
+    public string $namespace_name = '';
 
     #[OA\Property(title: 'Public element uuid',type: HexbatchUuid::class)]
     public string $public_element_uuid = '';
@@ -43,9 +49,11 @@ class UserNamespaceResponse extends ResultBase
 
 
 
-    public function __construct(protected ?UserNamespace $namespace = null, bool $show_homeset = false)
+    public function __construct(protected ?UserNamespace $namespace = null, bool $show_homeset = false,?Thing $thing = null)
     {
+        parent::__construct(thing: $thing);
         if ($namespace) {
+            $this->namespace_name = $this->namespace->namespace_name;
             $this->uuid = $namespace->ref_uuid;
             $this->base_type_uuid = $namespace->namespace_base_type->ref_uuid;
             $this->private_element_uuid = $namespace->private_element->ref_uuid;
@@ -65,6 +73,7 @@ class UserNamespaceResponse extends ResultBase
     public  function toArray() : array  {
         $ret = parent::toArray();
         $ret['uuid'] = $this->uuid;
+        $ret['namespace_name'] = $this->namespace_name;
         $ret['base_type_uuid'] = $this->base_type_uuid;
         $ret['private_element_uuid'] = $this->private_element_uuid;
         $ret['public_element_uuid'] = $this->public_element_uuid;

@@ -6,7 +6,7 @@ namespace App\OpenApi\Params\Listing\Design;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Listing\ListDataBaseParams;
+use App\OpenApi\Params\Listing\ListThingBaseParams;
 use App\Rules\NamespaceMemberReq;
 use App\Rules\TimeInputReq;
 
@@ -17,7 +17,7 @@ use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ListScheduleParams')]
-class ListScheduleParams extends ListDataBaseParams
+class ListScheduleParams extends ListThingBaseParams
 {
 
     #[OA\Property(title: 'Namespace',description: 'The schedule is in this namespace. Can be uuid or name.')]
@@ -39,6 +39,7 @@ class ListScheduleParams extends ListDataBaseParams
         protected ?UserNamespace     $given_namespace = null
     )
     {
+        parent::__construct();
         $this->namespace_ref = $this->given_namespace?->ref_uuid;
     }
 
@@ -49,7 +50,7 @@ class ListScheduleParams extends ListDataBaseParams
         if (!$this->given_namespace) {
             $this->namespace_ref = static::stringFromCollection(collection: $col,param_name: 'namespace_ref');
             $this->given_namespace = UserNamespace::resolveNamespace(value: $col->get('namespace_ref'));
-            $this->namespace_ref = $this->given_namespace->ref_uuid;
+            $this->namespace_ref = $this->given_namespace?->ref_uuid;
         }
 
 

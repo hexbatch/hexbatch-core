@@ -2,10 +2,10 @@
 
 namespace App\OpenApi\Results;
 
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 
 
-class ResultBase extends  ApiDataBase
+class ResultBase extends  ApiThingBase
 {
 
 }

@@ -8,7 +8,7 @@ use App\Helpers\Utilities;
 use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -19,7 +19,7 @@ use OpenApi\Attributes as OA;
  * bool has_events: A set can choose to turn off events fired when an element enters or leaves it. Cannot be changed later.
  */
 #[OA\Schema(schema: 'SetCreateParams')]
-class SetCreateParams extends ApiDataBase
+class SetCreateParams extends ApiThingBase
 {
 
     #[OA\Property(title: 'Element',description: 'required to create a set. An element can make one set')]
@@ -39,6 +39,7 @@ class SetCreateParams extends ApiDataBase
 
     )
     {
+        parent::__construct();
         $this->element_ref = $this->given_element?->ref_uuid;
         $this->parent_set_ref = $this->given_parent?->ref_uuid;
 

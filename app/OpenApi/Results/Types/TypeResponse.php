@@ -9,6 +9,8 @@ use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -18,6 +20,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'TypeResponse')]
 class TypeResponse extends ResultBase
 {
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Type uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -69,9 +72,10 @@ class TypeResponse extends ResultBase
     public function __construct(
         ElementType $given_type,int $namespace_levels = 0,int $parent_levels = 0,
         int $attribute_levels = 0, int $inherited_attribute_levels = 0,
-        $number_time_spans = 1
+        $number_time_spans = 1,?Thing $thing = null
     )
     {
+        parent::__construct(thing: $thing);
         $this->uuid = $given_type->ref_uuid;
         $this->name = $given_type->getName();
         $this->type_created_at = $given_type->created_at?

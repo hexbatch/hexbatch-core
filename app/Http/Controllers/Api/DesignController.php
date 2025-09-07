@@ -89,8 +89,8 @@ class DesignController extends Controller {
         $params = new DesignOwnershipParams(type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['change-owner']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['change-owner']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -133,8 +133,8 @@ class DesignController extends Controller {
         $params = new DesignOwnershipParams(type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\PromoteOwner(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['promote-owner']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['promote-owner']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -178,8 +178,8 @@ class DesignController extends Controller {
         $params = new TypeParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Purge(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['purge-design']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['purge-design']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -222,8 +222,8 @@ class DesignController extends Controller {
         $params = new TypeParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Destroy(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['destroy-design']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['destroy-design']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -262,8 +262,8 @@ class DesignController extends Controller {
         $params = new DesignParams(namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Create(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['create-design']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['create-design']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -306,8 +306,8 @@ class DesignController extends Controller {
         $params = new DesignParams(edit_type: $type, namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\Edit(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['edit-design']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['edit-design']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -347,9 +347,9 @@ class DesignController extends Controller {
         $params = new ShowDesignParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ShowDesign(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['show-design']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['show-design']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -384,9 +384,9 @@ class DesignController extends Controller {
         $params = new ListDesignParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ListDesigns(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-designs']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-designs']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -429,9 +429,9 @@ class DesignController extends Controller {
         $params = new ShowAttributeParams(given_attribute: $attribute);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ShowAttribute(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['show-attribute']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['show-attribute']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -464,9 +464,9 @@ class DesignController extends Controller {
         $params = new ListAttributeParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ListAttributes(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-attributes']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-attributes']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -512,8 +512,8 @@ class DesignController extends Controller {
         $params = new DesignAttributeDestroyParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\DestroyAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['destroy-attribute']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['destroy-attribute']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -560,8 +560,8 @@ class DesignController extends Controller {
         $params = new DesignAttributeParams(given_type: $type,namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\CreateAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['create-attribute']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['create-attribute']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -609,8 +609,8 @@ class DesignController extends Controller {
         $params = new DesignAttributeParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\EditAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['edit-attribute']);
-        Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['edit-attribute']);
+
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -660,7 +660,7 @@ class DesignController extends Controller {
         $params = new DesignParentParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\AddParent(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['remove-parent']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['remove-parent']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -707,7 +707,7 @@ class DesignController extends Controller {
         $params = new DesignParentParams(given_type: $type);
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\RemoveParent(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['add-parent']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['add-parent']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -750,7 +750,7 @@ class DesignController extends Controller {
         $params = new DesignTimeParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Design\CreateTime(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['create-schedule']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['create-schedule']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -794,7 +794,7 @@ class DesignController extends Controller {
         $params = new DesignTimeParams(given_bound: $bound);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Design\EditTime(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['edit-schedule']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['edit-schedule']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -837,7 +837,7 @@ class DesignController extends Controller {
         $params = new DesignTimeParams(given_bound: $bound);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Design\DestroyTime(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['destroy-schedule']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['destroy-schedule']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -876,7 +876,7 @@ class DesignController extends Controller {
         $params = new DesignLocationParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['create-location']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['create-location']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -918,7 +918,7 @@ class DesignController extends Controller {
         $params = new DesignLocationParams(given_bound: $bound);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['edit-location']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['edit-location']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -961,7 +961,7 @@ class DesignController extends Controller {
         $params = new DesignLocationParams(given_bound: $bound);
         $params->fromCollection(new Collection($request->all()));
         $api = new Root\Api\Design\DestroyLocation(params: $params, is_async: true, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['destroy-location']); Utilities::ignoreVar($thing);
+        $api->createThingTree(tags: ['destroy-location']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
     }
@@ -995,9 +995,9 @@ class DesignController extends Controller {
         $params = new ListLocationParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ListLocations(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-locations']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-locations']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 
@@ -1006,7 +1006,7 @@ class DesignController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/design/list_times',
+        path: '/api/v1/{user_namespace}/design/schedules/list',
         operationId: 'core.design.list_times',
         description: "Lists times",
         summary: 'Lists times  ',
@@ -1030,9 +1030,9 @@ class DesignController extends Controller {
         $params = new ListScheduleParams();
         $params->fromCollection(new Collection($request->all()));
         $api = new Api\Design\ListSchedules(params: $params, is_async: false, tags: ['api-top']);
-        $thing = $api->createThingTree(tags: ['list-schedules']);
-        Utilities::ignoreVar($thing);
-        $data_out = $api->getOwnResponse();
+        $api->createThingTree(tags: ['list-schedules']);
+
+        $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
     }
 

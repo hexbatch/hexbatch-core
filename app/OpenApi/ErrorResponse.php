@@ -5,7 +5,6 @@ namespace App\OpenApi;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
-use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Users\MeResponse;
 use Carbon\Carbon;
 use Hexbatch\Things\Models\ThingCallback;
@@ -19,7 +18,7 @@ use Throwable;
  */
 #[OA\Schema(schema: 'ErrorResponse',title: "Error")]
 
-class ErrorResponse extends ResultBase
+class ErrorResponse extends ApiCollectionBase
 {
     #[OA\Property(  title: 'Type of error ', description: 'Help with the error', format: 'url')]
     protected ?string $type = null;

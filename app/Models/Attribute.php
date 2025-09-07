@@ -294,10 +294,10 @@ class Attribute extends Model implements IAttribute,ISystemModel
         return $ret;
     }
 
-    public static function resolveAttribute(string $value, bool $throw_exception = true)
-    : static
+    public static function resolveAttribute(?string $value, bool $throw_exception = true)
+    : ?static
     {
-
+        if (!$value) {return null;}
         /** @var Builder $build */
         $build = null;
 

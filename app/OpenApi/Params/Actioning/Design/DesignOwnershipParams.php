@@ -9,7 +9,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use App\OpenApi\Common\Resources\HexbatchNamespace;
 use App\OpenApi\Common\Resources\HexbatchResource;
 use Illuminate\Support\Collection;
@@ -19,7 +19,7 @@ use OpenApi\Attributes as OA;
  *
  */
 #[OA\Schema(schema: 'DesignOwnershipParams')]
-class DesignOwnershipParams extends ApiDataBase
+class DesignOwnershipParams extends ApiThingBase
 {
 
 
@@ -38,7 +38,7 @@ class DesignOwnershipParams extends ApiDataBase
         protected ?string $namespace = null
     )
     {
-
+        parent::__construct();
     }
 
 

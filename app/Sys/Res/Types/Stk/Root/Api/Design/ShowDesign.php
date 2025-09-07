@@ -13,6 +13,7 @@ use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 
 use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -61,22 +62,17 @@ class ShowDesign extends Api\DesignApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array |IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $type = $what[static::PRIMARY_SNAPSHOT_KEY]??null;
-        $ret = [];
-        if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new TypeResponse(
-                given_type:  $type,
-                namespace_levels:  $this->params->getNamespaceLevels(),
-                parent_levels:  $this->params->getParentLevels(),
-                attribute_levels:  $this->params->getAttributeLevels(),
-                inherited_attribute_levels:  $this->params->getInheritedAttributeLevels(),
-                number_time_spans:  $this->params->getNumberTimeSpans(),
-            );
-        }
-        return $ret;
+        return new TypeResponse(
+            given_type:  $what[static::PRIMARY_SNAPSHOT_KEY],
+            namespace_levels:  $this->params->getNamespaceLevels(),
+            parent_levels:  $this->params->getParentLevels(),
+            attribute_levels:  $this->params->getAttributeLevels(),
+            inherited_attribute_levels:  $this->params->getInheritedAttributeLevels(),
+            number_time_spans:  $this->params->getNumberTimeSpans(),thing: $this->getMyThing()
+        );
     }
 
 }

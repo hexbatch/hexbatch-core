@@ -12,6 +12,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 
@@ -57,14 +58,11 @@ class WriteAttribute extends Api\ElementApi
             'phase'=>$this->getGivenPhase(),'value'=>$this->getImportantValue(),'attribute'=>$this->getGivenAttribute()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        $ret['write_value'] = new ElementActionResponse(value: $what['value'], given_element: $what['element'],
-            given_set: $what['set'], given_phase: $what['phase']);
-
-        return $ret;
+        return new ElementActionResponse(value: $what['value'], given_element: $what['element'],
+            given_set: $what['set'], given_phase: $what['phase'],thing: $this->getMyThing());
     }
 
 

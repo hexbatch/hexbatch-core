@@ -10,6 +10,7 @@ use App\Models\ActionDatum;
 use App\OpenApi\Params\Listing\Elements\ShowElementParams;
 use App\OpenApi\Results\Elements\ElementResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -55,19 +56,15 @@ class ShowElement extends Api\ElementApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
-        $ret = [];
-        if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new ElementResponse(
-                given_element:  $this->params->getGivenElement(),
-                type_level:  $this->params->getTypeLevel(),
-                attribute_level :  $this->params->getAttributeLevel(),
-                namespace_level:  $this->params->getNamespaceLevel(),
-                phase_level:  $this->params->getPhaseLevel(),
-            );
-        }
-        return $ret;
+        return new ElementResponse(
+            given_element:  $this->params->getGivenElement(),
+            type_level:  $this->params->getTypeLevel(),
+            attribute_level :  $this->params->getAttributeLevel(),
+            namespace_level:  $this->params->getNamespaceLevel(),
+            phase_level:  $this->params->getPhaseLevel(),thing: $this->getMyThing()
+        );
     }
 
 }

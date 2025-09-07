@@ -222,8 +222,9 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return $build;
     }
 
-    public static function resolveNamespace(string $value, bool $throw_exception = true) : ?UserNamespace {
+    public static function resolveNamespace(?string $value, bool $throw_exception = true) : ?UserNamespace {
 
+        if (empty($value)) {return null;}
         /** @var UserNamespace|null $ns */
         $ns = null;
         if (Utilities::is_uuid($value)) {

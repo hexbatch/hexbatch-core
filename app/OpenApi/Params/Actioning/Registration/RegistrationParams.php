@@ -6,7 +6,7 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use App\Rules\UserNameReq;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +21,7 @@ use OpenApi\Attributes as OA;
     example: [new OA\Examples(summary: "Registration Example", value: ["username"=>"will","password"=>"xamp"])]
 )]
 
-class RegistrationParams extends ApiDataBase
+class RegistrationParams extends ApiThingBase
 {
     #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'User Name',
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]

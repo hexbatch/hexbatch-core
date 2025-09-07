@@ -8,6 +8,7 @@ use App\Models\ActionDatum;
 use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -53,18 +54,14 @@ class ShowAttribute extends Api\DesignApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array |IThingBaseResponse
     {
-        $ret = [];
-        if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new AttributeResponse(
-                given_attribute:  $this->params->getGivenAttribute(),
-                attribute_levels:  $this->params->getAttributeLevels(),
-                owning_type_levels :  $this->params->getOwningTypeLevels(),
-                design_levels:  $this->params->getDesignLevels(),
-            );
-        }
-        return $ret;
+        return new AttributeResponse(
+            given_attribute:  $this->params->getGivenAttribute(),
+            attribute_levels:  $this->params->getAttributeLevels(),
+            owning_type_levels :  $this->params->getOwningTypeLevels(),
+            design_levels:  $this->params->getDesignLevels(),thing: $this->getMyThing()
+        );
     }
 
 }

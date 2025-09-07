@@ -4,20 +4,20 @@ namespace App\OpenApi\Params\Listing\Design;
 
 
 use App\Models\ElementType;
-use App\OpenApi\Params\Listing\ListDataBaseParams;
+use App\OpenApi\Params\Listing\ListThingBaseParams;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ShowDesignParams')]
-class ShowDesignParams extends ListDataBaseParams
+class ShowDesignParams extends ListThingBaseParams
 {
 
     public function __construct(
         protected ?ElementType     $given_type = null
     )
     {
-
+        parent::__construct();
     }
 
     #[OA\Property(title: 'Namespace Detail',description: 'Increase to show more namespace information')]

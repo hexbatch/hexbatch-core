@@ -6,7 +6,7 @@ namespace App\OpenApi\Params\Actioning\Element;
 
 use App\Models\Element;
 use App\Models\ElementSet;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -17,7 +17,7 @@ use OpenApi\Attributes as OA;
  * bool has_events: A set can choose to turn off events fired when an element enters or leaves it. Cannot be changed later.
  */
 #[OA\Schema(schema: 'LinkCreateParams')]
-class LinkCreateParams extends ApiDataBase
+class LinkCreateParams extends ApiThingBase
 {
 
     #[OA\Property(title: 'Element',description: 'The anchor to the link')]
@@ -34,6 +34,7 @@ class LinkCreateParams extends ApiDataBase
 
     )
     {
+        parent::__construct();
         $this->element_ref = $this->given_element?->ref_uuid;
         $this->target_set_ref = $this->given_set?->ref_uuid;
     }

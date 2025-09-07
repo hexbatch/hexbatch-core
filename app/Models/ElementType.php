@@ -237,11 +237,11 @@ class ElementType extends Model implements IType,ISystemModel
 
 
     public static function resolveType(
-        string $value, ?string $context_namespace_uuid = null, bool $throw_exception = true
+        ?string $value, ?string $context_namespace_uuid = null, bool $throw_exception = true
     )
     : null|static
     {
-
+        if (!$value) {return null;}
         /** @var Builder $build */
         $build = null;
 

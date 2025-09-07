@@ -4,7 +4,7 @@ namespace App\OpenApi\Params\Actioning\Type;
 
 
 use App\Models\ElementType;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
  *
  */
 #[OA\Schema(schema: 'TypeParams')]
-class TypeParams extends ApiDataBase
+class TypeParams extends ApiThingBase
 {
 
     #[OA\Property(title: 'Type',description: 'The type. Can be uuid or name')]
@@ -21,6 +21,7 @@ class TypeParams extends ApiDataBase
         protected ?ElementType $given_type = null
     )
     {
+        parent::__construct();
        $this->type_uuid = $this->given_type->ref_uuid;
     }
 

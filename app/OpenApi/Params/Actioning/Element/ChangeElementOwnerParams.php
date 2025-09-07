@@ -8,13 +8,13 @@ namespace App\OpenApi\Params\Actioning\Element;
 
 use App\Models\Element;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ChangeElementOwnerParams')]
-class ChangeElementOwnerParams extends ApiDataBase
+class ChangeElementOwnerParams extends ApiThingBase
 {
 
     #[OA\Property(title: 'Namespace',description: 'The new elements are put into this namespace. Can be uuid or name. If missing will be put into calling namespace')]
@@ -33,6 +33,7 @@ class ChangeElementOwnerParams extends ApiDataBase
 
     )
     {
+        parent::__construct();
         $this->namespace_ref = $this->given_namespace?->ref_uuid;
         if (count($this->elements)) {
             foreach ($this->elements as $ele) {
@@ -51,7 +52,7 @@ class ChangeElementOwnerParams extends ApiDataBase
         if (!$this->given_namespace) {
             if ($col->has('namespace_ref') && $col->get('namespace_ref')) {
                 $this->given_namespace = UserNamespace::resolveNamespace(value: $col->get('namespace_ref'));
-                $this->namespace_ref = $this->given_namespace->ref_uuid;
+                $this->namespace_ref = $this->given_namespace?->ref_uuid;
             }
         }
 

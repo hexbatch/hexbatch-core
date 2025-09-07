@@ -11,6 +11,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 #[ApiParamMarker( param_class: AddElementParams::class)]
@@ -56,15 +57,10 @@ class AddElement extends Api\SetApi
         return ['elements'=>$this->getGivenElements()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['elements'])) {
-            $ret['elements'] = new ElementCollectionResponse(given_elements:  $what['elements']);
-        }
-
-        return $ret;
+        return new ElementCollectionResponse(given_elements:  $what['elements'],thing: $this->getMyThing());
     }
 
 

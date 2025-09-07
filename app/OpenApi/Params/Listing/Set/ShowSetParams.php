@@ -4,20 +4,20 @@ namespace App\OpenApi\Params\Listing\Set;
 
 
 use App\Models\ElementSet;
-use App\OpenApi\Params\Listing\ListDataBaseParams;
+use App\OpenApi\Params\Listing\ListThingBaseParams;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ShowSetParams')]
-class ShowSetParams extends ListDataBaseParams
+class ShowSetParams extends ListThingBaseParams
 {
 
     public function __construct(
         protected ?ElementSet $given_set = null
     )
     {
-
+        parent::__construct();
     }
 
     #[OA\Property(title: 'Type Detail',description: 'Increase to show more type information')]

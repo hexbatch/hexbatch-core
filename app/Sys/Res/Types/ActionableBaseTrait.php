@@ -11,6 +11,7 @@ use BlueM\Tree;
 use Carbon\Carbon;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Interfaces\IThingOwner;
 use Hexbatch\Things\Models\Thing;
 use Hexbatch\Things\Models\ThingHook;
@@ -280,7 +281,7 @@ trait ActionableBaseTrait
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         return $this->getMyData();
     }

@@ -10,6 +10,7 @@ use App\OpenApi\Params\Listing\Design\ListScheduleParams;
 use App\OpenApi\Results\Bounds\ScheduleCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -61,14 +62,10 @@ class ListSchedules extends Api\DesignApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new ScheduleCollectionResponse(given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY]);
-        }
-        return $ret;
+        return new ScheduleCollectionResponse(given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],thing: $this->getMyThing());
     }
 
 

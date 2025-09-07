@@ -12,6 +12,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 
@@ -53,15 +54,10 @@ class Link extends Api\ElementApi
         return ['link'=>$this->getGivenLink()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['link'])) {
-            $ret['link'] = new LinkResponse(linker:  $what['link']);
-        }
-
-        return $ret;
+        return new LinkResponse(linker:  $what['link'],thing: $this->getMyThing());
     }
 
 

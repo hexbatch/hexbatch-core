@@ -10,6 +10,8 @@ use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -19,6 +21,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'ElementResponse')]
 class ElementResponse extends ResultBase
 {
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'User namespace uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -54,8 +57,9 @@ class ElementResponse extends ResultBase
 
 
     public function __construct(Element $given_element,?ElementSetMember $member = null
-        ,int $type_level = 0,int $attribute_level = 0,int $namespace_level = 0, int $phase_level = 0)
+        ,int $type_level = 0,int $attribute_level = 0,int $namespace_level = 0, int $phase_level = 0,?Thing $thing = null)
     {
+        parent::__construct(thing: $thing);
         $this->uuid = $given_element->ref_uuid;
 
         /** @uses  Element::element_phase() */

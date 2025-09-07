@@ -8,6 +8,8 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Servers\ServerResponse;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -17,7 +19,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'AccessLevelResponse')]
 class AccessLevelResponse extends ResultBase
 {
-
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Type uuid',type: HexbatchUuid::class)]
     public string $type_uuid = '';
 
@@ -42,9 +44,10 @@ class AccessLevelResponse extends ResultBase
     #[OA\Property(title: 'Type')]
     public ?TypeResponse $type = null;
 
-    public function __construct( ElementTypeServerLevel $given_server_level , int $server_levels = 0,int $type_levels = 0 )
+    public function __construct( ElementTypeServerLevel $given_server_level , int $server_levels = 0,int $type_levels = 0,?Thing $thing = null )
     {
 
+        parent::__construct(thing: $thing);
         $this->access_at = $given_server_level->created_at?
                             Carbon::parse($given_server_level->created_at,'UTC')->timezone(config('app.timezone'))->toIso8601String():null;
 

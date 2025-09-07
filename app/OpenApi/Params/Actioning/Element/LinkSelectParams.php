@@ -6,12 +6,12 @@ namespace App\OpenApi\Params\Actioning\Element;
 
 
 use App\Models\ElementLink;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(schema: 'LinkSelectParams')]
-class LinkSelectParams extends ApiDataBase
+class LinkSelectParams extends ApiThingBase
 {
 
     #[OA\Property(title: 'Link',description: 'The link')]
@@ -23,6 +23,7 @@ class LinkSelectParams extends ApiDataBase
 
     )
     {
+        parent::__construct();
         $this->link_ref = $this->given_link?->ref_uuid;
     }
 

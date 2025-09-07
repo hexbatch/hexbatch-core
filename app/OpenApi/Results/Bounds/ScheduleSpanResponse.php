@@ -5,6 +5,8 @@ namespace App\OpenApi\Results\Bounds;
 use App\Models\TimeBoundSpan;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -14,7 +16,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'ScheduleSpanResponse')]
 class ScheduleSpanResponse extends ResultBase
 {
-
+    use ThingMimimalResponseTrait;
 
     #[OA\Property(title: 'Start at',format: 'date-time')]
     public ?string $start = '';
@@ -28,9 +30,9 @@ class ScheduleSpanResponse extends ResultBase
 
 
 
-    public function __construct(TimeBoundSpan $span)
+    public function __construct(TimeBoundSpan $span,?Thing $thing = null)
     {
-
+        parent::__construct(thing: $thing);
         $this->start = $span->bound_start_ts?
             Carbon::createFromTimestamp($span->bound_start_ts,config('UTC'))->toIso8601String():null;
 

@@ -4,20 +4,20 @@ namespace App\OpenApi\Params\Listing\Elements;
 
 
 use App\Models\Element;
-use App\OpenApi\Params\Listing\ListDataBaseParams;
+use App\OpenApi\Params\Listing\ListThingBaseParams;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ShowElementParams')]
-class ShowElementParams extends ListDataBaseParams
+class ShowElementParams extends ListThingBaseParams
 {
 
     public function __construct(
         protected ?Element $given_element = null
     )
     {
-
+        parent::__construct();
     }
 
     #[OA\Property(title: 'Type Detail',description: 'Increase to show more type information')]

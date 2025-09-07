@@ -8,6 +8,8 @@ use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
 use Hexbatch\Things\Interfaces\ICallResponse;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -17,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
 #[OA\Schema(schema: 'Me')]
 class MeResponse extends ResultBase implements ICallResponse
 {
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'User unique id',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -35,8 +38,9 @@ class MeResponse extends ResultBase implements ICallResponse
 
 
 
-    public function __construct(protected ?User $user = null, bool $show_namespace = false)
+    public function __construct(protected ?User $user = null, bool $show_namespace = false,?Thing $thing = null)
     {
+        parent::__construct(thing: $thing);
         if ($user) {
             $this->uuid = $user->ref_uuid;
             $this->username = $user->username;

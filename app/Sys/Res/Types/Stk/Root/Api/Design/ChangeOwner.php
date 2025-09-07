@@ -7,13 +7,13 @@ use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
 use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
 use App\OpenApi\Results\Types\TypeResponse;
-use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IHookCode;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 
@@ -58,18 +58,10 @@ class ChangeOwner extends Api\DesignApi implements IHookCode
         return ['type'=>$this->getGivenType(),'namespace'=>$this->getGivenNamespace()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['type'])) {
-            $ret['type'] = new TypeResponse(given_type:  $what['type']);
-        }
-        if (isset($what['namespace'])) {
-            $ret['namespace'] = new UserNamespaceResponse(namespace:  $what['type']);
-        }
-
-        return $ret;
+        return new TypeResponse(given_type:  $what['type'],thing: $this->getMyThing());
     }
 
 

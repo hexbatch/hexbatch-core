@@ -5,7 +5,8 @@ namespace App\OpenApi\Results;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
+use Hexbatch\Things\Models\Thing;
 use Illuminate\Contracts\Encryption\EncryptException;
 use Illuminate\Pagination\AbstractCursorPaginator;
 use Illuminate\Pagination\Cursor;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Crypt;
 use OpenApi\Attributes as OA;
 
 
-class ResultDataBase extends ApiDataBase
+class ResultThingBase extends ApiThingBase
 {
 
     #[OA\Property( title: 'Cursor')]
@@ -37,8 +38,9 @@ class ResultDataBase extends ApiDataBase
 
     }
 
-    public function __construct($list)
+    public function __construct($list,?Thing $thing = null)
     {
+        parent::__construct(thing: $thing);
         $this->setCursor($list);
     }
 

@@ -12,6 +12,7 @@ use App\OpenApi\Params\Listing\Design\ListAttributeParams;
 use App\OpenApi\Results\Attributes\AttributeCollectionResponse;
 
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -73,16 +74,16 @@ class ListAttributes extends Api\DesignApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret[static::PRIMARY_SNAPSHOT_KEY] = new AttributeCollectionResponse(
+        return new AttributeCollectionResponse(
             given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],
             attribute_levels:  $this->params->getAttributeLevels(),
             owning_type_levels:  $this->params->getOwningTypeLevels(),
             design_levels:  $this->params->getDesignLevels(),
+            thing: $this->getMyThing()
         );
-        return $ret;
     }
 
 }

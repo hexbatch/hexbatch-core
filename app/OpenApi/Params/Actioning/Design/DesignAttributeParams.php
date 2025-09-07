@@ -10,7 +10,7 @@ use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -32,7 +32,7 @@ use OpenApi\Attributes as OA;
  *  unset_parent : when editing an existing attribute and want to remove the parent
  */
 #[OA\Schema(schema: 'DesignAttributeParams')]
-class DesignAttributeParams extends ApiDataBase
+class DesignAttributeParams extends ApiThingBase
 {
 
     protected ?string $uuid = null;
@@ -86,6 +86,7 @@ class DesignAttributeParams extends ApiDataBase
 
     )
     {
+        parent::__construct();
         $this->type_uuid = $this->given_type?->ref_uuid;
        $this->uuid = $this->given_attribute?->ref_uuid;
        $this->design_uuid = $this->given_design?->ref_uuid;

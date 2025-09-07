@@ -12,6 +12,7 @@ use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 
 #[ApiParamMarker( param_class: DesignLocationParams::class)]
@@ -52,15 +53,10 @@ class CreateLocation extends Api\DesignApi
         return ['bound'=>$this->getGivenLocationBound()];
     }
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['bound'])) {
-            $ret['bound'] = new LocationResponse(given_location:  $what['bound']);
-        }
-
-        return $ret;
+        return new LocationResponse(given_location:  $what['bound'],thing: $this->getMyThing());
     }
 
 

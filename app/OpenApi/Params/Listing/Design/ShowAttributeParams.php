@@ -4,20 +4,20 @@ namespace App\OpenApi\Params\Listing\Design;
 
 
 use App\Models\Attribute;
-use App\OpenApi\Params\Listing\ListDataBaseParams;
+use App\OpenApi\Params\Listing\ListThingBaseParams;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ShowAttributeParams')]
-class ShowAttributeParams extends ListDataBaseParams
+class ShowAttributeParams extends ListThingBaseParams
 {
 
     public function __construct(
         protected ?Attribute $given_attribute = null
     )
     {
-
+        parent::__construct();
     }
 
 

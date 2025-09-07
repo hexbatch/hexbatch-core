@@ -130,8 +130,8 @@ class AuthenticationController extends Controller
             $params = new RegistrationParams();
             $params->fromCollection(new Collection($request->all()));
             $api = new Api\User\UserRegister(is_async: false, params: $params, tags: [ 'api-top']);
-            $thing = $api->createThingTree(tags: ['registration']);
-            Utilities::ignoreVar($thing);
+            $api->createThingTree(tags: ['registration']);
+
             $data_out = $api->getCallbackResponse($http_code);
             if ($http_code > 299) {throw new HexbatchCodeRollbackException("Registration Failed");}
             $what =  response()->json(['response' => $data_out], $http_code);

@@ -10,12 +10,12 @@ use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\Phase;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(schema: 'ElementSelectParams')]
-class ElementSelectParams extends ApiDataBase
+class ElementSelectParams extends ApiThingBase
 {
 
     #[OA\Property(title: 'Elements',description: 'The elements to select. ')]
@@ -46,6 +46,7 @@ class ElementSelectParams extends ApiDataBase
 
     )
     {
+        parent::__construct();
         $this->phase_ref = $this->given_phase?->ref_uuid;
         $this->type_ref = $this->given_type?->ref_uuid;
         $this->set_ref = $this->given_set?->ref_uuid;

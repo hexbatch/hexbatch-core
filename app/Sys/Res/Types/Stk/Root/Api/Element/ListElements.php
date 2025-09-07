@@ -10,6 +10,7 @@ use App\Models\Element;
 use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Results\Elements\ElementCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -77,17 +78,16 @@ class ListElements extends Api\ElementApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret[static::PRIMARY_SNAPSHOT_KEY] = new ElementCollectionResponse(
+        return  new ElementCollectionResponse(
             given_elements:  $what[static::PRIMARY_SNAPSHOT_KEY],
             type_level: $this->params->getTypeLevel(),
             attribute_level: $this->params->getAttributeLevel(),
             namespace_level: $this->params->getNamespaceLevel(),
-            phase_level: $this->params->getPhaseLevel()
+            phase_level: $this->params->getPhaseLevel(),thing: $this->getMyThing()
         );
-        return $ret;
     }
 
 }

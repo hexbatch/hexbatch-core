@@ -7,7 +7,7 @@ namespace App\OpenApi\Params\Actioning\Type;
 use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiDataBase;
+use App\OpenApi\ApiThingBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -19,7 +19,7 @@ use OpenApi\Attributes as OA;
 
  */
 #[OA\Schema(schema: 'CreateElementParams')]
-class CreateElementParams extends ApiDataBase
+class CreateElementParams extends ApiThingBase
 {
 
     #[OA\Property(title: 'Type',description: 'The element is made from this type. Can be uuid or name')]
@@ -45,6 +45,7 @@ class CreateElementParams extends ApiDataBase
 
     )
     {
+        parent::__construct();
         $this->type_ref = $this->given_type?->ref_uuid;
         $this->phase_ref = $this->given_phase?->ref_uuid;
         $this->namespace_ref = $this->given_namespace?->ref_uuid;
@@ -75,11 +76,10 @@ class CreateElementParams extends ApiDataBase
             }
         }
 
-        if (!($this->given_phase || $this->calling_namespace)) {
-            if ($col->has('namespace_ref') && $col->get('namespace_ref')) {
-                $this->given_namespace = UserNamespace::resolveNamespace(value: $col->get('namespace_ref'));
-                $this->namespace_ref = $this->given_namespace->ref_uuid;
-            }
+        if (!($this->calling_namespace)) {
+            $this->namespace_ref = static::stringFromCollection(collection: $col,param_name: 'namespace_ref');
+            $this->given_namespace = UserNamespace::resolveNamespace(value: $this->namespace_ref);
+            $this->namespace_ref = $this->given_namespace?->ref_uuid;
         }
 
 

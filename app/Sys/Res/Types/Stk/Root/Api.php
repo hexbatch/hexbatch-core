@@ -6,6 +6,7 @@ namespace App\Sys\Res\Types\Stk\Root;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
+use App\OpenApi\ApiThingBase;
 use App\OpenApi\ErrorResponse;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackResponse;
@@ -137,13 +138,20 @@ class Api extends BaseType implements ICallResponse
         if (!$owner) {
             $owner = Utilities::getSystemNamespace();
         }
-        return Thing::buildFromAction(action: $this,owner: $owner,extra_tags: $tags );
+        $this->my_thing =  Thing::buildFromAction(action: $this,owner: $owner,extra_tags: $tags );
+        return $this->my_thing;
     }
 
+    protected ?Thing $my_thing = null;
+    protected function getMyThing() :?Thing {
+        if ($this->my_thing) {return $this->my_thing;}
+        $this->my_thing =   Thing::getThing(action_type_id: $this->getActionId(), action_type: $this->getActionType());
+        return $this->my_thing;
+    }
 
     public function getCallbackResponse(?int &$http_status = null)
     : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse|ThingResponse|
-    ErrorResponse|ThingErrorCollectionResponse
+    ErrorResponse|ThingErrorCollectionResponse|ApiThingBase
     {
         if (!$this->getActionData()) {return null;}
         $search_params = new CallbackSearchParams(
@@ -159,10 +167,10 @@ class Api extends BaseType implements ICallResponse
             //find the thing tied to this api
 
             try {
-                $thing = Thing::getThing(action_type_id: $this->getActionId(), action_type: $this->getActionType());
+                $thing = $this->getMyThing();
                 if ($thing->isSuccess()) {
                     $http_status = static::HTTP_CODE_GOOD;
-                    return new ThingResponse(thing: $thing);
+                    return $this->getDataSnapshot();
                 }
                 else if($thing->isError()) {
                     $http_status = static::HTTP_CODE_ERROR;
@@ -187,7 +195,8 @@ class Api extends BaseType implements ICallResponse
                 return new ThingErrorResponse(error: $maybe_callbacks[0]->callback_error);
             }
             if ($maybe_callbacks[0]->thing_callback_status === TypeOfCallbackStatus::CALLBACK_SUCCESSFUL) {
-                return $maybe_callbacks[0]->callback_incoming_data->getArrayCopy();
+                $http_status = static::HTTP_CODE_GOOD;
+                return $this->getDataSnapshot();
             }
             return new HexbatchCallbackResponse(callback: $maybe_callbacks[0]);
 
@@ -289,9 +298,5 @@ class Api extends BaseType implements ICallResponse
 
     const PRIMARY_SNAPSHOT_KEY = 'override_me';
 
-    public function getOwnResponse() :mixed {
-        $data = $this->getDataSnapshot();
-        return $data[static::PRIMARY_SNAPSHOT_KEY]??null;
-    }
 }
 

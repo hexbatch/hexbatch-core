@@ -10,6 +10,7 @@ use App\OpenApi\Params\Listing\Design\ListLocationParams;
 use App\OpenApi\Results\Bounds\LocationCollectionResponse;
 
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
@@ -59,14 +60,10 @@ class ListLocations extends Api\DesignApi
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what[static::PRIMARY_SNAPSHOT_KEY])) {
-            $ret[static::PRIMARY_SNAPSHOT_KEY] = new LocationCollectionResponse(given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY]);
-        }
-        return $ret;
+        return new LocationCollectionResponse(given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],thing: $this->getMyThing());
     }
 
 }

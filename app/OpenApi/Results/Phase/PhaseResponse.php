@@ -7,6 +7,8 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -16,6 +18,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'PhaseResponse')]
 class PhaseResponse extends ResultBase
 {
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Phase uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -43,8 +46,9 @@ class PhaseResponse extends ResultBase
 
 
 
-    public function __construct(Phase $given_phase,int $type_level = 0,int $attribute_level = 0,int $phase_level = 0)
+    public function __construct(Phase $given_phase,int $type_level = 0,int $attribute_level = 0,int $phase_level = 0,?Thing $thing = null)
     {
+        parent::__construct(thing: $thing);
         $this->uuid = $given_phase->ref_uuid;
         if ($type_level > 0 ) {
             /** @uses Phase::phase_type()  */

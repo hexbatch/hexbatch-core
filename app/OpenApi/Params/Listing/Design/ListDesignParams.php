@@ -37,7 +37,7 @@ class ListDesignParams extends ShowDesignParams
         if (!$this->given_namespace) {
             $this->namespace_ref = static::stringFromCollection(collection: $col,param_name: 'namespace_ref');
             $this->given_namespace = UserNamespace::resolveNamespace(value: $this->namespace_ref);
-            $this->namespace_ref = $this->given_namespace->ref_uuid;
+            $this->namespace_ref = $this->given_namespace?->ref_uuid;
         }
 
 

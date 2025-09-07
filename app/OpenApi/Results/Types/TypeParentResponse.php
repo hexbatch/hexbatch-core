@@ -6,6 +6,8 @@ use App\Enums\Types\TypeOfApproval;
 use App\Models\ElementTypeParent;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;
+use Hexbatch\Things\Models\Thing;
+use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -16,7 +18,7 @@ use OpenApi\Attributes as OA;
 class TypeParentResponse extends ResultBase
 {
 
-
+    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Parent type')]
     public TypeResponse $parent ;
 
@@ -33,9 +35,9 @@ class TypeParentResponse extends ResultBase
 
 
     public function __construct( ElementTypeParent $given_parent , int $namespace_levels = 0,int $parent_levels = 0,
-                                 int $attribute_levels = 0, int $inherited_attribute_levels = 0 )
+                                 int $attribute_levels = 0, int $inherited_attribute_levels = 0,?Thing $thing = null )
     {
-
+        parent::__construct(thing: $thing);
         $this->parent_at = $given_parent->created_at?
                             Carbon::parse($given_parent->created_at,'UTC')->timezone(config('app.timezone'))->toIso8601String():null;
 
