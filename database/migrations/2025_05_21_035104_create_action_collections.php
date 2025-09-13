@@ -122,6 +122,15 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
+            $table->foreignId('collection_link_id')
+                ->nullable()
+                ->default(null)
+                ->comment("Collection has a link")
+                ->index()
+                ->constrained('element_links')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
             $table->integer('collection_partition_flag')->nullable(false)->default(0)
                 ->comment("When need to do sub collections for the same type");
         });

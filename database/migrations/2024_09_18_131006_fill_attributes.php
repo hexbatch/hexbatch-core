@@ -48,11 +48,11 @@ return new class extends Migration
 
 
 
-            $table->foreignId('attribute_location_shape_bound_id')
+            $table->foreignId('attribute_shape_id')
                 ->nullable()
                 ->default(null)
                 ->comment("The value points to a location shape bounds")
-                ->index('idx_attribute_location_shape_bound_id')
+                ->index()
                 ->constrained('location_bounds')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
@@ -64,9 +64,6 @@ return new class extends Migration
                 ->comment("used for display and id outside the code");
 
 
-            $table->boolean('is_seen_in_child_elements')->default(true)->nullable(false)
-                ->comment('if false then child types do not inherit this attribute, and their elements do not contain the attribute');
-
 
             $table->boolean('is_system')->default(false)->nullable(false)
                 ->index()
@@ -77,6 +74,7 @@ return new class extends Migration
             $table->boolean('is_final_attribute')->default(false)->nullable(false)
                 ->comment('if true then cannot be used as a parent');
 
+
             $table->boolean('is_abstract')->default(false)->nullable(false)
                 ->comment('if true then child must have attribute that inherits from this');
 
@@ -85,9 +83,6 @@ return new class extends Migration
 
         });
 
-        DB::statement("ALTER TABLE attributes Add COLUMN live_merge_method type_of_merge_logic NOT NULL default 'union';");
-        DB::statement("ALTER TABLE attributes Add COLUMN reentry_merge_method type_of_merge_logic NOT NULL default 'union';");
-        DB::statement("ALTER TABLE attributes Add COLUMN popped_writing_method type_of_merge_logic NOT NULL default 'union';");
 
 
         DB::statement('ALTER TABLE attributes ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
@@ -101,6 +96,7 @@ return new class extends Migration
         DB::statement("CREATE TYPE type_of_server_access AS ENUM (
             'is_private',
             'is_public',
+            'is_public_domain',
             'is_protected'
             );");
 
@@ -108,16 +104,15 @@ return new class extends Migration
 
 
 
+        DB::statement("CREATE TYPE type_of_element_value_policy AS ENUM (
+            'static',        -- same across the server for all elements that use it
+            'per_element',   -- can have different values in each element that uses it
+            'per_set_chain', -- can have different values for each element's membership in each grouping of sets
+            'per_set'        -- can have different values for each element's membership in each set
 
-
-        DB::statement("CREATE TYPE type_of_set_value_policy AS ENUM (
-            'static',
-            'per_child', -- only different when put into a child set
-            'per_set', -- only different in top level sets, same in children
-            'per_all'  -- always different in each set
             );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN set_value_policy type_of_set_value_policy NOT NULL default 'static';");
+        DB::statement("ALTER TABLE attributes Add COLUMN value_policy type_of_element_value_policy NOT NULL default 'static';");
 
 
         DB::statement("CREATE TYPE type_of_approval AS ENUM (
@@ -137,8 +132,15 @@ return new class extends Migration
 
             $table->timestamps();
 
-            $table->text('value_json_path')->nullable()->default(null)
-                ->comment("if set the value json has to match this");
+            $table->rawColumn('read_json_path','jsonpath')->nullable()->default(null)
+                ->comment("if set the value given is filtered by this");
+
+            $table->rawColumn('validate_json_path','jsonpath')->nullable()->default(null)
+                ->comment("if set the value has to match this before being written");
+
+            $table->jsonb('attribute_default_value')
+                ->nullable()->default(null)
+                ->comment("value given to new elements");
 
             $table->string('attribute_name',128)->nullable()->index()
                 ->comment("The unique name of the attribute, using the naming rules");
@@ -165,32 +167,30 @@ return new class extends Migration
             $table->dropForeign(['parent_attribute_id']);
             $table->dropForeign(['design_attribute_id']);
             $table->dropForeign(['owner_element_type_id']);
-            $table->dropForeign(['attribute_location_shape_bound_id']);
+            $table->dropForeign(['attribute_shape_id']);
 
             $table->dropColumn('parent_attribute_id');
             $table->dropColumn('design_attribute_id');
             $table->dropColumn('owner_element_type_id');
-            $table->dropColumn('attribute_location_shape_bound_id');
+            $table->dropColumn('attribute_shape_id');
             $table->dropColumn('ref_uuid');
             $table->dropColumn('is_final_attribute');
             $table->dropColumn('is_abstract');
             $table->dropColumn('is_system');
-            $table->dropColumn('is_seen_in_child_elements');
-            $table->dropColumn('value_json_path');
+            $table->dropColumn('read_json_path');
+            $table->dropColumn('validate_json_path');
+            $table->dropColumn('attribute_default_value');
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
             $table->dropColumn('server_access_type');
-            $table->dropColumn('popped_writing_method');
-            $table->dropColumn('reentry_merge_method');
-            $table->dropColumn('live_merge_method');
-            $table->dropColumn('set_value_policy');
+            $table->dropColumn('value_policy');
             $table->dropColumn('attribute_approval');
 
         });
 
         DB::statement("DROP TYPE type_of_server_access;");
-        DB::statement("DROP TYPE type_of_set_value_policy;");
+        DB::statement("DROP TYPE type_of_element_value_policy;");
         DB::statement("DROP TYPE type_of_approval;");
 
     }

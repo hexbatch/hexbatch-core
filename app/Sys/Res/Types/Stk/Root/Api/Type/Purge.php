@@ -17,7 +17,6 @@ class Purge extends Api\TypeApi
 
     const PARENT_CLASSES = [
         Api\TypeApi::class,
-        Act\Cmd\Pa\Search::class,
         Act\Cmd\Ty\TypePurge::class
     ];
 

@@ -8,8 +8,8 @@ use App\Models\Element;
 use App\Models\Phase;
 
 use App\Models\UserNamespace;
+use App\OpenApi\Results\Elements\ElementResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -55,31 +55,26 @@ class ElementEdit extends Act\Cmd\Ele
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
-
-
 
 
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
 
         if (!$this->getEditedElement()) {
             throw new \InvalidArgumentException("Need element before can edit");
         }
+        $this->checkIfAdmin($this->getEditedElement()->element_namespace);
 
         try {
             DB::beginTransaction();
@@ -87,12 +82,9 @@ class ElementEdit extends Act\Cmd\Ele
                 $this->getEditedElement()->element_phase_id = $this->getChangedPhase();
             }
 
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
@@ -100,17 +92,26 @@ class ElementEdit extends Act\Cmd\Ele
 
 
 
+
     protected function getMyData() :array {
         return ['element'=>$this->getEditedElement(),'changed_phase'=>$this->getChangedPhase()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $ret = [];
+        $what =  $this->getMyData();
+        if (isset($what['element'])) {
+            $ret['element'] = new ElementResponse(given_element:  $what['element']);
+        }
+        return $ret;
     }
 
 
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_element_uuid) {
-            $this->action_data->data_element_id = Element::getThisElement(uuid: $this->given_element_uuid)->id;
-        }
+        $this->setGivenElement($this->given_element_uuid);
 
         if ($this->change_phase_uuid) {
             $this->action_data->data_phase_id = Phase::getThisPhase(uuid: $this->change_phase_uuid)->id;

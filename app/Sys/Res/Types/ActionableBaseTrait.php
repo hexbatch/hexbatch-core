@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Types;
 
 
+use App\Exceptions\HexbatchCoreException;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
 use App\Sys\Collections\SystemTypes;
@@ -10,10 +11,12 @@ use BlueM\Tree;
 use Carbon\Carbon;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Interfaces\IThingOwner;
 use Hexbatch\Things\Models\Thing;
 use Hexbatch\Things\Models\ThingHook;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 trait ActionableBaseTrait
 {
@@ -65,7 +68,6 @@ trait ActionableBaseTrait
             $async_flag = $this->is_async;
         }
         $this->action_data = new ActionDatum();
-        $this->action_data->data_priority = $this->priority;
         $this->action_data->is_async = $async_flag;
         $this->action_data->data_tags = $this->tags;
         $this->action_data->is_system_privilege = $this->is_system;
@@ -84,9 +86,12 @@ trait ActionableBaseTrait
         return $this->action_data;
     }
 
+
     protected function setActionStatus(TypeOfThingStatus $status) {
         $this->action_data->action_status = $status;
         $this->action_data->save();
+        $this->action_data->refresh();
+        $this->wakeLinkedThings();
     }
 
     protected function getActionStatus() : TypeOfThingStatus { return $this->action_data->action_status;}
@@ -140,10 +145,10 @@ trait ActionableBaseTrait
         return static::UUID;
     }
 
-    public function getActionPriority(): int
-    {
-        return $this->priority;
+    public function getActionName() : ?string {
+        return static::getHexbatchClassName();
     }
+
 
     public function getActionType(): string
     {
@@ -189,20 +194,55 @@ trait ActionableBaseTrait
         return  Thing::buildThing(action_type_id: $this->getActionId(), action_type: $this->getActionType())->get();
     }
 
-    /**
-     * @throws \Exception
-     */
     public function wakeLinkedThings() : void
     {
         foreach ($this->getLinkedThings() as $thung) {
-            $thung->continueThing();
+            try {
+                $thung->continueThing();
+            } catch (\Exception $e) {
+                throw new \RuntimeException(message:"Could not wake thing ". $thung->ref_uuid, code: $e->getCode(),previous: $e);
+            }
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function runAction(array $data = []): void {
-        $this->restoreData($data);
+        try {
+            $this->restoreData($data);
+        } catch (\Exception $e) {
+            Log::warning("could not restore data in ".static::class. " : ".$e->getMessage());
+            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
+            throw $e;
+        }
+
+        if ($this->isActionComplete()) {
+            return;
+        }
+
+        try {
+            $this->runActionInner(data: $data);
+            if ($this->getActionStatus() === TypeOfThingStatus::THING_PENDING ) {
+                //only set if not already changed from default
+                $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
+            }
+
+
+        }  catch (HexbatchCoreException $e) {
+            $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            throw $e;
+        }
+        catch (\Exception $e) {
+            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
+            throw $e;
+        }
+
+        $this->postActionInner(data: $data);
 
     }
+
+
 
 
 
@@ -223,7 +263,6 @@ trait ActionableBaseTrait
             $this->is_system = $this->action_data->is_system_privilege;
             $this->is_async = $this->action_data->is_async;
             $this->send_event = $this->action_data->is_sending_events;
-            $this->priority = $this->action_data->data_priority  ;
             $this->tags = $this->action_data->data_tags->getArrayCopy()??[] ;
         }
 
@@ -234,7 +273,7 @@ trait ActionableBaseTrait
         $this->restoreCollectionKeys();
     }
 
-    protected function getMyData() :array { return []; }
+
 
     public function getActionResult(): array
     {
@@ -242,7 +281,7 @@ trait ActionableBaseTrait
     }
 
 
-    public function getDataSnapshot(): array
+    public function getDataSnapshot(): array|IThingBaseResponse
     {
         return $this->getMyData();
     }
@@ -282,7 +321,7 @@ trait ActionableBaseTrait
 
 
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = [];
         foreach (static::ACTIVE_DATA_KEYS as $key) {
             $ret[$key] = $this->$key;
@@ -300,7 +339,10 @@ trait ActionableBaseTrait
     }
 
     public function getMoreSiblingActions(): array {
-        return $this->post_events_to_send;
+        if ($this->isActionSuccess()) {
+            return $this->post_events_to_send;
+        }
+        return [];
     }
 
     public function addDataBeforeRun(array $data): void

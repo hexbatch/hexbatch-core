@@ -5,7 +5,6 @@ namespace App\Models;
 
 use ArrayObject;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Models\Thing;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +33,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int data_namespace_id
  * @property int data_path_id
  * @property int data_phase_id
+ * @property int data_link_id
+ * @property int data_time_bound_id
+ * @property int data_location_bound_id
  * @property int data_second_phase_id
  * @property int data_user_id
  * @property int data_server_id
@@ -41,7 +43,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property bool is_system_privilege
  * @property bool is_sending_events
  * @property bool is_async
- * @property int data_priority
  * @property int action_wait_timeout_seconds
  * @property string ref_uuid
  * @property TypeOfThingStatus action_status
@@ -133,6 +134,18 @@ class ActionDatum extends Model
         return $this->belongsTo(Phase::class,'data_phase_id','id');
     }
 
+    public function data_link() : BelongsTo {
+        return $this->belongsTo(ElementLink::class,'data_link_id','id');
+    }
+
+    public function data_location_bound() : BelongsTo {
+        return $this->belongsTo(LocationBound::class,'data_location_bound_id','id');
+    }
+
+    public function data_time_bound() : BelongsTo {
+        return $this->belongsTo(TimeBound::class,'data_time_bound_id','id');
+    }
+
     public function data_second_phase() : BelongsTo {
         return $this->belongsTo(Phase::class,'data_second_phase_id','id');
     }
@@ -179,7 +192,6 @@ class ActionDatum extends Model
     protected $casts = [
         'is_sending_events' => 'boolean',
         'is_system_privilege' => 'boolean',
-        'data_priority' => 'integer',
         'action_wait_timeout_seconds' => 'integer',
         'collection_data' => AsArrayObject::class,
         'data_tags' => AsArrayObject::class,

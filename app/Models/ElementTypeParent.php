@@ -87,8 +87,8 @@ class ElementTypeParent extends Model
     /**
      * @throws \Exception
      */
-    public static function addParent(ElementType $parent, ElementType $child,TypeOfApproval $init_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL
-        ,bool $check_parent_published = true)
+    public static function addOrUpdateParent(ElementType $parent, ElementType $child, TypeOfApproval $approval = TypeOfApproval::PENDING_DESIGN_APPROVAL
+        , bool                                           $check_parent_published = true)
     :ElementTypeParent
     {
 
@@ -97,14 +97,14 @@ class ElementTypeParent extends Model
         try {
             DB::beginTransaction();
             if ( $parent->is_final_type) {
-                throw new HexbatchNotPossibleException(__('msg.parent_type_is_not_inheritable'),
+                throw new HexbatchNotPossibleException(__('msg.parent_type_is_not_inheritable',['ref'=>$parent->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::TYPE_CANNOT_INHERIT);
             }
 
             if ($check_parent_published) {
                 if ($parent->lifecycle !== TypeOfLifecycle::PUBLISHED) {
-                    throw new HexbatchNotPossibleException(__('msg.parent_type_must_be_published'),
+                    throw new HexbatchNotPossibleException(__('msg.parent_type_must_be_published',['ref'=>$parent->getName()]),
                         \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                         RefCodes::TYPE_CANNOT_INHERIT);
                 }
@@ -123,7 +123,7 @@ class ElementTypeParent extends Model
             $par->upsert([
                 'child_type_id' => $child->id,
                 'parent_type_id' => $parent->id,
-                'parent_type_approval' => $init_approval,
+                'parent_type_approval' => $approval,
                 'parent_rank' => $current_step + 1,
             ], ['parent_type_id', 'child_type_id']);
 
@@ -143,7 +143,8 @@ class ElementTypeParent extends Model
         ?int    $me_id = null,
         ?string $uuid = null,
         ?int $child_type_id = null,
-        ?int $parent_type_id = null
+        ?int $parent_type_id = null,
+        array $parent_ids = []
 
     ): Builder
     {
@@ -170,6 +171,10 @@ class ElementTypeParent extends Model
 
         if ($parent_type_id) {
             $build->where('element_type_parents.parent_type_id', $parent_type_id);
+        }
+
+        if (count($parent_ids)) {
+            $build->whereIn('element_type_parents.parent_type_id', $parent_ids);
         }
 
 

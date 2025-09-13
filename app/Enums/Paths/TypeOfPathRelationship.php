@@ -1,10 +1,10 @@
 <?php
 namespace App\Enums\Paths;
 
-
 /**
  * postgres enum type_of_path_relationship
  */
+
 enum TypeOfPathRelationship : string {
     case NO_RELATIONSHIP = 'no_relationship';
 

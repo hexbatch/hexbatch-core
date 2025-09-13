@@ -4,8 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Enums\Types\TypeOfApproval;
-use App\Models\ElementSet;
-use App\Models\ElementType;
+use App\Models\Attribute;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 
@@ -25,14 +24,13 @@ class TypePublished extends Evt\ScopeServer
     ];
 
 
-    public function getAskedAboutType(): ?ElementType
-    {
-        return $this->action_data?->data_type;
-    }
 
-    public function getParentType(): ?ElementType
+
+
+
+    public function getParentAttribute(): ?Attribute
     {
-        return $this->action_data?->second_second_type;
+        return $this->action_data?->data_attribute;
     }
 
     public function getApprovalStatus(): TypeOfApproval

@@ -30,5 +30,6 @@ class Content extends BaseType
         Root::class
     ];
 
+
 }
 

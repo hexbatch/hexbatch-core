@@ -3,6 +3,8 @@
 namespace App\Models;
 
 
+use App\Exceptions\HexbatchNotFound;
+use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -84,6 +86,25 @@ class ElementSetMember extends Model
         $build->with('of_element');
 
         return $build;
+    }
+
+    public static function getMember(
+        ElementSet $set,
+        Element $element,
+    )
+    : ElementSetMember
+    {
+        /** @var ?ElementSetMember $ret */
+        $ret = static::buildSetMember(set_id:$set->id,element_id: $element->id)->first();
+
+        if (!$ret) {
+            throw new HexbatchNotFound(
+                __('msg.set_does_not_have_element',['ref'=>$set->getName(),'ele'=>$element->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::ELEMENT_NOT_IN_SET
+            );
+        }
+        return $ret;
     }
 
 }

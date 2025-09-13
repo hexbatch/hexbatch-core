@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string access_token_expires_at
  *
  * @property UserNamespace owning_namespace
+ * @property ElementType server_type
  *
  *  @property string created_at
  *  @property string updated_at
@@ -109,12 +110,18 @@ class Server extends Model implements IServer,ISystemModel
         return $this->belongsTo(UserNamespace::class,'owning_namespace_id');
     }
 
+    public function server_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'server_type_id');
+    }
+
 
     public static function buildServer(
         ?int            $me_id = null,
         ?int            $type_id = null,
         ?string         $uuid = null,
-        ?bool           $is_system = null
+        ?bool           $is_system = null,
+        ?string           $server_name = null,
+        ?string           $server_domain = null
     )
     : Builder
     {
@@ -136,6 +143,14 @@ class Server extends Model implements IServer,ISystemModel
             $build->where('servers.ref_uuid', $uuid);
         }
 
+        if ($server_name) {
+            $build->where('servers.server_name', $server_name);
+        }
+
+        if ($server_domain) {
+            $build->where('servers.server_domain', $server_domain);
+        }
+
         if ($is_system !== null) {
             $build->where('is_system',$is_system);
         }
@@ -148,6 +163,31 @@ class Server extends Model implements IServer,ISystemModel
         return $build;
     }
 
+    public static function resolveServer(string $value, bool $throw_exception = true) : ?Server {
+        $build = null;
+        if (Utilities::is_uuid($value)) {
+            $build = static::buildServer(uuid: $value);
+        } else {
+            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+
+            if (count($parts) === 1) {
+                //by name
+                $domain = mb_strtolower($parts[0]);
+                $build = static::buildServer(server_domain: $domain);
+
+            }
+        }
+        $server = $build?->first();
+        if (empty($server) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.server_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SERVER_NOT_FOUND
+            );
+        }
+
+        return $server;
+    }
     /**
      * Retrieve the model for a bound value.
      *
@@ -157,42 +197,7 @@ class Server extends Model implements IServer,ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    $build = $this->where('ref_uuid', $value);
-                } else {
-                    if (is_string($value)) {
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
-                        if (count($parts) === 1) {
-                            $s_name = $parts[0];
-                            $build = $this->where('server_name', $s_name);
-                        }
-                    }
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = Server::buildServer(me_id:$first_id)->first();
-                }
-            }
-        } finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.server_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::SERVER_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
-
+        return static::resolveServer($value);
     }
 
     public static function getThisServer(
@@ -210,7 +215,11 @@ class Server extends Model implements IServer,ISystemModel
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             if ($type_id) { $arg_types[] = 'type_id'; $arg_vals[] = $type_id;}
             $arg_val = implode('|',$arg_vals); $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find server via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.server_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SERVER_NOT_FOUND
+            );
         }
         return $ret;
     }
@@ -231,12 +240,15 @@ class Server extends Model implements IServer,ISystemModel
         return $this->ref_uuid;
     }
 
+    protected static ?Server $default_server = null;
     public static function getDefaultServer(bool $b_throw_on_missing = true) : ?Server {
+        if (static::$default_server) { return static::$default_server;}
+
         $server = Server::buildServer(is_system: true)->first();
         if (!$server && $b_throw_on_missing) {
             throw new \LogicException("No system server made");
         }
-        return $server;
+        return static::$default_server = $server;
     }
 
 

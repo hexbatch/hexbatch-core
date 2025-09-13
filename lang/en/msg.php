@@ -19,18 +19,24 @@ return [
     'invalid_enum_type' => 'Invalid type of enum: was given :ref',
     'invalid_uuid' => 'Invalid uuid: was given :ref',
     'invalid_time' => 'Invalid time: was given :ref',
+    'invalid_time_with_message' => 'Invalid time: was given :ref : :msg',
+    'invalid_cursor' => 'Invalid cursor was given:  :ref',
+    'invalid_encryption_with_msg' => 'Invalid encrypted string was given: :msg :ref ',
 
 
     //users
     'unique_resource_name_per_user' => 'The :resource_name has already been used.',
     'user_not_found' => 'User not found using :ref',
+    'user_not_found_by' => 'User not found using :types : :values ',
     'user_not_priv' => 'Not in the admin group of this user',
     'passthrough_data_too_big' => 'The passthrough data for this token is too big, the max is :max bytes',
     'token_too_long_lived' => 'The token can only be created for up to :seconds seconds',
     'no_namespace' => 'There is no namespace found in the route when asking for it, or the user is not authenticated, or the user has no default namespace',
 
     //namespaces
+    'namespace_missing' => 'Namespace not found from path or user',
     'namespace_not_found' => 'Namespace not found using :ref',
+    'namespace_not_found_by' => 'Namespace not found using :types : :values ',
     'namespace_invalid_name' => 'Namespace has invalid name :ref',
     'namespace_not_system' => 'You are not a system namespace :ref',
     'namespace_not_default_owner' => 'You are not the owner of the default user namespace :ref',
@@ -45,8 +51,10 @@ return [
 
     //bounds
     'bound_not_found' => 'Bound not found using :ref',
+    'bound_in_use' => 'The bound :ref is in use by published types',
 
     //time bounds
+    'time_bound_not_found_by' => 'Schedule not found using :types : :values ',
     'time_bound_period_must_be_with_cron' => 'Time bound must have a period defined when a cron string is defined',
     'time_bounds_valid_stop_start' => 'Time bounds must have a valid start and stop, and the start happens before the stop',
     'time_bounds_invalid_cron_string' => 'Time bounds was given an invalid cron string',
@@ -54,6 +62,7 @@ return [
     'time_bounds_needs_minimum_info' => 'Time bounds require at least name,start and stop',
 
     //location bounds
+    'location_bound_not_found_by' => 'Location not found using :types : :values ',
     'location_bound_json_invalid' => 'Location bound was not given valid json',
     'location_out_of_bounds' => 'Location out of bounds',
     'location_wrong_number_coordinates' => 'Location needs two numbers in each point to make a map, and three to make a shape',
@@ -67,6 +76,7 @@ return [
 
     //attributes
     'attribute_not_found' => 'Attribute not found using :ref',
+    'attribute_not_found_by' => 'Attribute not found using :types : :values ',
     'attribute_cannot_be_used_as_parent' => 'This attribute :ref cannot be used as a parent, you are not an admin of its namespace',
     'attribute_cannot_be_used_at_parent_final' => 'This attribute :ref cannot be used as a parent, it is either retired or marked to not be used for parenting',
     'attribute_schema_must_have_name' => 'When making an attribute a name must be provided',
@@ -78,6 +88,11 @@ return [
     'attribute_parent_not_found' => 'The parent attribute was not found by using :ref',
     'attribute_cannot_use_map' => 'Attribute :ref can only use shapes and not maps',
     'attribute_cannot_use_design' => 'Attribute :ref can only be used for a design for :me if you are a member of its namespace and its not retired',
+    'attribute_has_invalid_default' => 'Attribute :ref was set with a default value that did not pass the validation or read json_path',
+    'attribute_has_invalid_default_read' => 'Attribute :ref was set with a default value that did not pass the read json_path',
+    'attribute_has_invalid_default_validation' => 'Attribute :ref was set with a default value that did not pass the validation json_path',
+    'attribute_validation_failed' => 'Attribute :ref was set with a value that did not pass the validation',
+    'attribute_parent_is_final' => 'Attribute :ref cannot be used as a parent because it is final',
 
     'rule_not_found' => 'The rule was not found by :ref',
     'parent_rule_not_found' => 'The parent rule was not found by the uuid :ref',
@@ -116,32 +131,52 @@ return [
     'remote_uncallable' => 'The remote :name exceeded its rate limit and has no cache',
 
 
-    //element types
+    //types
     'type_not_found' => 'Type not found using :ref',
+    'type_not_found_by' => 'Type not found using :types : :values ',
     'type_must_have_name' => 'Types need a name',
     'type_must_have_ns' => 'Types need a namespace',
     'type_must_have_map_bound' => 'Types can only use a map bound',
     'parent_types_must_be_string_names' => 'A parent type must already exist and be refered to by the name or uuid, which is a string and not an object',
     'type_descriptions_must_be_uuid' => 'A description element has to be a UUID',
-    'parent_type_is_not_inheritable' => 'The parent type must allow you to inherit, and also not be retired or final',
-    'parent_type_must_be_published' => 'The parent type must be published',
+    'parent_type_is_not_inheritable' => 'The parent type :ref must allow you to inherit, and also not be retired or final',
+    'parent_type_must_be_published' => 'The parent :ref type must be published',
+    'parent_type_is_invalid_cannot_remove' => 'The type :ref does not have all the given as parents, so cannot remove these as parents',
     'type_only_owner_can_delete' => 'Only the owner of the type :ref can delete it',
     'type_only_admin_can_edit' => 'Only the admins in :ns can edit the type :ref',
     'type_only_delete_if_unused' => 'Can only delete :ref when it has no elements, no children',
     'type_cannot_be_edited' => 'The type :ref cannot be edited',
     'type_in_use' => 'The type :ref is in use, or has been published, so cannot be significantly changed',
+    'type_must_be_published_before_making_elements' => "Type :ref needs to be published before making element",
+    'type_given_zero_elements_to_make' => "Type :ref was told to make 0 elements",
+    'type_is_already_published' => "Type :ref is already published",
+    'type_already_owned_by_namespace' => "Type :ref already has :ns owner",
+    'type_has_abstract_attributes' => 'The type :ref cannot be published because it has one or more abstract attribute :issues that do not have children attribute',
 
     //elements
     'element_not_found' => 'Element not found using :ref',
+    'element_not_given' => 'Element not given in route or api data',
+    'element_list_not_found' => 'All the elements from the list were not found using :ref',
+    'element_not_found_by' => 'Element not found using :types : :values ',
     'elements_must_have_owner' => 'When creating elements, an owner namespace must be defined',
     'elements_must_have_type' => 'When creating elements, the type of element must be defined',
+    'elements_mising_from_give_list' => 'When changing owners, there were no elements listed to give',
+    'elements_mising_from_destroy_list' => 'When deleting elements, there were no elements listed',
+    'element_not_in_phase' => 'Element :ref has phase :set_phase, which is different from  :other_phase',
 
     //sets
     'set_not_found' => 'Set not found using :ref',
+    'set_not_given' => 'Set not given in route or api data',
+    'set_not_found_by' => 'Set not found using :types : :values ',
     'set_must_have_a_defining_element' => 'Set must have a defining element',
+    'set_does_not_have_element' => 'Set :ref does not have the element :ele',
+    'set_has_different_phase_than_element_entering' => 'Set :ref has phase :set_phase, but element :ele has phase :ele_phase',
+    'set_has_different_phase_than_linking_element   ' => 'Cannot link: set :ref has phase :set_phase, but element :ele has phase :ele_phase',
+    'set_not_in_phase' => 'Set :ref has phase :set_phase, which is different from  :other_phase',
 
     //servers
     'server_not_found' => "Server not found using :ref",
+    'server_not_found_by' => 'Server not found using :types : :values ',
 
     //paths
     'path_not_found' => 'Path not found using :ref',
@@ -161,6 +196,28 @@ return [
     //thing
     'thing_owner_does_not_match_hook_given' => 'The hook given :ref is not associated with the hook :hook',
     'thing_owner_does_not_match_setting_given' => 'The hook given :ref is not associated with the setting :setting',
+
+
+    //design
+    'design_parents_did_not_approve_design' => 'The parents :ref did not approve design of :child',
+    'design_parents_did_not_approve_publishing' => 'The parents :ref did not approve publishing of :child',
+    'design_single_parent_did_not_approve_publishing' => 'The parent :ref did not approve publishing of :child',
+    'design_cannot_add_attribute_to_published'=> "Cannot add new attributes to published types. :ref is published",
+
+    //phase
+    'phase_not_found_by' => 'Phase not found using :types : :values ',
+    'phase_not_found' => 'Phase not found',
+    'no_phase_given' => 'Phase not given',
+
+    //params
+    'params_missing_namespace' => "Missing namespace in the api call",
+    'params_bad_namespace' => "Namespace provided not found",
+    'params_missing_type' => "Missing type in the api call",
+    'params_bad_type' => "Type provided not found",
+
+    //links
+    'link_not_found_by' => 'Link not found using :types : :values ',
+    'link_not_found' => 'Link not found using :ref',
 
 
 ];

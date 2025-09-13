@@ -3,11 +3,14 @@
 namespace App\Models;
 
 
+use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Utilities;
 use App\Rules\NamespaceNameReq;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -28,6 +31,9 @@ use Illuminate\Validation\ValidationException;
  *
  * @property string created_at
  * @property string updated_at
+ *
+ * @property ElementType phase_type
+ * @property Phase edited_by_phase
  *
  */
 class Phase extends Model
@@ -55,7 +61,19 @@ class Phase extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'is_default_phase'=>'boolean',
+        'is_system'=>'boolean'
+    ];
+
+
+    public function phase_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'phase_type_id');
+    }
+
+    public function edited_by_phase() : BelongsTo {
+        return $this->belongsTo(Phase::class,'edited_by_phase_id');
+    }
 
     public static function getDefaultPhase() : ?Phase {
         return Phase::where('is_default_phase',true)->first();
@@ -92,6 +110,33 @@ class Phase extends Model
         return $build;
     }
 
+
+    public static function resolvePhase(string $value, bool $throw_exception = true)
+    : ?static
+    {
+
+        $ret = null;
+        if (Utilities::is_uuid($value)) {
+            $ret =  static::getThisPhase(uuid: $value);
+        } else {
+            //maybe type name
+            $given_type = ElementType::resolveType(value: $value,throw_exception: false);
+            if ($given_type) {
+                $ret = static::getThisPhase(type_id: $given_type->id);
+            }
+        }
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.phase_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SET_NOT_FOUND
+            );
+        }
+
+        return $ret;
+    }
+
     public static function getThisPhase(
         ?int             $id = null,
         ?int             $type_id = null,
@@ -109,7 +154,12 @@ class Phase extends Model
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find phase via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.phase_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::PHASE_NOT_FOUND
+            );
+
         }
         return $ret;
     }
@@ -127,6 +177,10 @@ class Phase extends Model
                 RefCodes::TYPE_INVALID_NAME);
         }
         $this->phase_name = $name;
+    }
+
+    public function getName() : string {
+        return $this->phase_name;
     }
 
 }

@@ -5,11 +5,10 @@ namespace App\OpenApi;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
-use App\OpenApi\Users\MeResponse;
+use App\OpenApi\Results\Users\MeResponse;
 use Carbon\Carbon;
 use Hexbatch\Things\Models\ThingCallback;
 use Illuminate\Support\Facades\Request;
-use JsonSerializable;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 use Throwable;
@@ -19,7 +18,7 @@ use Throwable;
  */
 #[OA\Schema(schema: 'ErrorResponse',title: "Error")]
 
-class ErrorResponse implements  JsonSerializable
+class ErrorResponse extends ApiCollectionBase
 {
     #[OA\Property(  title: 'Type of error ', description: 'Help with the error', format: 'url')]
     protected ?string $type = null;
@@ -121,9 +120,8 @@ class ErrorResponse implements  JsonSerializable
     }
 
 
-    public function jsonSerialize(): array
-    {
-        $ret = [];
+    public  function toArray() : array  {
+        $ret = parent::toArray();
         $ret['type'] = $this->type;
         $ret['instance'] = $this->instance;
         $ret['message'] = $this->message;

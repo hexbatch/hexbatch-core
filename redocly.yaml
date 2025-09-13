@@ -1,0 +1,7 @@
+extends:
+  - recommended
+rules:
+  no-server-example.com: off
+  operation-2xx-response: off
+  operation-4xx-response: off
+  no-unused-components: warn

@@ -2,12 +2,17 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\St;
 
+use App\Annotations\ApiParamMarker;
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
-
 use App\Models\UserNamespace;
+use App\OpenApi\Params\Actioning\Set\AddElementParams;
+use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -15,6 +20,38 @@ use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
+#[HexbatchTitle( title: "Add elements to set")]
+#[HexbatchBlurb( blurb: "Add one or more elements to a set")]
+#[HexbatchDescription( description: /** @lang markdown */
+    '
+# Create elements
+
+  This adds elements to a set, the set and elements must be already existing.
+
+
+  given_set_uuid: uuid of the set
+  given_element_uuids: array of one or more element uuids to put into the set
+  is_sticky: if the elements are sticky, remaining after the remove command
+
+  Creation can be blocked by the following:
+
+  By the set
+
+  * [SetEnter.php](../../../Evt/Set/SetEnter.php)
+
+
+  After the elements are added, the following notices are given
+
+   * [SetEnter.php](../../../Evt/Set/SetEnter.php)
+   * [ShapeEnter.php](../../../Evt/Set/ShapeEnter.php)
+   * [MapEnter.php](../../../Evt/Set/MapEnter.php)
+   * [TypeMapEnclosedStart.php](../../../Evt/Set/TypeMapEnclosedStart.php)
+   * [TypeMapEnclosingStart.php](../../../Evt/Set/TypeMapEnclosingStart.php)
+   * [TypeShapeEnclosedStart.php](../../../Evt/Set/TypeShapeEnclosedStart.php)
+   * [TypeShapeEnclosingStart.php](../../../Evt/Set/TypeShapeEnclosingStart.php)
+
+
+')]
 class SetMemberAdd extends Act\Cmd\St
 {
     const UUID = 'ebd1275e-ecc6-486e-89cb-69e14ae4a44c';
@@ -126,6 +163,8 @@ class SetMemberAdd extends Act\Cmd\St
         'added_element_uuids'=>['class'=>Element::class,'partition'=>2] ,
         'allowed_element_uuids'=>['class'=>Element::class,'partition'=>1] ,
     ];
+
+    #[ApiParamMarker( param_class: AddElementParams::class)]
     public function __construct(
         protected ?string       $given_set_uuid = null ,
         /**
@@ -141,7 +180,6 @@ class SetMemberAdd extends Act\Cmd\St
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool         $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
@@ -149,28 +187,27 @@ class SetMemberAdd extends Act\Cmd\St
             $this->allowed_element_uuids = $this->given_element_uuids;
         }
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
-    /*
-     * type the design
-     * array uuid fo parent
-     *
-     */
+
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         if (!$this->getSetUsed()) {
             throw new \InvalidArgumentException("Need set before can add member");
         }
 
+        foreach ($this->getElementsAllowed() as $ele) {
+            $namespace_to_use = $ele->element_namespace;
+            if (!$namespace_to_use) { $namespace_to_use = $this->getNamespaceInUse();} //maybe being built for a new namespace
+            $this->checkIfAdmin($namespace_to_use);
+        }
         try {
             DB::beginTransaction();
             foreach ($this->getElementsAllowed() as $element) {
@@ -178,12 +215,9 @@ class SetMemberAdd extends Act\Cmd\St
                 $this->added_element_uuids[] = $element->ref_uuid;
             }
             $this->saveCollectionKeys();
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
@@ -191,8 +225,20 @@ class SetMemberAdd extends Act\Cmd\St
 
 
 
+
     protected function getMyData() :array {
         return ['set'=>$this->getSetUsed(),'elements_added'=>$this->getElementsAdded(),'elements_given'=>$this->getElementsGiven()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['set'])) {
+            $ret['set'] = new SetResponse(given_set:  $what['set'],show_elements: true);
+        }
+
+        return $ret;
     }
 
 
@@ -229,6 +275,9 @@ class SetMemberAdd extends Act\Cmd\St
         return null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void {
 
 

@@ -16,7 +16,6 @@ class Server extends BaseType
     const TYPE_NAME = 'server';
 
 
-
     const ATTRIBUTE_CLASSES = [
         \App\Sys\Res\Atr\Stk\MetaData\Server\ServerData::class,
         \App\Sys\Res\Atr\Stk\MetaData\Server\ServerData\CommitHash::class,
@@ -29,6 +28,7 @@ class Server extends BaseType
     const PARENT_CLASSES = [
         Root::class
     ];
+
 
 }
 

@@ -18,7 +18,7 @@ class PromotePublish extends Api\DesignApi
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\Ty\TypePublishPromote::class,
+        Act\Cmd\Ty\TypePublish::class,
     ];
 
 }

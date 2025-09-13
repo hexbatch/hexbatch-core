@@ -3,6 +3,7 @@ namespace App\Enums\Types;
 /**
  * postgres enum type_of_intersection_category
  */
+
 enum TypeOfIntersectionCategory : string {
 
   case enclosed = 'enclosed';

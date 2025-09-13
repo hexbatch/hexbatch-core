@@ -2,35 +2,40 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\Annotations\Access\TypeOfAccessMarker;
-use App\Helpers\Annotations\ApiAccessMarker;
-use App\Helpers\Annotations\ApiEventMarker;
-use App\Helpers\Annotations\ApiTypeMarker;
+use App\Annotations\Access\TypeOfAccessMarker;
+use App\Annotations\ApiAccessMarker;
+use App\Annotations\ApiEventMarker;
+use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
 use App\Sys\Res\Types\Stk\Root;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
-use OpenApi\Attributes as OA;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class WaitController extends Controller {
 
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/create_master',
+        path: '/api/v1/{user_namespace}/waits/create_master',
         operationId: 'core.waits.create_master',
         description: "A new master system is created with the caller the owner of the new types and sets and elements",
         summary: 'Create a master system',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Server\TypeOwnerChange::class)]
+    #[ApiEventMarker( Evt\Server\TypeOwnerChanging::class)]
     #[ApiEventMarker( Evt\Server\SetCreated::class)]
     #[ApiEventMarker( Evt\Server\DesignPending::class)]
     #[ApiEventMarker( Evt\Server\TypePublished::class)]
     #[ApiEventMarker( Evt\Type\ElementCreation::class)]
-    #[ApiEventMarker( Evt\Type\ElementCreationBatch::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
     #[ApiTypeMarker( Root\Api\Waiting\CreateMaster::class)]
     public function create_master() {
@@ -40,10 +45,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/update_master',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/update_master',
         operationId: 'core.waits.update_master',
         description: "Changes the ready state of a master",
         summary: 'Update waiting master state',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -70,10 +84,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/run_master',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/run',
         operationId: 'core.waits.run_master',
         description: "Sets a pending master to run, any member of the type can do this. May have to wait, also may not work if limits set",
         summary: 'Starts running a master',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -102,10 +125,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/reset_semaphore',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/reset_semaphore',
         operationId: 'core.waits.reset_semaphore',
         description: "Semaphores moved to the idle state",
         summary: 'Semaphores moved to idle',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -132,10 +164,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/ready_semaphore',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/ready_semaphore',
         operationId: 'core.waits.ready_semaphore',
         description: "Semaphores moved to the waiting state",
         summary: 'Sets semaphores ready to be used',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -163,10 +204,19 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/show_master',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/show',
         operationId: 'core.waits.show_master',
         description: "Type members can see the status of the master",
         summary: 'Shows information about a master',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -179,17 +229,26 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/show_master_run',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/status',
         operationId: 'core.waits.show_master_run',
         description: "Shows the details about a run the master made, or current state if running",
         summary: 'Shows master run data',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Waiting\ShowMasterRun::class)]
-    public function show_master_run() {
+    public function show_master_status() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
@@ -197,10 +256,16 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/list_masters',
+        path: '/api/v1/{user_namespace}/waits/list',
         operationId: 'core.waits.list_masters',
         description: "Lists the masters the caller is a member, admin or owner of",
         summary: 'List masters',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -213,10 +278,19 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/show_semaphore',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/show_semaphore',
         operationId: 'core.waits.show_semaphore',
         description: "Shows information about a semaphore if the caller is a member, admin or owner",
         summary: 'Show semaphore',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -229,10 +303,16 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/list_semaphores',
+        path: '/api/v1/{user_namespace}/waits/list_semaphores',
         operationId: 'core.waits.list_semaphores',
         description: "Lists the semaphores the caller is a member, admin or owner of",
         summary: 'List semaphores',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -245,10 +325,16 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/list_waits',
+        path: '/api/v1/{user_namespace}/waits/list_waits',
         operationId: 'core.waits.list_waits',
         description: "Lists the semaphores or mutexes being waited on from types the caller is a member, admin or owner of",
         summary: 'List Waits',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -260,10 +346,19 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/show_wait',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/show_wait',
         operationId: 'core.waits.show_wait',
         description: "Shows information specific wait on a type the caller is a member, admin or owner",
         summary: 'Show wait info',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -276,10 +371,16 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/list_mutexes',
+        path: '/api/v1/{user_namespace}/waits/list_mutexes',
         operationId: 'core.waits.list_mutexes',
         description: "Lists the mutexes created with types the caller is a member, admin or owner of",
         summary: 'List Mutexes',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -291,10 +392,19 @@ class WaitController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{namespace}/waits/show_mutex',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/show_mutex',
         operationId: 'core.waits.show_mutex',
         description: "Shows information about a mutex if the caller is a member, admin or owner",
         summary: 'Show mutex',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -307,10 +417,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/wait_if_available',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/wait_if_available',
         operationId: 'core.waits.wait_if_available',
         description: "Will wait only if this is immediately ready, otherwise it fails",
         summary: 'Do work if signal ready, otherwise do not wait',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -326,10 +445,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/wait_for_any',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/wait_for_any',
         operationId: 'core.waits.wait_for_any',
         description: "Will for only the first signal ready and ignore the other waits after that. Can set many signals to wait",
         summary: 'Do work at first signal that is ready',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -345,10 +473,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/wait_for_all',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/wait_for_all',
         operationId: 'core.waits.wait_for_all',
         description: "Will for all the signals to be ready. Can set many signals to wait",
         summary: 'Do work after all signals are ready',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -364,10 +501,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/wait_for_mutex',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/wait_for_mutex',
         operationId: 'core.waits.wait_for_mutex',
         description: "Will wait for this mutex",
         summary: 'Do work after mutex allows',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
@@ -382,10 +528,19 @@ class WaitController extends Controller {
 
 
     #[OA\Post(
-        path: '/api/v1/{namespace}/waits/wait_for_semaphore',
+        path: '/api/v1/{user_namespace}/waits/{element_type}/wait_for_semaphore',
         operationId: 'core.waits.wait_for_semaphore',
         description: "Will wait on the semaphore",
         summary: 'Do work when semaphore allows',
+        security: [['bearerAuth' => []]],
+        tags: ['wait'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+        ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]

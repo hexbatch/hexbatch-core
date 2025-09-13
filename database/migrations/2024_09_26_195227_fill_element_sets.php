@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('parent_set_element_id')
                 ->nullable()->default(null)
                 ->comment("The element which controls this set")
-                ->index()
+                ->unique()
                 ->constrained('elements')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();

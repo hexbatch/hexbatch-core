@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Exceptions\HexbatchDifferentPhase;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -28,6 +31,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  *
  * @property ElementSetMember[] element_members
  * @property Element defining_element
+ * @property ElementSet parent_set
+ * @property ElementSet[] children_sets
  *
  */
 class ElementSet extends Model implements ISet,ISystemModel
@@ -77,9 +82,24 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         return $this->belongsTo(Element::class,'parent_set_element_id');
     }
 
+    public function children_sets() : HasMany {
+        return $this->hasMany(ElementSetChild::class,'parent_set_id','id');
+    }
+
+    public function parent_set() : HasOne {
+        return $this->hasOne(ElementSetChild::class,'child_set_id','id');
+    }
+
     public static function buildSet(
         ?int            $me_id = null,
-        ?string         $uuid = null
+        ?string         $uuid = null,
+        ?int            $parent_set_id = null,
+        ?int            $type_id = null,
+        ?int            $phase_id = null,
+        ?int            $namespace_id = null,
+        array           $in_namespace_ids = [],
+        bool            $b_do_relations = false
+
     )
     : Builder
     {
@@ -99,10 +119,87 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
             $build->where('element_sets.ref_uuid', $uuid);
         }
 
-        /** @uses ElementSet::element_members(),ElementSet::defining_element(),ElementSetMember::of_element() */
-        $build->with('element_members','defining_element','element_members.of_element');
+        if ($parent_set_id ) {
+            $build->join('element_set_members sim',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($parent_set_id) {
+                    $join->on('sim.child_set_id', '=', 'element_sets.id')
+                        ->where('sim.parent_set_id',$parent_set_id);
+                }
+            );
+        }
+
+        if ($namespace_id ) {
+            $build->join('elements e_one',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($namespace_id) {
+                    $join->on('e_one.id', '=', 'element_sets.parent_set_element_id')
+                    ->where('e_one.element_namespace_id',$namespace_id);
+                }
+            );
+        }
+
+        if (count($in_namespace_ids) ) {
+            $build->join('elements e_two',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($in_namespace_ids) {
+                    $join->on('e_two.id', '=', 'element_sets.parent_set_element_id')
+                        ->whereIn('e_two.element_namespace_id',$in_namespace_ids);
+                }
+            );
+        }
+
+        if ($phase_id ) {
+            $build->join('elements e_phase',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($phase_id) {
+                    $join->on('e_phase.id', '=', 'element_sets.parent_set_element_id')
+                        ->whereIn('e_phase.element_phase_id',$phase_id);
+                }
+            );
+        }
+
+        if ($type_id ) {
+            $build->join('elements e_type',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  use($type_id) {
+                    $join->on('e_type.id', '=', 'element_sets.parent_set_element_id')
+                        ->where('e_type.element_parent_type_id',$type_id);
+                }
+            );
+        }
+
+        if ($b_do_relations) {
+            /** @uses ElementSet::element_members(),ElementSet::defining_element(),ElementSetMember::of_element() */
+            $build->with('element_members','defining_element','element_members.of_element');
+        }
+
 
         return $build;
+    }
+
+    public static function resolveSet(string $value, bool $throw_exception = true)
+    : static
+    {
+
+        /** @var Builder $build */
+        $build = null;
+
+        if (Utilities::is_uuid($value)) {
+           return static::getThisSet(uuid: $value);
+        }
+
+        $ret = $build?->first();
+
+        if (empty($ret) && $throw_exception) {
+            throw new HexbatchNotFound(
+                __('msg.set_not_found',['ref'=>$value]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SET_NOT_FOUND
+            );
+        }
+
+        return $ret;
     }
 
     public static function getThisSet(
@@ -119,7 +216,11 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
             if ($uuid) { $arg_types[] = 'uuid'; $arg_vals[] = $uuid;}
             $arg_val = implode('|',$arg_vals);
             $arg_type = implode('|',$arg_types);
-            throw new \InvalidArgumentException("Could not find set via $arg_type : $arg_val");
+            throw new HexbatchNotFound(
+                __('msg.set_not_found_by',['types'=>$arg_type,'values'=>$arg_val]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::SET_NOT_FOUND
+            );
         }
         return $ret;
     }
@@ -133,34 +234,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        $build = null;
-        $ret = null;
-        $first_id = null;
-        try {
-            if ($field) {
-                $build = $this->where($field, $value);
-            } else {
-                if (Utilities::is_uuid($value)) {
-                    $build = $this->where('ref_uuid', $value);
-                }
-            }
-            if ($build) {
-                $first_id = (int)$build->value('id');
-                if ($first_id) {
-                    $ret = ElementSet::buildSet(me_id:$first_id)->first();
-                }
-            }
-        } finally {
-            if (empty($ret) || empty($first_id) || empty($build)) {
-                throw new HexbatchNotFound(
-                    __('msg.set_not_found',['ref'=>$value]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::SET_NOT_FOUND
-                );
-            }
-        }
-        return $ret;
-
+        return static::resolveSet($value);
     }
 
 
@@ -175,15 +249,23 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
 
 
     public function addElement(Element $ele, bool $is_sticky = false) : ElementSetMember {
+        // see if element is same phase as set
+        if ($ele->element_phase_id !== $this->defining_element->element_phase_id) {
+            throw new HexbatchDifferentPhase(__("msg.set_has_different_phase_than_element_entering",
+                ['ref'=>$this->getName(),'ele'=>$ele->getName(),'set_phase'=>$this->defining_element->element_phase->getName(),
+                    'ele_phase'=>$ele->element_phase->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::PHASE_IS_DIFFERENT);
+        }
         $node = new ElementSetMember();
         $node->holder_set_id = $this->id;
         $node->member_element_id = $ele->id;
         $node->is_sticky = $is_sticky;
         $node->save();
-        return $node; //todo make code to  include the element_values and related
+        return $node;
     }
 
     public function getName(): string {
-        return 'Set from '.$this->defining_element->getName();
+        return $this->ref_uuid.' from '.$this->defining_element->getName();
     }
 }

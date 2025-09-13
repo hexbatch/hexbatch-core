@@ -3,6 +3,7 @@ namespace App\Enums\Types;
 /**
  * postgres enum type_of_server_event_access
  */
+
 enum TypeOfServerEventAccess : string {
 
   case USE_HANDLER = 'use_handler';

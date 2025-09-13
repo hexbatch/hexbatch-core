@@ -5,6 +5,7 @@ use Illuminate\Support\Collection;
 /**
  * postgres enum type_of_lifecycle
  */
+
 enum TypeOfLifecycle : string {
 
   case DEVELOPING = 'developing';

@@ -2,15 +2,21 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty;
 
+use App\Annotations\ApiParamMarker;
+use App\Annotations\Documentation\HexbatchBlurb;
+use App\Annotations\Documentation\HexbatchDescription;
+use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-
+use App\Exceptions\HexbatchNothingDoneException;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\Element;
-
 use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
-
+use App\OpenApi\Params\Actioning\Type\CreateElementParams;
+use App\OpenApi\Results\Elements\ElementCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -18,24 +24,42 @@ use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\DB;
 
-/**
- * if no handler for element creation, then only the type owner members can create
- *
- * This can create one or many elements at once
- * it can access a list of ns from a child to create one element per ns. This can be any ns.
- *  if no list, then the caller will be the element owner
- *
- * Creation can be blocked by the following
- * @see Evt\Type\ElementOwnerChange,Evt\Type\ElementRecieved,Evt\Type\ElementRecievedBatch,Evt\Type\ElementOwnerChangeBatch
- *
- * it can access a list of sets from a child to create one per set (and put them in the set)
- *  if no set provided, it will put new element in the caller's home set.
- *  the set the element is going to will be provided as context info for any event handlers
- *
- * if more than one element created, the batch version of the handler is called instead
- *
- */
 
+#[HexbatchTitle( title: "Create elements")]
+#[HexbatchBlurb( blurb: "Create one or more elements from a type")]
+#[HexbatchDescription( description: /** @lang markdown */
+    '
+# Create elements
+
+  This can create one or many elements at once, must be from the same type.
+
+  If no handler for element creation, then only the type admin members can create
+
+  given_type_uuid: uuid of the type
+  given_namespace_uuid: uuid of the namespace to put the element into, if not given, the same namespace as the call will be used
+  given_phase_uuid: uuid of the phase, if not given, the default will be used
+  number_to_create: if missing will be one
+
+
+  Creation can be blocked by the following:
+
+  By the type owners who get
+
+  * [ElementCreation.php](../../../Evt/Type/ElementCreation.php)
+
+  By the recipients who get
+
+   * [ElementOwnerChange](../../../Evt/Type/ElementOwnerChange.php)
+
+
+
+
+  After element creation the recipent gets a notice
+
+  * [ElementRecieved](../../../Evt/Type/ElementRecieved.php)
+
+
+')]
 class ElementCreate extends Act\Cmd\Ele
 {
     const UUID = 'c21c5d03-685f-467b-afce-3ec449197eda';
@@ -51,9 +75,9 @@ class ElementCreate extends Act\Cmd\Ele
 
     const EVENT_CLASSES = [
         Evt\Type\ElementCreation::class,
-        Evt\Type\ElementCreationBatch::class,
-        Evt\Element\ElementRecieved::class,
-        Evt\Element\ElementRecievedBatch::class
+        Evt\Type\ElementOwnerChange::class,
+        Evt\Type\ElementRecieved::class,
+        Evt\Type\ElementRecievedBatch::class
     ];
 
     /**
@@ -66,25 +90,23 @@ class ElementCreate extends Act\Cmd\Ele
 
     public function getNamespaceUsed(): ?UserNamespace
     {
-        return $this->action_data->data_namespace;
+        return $this->getGivenNamespace();
     }
 
     public function getPhaseUsed(): ?Phase
     {
-        /** @uses ActionDatum::data_phase() */
-        return $this->action_data->data_phase;
+        return $this->getGivenPhase();
     }
 
     protected function setTemplateType(ElementType $type) : void {
-        $this->action_data->data_type_id = $type->id;
         $this->given_type_uuid = $type->ref_uuid;
         $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
+        $this->setGivenType($type,true);
     }
 
     public function getTemplateType(): ?ElementType
     {
-        return $this->action_data->data_type;
+        return $this->getGivenType();
     }
 
     public function setNumberToMake(int $number_allowed) : void {
@@ -103,7 +125,7 @@ class ElementCreate extends Act\Cmd\Ele
     const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_namespace_uuid','given_phase_uuid',
         'number_to_create','preassinged_uuids','b_must_have_namespace'];
 
-
+    #[ApiParamMarker( param_class: CreateElementParams::class)]
     public function __construct(
         protected ?string       $given_type_uuid = null,
         protected ?string       $given_namespace_uuid = null,
@@ -118,32 +140,24 @@ class ElementCreate extends Act\Cmd\Ele
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool         $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
 
     }
 
 
 
-    /*
-     * type the design
-     * array uuid fo parent
-     *
-     */
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
+        parent::runActionInner();
+
         if ($this->b_must_have_namespace && !$this->getNamespaceUsed()) {
             throw new \InvalidArgumentException("Need namespace before can make element");
         }
@@ -152,20 +166,28 @@ class ElementCreate extends Act\Cmd\Ele
             throw new \InvalidArgumentException("Need template type before can make element");
         }
 
-        if (!$this->getTemplateType()->isPublished() ) {
-            throw new \InvalidArgumentException(sprintf("Template type %s needs to be published before making element",$this->getTemplateType()->getName() ));
+        if (!$this->getTemplateType()->isPublished()) {
+            throw new HexbatchNotPossibleException(__("msg.type_must_be_published_before_making_elements",
+                ['ref' => $this->getTemplateType()->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_NEEDS_PUBLISHING);
         }
 
-        if ($this->number_to_create <= 0) {return;}
-        $post_actions = [];
-        $post_events = [];
+
+        if ($this->number_to_create <= 0) {
+            throw new HexbatchNothingDoneException(__("msg.type_given_zero_elements_to_make",
+                ['ref' => $this->getTemplateType()->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::TYPE_GIVEN_ZERO_TO_MAKE);
+        }
+
+
+
         try {
             $this->created_element_uuids = [];
             $uuid_index = 0;
 
             DB::beginTransaction();
-
-
 
             for ($set_index = 0; $set_index < $this->number_to_create; $set_index++) {
                 $this->makeElement(loop_number: $uuid_index++);
@@ -175,33 +197,29 @@ class ElementCreate extends Act\Cmd\Ele
             if (count($this->created_element_uuids) > 1 ) {
                 if ($this->send_event) {
                     $this->post_events_to_send =
-                        Evt\Element\ElementRecievedBatch::makeEventActions(source: $this, action_data: $this->action_data);
+                        Evt\Type\ElementRecievedBatch::makeEventActions(
+                            source: $this, action_data: $this->action_data,important_array: $this->getElementsCreated());
                 }
-            } else {
+            } else if(count($this->created_element_uuids) === 1) {
                 if ($this->send_event) {
                     $this->post_events_to_send =
-                        Evt\Element\ElementRecieved::makeEventActions(source: $this, action_data: $this->action_data);
+                        Evt\Type\ElementRecieved::makeEventActions(
+                            source: $this, action_data: $this->action_data,important_array: $this->getElementsCreated());
                 }
             }
 
 
 
             $this->saveCollectionKeys();
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->wakeLinkedThings();
-            $this->action_data->refresh();
-            if ($this->send_event) {
-                $this->post_events_to_send = array_merge($post_actions,$post_events);
-            }
 
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
 
     }
+
 
     private function makeElement(int $loop_number) : void
     {
@@ -232,24 +250,31 @@ class ElementCreate extends Act\Cmd\Ele
             'namespace_used'=>$this->getNamespaceUsed(),'phase_used'=>$this->getPhaseUsed()];
     }
 
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['created_elements'])) {
+            $ret['created_elements'] = new ElementCollectionResponse(given_elements:  $what['created_elements']);
+        }
+
+        return $ret;
+    }
+
 
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id =ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
 
-        if ($this->given_namespace_uuid) {
-            $this->action_data->data_namespace_id =UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
-        }
-
+        $this->setGivenNamespace( $this->given_namespace_uuid)->setGivenType($this->given_type_uuid);
 
         if ($this->given_phase_uuid) {
-            $this->action_data->data_phase_id = Phase::getThisPhase(uuid: $this->given_phase_uuid)->id;
+            $phase = Phase::getThisPhase(uuid: $this->given_phase_uuid);
         } else {
-            $this->action_data->data_phase_id = Phase::getDefaultPhase()?->id;
+            $phase = Phase::getDefaultPhase();
         }
+
+        $this->setGivenPhase($phase);
 
         $this->action_data->save();
         $this->action_data->refresh();
@@ -261,13 +286,14 @@ class ElementCreate extends Act\Cmd\Ele
 
         if ($this->send_event && !$this->is_system) {
             $nodes = [];
-            if (count($this->getElementsCreated()) > 1) {
-                $events = Evt\Type\ElementCreationBatch::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getTemplateType());
-            } else {
-                $events = Evt\Type\ElementCreation::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getTemplateType());
-            }
+
+            $creation_events = Evt\Type\ElementCreation::makeEventActions(source: $this, action_data: $this->action_data,
+                type_context: $this->getTemplateType());
+
+            $owner_events = Evt\Type\ElementOwnerChange::makeEventActions(source: $this, action_data: $this->action_data,
+                type_context: $this->getTemplateType());
+
+            $events = array_merge($creation_events,$owner_events);
 
             foreach ($events as $event) {
                 $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
@@ -285,30 +311,34 @@ class ElementCreate extends Act\Cmd\Ele
         return null;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function setChildActionResult(IThingAction $child): void {
 
 
-        if ($child instanceof Evt\Type\ElementCreationBatch || $child instanceof Evt\Type\ElementCreation) {
+        if ($child instanceof Evt\Type\ElementCreation) {
             if ($child->isActionFail() || $child->isActionError()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
 
             else if($child->isActionSuccess()) {
                 if ($child->getAskedAboutType() === $this->getTemplateType()) {
-                    if ($this->getTemplateType()->isParentOfThis($child->getParentType())) //todo change to or ancestor later when doing element_type_ancestors
-                    if ($child instanceof Evt\Type\ElementCreationBatch) {
-                        $number_allowed = $child->getNumberAllowed();
-                        if (null !== $number_allowed) {
-                            $this->setNumberToMake($number_allowed);
-                        }
-                    }
+                    $this->setNumberToMake($child->getNumberAllowed());
                 }
             }
         }
 
 
+        if ($child instanceof Evt\Type\ElementOwnerChange ) {
+            if ($child->isActionError() || $child->isActionFail()) {
+                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+            }
+        }
+
+
         if ($child instanceof TypePublish) {
-            if ($child->isActionError()) {
+            if ($child->isActionError() || $child->isActionFail()) {
                 $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
             }
             else if($child->isActionSuccess() && $child->getPublishingType()) {

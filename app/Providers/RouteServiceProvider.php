@@ -8,6 +8,8 @@ use App\Models\Element;
 use App\Models\ElementLink;
 use App\Models\ElementSet;
 use App\Models\ElementType;
+use App\Models\LiveRule;
+use App\Models\LiveType;
 use App\Models\LocationBound;
 use App\Models\Path;
 use App\Models\PathPart;
@@ -51,6 +53,8 @@ class RouteServiceProvider extends ServiceProvider
         Route::model('attribute_rule', AttributeRule::class);
         Route::model('element', Element::class);
         Route::model('element_type', ElementType::class);
+        Route::model('live_type', LiveType::class);
+        Route::model('live_rule', LiveRule::class);
         Route::model('element_set', ElementSet::class);
         Route::model('server', Server::class);
         Route::model('path', Path::class);

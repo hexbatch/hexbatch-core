@@ -3,6 +3,7 @@ namespace App\Enums\Paths;
 /**
  * postgres enum type_of_time_comparison
  */
+
 enum TypeOfTimeComparison : string {
 
   case NO_TIME_COMPARISON = 'no_time_comparison';

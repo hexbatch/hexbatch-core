@@ -5,17 +5,13 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Server;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
-use App\Models\ElementType;
-
 use App\Models\Server;
 use App\Models\UserNamespace;
-
+use App\OpenApi\Results\Servers\ServerResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
-
-use Hexbatch\Things\Enums\TypeOfThingStatus;
+use App\Sys\Res\Types\Stk\Root\Evt;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * asking elsewhere for new credentials
@@ -39,22 +35,10 @@ class ServerPromote extends Act\Cmd\Server
     ];
 
 
-    public function getGivenType(): ?ElementType
-    {
-        /** @uses ActionDatum::data_type() */
-        return $this->action_data->data_type;
-    }
 
     public function getCreatedServer(): Server
     {
-        /** @uses ActionDatum::data_server() */
-        return $this->action_data->data_server;
-    }
-
-    public function getGivenNamespace(): ?UserNamespace
-    {
-        /** @uses ActionDatum::data_namespace() */
-        return $this->action_data->data_namespace;
+       return $this->getGivenServer();
     }
 
 
@@ -85,25 +69,20 @@ class ServerPromote extends Act\Cmd\Server
         protected ?ActionDatum        $parent_action_data = null,
         protected ?UserNamespace      $owner_namespace = null,
         protected bool                $b_type_init = false,
-        protected int            $priority = 0,
         protected array          $tags = []
     )
     {
 
         parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,priority: $this->priority,tags: $this->tags);
+            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
 
 
     protected function initData(bool $b_save = true) : ActionDatum {
         parent::initData(b_save: false);
-        if ($this->given_type_uuid) {
-            $this->action_data->data_type_id = ElementType::getElementType(uuid: $this->given_type_uuid)->id;
-        }
-        if ($this->given_namespace_uuid) {
-            $this->action_data->data_namespace_id = UserNamespace::getThisNamespace(uuid: $this->given_namespace_uuid)->id;
-        }
+
+        $this->setGivenNamespace( $this->given_namespace_uuid)->setGivenType($this->given_type_uuid);
 
         $this->action_data->collection_data->offsetSet('server_status',$this->server_status->value);
         $this->action_data->save();
@@ -121,25 +100,19 @@ class ServerPromote extends Act\Cmd\Server
         }
     }
 
-    public function getInitialConstantData(): ?array {
+    public function getInitialConstantData(): array {
         $ret = parent::getInitialConstantData();
         $ret['server_status'] = $this->server_status?->value;
         return $ret;
     }
 
 
-
-
     /**
      * @throws \Exception
      */
-    public function runAction(array $data = []): void
+    protected function runActionInner(array $data = []): void
     {
-        parent::runAction($data);
-        if ($this->isActionComplete()) {
-            return;
-        }
-
+        parent::runActionInner();
         try {
             DB::beginTransaction();
             $server = new Server();
@@ -165,29 +138,35 @@ class ServerPromote extends Act\Cmd\Server
 
 
             $server->save();
-            $this->action_data->data_server_id = $server->id;
-            $this->action_data->save();
+            $this->setGivenServer($server,true);
             $this->action_data->refresh();
             if ($this->send_event) {
                 $this->post_events_to_send = Evt\Elsewhere\ServerRegistered::makeEventActions(
                     source: $this, action_data: $this->action_data,elsewhere_context: $server);
             }
 
-
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->setActionStatus(TypeOfThingStatus::THING_ERROR);
             throw $e;
         }
-
     }
 
 
 
     protected function getMyData() :array {
         return ['server'=>$this->getCreatedServer(),'given_namespace'=>$this->getGivenNamespace(),'given_type'=>$this->getGivenType()];
+    }
+
+    public function getDataSnapshot(): array
+    {
+        $what =  $this->getMyData();
+        $ret = [];
+        if (isset($what['server'])) {
+            $ret['server'] = new ServerResponse(given_server:  $what['server']);
+        }
+
+        return $ret;
     }
 
 }
