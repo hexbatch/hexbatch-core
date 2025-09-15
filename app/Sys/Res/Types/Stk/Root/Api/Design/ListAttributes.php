@@ -8,8 +8,8 @@ use App\Annotations\ApiParamMarker;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
+use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
 use App\OpenApi\Params\Listing\Design\ListAttributeParams;
-use App\OpenApi\Results\Attributes\AttributeCollectionResponse;
 
 use App\Sys\Res\Types\Stk\Root\Api;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
@@ -77,7 +77,7 @@ class ListAttributes extends Api\DesignApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new AttributeCollectionResponse(
+        return new ApiAttributeCollectionResponse(
             given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],
             attribute_levels:  $this->params->getAttributeLevels(),
             owning_type_levels:  $this->params->getOwningTypeLevels(),

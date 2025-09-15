@@ -4,8 +4,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Set\ApiSetResponse;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
-use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -59,7 +59,7 @@ class Publish extends Api\TypeApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new SetResponse(given_set:  $what['set'],thing: $this->getMyThing());
+        return new ApiSetResponse(given_set:  $what['set'],thing: $this->getMyThing());
     }
 
 

@@ -8,7 +8,7 @@ use App\Helpers\Utilities;
 use App\Models\ElementType;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use App\OpenApi\Common\Resources\HexbatchResource;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
@@ -17,7 +17,7 @@ use OpenApi\Attributes as OA;
  *
  */
 #[OA\Schema(schema: 'DesignParams')]
-class DesignParams extends ApiThingBase
+class DesignParams extends ApiCallBase
 {
     #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Type name',
         example: [new OA\Examples(summary: "name example", value:'he312345') ]

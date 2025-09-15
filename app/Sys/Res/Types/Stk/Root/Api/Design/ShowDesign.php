@@ -9,9 +9,9 @@ use App\Models\ActionDatum;
 
 
 use App\Models\ElementType;
+use App\OpenApi\ApiResults\Type\ApiTypeResponse;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 
-use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
@@ -65,7 +65,7 @@ class ShowDesign extends Api\DesignApi
     public function getDataSnapshot(): array |IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new TypeResponse(
+        return new ApiTypeResponse(
             given_type:  $what[static::PRIMARY_SNAPSHOT_KEY],
             namespace_levels:  $this->params->getNamespaceLevels(),
             parent_levels:  $this->params->getParentLevels(),

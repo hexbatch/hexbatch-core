@@ -10,12 +10,12 @@ use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\Phase;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(schema: 'ElementSelectParams')]
-class ElementSelectParams extends ApiThingBase
+class ElementSelectParams extends ApiCallBase
 {
 
     #[OA\Property(title: 'Elements',description: 'The elements to select. ')]

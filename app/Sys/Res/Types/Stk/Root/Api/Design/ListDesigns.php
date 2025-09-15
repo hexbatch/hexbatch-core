@@ -10,8 +10,8 @@ use App\Models\ActionDatum;
 use App\Models\ElementType;
 
 use App\Models\UserNamespace;
+use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
-use App\OpenApi\Results\Types\TypeCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
@@ -78,8 +78,8 @@ class ListDesigns extends Api\DesignApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new TypeCollectionResponse(
-            given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],
+        return new ApiTypeCollectionResponse(
+            given_types:  $what[static::PRIMARY_SNAPSHOT_KEY],
             namespace_levels:  $this->params->getNamespaceLevels(),
             parent_levels:  $this->params->getParentLevels(),
             attribute_levels:  $this->params->getAttributeLevels(),

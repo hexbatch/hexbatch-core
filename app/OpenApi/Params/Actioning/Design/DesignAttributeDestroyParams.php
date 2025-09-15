@@ -4,7 +4,7 @@ namespace App\OpenApi\Params\Actioning\Design;
 
 use App\Models\Attribute;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
  *
  */
 #[OA\Schema(schema: 'DesignAttributeDestroyParams')]
-class DesignAttributeDestroyParams extends ApiThingBase
+class DesignAttributeDestroyParams extends ApiCallBase
 {
     #[OA\Property(title: 'Attribute',description: 'Attribute can be the full name or uuid')]
     protected ?string $attribute_reference = null;

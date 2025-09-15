@@ -6,12 +6,12 @@ namespace App\OpenApi\Params\Actioning\Element;
 
 
 use App\Models\ElementLink;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(schema: 'LinkSelectParams')]
-class LinkSelectParams extends ApiThingBase
+class LinkSelectParams extends ApiCallBase
 {
 
     #[OA\Property(title: 'Link',description: 'The link')]

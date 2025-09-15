@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
 use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
-use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
@@ -56,7 +56,7 @@ class ShowAttribute extends Api\DesignApi
 
     public function getDataSnapshot(): array |IThingBaseResponse
     {
-        return new AttributeResponse(
+        return new ApiAttributeResponse(
             given_attribute:  $this->params->getGivenAttribute(),
             attribute_levels:  $this->params->getAttributeLevels(),
             owning_type_levels :  $this->params->getOwningTypeLevels(),

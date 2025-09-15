@@ -13,6 +13,14 @@ use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
+use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
+use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
+use App\OpenApi\ApiResults\Bounds\ApiLocationCollectionResponse;
+use App\OpenApi\ApiResults\Bounds\ApiLocationResponse;
+use App\OpenApi\ApiResults\Bounds\ApiScheduleCollectionResponse;
+use App\OpenApi\ApiResults\Bounds\ApiScheduleResponse;
+use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
+use App\OpenApi\ApiResults\Type\ApiTypeResponse;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
 use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
@@ -27,15 +35,8 @@ use App\OpenApi\Params\Listing\Design\ListLocationParams;
 use App\OpenApi\Params\Listing\Design\ListScheduleParams;
 use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
-use App\OpenApi\Results\Attributes\AttributeCollectionResponse;
-use App\OpenApi\Results\Attributes\AttributeResponse;
-use App\OpenApi\Results\Bounds\LocationCollectionResponse;
-use App\OpenApi\Results\Bounds\LocationResponse;
-use App\OpenApi\Results\Bounds\ScheduleCollectionResponse;
-use App\OpenApi\Results\Bounds\ScheduleResponse;
+
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
-use App\OpenApi\Results\Types\TypeCollectionResponse;
-use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -74,7 +75,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -118,7 +119,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -161,7 +162,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -207,7 +208,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -247,7 +248,7 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -291,7 +292,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -335,7 +336,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ApiTypeResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -372,7 +373,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: TypeCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ApiTypeCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -417,7 +418,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: ApiAttributeResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -452,7 +453,7 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: ApiAttributeCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -495,7 +496,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -545,7 +546,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -592,7 +593,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -643,7 +644,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -689,7 +690,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents added', content: new JsonContent(ref: TypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents added', content: new JsonContent(ref: ApiTypeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -733,7 +734,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule created', content: new JsonContent(ref: ScheduleResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule created', content: new JsonContent(ref: ApiScheduleResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -777,7 +778,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: ScheduleResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: ApiScheduleResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -820,7 +821,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule destroyed', content: new JsonContent(ref: ScheduleResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule destroyed', content: new JsonContent(ref: ApiScheduleResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -859,7 +860,7 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: LocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: ApiLocationResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -901,7 +902,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: LocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: ApiLocationResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -944,7 +945,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: LocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: ApiLocationResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -983,7 +984,7 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: LocationCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: ApiLocationCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -1018,7 +1019,7 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ScheduleCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ApiScheduleCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))

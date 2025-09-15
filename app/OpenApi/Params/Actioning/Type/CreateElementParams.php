@@ -7,7 +7,7 @@ namespace App\OpenApi\Params\Actioning\Type;
 use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -19,7 +19,7 @@ use OpenApi\Attributes as OA;
 
  */
 #[OA\Schema(schema: 'CreateElementParams')]
-class CreateElementParams extends ApiThingBase
+class CreateElementParams extends ApiCallBase
 {
 
     #[OA\Property(title: 'Type',description: 'The element is made from this type. Can be uuid or name')]

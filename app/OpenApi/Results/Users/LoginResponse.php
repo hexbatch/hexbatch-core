@@ -4,8 +4,6 @@ namespace App\OpenApi\Results\Users;
 
 
 use App\OpenApi\Results\ResultBase;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 /**
@@ -14,7 +12,6 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'LoginResponse')]
 class LoginResponse extends ResultBase
 {
-    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Message')]
     public string $message;
 
@@ -22,9 +19,9 @@ class LoginResponse extends ResultBase
     public string $auth_token;
 
 
-    public function __construct(string $message, string $auth_token,?Thing $thing = null)
+    public function __construct(string $message, string $auth_token)
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         $this->message = $message;
         $this->auth_token = $auth_token;
     }

@@ -10,8 +10,6 @@ use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -21,7 +19,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'ServerResponse')]
 class ServerResponse extends ResultBase
 {
-    use ThingMimimalResponseTrait;
+
     #[OA\Property(title: 'Server uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -59,9 +57,9 @@ class ServerResponse extends ResultBase
 
 
 
-    public function __construct(Server $given_server,int $type_level = 0,int $attribute_level = 0,bool $b_show_namespace = false,?Thing $thing = null)
+    public function __construct(Server $given_server,int $type_level = 0,int $attribute_level = 0,bool $b_show_namespace = false)
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         $this->uuid = $given_server->ref_uuid;
         $this->namespace_uuid = $given_server->owning_namespace->ref_uuid;
         $this->type_uuid = $given_server->server_type->ref_uuid;

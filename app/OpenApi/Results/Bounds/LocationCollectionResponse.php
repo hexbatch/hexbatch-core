@@ -3,9 +3,7 @@
 namespace App\OpenApi\Results\Bounds;
 
 use App\Models\LocationBound;
-use App\OpenApi\Results\ResultThingBase;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
+use App\OpenApi\Results\ResultCursorBase;
 use Illuminate\Pagination\AbstractCursorPaginator;
 use OpenApi\Attributes as OA;
 
@@ -13,9 +11,8 @@ use OpenApi\Attributes as OA;
  * A collection of time bounds
  */
 #[OA\Schema(schema: 'LocationCollectionResponse',title: "Locations")]
-class LocationCollectionResponse extends ResultThingBase
+class LocationCollectionResponse extends ResultCursorBase
 {
-    use ThingMimimalResponseTrait;
 
     #[OA\Property( title: 'List of Schedules')]
     /**
@@ -24,13 +21,13 @@ class LocationCollectionResponse extends ResultThingBase
     public array $locations = [];
 
     /**
-     * @param LocationBound[]|AbstractCursorPaginator $given_attributes
+     * @param LocationBound[]|AbstractCursorPaginator $given_locations
      */
-    public function __construct($given_attributes,?Thing $thing = null)
+    public function __construct($given_locations)
     {
-        parent::__construct($given_attributes,$thing);
+        parent::__construct($given_locations);
         $this->locations = [];
-        foreach ($given_attributes as $loc) {
+        foreach ($given_locations as $loc) {
             $this->locations[] = new LocationResponse(given_location: $loc);
         }
 

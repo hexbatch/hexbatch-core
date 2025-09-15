@@ -7,8 +7,6 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Set\SetResponse;
 use Carbon\Carbon;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -18,7 +16,6 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'UserNamespaceResponse')]
 class UserNamespaceResponse extends ResultBase
 {
-    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'User namespace uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -49,9 +46,9 @@ class UserNamespaceResponse extends ResultBase
 
 
 
-    public function __construct(protected ?UserNamespace $namespace = null, bool $show_homeset = false,?Thing $thing = null)
+    public function __construct(protected ?UserNamespace $namespace = null, bool $show_homeset = false)
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         if ($namespace) {
             $this->namespace_name = $this->namespace->namespace_name;
             $this->uuid = $namespace->ref_uuid;

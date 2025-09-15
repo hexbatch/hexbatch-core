@@ -11,8 +11,6 @@ use App\OpenApi\Results\Bounds\LocationResponse;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;
 use Carbon\Carbon;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -22,7 +20,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'AttributeResponse')]
 class AttributeResponse extends ResultBase
 {
-    use ThingMimimalResponseTrait;
+
     #[OA\Property(title: 'Attribute uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -86,11 +84,10 @@ class AttributeResponse extends ResultBase
 
 
     public function __construct(
-         Attribute $given_attribute, int $attribute_levels = 0,int $owning_type_levels = 0,int $design_levels = 0,
-         ?Thing $thing = null
+         Attribute $given_attribute, int $attribute_levels = 0,int $owning_type_levels = 0,int $design_levels = 0
     )
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         $this->uuid = $given_attribute->ref_uuid;
         $this->name = $given_attribute->getName(short_name: false);
         $this->short_name = $given_attribute->getName();

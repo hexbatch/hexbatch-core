@@ -7,8 +7,8 @@ use App\Annotations\ApiParamMarker;
 
 
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Elements\ApiElementResponse;
 use App\OpenApi\Params\Listing\Elements\ShowElementParams;
-use App\OpenApi\Results\Elements\ElementResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
@@ -58,7 +58,7 @@ class ShowElement extends Api\ElementApi
 
     public function getDataSnapshot(): array|IThingBaseResponse
     {
-        return new ElementResponse(
+        return new ApiElementResponse(
             given_element:  $this->params->getGivenElement(),
             type_level:  $this->params->getTypeLevel(),
             attribute_level :  $this->params->getAttributeLevel(),

@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
-use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -60,7 +60,7 @@ class CreateAttribute extends Api\DesignApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new AttributeResponse(given_attribute:  $what['attribute'],thing: $this->getMyThing());
+        return new ApiAttributeResponse(given_attribute:  $what['attribute'],thing: $this->getMyThing());
     }
 
 

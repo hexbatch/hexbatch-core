@@ -3,9 +3,7 @@
 namespace App\OpenApi\Results\Bounds;
 
 use App\Models\TimeBound;
-use App\OpenApi\Results\ResultThingBase;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
+use App\OpenApi\Results\ResultCursorBase;
 use Illuminate\Pagination\AbstractCursorPaginator;
 use OpenApi\Attributes as OA;
 
@@ -13,9 +11,8 @@ use OpenApi\Attributes as OA;
  * A collection of time bounds
  */
 #[OA\Schema(schema: 'ScheduleCollectionResponse',title: "Schedules")]
-class ScheduleCollectionResponse extends ResultThingBase
+class ScheduleCollectionResponse extends ResultCursorBase
 {
-    use ThingMimimalResponseTrait;
 
     #[OA\Property( title: 'List of Schedules')]
     /**
@@ -24,13 +21,13 @@ class ScheduleCollectionResponse extends ResultThingBase
     public array $schedules = [];
 
     /**
-     * @param TimeBound[]|AbstractCursorPaginator $given_attributes
+     * @param TimeBound[]|AbstractCursorPaginator $given_schedules
      */
-    public function __construct($given_attributes, int $number_spans = 3,?Thing $thing = null)
+    public function __construct($given_schedules, int $number_spans = 3)
     {
-        parent::__construct($given_attributes,$thing);
+        parent::__construct($given_schedules);
         $this->schedules = [];
-        foreach ($given_attributes as $schedule) {
+        foreach ($given_schedules as $schedule) {
             $this->schedules[] = new ScheduleResponse(given_time: $schedule,number_spans: $number_spans);
         }
 

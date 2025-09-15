@@ -4,13 +4,13 @@ namespace App\OpenApi\Params\Listing\Design;
 
 
 use App\Models\Attribute;
-use App\OpenApi\Params\Listing\ListThingBaseParams;
+use App\OpenApi\Params\Listing\ListCallBaseParams;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ShowAttributeParams')]
-class ShowAttributeParams extends ListThingBaseParams
+class ShowAttributeParams extends ListCallBaseParams
 {
 
     public function __construct(

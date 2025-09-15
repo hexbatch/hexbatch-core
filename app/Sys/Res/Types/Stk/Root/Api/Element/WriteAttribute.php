@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
 use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
-use App\OpenApi\Results\Elements\ElementActionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -61,7 +61,7 @@ class WriteAttribute extends Api\ElementApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new ElementActionResponse(value: $what['value'], given_element: $what['element'],
+        return new ApiElementActionResponse(value: $what['value'], given_element: $what['element'],
             given_set: $what['set'], given_phase: $what['phase'],thing: $this->getMyThing());
     }
 

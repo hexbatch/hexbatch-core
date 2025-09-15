@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Bounds\ApiScheduleResponse;
 use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
-use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -57,7 +57,7 @@ class CreateTime extends Api\DesignApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new ScheduleResponse(given_time:  $what['bound'],thing: $this->getMyThing());
+        return new ApiScheduleResponse(given_time:  $what['bound'],thing: $this->getMyThing());
     }
 
 

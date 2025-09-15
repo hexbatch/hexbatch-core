@@ -3,19 +3,15 @@
 namespace App\OpenApi\Results\Elements;
 
 use App\Models\Element;
-use App\OpenApi\Results\ResultThingBase;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
+use App\OpenApi\Results\ResultCursorBase;
 use OpenApi\Attributes as OA;
 
 /**
  * A collection of elements
  */
 #[OA\Schema(schema: 'ElementCollectionResponse')]
-class ElementCollectionResponse extends ResultThingBase
+class ElementCollectionResponse extends ResultCursorBase
 {
-
-    use ThingMimimalResponseTrait;
 
 
     #[OA\Property( title: 'List of elements')]
@@ -27,9 +23,9 @@ class ElementCollectionResponse extends ResultThingBase
     /**
      * @param Element[] $given_elements
      */
-    public function __construct($given_elements,int $type_level = 0,int $attribute_level = 0,int $namespace_level = 0, int $phase_level = 0,?Thing $thing = null)
+    public function __construct($given_elements,int $type_level = 0,int $attribute_level = 0,int $namespace_level = 0, int $phase_level = 0)
     {
-        parent::__construct($given_elements,$thing);
+        parent::__construct($given_elements);
         $this->elements = [];
         foreach ($given_elements as $ele) {
             $this->elements[] = new ElementResponse(

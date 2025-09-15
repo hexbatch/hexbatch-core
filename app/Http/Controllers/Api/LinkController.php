@@ -8,10 +8,10 @@ use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
 use App\Models\ElementLink;
+use App\OpenApi\ApiResults\Set\ApiLinkerCollectionResponse;
+use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
 use App\OpenApi\Params\Actioning\Element\LinkSelectParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
-use App\OpenApi\Results\Set\LinkerCollectionResponse;
-use App\OpenApi\Results\Set\LinkResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
@@ -47,7 +47,7 @@ class LinkController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Unlinked', content: new JsonContent(ref: LinkResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Unlinked', content: new JsonContent(ref: ApiLinkerResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -90,7 +90,7 @@ class LinkController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: LinkerCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ApiLinkerCollectionResponse::class)),
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
@@ -120,7 +120,7 @@ class LinkController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Found link', content: new JsonContent(ref: LinkResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Found link', content: new JsonContent(ref: ApiLinkerResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not a member of the namespace',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -129,7 +129,7 @@ class LinkController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::LINK_MEMBER)]
     #[ApiTypeMarker( Root\Api\Element\ShowLink::class)]
     public function show_link(ElementLink $link) {
-        return  response()->json(new LinkResponse(linker: $link),CodeOf::HTTP_OK);
+        return  response()->json(new ApiLinkerResponse(linker: $link),CodeOf::HTTP_OK);
     }
 
 

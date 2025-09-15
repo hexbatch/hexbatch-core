@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Type\ApiTypeResponse;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
-use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -61,7 +61,7 @@ class Destroy extends Api\DesignApi implements IHookCode
 
     public function getDataSnapshot(): array|IThingBaseResponse
     {
-        return new TypeResponse(given_type: $this->params->getGivenType(),thing: $this->getMyThing());
+        return new ApiTypeResponse(given_type: $this->params->getGivenType(),thing: $this->getMyThing());
     }
 
 

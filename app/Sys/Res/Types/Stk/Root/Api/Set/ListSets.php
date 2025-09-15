@@ -6,8 +6,8 @@ use App\Annotations\ApiParamMarker;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\ElementSet;
+use App\OpenApi\ApiResults\Set\ApiSetCollectionResponse;
 use App\OpenApi\Params\Listing\Set\ListSetParams;
-use App\OpenApi\Results\Set\SetCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Illuminate\Support\Collection;
@@ -76,7 +76,7 @@ class ListSets extends Api\SetApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new SetCollectionResponse(
+        return new ApiSetCollectionResponse(
            given_sets:  $what[static::PRIMARY_SNAPSHOT_KEY],
            show_definer:  $this->params->isShowDefiner(),
            show_parent :  $this->params->isShowParent(),

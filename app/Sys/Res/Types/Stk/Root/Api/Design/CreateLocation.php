@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Bounds\ApiLocationResponse;
 use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
-use App\OpenApi\Results\Bounds\LocationResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -56,7 +56,7 @@ class CreateLocation extends Api\DesignApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new LocationResponse(given_location:  $what['bound'],thing: $this->getMyThing());
+        return new ApiLocationResponse(given_location:  $what['bound'],thing: $this->getMyThing());
     }
 
 

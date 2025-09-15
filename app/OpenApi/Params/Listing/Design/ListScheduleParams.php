@@ -6,7 +6,7 @@ namespace App\OpenApi\Params\Listing\Design;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Listing\ListThingBaseParams;
+use App\OpenApi\Params\Listing\ListCallBaseParams;
 use App\Rules\NamespaceMemberReq;
 use App\Rules\TimeInputReq;
 
@@ -17,7 +17,7 @@ use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ListScheduleParams')]
-class ListScheduleParams extends ListThingBaseParams
+class ListScheduleParams extends ListCallBaseParams
 {
 
     #[OA\Property(title: 'Namespace',description: 'The schedule is in this namespace. Can be uuid or name.')]

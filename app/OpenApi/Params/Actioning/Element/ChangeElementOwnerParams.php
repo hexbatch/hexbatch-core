@@ -8,13 +8,13 @@ namespace App\OpenApi\Params\Actioning\Element;
 
 use App\Models\Element;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ChangeElementOwnerParams')]
-class ChangeElementOwnerParams extends ApiThingBase
+class ChangeElementOwnerParams extends ApiCallBase
 {
 
     #[OA\Property(title: 'Namespace',description: 'The new elements are put into this namespace. Can be uuid or name. If missing will be put into calling namespace')]

@@ -6,7 +6,7 @@ namespace App\OpenApi\Params\Listing\Design;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Listing\ListThingBaseParams;
+use App\OpenApi\Params\Listing\ListCallBaseParams;
 use App\Rules\NamespaceMemberReq;
 
 use Illuminate\Support\Collection;
@@ -16,7 +16,7 @@ use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'ListLocationParams')]
-class ListLocationParams extends ListThingBaseParams
+class ListLocationParams extends ListCallBaseParams
 {
 
     #[OA\Property(title: 'Namespace',description: 'The location is in this namespace. Can be uuid or name')]

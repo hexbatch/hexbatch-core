@@ -9,8 +9,8 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
+use App\OpenApi\ApiResults\Users\ApiMeResponse;
 use App\OpenApi\Params\Actioning\Registration\RegistrationParams;
-use App\OpenApi\Results\Users\MeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -71,7 +71,7 @@ class UserRegister extends Api\UserApi implements IHookCode
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new MeResponse(user:  $what['user'],show_namespace: true,thing: $this->getMyThing());
+        return new ApiMeResponse(user:  $what['user'],show_namespace: true,thing: $this->getMyThing());
     }
 
     public function __construct(

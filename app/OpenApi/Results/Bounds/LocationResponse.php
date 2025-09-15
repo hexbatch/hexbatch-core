@@ -8,8 +8,7 @@ use App\Models\LocationBound;
 use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
+
 use OpenApi\Attributes as OA;
 
 
@@ -19,7 +18,6 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'LocationResponse')]
 class LocationResponse extends ResultBase
 {
-    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Location uuid',type: HexbatchUuid::class)]
     public string $uuid ;
 
@@ -45,9 +43,9 @@ class LocationResponse extends ResultBase
 
 
 
-    public function __construct(LocationBound $given_location,?Thing $thing = null)
+    public function __construct(LocationBound $given_location)
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         $this->uuid = $given_location->ref_uuid;
         $this->name = $given_location->getName();
         $this->location_type = $given_location->location_type;

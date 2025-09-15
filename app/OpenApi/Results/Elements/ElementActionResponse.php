@@ -13,8 +13,6 @@ use App\OpenApi\Results\Phase\PhaseResponse;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Set\SetResponse;
 use App\OpenApi\Results\Types\TypeResponse;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -24,9 +22,6 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'ElementActionResponse')]
 class ElementActionResponse extends ResultBase
 {
-
-    use ThingMimimalResponseTrait;
-
 
     public function __construct(
         #[OA\Property(title: 'Element')]
@@ -53,10 +48,10 @@ class ElementActionResponse extends ResultBase
         protected ?ElementType $given_type = null,
         protected ?Attribute $given_attribute = null,
         protected ?Phase $given_phase = null,
-        ?Thing $thing = null
+
     )
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         if ($this->given_element) {
             $this->element = new ElementResponse(given_element: $this->given_element);
         }

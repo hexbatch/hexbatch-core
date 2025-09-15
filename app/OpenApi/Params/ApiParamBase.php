@@ -2,14 +2,10 @@
 
 namespace App\OpenApi\Params;
 
-use App\OpenApi\ApiThingBase;
-use Hexbatch\Things\Models\Thing;
+use App\OpenApi\ApiCallBase;
 
 
-class ApiParamBase extends  ApiThingBase
+class ApiParamBase extends  ApiCallBase
 {
-    public function __construct(?Thing $thing = null)
-    {
-        parent::__construct(thing:$thing);
-    }
+
 }

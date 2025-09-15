@@ -7,9 +7,7 @@ use App\Models\ElementLink;
 use App\Models\ElementSet;
 use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\Elements\ElementResponse;
-use App\OpenApi\Results\ResultThingBase;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
+use App\OpenApi\Results\ResultCursorBase;
 use OpenApi\Attributes as OA;
 
 
@@ -17,10 +15,9 @@ use OpenApi\Attributes as OA;
  * Show details about the sets linked together by an element
  */
 #[OA\Schema(schema: 'LinkerCollectionResponse')]
-class LinkerCollectionResponse extends ResultThingBase
+class LinkerCollectionResponse extends ResultCursorBase
 {
 
-    use ThingMimimalResponseTrait;
     #[OA\Property(title: 'Linking element uuid',type: HexbatchUuid::class)]
     public string $linking_element_uuid = '';
 
@@ -42,10 +39,10 @@ class LinkerCollectionResponse extends ResultThingBase
                                 bool $show_definer = false,
                                 bool $show_parent = false,bool $show_elements = false,bool $show_set = false,
                                 int $definer_type_level = 0,int $children_set_level = 0,int $parent_set_level = 0,
-         int $type_level = 0,int $attribute_level = 0,int $namespace_level = 0, int $phase_level = 0,?Thing $thing = null
+         int $type_level = 0,int $attribute_level = 0,int $namespace_level = 0, int $phase_level = 0
     )
     {
-        parent::__construct(list:null,thing: $thing);
+        parent::__construct(list:null);
         $this->linking_element_uuid = $linker_element->ref_uuid;
         if ($show_linker) {
             $this->linking_element = new ElementResponse(given_element: $linker_element,

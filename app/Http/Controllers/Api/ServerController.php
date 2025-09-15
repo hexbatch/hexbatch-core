@@ -8,7 +8,7 @@ use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
 use App\Models\Server;
-use App\OpenApi\Results\Servers\ServerResponse;
+use App\OpenApi\ApiResults\Server\ApiServerResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -24,14 +24,14 @@ class ServerController extends Controller {
         summary: 'Show this server information',
         tags: ['server','public'],
         responses: [
-            new OA\Response( response: 200, description: 'The server',content: new JsonContent(ref: ServerResponse::class)),
+            new OA\Response( response: 200, description: 'The server',content: new JsonContent(ref: ApiServerResponse::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::IS_PUBLIC)]
     #[ApiTypeMarker( Root\Api\Server\Show::class)]
     public function us() {
 
-        return response()->json(new ServerResponse(given_server: Server::getDefaultServer(),type_level: 1,attribute_level: 1,b_show_namespace: true), CodeOf::HTTP_OK);
+        return response()->json(new ApiServerResponse(given_server: Server::getDefaultServer(),type_level: 1,attribute_level: 1,b_show_namespace: true), CodeOf::HTTP_OK);
     }
 
 

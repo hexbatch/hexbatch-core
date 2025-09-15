@@ -6,13 +6,13 @@ namespace App\OpenApi\Params\Actioning\Design;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Helpers\Utilities;
 use App\Models\LocationBound;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'DesignLocationParams')]
-class DesignLocationParams extends ApiThingBase
+class DesignLocationParams extends ApiCallBase
 {
     #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Name', description: 'Name of the bound', nullable: true)]
     protected ?string $bound_name = null;

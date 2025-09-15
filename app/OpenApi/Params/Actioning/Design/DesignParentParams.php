@@ -6,7 +6,7 @@ namespace App\OpenApi\Params\Actioning\Design;
 use App\Exceptions\HexbatchBadParamException;
 use App\Exceptions\RefCodes;
 use App\Models\ElementType;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -14,7 +14,7 @@ use OpenApi\Attributes as OA;
  *
  */
 #[OA\Schema(schema: 'DesignParentParams')]
-class DesignParentParams extends ApiThingBase
+class DesignParentParams extends ApiCallBase
 {
 
     protected ?string $type_uuid = null;

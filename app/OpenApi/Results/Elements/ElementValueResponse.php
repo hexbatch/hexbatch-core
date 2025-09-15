@@ -9,8 +9,6 @@ use App\Models\ElementValue;
 use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\OpenApi\Results\ResultBase;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -20,7 +18,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'ElementValueResponse')]
 class ElementValueResponse extends ResultBase
 {
-    use ThingMimimalResponseTrait;
+
     #[OA\Property(title: 'Attribute uuid',type: HexbatchUuid::class)]
     public string $attribute_uuid = '';
 
@@ -41,11 +39,10 @@ class ElementValueResponse extends ResultBase
     public function __construct(ElementSetMember $member,
                                 Attribute $att,
                                 ElementType $type,
-                                $attribute_levels = 0,
-                                ?Thing $thing = null
+                                $attribute_levels = 0
     )
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         $this->attribute_uuid = $att->ref_uuid;
         $this->attribute_name = $att->getName();
         if ($attribute_levels > 0) {

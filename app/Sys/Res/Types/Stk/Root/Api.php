@@ -6,7 +6,7 @@ namespace App\Sys\Res\Types\Stk\Root;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use App\OpenApi\ErrorResponse;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackResponse;
@@ -151,7 +151,7 @@ class Api extends BaseType implements ICallResponse
 
     public function getCallbackResponse(?int &$http_status = null)
     : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse|ThingResponse|
-    ErrorResponse|ThingErrorCollectionResponse|ApiThingBase
+    ErrorResponse|ThingErrorCollectionResponse|ApiCallBase
     {
         if (!$this->getActionData()) {return null;}
         $search_params = new CallbackSearchParams(

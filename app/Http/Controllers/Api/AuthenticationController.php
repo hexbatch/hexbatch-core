@@ -13,14 +13,14 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\OpenApi\ApiResults\Users\ApiCreateTokenResponse;
+use App\OpenApi\ApiResults\Users\ApiLoginResponse;
+use App\OpenApi\ApiResults\Users\ApiMeResponse;
 use App\OpenApi\ErrorResponse;
 use App\OpenApi\Params\Actioning\Registration\RegistrationParams;
 use App\OpenApi\Params\Users\CreateTokenParams;
 use App\OpenApi\Params\Users\LoginParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
-use App\OpenApi\Results\Users\CreateTokenResponse;
-use App\OpenApi\Results\Users\LoginResponse;
-use App\OpenApi\Results\Users\MeResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Carbon\Carbon;
@@ -49,14 +49,14 @@ class AuthenticationController extends Controller
         security: [['bearerAuth' => []]],
         tags: ['user'],
         responses: [
-            new OA\Response( response: 200, description: 'This is you',content: new JsonContent(ref: MeResponse::class)),
+            new OA\Response( response: 200, description: 'This is you',content: new JsonContent(ref: ApiMeResponse::class)),
             new OA\Response( response: CodeOf::HTTP_FORBIDDEN, description: 'Not logged in',content: new JsonContent(ref: ErrorResponse::class))
         ]
     )]
     public function me(Request $request) {
         $user = User::buildUser($request->user()->id)->first();
 
-        return response()->json(new MeResponse(user: $user,show_namespace: true), CodeOf::HTTP_OK);
+        return response()->json(new ApiMeResponse(user: $user,show_namespace: true), CodeOf::HTTP_OK);
     }
 
 
@@ -72,7 +72,7 @@ class AuthenticationController extends Controller
         requestBody: new OA\RequestBody( required: true,content: new JsonContent(type: LoginParams::class) ),
         tags: ['user'],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_OK, description: 'Login returns a token',content: new JsonContent(ref: LoginResponse::class)),
+            new OA\Response( response: CodeOf::HTTP_OK, description: 'Login returns a token',content: new JsonContent(ref: ApiLoginResponse::class)),
             new OA\Response( response: CodeOf::HTTP_UNAUTHORIZED, description: 'Wrong credentials',content: new JsonContent(ref: ErrorResponse::class))
         ]
     )]
@@ -93,7 +93,7 @@ class AuthenticationController extends Controller
         $user->tokens()->delete(); //change later to keep reserved tokens
 
         $token = $user->createToken($request->username)->plainTextToken;
-        return response()->json(new LoginResponse(message: __("auth.success"),auth_token: $token));
+        return response()->json(new ApiLoginResponse(message: __("auth.success"),auth_token: $token));
     }
 
 
@@ -108,7 +108,7 @@ class AuthenticationController extends Controller
         requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: RegistrationParams::class)),
         tags: ['user','public'],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Registered', content: new JsonContent(ref: MeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Registered', content: new JsonContent(ref: ApiMeResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -189,7 +189,7 @@ class AuthenticationController extends Controller
 
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Returns a new token set to that lifetime',
-                                content: new JsonContent(ref: CreateTokenResponse::class)),
+                                content: new JsonContent(ref: ApiCreateTokenResponse::class)),
             new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorResponse::class))
         ]
     )]
@@ -215,7 +215,7 @@ class AuthenticationController extends Controller
                 "UPDATE personal_access_tokens SET passthrough = :json_string WHERE id = :id"
                 ,['json_string'=>$passthrough_json,'id'=>$token_id]);
         }
-        return response()->json(new CreateTokenResponse(auth_token: $token->plainTextToken), CodeOf::HTTP_CREATED);
+        return response()->json(new ApiCreateTokenResponse(auth_token: $token->plainTextToken), CodeOf::HTTP_CREATED);
     }
 
 

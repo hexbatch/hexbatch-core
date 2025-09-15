@@ -9,14 +9,14 @@ use App\Annotations\ApiTypeMarker;
 use App\Http\Controllers\Controller;
 use App\Models\ElementSet;
 use App\Models\Phase;
+use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
+use App\OpenApi\ApiResults\Set\ApiSetCollectionResponse;
+use App\OpenApi\ApiResults\Set\ApiSetResponse;
 use App\OpenApi\Params\Actioning\Set\AddElementParams;
 use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Params\Listing\Set\ListSetParams;
 use App\OpenApi\Params\Listing\Set\ShowSetParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
-use App\OpenApi\Results\Elements\ElementCollectionResponse;
-use App\OpenApi\Results\Set\SetCollectionResponse;
-use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
@@ -52,7 +52,7 @@ class SetController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -329,7 +329,7 @@ class SetController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Set info returned', content: new JsonContent(ref: SetResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Set info returned', content: new JsonContent(ref: ApiSetResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -422,7 +422,7 @@ class SetController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -461,7 +461,7 @@ class SetController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed sets', content: new JsonContent(ref: SetCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed sets', content: new JsonContent(ref: ApiSetCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))

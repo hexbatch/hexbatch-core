@@ -5,7 +5,7 @@ namespace App\OpenApi\Params\Listing;
 
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Contracts\Encryption\EncryptException;
 use Illuminate\Pagination\Cursor;
 use Illuminate\Support\Collection;
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use OpenApi\Attributes as OA;
 
 
-class ListThingBaseParams extends ApiThingBase
+class ListCallBaseParams extends ApiCallBase
 {
 
     #[OA\Property( title: 'Cursor')]

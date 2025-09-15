@@ -8,8 +8,6 @@ use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\Elements\ElementResponse;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\OpenApi\Things\ThingMimimalResponseTrait;
 use OpenApi\Attributes as OA;
 
 
@@ -19,7 +17,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'SetResponse')]
 class SetResponse extends ResultBase
 {
-    use ThingMimimalResponseTrait;
+
     #[OA\Property(title: 'Set uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
@@ -57,9 +55,9 @@ class SetResponse extends ResultBase
 
     public function __construct(ElementSet $given_set,bool $show_definer = false,
                                 bool $show_parent = false,bool $show_elements = false,
-                                int $definer_type_level = 0,int $children_set_level = 0,int $parent_set_level = 0,?Thing $thing = null)
+                                int $definer_type_level = 0,int $children_set_level = 0,int $parent_set_level = 0)
     {
-        parent::__construct(thing: $thing);
+        parent::__construct();
         $this->uuid = $given_set->ref_uuid;
         $this->has_events = $given_set->has_events;
         if ($show_definer) {

@@ -7,7 +7,7 @@ namespace App\OpenApi\Params\Actioning\Set;
 use App\Helpers\Utilities;
 use App\Models\Element;
 use App\Models\ElementSet;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -18,7 +18,7 @@ use OpenApi\Attributes as OA;
   is_sticky: if the elements are sticky, remaining after the remove command
  */
 #[OA\Schema(schema: 'AddElementParams')]
-class AddElementParams extends ApiThingBase
+class AddElementParams extends ApiCallBase
 {
 
     #[OA\Property(title: 'Set',description: 'The set which will have the elements. This is uuid')]

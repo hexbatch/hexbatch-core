@@ -4,7 +4,7 @@ namespace App\OpenApi\Params\Actioning\Type;
 
 
 use App\Models\ElementType;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -12,7 +12,7 @@ use OpenApi\Attributes as OA;
  *
  */
 #[OA\Schema(schema: 'TypeParams')]
-class TypeParams extends ApiThingBase
+class TypeParams extends ApiCallBase
 {
 
     #[OA\Property(title: 'Type',description: 'The type. Can be uuid or name')]

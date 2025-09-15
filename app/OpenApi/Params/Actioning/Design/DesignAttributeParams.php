@@ -10,7 +10,7 @@ use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -32,7 +32,7 @@ use OpenApi\Attributes as OA;
  *  unset_parent : when editing an existing attribute and want to remove the parent
  */
 #[OA\Schema(schema: 'DesignAttributeParams')]
-class DesignAttributeParams extends ApiThingBase
+class DesignAttributeParams extends ApiCallBase
 {
 
     protected ?string $uuid = null;

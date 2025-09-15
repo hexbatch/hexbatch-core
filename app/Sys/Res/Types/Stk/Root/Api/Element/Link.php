@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Results\Set\LinkResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -57,7 +57,7 @@ class Link extends Api\ElementApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new LinkResponse(linker:  $what['link'],thing: $this->getMyThing());
+        return new ApiLinkerResponse(linker:  $what['link'],thing: $this->getMyThing());
     }
 
 

@@ -3,14 +3,14 @@
 namespace App\OpenApi\Params\Actioning\Design;
 
 use App\Models\TimeBound;
-use App\OpenApi\ApiThingBase;
+use App\OpenApi\ApiCallBase;
 use App\OpenApi\Common\HexbatchCron;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
 
 #[OA\Schema(schema: 'DesignTimeParams')]
-class DesignTimeParams extends ApiThingBase
+class DesignTimeParams extends ApiCallBase
 {
     #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Name', description: 'Name of the bound')]
     protected ?string $bound_name = null;

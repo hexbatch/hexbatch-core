@@ -6,8 +6,9 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
+use App\OpenApi\ApiResults\Bounds\ApiScheduleCollectionResponse;
 use App\OpenApi\Params\Listing\Design\ListScheduleParams;
-use App\OpenApi\Results\Bounds\ScheduleCollectionResponse;
+
 use App\Sys\Res\Types\Stk\Root\Api;
 
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
@@ -65,7 +66,7 @@ class ListSchedules extends Api\DesignApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new ScheduleCollectionResponse(given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],thing: $this->getMyThing());
+        return new ApiScheduleCollectionResponse(given_times:  $what[static::PRIMARY_SNAPSHOT_KEY],thing: $this->getMyThing());
     }
 
 

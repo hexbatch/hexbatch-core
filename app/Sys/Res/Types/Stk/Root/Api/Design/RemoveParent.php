@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Type\ApiTypeResponse;
 use App\OpenApi\Params\Actioning\Design\DesignParentParams;
-use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -57,7 +57,7 @@ class RemoveParent extends Api\DesignApi
     public function getDataSnapshot(): array |IThingBaseResponse
     {
         $what =  $this->getMyData();
-        return new TypeResponse(given_type:  $what['type'],thing: $this->getMyThing());
+        return new ApiTypeResponse(given_type:  $what['type'],thing: $this->getMyThing());
     }
 
 

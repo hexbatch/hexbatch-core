@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 use App\Annotations\ApiParamMarker;
 use App\Models\ActionDatum;
+use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
 use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
-use App\OpenApi\Results\Elements\ElementActionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -62,7 +62,7 @@ class TypeOff extends Api\ElementApi
     public function getDataSnapshot(): array|IThingBaseResponse
     {
         $ret =  $this->getMyData();
-        return new ElementActionResponse(given_element: $ret['element'],given_set: $ret['set'],
+        return new ApiElementActionResponse(given_element: $ret['element'],given_set: $ret['set'],
             given_type: $ret['type'],given_phase: $ret['phase'],thing: $this->getMyThing());
     }
 
