@@ -19,7 +19,7 @@ class ApiElementCollectionResponse extends ApiCollectionBase implements IThingBa
 {
 
     #[OA\Property(title: 'Elements')]
-    public ElementCollectionResponse $elements;
+    public ElementCollectionResponse $element_collection;
 
     #[OA\Property(title: 'Thing')]
     public ?ApiThingResponse $thing = null;
@@ -31,7 +31,7 @@ class ApiElementCollectionResponse extends ApiCollectionBase implements IThingBa
          ?Thing $thing = null
     )
     {
-        $this->elements = new ElementCollectionResponse(given_elements: $given_elements,type_level: $type_level,attribute_level: $attribute_level,
+        $this->element_collection = new ElementCollectionResponse(given_elements: $given_elements,type_level: $type_level,attribute_level: $attribute_level,
         namespace_level: $namespace_level,phase_level: $phase_level);
 
         $this->thing = new ApiThingResponse(thing:$thing);
@@ -40,7 +40,7 @@ class ApiElementCollectionResponse extends ApiCollectionBase implements IThingBa
 
     public  function toArray() : array  {
         $ret = parent::toArray();
-        $ret['elements'] = $this->elements;
+        $ret['element_collection'] = $this->element_collection;
         $ret['thing'] = $this->thing;
         return $ret;
     }

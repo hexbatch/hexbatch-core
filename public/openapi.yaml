@@ -7710,7 +7710,7 @@ components:
     ApiLocationCollectionResponse:
       description: 'Shows the location bounds list and thing for the api call'
       properties:
-        locations:
+        location_collection:
           $ref: '#/components/schemas/LocationCollectionResponse'
         thing:
           oneOf:
@@ -7736,7 +7736,7 @@ components:
     ApiScheduleCollectionResponse:
       description: 'Shows the schedule list and thing for the api call'
       properties:
-        schedule:
+        schedule_collection:
           $ref: '#/components/schemas/ScheduleCollectionResponse'
         thing:
           oneOf:
@@ -7775,7 +7775,7 @@ components:
     ApiElementCollectionResponse:
       description: 'Shows the element details and thing for the api call'
       properties:
-        elements:
+        element_collection:
           $ref: '#/components/schemas/ElementCollectionResponse'
         thing:
           oneOf:
@@ -7814,7 +7814,7 @@ components:
     ApiLinkerCollectionResponse:
       description: 'Shows the link collection and thing for the api call'
       properties:
-        links:
+        link_collection:
           $ref: '#/components/schemas/LinkerCollectionResponse'
         thing:
           oneOf:
@@ -7840,7 +7840,7 @@ components:
     ApiSetCollectionResponse:
       description: 'Shows the set list and thing for the api call'
       properties:
-        sets:
+        set_collection:
           $ref: '#/components/schemas/SetCollectionResponse'
         thing:
           oneOf:
@@ -7866,7 +7866,7 @@ components:
     ApiTypeCollectionResponse:
       description: 'Shows the type list and thing for the api call'
       properties:
-        types:
+        type_collection:
           $ref: '#/components/schemas/TypeCollectionResponse'
         thing:
           oneOf:

@@ -19,7 +19,7 @@ class ApiSetCollectionResponse extends ApiCollectionBase implements IThingBaseRe
 {
 
     #[OA\Property(title: 'Sets')]
-    public SetCollectionResponse $sets;
+    public SetCollectionResponse $set_collection;
 
     #[OA\Property(title: 'Thing')]
     public ?ApiThingResponse $thing = null;
@@ -32,7 +32,7 @@ class ApiSetCollectionResponse extends ApiCollectionBase implements IThingBaseRe
          ?Thing $thing = null
     )
     {
-        $this->sets = new SetCollectionResponse(given_sets: $given_sets,show_definer: $show_definer,show_parent: $show_parent,
+        $this->set_collection = new SetCollectionResponse(given_sets: $given_sets,show_definer: $show_definer,show_parent: $show_parent,
                                                 show_elements: $show_elements,
                                                 definer_type_level: $definer_type_level,children_set_level: $children_set_level,
                                                 parent_set_level: $parent_set_level);
@@ -45,7 +45,7 @@ class ApiSetCollectionResponse extends ApiCollectionBase implements IThingBaseRe
 
     public  function toArray() : array  {
         $ret = parent::toArray();
-        $ret['sets'] = $this->sets;
+        $ret['set_collection'] = $this->set_collection;
         if ($this->thing) {
             $ret['thing'] = $this->thing;
         }

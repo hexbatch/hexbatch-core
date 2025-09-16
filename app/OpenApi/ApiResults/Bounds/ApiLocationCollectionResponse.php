@@ -17,8 +17,8 @@ use OpenApi\Attributes as OA;
 class ApiLocationCollectionResponse extends ApiCollectionBase implements IThingBaseResponse
 {
 
-    #[OA\Property(title: 'Location collection')]
-    public LocationCollectionResponse $locations;
+    #[OA\Property(title: 'Locations')]
+    public LocationCollectionResponse $location_collection;
 
     #[OA\Property(title: 'Thing')]
     public ?ApiThingResponse $thing = null;
@@ -28,14 +28,14 @@ class ApiLocationCollectionResponse extends ApiCollectionBase implements IThingB
         $given_locations,?Thing $thing = null
     )
     {
-        $this->locations = new LocationCollectionResponse(given_locations: $given_locations);
+        $this->location_collection = new LocationCollectionResponse(given_locations: $given_locations);
         $this->thing = new ApiThingResponse(thing:$thing);
     }
 
 
     public  function toArray() : array  {
         $ret = parent::toArray();
-        $ret['locations'] = $this->locations;
+        $ret['location_collection'] = $this->location_collection;
         $ret['thing'] = $this->thing;
         return $ret;
     }

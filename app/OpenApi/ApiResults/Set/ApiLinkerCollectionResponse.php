@@ -23,7 +23,7 @@ class ApiLinkerCollectionResponse extends ApiCollectionBase implements IThingBas
 {
 
     #[OA\Property(title: 'Links')]
-    public LinkerCollectionResponse $links;
+    public LinkerCollectionResponse $link_collection;
 
     #[OA\Property(title: 'Thing')]
     public ?ApiThingResponse $thing = null;
@@ -39,7 +39,7 @@ class ApiLinkerCollectionResponse extends ApiCollectionBase implements IThingBas
         ?Thing $thing = null
     )
     {
-        $this->links = new LinkerCollectionResponse(linker_element: $linker_element,
+        $this->link_collection = new LinkerCollectionResponse(linker_element: $linker_element,
             show_linker: $show_linker,show_definer: $show_definer,show_parent: $show_parent,show_elements: $show_elements ,show_set: $show_set,
             definer_type_level: $definer_type_level,children_set_level: $children_set_level,parent_set_level: $parent_set_level,
             type_level: $type_level,attribute_level: $attribute_level,namespace_level: $namespace_level,phase_level: $phase_level
@@ -54,7 +54,7 @@ class ApiLinkerCollectionResponse extends ApiCollectionBase implements IThingBas
 
     public  function toArray() : array  {
         $ret = parent::toArray();
-        $ret['links'] = $this->links;
+        $ret['link_collection'] = $this->link_collection;
         if ($this->thing) {
             $ret['thing'] = $this->thing;
         }

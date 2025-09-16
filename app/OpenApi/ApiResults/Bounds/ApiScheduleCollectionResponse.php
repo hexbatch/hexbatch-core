@@ -18,8 +18,8 @@ use OpenApi\Attributes as OA;
 class ApiScheduleCollectionResponse extends ApiCollectionBase implements IThingBaseResponse
 {
 
-    #[OA\Property(title: 'Schedule')]
-    public ScheduleCollectionResponse $schedule;
+    #[OA\Property(title: 'Schedules')]
+    public ScheduleCollectionResponse $schedule_collection;
 
     #[OA\Property(title: 'Thing')]
     public ?ApiThingResponse $thing = null;
@@ -29,7 +29,7 @@ class ApiScheduleCollectionResponse extends ApiCollectionBase implements IThingB
          $given_times,?Thing $thing = null
     )
     {
-        $this->schedule = new ScheduleCollectionResponse(given_schedules: $given_times);
+        $this->schedule_collection = new ScheduleCollectionResponse(given_schedules: $given_times);
 
         $this->thing = new ApiThingResponse(thing:$thing);
     }
@@ -37,7 +37,7 @@ class ApiScheduleCollectionResponse extends ApiCollectionBase implements IThingB
 
     public  function toArray() : array  {
         $ret = parent::toArray();
-        $ret['location'] = $this->schedule;
+        $ret['schedule_collection'] = $this->schedule_collection;
         $ret['thing'] = $this->thing;
         return $ret;
     }

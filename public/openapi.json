@@ -11353,7 +11353,7 @@
             "ApiLocationCollectionResponse": {
                 "description": "Shows the location bounds list and thing for the api call",
                 "properties": {
-                    "locations": {
+                    "location_collection": {
                         "$ref": "#/components/schemas/LocationCollectionResponse"
                     },
                     "thing": {
@@ -11393,7 +11393,7 @@
             "ApiScheduleCollectionResponse": {
                 "description": "Shows the schedule list and thing for the api call",
                 "properties": {
-                    "schedule": {
+                    "schedule_collection": {
                         "$ref": "#/components/schemas/ScheduleCollectionResponse"
                     },
                     "thing": {
@@ -11453,7 +11453,7 @@
             "ApiElementCollectionResponse": {
                 "description": "Shows the element details and thing for the api call",
                 "properties": {
-                    "elements": {
+                    "element_collection": {
                         "$ref": "#/components/schemas/ElementCollectionResponse"
                     },
                     "thing": {
@@ -11513,7 +11513,7 @@
             "ApiLinkerCollectionResponse": {
                 "description": "Shows the link collection and thing for the api call",
                 "properties": {
-                    "links": {
+                    "link_collection": {
                         "$ref": "#/components/schemas/LinkerCollectionResponse"
                     },
                     "thing": {
@@ -11553,7 +11553,7 @@
             "ApiSetCollectionResponse": {
                 "description": "Shows the set list and thing for the api call",
                 "properties": {
-                    "sets": {
+                    "set_collection": {
                         "$ref": "#/components/schemas/SetCollectionResponse"
                     },
                     "thing": {
@@ -11593,7 +11593,7 @@
             "ApiTypeCollectionResponse": {
                 "description": "Shows the type list and thing for the api call",
                 "properties": {
-                    "types": {
+                    "type_collection": {
                         "$ref": "#/components/schemas/TypeCollectionResponse"
                     },
                     "thing": {

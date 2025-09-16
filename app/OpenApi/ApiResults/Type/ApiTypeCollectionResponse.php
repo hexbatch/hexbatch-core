@@ -20,7 +20,7 @@ class ApiTypeCollectionResponse extends ApiCollectionBase implements IThingBaseR
 {
 
     #[OA\Property(title: 'Types')]
-    public TypeCollectionResponse $types;
+    public TypeCollectionResponse $type_collection;
 
     #[OA\Property(title: 'Thing')]
     public ?ApiThingResponse $thing = null;
@@ -33,7 +33,7 @@ class ApiTypeCollectionResponse extends ApiCollectionBase implements IThingBaseR
          ?Thing $thing = null
     )
     {
-        $this->types = new TypeCollectionResponse(given_types: $given_types,namespace_levels: $namespace_levels,parent_levels: $parent_levels,
+        $this->type_collection = new TypeCollectionResponse(given_types: $given_types,namespace_levels: $namespace_levels,parent_levels: $parent_levels,
                                                 attribute_levels: $attribute_levels,
                                                 inherited_attribute_levels: $inherited_attribute_levels,number_time_spans: $number_time_spans);
 
@@ -45,7 +45,7 @@ class ApiTypeCollectionResponse extends ApiCollectionBase implements IThingBaseR
 
     public  function toArray() : array  {
         $ret = parent::toArray();
-        $ret['types'] = $this->types;
+        $ret['type_collection'] = $this->type_collection;
         if ($this->thing) {
             $ret['thing'] = $this->thing;
         }
