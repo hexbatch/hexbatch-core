@@ -3,7 +3,7 @@
 namespace App\OpenApi\ApiResults\Bounds;
 
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 use App\OpenApi\Results\Bounds\LocationCollectionResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
@@ -21,7 +21,7 @@ class ApiLocationCollectionResponse extends ApiCollectionBase implements IThingB
     public LocationCollectionResponse $locations;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -29,7 +29,7 @@ class ApiLocationCollectionResponse extends ApiCollectionBase implements IThingB
     )
     {
         $this->locations = new LocationCollectionResponse(given_locations: $given_locations);
-        $this->thing = new ThingResponse(thing:$thing);
+        $this->thing = new ApiThingResponse(thing:$thing);
     }
 
 

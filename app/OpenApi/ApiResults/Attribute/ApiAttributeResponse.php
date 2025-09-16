@@ -4,7 +4,7 @@ namespace App\OpenApi\ApiResults\Attribute;
 
 use App\Models\Attribute;
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
@@ -22,7 +22,7 @@ class ApiAttributeResponse extends ApiCollectionBase implements IThingBaseRespon
     public AttributeResponse $attribute;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -34,7 +34,7 @@ class ApiAttributeResponse extends ApiCollectionBase implements IThingBaseRespon
         $this->attribute = new AttributeResponse(given_attribute: $given_attribute,
             attribute_levels: $attribute_levels,owning_type_levels: $owning_type_levels,design_levels: $design_levels);
 
-        $this->thing = new ThingResponse(thing:$thing);
+        $this->thing = new ApiThingResponse(thing:$thing);
     }
 
 

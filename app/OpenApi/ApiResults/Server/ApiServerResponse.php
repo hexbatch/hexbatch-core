@@ -6,7 +6,7 @@ namespace App\OpenApi\ApiResults\Server;
 
 use App\Models\Server;
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 use App\OpenApi\Results\Servers\ServerResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
@@ -24,7 +24,7 @@ class ApiServerResponse extends ApiCollectionBase implements IThingBaseResponse
     public ServerResponse $server;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -35,7 +35,7 @@ class ApiServerResponse extends ApiCollectionBase implements IThingBaseResponse
             b_show_namespace: $b_show_namespace);
 
         if ($thing) {
-            $this->thing = new ThingResponse(thing:$thing);
+            $this->thing = new ApiThingResponse(thing:$thing);
         }
 
     }

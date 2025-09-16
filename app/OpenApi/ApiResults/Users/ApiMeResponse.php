@@ -5,7 +5,7 @@ namespace App\OpenApi\ApiResults\Users;
 
 use App\Models\User;
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 
 use App\OpenApi\Results\Users\MeResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
@@ -16,7 +16,7 @@ use OpenApi\Attributes as OA;
 /**
  * Shows who you are and thing for the api call
  */
-#[OA\Schema(schema: 'ApiLoginResponse')]
+#[OA\Schema(schema: 'ApiMeResponse')]
 class ApiMeResponse extends ApiCollectionBase implements IThingBaseResponse
 {
 
@@ -24,7 +24,7 @@ class ApiMeResponse extends ApiCollectionBase implements IThingBaseResponse
     public MeResponse $me;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -35,7 +35,7 @@ class ApiMeResponse extends ApiCollectionBase implements IThingBaseResponse
         $this->me = new MeResponse(user: $user,show_namespace: $show_namespace);
 
         if ($thing) {
-            $this->thing = new ThingResponse(thing:$thing);
+            $this->thing = new ApiThingResponse(thing:$thing);
         }
     }
 

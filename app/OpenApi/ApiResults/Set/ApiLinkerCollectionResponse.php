@@ -7,7 +7,7 @@ namespace App\OpenApi\ApiResults\Set;
 use App\Models\Element;
 
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 
 use App\OpenApi\Results\Set\LinkerCollectionResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
@@ -26,7 +26,7 @@ class ApiLinkerCollectionResponse extends ApiCollectionBase implements IThingBas
     public LinkerCollectionResponse $links;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -46,7 +46,7 @@ class ApiLinkerCollectionResponse extends ApiCollectionBase implements IThingBas
            );
 
         if ($thing) {
-            $this->thing = new ThingResponse(thing:$thing);
+            $this->thing = new ApiThingResponse(thing:$thing);
         }
 
     }

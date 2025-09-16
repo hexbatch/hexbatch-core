@@ -19,7 +19,7 @@ class HexbatchCallbackCollectionResponse extends ResultCursorBase
 
     #[OA\Property( title: 'List of callbacks')]
     /**
-     * @var CallbackResponse[] $callbacks
+     * @var HexbatchCallbackResponse[] $callbacks
      */
     public array $callbacks = [];
 
@@ -34,7 +34,7 @@ class HexbatchCallbackCollectionResponse extends ResultCursorBase
         parent::__construct($given_callbacks);
         $this->callbacks = [];
         foreach ($given_callbacks as $callback) {
-            $this->callbacks[] = new CallbackResponse(callback: $callback,b_include_hook: $b_include_hook,
+            $this->callbacks[] = new HexbatchCallbackResponse(callback: $callback,b_include_hook: $b_include_hook,
                 b_include_thing: $b_include_thing,b_alerted_by: $b_alerted_by);
         }
 

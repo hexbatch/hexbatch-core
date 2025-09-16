@@ -4,7 +4,7 @@ namespace App\OpenApi\ApiResults\Bounds;
 
 
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 use App\OpenApi\Results\Bounds\ScheduleCollectionResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
@@ -22,7 +22,7 @@ class ApiScheduleCollectionResponse extends ApiCollectionBase implements IThingB
     public ScheduleCollectionResponse $schedule;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -31,7 +31,7 @@ class ApiScheduleCollectionResponse extends ApiCollectionBase implements IThingB
     {
         $this->schedule = new ScheduleCollectionResponse(given_schedules: $given_times);
 
-        $this->thing = new ThingResponse(thing:$thing);
+        $this->thing = new ApiThingResponse(thing:$thing);
     }
 
 

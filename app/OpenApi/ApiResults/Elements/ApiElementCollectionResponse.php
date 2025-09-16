@@ -4,7 +4,7 @@ namespace App\OpenApi\ApiResults\Elements;
 
 
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 use App\OpenApi\Results\Elements\ElementCollectionResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
@@ -22,7 +22,7 @@ class ApiElementCollectionResponse extends ApiCollectionBase implements IThingBa
     public ElementCollectionResponse $elements;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -34,7 +34,7 @@ class ApiElementCollectionResponse extends ApiCollectionBase implements IThingBa
         $this->elements = new ElementCollectionResponse(given_elements: $given_elements,type_level: $type_level,attribute_level: $attribute_level,
         namespace_level: $namespace_level,phase_level: $phase_level);
 
-        $this->thing = new ThingResponse(thing:$thing);
+        $this->thing = new ApiThingResponse(thing:$thing);
     }
 
 

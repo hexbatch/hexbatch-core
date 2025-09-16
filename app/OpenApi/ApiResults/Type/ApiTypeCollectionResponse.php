@@ -4,7 +4,7 @@ namespace App\OpenApi\ApiResults\Type;
 
 
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 
 use App\OpenApi\Results\Types\TypeCollectionResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
@@ -23,7 +23,7 @@ class ApiTypeCollectionResponse extends ApiCollectionBase implements IThingBaseR
     public TypeCollectionResponse $types;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -38,7 +38,7 @@ class ApiTypeCollectionResponse extends ApiCollectionBase implements IThingBaseR
                                                 inherited_attribute_levels: $inherited_attribute_levels,number_time_spans: $number_time_spans);
 
         if ($thing) {
-            $this->thing = new ThingResponse(thing:$thing);
+            $this->thing = new ApiThingResponse(thing:$thing);
         }
     }
 

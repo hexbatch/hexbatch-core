@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Me'
+                $ref: '#/components/schemas/ApiMeResponse'
         '403':
           description: 'Not logged in'
           content:
@@ -57,7 +57,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/ApiLoginResponse'
         '401':
           description: 'Wrong credentials'
           content:
@@ -84,7 +84,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Me'
+                $ref: '#/components/schemas/ApiMeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -141,7 +141,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateTokenResponse'
+                $ref: '#/components/schemas/ApiCreateTokenResponse'
         '400':
           description: 'Something happened'
           content:
@@ -270,7 +270,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -326,7 +326,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -382,7 +382,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -438,7 +438,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -487,7 +487,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -537,7 +537,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -593,7 +593,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -630,7 +630,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeCollectionResponse'
+                $ref: '#/components/schemas/ApiTypeCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -682,7 +682,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttributeResponse'
+                $ref: '#/components/schemas/ApiAttributeResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -720,7 +720,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttributeCollectionResponse'
+                $ref: '#/components/schemas/ApiAttributeCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -772,7 +772,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttributeResponse'
+                $ref: '#/components/schemas/ApiAttributeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -829,7 +829,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttributeResponse'
+                $ref: '#/components/schemas/ApiAttributeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -893,7 +893,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttributeResponse'
+                $ref: '#/components/schemas/ApiAttributeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -949,7 +949,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1005,7 +1005,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1055,7 +1055,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduleResponse'
+                $ref: '#/components/schemas/ApiScheduleResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1112,7 +1112,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduleResponse'
+                $ref: '#/components/schemas/ApiScheduleResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1169,7 +1169,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduleResponse'
+                $ref: '#/components/schemas/ApiScheduleResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1219,7 +1219,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LocationResponse'
+                $ref: '#/components/schemas/ApiLocationResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1276,7 +1276,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LocationResponse'
+                $ref: '#/components/schemas/ApiLocationResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1333,7 +1333,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LocationResponse'
+                $ref: '#/components/schemas/ApiLocationResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1383,7 +1383,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LocationCollectionResponse'
+                $ref: '#/components/schemas/ApiLocationCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -1393,7 +1393,7 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/list_times':
+  '/api/v1/{user_namespace}/design/schedules/list':
     patch:
       tags:
         - design
@@ -1421,7 +1421,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduleCollectionResponse'
+                $ref: '#/components/schemas/ApiScheduleCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -1905,7 +1905,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1961,7 +1961,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementActionResponse'
+                $ref: '#/components/schemas/ApiElementActionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -2017,7 +2017,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementActionResponse'
+                $ref: '#/components/schemas/ApiElementActionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -2185,7 +2185,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementActionResponse'
+                $ref: '#/components/schemas/ApiElementActionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -2512,7 +2512,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -2568,7 +2568,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -2640,7 +2640,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LinkResponse'
+                $ref: '#/components/schemas/ApiLinkerResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -2703,7 +2703,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementResponse'
+                $ref: '#/components/schemas/ApiElementResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -2747,7 +2747,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -2813,7 +2813,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SetResponse'
+                $ref: '#/components/schemas/ApiSetResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -3598,7 +3598,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LinkResponse'
+                $ref: '#/components/schemas/ApiLinkerResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -3648,7 +3648,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LinkerCollectionResponse'
+                $ref: '#/components/schemas/ApiLinkerCollectionResponse'
         '501':
           description: 'Not yet implemented'
       security:
@@ -3689,7 +3689,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LinkResponse'
+                $ref: '#/components/schemas/ApiLinkerResponse'
         '403':
           description: 'Not a member of the namespace'
           content:
@@ -4928,7 +4928,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServerResponse'
+                $ref: '#/components/schemas/ApiServerResponse'
   /api/v1/server/admin:
     get:
       tags:
@@ -4997,7 +4997,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -5308,7 +5308,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SetResponse'
+                $ref: '#/components/schemas/ApiSetResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -5406,7 +5406,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -5450,7 +5450,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SetCollectionResponse'
+                $ref: '#/components/schemas/ApiSetCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -5494,7 +5494,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -5550,7 +5550,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeCollectionResponse'
+                $ref: '#/components/schemas/ApiTypeCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -5587,7 +5587,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeCollectionResponse'
+                $ref: '#/components/schemas/ApiTypeCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -5672,7 +5672,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -5937,7 +5937,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -5993,7 +5993,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TypeResponse'
+                $ref: '#/components/schemas/ApiTypeResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -6134,7 +6134,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ElementCollectionResponse'
+                $ref: '#/components/schemas/ApiElementCollectionResponse'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -7594,6 +7594,340 @@ components:
         - PENDING_PUBLISHING_APPROVAL
         - PUBLISHING_APPROVED
         - PUBLISHING_DENIED
+    ApiThingResponse:
+      description: 'Show details about an attribute'
+      properties:
+        thing_uuid:
+          title: Self
+          type:
+            - string
+            - 'null'
+          format: uuid
+        thing_parent_uuid:
+          title: Parent
+          type:
+            - string
+            - 'null'
+          format: uuid
+        thing_error:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ThingErrorResponse'
+            -
+              type: 'null'
+          title: Error
+        thing_status:
+          oneOf:
+            -
+              $ref: '#/components/schemas/TypeOfThingStatus'
+            -
+              type: 'null'
+          title: Status
+        thing_async:
+          title: Async
+          type:
+            - boolean
+            - 'null'
+        thing_action_name:
+          title: 'Action name'
+          type:
+            - string
+            - 'null'
+        thing_action_ref:
+          title: 'Action ref'
+          type:
+            - string
+            - 'null'
+        thing_owner_name:
+          title: 'Owner name'
+          type:
+            - string
+            - 'null'
+        thing_owner_ref:
+          title: 'Owner ref'
+          type:
+            - string
+            - 'null'
+        thing_started_at:
+          title: 'Started at'
+          description: 'Iso 8601 datetime string for when this was started'
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-01-25T15:00:59-06:00'
+        thing_ran_at:
+          title: 'Ran at'
+          description: 'Iso 8601 datetime string for when this ran'
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-01-25T15:00:59-06:00'
+        thing_wait_until_at:
+          title: 'Wait until '
+          description: 'Iso 8601 datetime string for when this ran'
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-01-25T15:00:59-06:00'
+        thing_tags:
+          title: Tags
+          description: $tags
+          type:
+            - array
+            - 'null'
+          items:
+            type: string
+      type: object
+    ApiAttributeCollectionResponse:
+      description: 'Shows the attribute list and thing for the api call'
+      properties:
+        attribute_collection:
+          $ref: '#/components/schemas/AttributeCollectionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiAttributeResponse:
+      description: 'Shows the attribute and thing for the api call'
+      properties:
+        attribute:
+          $ref: '#/components/schemas/AttributeResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiLocationCollectionResponse:
+      description: 'Shows the location bounds list and thing for the api call'
+      properties:
+        locations:
+          $ref: '#/components/schemas/LocationCollectionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiLocationResponse:
+      description: 'Shows the location bound and thing for the api call'
+      properties:
+        location:
+          $ref: '#/components/schemas/LocationResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiScheduleCollectionResponse:
+      description: 'Shows the schedule list and thing for the api call'
+      properties:
+        schedule:
+          $ref: '#/components/schemas/ScheduleCollectionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiScheduleResponse:
+      description: 'Shows the time bound and thing for the api call'
+      properties:
+        schedule:
+          $ref: '#/components/schemas/ScheduleResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiElementActionResponse:
+      description: 'Shows the element details and thing for the api call'
+      properties:
+        action:
+          $ref: '#/components/schemas/ElementActionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiElementCollectionResponse:
+      description: 'Shows the element details and thing for the api call'
+      properties:
+        elements:
+          $ref: '#/components/schemas/ElementCollectionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiElementResponse:
+      description: 'Shows the element details and thing for the api call'
+      properties:
+        element:
+          $ref: '#/components/schemas/ElementResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiServerResponse:
+      description: 'Shows the server details and thing for the api call'
+      properties:
+        server:
+          $ref: '#/components/schemas/ServerResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiLinkerCollectionResponse:
+      description: 'Shows the link collection and thing for the api call'
+      properties:
+        links:
+          $ref: '#/components/schemas/LinkerCollectionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiLinkerResponse:
+      description: 'Shows the link and thing for the api call'
+      properties:
+        link:
+          $ref: '#/components/schemas/LinkResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiSetCollectionResponse:
+      description: 'Shows the set list and thing for the api call'
+      properties:
+        sets:
+          $ref: '#/components/schemas/SetCollectionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiSetResponse:
+      description: 'Shows the set detail and thing for the api call'
+      properties:
+        set:
+          $ref: '#/components/schemas/SetResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiTypeCollectionResponse:
+      description: 'Shows the type list and thing for the api call'
+      properties:
+        types:
+          $ref: '#/components/schemas/TypeCollectionResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiTypeResponse:
+      description: 'Shows the type detail and thing for the api call'
+      properties:
+        type:
+          $ref: '#/components/schemas/TypeResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiCreateTokenResponse:
+      description: 'Shows the token and thing for the api call'
+      properties:
+        token:
+          $ref: '#/components/schemas/CreateTokenResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiLoginResponse:
+      description: 'Shows the login and thing for the api call'
+      properties:
+        login:
+          $ref: '#/components/schemas/LoginResponse'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
+    ApiMeResponse:
+      description: 'Shows who you are and thing for the api call'
+      properties:
+        me:
+          $ref: '#/components/schemas/Me'
+        thing:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ApiThingResponse'
+            -
+              type: 'null'
+          title: Thing
+      type: object
     HexbatchCron:
       title: 'Linux crontab schedule'
       description: 'Defines the cron format'
@@ -8029,89 +8363,6 @@ components:
       type: object
     DesignAttributeDestroyParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         attribute_reference:
           title: Attribute
           description: 'Attribute can be the full name or uuid'
@@ -8121,89 +8372,6 @@ components:
       type: object
     DesignAttributeParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         type_uuid:
           title: Type
           description: 'Attributes must have a type. This can the full name or uuid'
@@ -8275,89 +8443,6 @@ components:
       type: object
     DesignLocationParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         bound_name:
           oneOf:
             -
@@ -8387,89 +8472,6 @@ components:
       type: object
     DesignOwnershipParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         type:
           oneOf:
             -
@@ -8491,89 +8493,6 @@ components:
       type: object
     DesignParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         type_name:
           $ref: '#/components/schemas/HexbatchResourceName'
         schedule:
@@ -8592,89 +8511,6 @@ components:
       type: object
     DesignParentParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         parents:
           title: Parents
           type:
@@ -8685,89 +8521,6 @@ components:
       type: object
     DesignTimeParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         bound_name:
           $ref: '#/components/schemas/HexbatchResourceName'
           description: 'Name of the bound'
@@ -8806,89 +8559,6 @@ components:
       type: object
     ChangeElementOwnerParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         namespace_ref:
           title: Namespace
           description: 'The new elements are put into this namespace. Can be uuid or name. If missing will be put into calling namespace'
@@ -8904,89 +8574,6 @@ components:
       type: object
     ElementSelectParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         element_refs:
           title: Elements
           description: 'The elements to select. '
@@ -9020,89 +8607,6 @@ components:
       type: object
     LinkCreateParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         element_ref:
           title: Element
           description: 'The anchor to the link'
@@ -9118,89 +8622,6 @@ components:
       type: object
     LinkSelectParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         link_ref:
           title: Link
           description: 'The link'
@@ -9211,89 +8632,6 @@ components:
     RegistrationParams:
       description: 'Login requires a username and password'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         username:
           $ref: '#/components/schemas/HexbatchResourceName'
         password:
@@ -9321,89 +8659,6 @@ components:
             password: xamp
     AddElementParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         set_ref:
           title: Set
           description: 'The set which will have the elements. This is uuid'
@@ -9424,89 +8679,6 @@ components:
     SetCreateParams:
       description: "Create set params\nelement_uuid: required to create a set. An element can make one set. This can be uuid.\nparent_set_uuid: A set can optionally have a parent set.  Parents cannot be changed later. Children can be parents. This can be uuid.\nbool has_events: A set can choose to turn off events fired when an element enters or leaves it. Cannot be changed later."
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         element_ref:
           title: Element
           description: 'required to create a set. An element can make one set'
@@ -9526,89 +8698,6 @@ components:
       type: object
     CreateElementParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         type_ref:
           title: Type
           description: 'The element is made from this type. Can be uuid or name'
@@ -9634,89 +8723,6 @@ components:
       type: object
     TypeParams:
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         type_uuid:
           title: Type
           description: 'The type. Can be uuid or name'
@@ -10046,89 +9052,6 @@ components:
           type:
             - string
             - 'null'
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         attributes:
           title: 'List of Attributes'
           description: $attributes
@@ -10139,89 +9062,6 @@ components:
     AttributeResponse:
       description: 'Show details about an attribute'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         name:
@@ -10307,89 +9147,6 @@ components:
           type:
             - string
             - 'null'
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         locations:
           title: 'List of Schedules'
           description: $locations
@@ -10400,89 +9157,6 @@ components:
     LocationResponse:
       description: 'Show details about a map or shape location'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         name:
@@ -10524,89 +9198,6 @@ components:
           type:
             - string
             - 'null'
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         schedules:
           title: 'List of Schedules'
           description: $schedules
@@ -10617,89 +9208,6 @@ components:
     ScheduleResponse:
       description: 'Show details about a time schedule'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         name:
@@ -10758,89 +9266,6 @@ components:
     ScheduleSpanResponse:
       description: 'Show details about a time schedule'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         start:
           title: 'Start at'
           type:
@@ -10865,99 +9290,20 @@ components:
             - 'null'
         callbacks:
           title: 'List of callbacks'
-          description: $hooks
+          description: $callbacks
           type: array
           items:
             $ref: '#/components/schemas/HexbatchCallbackResponse'
       type: object
     HexbatchCallbackResponse:
       description: 'Show callbacks'
+      properties:
+        callback:
+          $ref: '#/components/schemas/CallbackResponse'
+      type: object
     ElementActionResponse:
       description: 'Show details about an element'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         element:
           oneOf:
             -
@@ -11009,89 +9355,6 @@ components:
           type:
             - string
             - 'null'
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         elements:
           title: 'List of elements'
           description: $elements
@@ -11102,89 +9365,6 @@ components:
     ElementResponse:
       description: 'Show details about an element'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         phase_uuid:
@@ -11223,89 +9403,6 @@ components:
     ElementValueResponse:
       description: 'Show details about an element'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         attribute_uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         attribute_name:
@@ -11328,89 +9425,6 @@ components:
     PhaseResponse:
       description: 'Show details about a phase'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         phase_type:
@@ -11445,89 +9459,6 @@ components:
     ServerResponse:
       description: 'Show details about a phase'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         namespace_uuid:
@@ -11580,89 +9511,6 @@ components:
     LinkResponse:
       description: 'Show details about the sets linked together by an element'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         linking_element_uuid:
@@ -11698,89 +9546,6 @@ components:
           type:
             - string
             - 'null'
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         linking_element_uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         linking_element:
@@ -11806,89 +9571,6 @@ components:
           type:
             - string
             - 'null'
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         sets:
           title: 'List of elements'
           description: $sets
@@ -11899,89 +9581,6 @@ components:
     SetResponse:
       description: 'Show details about a set'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         defining_element_uuid:
@@ -12024,89 +9623,6 @@ components:
     AccessLevelResponse:
       description: 'Show details about a parent type'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         type_uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         server_uuid:
@@ -12146,89 +9662,6 @@ components:
           type:
             - string
             - 'null'
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         types:
           title: 'List of types'
           description: $types
@@ -12239,89 +9672,6 @@ components:
     TypeParentResponse:
       description: 'Show details about a parent type'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         parent:
           $ref: '#/components/schemas/TypeResponse'
         approval:
@@ -12336,89 +9686,6 @@ components:
     TypeResponse:
       description: 'Show details about a type'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         name:
@@ -12477,89 +9744,6 @@ components:
     UserNamespaceResponse:
       description: 'Show details about a namespace'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         home_set_uuid:
@@ -12590,178 +9774,12 @@ components:
     CreateTokenResponse:
       description: 'Returns the token that is required other api calls'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         auth_token:
           $ref: '#/components/schemas/HexbatchToken'
       type: object
     LoginResponse:
       description: 'Returns the token that is required other api calls'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         message:
           title: Message
           type: string
@@ -12771,89 +9789,6 @@ components:
     Me:
       description: 'Show details about the logged-in user'
       properties:
-        thing_uuid:
-          title: Self
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_parent_uuid:
-          title: Parent
-          type:
-            - string
-            - 'null'
-          format: uuid
-        thing_error:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThingErrorResponse'
-            -
-              type: 'null'
-          title: Error
-        thing_status:
-          oneOf:
-            -
-              $ref: '#/components/schemas/TypeOfThingStatus'
-            -
-              type: 'null'
-          title: Status
-        thing_async:
-          title: Async
-          type:
-            - boolean
-            - 'null'
-        thing_action_name:
-          title: 'Action name'
-          type:
-            - string
-            - 'null'
-        thing_action_ref:
-          title: 'Action ref'
-          type:
-            - string
-            - 'null'
-        thing_owner_name:
-          title: 'Owner name'
-          type:
-            - string
-            - 'null'
-        thing_owner_ref:
-          title: 'Owner ref'
-          type:
-            - string
-            - 'null'
-        thing_started_at:
-          title: 'Started at'
-          description: 'Iso 8601 datetime string for when this was started'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_ran_at:
-          title: 'Ran at'
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_wait_until_at:
-          title: 'Wait until '
-          description: 'Iso 8601 datetime string for when this ran'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        thing_tags:
-          title: Tags
-          description: $tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         username:

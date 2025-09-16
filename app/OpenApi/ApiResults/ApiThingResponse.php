@@ -13,8 +13,8 @@ use OpenApi\Attributes as OA;
 /**
  * Show details about an attribute
  */
-#[OA\Schema(schema: 'ThingResponse')]
-class ThingResponse extends ApiCallBase
+#[OA\Schema(schema: 'ApiThingResponse')]
+class ApiThingResponse extends ApiCallBase
 {
     use ThingMimimalResponseTrait;
 

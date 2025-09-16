@@ -8,7 +8,7 @@ use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\Phase;
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 use App\OpenApi\Results\Elements\ElementActionResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
@@ -26,7 +26,7 @@ class ApiElementActionResponse extends ApiCollectionBase implements IThingBaseRe
     public ElementActionResponse $action;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -42,7 +42,7 @@ class ApiElementActionResponse extends ApiCollectionBase implements IThingBaseRe
         $this->action = new ElementActionResponse(value: $value,given_element: $given_element,given_set: $given_set,
         given_type: $given_type,given_attribute: $given_attribute,given_phase: $given_phase);
 
-        $this->thing = new ThingResponse(thing:$thing);
+        $this->thing = new ApiThingResponse(thing:$thing);
     }
 
 

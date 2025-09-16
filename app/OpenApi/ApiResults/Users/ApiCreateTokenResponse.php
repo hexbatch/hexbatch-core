@@ -4,7 +4,7 @@ namespace App\OpenApi\ApiResults\Users;
 
 
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 
 use App\OpenApi\Results\Users\CreateTokenResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
@@ -23,7 +23,7 @@ class ApiCreateTokenResponse extends ApiCollectionBase implements IThingBaseResp
     public CreateTokenResponse $token;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -34,7 +34,7 @@ class ApiCreateTokenResponse extends ApiCollectionBase implements IThingBaseResp
         $this->token = new CreateTokenResponse(auth_token: $auth_token);
 
         if ($thing) {
-            $this->thing = new ThingResponse(thing:$thing);
+            $this->thing = new ApiThingResponse(thing:$thing);
         }
     }
 

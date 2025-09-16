@@ -5,7 +5,7 @@ namespace App\OpenApi\ApiResults\Set;
 
 use App\Models\ElementSet;
 use App\OpenApi\ApiCollectionBase;
-use App\OpenApi\ApiResults\ThingResponse;
+use App\OpenApi\ApiResults\ApiThingResponse;
 use App\OpenApi\Results\Set\SetResponse;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
@@ -23,7 +23,7 @@ class ApiSetResponse extends ApiCollectionBase implements IThingBaseResponse
     public SetResponse $set;
 
     #[OA\Property(title: 'Thing')]
-    public ?ThingResponse $thing = null;
+    public ?ApiThingResponse $thing = null;
 
 
     public function __construct(
@@ -39,7 +39,7 @@ class ApiSetResponse extends ApiCollectionBase implements IThingBaseResponse
                                                 parent_set_level: $parent_set_level);
 
         if ($thing) {
-            $this->thing = new ThingResponse(thing:$thing);
+            $this->thing = new ApiThingResponse(thing:$thing);
         }
     }
 

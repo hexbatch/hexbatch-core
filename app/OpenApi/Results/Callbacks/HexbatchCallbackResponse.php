@@ -17,10 +17,11 @@ class HexbatchCallbackResponse extends ResultBase
     #[OA\Property( title: 'Callback')]
 
     public CallbackResponse $callback;
-    public function __construct(ThingCallback $callback)
+    public function __construct(ThingCallback $callback,bool $b_include_hook =  true, bool $b_include_thing =  false, bool $b_alerted_by =  true)
     {
         parent::__construct();
-        $this->callback = new CallbackResponse(callback: $callback,b_include_hook: true,b_include_thing: true,b_alerted_by: true);
+        $this->callback = new CallbackResponse(callback: $callback,b_include_hook: $b_include_hook,
+            b_include_thing: $b_include_thing,b_alerted_by: $b_alerted_by);
     }
 
 
