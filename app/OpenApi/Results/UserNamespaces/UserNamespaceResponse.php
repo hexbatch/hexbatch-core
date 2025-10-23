@@ -68,7 +68,8 @@ class UserNamespaceResponse extends ResultBase
 
 
     public  function toArray() : array  {
-        $ret = parent::toArray();
+      $ret = parent::toArray();
+        unset($ret['namespace']);
         $ret['uuid'] = $this->uuid;
         $ret['namespace_name'] = $this->namespace_name;
         $ret['base_type_uuid'] = $this->base_type_uuid;

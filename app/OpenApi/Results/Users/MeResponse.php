@@ -54,6 +54,8 @@ class MeResponse extends ResultBase implements ICallResponse
 
     public  function toArray() : array  {
         $ret = parent::toArray();
+        unset($ret['user']);
+        unset($ret['show_namespace']);
         $ret['uuid'] = $this->uuid;
         $ret['username'] = $this->username;
         $ret['registered_at'] = $this->registered_at;
