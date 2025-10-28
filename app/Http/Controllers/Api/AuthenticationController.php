@@ -55,8 +55,8 @@ class AuthenticationController extends Controller
     )]
     public function me(Request $request) {
         $user = User::buildUser($request->user()->id)->first();
-
-        return response()->json(new ApiMeResponse(user: $user,show_namespace: true), CodeOf::HTTP_OK);
+        $expires_at = $request->user()->currentAccessToken()?->expires_at;
+        return response()->json(new ApiMeResponse(user: $user,show_namespace: true,token_expires_at: $expires_at), CodeOf::HTTP_OK);
     }
 
 
@@ -92,13 +92,15 @@ class AuthenticationController extends Controller
 
         $user->tokens()->delete(); //change later to keep reserved tokens
 
-        $token = $user->createToken($request->username)->plainTextToken;
-        return response()->json(new ApiLoginResponse(message: __("auth.success"),auth_token: $token));
+        $token = $user->createToken($request->username);
+
+        return response()->json(new ApiLoginResponse(message: __("auth.success"),
+            auth_token: $token->plainTextToken,expiration_date: null ));
     }
 
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/users/register',
@@ -264,7 +266,7 @@ class AuthenticationController extends Controller
     )]
     public function remove_current_token(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()?->delete();
         return response()->json([], CodeOf::HTTP_NO_CONTENT);
     }
 

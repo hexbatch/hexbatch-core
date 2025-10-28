@@ -18,6 +18,7 @@ use Hexbatch\Things\Enums\TypeOfCallbackStatus;
 use Hexbatch\Things\Enums\TypeOfHookMode;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\ICallResponse;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
 use Hexbatch\Things\Models\ThingCallback;
 use Hexbatch\Things\Models\ThingHook;
@@ -151,7 +152,7 @@ class Api extends BaseType implements ICallResponse
 
     public function getCallbackResponse(?int &$http_status = null)
     : null|array|HexbatchCallbackCollectionResponse|HexbatchCallbackResponse|ThingErrorResponse|ThingResponse|
-    ErrorResponse|ThingErrorCollectionResponse|ApiCallBase
+    ErrorResponse|ThingErrorCollectionResponse|ApiCallBase|IThingBaseResponse
     {
         if (!$this->getActionData()) {return null;}
         $search_params = new CallbackSearchParams(

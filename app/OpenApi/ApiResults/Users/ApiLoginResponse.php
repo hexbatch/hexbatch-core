@@ -27,8 +27,7 @@ class ApiLoginResponse extends ApiCollectionBase implements IThingBaseResponse
 
 
     public function __construct(
-        string $message, string $auth_token,
-         ?Thing $thing = null
+        string $message, string $auth_token,?string $expiration_date = null, ?Thing $thing = null
     )
     {
         $this->login = new LoginResponse(message: $message,auth_token: $auth_token);

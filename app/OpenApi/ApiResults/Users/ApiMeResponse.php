@@ -8,6 +8,7 @@ use App\OpenApi\ApiCollectionBase;
 use App\OpenApi\ApiResults\ApiThingResponse;
 
 use App\OpenApi\Results\Users\MeResponse;
+use Carbon\Carbon;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
 use Hexbatch\Things\Models\Thing;
 use OpenApi\Attributes as OA;
@@ -29,10 +30,10 @@ class ApiMeResponse extends ApiCollectionBase implements IThingBaseResponse
 
     public function __construct(
         ?User $user = null, bool $show_namespace = false,
-         ?Thing $thing = null
+         ?Thing $thing = null,?Carbon $token_expires_at = null
     )
     {
-        $this->me = new MeResponse(user: $user,show_namespace: $show_namespace);
+        $this->me = new MeResponse(user: $user,show_namespace: $show_namespace,token_expires_at: $token_expires_at);
 
         if ($thing) {
             $this->thing = new ApiThingResponse(thing:$thing);
