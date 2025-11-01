@@ -9,7 +9,8 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 
 /**
@@ -30,7 +31,7 @@ class DesignLocationDestroy extends DesignLocationCreate
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
     ];
-    #[ApiParamMarker( param_class: DesignTimeParams::class)]
+    #[ApiParamMarker( param_class: DesignLocationParams::class)]
     public function __construct(
         protected ?string           $given_location_uuid = null,
         protected bool              $is_system = false,

@@ -7,6 +7,8 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Schedules\ScheduleList;
+use App\Data\ApiParams\Data\Schedules\ScheduleParams;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
@@ -27,12 +29,10 @@ use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
 use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Actioning\Design\DesignParams;
 use App\OpenApi\Params\Actioning\Design\DesignParentParams;
-use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
 use App\OpenApi\Params\Listing\Design\ListAttributeParams;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
 use App\OpenApi\Params\Listing\Design\ListLocationParams;
-use App\OpenApi\Params\Listing\Design\ListScheduleParams;
 use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 
@@ -721,12 +721,12 @@ class DesignController extends Controller {
      * @throws \Exception
      */
     #[OA\Post(
-        path: '/api/v1/{user_namespace}/design/create_time',
+        path: '/api/v1/{user_namespace}/design/schedules/create',
         operationId: 'core.design.create_time',
         description: "Makes a schedule that can be used in one or more attributes",
         summary: 'Makes a new schedule',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignTimeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ScheduleParams::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -748,8 +748,7 @@ class DesignController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateTime::class)]
     public function create_time(Request $request) {
-        $params = new DesignTimeParams();
-        $params->fromCollection(new Collection($request->all()));
+        $params = ScheduleParams::validateAndCreate($request->request->all());
         $api = new Root\Api\Design\CreateTime(params: $params, is_async: true, tags: ['api-top']);
         $api->createThingTree(tags: ['create-schedule']);
         $data_out = $api->getCallbackResponse($http_code);
@@ -762,12 +761,12 @@ class DesignController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/design/time/{time_bound}/edit',
+        path: '/api/v1/{user_namespace}/design/schedules/{time_bound}/edit',
         operationId: 'core.design.time_edit',
         description: "Schedules can be changed",
         summary: 'Edits a schedule',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignTimeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ScheduleParams::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -791,9 +790,8 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
-    public function time_edit(TimeBound $bound, Request $request) {
-        $params = new DesignTimeParams(given_bound: $bound);
-        $params->fromCollection(new Collection($request->all()));
+    public function edit_schedule(TimeBound $bound, Request $request) {
+        $params = ScheduleParams::validateAndCreate($request->request->all());
         $api = new Root\Api\Design\EditTime(params: $params, is_async: true, tags: ['api-top']);
         $api->createThingTree(tags: ['edit-schedule']);
         $data_out = $api->getCallbackResponse($http_code);
@@ -805,12 +803,11 @@ class DesignController extends Controller {
      * @throws \Exception
      */
     #[OA\Delete(
-        path: '/api/v1/{user_namespace}/design/time/{time_bound}/destroy',
+        path: '/api/v1/{user_namespace}/design/schedules/{time_bound}/destroy',
         operationId: 'core.design.destroy_time',
         description: "Destroys a time resource, but only if its not used. ",
         summary: 'Remove a time resource  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignTimeParams::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -834,10 +831,8 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\DestroyTime::class)]
-    public function destroy_time(TimeBound $bound, Request $request) {
-        $params = new DesignTimeParams(given_bound: $bound);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Design\DestroyTime(params: $params, is_async: true, tags: ['api-top']);
+    public function destroy_schedule(TimeBound $bound) {
+        $api = new Root\Api\Design\DestroyTime(bound: $bound, is_async: false, tags: ['api-top']);
         $api->createThingTree(tags: ['destroy-schedule']);
         $data_out = $api->getCallbackResponse($http_code);
         return  response()->json(['response'=>$data_out],$http_code);
@@ -1012,7 +1007,7 @@ class DesignController extends Controller {
         description: "Lists times",
         summary: 'Lists times  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListScheduleParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ScheduleList::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -1028,8 +1023,8 @@ class DesignController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ListSchedules::class)]
     public function list_times(Request $request) {
-        $params = new ListScheduleParams();
-        $params->fromCollection(new Collection($request->all()));
+        $params = ScheduleList::validateAndCreate($request->query->all());
+
         $api = new Api\Design\ListSchedules(params: $params, is_async: false, tags: ['api-top']);
         $api->createThingTree(tags: ['list-schedules']);
 

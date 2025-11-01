@@ -513,8 +513,8 @@ Route::prefix('v1')->group(function () {
                         Route::get('list', [Api\DesignController::class, 'list_times'])->name('core.design.schedules.list');
                         Route::get('create', [Api\DesignController::class, 'create_time'])->name('core.design.schedules.create');
                         Route::prefix('{time_bound}')->group(function () {
-                            Route::delete('edit', [Api\DesignController::class, 'time_edit'])->name('core.design.schedules.edit');
-                            Route::delete('destroy', [Api\DesignController::class, 'destroy_time'])->name('core.design.schedules.destroy');
+                            Route::delete('edit', [Api\DesignController::class, 'edit_schedule'])->name('core.design.schedules.edit');
+                            Route::delete('destroy', [Api\DesignController::class, 'destroy_schedule'])->name('core.design.schedules.destroy');
                         });
                     });
 

@@ -4,16 +4,20 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Annotations\ApiParamMarker;
-use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+
+use App\Models\ActionDatum;
+use App\Models\TimeBound;
+use App\OpenApi\ApiResults\Bounds\ApiScheduleResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Things\Interfaces\IThingBaseResponse;
 
 
-#[ApiParamMarker( param_class: DesignTimeParams::class)]
-class DestroyTime extends CreateTime
+
+class DestroyTime extends Api\DesignApi
 {
     const UUID = 'd55e0d09-0830-4723-acbc-acb3595b7d57';
     const TYPE_NAME = 'api_design_destroy_time';
@@ -24,13 +28,39 @@ class DestroyTime extends CreateTime
         Act\Cmd\Ds\DesignTimeDestroy::class,
     ];
 
+    public function __construct(
+        protected TimeBound $bound,
+
+        protected ?ActionDatum   $action_data = null,
+        protected bool $b_type_init = false,
+        protected ?bool $is_async = null,
+        protected array          $tags = []
+    )
+    {
+
+        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
+            is_async: $this->is_async,tags: $this->tags);
+    }
+
+
+    protected function getMyData() :array {
+        return ['bound'=>$this->bound];
+    }
+
+    public function getDataSnapshot(): array|IThingBaseResponse
+    {
+        $what =  $this->getMyData();
+        return new ApiScheduleResponse(given_time:  $what['bound'],thing: $this->getMyThing());
+    }
+
+
     public function getChildrenTree(): ?Tree
     {
 
 
         $nodes = [];
         $creator = new Act\Cmd\Ds\DesignTimeDestroy(
-            given_time_uuid: $this->params->getBoundUuid(),
+            given_time_uuid: $this->bound->ref_uuid,
              tags: ['edit time bound from api']);
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 

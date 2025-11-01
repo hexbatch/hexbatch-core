@@ -176,7 +176,8 @@ class TimeBound extends Model
     }
 
 
-    public static function buildTimeBound(?int                   $me_id = null, ?int $type_id = null, ?string $uuid = null,
+    public static function buildTimeBound(?int                   $me_id = null, ?int $type_id = null,
+                                          ?string $uuid = null,
                                           ?int                   $namespace_id = null,
                                           array                  $in_namespace_ids = [],
                                           ?string                $name = null,

@@ -11,7 +11,8 @@ use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
+
 use App\OpenApi\Results\Bounds\LocationResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
@@ -45,7 +46,7 @@ class DesignLocationCreate extends Act\Cmd\Ds
 
     const array ACTIVE_DATA_KEYS = ['bound_name','given_location_uuid','location_type','geo_json','display','is_deleting'];
 
-    #[ApiParamMarker( param_class: DesignTimeParams::class)]
+    #[ApiParamMarker( param_class: DesignLocationParams::class)]
     public function __construct(
         protected ?string           $bound_name =null,
         protected ?string           $given_location_uuid = null,

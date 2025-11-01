@@ -6,13 +6,13 @@ use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Schedules\ScheduleParams;
 use App\Enums\Sys\TypeOfAction;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
 use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
@@ -47,7 +47,7 @@ class DesignTimeCreate extends Act\Cmd\Ds
 
     const array ACTIVE_DATA_KEYS = ['bound_name','given_time_uuid','bound_start','bound_stop','bound_cron_timezone','bound_period_length','is_deleting'];
 
-    #[ApiParamMarker( param_class: DesignTimeParams::class)]
+    #[ApiParamMarker( param_class: ScheduleParams::class)]
     public function __construct(
         protected ?string           $bound_name =null,
         protected ?string           $given_time_uuid = null,

@@ -4,18 +4,18 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Schedules\ScheduleParams;
 use App\Models\ActionDatum;
 use App\OpenApi\ApiResults\Bounds\ApiScheduleResponse;
-use App\OpenApi\Params\Actioning\Design\DesignTimeParams;
+
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
 use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
 
-#[ApiParamMarker( param_class: DesignTimeParams::class)]
+#[ApiParamMarker( param_class: ScheduleParams::class)]
 class CreateTime extends Api\DesignApi
 {
     const UUID = 'b3b52738-f425-4083-9648-e777837696b7';
@@ -29,7 +29,7 @@ class CreateTime extends Api\DesignApi
 
 
     public function __construct(
-        protected ?DesignTimeParams $params = null,
+        protected ?ScheduleParams $params = null,
 
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
@@ -42,13 +42,6 @@ class CreateTime extends Api\DesignApi
             is_async: $this->is_async,tags: $this->tags);
     }
 
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new DesignTimeParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
 
     protected function getMyData() :array {
         return ['bound'=>$this->getGivenTimeBound()];
@@ -71,12 +64,12 @@ class CreateTime extends Api\DesignApi
 
         $nodes = [];
         $creator = new Act\Cmd\Ds\DesignTimeCreate(
-            bound_name: $this->params->getBoundName(),
-            bound_start: $this->params->getBoundStart(),
-            bound_stop: $this->params->getBoundStop(),
-            bound_cron: $this->params->getBoundCron(),
-            bound_cron_timezone: $this->params->getBoundCronTimezone(),
-            bound_period_length: $this->params->getBoundPeriodLength(),
+            bound_name: $this->params->bound_name,
+            bound_start: $this->params->bound_start,
+            bound_stop: $this->params->bound_stop,
+            bound_cron: $this->params->bound_cron,
+            bound_cron_timezone: $this->params->bound_cron_timezone,
+            bound_period_length: $this->params->bound_period_length,
             parent_action_data: $this->action_data,tags: ['create time bound from api']);
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 
