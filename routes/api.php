@@ -631,5 +631,6 @@ Route::prefix('v1')->group(function () {
 
 
 require app()->basePath('libs/hbc-things/routes/thing_api.php');
+require app()->basePath('libs/thangs/routes/thang_api.php');
 
 

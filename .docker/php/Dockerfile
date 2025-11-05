@@ -1,4 +1,4 @@
-FROM php:8.3-apache  AS my_hci_php_base_8_3_apache
+FROM php:8.3-apache-trixie  AS my_hci_php_base_8_3_apache
 
 RUN pecl install xdebug-3.4.2 && docker-php-ext-enable xdebug
 

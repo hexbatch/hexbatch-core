@@ -7,3 +7,6 @@
 [submodule "app/Data/ApiParams"]
 	path = app/Data/ApiParams
 	url = ssh://git@codeberg.org/Hexbatch/core-api-params.git
+[submodule "libs/thangs"]
+	path = libs/thangs
+	url = ssh://git@codeberg.org/Hexbatch/hbc-thangs.git
