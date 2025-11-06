@@ -4,19 +4,25 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 
 use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
-use App\OpenApi\Params\Actioning\Element\LinkSelectParams;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Models\ElementSet;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
 
-#[ApiParamMarker( param_class: LinkSelectParams::class)]
-class UnLink extends Api\ElementApi
+#[ApiParamMarker( param_class: SelectElementParamData::class)]
+class UnLink extends Api\ElementApi implements ICommandCallable
 {
     const UUID = '7dddcc46-b3dc-464a-8088-425c44c5b993';
     const TYPE_NAME = 'api_element_unlink';
@@ -26,87 +32,50 @@ class UnLink extends Api\ElementApi
         Act\Cmd\Ele\LinkRemove::class,
     ];
 
-    public function __construct(
-        protected ?LinkSelectParams $params = null,
-
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
+        Log::debug("Called api link element");
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,data: $children_args);
     }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new LinkSelectParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['link'=>$this->getGivenLink()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiLinkerResponse(linker:  $what['link'],thing: $this->getMyThing());
-    }
-
-
-
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ele\LinkRemove(
-            given_set_uuid: $this->params->getTargetSetRef(),
-            given_element_uuid: $this->params->getElementRef()
-        );
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1,
-            'title' => sprintf('unlink set %s of element %s ',$creator->getGivenSet()->getName(),$creator->getGivenElement()->getName()),
-            'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function doRemoveLink(
+        SelectElementParamData    $params,
+        ElementSet                     $given_set,
+        UserNamespace             $calling_namespace,
+        bool                      $is_system,
 
-        if ($child instanceof Act\Cmd\Ele\LinkRemove) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenLink($child->getGivenLink());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+        array $tags = [], ?IThangBuilder $builder = null
+    ) : ElementList|Thang|CursorPaginatedDataCollection
+    {
+
+
+        $my_command = CommandParams::validateAndCreate([
+            'command_class' => static::class,
+            'command_tags' => array_merge([static::class], $tags)
+        ]);
+        ($builder ?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($calling_namespace)
+            ->setSharedArg('namespace', $calling_namespace)
+            ->tree($my_command);
+
+
+        Act\Cmd\Ele\LinkRemove::linkRemoveTree(
+            params: $params,
+            given_set: $given_set, is_system: $is_system, calling_namespace: $calling_namespace,
+            builder: $builder);
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            return static::rebuildElementList(data: $thang->finished_data,key: 'elements',length: static::CURSOR_ALL_LENGTH);
+        } else {
+            return $thang;
         }
+
     }
 
 }

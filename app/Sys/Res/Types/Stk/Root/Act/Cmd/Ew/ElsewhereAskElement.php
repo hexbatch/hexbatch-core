@@ -18,9 +18,7 @@ class ElsewhereAskElement extends Act\Cmd\Ew
     const UUID = '479b450e-1c80-42f9-a9d6-d374bdcf4ad6';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_ASK_ELEMENT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

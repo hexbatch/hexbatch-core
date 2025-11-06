@@ -1,11 +1,14 @@
 <?php
 namespace App\Enums\Paths;
 
+use App\Data\ApiParams\Enums\EnumTryTrait;
+
 /**
  * postgres enum type_of_path_relationship
  */
 
 enum TypeOfPathRelationship : string {
+    use EnumTryTrait;
     case NO_RELATIONSHIP = 'no_relationship';
 
 
@@ -64,15 +67,6 @@ enum TypeOfPathRelationship : string {
     case UP_SET = 'up_set';
     case ELEMENT_OF_SET = 'element_of_set';
 
-
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfPathRelationship {
-        $maybe  = TypeOfPathRelationship::tryFrom($test);
-        if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfPathRelationship::cases(),'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
-        }
-        return $maybe;
-    }
 }
 
 

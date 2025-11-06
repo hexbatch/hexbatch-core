@@ -14,7 +14,7 @@ class HomeSet extends NamespaceType
     const TYPE_NAME = 'home_set';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

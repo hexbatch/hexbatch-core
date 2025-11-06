@@ -17,9 +17,7 @@ class Mutual extends Act\Cmd\Op
     const UUID = '7d52ebfa-079c-4a2d-9bef-874a473c5220';
     const ACTION_NAME = TypeOfAction::OP_MUTUAL;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class,

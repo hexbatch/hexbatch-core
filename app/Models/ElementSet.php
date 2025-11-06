@@ -6,15 +6,20 @@ namespace App\Models;
 use App\Exceptions\HexbatchDifferentPhase;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
+use App\Helpers\Events\EventFilter;
+use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Sets\ISet;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 
 /**
@@ -35,7 +40,7 @@ use Illuminate\Database\Query\JoinClause;
  * @property ElementSet[] children_sets
  *
  */
-class ElementSet extends Model implements ISet,ISystemModel
+class ElementSet extends Model implements ISystemModel
 {
 
     /*
@@ -72,15 +77,38 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
-    public function element_members() : HasMany {
-        return $this->hasMany(ElementSetMember::class,'holder_set_id');
+
+    public function element_members() : HasManyThrough {
+        return $this->hasManyThrough(
+            Element::class, //what is returned
+            ElementSetMember::class, //the connecting class
+            'holder_set_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'member_element_id' // Local key on the connecting table...
+        );
     }
 
     public function defining_element() : BelongsTo {
-        return $this->belongsTo(Element::class,'parent_set_element_id');
+        return $this->belongsTo(Element::class,'parent_set_element_id')->with('element_phase')->with('element_namespace');
     }
+
+    public function defining_type() : HasOneThrough {
+        return $this->hasOneThrough(
+            ElementType::class, //what is returned
+            Element::class, //the connecting class
+            'id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'parent_set_element_id', // Local key on this class table...
+            'element_parent_type_id' // Local key on the connecting table...
+        );
+    }
+
 
     public function children_sets() : HasMany {
         return $this->hasMany(ElementSetChild::class,'parent_set_id','id');
@@ -97,6 +125,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         ?int            $type_id = null,
         ?int            $phase_id = null,
         ?int            $namespace_id = null,
+        array           $defining_element_ids = [],
         array           $in_namespace_ids = [],
         bool            $b_do_relations = false
 
@@ -118,6 +147,11 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         if ($uuid) {
             $build->where('element_sets.ref_uuid', $uuid);
         }
+
+        if (count($defining_element_ids)) {
+            $build->whereIn('element_sets.parent_set_element_id', $defining_element_ids);
+        }
+
 
         if ($parent_set_id ) {
             $build->join('element_set_members sim',
@@ -178,29 +212,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         return $build;
     }
 
-    public static function resolveSet(string $value, bool $throw_exception = true)
-    : static
-    {
 
-        /** @var Builder $build */
-        $build = null;
-
-        if (Utilities::is_uuid($value)) {
-           return static::getThisSet(uuid: $value);
-        }
-
-        $ret = $build?->first();
-
-        if (empty($ret) && $throw_exception) {
-            throw new HexbatchNotFound(
-                __('msg.set_not_found',['ref'=>$value]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::SET_NOT_FOUND
-            );
-        }
-
-        return $ret;
-    }
 
     public static function getThisSet(
         ?int             $id = null,
@@ -234,13 +246,17 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return static::resolveSet($value);
+        if (Utilities::is_uuid($value)) {
+            return static::getThisSet(uuid: $value);
+        }
+
+        throw new HexbatchNotFound(
+            __('msg.set_not_found',['ref'=>$value]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+            RefCodes::SET_NOT_FOUND
+        );
     }
 
-
-    public function getSetObject(): ?ElementSet {
-        return $this;
-    }
 
     public function getUuid(): string{
         return $this->ref_uuid;
@@ -267,5 +283,13 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
 
     public function getName(): string {
         return $this->ref_uuid.' from '.$this->defining_element->getName();
+    }
+
+    /**
+     * @return Collection<IEventReference>
+     */
+    public  function getEventHandlerRefsFromMembers(EventFilter $event_filter) : Collection {
+        Utilities::ignoreVar($event_filter);
+        return new Collection;
     }
 }

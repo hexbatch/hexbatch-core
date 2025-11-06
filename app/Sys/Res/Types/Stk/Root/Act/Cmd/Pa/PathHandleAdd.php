@@ -12,9 +12,7 @@ class PathHandleAdd extends Act\Cmd\Pa
     const UUID = 'e39d9974-0cba-4366-aace-0e06bbcf629e';
     const ACTION_NAME = TypeOfAction::CMD_PATH_HANDLE_ADD;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Pa::class

@@ -38,7 +38,19 @@ return new class extends Migration
 
             $table->timestamps();
 
+            $table->uuid('parent_namespace_uuid')
+                ->index()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('member_namespace_uuid')
+                ->index()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
             $table->unique(['parent_namespace_id','member_namespace_id']);
+
+
         });
 
 

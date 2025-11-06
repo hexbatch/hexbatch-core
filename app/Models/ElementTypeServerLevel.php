@@ -51,6 +51,8 @@ class ElementTypeServerLevel extends Model
      */
     protected $casts = [
         'access_type' => TypeOfServerAccess::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function access_server() : BelongsTo {

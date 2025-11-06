@@ -6,6 +6,7 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Http\Controllers\Controller;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -24,26 +25,22 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetEnter::class)]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
-    #[ApiEventMarker(Evt\Set\ShapeLeave::class)]
-    #[ApiEventMarker(Evt\Set\MapLeave::class)]
+    #[ApiEventMarker( Evt\Set\SetEntering::class)]
+    #[ApiEventMarker( Evt\Set\SetLeaving::class)]
+    #[ApiEventMarker(Evt\Set\ShapeLeft::class)]
+    #[ApiEventMarker(Evt\Set\MapLeft::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingEnd::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingEnd::class)]
-    #[ApiEventMarker(Evt\Set\ShapeEnter::class)]
-    #[ApiEventMarker(Evt\Set\MapEnter::class)]
+    #[ApiEventMarker(Evt\Set\ShapeEntered::class)]
+    #[ApiEventMarker(Evt\Set\MapEntered::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingStart::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Operation\Unshift::class)]
     public function op_unshift() {
@@ -60,26 +57,22 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetEnter::class)]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
-    #[ApiEventMarker(Evt\Set\ShapeLeave::class)]
-    #[ApiEventMarker(Evt\Set\MapLeave::class)]
+    #[ApiEventMarker( Evt\Set\SetEntering::class)]
+    #[ApiEventMarker( Evt\Set\SetLeaving::class)]
+    #[ApiEventMarker(Evt\Set\ShapeLeft::class)]
+    #[ApiEventMarker(Evt\Set\MapLeft::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingEnd::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingEnd::class)]
-    #[ApiEventMarker(Evt\Set\ShapeEnter::class)]
-    #[ApiEventMarker(Evt\Set\MapEnter::class)]
+    #[ApiEventMarker(Evt\Set\ShapeEntered::class)]
+    #[ApiEventMarker(Evt\Set\MapEntered::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingStart::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Operation\Combine::class)]
     public function op_combine() {
@@ -96,7 +89,7 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -120,26 +113,22 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetEnter::class)]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
-    #[ApiEventMarker(Evt\Set\ShapeLeave::class)]
-    #[ApiEventMarker(Evt\Set\MapLeave::class)]
+    #[ApiEventMarker( Evt\Set\SetEntering::class)]
+    #[ApiEventMarker( Evt\Set\SetLeaving::class)]
+    #[ApiEventMarker(Evt\Set\ShapeLeft::class)]
+    #[ApiEventMarker(Evt\Set\MapLeft::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingEnd::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingEnd::class)]
-    #[ApiEventMarker(Evt\Set\ShapeEnter::class)]
-    #[ApiEventMarker(Evt\Set\MapEnter::class)]
+    #[ApiEventMarker(Evt\Set\ShapeEntered::class)]
+    #[ApiEventMarker(Evt\Set\MapEntered::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingStart::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Operation\Pop::class)]
     public function op_pop() {
@@ -156,26 +145,22 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetEnter::class)]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
-    #[ApiEventMarker(Evt\Set\ShapeLeave::class)]
-    #[ApiEventMarker(Evt\Set\MapLeave::class)]
+    #[ApiEventMarker( Evt\Set\SetEntering::class)]
+    #[ApiEventMarker( Evt\Set\SetLeaving::class)]
+    #[ApiEventMarker(Evt\Set\ShapeLeft::class)]
+    #[ApiEventMarker(Evt\Set\MapLeft::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingEnd::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingEnd::class)]
-    #[ApiEventMarker(Evt\Set\ShapeEnter::class)]
-    #[ApiEventMarker(Evt\Set\MapEnter::class)]
+    #[ApiEventMarker(Evt\Set\ShapeEntered::class)]
+    #[ApiEventMarker(Evt\Set\MapEntered::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingStart::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Operation\Push::class)]
     public function op_push() {
@@ -194,14 +179,14 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetEnter::class)]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
+    #[ApiEventMarker( Evt\Set\SetEntering::class)]
+    #[ApiEventMarker( Evt\Set\SetLeaving::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Operation\Shift::class)]
     public function op_shift() {

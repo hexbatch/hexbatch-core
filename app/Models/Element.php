@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 
 /*
@@ -25,7 +27,7 @@ use Illuminate\Database\Query\JoinClause;
 
 /**
  * @mixin Builder
- * @mixin \Illuminate\Database\Query\Builder
+ * @mixin QueryBuilder
  * @property int id
  * @property int element_parent_type_id
  * @property int element_phase_id
@@ -57,6 +59,7 @@ class Element extends Model implements ISystemModel
      */
     protected $fillable = [
         'element_parent_type_id',
+        'element_namespace_id',
     ];
 
     /**
@@ -71,7 +74,10 @@ class Element extends Model implements ISystemModel
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
 
     public function element_namespace() : BelongsTo {
@@ -85,9 +91,15 @@ class Element extends Model implements ISystemModel
         return $this->belongsTo(Phase::class,'element_phase_id');
     }
 
+    public function linked_sets() : HasMany {
+        return $this->hasMany(ElementLink::class,'linker_element_id','id')
+            ->with('linked_set','linked_set.defining_element');
+    }
+
 
     public static function buildElement(
         ?int    $me_id = null,
+        array    $me_ids = [],
         ?int    $type_id = null,
         ?int    $attribute_id = null,
         ?int    $shape_id = null,
@@ -99,7 +111,19 @@ class Element extends Model implements ISystemModel
         ?bool   $is_set = null,
         ?string $uuid = null,
         array   $given_uuids = [],
-        bool    $b_do_relations = false
+        ?string $set_ref = null,
+        ?string $phase_ref = null,
+        ?string $type_ref = null,
+        ?string $namespace_ref = null,
+        ?string $exposed_attribute_ref = null,
+        ?string $included_attribute_ref = null,
+        bool    $b_do_namespace_relation = false,
+        bool    $b_do_namespace_type_relation = false,
+        bool    $b_do_type_relation = false,
+        bool    $b_do_link_relation = false,
+        ?int    $not_member_set_id = null,
+        bool    $b_use_select = true,
+        bool    $b_check_visiblity = false
 
     ): Builder
     {
@@ -107,12 +131,22 @@ class Element extends Model implements ISystemModel
         /**
          * @var Builder $build
          */
-        $build = Element::select('elements.*')
-            ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
-        ;
+        $build = Element::where('elements.id', '<>',0);
+
+        if ($b_use_select)
+        {
+            $build = $build->select('elements.*')
+                ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
+            ;
+        }
+
 
         if ($me_id) {
             $build->where('elements.id', $me_id);
+        }
+
+        if (count($me_ids)) {
+            $build->whereIn('elements.id', $me_ids);
         }
 
         if ($uuid) {
@@ -127,6 +161,16 @@ class Element extends Model implements ISystemModel
             $build->where('elements.element_phase_id', $phase_id);
         }
 
+        if ($phase_ref) {
+            $build->join('phases as p',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($phase_ref) {
+                    $join->on('p.id', '=', 'elements.element_phase_id')
+                        ->where('p.ref_uuid', $phase_ref);
+                }
+            );
+        }
+
         if ($namespace_id) {
             $build->where('elements.element_namespace_id', $namespace_id);
         }
@@ -135,20 +179,57 @@ class Element extends Model implements ISystemModel
             $build->whereIn('elements.element_namespace_id', $in_namespace_ids);
         }
 
+
+        if ($namespace_ref) {
+            $build->join('user_namespaces as nee',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($namespace_ref) {
+                    $join->on('nee.id', '=', 'elements.element_namespace_id')
+                        ->where('nee.ref_uuid', $namespace_ref);
+                }
+            );
+        }
+
+        if ($not_member_set_id) {
+            $build->leftJoin('element_set_members setex',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($not_member_set_id) {
+                    $join->on('setex.member_element_id', '=', 'elements.id')
+                        ->where('setex.holder_set_id', $not_member_set_id)
+                        ->whereNull('setex.id')
+                    ;
+                }
+            );
+        }
+
+
+
+
         if($type_id) {
             $build->where('elements.element_parent_type_id', $type_id);
         }
 
+
+        if ($type_ref) {
+            $build->join('element_types as tee',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($type_ref) {
+                    $join->on('nee.id', '=', 'elements.element_parent_type_id')
+                        ->where('nee.ref_uuid', $type_ref);
+                }
+            );
+        }
+
         if ($is_set !== null) {
             if ($is_set) {
-                $build->join('element_sets s',
+                $build->join('element_sets as s',
                     /** @param JoinClause $join */
                     function (JoinClause $join)  {
                         $join->on('s.parent_set_element_id', '=', 'elements.id');
                     }
                 );
             } else {
-                $build->leftJoin('element_sets s',
+                $build->leftJoin('element_sets as s',
                     /** @param JoinClause $join */
                     function (JoinClause $join)  {
                         $join->on('s.parent_set_element_id', '=', 'elements.id');
@@ -158,7 +239,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($schedule_id) {
-            $build->join('element_types aet',
+            $build->join('element_types as aet',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($schedule_id) {
                     $join->on('aet.id', '=', 'elements.element_parent_type_id')
@@ -168,7 +249,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($set_id) {
-            $build->join('element_set_members sem',
+            $build->join('element_set_members as  sem',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($set_id) {
                     $join->on('sem.member_element_id', '=', 'elements.id')
@@ -177,8 +258,60 @@ class Element extends Model implements ISystemModel
             );
         }
 
+        if ($set_ref) {
+            $build->join('element_set_members as semp',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  {
+                    $join->on('semp.member_element_id', '=', 'elements.id');
+                }
+            );
+
+            $build->join('element_sets as sempe',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($set_ref) {
+                    $join->on('semp.holder_set_id', '=', 'sempe.id')
+                        ->where('sempe.ref_uuid', $set_ref);
+                }
+            );
+        }
+
+
+        if ($b_check_visiblity) {
+
+
+            if ($set_id) {
+                $build->leftJoin('element_visibilities as el_vis',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join) use($set_id,$set_ref) {
+                        $join->on('el_vis.visible_element_id', '=', 'elements.id')
+                            ->on('sem.id','=','el_vis.visible_set_member_id');
+                    }
+                );
+            } elseif ($set_ref) {
+                $build->leftJoin('element_visibilities as el_vis',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join) use($set_id,$set_ref) {
+                        $join->on('el_vis.visible_element_id', '=', 'elements.id')
+                            ->on('semp.id','=','el_vis.visible_set_member_id');
+                    }
+                );
+            } else {
+                $build->leftJoin('element_visibilities as el_vis',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join) use($set_id,$set_ref) {
+                        $join->on('el_vis.visible_element_id', '=', 'elements.id')
+                            ->whereNull('el_vis.visible_set_member_id');
+                    }
+                );
+
+            }
+
+            $build->whereNull('el_vis.id')->orWhere('el_vis.is_visible',true);
+
+        }
+
         if ($attribute_id) {
-            $build->join('attributes att',
+            $build->join('attributes as att',
                 /**
                  * @param JoinClause $join
                  */
@@ -190,8 +323,54 @@ class Element extends Model implements ISystemModel
             );
         }
 
+        if ($exposed_attribute_ref) {
+            $build->join('element_type_exposed_attributes as att_exposed',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('elements.element_parent_type_id','=','att_exposed.exposed_type_id');
+                }
+            );
+
+            $build->join('attributes as att_ref',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($exposed_attribute_ref) {
+                    $join
+                        ->on('att_exposed.exposed_attribute_id','=','att_ref.id')
+                        ->where('att.ref_uuid',$exposed_attribute_ref);
+                }
+            );
+        }
+
+        if ($included_attribute_ref) {
+            $build->join('element_type_included_attributes as  att_included',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('elements.element_parent_type_id','=','att_included.included_type_id');
+                }
+            );
+
+            $build->join('attributes as att_inc_ref',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($exposed_attribute_ref) {
+                    $join
+                        ->on('att_inc_ref.included_attribute_id','=','att_inc_ref.id')
+                        ->where('att.ref_uuid',$exposed_attribute_ref);
+                }
+            );
+        }
+
         if ($shape_id) {
-            $build->join('attributes satt',
+            $build->join('attributes as satt',
                 /**
                  * @param JoinClause $join
                  */
@@ -203,80 +382,33 @@ class Element extends Model implements ISystemModel
             );
         }
 
-        if ($b_do_relations) {
-            /** @uses Element::element_namespace(),Element::element_parent_type() */
-            $build->with('element_namespace','element_parent_type');
+
+        if ($b_do_namespace_relation) {
+            /** @uses Element::element_namespace() */
+            $build->with('element_namespace');
         }
+
+        if ($b_do_namespace_type_relation) {
+            /** @uses Element::element_namespace(),UserNamespace::namespace_base_type() */
+            $build->with('element_namespace.namespace_base_type');
+        }
+
+        if ($b_do_type_relation) {
+            /** @uses Element::element_parent_type() */
+            $build->with('element_parent_type');
+        }
+
+        if ($b_do_link_relation) {
+            /** @uses Element::linked_sets() */
+            $build->with('linked_sets');
+        }
+
 
 
         return $build;
     }
 
-    /**
-     * @param string[]|\Illuminate\Support\Collection $values
-     * @param bool $throw_exception
-     * @return Collection|Element[]
-     */
-    public static function resolveElements( $values, bool $throw_exception = true)
-    {
 
-        $refs = [];
-        foreach ($values as $val) {
-            if (!Utilities::is_uuid($val)) {
-                if ($throw_exception) {
-                    throw new HexbatchNotFound(
-                        __('msg.element_not_found',['ref'=>$val]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                        RefCodes::ELEMENT_NOT_FOUND
-                    );
-                } else {
-                    continue;
-                }
-            }
-
-            $refs[] = $val;
-
-        }
-
-       /** @var Collection|Element[] $ret */
-        $ret = static::buildElement(given_uuids:$refs)->get();
-
-        if (count($ret) !== count($values) ) {
-            if ($throw_exception) {
-                throw new HexbatchNotFound(
-                    __('msg.element_list_not_found',['ref'=>implode('|',$values)]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::ELEMENT_NOT_FOUND
-                );
-            }
-        }
-
-        return $ret;
-    }
-
-    public static function resolveElement(string $value, bool $throw_exception = true)
-    : static
-    {
-
-        /** @var Builder $build */
-        $build = null;
-
-        if (Utilities::is_uuid($value)) {
-            return static::getThisElement(uuid: $value);
-        }
-
-        $ret = $build?->first();
-
-        if (empty($ret) && $throw_exception) {
-            throw new HexbatchNotFound(
-                __('msg.element_not_found',['ref'=>$value]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::ELEMENT_NOT_FOUND
-            );
-        }
-
-        return $ret;
-    }
 
     public static function getThisElement(
         ?int             $id = null,
@@ -310,7 +442,15 @@ class Element extends Model implements ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return static::resolveElement($value);
+        if (Utilities::is_uuid($value)) {
+            return static::getThisElement(uuid: $value);
+        }
+
+        throw new HexbatchNotFound(
+            __('msg.element_not_found',['ref'=>$value]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+            RefCodes::ELEMENT_NOT_FOUND
+        );
 
     }
 
@@ -324,13 +464,37 @@ class Element extends Model implements ISystemModel
         return $this->ref_uuid;
     }
 
-    public function changeOwners(UserNamespace $namespace) {
-        $this->element_namespace_id = $namespace->id;
-        $this->save();
+    const DEFAULT_ELEMENT_LIMIT = 100;
+
+    /** @return \Illuminate\Pagination\CursorPaginator<Element>|\Illuminate\Support\Collection<Element> */
+    public static function getElementsFromParams(SelectElementParamData $params,
+                                          bool $b_ns_relations ,bool $b_type_relations,bool $b_ns_type_relations,
+                                          ?int $not_member_set_id = null,?string $cursor = null
+    ) {
+
+        $builder =  static::getBuilderFromParams(params: $params, b_ns_relations: $b_ns_relations,
+            b_type_relations: $b_type_relations, b_ns_type_relations: $b_ns_type_relations, not_member_set_id: $not_member_set_id
+        );
+        /** @type \Illuminate\Pagination\CursorPaginator|\Illuminate\Support\Collection */
+        return $builder->cursorPaginate(perPage: config('hbc.pagination.default_element_limit'), cursor: $cursor);
+
     }
 
-    public function destroyElement() {
-        $this->delete();
+
+
+    public static function getBuilderFromParams(SelectElementParamData $params,
+                                          bool $b_ns_relations ,bool $b_type_relations,bool $b_ns_type_relations,
+                                          ?int $not_member_set_id = null,bool $b_link_relations = false
+    )
+    : Builder
+    {
+        return static::buildElement(
+            given_uuids: $params->element_refs, set_ref: $params->set_ref, phase_ref: $params->phase_ref,
+            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref, exposed_attribute_ref: $params->attribute_ref,
+            b_do_namespace_relation: $b_ns_relations, b_do_namespace_type_relation: $b_ns_type_relations,
+            b_do_type_relation: $b_type_relations,b_do_link_relation: $b_link_relations,not_member_set_id: $not_member_set_id,b_check_visiblity: true
+        );
+
     }
 
 

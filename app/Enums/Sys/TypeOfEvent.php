@@ -19,10 +19,14 @@ namespace App\Enums\Sys;
  *
  */
 
+use App\Data\ApiParams\Enums\EnumTryTrait;
+
 enum TypeOfEvent: string
 {
-    case NOTHING = 'nothing';
+    use EnumTryTrait;
+    case EVENTS = 'events';
     case BASE_EVENT = 'base_event';
+    case EVENT_HANDLER = 'event_handler';
     case EVENT_SCOPE_ELEMENT = 'event_scope_element';
     case EVENT_SCOPE_ELSEWHERE = 'event_scope_elsewhere';
     case EVENT_SCOPE_SET = 'event_scope_set';
@@ -51,7 +55,6 @@ enum TypeOfEvent: string
 
 
     case ELEMENT_RECIEVED = 'element_recieved';
-    case ELEMENT_RECIEVED_BATCH = 'element_recieved_batch';
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
@@ -62,24 +65,25 @@ enum TypeOfEvent: string
     case ATTRIBUTE_READING = 'attribute_reading';
     case ATTRIBUTE_WRITE = 'attribute_write';
 
-    case DISPLAY_READING = 'display_reading';
-    case TIME_READING = 'time_reading';
 
-    case ELEMENT_TYPE_TURNING_OFF = 'element_type_turning_off';
-    case ELEMENT_TYPE_TURNED_OFF = 'element_type_turned_off';
-    case ELEMENT_TYPE_TURNING_ON = 'element_type_turning_on';
-    case ELEMENT_TYPE_TURNED_ON = 'element_type_turned_on';
+    case SWITCHING_OFF = 'switching_off';
+    case SWITCHED_OFF = 'switched_off';
+    case SWITCHING_ON = 'switching_on';
+    case SWITCHED_ON = 'switched_on';
 
 
 
 
-    case SET_ENTER = 'set_enter';
-    case SET_LEAVE = 'set_leave';
+    case SET_ENTERING = 'set_entering';
+    case SET_ENTERED = 'set_entered';
+    case SET_LEAVING = 'set_leaving';
+    case SET_LEFT = 'set_left';
 
     case SET_CHILD_CREATED = 'set_child_created';
     case SET_CHILD_DESTROYED = 'set_child_destroyed';
 
     case SET_CREATED = 'set_created';
+    case SET_CREATING = 'set_creating';
 
     case SET_DESTROYED = 'set_destroyed';
     case SET_DESTROYING = 'set_destroying';
@@ -87,31 +91,26 @@ enum TypeOfEvent: string
 
 
 
-    case SHAPE_ENTER = 'shape_enter';
-    case SHAPE_LEAVE = 'shape_leave';
+    case SHAPE_ENTERED = 'shape_entered';
+    case SHAPE_LEFT = 'shape_left';
 
-    case MAP_ENTER = 'map_enter';
-    case MAP_LEAVE = 'map_leave';
+    case MAP_ENTERED = 'map_entered';
+    case MAP_LEFT = 'map_left';
 
     case TYPE_SHAPE_ENCLOSED_START = 'type_shape_enclosed_start';
     case TYPE_SHAPE_ENCLOSED_END = 'type_shape_enclosed_end';
 
-    case TYPE_SHAPE_ENCLOSING_START = 'type_shape_enclosing_start';
-    case TYPE_SHAPE_ENCLOSING_END = 'type_shape_enclosing_end';
 
     case TYPE_MAP_ENCLOSED_START = 'type_map_enclosed_start';
     case TYPE_MAP_ENCLOSED_END = 'type_map_enclosed_end';
 
-    case TYPE_MAP_ENCLOSING_START = 'type_map_enclosing_start';
-    case TYPE_MAP_ENCLOSING_END = 'type_map_enclosing_end';
 
 
 
     case LIVE_TYPE_ADDED = 'live_type_added';
     case LIVE_TYPE_REMOVED = 'live_type_removed';
     case LIVE_TYPE_PASTED = 'live_type_pasted';
-    case TIME_IN_AFTER = 'time_in_after'; //notice after it happened
-    case TIME_OUT_AFTER = 'time_out_after';
+
 
 
 
@@ -132,18 +131,20 @@ enum TypeOfEvent: string
 
     case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
 
-    case PHASE_REMOVED = 'phase_removed';
+    case PHASE_PURGED = 'phase_purged';
     case PHASE_ADDED = 'phase_added';
-    case PHASE_MOVING = 'phase_moving';
-    case PHASE_CUTTING = 'phase_cutting';
-    case PHASE_REPLACING = 'phase_replacing';
+
+    case PHASE_TREE_DELETED = 'phase_tree_deleted';
+    case PHASE_TREE_MOVED = 'phase_tree_moved';
+    case PHASE_TREE_COPIED = 'phase_tree_copied';
     case ELEMENT_PHASE_CHANGE_BATCH = 'element_phase_change_batch';
+    case ELEMENT_PHASE_CHANGED_QUIET = 'element_phase_changed_quiet';
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
     "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
      */
-    //system wide
+    //system-wide
 
     case SERVER_EDITED = 'server_edited';
     case LINK_CREATED = 'link_created';
@@ -162,8 +163,9 @@ enum TypeOfEvent: string
     case TYPE_OWNER_CHANGING = 'type_owner_changing'; //type given different ownership from what it started as, parents can block
     case TYPE_OWNER_CHANGED = 'type_owner_changed'; //after type given different ownership
 
-    case DESIGN_PENDING = 'design_pending'; //when a design uses a base attribute or parent type. Goes to all listeners in the inheritance chain
-    case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
+    case DESIGN_PARENT_ADDING = 'design_parent_adding'; //when a design uses a parent type. Goes to all listeners in the inheritance chain
+    case ATTRIBUTE_PENDING = 'attribute_pending'; //when a design uses a base attribute. Goes to all listeners in the inheritance chain
+    case TYPE_PUBLISHING = 'type_publishing'; //covers both parent types and parent attributes: type or type ancestor ns admin
     case TYPE_RETIRED = 'type_retired'; //type or type ancestor ns admin
     case TYPE_SUSPENDED = 'type_suspended'; //only system admin group
     case TYPE_DELETED = 'type_deleted'; //only system admin group
@@ -172,9 +174,8 @@ enum TypeOfEvent: string
 
 
     case USER_DELETION_PREPARING = 'user_deletion_preparing';
-    case USER_DELETION_STARTING = 'user_deletion_starting';
-    case USER_REGISTRATION_STARTING = 'user_registration_starting';
-    case USER_REGISTRATION_PROCESSING = 'user_registration_processing';
+    case USER_DELETED = 'user_deleted';
+    case USER_REGISTERED = 'user_registered';
     case USER_LOGGING_IN = 'user_logging_in';
     case USER_EDIT = 'user_edit';
 
@@ -184,11 +185,6 @@ enum TypeOfEvent: string
     case NAMESPACE_TRANSFERRED = 'namespace_transferred';
     case NAMESPACE_DESTROYED = 'namespace_destroyed';
 
-    case NAMESPACE_HANDLE_ADDED = 'namespace_handle_added';
-    case NAMESPACE_HANDLE_REMOVED = 'namespace_handle_removed';
-
-    case WAIT_FAIL = 'wait_fail';
-    case WAIT_SUCCESS = 'wait_success';
 
 
 
@@ -233,21 +229,6 @@ enum TypeOfEvent: string
     case ELSEWHERE_SHARING_ELEMENT = 'elsewhere_sharing_element';
     case ELSEWHERE_ELEMENT_REENTERED = 'elsewhere_element_reentered'; //element with same uuid come back after copied out
 
-
-
-
-
-
-
-    public static function tryFromInput(string|int|bool|null $test): TypeOfEvent
-    {
-        $maybe = TypeOfEvent::tryFrom($test);
-        if (!$maybe) {
-            $delimited_values = implode('|', array_column(TypeOfEvent::cases(), 'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum", ['ref' => $test, 'enum_list' => $delimited_values]));
-        }
-        return $maybe;
-    }
 }
 
 

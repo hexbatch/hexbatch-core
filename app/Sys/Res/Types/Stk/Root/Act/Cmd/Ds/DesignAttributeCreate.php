@@ -6,25 +6,28 @@ use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeParamData;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
-use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\ActionDatum;
 use App\Models\Attribute;
+use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
-use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Illuminate\Support\Facades\DB;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
 
 #[HexbatchTitle( title: "Attribute create")]
 #[HexbatchBlurb( blurb: "Attributes are made in design phase only, an optional parent is added after creation")]
@@ -48,352 +51,197 @@ use Illuminate\Support\Facades\DB;
 
 the type owner of the optional attribute parent will get a notice before creation
 
-* [ElementTypeTurningOn](../../../Evt/Server/DesignPending.php)
+* [AttributePending](../../../Evt/Server/AttributePending.php)
 
 This can decide to accept the new design using the parent or not, if they deny, the attribute is still created,
  but without the parent being approved, and it will be impossible to publish until this is changed
 ")]
 
-class DesignAttributeCreate extends Act\Cmd\Ds
+class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
 {
     const UUID = '47661774-8acc-45fb-8c22-77663177e92c';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_ATTRIBUTE_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\DesignPending::class
+        Evt\Type\DesignParentAdding::class
     ];
 
-    protected function setAttributeApproval(TypeOfApproval $approval) {
-        $this->action_data->collection_data->offsetSet('attribute_approval',$approval);
-        $this->action_data->save();
-    }
 
-    const array ACTIVE_DATA_KEYS = ['attribute_name','owner_type_uuid','parent_attribute_uuid',
-        'design_attribute_uuid','location_uuid','is_final','is_abstract','uuid','given_design_uuid','unset_parent',
-        'read_json_path','validate_json_path','default_value'];
-
-    protected TypeOfApproval     $attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
-
-    #[ApiParamMarker( param_class: DesignAttributeParams::class)]
+    protected Attribute|null $parent_attribute = null;
+    #[ApiParamMarker( param_class: AttributeParamData::class)]
     public function __construct(
-        protected ?string                  $given_design_uuid = null, //for editing an existing design
-        protected ?string                  $uuid = null, //for assigning a uuid to a new type
-        protected bool                     $unset_parent = false,  //for editing
-        protected ?string                  $attribute_name = null,
-        protected ?string                  $owner_type_uuid = null,
-        protected ?string                  $parent_attribute_uuid = null,
-        protected ?string                  $design_attribute_uuid = null,
-        protected ?string                  $location_uuid = null,
-        protected ?bool                     $is_final = null,
-        protected ?bool                     $is_abstract = null,
-        protected ?string                     $read_json_path = null,
-        protected ?string                     $validate_json_path = null,
-        protected array                     $default_value = [],
-        protected ?TypeOfServerAccess       $access = null,
-        protected ?TypeOfElementValuePolicy $value_policy = null,
-
-        protected ?bool                    $is_async = null,
-        protected bool                     $is_system = false,
-        protected bool                     $send_event = true,
-        protected ?ActionDatum             $action_data = null,
-        protected ?ActionDatum             $parent_action_data = null,
-        protected ?UserNamespace           $owner_namespace = null,
-        protected bool                     $b_type_init = false,
-        protected array                    $tags = []
+        protected AttributeParamData     $params,
+        protected bool              $is_system,
+        protected ?string              $use_ref,
+        protected ?UserNamespace      $calling_namespace,
+        protected ElementType            $given_type,
+        protected bool          $do_permission_check = true,
     )
     {
 
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
-
-    protected function restoreData(array $data = []) {
-        parent::restoreData($data);
-        if ($this->action_data) {
-            if ($this->action_data->collection_data?->offsetExists('access')) {
-                $access_string = $this->action_data->collection_data->offsetGet('access');
-                if ($access_string) {
-                    $this->access = TypeOfServerAccess::tryFromInput($access_string);
-                } else {
-                    $this->access = null;
-                }
-            }
-
-            if ($this->action_data->collection_data?->offsetExists('attribute_approval')) {
-                $access_string = $this->action_data->collection_data->offsetGet('attribute_approval');
-                $this->attribute_approval = TypeOfApproval::tryFromInput($access_string);
-            }
-
-            if ($this->action_data->collection_data?->offsetExists('value_policy')) {
-                $policy_string = $this->action_data->collection_data->offsetGet('value_policy');
-                if ($policy_string) {
-                    $this->value_policy = TypeOfElementValuePolicy::tryFromInput($policy_string);
-                } else {
-                    $this->value_policy = null;
-                }
-            }
-
-        }
+    protected  function toArray() :array {
+        return [
+            'params'=>$this->params->toArray(),
+            'use_ref'=>$this->use_ref,
+            'is_system'=>$this->is_system,
+            'do_permission_check'=>$this->do_permission_check,
+            'calling_namespace'=>$this->calling_namespace,
+            'given_type'=>$this->given_type,
+        ];
     }
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-
-
-        $this->setGivenAttribute($this->given_design_uuid)->setGivenType($this->owner_type_uuid);
-
-
-        if ($this->parent_attribute_uuid) {
-            $this->action_data->data_second_attribute_id = Attribute::getThisAttribute(uuid: $this->parent_attribute_uuid)->id;
-        }
-
-        if ($this->design_attribute_uuid) {
-            $this->action_data->data_third_attribute = Attribute::getThisAttribute(uuid: $this->design_attribute_uuid)->id;
-        }
-
-        $this->action_data->collection_data->offsetSet('access',$this->access?->value);
-        $this->action_data->collection_data->offsetSet('value_policy',$this->value_policy?->value);
-        $this->action_data->collection_data->offsetSet('attribute_approval',$this->attribute_approval->value);
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
-    }
-
-    public function getInitialConstantData(): array {
-        $ret = parent::getInitialConstantData();
-        $ret['access'] = $this->access?->value;
-        $ret['value_policy'] = $this->value_policy?->value;
-        return $ret;
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    protected function runActionInner(array $data = []): void {
-        parent::runActionInner();
-
-        if (!$this->getGivenAttribute() && !$this->getGivenType()) {
-            throw new \InvalidArgumentException("Need owning type before can make attribute");
-        }
-
-        if ($this->getGivenType()->lifecycle === TypeOfLifecycle::PUBLISHED) {
-
-            throw new HexbatchNotPossibleException(__('msg.design_cannot_add_attribute_to_published',['ref'=>$this->getGivenType()->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::TYPE_SCHEMA_ISSUE);
-        }
-
-        if (!$this->getGivenAttribute() && !$this->attribute_name) {
-            throw new HexbatchNotPossibleException(__('msg.attribute_schema_must_have_name'),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-        }
-
-        if ($this->getParentAttribute()?->is_final_attribute) {
-            throw new HexbatchNotPossibleException(__('msg.attribute_parent_is_final',['ref'=>$this->getParentAttribute()->getName()]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-        }
-
-        $shape_id = null;
-        if ($this->location_uuid) {
-            $shape_id = LocationBound::getThisLocation(uuid: $this->location_uuid)->id;
-        }
-
-        $this->checkIfAdmin($this->getGivenType()->owner_namespace);
-
-        try {
-            DB::beginTransaction();
-            $attr = $this->getGivenAttribute();
-            if (!$attr) {
-                $attr = new Attribute();
-                if ($this->uuid) {
-                    $attr->ref_uuid = $this->uuid;
-                }
-            }
-
-
-
-            if ($this->attribute_name) {
-                $attr->setAttributeName($this->attribute_name);
-            }
-
-            if (!$this->getGivenAttribute()) {
-                $attr->owner_element_type_id = $this->getGivenType()->id ;
-                if (!$this->getParentAttribute()) {
-                    $attr->attribute_approval = TypeOfApproval::DESIGN_APPROVED;
-                }
-            }
-
-            if ($parent = $this->getParentAttribute()) {
-                if ($this->getGivenAttribute()?->parent_attribute_id !== $parent->id) {
-                    $attr->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
-                }
-                $attr->parent_attribute_id = $parent->id ;
-            }
-
-            if ($this->unset_parent) {
-                $attr->parent_attribute_id = null;
-                $attr->attribute_approval = TypeOfApproval::DESIGN_APPROVED;
-            }
-
-            if( $this->getDesignAttribute()) {
-                if (!($this->is_system || $this->getDesignAttribute()->isPublicDomain()) ) {
-                    $this->checkIfMember($this->getDesignAttribute()->type_owner->owner_namespace);
-                }
-                $attr->design_attribute_id = $this->getDesignAttribute()->id ;
-            }
-
-            if ($this->access) {
-                $attr->server_access_type = $this->access ;
-            }
-
-            if ($this->value_policy) {
-                $attr->value_policy = $this->value_policy ;
-            }
-
-            if ($this->read_json_path) {
-                $attr->read_json_path = $this->read_json_path ;
-            }
-
-            if ($this->validate_json_path) {
-                $attr->validate_json_path = $this->validate_json_path ;
-            }
-
-            if (!empty($this->default_value)) {
-                $attr->setDefaultValue($this->default_value);
-            }
-
-
-            //public domain parents can be automatically approved
-            if ($this->parent_attribute_uuid) {
-                $par_attr = $this->getParentAttribute();
-                if ($this->is_system || $par_attr->attribute_parent->isPublicDomain() ||
-                    $par_attr->type_owner->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())
-                )
-                {
-                    $attr->attribute_approval =  TypeOfApproval::DESIGN_APPROVED;
-                } else {
-                    $attr->attribute_approval = $this->attribute_approval;
-                }
-
-            }
-
-            if ($this->is_final !== null ) {
-                $attr->is_final_attribute = $this->is_final ;
-            }
-
-
-
-            if ($this->is_abstract !== null ) {
-                $attr->is_abstract = $this->is_abstract ;
-            }
-
-
-
-            if ($shape_id) {
-                $attr->attribute_shape_id = $shape_id;
-            }
-            $attr->save();
-
-
-            $this->action_data->data_attribute_id = $attr->id;
-            DB::commit();
-        }
-        catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-
+    protected static function fromArray(array $args) : static{
+        $params = AttributeParamData::from($args['params']);
+        $is_system = (bool)$args['is_system'];
+        $do_permission_check = (bool)$args['do_permission_check'];
+        $use_ref = $args['use_ref'];
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args,false);
+        $given_type = static::getTypeFromArray('given_type',$args);
+        return new static(params: $params,is_system: $is_system,use_ref: $use_ref,calling_namespace: $calling_namespace,given_type: $given_type,do_permission_check: $do_permission_check);
     }
 
 
 
-    protected function getMyData() :array {
-        return ['attribute'=>$this->getGivenAttribute(),'parent'=>$this->getParentAttribute(),'design'=>$this->getDesignAttribute()];
-    }
 
-    public function getDataSnapshot(): array
+    public  function doCreateAttribute()
+    : Attribute
     {
-        $ret = [];
-        $what =  $this->getMyData();
-        if (isset($what['attribute'])) {
-            $ret['attribute'] = new AttributeResponse(given_attribute: $what['attribute']);
+        if ($this->do_permission_check) {
+            static::checkIfGivenIsAdmin(given: $this->calling_namespace,target: $this->given_type->owner_namespace);
         }
-        return $ret;
+
+
+        $given_attribute = new Attribute();
+        $given_attribute->owner_element_type_id = $this->given_type->id;
+        $given_attribute->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
+        $given_attribute->is_system = $this->is_system;
+        $given_attribute->type_uuid = $this->given_type->ref_uuid;
+
+        if ($this->use_ref) {
+            $given_attribute->ref_uuid = $this->use_ref;
+        }
+
+        $given_attribute->setAttributeName($this->params->attribute_name??null);
+
+        if ($this->params->parent_ref_uuid) {
+            $this->parent_attribute = $parent = Attribute::getThisAttribute(uuid: $this->params->parent_ref_uuid);
+            if ($parent->is_final_attribute) {
+                throw new HexbatchNotPossibleException(__('msg.attribute_parent_is_final',['ref'=>$parent->getName()]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
+            }
+
+            $given_attribute->parent_attribute_id = $parent->id;
+        }
+
+
+        if ($this->params->location_uuid) {
+            $shape_id = LocationBound::getThisLocation(uuid: $this->params->location_uuid)->id;
+            $given_attribute->attribute_shape_id = $shape_id;
+        }
+
+
+        if( $this->params->design_ref_uuid) {
+            $design_attribute = Attribute::getThisAttribute(uuid: $this->params->design_ref_uuid);
+            if ($this->do_permission_check || !$design_attribute->isPublicDomain())  {
+                static::checkIfGivenIsMember(given: $this->calling_namespace,target: $design_attribute->type_owner->owner_namespace );
+            }
+            $given_attribute->design_attribute_id = $design_attribute->id ;
+        }
+
+
+        $given_attribute->access_policy = $this->params->access_policy?? TypeOfServerAccess::IS_PRIVATE;
+        $given_attribute->value_policy = $this->params->value_policy?? TypeOfElementValuePolicy::STATIC;
+
+        $given_attribute->read_json_path = $this->params->read_json_path??null ;
+        $given_attribute->validate_json_path = $this->params->validate_json_path??null ;
+        $given_attribute->is_final_attribute = $this->params->is_final_attribute??false ;
+        $given_attribute->is_abstract = $this->params->is_abstract?? false  ;
+
+        if (!empty($this->params->default_value)) {
+            $given_attribute->setDefaultValue($this->params->default_value);
+        }
+
+
+        $given_attribute->save();
+        return $given_attribute;
     }
 
-
-    public function getChildrenTree(): ?Tree
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        if (!$this->send_event) {return null;}
-        $nodes = [];
-        $events = [];
-        if ($this->getGivenAttribute() && !$this->unset_parent) {
-            if ($this->parent_attribute_uuid !== $this->getGivenAttribute()->attribute_parent->ref_uuid) {
-                if ($this->parent_attribute_uuid && !$this->getParentAttribute()->isPublicDomain()) {
-                    $events = Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,
-                        type_context: $this->getGivenType(),attribute_context: $this->getParentAttribute());
-                }
-            }
-        } else {
-            if ( $this->parent_attribute_uuid && !$this->getParentAttribute()->isPublicDomain()) {
-                $events = Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getGivenType(),attribute_context: $this->getParentAttribute());
-
-            }
+        $attribute = null;
+        $b_approved = true;
+        if (count($children_args)) {
+            $b_approved = static::getDecisionUsingAndLogic($children_args);
+            /** @var Attribute $attribute */
+            $attribute = $children_args['attribute'];
         }
-
-        foreach ($events as $event) {
-            $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(), 'action' => $event];
-        }
-
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-
-
-        return null;
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function setChildActionResult(IThingAction $child): void
-    {
-
-
-        if ($child instanceof Evt\Server\DesignPending) {
-
-            if ($child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
+        if ($attribute) {
+            if ($b_approved) {
+                $attribute->attribute_approval = TypeOfApproval::DESIGN_APPROVED;
             } else {
-
-                if ($this->owner_type_uuid === $child->getAskedAboutType()?->ref_uuid) {
-                    if ($this->attribute_name === $child->getAskedAboutAttributeName()) {
-                        if ($child->isActionSuccess()) {
-                            $this->setAttributeApproval(approval: TypeOfApproval::DESIGN_APPROVED);
-                        } elseif ($child->isActionFail()) {
-                            $this->setAttributeApproval(approval: TypeOfApproval::DESIGN_DENIED);
-                        }
-                    }
-                }
-
+                $attribute->attribute_approval = TypeOfApproval::DESIGN_DENIED;
             }
-        } //end if this is design pending
+            $attribute->save();
+
+        }
+
+        Log::debug("Called design attribute create node",['args'=>$command_args,'children'=>$children_args]);
+        return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
+            data: ['attribute'=>$attribute,static::CHILD_DECISION_KEY=>$b_approved]);
     }
 
+    /**
+     * @throws \Throwable
+     */
+    public static function makeCreateAttributeTree(
+         AttributeParamData     $params,
+         bool                   $is_system,
+         ?string                $use_ref,
+         UserNamespace          $calling_namespace,
+         ElementType            $given_type,
+         ?IThangBuilder         $builder = null
+    ) : Thang|IThangBuilder|null
+    {
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
+        }
+
+        $me = new static(params: $params,is_system: $is_system,
+            use_ref: $use_ref,calling_namespace: $calling_namespace,given_type: $given_type);
+
+        $attribute = $me->doCreateAttribute();
+
+
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+
+
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>[static::class],
+            'command_args' => $me->toArray()
+        ]);
+        $builder->tree($my_command);
+        if (!$is_system && $params->parent_ref_uuid) {
+            Evt\Type\AttributePending::callParentTree(ancestor_attribute: $me->parent_attribute, given_attribute: $attribute, builder: $builder);
+        }
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        return  $builder->execute()->getThang();
+
+    }
 }
 

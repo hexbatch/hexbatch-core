@@ -14,8 +14,8 @@ use App\Sys\Res\Types\BaseType;
 class Root extends BaseType
 {
     const UUID = '79a56b04-c36e-430f-bad4-5f53fb29ad4e';
-    const TYPE_NAME = 'system';
-
+    const TYPE_NAME = self::ROOT_NAME;
+    const ROOT_NAME = 'system';
 
 
     const ATTRIBUTE_CLASSES = [

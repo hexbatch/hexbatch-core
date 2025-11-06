@@ -12,11 +12,12 @@ class EditPhase extends Phase
     const EDITED_BY_PHASE_SYSTEM_CLASS = AdvicePhase::class;
 
 
-
+    const PHASE_UUID = 'c2354914-f726-4733-ad81-995c2ac5e634';
 
     const PARENT_CLASSES = [
         Phase::class
     ];
 
+    const ATTRIBUTE_CLASSES = [];
 }
 

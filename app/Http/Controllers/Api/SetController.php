@@ -6,22 +6,24 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\ErrorData;
+use App\Data\ApiParams\Data\Sets\Params\AddElementsParamData;
+use App\Data\ApiParams\Data\Sets\Responses\SetList;
+use App\Data\ApiParams\Data\Sets\SetData;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementSet;
 use App\Models\Phase;
-use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
-use App\OpenApi\ApiResults\Set\ApiSetCollectionResponse;
-use App\OpenApi\ApiResults\Set\ApiSetResponse;
-use App\OpenApi\Params\Actioning\Set\AddElementParams;
-use App\OpenApi\Params\Listing\Elements\ListElementParams;
-use App\OpenApi\Params\Listing\Set\ListSetParams;
-use App\OpenApi\Params\Listing\Set\ShowSetParams;
-use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Hexbatch\Thangs\Data\ThangData;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
@@ -31,55 +33,59 @@ class SetController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/add_element',
         operationId: 'core.sets.add_element',
-        description: "Element namespace members can put element into any set that allows that ",
+        description: "Element namespace members can put element into any set they control. Union of elements selected and not there are added ",
         summary: 'Change the element owner',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementsParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ElementList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Set was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetEnter::class)]
-    #[ApiEventMarker(Evt\Set\ShapeEnter::class)]
-    #[ApiEventMarker(Evt\Set\MapEnter::class)]
+    #[ApiEventMarker( Evt\Set\SetEntering::class)]
+    #[ApiEventMarker( Evt\Set\SetEntered::class)]
+    #[ApiEventMarker(Evt\Set\ShapeEntered::class)]
+    #[ApiEventMarker(Evt\Set\MapEntered::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingStart::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\AddElement::class)]
-    public function add_element(Request $request,ElementSet $set) {
-        $params = new AddElementParams(given_set: $set);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Set\AddElement(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['add-elements']);
+    public function add_element(UserNamespace $namespace,Phase $working_phase,ElementSet $set,Request $request) {
+        Utilities::ignoreVar($working_phase);
+        $params = AddElementsParamData::fromRequest($request);
+        $data_out = Root\Api\Set\AddElement::addElementsToSet(params: $params,calling_namespace: $namespace, given_set: $set,
+            is_system: false, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = SetData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -95,13 +101,13 @@ class SetController extends Controller {
         tags: ['set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -123,33 +129,33 @@ class SetController extends Controller {
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/remove_element',
         operationId: 'core.sets.remove_element',
-        description: "Element namespace members can put element into any set that allows that ",
-        summary: 'Change the element owner',
+        description: "Remove selected elements from set. Union of selected elements and present elements chosen ",
+        summary: 'Remove elements from set',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
-    #[ApiEventMarker(Evt\Set\ShapeLeave::class)]
-    #[ApiEventMarker(Evt\Set\MapLeave::class)]
+    #[ApiEventMarker( Evt\Set\SetLeaving::class)]
+    #[ApiEventMarker( Evt\Set\SetLeft::class)]
+    #[ApiEventMarker(Evt\Set\ShapeLeft::class)]
+    #[ApiEventMarker(Evt\Set\MapLeft::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingEnd::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingEnd::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\RemoveElement::class)]
     public function remove_element() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -161,26 +167,26 @@ class SetController extends Controller {
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/empty_set',
         operationId: 'core.sets.empty_set',
-        description: "Element namespace members can clear out sticky elements. Event handlers can block their elements from leaving ",
+        description: "Removes all except sticky elements. Event handlers can block their elements from leaving ",
         summary: 'Removes all elements except sticky ones',
         security: [['bearerAuth' => []]],
         tags: ['set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\EmptySet::class)]
     public function empty_set() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -188,61 +194,35 @@ class SetController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/stick_element',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/stick_elements',
         operationId: 'core.sets.stick_element',
-        description: "Set namespace members can make sticky elements in those sets ",
+        description: "Set namespace admins can stick or unstick elements in those sets ",
         summary: 'Makes element sticky in set operations',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementsParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\StickElement::class)]
-    public function stick_element() {
+    public function stick_elements() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
-    #[OA\Patch(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/unstick_element',
-        operationId: 'core.sets.unstick_element',
-        description: "Set namespace members can unstick elements in those sets ",
-        summary: 'Unsticks one or more elements in one or more sets',
-        security: [['bearerAuth' => []]],
-        tags: ['set','element'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-            new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Set\UnstickElement::class)]
-    public function unstick_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 
@@ -256,13 +236,13 @@ class SetController extends Controller {
         tags: ['set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -286,13 +266,13 @@ class SetController extends Controller {
         tags: ['set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -310,41 +290,44 @@ class SetController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/show',
+        path: '/api/v1/{user_namespace}/sets/set/{element_set}/show',
         operationId: 'core.sets.show_set',
         description: "Shows information about a set to set members ",
         summary: 'Gives information about a set',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowSetParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Set info returned', content: new JsonContent(ref: ApiSetResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Elements added', content: new JsonContent(ref: SetData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Set was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Set\ShowSet::class)]
-    public function show_set(Request $request, ElementSet $set) {
-        $params = new ShowSetParams(given_set: $set);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Set\ShowSet(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-set']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function show_set(UserNamespace $namespace,ElementSet $set,Request $request ) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Set\ShowSet::showSet(set: $set,params: $params, caller_namespace:$namespace);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -370,74 +353,40 @@ class SetController extends Controller {
 
 
 
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/list_children',
-        operationId: 'core.sets.list_children',
-        description: "Set namespace members can get a list of children sets ",
-        summary: 'List child sets',
-        security: [['bearerAuth' => []]],
-        tags: ['set'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-            new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Set\ListChildren::class)]
-    public function list_children() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
     /**
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/list_elements',
+        path: '/api/v1/{user_namespace}/sets/set/{element_set}/list_elements',
         operationId: 'core.sets.list_elements',
         description: "Can search in the element list of a set ",
         summary: 'list elements in a set',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ElementList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue', content: new JsonContent(ref: ErrorData::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Set\ListMembers::class)]
-    public function list_elements(Request $request,ElementSet $set) {
-        $params = new ListElementParams(given_set: $set);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Set\ListMembers(params: $params, given_set: $set, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-members']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_elements(UserNamespace $namespace,Request $request,ElementSet $set) {
+        $params = SelectElementParamData::fromRequest($request);
+        $params->set_ref = $set->ref_uuid;
+        $data_out = Root\Api\Set\ListMembers::listElements(params: $params, caller_namespace: $namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -445,38 +394,46 @@ class SetController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/list',
+        path: '/api/v1/{user_namespace}/sets/list',
         operationId: 'core.sets.list',
-        description: "Lists all sets this is a member, admin or owner  ",
+        description: "Lists all sets asked for  ",
         summary: 'list sets',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListSetParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed sets', content: new JsonContent(ref: ApiSetCollectionResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Showing sets', content: new JsonContent(ref: SetList::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Set was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Set\ListSets::class)]
-    public function list_sets(Phase $working_phase,Request $request) {
-        $params = new ListSetParams(working_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Set\ListSets(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-sets']);
+    public function list_sets(UserNamespace $namespace,Request $request) {
 
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Set\ListSets::listSets(params: $params, caller_namespace:$namespace);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 }

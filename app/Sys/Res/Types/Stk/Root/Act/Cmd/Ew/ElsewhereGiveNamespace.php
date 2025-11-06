@@ -12,9 +12,7 @@ class ElsewhereGiveNamespace extends Act\Cmd\Ew
     const UUID = '3fa65eaf-79c0-4097-89aa-84d4c4643215';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_GIVE_NS;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class

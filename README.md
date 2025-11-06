@@ -86,3 +86,8 @@ Making api for
 
 for rendering the docs 
 https://commonmark.thephpleague.com/2.7/extensions/overview/
+
+# Notes for dev
+
+    php artisan schedule:work
+    php artisan schedule:list

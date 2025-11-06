@@ -65,11 +65,22 @@ class TimeBound extends Model
         'bound_start',
         'bound_stop',
         'bound_period_length',
-        'boundscron'
+        'boundscron',
+    ];
+
+
+    /**
+     * The attributes that should be cast.
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'bound_start' => 'datetime',
+        'bound_stop' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     const MAKE_PERIOD_SECONDS = 60*60*6;
-    const MAKE_REPEAT_SECONDS = 60*30;
 
 
     public function scheduled_types() : HasMany {
@@ -80,13 +91,15 @@ class TimeBound extends Model
     public function time_spans() : HasMany {
         return $this->hasMany(TimeBoundSpan::class)
             ->select('*')
-            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts, extract(epoch from upper(time_slice_range)) as bound_stop_ts")
-            ->orderBy('span_start');
+            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts")
+            ->selectRaw(" extract(epoch from upper(time_slice_range)) as bound_stop_ts")
+            ->orderBy('bound_start_ts')
+            ;
     }
 
 
     public function schedule_namespace() : BelongsTo {
-        return $this->belongsTo(UserNamespace::class,'location_bound_namespace_id');
+        return $this->belongsTo(UserNamespace::class,'time_bound_namespace_id');
     }
     public function getName() {
         return $this->bound_name;
@@ -96,70 +109,92 @@ class TimeBound extends Model
 
     /**
      * @param int[] $only_ids
-
+        make spans for any bound that has an ending time greater than now, whose last span is less than the max time
      */
-    public static function generateSpans(array $only_ids = []) : void {
+    public static function generateSpans(array $only_ids = []) : array {
 
         $now_ts = time();
         $unix_timestamp = $now_ts + static::MAKE_PERIOD_SECONDS;
-        $query = TimeBound::select('*')
-            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts, extract(epoch from upper(time_slice_range)) as bound_stop_ts")
-            ->whereRaw('upper(time_slice_range) >= NOW()')
-            ->join('time_bound_spans',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($now_ts) {
-                    $join
-                        ->on('time_bounds.id','=','time_bound_spans.time_bound_id')
-                        ->where('time_bound_spans.span_start','>',$now_ts + TimeBound::MAKE_REPEAT_SECONDS);
-                }
+
+        $query = TimeBound::select('time_bounds.*')
+            ->selectRaw("max_spans.max_upper_time,max_spans.max_span_id,to_timestamp($unix_timestamp) as my_time")
+            ->joinSub(
+                query:
+                    "
+                        SELECT MAX(s.id) as max_span_id,s.time_bound_id ,MAX(upper(s.time_slice_range)) as max_upper_time
+                        FROM time_bound_spans s
+                        GROUP BY s.time_bound_id
+                    ",
+                as: 'max_spans',
+                first: 'max_spans.time_bound_id',
+                operator: '=',
+                second: 'time_bounds.id'
             )
-            ->whereNull('time_bound_spans.id')
-            ->where('time_bounds.bound_stop','>',$now_ts)
-            ->orderBy('time_bounds.id');
+            ->whereRaw("time_bounds.bound_stop >= current_timestamp")
+            ->whereRaw("max_upper_time < to_timestamp($unix_timestamp)::timestamptz")
+            ->orderBy('time_bounds.id')
+
+            ;
+
 
         if (count($only_ids)) {
-            $query->whereIn('id',$only_ids);
+            $query->whereIn('time_bounds.id',$only_ids);
         }
-        $paginator = $query->cursorPaginate(20, ['*'], 'timeSpanCursorId');
 
-        do  {
-            /**
-             * @var static $item
-             */
-            foreach ($paginator->items() as $item) {
-                $item->makeSpansUntil($unix_timestamp);
+        $counter = 0;
+        $total = 0;
+        $query->chunkById(200, function (Collection $flights) use($unix_timestamp,&$counter,&$total)
+        {
+            /** @var static $item */
+            foreach ($flights as $item) {
+                $total += $item->makeSpansUntil($unix_timestamp);
+                $counter++;
             }
+        }, column: 'id');
 
-            $next = $paginator->nextCursor();
-            $paginator = $query->cursorPaginate(20, ['*'], 'timeSpanCursorId', $next);
-        } while( $paginator->hasPages() );
+        return [$counter,$total];
     }
 
 
-    public function makeSpansUntil(int $unix_timestamp) {
-        try {
-            if ($this->bound_cron) {
+    /**
+     * @throws \Throwable
+     */
+    public function makeSpansUntil(int $unix_timestamp) : int
+    {
+        $counter = 0;
+        DB::transaction(function () use($unix_timestamp,&$counter)
+        {
+            if ($this->bound_cron && ($this->bound_cron !== static::EMPTY_CRON)) {
                 $cron = new \Cron\CronExpression($this->bound_cron);
                 $next_time_ts = time();
+                $old_cron_time_ts = null;
                 $skip = 0;
-                while ($next_time_ts < $unix_timestamp) {
+                while ($next_time_ts < $unix_timestamp ) {
                     $next_date_time = $cron->getNextRunDate('now', $skip++, true, $this->bound_cron_timezone);
+
                     $next_time_ts = Carbon::create($next_date_time)->unix();
-                    $this->insertSpan($next_time_ts, $next_time_ts + ($this->bound_period_length ?? 1));
+                    if ( $old_cron_time_ts && ($next_time_ts - $old_cron_time_ts) < ($this->bound_period_length??1) ) {
+                        throw ValidationException::withMessages(
+                            ['bound_period_length' => __("msg.time_bound_period_must_be_less_than_cron_period",
+                                ['period_seconds'=>$this->bound_period_length??1,'cron_seconds'=>$next_time_ts - $old_cron_time_ts])]);
+                    }
+                    $old_cron_time_ts = $next_time_ts;
+                    $counter+=$this->insertSpan($next_time_ts, $next_time_ts + ($this->bound_period_length ?? 1));
                 }
             } else {
-                $this->insertSpan($this->bound_start_ts, $this->bound_stop_ts);
+
+                $first_time_ts = Carbon::create($this->bound_start)->unix();
+                $next_time_ts = Carbon::create($this->bound_stop)->unix();
+                $counter += $this->insertSpan($first_time_ts, $next_time_ts);
             }
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(),$e->getCode(),$e);
-        }
+        });
+        return $counter;
     }
 
-    protected function insertSpan(int $from_ts,int $to_ts) {
+    protected function insertSpan(int $from_ts,int $to_ts) :int
+    {
 
-        DB::affectingStatement("
+        return DB::affectingStatement("
                 INSERT INTO time_bound_spans(time_bound_id,time_slice_range)
                 SELECT :bounds_id,tstzrange( to_timestamp(:start_at),to_timestamp(:stop_at) )
                 WHERE
@@ -171,9 +206,6 @@ class TimeBound extends Model
         );
     }
 
-    public static function convertTsToSqlTime(int $unix_ts) : string  {
-        return DB::selectOne("SELECT to_timestamp(:unix_ts) as da_time",['unix_ts'=>$unix_ts])->da_time;
-    }
 
 
     public static function buildTimeBound(?int                   $me_id = null, ?int $type_id = null,
@@ -259,7 +291,8 @@ class TimeBound extends Model
                 function (JoinClause $join) use($date_string) {
                     $join
                         ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
-                        ->where('time_bound_spans.time_slice_range','>',$date_string);
+                        ->whereRaw('upper(s.time_slice_range) < :my_time::timestamptz',['my_time'=>$date_string])
+                        ;
                 }
             );
         }
@@ -273,7 +306,7 @@ class TimeBound extends Model
                 function (JoinClause $join) use($date_string) {
                     $join
                         ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
-                        ->where('time_bound_spans.time_slice_range','<',$date_string);
+                        ->whereRaw('lower(s.time_slice_range) > :my_time::timestamptz',['my_time'=>$date_string]);
                 }
             );
         }
@@ -287,7 +320,7 @@ class TimeBound extends Model
                 function (JoinClause $join) use($date_string) {
                     $join
                         ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
-                        ->where('time_bound_spans.time_slice_range','@>',$date_string);
+                        ->whereRaw('s.time_slice_range  @> :my_time::timestamptz',['my_time'=>$date_string]);
                 }
             );
         }
@@ -353,8 +386,11 @@ class TimeBound extends Model
     }
 
 
+    /**
+     * @throws \Throwable
+     */
     public function setTimes(string|int $start, string|int $stop,
-                             ?string $bound_cron = null, ?int $period_length = null,?string $bound_cron_timezone = null
+                             ?string    $bound_cron = null, ?int $period_length = null, ?string $bound_cron_timezone = null
     ) :void
     {
         if (empty($start) || empty($stop)) {
@@ -377,20 +413,25 @@ class TimeBound extends Model
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::BOUND_INVALID_START_STOP);
         }
-        $this->bound_start = TimeBound::convertTsToSqlTime($bound_start_ts);
-        $this->bound_stop = TimeBound::convertTsToSqlTime($bound_stop_ts);
+        $this->bound_start = Carbon::create($start)->toIso8601String();
+        $this->bound_stop = Carbon::create($stop)->toIso8601String();
 
         $this->bound_cron = $bound_cron;
-        if ($bound_cron) {
+        if ($bound_cron && ($bound_cron !== static::EMPTY_CRON)) {
             $this->setCronString($bound_cron) ;
-            $this->setPeriodLength($period_length);
+            $this-> setPeriodLength($period_length);
         }
         $this->setTimezone($bound_cron_timezone);
         $this->save();
-        $this->redoTimeSpans();
+       $this->redoTimeSpans();
     }
 
+    const string EMPTY_CRON = '* * * * *';
 
+
+    /**
+     * @throws \Throwable
+     */
     public function redoTimeSpans() {
         TimeBoundSpan::where('time_bound_id',$this->id)->delete();
         $this->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);
@@ -415,10 +456,10 @@ class TimeBound extends Model
         $build = null;
 
         if (Utilities::is_uuid($value)) {
-            $build = static::buildTimeBound(uuid: $value);
+            $build = static::buildTimeBound(uuid: $value,with_namespace: true);
         } else {
 
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
             if (count($parts) === 2) {
                 $owner_hint = $parts[0];
                 $maybe_name = $parts[1];
@@ -426,10 +467,11 @@ class TimeBound extends Model
                  * @var UserNamespace $owner
                  */
                 $owner = UserNamespace::resolveNamespace($owner_hint);
-                $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name);
+                $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name,with_namespace: true);
             }
         }
 
+        /** @var TimeBound|null $ret */
         $ret = $build?->first();
 
         if (empty($ret) && $throw_exception) {
@@ -449,7 +491,7 @@ class TimeBound extends Model
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     public static function collectTimeBound(Collection|string $collect, ?UserNamespace $namespace = null,?TimeBound $bound = null)
     : TimeBound
@@ -491,6 +533,8 @@ class TimeBound extends Model
                     $test = $collect->get('bound_start');
                     if (is_string($test) && Str::trim($test)) {
                         $bound->bound_start = Str::trim($test);
+                    } elseif ($test instanceof Carbon) {
+                        $bound->bound_start = $test->toIso8601String();
                     }
                 }
 
@@ -498,6 +542,8 @@ class TimeBound extends Model
                     $test = $collect->get('bound_stop');
                     if (is_string($test) && Str::trim($test)) {
                         $bound->bound_stop = Str::trim($test);
+                    } elseif ($test instanceof Carbon) {
+                        $bound->bound_stop = $test->toIso8601String();
                     }
                 }
 
@@ -535,12 +581,6 @@ class TimeBound extends Model
             }
 
             $bound->refresh();
-
-            $bound = TimeBound::buildTimeBound(me_id: $bound->id)->first();
-
-
-
-
 
             DB::commit();
             return $bound;

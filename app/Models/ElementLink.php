@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -10,6 +11,7 @@ use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 
@@ -55,17 +57,20 @@ class ElementLink extends Model
     protected $casts = [];
 
     public function linking_element() : BelongsTo {
-        return $this->belongsTo(Element::class,'linker_element_id');
+        return $this->belongsTo(Element::class,'linker_element_id')
+            ->with('element_namespace','element_parent_type','element_parent_type.owner_namespace');
     }
 
     public function linked_set() : BelongsTo {
-        return $this->belongsTo(ElementSet::class,'link_to_set_id');
+        return $this->belongsTo(ElementSet::class,'link_to_set_id')
+            ->with('defining_element','defining_element.element_parent_type');
     }
 
     public static function buildLink(
         ?int            $me_id = null,
         ?string         $uuid = null,
         ?int         $linking_element_id = null,
+        array         $linking_element_ids = [],
         ?int         $linked_set_id = null,
         bool         $with_linker_element = false,
         bool         $with_linked_set = false,
@@ -91,6 +96,10 @@ class ElementLink extends Model
 
         if ($linking_element_id) {
             $build->where('element_links.linker_element_id', $linking_element_id);
+        }
+
+        if (count($linking_element_ids)) {
+            $build->whereIn('element_links.linker_element_id', $linking_element_ids);
         }
 
         if ($linked_set_id) {
@@ -137,14 +146,6 @@ class ElementLink extends Model
         return $node;
     }
 
-    public static function destroyLink(Element $el,ElementSet $set) : ?static {
-
-        /** @var static|null $maybe_exists */
-        $maybe_exists = static::buildLink(linking_element_id: $el->id,linked_set_id: $set->id)->first();
-         $maybe_exists?->delete();
-        return $maybe_exists;
-
-    }
 
 
     public static function getThisLink(
@@ -205,6 +206,22 @@ class ElementLink extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         return static::resolveLink($value);
+
+    }
+
+    /** @return \Illuminate\Pagination\CursorPaginator<ElementLink>|\Illuminate\Support\Collection<Element> */
+    public static function getLinksFromParams(SelectElementParamData $params, ElementSet $set,
+                                                 bool $b_do_relations ,?string $cursor = null
+    ) {
+
+        $ele_builder =  static::getBuilderFromParams(params: $params);
+        $builder = static::buildLink(linked_set_id: $set->id, with_linker_element: $b_do_relations, with_linked_set: $b_do_relations)
+            ->joinSub($ele_builder, 'sel_els', function (JoinClause $join) {
+                $join->on('element_links.linker_element_id', '=', 'sel_els.id');
+            })
+        ;
+        /** @type \Illuminate\Pagination\CursorPaginator|\Illuminate\Support\Collection */
+        return $builder->cursorPaginate(perPage: config('hbc.pagination.default_element_limit'), cursor: $cursor);
 
     }
 

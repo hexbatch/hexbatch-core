@@ -12,7 +12,7 @@ class PublicType extends NamespaceType
 
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         NamespaceType::class

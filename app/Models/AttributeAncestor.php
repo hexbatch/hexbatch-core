@@ -52,6 +52,13 @@ class AttributeAncestor extends Model
         }
     }
 
+    public static function makeRecordsForAll() {
+        foreach (Attribute::all() as $att) {
+            if (!$att->parent_attribute_id) { continue; }
+            static::makeRecordsForAttribute($att);
+        }
+    }
+
     public static function makeRecordsForAttribute(Attribute $att) {
         $att_id = $att->id;
 

@@ -76,6 +76,8 @@ class User extends Authenticatable implements ISystemModel
         'two_factor_secret',
         'two_factor_recovery_codes',
         'two_factor_confirmed_at',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**
@@ -86,6 +88,9 @@ class User extends Authenticatable implements ISystemModel
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_system' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
 
@@ -94,7 +99,8 @@ class User extends Authenticatable implements ISystemModel
     }
 
     public function default_namespace() : BelongsTo {
-        return $this->belongsTo(UserNamespace::class,'default_namespace_id');
+        return $this->belongsTo(UserNamespace::class,'default_namespace_id')
+            ->with('home_set', 'public_element','namespace_base_type','private_element');
     }
 
     /**
@@ -127,20 +133,19 @@ class User extends Authenticatable implements ISystemModel
                     \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                     RefCodes::USER_NOT_FOUND
                 );
-            } else {
-                $out = User::buildUser($ret->id)->first();
             }
         }
-        return $out;
+        return $ret;
 
     }
 
-    public static function getUser(
+    public static function getThisUser(
         ?int $id = null ,
-        ?string          $uuid = null
+        ?string          $uuid = null,
+        bool $b_relations = false
     ): User
     {
-        $ret = static::buildUser(me_id:$id,uuid: $uuid)->first();
+        $ret = static::buildUser(me_id:$id,uuid: $uuid,b_relations: $b_relations)->first();
 
         if (!$ret) {
             $arg_types = [];
@@ -160,19 +165,22 @@ class User extends Authenticatable implements ISystemModel
 
     public static function buildUser(
         ?int $me_id = null ,
-        ?string         $uuid = null
+        ?string         $uuid = null,
+        bool $b_relations = false
     )
     : Builder
     {
 
+        /** @var Builder $build */
         $build =  User::select('users.*')
-            ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts");
 
+        if ($b_relations) {
             /** @uses User::my_namespaces(),User::default_namespace() */
-            ->with('my_namespaces','default_namespace')
+            $build->with('my_namespaces','default_namespace');
+        }
 
 
-        ;
 
         if ($me_id) {
             $build->where('users.id',$me_id);
@@ -191,6 +199,14 @@ class User extends Authenticatable implements ISystemModel
 
     public function getUuid(): string {
         return $this->ref_uuid;
+    }
+
+    protected function tokenExpiresAt(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $this->currentAccessToken()->expires_at??null,
+        );
     }
 
 

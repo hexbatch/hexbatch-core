@@ -22,6 +22,7 @@ return [
     'invalid_time_with_message' => 'Invalid time: was given :ref : :msg',
     'invalid_cursor' => 'Invalid cursor was given:  :ref',
     'invalid_encryption_with_msg' => 'Invalid encrypted string was given: :msg :ref ',
+    'cannot_convert_time' => 'Cannot convert :field time to iso8601 :msg',
 
 
     //users
@@ -47,6 +48,8 @@ return [
     'namespace_member_not_found' => 'The namespace :ref is not an admin of :me',
     'namespace_cannot_delete_default' => 'The namespace :ref is the default namespace for :user_name',
     'namespace_cannot_delete_while_in_use' => 'The namespace :ref is still in use, cannot delete',
+    'operation_cannot_delete_when_no_precursor' => 'The operation :ref cannot be deleted because there was not a permission element matching the uuid given :uuid',
+    'namespace_cannot_demote_owner' => 'The namespace :ref cannot change its owner from an admin',
 
 
     //bounds
@@ -56,10 +59,12 @@ return [
     //time bounds
     'time_bound_not_found_by' => 'Schedule not found using :types : :values ',
     'time_bound_period_must_be_with_cron' => 'Time bound must have a period defined when a cron string is defined',
+    'time_bound_period_must_be_less_than_cron_period' => 'Time bound has a period :period_seconds that is more than the cron cycle of :cron_seconds',
     'time_bounds_valid_stop_start' => 'Time bounds must have a valid start and stop, and the start happens before the stop',
     'time_bounds_invalid_cron_string' => 'Time bounds was given an invalid cron string',
     'time_bounds_invalid_time_zone' => 'Time zone is not valid',
     'time_bounds_needs_minimum_info' => 'Time bounds require at least name,start and stop',
+
 
     //location bounds
     'location_bound_not_found_by' => 'Location not found using :types : :values ',
@@ -162,7 +167,10 @@ return [
     'elements_must_have_type' => 'When creating elements, the type of element must be defined',
     'elements_mising_from_give_list' => 'When changing owners, there were no elements listed to give',
     'elements_mising_from_destroy_list' => 'When deleting elements, there were no elements listed',
+    'elements_do_not_have_all_permissions' => 'The calling namespace :ref is not an admin for all the elements listed',
     'element_not_in_phase' => 'Element :ref has phase :set_phase, which is different from  :other_phase',
+    'element_not_have_attribute' => 'Element :ref does not have attribute :attr',
+    'cannot_write_to_element_attribute' => 'The attrribute :ref cannot be written for you selection of elements',
 
     //sets
     'set_not_found' => 'Set not found using :ref',
@@ -199,6 +207,7 @@ return [
 
 
     //design
+    'attribute_parents_did_not_approve_design' => 'Type :ref cannot be published because at least one attribute parent did not approve design of :child',
     'design_parents_did_not_approve_design' => 'The parents :ref did not approve design of :child',
     'design_parents_did_not_approve_publishing' => 'The parents :ref did not approve publishing of :child',
     'design_single_parent_did_not_approve_publishing' => 'The parent :ref did not approve publishing of :child',

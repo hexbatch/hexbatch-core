@@ -13,8 +13,7 @@ class DesignListenerDestroy extends Act\Cmd\Ds
     const UUID = 'a4fc0537-f43e-461e-9be4-0918f2ec0542';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LISTENER_DESTROY;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

@@ -7,17 +7,22 @@ use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Types\Params\TypeParamData;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
-use App\Models\ActionDatum;
+use App\Helpers\Utilities;
+use App\Models\Element;
 use App\Models\ElementType;
+use App\Models\ElementTypeParent;
 use App\Models\ElementTypeServerLevel;
 use App\Models\Server;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignParams;
-use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Illuminate\Support\Facades\DB;
 
 
@@ -26,22 +31,23 @@ use Illuminate\Support\Facades\DB;
 #[HexbatchDescription( description: "
 ## Types can be set with the following properties
 
-* type_uuid : when editing an existing type
+* the owning namespace
+* is_system : code can set if this is a system, api cannot
 * type_name: has to be unique in the namespace
-* time_uuid: types can have a schedule
+* schedule: types can have a schedule
 * is_final: cannot be a parent
-* access: sets access across different servers
+* access: sets access for this server
+* handle: set the element handle
 
 ")]
 
-class DesignCreate extends Act\Cmd\Ds
+class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
 {
     const UUID = 'f635c4b8-5903-4688-802c-c0b28f376be0';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_CREATE;
 
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
@@ -50,161 +56,98 @@ class DesignCreate extends Act\Cmd\Ds
 
 
 
-
-
-    const array ACTIVE_DATA_KEYS = ['type_name','uuid','given_server_uuid','is_final','design_uuid',
-        'time_uuid'];
-
-
-    #[ApiParamMarker( param_class: DesignParams::class)]
+    #[ApiParamMarker( param_class: TypeParamData::class)]
     public function __construct(
-        protected ?string             $type_name =null,
-        protected ?string                $given_server_uuid = null,
-        protected ?string                $time_uuid = null,
-        protected ?string                $design_uuid = null,
-        protected ?bool                $is_final = null,
-        protected ?TypeOfServerAccess $access = null,
-        protected ?string             $uuid = null,
-        protected bool                $is_system = false,
-        protected bool                $send_event = true,
-        protected ?bool                $is_async = null,
-        protected ?ActionDatum        $action_data = null,
-        protected ?ActionDatum        $parent_action_data = null,
-        protected ?UserNamespace      $owner_namespace = null,
-        protected bool                $b_type_init = false,
-        protected array          $tags = []
+        protected TypeParamData     $params,
+        protected bool              $is_system,
+        protected ?string              $use_ref,
+        protected ?UserNamespace      $owner_namespace,
+        protected Server            $server
+
     )
     {
-        if (!$this->given_server_uuid) {
-            $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
-        }
 
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init,
-            is_system: $this->is_system,
-            send_event: $this->send_event, is_async: $this->is_async,  tags: $this->tags);
     }
 
-
-
-    protected function restoreData(array $data = []) {
-        parent::restoreData($data);
-        if ($this->action_data) {
-            if ($this->action_data->collection_data?->offsetExists('access')) {
-                $access_string = $this->action_data->collection_data->offsetGet('access');
-                $this->access = TypeOfServerAccess::tryFromInput($access_string);
-            }
-        }
+    protected  function toArray() :array {
+        return [
+            'design_params'=>$this->params->toArray(),
+            'use_ref'=>$this->use_ref,
+            'is_system'=>$this->is_system,
+            'namespace'=>$this->owner_namespace,
+            'server'=>$this->server,
+        ];
     }
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-
-        $this->setGivenServer($this->given_server_uuid)->setGivenType($this->design_uuid);
-
-
-        if ($this->owner_namespace) {
-            $this->setGivenNamespace( $this->owner_namespace);
-        } else {
-            $this->setGivenNamespace( $this->getOwningNamespace());
-        }
-
-
-        $this->action_data->collection_data->offsetSet('access',$this->access?->value);
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
+    protected static function fromArray(array $args) : static{
+        $params = TypeParamData::from($args['design_params']);
+        $is_system = (bool)$args['is_system'];
+        $use_ref = $args['use_ref'];
+        $owner_namespace = static::getNamespaceFromArray('namespace',$args,false);
+        $server = static::getServerFromArray('server',$args);
+        return new DesignCreate(params: $params,is_system: $is_system,use_ref: $use_ref,owner_namespace: $owner_namespace,server: $server);
     }
-
-    public function getInitialConstantData(): array {
-        $ret = parent::getInitialConstantData();
-        $ret['access'] = $this->access?->value;
-        return $ret;
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    protected function runActionInner(array $data = []): void
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        parent::runActionInner();
+        $work = static::fromArray($command_args);
+        $new_design = $work->createDesign();
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $new_design->toArray());
+    }
 
+    /**
+     * @throws \Throwable
+     */
+    public  function createDesign() : ElementType {
+        if ($this->use_ref) {
+            if (!Utilities::is_uuid($this->use_ref)) {
+                throw new \LogicException("Type use ref is not uuid ". $this->use_ref);
+            }
+        }
         try {
             DB::beginTransaction();
-            $type = $this->getGivenType();
-            if (!$type) {
-                $type = new ElementType();
+
+            $type = new ElementType();
+            $type->setTypeName(name: $this->params->type_name,namespace: $this->owner_namespace,b_do_check: !!$this->owner_namespace);
+            if ($this->params->schedule_ref_uuid) {
+                $type->type_time_bound_id = TimeBound::getThisSchedule($this->params->schedule_ref_uuid)->id;
+            }
+            if ($this->use_ref) {
+                $type->ref_uuid = $this->use_ref;
             }
 
-            if ($this->uuid) {
-                $type->ref_uuid = $this->uuid;
-            }
+            $type->owner_namespace_id = $this->owner_namespace?->id;
+            $type->imported_from_server_id = $this->server->id;
 
-            if ($this->type_name) {
-                if ($this->is_system) {
-                    $type->type_name = $this->type_name;
-                } else {
-                    $type->setTypeName(name: $this->type_name,namespace: $this->getNamespaceInUse());
-                }
-
-            }
-
-            if (!$type->owner_namespace_id) {
-                $type->owner_namespace_id = $this->getGivenNamespace()?->id;
-            }
-
-            if ($given_server_id =  $this->getGivenServer()?->id) {
-                $type->imported_from_server_id = $given_server_id;
-            }
 
             $type->is_system = $this->is_system;
-
-            if ($this->is_final !== null) {
-                $type->is_final_type = $this->is_final;
-            }
-
-
-            if ($this->time_uuid) {
-                $type->type_time_bound_id = TimeBound::getThisSchedule(uuid: $this->time_uuid)->id;
+            $type->is_final_type = $this->params->is_final_type??false;
+            if ($this->params->handle_ref_uuid) {
+                $type->type_handle_element_id = Element::getThisElement(uuid: $this->params->handle_ref_uuid)->id;
             }
 
             $type->save();
 
-            if ($this->access && $this->getGivenServer()) {
-                $access = new ElementTypeServerLevel();
-                $access->server_access_type_id = $type->id;
-                $access->to_server_id = $type->imported_from_server_id;
-                $access->access_type = $this->access;
-                $access->save();
+            $access = new ElementTypeServerLevel();
+            $access->server_access_type_id = $type->id;
+            $access->to_server_id = $type->imported_from_server_id;
+            $access->access_type = $this->params->access??TypeOfServerAccess::IS_PRIVATE;
+            $access->save();
+
+            $root = ElementType::getSystemType();
+            if ($root->id !== $type->id) {
+                ElementTypeParent::addOrUpdateParent(parent: $root, child: $type);
             }
 
-            $this->setGivenType($type,true);
+
             DB::commit();
+            return $type;
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
-
     }
-
-
-
-
-
-    protected function getMyData() :array {
-        return ['type'=>$this->getGivenType()];
-    }
-
-    public function getDataSnapshot(): array
-    {
-        $ret = [];
-        $what =  $this->getMyData();
-        if (isset($what['type'])) {
-            $ret['type'] = new TypeResponse(given_type: $what['type']);
-        }
-        return $ret;
-    }
-
 }
 

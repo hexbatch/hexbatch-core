@@ -1,5 +1,6 @@
 <?php
 
+
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 
@@ -17,3 +18,14 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+$span_file_path =  storage_path("/logs/spans.log");
+Schedule::command(\App\Console\Commands\MakeTimeSpans::class)->hourly()
+    ->withoutOverlapping()
+    ->description("add new time spans as needed")
+    ->appendOutputTo($span_file_path);
+
+Schedule::command(\App\Console\Commands\CleanTimeSpans::class)->hourly()
+    ->withoutOverlapping()
+    ->description("remove old time spans")
+    ->appendOutputTo($span_file_path);

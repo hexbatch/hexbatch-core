@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root;
 
 
 
+use App\Sys\Res\Atr\Stk\Act\ActionMetric;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root;
 
@@ -15,7 +16,9 @@ class Action extends BaseType
     const UUID = '5453ef40-affb-4ea0-91dd-d3f998542288';
     const TYPE_NAME = 'action';
 
-
+    const  ATTRIBUTE_CLASSES = [
+        ActionMetric::class
+    ];
 
     const PARENT_CLASSES = [
         Root::class

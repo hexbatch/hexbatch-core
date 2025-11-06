@@ -143,7 +143,7 @@ return new class extends Migration
         ");
 
         DB::statement(/** @lang text */
-            "CREATE UNIQUE INDEX udx_user_per_type_name ON element_types (owner_namespace_id,type_name) NULLS NOT DISTINCT;");
+            "CREATE UNIQUE INDEX udx_ns_per_type_name ON element_types (owner_namespace_id,type_name) NULLS NOT DISTINCT;");
     }
 
     /**

@@ -6,26 +6,26 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
-use App\Helpers\Utilities;
+use App\Data\ApiParams\Data\Elements\ElementData;
+use App\Data\ApiParams\Data\Elements\Params\ReadElementParamData;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Data\ApiParams\Data\Elements\Params\WriteElementParamData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\Elements\Responses\ElementReadingList;
+use App\Data\ApiParams\Data\Sets\Params\CreateSetParamData;
+use App\Data\ApiParams\Data\Sets\SetData;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
 use App\Models\Element;
 use App\Models\ElementSet;
+
 use App\Models\Phase;
-use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
-use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
-use App\OpenApi\ApiResults\Elements\ApiElementResponse;
-use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
-use App\OpenApi\ApiResults\Set\ApiSetResponse;
-use App\OpenApi\Params\Actioning\Element\ChangeElementOwnerParams;
-use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
-use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Params\Actioning\Set\SetCreateParams;
-use App\OpenApi\Params\Listing\Elements\ListElementParams;
-use App\OpenApi\Params\Listing\Elements\ShowElementParams;
-use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Hexbatch\Thangs\Data\ThangData;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
@@ -35,180 +35,228 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
 class ElementController extends Controller {
 
     /**
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/{element}/change_owner',
+        path: '/api/v1/{user_namespace}/elements/{element}/change_owner/{target_namespace}',
         operationId: 'core.elements.change_owner',
         description: "Element owner can give ownership to another namespace at any time. Any number of elements can be included with a path ",
         summary: 'Change the element owner',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ChangeElementOwnerParams::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+
+            new OA\PathParameter(  name: 'target_namespace', description: "The new namespace",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Owner changed', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Owner changed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
     #[ApiEventMarker( Evt\Type\ElementRecieved::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_OWNER)]
     #[ApiTypeMarker( Root\Api\Element\ChangeOwner::class)]
-    public function change_owner(Request $request) {
-        $params = new ChangeElementOwnerParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['change-element-owner']);
+    public function change_owner(UserNamespace $namespace,Element $element,UserNamespace $target_namespace) {
+        $col = new Collection();
+        $col->add($element);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Root\Api\Element\ChangeOwner::doElementChangeOwner(
+            owner_namespace: $target_namespace,
+            calling_namespace: $namespace,is_system: false ,given_elements:$col,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/type_off',
-        operationId: 'core.elements.type_off',
+        path: '/api/v1/{user_namespace}/elements/change_phase/phase',
+        operationId: 'core.elements.change_phase',
+        description: "Element admin group can change the elements to another phase, but need to be in the phase's group",
+        summary: 'Change the phase of elements',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'phase', description: "The phase to use",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'phase changed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiEventMarker( Evt\Type\PhaseChangedQuiet::class)]
+    public function change_phase(UserNamespace $namespace, Phase $phase ,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Element\ChangePhase::doElementChangePhase(
+            params: $params,  given_phase: $phase, calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    #[OA\Patch(
+        path: '/api/v1/{user_namespace}/elements/switch/off',
+        operationId: 'core.elements.switch.off',
         description: "Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path ",
         summary: 'Turn off all the subtype attributes of elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type on', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Switched off', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurningOff::class)]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurnedOff::class)]
+    #[ApiEventMarker( Evt\Set\SwitchingOff::class)]
+    #[ApiEventMarker( Evt\Set\SwitchedOff::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Element\TypeOff::class)]
-    public function type_off(Phase $working_phase, Request $request) {
-        $params = new ElementSelectParams(given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['type-off']);
+    #[ApiTypeMarker( Root\Api\Element\SwitchOff::class)]
+    public function switch_off(UserNamespace $namespace, Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Element\SwitchOff::doSwitch(calling_namespace: $namespace,is_system: false ,params: $params,  tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/type_on',
-        operationId: 'core.elements.type_on',
-        description: "Element admin group turn on all parent type attributes. The types, elements and sets given by a path ",
+        path: '/api/v1/{user_namespace}/elements/switch/on',
+        operationId: 'core.elements.switch.type.on',
+        description: "Element admin group turn on all parent type attributes for selected elements",
         summary: 'Turn on all the attributes of a parent type in elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type off', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Switched on', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurningOn::class)]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurnedOn::class)]
+    #[ApiEventMarker( Evt\Set\SwitchingOn::class)]
+    #[ApiEventMarker( Evt\Set\SwitchedOn::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Element\TypeOn::class)]
-    public function type_on(Phase $working_phase, Request $request) {
-        $params = new ElementSelectParams(given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['type-on']);
+    #[ApiTypeMarker( Root\Api\Element\SwitchOn::class)]
+    public function switch_on(UserNamespace $namespace, Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Element\SwitchOn::doSwitch(calling_namespace: $namespace,is_system: false ,params: $params,  tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_attribute',
-        operationId: 'core.elements.read_attribute',
-        description: "Can select the same attribute(s) in elements(s) to read, ".
+        path: '/api/v1/{user_namespace}/elements/read',
+        operationId: 'core.elements.read',
+        description: "Can select one or more elements, and types in them, and read all or some attributes, some attributes may not be readable ".
                     "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the same attributes in one or more elements',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ReadElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Results returned', content: new JsonContent(ref: ElementReadingList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Set\Reading::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
-    #[ApiTypeMarker( Root\Api\Element\ReadAttribute::class)]
-    public function read_attribute(Phase $working_phase, Element $element, Request $request) {
-        $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['read-attribute']);
+    #[ApiTypeMarker( Root\Api\Element\Read::class)]
+    public function read_elements(UserNamespace $namespace, Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = ReadElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\Read::readElements(params: $params,calling_namespace: $namespace,is_system: false, tags: ['api-top']);
+        $http_code = CodeOf::HTTP_ACCEPTED;
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -221,13 +269,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -243,84 +291,45 @@ class ElementController extends Controller {
     }
 
 
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_type',
-        operationId: 'core.elements.read_type',
-        description:  "Can select the same type(s) in elements(s) to read, will either succeed if can read all of them or fail if one cannot be read ".
-            "\n its up to the attribute access, the type access and the event handlers to decide who can ",
-        summary: 'Read all the attributes of a live type in one or more elements',
-        security: [['bearerAuth' => []]],
-        tags: ['element'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Set\Reading::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
-    #[ApiTypeMarker( Root\Api\Element\ReadLiveType::class)]
-    public function read_type() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/write_attribute',
+        path: '/api/v1/{user_namespace}/elements/write',
         operationId: 'core.elements.write_attribute',
         description: "Write one or more elements found in a path, that have the same attributes. If one can. ",
         summary: 'Write json to the same attributes of one or more elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: WriteElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Write attribute', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_NO_CONTENT, description: 'Wrote the attribute'),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Set\AttributeWrite::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
     #[ApiTypeMarker( Root\Api\Element\WriteAttribute::class)]
-    public function write_attribute(Phase $working_phase, Element $element, Request $request) {
-        $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['write-attribute']);
+    public function write_attribute( UserNamespace $namespace,Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = WriteElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\WriteAttribute::write(params: $params,calling_namespace: $namespace,is_system: false, tags: ['api-top']);
+        $http_code = CodeOf::HTTP_NO_CONTENT;
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -336,13 +345,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -351,7 +360,6 @@ class ElementController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
-    #[ApiEventMarker( Evt\Element\ReadingTime::class)]
     #[ApiTypeMarker( Root\Api\Element\ReadTime::class)]
     public function read_time() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -373,13 +381,13 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -411,16 +419,16 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_type', description: "The live type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -451,16 +459,16 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_type', description: "The live type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -486,13 +494,13 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
 
         ],
@@ -515,16 +523,16 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_type', description: "The live type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -550,13 +558,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -572,186 +580,188 @@ class ElementController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
-        path: '/api/v1/{user_namespace}/elements/{element}/destroy',
+        path: '/api/v1/{user_namespace}/elements/destroy',
         operationId: 'core.elements.destroy_element',
         description: "Element admin can destroy one or more elements, the type or parent types can reject this",
         summary: 'Destroys one or more elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements destroyed', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Elements destroyed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementDestruction::class)]
     #[ApiEventMarker( Evt\Type\ElementDestroyed::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Destroy::class)]
-    public function destroy_element(Request $request) {
-        $params = new ElementSelectParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\Destroy(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-elements']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function destroy_elements(UserNamespace $namespace,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\Destroy::destroyElements(params: $params, is_system: false,caller_namespace: $namespace, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementData::collect($data_out, Collection::class);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
-        path: '/api/v1/{user_namespace}/elements/{element}/purge',
+        path: '/api/v1/{user_namespace}/elements/purge',
         operationId: 'core.elements.purge_element',
         description: "System can destroy one or more elements without permission or events",
         summary: 'System Destroy one or more elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements purged', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Deleted off', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Element\Purge::class)]
-    public function purge_element(Request $request) {
-        $params = new ElementSelectParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\Purge(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['purge-elements']);
+    #[ApiTypeMarker( Root\Api\Element\Destroy::class)]
+    public function purge_elements(UserNamespace $namespace,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\Destroy::destroyElements(params: $params, is_system: true,caller_namespace: $namespace, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementData::collect($data_out, Collection::class);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/link/{element_set}',
+        path: '/api/v1/{user_namespace}/elements/link/add',
         operationId: 'core.elements.link',
         description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set ".
         "\n The link can be assigned to another namespace, they can reject that. The linked set can reject the link",
         summary: 'Makes a link between an element and a set',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LinkCreateParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element','set','link'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: ApiLinkerResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Server\LinkCreated::class)]
-    #[ApiEventMarker( Evt\Server\LinkCreating::class)]
+    #[ApiEventMarker( Evt\Element\LinkCreated::class)]
+    #[ApiEventMarker( Evt\Element\LinkCreating::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Link::class)]
-    public function create_link(Request $request,Element $element,ElementSet $set) {
-        $params = new LinkCreateParams(given_element: $element,given_set: $set);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\Link(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-link']);
+    public function create_link(UserNamespace $namespace,ElementSet $set,Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = SelectElementParamData::fromRequest($request);
+        $params->phase_ref = $set->defining_element->element_phase->ref_uuid;
+        $data_out =  Root\Api\Element\Link::doAddLink(
+            params: $params,  given_set: $set, calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/show',
-        operationId: 'core.elements.show_element',
-        description: "Element members can see details about an element",
-        summary: 'Shows the value and information about an element',
+    #[OA\Delete(
+        path: '/api/v1/{user_namespace}/elements/link/unlink/{element_set}',
+        operationId: 'core.links.unlink',
+        description: "Link admin can remove a links they control",
+        summary: 'Destroys a link',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowElementParams::class)),
-        tags: ['element'],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
+        tags: ['link'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+            new OA\PathParameter(  name: 'element_set', description: "The set used",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Element info returned', content: new JsonContent(ref: ApiElementResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Link removed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Element\ShowElement::class)]
-    public function show_element(Element $element,Request $request) {
-        $params = new ShowElementParams(given_element: $element);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\ShowElement(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-element']);
+    #[ApiEventMarker( Evt\Server\LinkDestroyed::class)]
+    #[ApiEventMarker( Evt\Server\LinkDestroying::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::LINK_OWNER)]
+    #[ApiTypeMarker( Root\Api\Element\UnLink::class)]
+    public function unlink_link(UserNamespace $namespace,ElementSet $set,Request $request) {
 
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+
+        $params = SelectElementParamData::fromRequest($request);
+        $params->phase_ref = $set->defining_element->element_phase->ref_uuid;
+        $data_out =  Root\Api\Element\UnLink::doRemoveLink(
+            params: $params,  given_set: $set, calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -759,38 +769,29 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/list',
+        path: '/api/v1/{user_namespace}/elements/list',
         operationId: 'core.elements.list_elements',
         description: "Element members can see a list of all the elements of namespaces they belong",
         summary: 'Shows list of elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements', content: new JsonContent(ref: ElementList::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiTypeMarker( Root\Api\Element\ListElements::class)]
-    public function list_elements(Phase $working_phase,Request $request) {
-        $params = new ListElementParams(working_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\ListElements(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-elements']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_elements(UserNamespace $namespace,Phase $working_phase,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $params->phase_ref = $working_phase->ref_uuid;
+        $data_out = Root\Api\Element\ListElements::listElements(params: $params, caller_namespace: $namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -814,6 +815,7 @@ class ElementController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/create_set',
@@ -821,43 +823,45 @@ class ElementController extends Controller {
         description: "Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets",
         summary: 'Create a set from element',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: CreateSetParamData::class)),
         tags: ['element','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiSetResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Set created', content: new JsonContent(ref: ElementData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Server\SetCreated::class)]
     #[ApiEventMarker( Evt\Set\SetChildCreated::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\CreateSet::class)]
-    public function create_set(Request $request,Element $element) {
-        $params = new SetCreateParams(given_element: $element,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\CreateSet(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-set']);
+    public function create_set(UserNamespace $namespace,Element $element,Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = CreateSetParamData::fromRequest($request);
+        $data_out = Root\Api\Element\CreateSet::doSetCreation(calling_namespace: $namespace, defining_element: $element,
+            is_system: false,params: $params, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = SetData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -870,13 +874,13 @@ class ElementController extends Controller {
         tags: ['element','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [

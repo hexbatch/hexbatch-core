@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
+use App\Helpers\Events\EventFilter;
+use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Servers\IServer;
-use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\MasterSemaphore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 /**
  * Communication with elsewhere uses @uses MasterSemaphore
@@ -40,7 +42,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *  @property string updated_at
  *
  */
-class Server extends Model implements IServer,ISystemModel
+class Server extends Model implements ISystemModel
 {
 
     /*
@@ -104,6 +106,8 @@ class Server extends Model implements IServer,ISystemModel
      */
     protected $casts = [
         'server_status' => TypeOfServerStatus::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     public function owning_namespace() : BelongsTo {
@@ -129,7 +133,8 @@ class Server extends Model implements IServer,ISystemModel
         /**
          * @var Builder $build
          */
-        $build = Server::select('servers.*');
+        $build = Server::select('servers.*')
+            ->with('owning_namespace','server_type');
 
         if ($me_id) {
             $build->where('servers.id', $me_id);
@@ -155,10 +160,6 @@ class Server extends Model implements IServer,ISystemModel
             $build->where('is_system',$is_system);
         }
 
-        /**
-         * @uses Server::owning_namespace()
-         */
-        $build->with('owning_namespace');
 
         return $build;
     }
@@ -168,7 +169,7 @@ class Server extends Model implements IServer,ISystemModel
         if (Utilities::is_uuid($value)) {
             $build = static::buildServer(uuid: $value);
         } else {
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
 
             if (count($parts) === 1) {
                 //by name
@@ -177,6 +178,7 @@ class Server extends Model implements IServer,ISystemModel
 
             }
         }
+        /** @var Server|null $server */
         $server = $build?->first();
         if (empty($server) && $throw_exception) {
             throw new HexbatchNotFound(
@@ -230,12 +232,6 @@ class Server extends Model implements IServer,ISystemModel
 
 
 
-
-    public function getServerObject(): ?Server
-    {
-        return $this;
-    }
-
     public function getUuid(): string{
         return $this->ref_uuid;
     }
@@ -249,6 +245,14 @@ class Server extends Model implements IServer,ISystemModel
             throw new \LogicException("No system server made");
         }
         return static::$default_server = $server;
+    }
+
+    /**
+     * @return Collection<IEventReference>
+     */
+    public static function getEventHandlerRefs(EventFilter $event_filter) : Collection {
+        Utilities::ignoreVar($event_filter);
+        return new Collection;
     }
 
 

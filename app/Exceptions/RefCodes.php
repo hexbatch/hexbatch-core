@@ -35,11 +35,15 @@ class RefCodes {
     const int NAMESPACE_NOT_FOUND = 2003;
     const int NAMESPACE_NOT_OWNER = 2004;
     const int NAMESPACE_NOT_ADMIN = 2005;
-    const int NAMESPACE_NOT_MEMBER = 2008;
+
     const int NAMESPACE_MEMBER_MISSING_ISSUE = 2006;
     const int NAMESPACE_CANNOT_DELETE_CORE_PARTS = 2007;
+    const int NAMESPACE_NOT_MEMBER = 2008;
     const int NAMESPACE_SCHEMA_ISSUE = 2010;
     const int NAMESPACE_NOT_DEFAULT_OWNER = 2011;
+    const int NAMESPACE_CANNOT_REMOVE_OWNER_AS_ADMIN = 2014;
+
+    const int NAMESPACE_CANNOT_DELETE_WITHOUT_UUID = 2015;
 
 
     // bounds start at 3000
@@ -102,6 +106,7 @@ class RefCodes {
 
 
     const int TYPE_PARENT_DENIED_DESIGN = 7200;
+    const int ATTRIBUTE_PARENT_DENIED_DESIGN = 7201;
     const int TYPE_PARENT_DENIED_PUBLISHING = 7250;
     const int TYPE_PARENT_CANNOT_BE_REMOVED = 7270;
 
@@ -113,8 +118,10 @@ class RefCodes {
     const int ELEMENT_NOT_FOUND =  8001;
     const int ELEMENT_BAD_SCHEMA =  8002;
     const int ELEMENT_NOT_IN_SET =  8003;
+    const int ELEMENT_NOT_HAVE_ATTRIBUTE =  8004;
     const int ELEMENTS_NOT_LISTED_TO_GIVE =  8010;
     const int ELEMENTS_NOT_LISTED_TO_DESTROY =  8011;
+    const int ELEMENTS_CANNOT_HAVE_ATTR_WRITTEN =  8012;
 
     //sets start at 9000
     const int SET_NOT_FOUND =  9001;
@@ -166,6 +173,8 @@ class RefCodes {
         self::NAMESPACE_NOT_MEMBER => '',
         self::NAMESPACE_MEMBER_MISSING_ISSUE => '',
         self::NAMESPACE_CANNOT_DELETE_CORE_PARTS => '',
+        self::NAMESPACE_CANNOT_DELETE_WITHOUT_UUID => '',
+        self::NAMESPACE_CANNOT_REMOVE_OWNER_AS_ADMIN => '',
         self::NAMESPACE_SCHEMA_ISSUE => '',
 
 
@@ -208,6 +217,7 @@ class RefCodes {
         self::TYPE_ALREADY_PUBLISHED => '',
         self::TYPE_CANNOT_PUBLISH_ABSTRACT => '',
         self::TYPE_PARENT_DENIED_DESIGN => '',
+        self::ATTRIBUTE_PARENT_DENIED_DESIGN => '',
         self::TYPE_PARENT_DENIED_PUBLISHING => '',
         self::TYPE_PARENT_CANNOT_BE_REMOVED => '',
         self::TYPE_GIVEN_ZERO_TO_MAKE => '',
@@ -217,7 +227,9 @@ class RefCodes {
         self::ELEMENT_BAD_SCHEMA => '',
         self::ELEMENT_NOT_IN_SET => '',
         self::ELEMENTS_NOT_LISTED_TO_GIVE => '',
+        self::ELEMENT_NOT_HAVE_ATTRIBUTE => '',
         self::ELEMENTS_NOT_LISTED_TO_DESTROY => '',
+        self::ELEMENTS_CANNOT_HAVE_ATTR_WRITTEN => '',
 
         self::SET_NOT_FOUND => '',
         self::SET_SCHEMA_ISSUE => '',

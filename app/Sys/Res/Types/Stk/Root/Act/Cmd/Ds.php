@@ -3,8 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Models\ActionDatum;
-use App\Models\Attribute;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 
@@ -14,25 +12,12 @@ class Ds extends Cmd
     const ACTION_NAME = TypeOfAction::BASE_DESIGN;
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Cmd::class
     ];
 
-
-
-    public function getParentAttribute(): ?Attribute
-    {
-        /** @uses ActionDatum::data_second_attribute() */
-        return $this->action_data->data_second_attribute;
-    }
-
-    public function getDesignAttribute(): ?Attribute
-    {
-        /** @uses ActionDatum::data_third_attribute() */
-        return $this->action_data->data_third_attribute;
-    }
 
 
 }

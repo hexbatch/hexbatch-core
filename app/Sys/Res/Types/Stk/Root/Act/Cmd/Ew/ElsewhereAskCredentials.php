@@ -18,9 +18,7 @@ class ElsewhereAskCredentials extends Act\Cmd\Ew
     const UUID = '424d4d74-14f2-4b39-ba7f-8520bfc25852';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_ASK_CREDENTIALS;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

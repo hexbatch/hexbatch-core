@@ -11,7 +11,7 @@ class Image extends Media
     const TYPE_NAME = 'media_image';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

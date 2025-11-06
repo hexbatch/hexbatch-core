@@ -2,24 +2,24 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
-use App\Annotations\ApiParamMarker;
+use App\Annotations\ApiEventMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-use App\Enums\Sys\TypeOfFlag;
-use App\Exceptions\HexbatchNothingDoneException;
-use App\Exceptions\RefCodes;
-use App\Models\ActionDatum;
 use App\Models\Element;
+use App\Models\ElementType;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Element\ChangeElementOwnerParams;
-use App\OpenApi\Results\Elements\ElementCollectionResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Change element ownership")]
@@ -60,14 +60,14 @@ if more than one element created, the batch version of the handler is called ins
 
 
 ')]
-class ElementOwnerChange extends Act\Cmd\Ele
+#[ApiEventMarker( Evt\Type\ElementOwnerChange::class)] //pre
+#[ApiEventMarker( Evt\Type\ElementRecieved::class)] //post
+class ElementOwnerChange extends Act\Cmd\Ele implements ICommandCallable
 {
     const UUID = '829b1a2d-8ed9-4950-8883-570c3517cfeb';
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CHANGE_OWNER;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
@@ -78,159 +78,160 @@ class ElementOwnerChange extends Act\Cmd\Ele
         Evt\Type\ElementRecieved::class,
     ];
 
-    /** @return Element[] */
-    public function getElementsToGive(): array
-    {
-        return $this->action_data->getCollectionOfType(Element::class);
-    }
 
-
-
-    const array ACTIVE_COLLECTION_KEYS = ['given_element_uuids'=>Element::class];
-
-    const array ACTIVE_DATA_KEYS = ['given_element_uuids','given_new_namespace_uuid'];
-
-
-    #[ApiParamMarker( param_class: ChangeElementOwnerParams::class)]
     public function __construct(
-        protected array          $given_element_uuids = [],
-        protected ?string        $given_new_namespace_uuid = null,
+        protected UserNamespace             $owner_namespace,
+        protected bool                      $is_system,
+        protected UserNamespace             $calling_namespace,
 
-        protected bool           $is_system = false,
-        protected bool           $send_event = true,
-        protected ?bool          $is_async = null,
-        protected ?ActionDatum   $action_data = null,
-        protected ?ActionDatum   $parent_action_data = null,
-        protected ?UserNamespace $owner_namespace = null,
-        protected bool           $b_type_init = false,
-        protected array          $tags = []
+        /** @var Collection<Element>        $given_elements */
+        protected Collection                $given_elements,
+
+
     )
     {
 
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
+    }
+
+
+
+    protected  function toArray() :array {
+        return [
+            'is_system'=> $this->is_system,
+            'owner_namespace'=> $this->owner_namespace,
+            'calling_namespace'=> $this->calling_namespace,
+            'given_elements'=> $this->given_elements,
+        ];
+    }
+    protected static function fromArray(array $args) : static{
+        $is_system = (bool)$args['is_system'];
+        $given_elements = static::getElementCollectionFromArray('given_elements',$args);
+        $owner_namespace = static::getNamespaceFromArray('owner_namespace',$args);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        return new static(
+            owner_namespace: $owner_namespace, is_system: $is_system,
+            calling_namespace: $calling_namespace,given_elements: $given_elements);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        $work = static::fromArray($command_args);
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        if ($b_approved) {
+            $moved_elements = $work->moveElements();
+        } else {
+            $moved_elements = new Collection();
+        }
+
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
+            data: [static::CHILD_DECISION_KEY =>$b_approved,'elements'=>$moved_elements->toArray()]);
+    }
+
+
+    /** @return Collection<Element>
+     * @throws \Throwable
+     */
+    protected function moveElements()
+    : Collection
+    {
+        if ($this->is_system) {
+            static::checkPermissions(given_elements: $this->given_elements, calling_namespace: $this->calling_namespace);
+        }
+        DB::transaction(function() {
+            foreach ($this->given_elements as $el) {
+                $el->element_namespace_id = $this->owner_namespace->id;
+                $el->save();
+            }
+        });
+
+        return $this->given_elements;
 
     }
 
+    /**
+     * @param Collection<Element> $given_elements
+     */
+    protected static function checkPermissions(Collection  $given_elements, UserNamespace  $calling_namespace)
+    {
+        $ns = [];
+        foreach ($given_elements as $el) {
+            $ns[$el->element_namespace->ref_uuid] = $el->element_namespace;
+        }
+        foreach ($ns as $a_ns) {
+            static::checkIfGivenIsOwner(given: $calling_namespace,target: $a_ns);
+        }
+    }
 
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    protected function runActionInner(array $data = []): void
-    {
-        parent::runActionInner();
+    public static function changeElementOwnerTree(
+         UserNamespace             $owner_namespace,
+         bool                      $is_system,
+         UserNamespace             $calling_namespace,
 
-
-        if (count($this->getElementsToGive())  <= 0) {
-            throw new HexbatchNothingDoneException(__("msg.elements_mising_from_give_list"),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ELEMENTS_NOT_LISTED_TO_GIVE);
-        }
-
-
-        if (!$this->hasFlag(TypeOfFlag::CAN_WRITE)) {
-            foreach ($this->getElementsToGive() as $element)
-            //element admin check only
-            $this->checkIfAdmin($element->element_namespace);
-        }
-
-
-        try {
-
-            DB::beginTransaction();
-
-            foreach ($this->getElementsToGive() as $element) {
-                $element->changeOwners(namespace: $this->getGivenNamespace());
-            }
-
-
-            if ($this->send_event) {
-                $this->post_events_to_send =
-                    Evt\Type\ElementRecieved::makeEventActions(
-                        source: $this, action_data: $this->action_data,important_array: $this->getElementsToGive());
-            }
-
-
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-
-    }
-
-
-
-    protected function getMyData() :array {
-        return [
-            'given_elements'=>$this->getElementsToGive(),
-            'namespace_used'=>$this->getGivenNamespace()
-        ];
-    }
-
-    public function getDataSnapshot(): array
-    {
-        $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['given_elements'])) {
-            $ret['given_elements'] = new ElementCollectionResponse(given_elements:  $what['given_elements']);
-        }
-
-        return $ret;
-    }
-
-
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-
-        $this->setGivenNamespace( $this->given_new_namespace_uuid);
-
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
-    }
-
-    public function getChildrenTree(): ?Tree
+        /** @var Collection<Element>        $given_elements */
+         Collection                $given_elements,
+         ?IThangBuilder $builder = null
+    ) : ElementType|Thang|IThangBuilder
     {
 
-        if ($this->send_event && !$this->is_system) {
-            $nodes = [];
-            $owner_events = Evt\Type\ElementOwnerChange::makeEventActions(source: $this, action_data: $this->action_data,
-                important_array: $this->getElementsToGive());
-
-
-            foreach ($owner_events as $event) {
-                $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
-            }
-
-            //last in tree is the
-            if (count($nodes)) {
-                return new Tree(
-                    $nodes,
-                    ['rootId' => -1]
-                );
-            }
+        if (!$is_system) {
+            static::checkPermissions(given_elements: $given_elements, calling_namespace: $calling_namespace);
         }
 
-        return null;
-    }
+        $node = new static(
+            owner_namespace: $owner_namespace,
+            is_system: $is_system,
+            calling_namespace: $calling_namespace,
+            given_elements: $given_elements
+        );
 
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
+        }
 
-    public function setChildActionResult(IThingAction $child): void {
+        $builder?: $builder = ThangBuilder::createBuilder();
+        $builder->setNamespace($calling_namespace);
 
+        Evt\Type\ElementRecieved::callRecievedTree(
+            given_elements: $given_elements,recipient_namespace: $owner_namespace,
+            number_of_elements: $given_elements->count(),builder: $builder);
 
-        if ($child instanceof Evt\Type\ElementOwnerChange) {
-            if ($child->isActionError() || $child->isActionFail()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            } else if ($child->isActionSuccess()) {
-                $this->setFlag(TypeOfFlag::CAN_WRITE,true);
-            }
+        $builder->tree(
+            command_class: static::class,
+            command_args: $node->toArray(),
+            command_tags: [static::class],
+        );
+
+        if (!$is_system)
+        {
+
+            Evt\Type\ElementOwnerChange::callOwnerTree(
+                given_elements: $given_elements,recipient_namespace: $owner_namespace,
+                number_of_elements: $given_elements->count(),builder: $builder);
         }
 
 
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  ElementType::getElementType(uuid: $data['ref_uuid']);
+        } else {
+            return $thang;
+        }
     }
+
 
 }
 

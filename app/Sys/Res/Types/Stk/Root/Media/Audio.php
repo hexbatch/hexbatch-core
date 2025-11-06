@@ -12,7 +12,7 @@ class Audio extends Media
 
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Media::class

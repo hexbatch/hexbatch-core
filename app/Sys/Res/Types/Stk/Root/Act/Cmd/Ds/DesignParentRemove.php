@@ -2,33 +2,33 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
-use App\Annotations\ApiParamMarker;
+
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
 use App\Exceptions\HexbatchFailException;
 use App\Exceptions\RefCodes;
-use App\Models\ActionDatum;
 use App\Models\ElementType;
-use App\Models\ElementTypeParent;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignParentParams;
-use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
-use Illuminate\Support\Facades\DB;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 
 #[HexbatchTitle( title: "Remove one or more parents")]
 #[HexbatchBlurb( blurb: "Parents can be removed from the design without any events raised")]
 #[HexbatchDescription( description:'')]
-class DesignParentRemove extends Act\Cmd\Ds
+class DesignParentRemove extends Act\Cmd\Ds implements ICommandCallable
 {
     const UUID = 'bf333396-fdcc-45ac-977c-2a9be8f9840c';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_REMOVE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
@@ -36,121 +36,115 @@ class DesignParentRemove extends Act\Cmd\Ds
 
 
 
-    /**
-     * @return ElementType[]
-     */
-    public function getParents(): array
-    {
-        return $this->action_data->getCollectionOfType(ElementType::class);
-    }
 
-    const array ACTIVE_DATA_KEYS = ['given_type_uuid','check_permission'];
-
-    const array ACTIVE_COLLECTION_KEYS = ['given_parent_uuids'=>ElementType::class];
-
-    #[ApiParamMarker( param_class: DesignParentParams::class)]
     public function __construct(
-        protected ?string              $given_type_uuid = null,
-        /**
-         * @var string[] $given_parent_uuids
-         */
-        protected array               $given_parent_uuids = [],
-        protected bool                $check_permission = true,
-        protected bool                $is_system = false,
-        protected bool                $send_event = true,
-        protected ?ActionDatum        $action_data = null,
-        protected ?ActionDatum        $parent_action_data = null,
-        protected ?UserNamespace      $owner_namespace = null,
-        protected bool                $b_type_init = false,
-        protected ?bool                $is_async = null,
-        protected array             $tags = []
+        protected ElementType   $given_type,
+        protected ElementType   $parent_type,
+        protected UserNamespace $caller_namespace,
+        protected bool          $do_permission_check
+
     )
     {
 
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
+    protected  function toArray() :array {
+        return [
+            'given_type'=>$this->given_type,
+            'parent_type'=>$this->parent_type,
+            'caller_namespace'=>$this->caller_namespace,
+            'do_permission_check'=>$this->do_permission_check,
+        ];
+    }
+
+    protected static function fromArray(array $args) : static {
+        $given_type = static::getTypeFromArray('given_type',$args);
+        $parent_type = static::getTypeFromArray('parent_type',$args) ;
+        $caller_namespace =  static::getNamespaceFromArray('caller_namespace',$args) ;
+        $do_permission_check = $args['do_permission_check'];
+        return new static(given_type: $given_type,parent_type: $parent_type,
+            caller_namespace: $caller_namespace,do_permission_check: $do_permission_check);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        $work = static::fromArray($command_args);
+        $updated_type = $work->doRemoveParentCall();
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $updated_type->toArray());
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected  function doRemoveParentCall() : ElementType {
+        if ($this->do_permission_check) {
+            static::checkIfGivenIsAdmin(given: $this->caller_namespace,target: $this->given_type->owner_namespace);
+        }
+
+        $this->parent_type->loadMissing('type_parents');
+        if ($this->do_permission_check) {
+            foreach ($this->parent_type->type_parents as $par) {
+                if ($par->ref_uuid === $this->parent_type->ref_uuid) {
+                    $par->delete();
+                    return $this->given_type;
+                }
+            }
+        }
+
+        throw new HexbatchFailException( __('msg.parent_type_is_invalid_cannot_remove',['ref'=>$this->given_type->getName()]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+            RefCodes::TYPE_PARENT_CANNOT_BE_REMOVED);
+
+    }
 
 
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    protected function runActionInner(array $data = []): void
+    public static function removeParent(
+        UserNamespace $calling_namespace,ElementType $given_type,ElementType $parent_type, bool $do_permission_check,
+        ?IThangBuilder $builder = null
+    ) : ElementType|Thang|IThangBuilder
     {
-        parent::runActionInner();
-        if (!$this->getGivenType()) {
-            throw new \InvalidArgumentException("Need type before can add parents to it");
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
         }
 
-        if ($this->check_permission) {
-            $this->checkIfAdmin($this->getGivenType()->owner_namespace);
+        $builder?: $builder = ThangBuilder::createBuilder();
+        $builder->setNamespace($calling_namespace);
+
+
+        $builder->tree(
+            command_class: Act\Cmd\Ds\DesignParentRemove::class,
+            command_args: new Act\Cmd\Ds\DesignParentRemove(
+                given_type:$given_type,
+                parent_type: $parent_type,
+                caller_namespace: $calling_namespace,
+                do_permission_check: $do_permission_check
+            )->toArray(),
+            command_tags: [Act\Cmd\Ds\DesignParentRemove::class]
+        );
+
+
+
+        if ($ret_builder) {
+            return $builder;
         }
 
-
-        try {
-            DB::beginTransaction();
-            $maybe_parent_ids = [];
-            foreach ($this->getParents() as $parent) {
-                $maybe_parent_ids[] = $parent->id;
-            }
-            /** @var ElementTypeParent[]|\Illuminate\Database\Eloquent\Collection $parent_records */
-            $parent_records = ElementTypeParent::buildTypeParents(child_type_id:$this->getGivenType()->id,parent_ids: $maybe_parent_ids )->get();
-
-            //check to see if they are parents in first list
-            $parent_ids = [];
-            foreach ($parent_records as $parent) {
-                $parent_ids[] = $parent->id;
-            }
-            if (count($parent_ids) !== count($maybe_parent_ids)) {
-                throw new HexbatchFailException( __('msg.parent_type_is_invalid_cannot_remove',['ref'=>$this->getGivenType()->getName()]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::TYPE_PARENT_CANNOT_BE_REMOVED);
-            }
-
-            foreach ($parent_records as $parent) {
-                $parent->delete();
-            }
-
-            DB::commit();
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  ElementType::getElementType(uuid: $data['ref_uuid']);
+        } else {
+            return $thang;
         }
 
-        catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
     }
-
-
-
-
-    protected function getMyData() :array {
-        return ['type'=>$this->getGivenType()];
-    }
-
-    public function getDataSnapshot(): array
-    {
-        $ret = [];
-        $what =  $this->getMyData();
-        if (isset($what['type'])) {
-            $ret['type'] = new TypeResponse(given_type: $what['type'],parent_levels: 1);
-        }
-        return $ret;
-    }
-
-
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-        $this->setGivenType($this->given_type_uuid);
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
-    }
-
-
-
 
 
 }

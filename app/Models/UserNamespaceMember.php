@@ -59,7 +59,9 @@ class UserNamespaceMember extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'is_admin' => 'boolean'
+        'is_admin' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     public function namespace_member() : BelongsTo {
@@ -70,16 +72,33 @@ class UserNamespaceMember extends Model
         return $this->belongsTo(UserNamespace::class,'parent_namespace_id');
     }
 
-    public static function buildGroupMembers(?int $id = null,int $member_namespace_id = null, int $namespace_parent_id = null) : Builder {
+    public static function buildGroupMembers(
+        ?int $id = null,?int $member_namespace_id = null, ?int $namespace_parent_id = null,
+        array $member_namespace_ids = [], ?bool $is_admin = null, bool  $b_relations = false, bool $b_select = true
+    ) : Builder {
 
-        $build =  UserNamespaceMember::select('user_namespace_members.*')
-            ->selectRaw(" extract(epoch from  user_namespace_members.created_at) as created_at_ts,  ".
-                "extract(epoch from  user_namespace_members.updated_at) as updated_at_ts")
-            /** @uses UserNamespaceMember::namespace_member() */
-            ->with('namespace_member');
+        /** @var Builder $build */
+        $build =  UserNamespaceMember::where('id','>',0);
+
+        if ($b_select)
+        {
+            $build->select('user_namespace_members.*')
+                ->selectRaw(" extract(epoch from  user_namespace_members.created_at) as created_at_ts,  ".
+                    "extract(epoch from  user_namespace_members.updated_at) as updated_at_ts");
+        }
+
+
+        if ($b_relations) {
+            $build->with('namespace_member');
+        }
+
 
         if ($id) {
             $build->where('user_namespace_members.id', $id);
+        }
+
+        if ($member_namespace_ids) {
+            $build->whereIn('user_namespace_members.member_namespace_id', $member_namespace_ids);
         }
 
         if ($member_namespace_id) {
@@ -89,6 +108,12 @@ class UserNamespaceMember extends Model
         if ($namespace_parent_id) {
             $build->where('user_namespace_members.parent_namespace_id',$namespace_parent_id);
         }
+
+        if (null !== $is_admin) {
+            $build->where('user_namespace_members.is_admin', $is_admin);
+        }
         return $build;
     }
+
+
 }

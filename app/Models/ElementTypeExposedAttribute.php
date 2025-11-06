@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 
 /**
@@ -14,16 +15,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int id
  * @property int exposed_type_id
  * @property int exposed_attribute_id
- * @property int inherits_exposed_id
- * @property int exposed_parent_attribute_id
- * @property int exposed_parent_type_id
 
  *
  * @property Attribute exposed_attribute
  * @property ElementType exposed_type
- * @property Attribute exposed_parent_attribute
- * @property ElementType exposed_parent_type
- * @property ElementTypeExposedAttribute exposed_inheritance
+
  *
  * @property string created_at
  * @property string updated_at
@@ -64,22 +60,79 @@ class ElementTypeExposedAttribute extends Model
     }
 
     public function exposed_type() : BelongsTo {
-        return $this->belongsTo(ElementType::class,'exposed_attribute_id');
+        return $this->belongsTo(ElementType::class,'exposed_type_id');
     }
 
-    /** @noinspection PhpUnused */
-    public function exposed_parent_attribute() : BelongsTo {
-        return $this->belongsTo(Attribute::class,'exposed_attribute_id');
+
+    public static function findExposedAttributes(ElementType $type)
+    : array
+    {
+        // get the terminal chains of inheritance (by finding the system id at the end of each array or not)
+        // for all types get the attributes with parent lists
+        //for each chain get all atts and  from the end, add to a new collection, add all atts from that type, go to the next type up
+            // if type has att A or parent chain that uses any of the last level attribute B, then remove B from the collection. Add all A
+        // union all chain collections at the end
+        $attributes_used = new Collection;
+        $chains = ElementTypeParent::getInheritanceChains($type);
+        $all_type_ids_hash = [];
+        foreach ($chains as $chain) {
+            foreach ($chain as $some_id) {
+                $all_type_ids_hash[$some_id] = $some_id;
+            }
+        }
+        $all_type_ids = array_values($all_type_ids_hash);
+
+        if (empty($all_type_ids)) {return [];}
+
+        /** @var Collection<Attribute> $all_attributes */
+        $all_attributes = Attribute::buildAttribute(in_type_ids: $all_type_ids,b_do_ancestors: true)->get();
+        /** @var array<Attribute[]> $attr_type_hash */
+        $attr_type_hash = [];
+        foreach ($all_attributes as $att) {
+            if (!isset($all_type_ids_hash[$att->owner_element_type_id])) {
+                $attr_type_hash[$att->owner_element_type_id] = [];
+            }
+            $attr_type_hash[$att->owner_element_type_id][] = $att;
+        }
+
+        $collections = [];
+        foreach ($chains as $chain) {
+            /** @var Collection<Attribute> $chain_collection */
+            $collections[] = $chain_collection = new Collection;
+            foreach (array_reverse($chain) as $some_id) { //start with the root and work up
+
+                foreach (($attr_type_hash[$some_id]??[]) as $att ) {
+                    //remove older that are in inheritance chain of newer
+                    foreach ($chain_collection as $what) {
+                        foreach ($what->attribute_ancestors as $ancestor) {
+                            if ($ancestor->id === $what->id) {
+                                //what is in the ancestor chain of anc, so remove what
+                                $chain_collection->forget([$what->ref_uuid]);
+                            }
+                        }
+
+                    }
+                    if (!$chain_collection->has($att->ref_uuid)) {
+                        $chain_collection->offsetSet($att->ref_uuid,$att);
+                    }
+
+                }
+            }
+        }
+        foreach ($collections as $type_collection) {
+            $attributes_used =  $attributes_used->merge($type_collection);
+        }
+        $unique_collection = $attributes_used->unique('ref_uuid');
+        $ret = [];
+        foreach ($unique_collection as $att) {
+            $ret[] = $att;
+        }
+        return $ret;
     }
 
-    /** @noinspection PhpUnused */
-    public function exposed_parent_type() : BelongsTo {
-        return $this->belongsTo(ElementType::class,'exposed_attribute_id');
-    }
 
-    public function exposed_inheritance() : BelongsTo {
-        return $this->belongsTo(static::class,'exposed_attribute_id');
-    }
+
+
 
     /**
      * Clears out records from before for this type and then gets all the exposed attributes
@@ -90,60 +143,20 @@ class ElementTypeExposedAttribute extends Model
     public static function makeRecords(ElementType $type)  {
 
         static::buildExposed(exposed_type_id: $type->id)->delete();
-        $atts  = $type->getAllAttributes();
-        $all_attributes = [];
-
-        $parent_uuids_hash = [];
-        foreach ($atts as $att) {
-            $all_attributes[$att->getUuid()] = $att ;
-            if($att->attribute_parent?->getUuid()) {
-                $parent_uuids_hash[$att->attribute_parent?->getUuid()] = true;
-            }
-
-        }
-
-
-        $exposed_uuids = [];
-        $parent_uuids = array_keys($parent_uuids_hash);
-        foreach ($all_attributes as $att_uuid => $att ) {
-
-            if (in_array($att_uuid,$parent_uuids)) {
-                continue;
-            }
-            $exposed_uuids[] = $att->getUuid();
-        }
+        $atts  = static::findExposedAttributes($type);
 
         $inserts = [];
-        foreach ($exposed_uuids as  $exposed_uuid ) {
-            $att = $all_attributes[$exposed_uuid];
+        foreach ($atts as  $att ) {
             $inserts[] = [
-                'exposed_type_id'=>$att->owner_element_type_id,
+                'exposed_type_id'=>$type->id,
                 'exposed_attribute_id'=>$att->id,
-                'exposed_parent_attribute_id'=>($all_attributes[$att->attribute_parent?->getUuid()]??null)?->id,
-                'exposed_parent_type_id'=>($all_attributes[$att->attribute_parent?->getUuid()]??null)?->owner_element_type_id,
-                'inherits_exposed_id'=>null
+                'exposed_parent_type_id'=>$att->owner_element_type_id
             ];
         }
 
 
 
         ElementTypeExposedAttribute::insert($inserts);
-
-        $recs = ElementTypeExposedAttribute::where('exposed_type_id',$type->id)->get();
-
-
-        /**
-         * @var static $row
-         */
-        foreach ($recs as $row) {
-            if (!$row->exposed_parent_attribute_id) {continue;}
-            $parent_row = ElementTypeExposedAttribute::where('exposed_type_id',$row->exposed_parent_type_id)
-                ->where('exposed_attribute_id',$row->exposed_parent_attribute_id)->first();
-            if ($parent_row) {
-                $row->inherits_exposed_id = $parent_row->id;
-                $row->save();
-            }
-        }
 
         /** @type  ElementTypeExposedAttribute[]|\Illuminate\Database\Eloquent\Collection */
         return static::buildExposed(exposed_type_id: $type->id)->get();
@@ -167,8 +180,7 @@ class ElementTypeExposedAttribute extends Model
     public static function buildExposed(?int $exposed_type_id = null,?int $exposed_attribute_id = null,
                                         ?int $in_set_member_id = null,
                                         ?int $phase_id = null,
-                                        bool $with_exposed_attribute = false,bool $with_exposed_type = false,
-                                        bool $with_exposed_inheritance = false
+                                        bool $with_exposed_attribute = false,bool $with_exposed_type = false
     )
     : Builder
     {
@@ -187,7 +199,7 @@ class ElementTypeExposedAttribute extends Model
         }
 
         if ($in_set_member_id && $exposed_type_id) {
-            ElementTypeSetVisibility::buildVisibles(visible_type_id: $exposed_type_id, visible_set_member_id: $in_set_member_id,phase_id: $phase_id,
+            ElementVisibility::buildVisibles(visible_type_id: $exposed_type_id, visible_set_member_id: $in_set_member_id,phase_id: $phase_id,
                 use_builder: $build, must_be_visible_in_scope: true);
         }
 
@@ -199,9 +211,6 @@ class ElementTypeExposedAttribute extends Model
             $build/** @uses static::exposed_type() */ ->with('exposed_type');
         }
 
-        if ($with_exposed_inheritance) {
-            $build/** @uses static::exposed_inheritance() */ ->with('exposed_inheritance');
-        }
 
         return $build;
     }

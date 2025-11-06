@@ -13,11 +13,13 @@ namespace App\Enums\Sys;
  *
  *  if reading very large results, then the same pagination happens, and each page has merged data from that page sent through the rule
  */
+
+use App\Data\ApiParams\Enums\EnumTryTrait;
+
 enum TypeOfAction: string
 {
+    use EnumTryTrait;
 
-    case NOP = 'NOP';
-    case BASE_ACTION = 'base_action';
     case BASE_COMMAND = 'base_command';
     case BASE_PRAGMA = 'base_pragma';
     case BASE_OPERATION = 'base_op';
@@ -33,7 +35,6 @@ enum TypeOfAction: string
     case BASE_SET = 'base_set';
     case BASE_TYPE = 'base_type';
     case BASE_USER = 'base_user';
-    case BASE_WAIT = 'base_wait';
 
 
 
@@ -62,7 +63,6 @@ enum TypeOfAction: string
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
-    case CMD_DESIGN_PURGE = 'cmd_design_purge';
 
 
 
@@ -95,11 +95,7 @@ enum TypeOfAction: string
     case CMD_DESIGN_LIVE_RULE_REMOVE = 'cmd_design_live_rule_remove';
 
 
-    case CMD_DESIGN_REQUIREMENT_ADD = 'cmd_design_requirement_add';
-    case CMD_DESIGN_REQUIREMENT_REMOVE = 'cmd_design_requirement_remove';
-
     case CMD_DESIGN_OWNER_CHANGE = 'cmd_design_owner_change';
-    case CMD_DESIGN_OWNER_PROMOTE = 'cmd_design_owner_promote';
 
 
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';
@@ -132,7 +128,7 @@ enum TypeOfAction: string
     case CMD_SET_CREATE = 'cmd_set_create'; //child set or top level set
     case CMD_SET_DESTROY = 'cmd_set_destroy'; //if ns-admin of definer element of set ns
 
-    case CMD_SET_EMPTY = 'cmd_set_empty'; //non sticky stuff
+    case CMD_SET_EMPTY = 'cmd_set_empty'; //non-sticky stuff
     case CMD_SET_PURGE = 'cmd_set_purge'; //server admin
     case CMD_LINK_ADD = 'cmd_link_add';
     case CMD_LINK_REMOVE = 'cmd_link_remove';
@@ -151,8 +147,8 @@ enum TypeOfAction: string
 
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
 
-    case CMD_ELEMENT_EDIT = 'cmd_element_edit';
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
+    case CMD_ELEMENT_PHASE_CHANGE = 'cmd_element_phase_change';
 
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
@@ -162,10 +158,9 @@ enum TypeOfAction: string
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
 
 
-    case CMD_TIME_SPAN_ROTATION = 'cmd_time_span_rotation';
-    case CMD_PHASE_CUT_TREE = 'cmd_phase_cut_tree';
-    case CMD_PHASE_REPLACE_TREE = 'cmd_phase_replace_tree';
-    case CMD_PHASE_MOVE_TREE = 'cmd_phase_move_tree';
+    case CMD_PHASE_TREE_DELETE = 'cmd_phase_tree_delete';
+    case CMD_PHASE_TREE_COPY = 'cmd_phase_tree_copy';
+    case CMD_PHASE_TREE_MOVE = 'cmd_phase_tree_move';
 
     case CMD_PHASE_PURGE = 'cmd_phase_purge';
     case CMD_PHASE_CREATE = 'cmd_phase_create';
@@ -182,44 +177,25 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_MEMBER_REMOVE = 'cmd_namespace_remove_member';
 
 
-    case CMD_NAMESPACE_MEMBER_PROMOTE = 'cmd_namespace_member_promote';
-    case CMD_NAMESPACE_ADMIN_PROMOTE = 'cmd_namespace_admin_promote';
-    case CMD_NAMESPACE_ADMIN_PURGE = 'cmd_namespace_admin_purge';
-    case CMD_NAMESPACE_MEMBER_PURGE = 'cmd_namespace_member_purge';
-
 
 
 
     case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
+    case CMD_NAMESPACE_PREP_DELETION = 'cmd_namespace_prep_deletion';
     case CMD_NAMESPACE_PREP_TRANSFER = 'cmd_namespace_prep_transfer';
     case CMD_NAMESPACE_DO_TRANSFER = 'cmd_namespace_do_transfer';
-    case CMD_NAMESPACE_PROMOTE = 'cmd_namespace_promote';
-    case CMD_NAMESPACE_EDIT = 'cmd_namespace_edit';
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
-    case CMD_NAMESPACE_PURGE = 'cmd_namespace_purge'; //server admin
 
 
-    case CMD_NAMESPACE_HANDLE_ADD = 'cmd_namespace_handle_add';
-    case CMD_NAMESPACE_HANDLE_REMOVE = 'cmd_namespace_handle_remove';
 
 
-    case CMD_USER_PREPARE_DELETION = 'cmd_user_prepare_deletion';
+    case CMD_USER_DELETE = 'cmd_user_delete';
     case CMD_USER_START_DELETION = 'cmd_user_start_deletion';
     case CMD_USER_REGISTER = 'cmd_user_register';
     case CMD_USER_LOGIN = 'cmd_user_login';
     case CMD_USER_EDIT = 'cmd_user_edit';
 
 
-    case CMD_WAIT_ALL = 'cmd_wait_all';
-    case CMD_WAIT_ANY = 'cmd_wait_any';
-    case CMD_WAIT_AVAILABLE = 'cmd_wait_available';
-    case CMD_WAIT_MUTEX = 'cmd_wait_mutex';
-    case CMD_WAIT_SEMAPHORE = 'cmd_wait_semaphore';
-    case CMD_SEMAPHORE_READY = 'cmd_semaphore_ready';
-    case CMD_SEMAPHORE_RESET = 'cmd_semaphore_reset';
-    case CMD_SEMAPHORE_MASTER_CREATE = 'cmd_semaphore_master_create';
-    case CMD_SEMAPHORE_MASTER_RUN = 'cmd_semaphore_master_run';
-    case CMD_SEMAPHORE_MASTER_UPDATE = 'cmd_semaphore_master_update';
 
     case CMD_SERVER_PROMOTE = 'cmd_server_promote';
     case CMD_SERVER_EDIT = 'cmd_server_edit';
@@ -255,15 +231,6 @@ enum TypeOfAction: string
     case CMD_ELSEWHERE_PUSH_NAMESPACE = 'cmd_elsewhere_push_namespace';
     case CMD_ELSEWHERE_PUSH_EVENT = 'cmd_elsewhere_push_event';
 
-
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfAction {
-        $maybe  = TypeOfAction::tryFrom($test);
-        if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfAction::cases(),'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
-        }
-        return $maybe;
-    }
 
 }
 

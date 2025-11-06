@@ -4,26 +4,27 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Type\ApiTypeResponse;
-use App\OpenApi\Params\Actioning\Design\DesignParams;
+use App\Data\ApiParams\Data\Types\Params\TypeParamData;
+use App\Models\ElementType;
+use App\Models\Server;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
 
-#[ApiParamMarker( param_class: DesignParams::class)]
-class Create extends Api\DesignApi
+#[ApiParamMarker( param_class: TypeParamData::class)]
+class Create extends Api\DesignApi implements ICommandCallable
 {
     const UUID = 'eb4805a7-3f25-4aae-a42b-4308edc66185';
     const TYPE_NAME = 'api_design_create';
-
-
-
-
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
@@ -31,85 +32,48 @@ class Create extends Api\DesignApi
     ];
 
 
-    public function __construct(
-        protected ?DesignParams $params = null,
-
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
+        Log::debug("Called api create type node");
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $children_args);
     }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new DesignParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['type'=>$this->getGivenType()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiTypeResponse(given_type:  $what['type'],thing: $this->getMyThing());
-    }
-
-
-
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ds\DesignCreate(
-            type_name: $this->params->getTypeName(), time_uuid: $this->params->getScheduleUuid(),
-            is_final: $this->params->isFinal(), access: $this->params->getAccess(),
-            parent_action_data: $this->action_data,tags: ['create type from api']);
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function createDesign(UserNamespace      $namespace, TypeParamData $params ,
+                                        bool $is_system = false,
+                                        array $tags = [], ?IThangBuilder $builder = null)
+    : ElementType|Thang
+    {
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['create-design'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($namespace)
+            ->setSharedArg('namespace',$namespace)
+            ->tree($my_command)
+            ->leaf(
+                command_class: Act\Cmd\Ds\DesignCreate::class,
+                command_args: new Act\Cmd\Ds\DesignCreate(
+                    params:$params,
+                    is_system:$is_system,
+                    use_ref: null,
+                    owner_namespace: $namespace,
+                    server: Server::getDefaultServer()
+                )->toArray(),
+                command_tags: [Act\Cmd\Ds\DesignCreate::class]
+            );
 
-        if ($child instanceof Act\Cmd\Ds\DesignCreate) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenType($child->getGivenType());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  ElementType::getElementType(uuid: $data['ref_uuid']);
+        } else {
+            return $thang;
         }
+
     }
 
 }

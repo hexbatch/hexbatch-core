@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act;
 
 
 use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stk\Root\Action;
 
 /**
  *
@@ -14,11 +15,11 @@ class NoEventsTriggered extends BaseType
     const TYPE_NAME = 'no_events_triggered';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [
-        BaseAction::class
+        Action::class
     ];
 
 

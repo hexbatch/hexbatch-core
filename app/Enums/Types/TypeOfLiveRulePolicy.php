@@ -1,11 +1,13 @@
 <?php
 namespace App\Enums\Types;
+use App\Data\ApiParams\Enums\EnumTryTrait;
+
 /**
  * postgres enum type_of_live_rule_policy
  */
 
 enum TypeOfLiveRulePolicy : string {
-
+    use EnumTryTrait;
     /*
       '','', '','','','',
                 '','',''
@@ -20,15 +22,6 @@ enum TypeOfLiveRulePolicy : string {
   case drop_when_leaving = 'drop_when_leaving';
   case drop_when_leaving_stack = 'drop_when_leaving_stack';
 
-
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfLiveRulePolicy {
-        $maybe  = TypeOfLiveRulePolicy::tryFrom($test);
-        if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfLiveRulePolicy::cases(),'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
-        }
-        return $maybe;
-    }
 }
 
 

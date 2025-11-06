@@ -3,9 +3,6 @@
 namespace App\Providers;
 
 
-use App\Models\UserNamespace;
-use App\Sys\Collections\SystemTypes;
-use App\Sys\Res\Types\BaseType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,13 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Model::preventLazyLoading();
         Model::automaticallyEagerLoadRelationships();
-
-        /** @var BaseType $class $class */
-        foreach (SystemTypes::loadClasses() as $class) {
-            $class::registerAction();
-        }
-
-        UserNamespace::registerOwner();
     }
 }

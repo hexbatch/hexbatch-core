@@ -3,16 +3,27 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
+use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiParamMarker;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeParamData;
+use App\Models\Attribute;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
-#[ApiParamMarker( param_class: DesignAttributeParams::class)]
-class EditAttribute extends CreateAttribute
+#[ApiParamMarker( param_class: AttributeParamData::class)]
+#[ApiEventMarker( Evt\Type\AttributePending::class)]
+class EditAttribute extends Api\DesignApi implements ICommandCallable
 {
     const UUID = '40a60d68-5fb3-472d-9c90-bc033501ab1b';
     const TYPE_NAME = 'api_design_edit_attribute';
@@ -27,62 +38,51 @@ class EditAttribute extends CreateAttribute
     ];
 
 
-    public function getChildrenTree(): ?Tree
+
+
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
+        Log::debug("Called api edit attribute node");
 
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ds\DesignAttributeEdit(
-            given_design_uuid: $this->params->getDesignUuid(),
-            uuid: $this->params->getUuid(),
-            unset_parent: $this->params->isUnsetParent(),
-            attribute_name: $this->params->getAttributeName(),
-            owner_type_uuid: $this->params->getTypeUuid(),
-            parent_attribute_uuid: $this->params->getParentUuid(),
-            design_attribute_uuid: $this->params->getDesignUuid(),
-            location_uuid: $this->params->getLocationUuid(),
-            is_final: $this->params->isFinal(),
-            is_abstract: $this->params->isAbstract(),
-            read_json_path: $this->params->getReadJsonPath(),
-            validate_json_path: $this->params->getValidateJsonPath(),
-            default_value: $this->params->getDefaultValue(),
-            access: $this->params->getAccess(),
-            value_policy: $this->params->getValuePolicy(),
-            parent_action_data: $this->action_data,tags: ['edit attribute from api']);
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
+        $b_approved = true;
+        if (count($children_args)) {
+            $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
         }
-        return null;
 
+        return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,data: [static::CHILD_DECISION_KEY=>$b_approved]);
     }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function editAttribute(UserNamespace      $calling_namespace, Attribute $given_attribute,
+                                         AttributeParamData $params , array $tags = [], ?IThangBuilder $builder = null)
+    : Attribute|Thang
+    {
 
-        if ($child instanceof Act\Cmd\Ds\DesignAttributeEdit) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenAttribute($child->getGivenAttribute());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['edit-attribute'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($calling_namespace)
+            ->setSharedArg('namespace',$calling_namespace)
+            ->tree($my_command);
+
+        Act\Cmd\Ds\DesignAttributeEdit::makeEditAttributeTree(
+            params: $params,given_attribute: $given_attribute,
+            calling_namespace: $calling_namespace,builder: $builder);
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  Attribute::getThisAttribute(uuid: $data['ref_uuid'],b_do_relations: true);
+        } else {
+            return $thang;
         }
-    }
 
+    }
 }
 

@@ -3,174 +3,176 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Us;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\User\Params\RegistrationParamData;
 use App\Enums\Sys\TypeOfAction;
-use App\Models\ActionDatum;
+use App\Helpers\NamespacePresetUuids;
+use App\Models\Server;
 use App\Models\User;
-use App\Models\UserNamespace;
-use App\OpenApi\Results\Users\MeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\NamespaceCreate;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\DB;
 
-class UserRegister extends Act\Cmd\Us
+#[ApiParamMarker( param_class: RegistrationParamData::class)]
+class UserRegister extends Act\Cmd\Us implements ICommandCallable
 {
     const string UUID = '2cca7cb0-4bde-4b66-ac54-302fba98853e';
     const TypeOfAction ACTION_NAME = TypeOfAction::CMD_USER_REGISTER;
 
-    const array ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const array PARENT_CLASSES = [
         Act\Cmd\Us::class,
-        Act\SystemPrivilege::class,
     ];
 
     const array EVENT_CLASSES = [
-        Evt\Server\UserRegistrationStarting::class,
-        Evt\Server\UserRegistrationProcessing::class
+        Evt\Server\UserRegistered::class //todo pass new default namespace to event
     ];
-
-
-
-    public function getCreatedUser(): ?User
-    {
-        return /** @uses ActionDatum::data_user() */
-            $this->action_data->data_user;
-    }
-
-
-    const array ACTIVE_DATA_KEYS = ['user_name','user_password','uuid'];
 
 
 
     public function __construct(
-        protected ?string      $user_name =null,
-        protected ?string      $user_password = null,
-        protected ?string      $uuid = null,
-        protected bool         $is_system = false,
-        protected bool         $send_event = true,
-        protected ?bool                $is_async = null,
-        protected ?ActionDatum $action_data = null,
-        protected ?ActionDatum        $parent_action_data = null,
-        protected ?UserNamespace      $owner_namespace = null,
-        protected bool         $b_type_init = false,
-        protected array          $tags = []
+        protected RegistrationParamData   $params,
+        protected bool $b_do_post_events = true,
     )
     {
 
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
+    }
 
+    protected  function toArray() :array {
+        return [
+            'params'=>$this->params->toArray(),
+            'b_do_post_events'=>$this->b_do_post_events,
+        ];
+    }
+
+    protected static function fromArray(array $args) : static {
+        $b_do_post_events = $args['b_do_post_events']??false;
+        $params = RegistrationParamData::from( $args['params']);
+        return new static(params: $params,b_do_post_events: $b_do_post_events);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        $work = static::fromArray($command_args);
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        $user = null;
+        if ($b_approved) {
+            $user = $work->doCreateUserWithDefaultNamespace();
+            if ($work->b_do_post_events)
+            {
+                $r = new Evt\Server\UserRegistered(given_namespace: $user->default_namespace);
+                $r->callTreeByItself($children_args);
+            }
+        }
+
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
+            data: [static::CHILD_DECISION_KEY =>$b_approved,'user'=>$user]);
     }
 
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    protected function runActionInner(array $data = []): void
+    public  function doCreateUserWithDefaultNamespace(bool $b_reload = true, bool $b_is_system = false, ?string $user_ref = null, ?NamespacePresetUuids $preset = null )
+    : User
     {
-        parent::runActionInner();
-
-        try {
-            DB::beginTransaction();
-            $created_user = null;
-            if (!$this->getCreatedUser()) {
-                $created_user = (new CreateNewUser)->create([
-                    "username" => $this->user_name,
-                    "password" => $this->user_password,
-                    "password_confirmation" => $this->user_password
-                ]);
-                $this->action_data->data_user_id = $created_user->id;
-                $this->action_data->save();
-            }
-
+        $created_user = null;
+        DB::transaction(function() use($b_is_system,$user_ref,$preset,&$created_user)
+        {
+            $created_user = (new CreateNewUser)->create([
+                "username" => $this->params->namespace->name,
+                "password" => $this->params->password,
+                "password_confirmation" => $this->params->password
+            ]);
             $b_save_again = false;
 
-            if ($this->uuid && $created_user) {
-                $created_user->ref_uuid = $this->uuid;
+            if ($user_ref ) {
+                $created_user->ref_uuid = $user_ref;
                 $b_save_again = true;
             }
 
-            if ($this->is_system && $created_user) {
+            if ($b_is_system ) {
                 $b_save_again = true;
-                $created_user->is_system = $this->is_system;
+                $created_user->is_system = $b_is_system;
             }
 
             if ($b_save_again) {
                 $created_user->save();
             }
-            $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-            $this->action_data->refresh();
-            if ($this->send_event) {
-                $this->post_events_to_send = Evt\Server\UserRegistrationProcessing::makeEventActions(source: $this, action_data: $this->action_data);
-            }
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollback();
-            throw $e;
+            $server = Server::getDefaultServer();
+            $namespace_factory = new NamespaceCreate(params: $this->params->namespace,given_user: $created_user,given_server: $server,is_system: $b_is_system);
+            $namespace = $namespace_factory->makeNamespace(preset: $preset);
+            $created_user->default_namespace_id = $namespace->id;
+            $created_user->save();
+
+        });
+
+
+        if ($b_reload) {
+            $created_user = User::getThisUser(id: $created_user->id,b_relations: true);
         }
 
+        return $created_user;
     }
 
-
-
-
-    protected function getMyData() :array {
-        return ['user'=>$this->getCreatedUser()];
-    }
-
-    public function getDataSnapshot(): array
-    {
-        $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['user'])) {
-            $ret['user'] = new MeResponse(user:  $what['user']);
-        }
-
-        return $ret;
-    }
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-        if ($this->send_event && !$this->is_system) {
-            $nodes = [];
-            $events = Evt\Server\UserRegistrationStarting::makeEventActions(source: $this, action_data: $this->action_data);
-
-            foreach ($events as $event) {
-                $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
-            }
-
-            //last in tree is the
-            if (count($nodes)) {
-                return new Tree(
-                    $nodes,
-                    ['rootId' => -1]
-                );
-            }
-        }
-
-        return null;
-    }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function doRegistration(
+        RegistrationParamData   $params,
+        ?IThangBuilder $builder = null
+    ) : User|Thang|IThangBuilder
+    {
 
 
-        if ($child instanceof Evt\Server\UserRegistrationStarting) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
+
+
+        $node = new static(
+            params:$params,
+        );
+
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
         }
 
+        $builder?: $builder = ThangBuilder::createBuilder();
+
+        $builder->tree(
+            command_class: static::class,
+            command_args: $node->toArray(),
+            command_tags: [static::class],
+            command_priority: -1
+        );
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  $data['user'];
+        } else {
+            return $thang;
+        }
     }
+
+
 
 }
 

@@ -20,16 +20,14 @@ class Pop extends Act\Cmd\Op
     const ACTION_NAME = TypeOfAction::OP_POP;
 
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetLeave::class,
+        Evt\Set\SetLeaving::class,
     ];
 
 }

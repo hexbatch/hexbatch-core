@@ -7,41 +7,39 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Casts\FromBoxToArray;
+use App\Data\ApiParams\Data\Attributes\AttributeData;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeParamData;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeSearchParams;
+use App\Data\ApiParams\Data\Attributes\Responses\AttributeList;
+use App\Data\ApiParams\Data\Locations\Location;
+use App\Data\ApiParams\Data\Locations\Params\LocationSearchParams;
+use App\Data\ApiParams\Data\Locations\Responses\LocationList;
 use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
+use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Data\ApiParams\Data\Types\ElementTypeData;
+use App\Data\ApiParams\Data\Types\Params\TypeOwnershipChangeParamData;
+use App\Data\ApiParams\Data\Types\Params\TypeParamData;
+use App\Data\ApiParams\Data\Types\Params\TypeParentsParamData;
+use App\Data\ApiParams\Data\Types\Params\TypeSearchParams;
+use App\Data\ApiParams\Data\Types\Responses\ElementTypeList;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchAttribute;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
-use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
-use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
-use App\OpenApi\ApiResults\Bounds\ApiLocationCollectionResponse;
-use App\OpenApi\ApiResults\Bounds\ApiLocationResponse;
-use App\OpenApi\ApiResults\Bounds\ApiScheduleCollectionResponse;
-use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
-use App\OpenApi\ApiResults\Type\ApiTypeResponse;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
-use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
-use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
-use App\OpenApi\Params\Actioning\Design\DesignParams;
-use App\OpenApi\Params\Actioning\Design\DesignParentParams;
-use App\OpenApi\Params\Actioning\Type\TypeParams;
-use App\OpenApi\Params\Listing\Design\ListAttributeParams;
-use App\OpenApi\Params\Listing\Design\ListDesignParams;
-use App\OpenApi\Params\Listing\Design\ListLocationParams;
-use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
-use App\OpenApi\Params\Listing\Design\ShowDesignParams;
-
-use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
+use Hexbatch\Thangs\Data\ThangData;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
@@ -50,7 +48,7 @@ class DesignController extends Controller {
 
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\ChangeOwner::class)]
     #[ApiEventMarker( Evt\Server\TypeOwnerChanging::class)]
@@ -63,43 +61,47 @@ class DesignController extends Controller {
                     " Owners of subtypes can deny this change by listening to the type_owner_change event raised by this action",
         summary: 'Changes the ownership of a type before its published.  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignOwnershipParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeOwnershipChangeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function change_design_owner(Request $request,ElementType $type) {
-        $params = new DesignOwnershipParams(type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['change-owner']);
+    public function change_design_owner(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeOwnershipChangeParamData::fromRequest($request);
+        $data_out = Api\Design\ChangeOwner::changeOwner(calling_namespace: $namespace, params: $params, given_type: $type,
+            do_permission_check: true, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
-    #[ApiTypeMarker( Root\Api\Design\PromoteOwner::class)]
+    #[ApiTypeMarker( Root\Api\Design\ChangeOwner::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/promote_owner',
@@ -107,86 +109,88 @@ class DesignController extends Controller {
         description: 'The system can transfer this design to be managed by another namespace. No events are raised that can deny the change.',
         summary: 'Changes the ownership of a type before its published. ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeOwnershipChangeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
         ]
     )]
-    public function promote_design_owner(Request $request,ElementType $type) {
-        $params = new DesignOwnershipParams(type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\PromoteOwner(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['promote-owner']);
+    public function promote_design_owner(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeOwnershipChangeParamData::fromRequest($request);
+        $data_out = Api\Design\ChangeOwner::changeOwner(calling_namespace: $namespace, params: $params, given_type: $type,
+            do_permission_check: false, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
-    #[ApiTypeMarker( Root\Api\Design\Purge::class)]
+    #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/{element_type}/purge',
         operationId: 'core.design.purge',
         description: 'The system can delete any design, owned by anyone, before publishing, without raising any events',
         summary: 'Purges an unpublished type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
-    #[ApiTypeMarker( Root\Api\Design\Purge::class)]
+    #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    public function purge_design(Request $request,ElementType $type) {
-        $params = new TypeParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Purge(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['purge-design']);
+    public function purge_design(UserNamespace $namespace,ElementType $type) {
+        $data_out = Api\Design\Destroy::destroyDesign(namespace: $namespace, given_type: $type,do_permission_check: false,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
@@ -196,41 +200,42 @@ class DesignController extends Controller {
         description: 'A namespace can delete a new design, before publishing, without raising any events',
         summary: 'Deletes an unpublished type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
-    public function destroy_design(Request $request,ElementType $type) {
-        $params = new TypeParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Destroy(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-design']);
+    public function destroy_design(UserNamespace $namespace,ElementType $type) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Api\Design\Destroy::destroyDesign(namespace: $namespace, given_type: $type,do_permission_check: true,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\Create::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
@@ -240,37 +245,40 @@ class DesignController extends Controller {
         description: 'A namespace can make a new design, they are the owner. No events are raised',
         summary: 'Makes a new design type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    public function create_design(Request $request) {
-        $params = new DesignParams(namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Create(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-design']);
+    public function create_design(UserNamespace $namespace,Request $request) {
+        $params = TypeParamData::fromRequest($request);
+        $data_out = Api\Design\Create::createDesign(namespace: $namespace, params: $params,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\Edit::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
@@ -281,35 +289,38 @@ class DesignController extends Controller {
                         "\nNo events are raised",
         summary: 'Edits the name, final type, access ',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Type edited', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    public function edit_design(Request $request,ElementType $type) {
-        $params = new DesignParams(edit_type: $type, namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Edit(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-design']);
+    public function edit_design(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeParamData::fromRequest($request);
+        $data_out = Api\Design\Edit::editDesign(namespace: $namespace, params: $params,given_type: $type,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -324,33 +335,27 @@ class DesignController extends Controller {
         "\nTo see more detail about any one of these, use the show api for that reference",
         summary: 'Shows information about a type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowDesignParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ApiTypeResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\ShowDesign::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function show_design(Request $request,ElementType $type) {
-        $params = new ShowDesignParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ShowDesign(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-design']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function show_design(UserNamespace $namespace,ElementType $type) {
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Design\ShowDesign::showDesign($type);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -364,30 +369,24 @@ class DesignController extends Controller {
                 "\nCan see the name, uuid, the status and how many attributes, listeners, requirements and rules there are",
         summary: 'Lists all the designed owned or managed  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeSearchParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') )
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ApiTypeCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ElementTypeList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\ListDesigns::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function list_designs(Request $request) {
-        $params = new ListDesignParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ListDesigns(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-designs']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_designs(UserNamespace $namespace,Request $request) {
+        $params = TypeSearchParams::fromRequest($request);
+        $data_out = Api\Design\ListDesigns::listDesigns(calling_namespace: $namespace,params: $params);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -395,44 +394,39 @@ class DesignController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/design/{element_type}/attribute/{attribute}/show',
-        operationId: 'core.design.show_attribute',
+        path: '/api/v1/{user_namespace}/attributes/{attribute}/show',
+        operationId: 'core.design.attributes.show',
         description: "See information about an attribute. Will list the settings and bounds, will show parent, and status ".
                     "\nShows stats about its descendants".
                     "\nif the type is marked as public, and the attribute is marked as public then any namespace can use this, ".
                     " \notherwise the members of the owning namesapce can ",
         summary: 'Information about a single attribute on a type  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowAttributeParams::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: ApiAttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found'),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\ShowAttribute::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function show_attribute(Request $request,Attribute $attribute) {
-        $params = new ShowAttributeParams(given_attribute: $attribute);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ShowAttribute(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-attribute']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function show_attribute(UserNamespace $namespace,Attribute $attribute) {
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Design\ShowAttribute::showAttribute($attribute);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -445,34 +439,28 @@ class DesignController extends Controller {
         description: "See a list of attributes in namespaces that one belongs to",
         summary: 'Lists attributes with optional search',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListAttributeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AttributeSearchParams::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: ApiAttributeCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeList::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ListAttributes::class)]
-    public function list_attributes(Request $request) {
-        $params = new ListAttributeParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ListAttributes(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-attributes']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_attributes(UserNamespace $namespace,Request $request) {
+        $params = AttributeSearchParams::fromRequest($request);
+        $data_out = Api\Design\ListAttributes::listAttributes(params: $params, caller_namespace: $namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/{element_type}/attribute/{attribute}/destroy',
@@ -481,52 +469,52 @@ class DesignController extends Controller {
         "\nRemoving design attributes does not generate any event",
         summary: 'Delete an attribute',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeDestroyParams::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Attribute destroyed', content: new JsonContent(ref: AttributeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\DestroyAttribute::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    public function destroy_attribute(Request $request,Attribute $attribute) {
-        $params = new DesignAttributeDestroyParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\DestroyAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-attribute']);
+    public function destroy_attribute(UserNamespace $namespace,Attribute $attribute) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Root\Api\Design\DestroyAttribute::destoryAttribute(namespace: $namespace,given_attribute:$attribute, tags: ['api-top']);
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = AttributeData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
-
-
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\CreateAttribute::class)]
-    #[ApiEventMarker( Evt\Server\DesignPending::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
+    #[ApiEventMarker( Evt\Type\AttributePending::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/create_attribute',
         operationId: 'core.design.create_attribute',
@@ -534,42 +522,45 @@ class DesignController extends Controller {
         "\nBut the design can only be published if the inheritance chain does not block this using the design_pending event",
         summary: 'Creates a new attribute on a design',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AttributeParamData::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    public function create_attribute(Request $request,ElementType $type) {
-        $params = new DesignAttributeParams(given_type: $type,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\CreateAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-attribute']);
+    public function create_attribute(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = AttributeParamData::fromRequest($request);
+        $data_out = Root\Api\Design\CreateAttribute::createAttribute(
+            calling_namespace: $namespace,given_type:$type, is_system: false,use_ref: null ,params: $params,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = AttributeData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
-
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
         path: '/api/v1/{user_namespace}/design/{element_type}/attribute/{attribute}/edit',
@@ -578,51 +569,53 @@ class DesignController extends Controller {
         "\nparent, boolean properties, merge methods, access, value policy, value rules, initial value",
         summary: 'Edits the properites of an unpublished attribute  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AttributeParamData::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Attribute created', content: new JsonContent(ref: AttributeData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditAttribute::class)]
-    public function edit_attribute(Request $request,Attribute $attribute) {
-        $params = new DesignAttributeParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\EditAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-attribute']);
+    #[ApiEventMarker( Evt\Type\AttributePending::class)]
+    public function edit_attribute(UserNamespace $namespace,Attribute $attribute,Request $request) {
+        $params = AttributeParamData::fromRequest($request);
+        $data_out = Root\Api\Design\EditAttribute::editAttribute(
+            calling_namespace: $namespace,given_attribute:$attribute, params: $params,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = AttributeData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
-
-
-
-
-
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/{element_type}/remove_parent',
@@ -632,42 +625,47 @@ class DesignController extends Controller {
         "\nParents need approval to use, but do not notify the inheritance chain of design changes when dropping that parent",
         summary: 'Removes a parent',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParentParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParentsParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\RemoveParent::class)]
-    public function remove_parent(Request $request,ElementType $type) {
-        $params = new DesignParentParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\AddParent(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['remove-parent']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function remove_parent(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeParentsParamData::fromRequest($request);
+        $data_out = Root\Api\Design\RemoveParent::removeParent(calling_namespace: $namespace, params: $params,given_type: $type,do_permission_check: true ,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/add_parent',
@@ -678,46 +676,48 @@ class DesignController extends Controller {
         "\nParents need approval to use in the design, and later to publish, to look over any conflicts after the design allowed",
         summary: 'Adds a parent',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParentParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParentsParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') )
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents added', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Parents added', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiEventMarker( Evt\Server\DesignPending::class)]
+    #[ApiEventMarker( Evt\Type\DesignParentAdding::class)]
     #[ApiTypeMarker( Root\Api\Design\AddParent::class)]
-    public function add_parent(Request $request,ElementType $type) {
-        $params = new DesignParentParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\RemoveParent(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['add-parent']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function add_parent(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeParentsParamData::fromRequest($request);
+        $data_out = Root\Api\Design\AddParent::addParent(calling_namespace: $namespace, params: $params,given_type: $type,do_permission_check: true ,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
-
-
-
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/schedules/create',
@@ -729,28 +729,31 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule created', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Schedule created', content: new JsonContent(ref: Schedule::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateTime::class)]
-    public function create_time(Request $request) {
+    public function create_time(UserNamespace $namespace,Request $request) {
         $params = Schedule::fromRequest($request);
-        $api = new Root\Api\Design\CreateTime(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-schedule']);
-        $data_out = $api->getCallbackResponse($http_code);
+        $data = Root\Api\Design\CreateTime::makeSchedule(namespace:$namespace,params: $params,tags: ['api-top']);
+
+        if ($data instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = $data;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = Schedule::validateAndCreate($data);
+        }
         return  response()->json($data_out,$http_code);
     }
 
@@ -768,36 +771,31 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'time_bound', description: "The schedule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'The schedule and its spans', content: new JsonContent(ref: Schedule::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
-    public function show_schedule(TimeBound $bound) {
-
-        $api = new Root\Api\Design\ShowTime(bound: $bound, is_async: false, tags: ['api-top']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function show_schedule(UserNamespace $namespace, TimeBound $bound) {
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Design\ShowTime::showSchedule(given_bound: $bound);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
         path: '/api/v1/{user_namespace}/design/schedules/{time_bound}/edit',
@@ -809,37 +807,43 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'time_bound', description: "The schedule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
-    public function edit_schedule(TimeBound $bound, Request $request) {
-        $params = Schedule::validateAndCreate($request->request->all());
-        $api = new Root\Api\Design\EditTime(bound: $bound,params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-schedule']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function edit_schedule(UserNamespace $namespace, TimeBound $bound, Request $request) {
+        $params = Schedule::fromRequest($request);
+        $data_out = Root\Api\Design\EditTime::editSchedule(namespace: $namespace,bound:$bound, params: $params,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/schedules/{time_bound}/destroy',
@@ -850,30 +854,179 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'time_bound', description: "The schedule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule destroyed', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\DestroyTime::class)]
-    public function destroy_schedule(TimeBound $bound) {
-        $api = new Root\Api\Design\DestroyTime(bound: $bound, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-schedule']);
-        $data_out = $api->getCallbackResponse($http_code);
+    public function destroy_schedule(UserNamespace $namespace,TimeBound $bound) {
+
+        $data_out = Root\Api\Design\DestroyTime::destroySchedule(namespace: $namespace,bound:$bound,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($bound);
+        }
+
+        return  response()->json($data_out,$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    #[OA\Post(
+        path: '/api/v1/{user_namespace}/design/locations/create',
+        operationId: 'core.design.locations.create',
+        description: "Makes a new geo json 2d or 3d shape",
+        summary: 'Makes a new location bound',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Location::class)),
+        tags: ['design','bounds'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Location created', content: new JsonContent(ref: Location::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\CreateLocation::class)]
+    public function create_location(Request $request) {
+
+        $params = Location::fromRequest($request);
+        $data = Root\Api\Design\CreateLocation::makeLocation(
+            namespace:Utilities::getCurrentOrUserNamespace(),params: $params,tags: ['api-top']);
+
+        if ($data instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = $data;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data->shape_bounding_box = FromBoxToArray::fromBoxtoArray($data->shape_bounding_box);
+            $data->map_bounding_box = FromBoxToArray::fromBoxtoArray($data->map_bounding_box);
+            $data_out = Location::validateAndCreate($data);
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+    /**
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    #[OA\Patch(
+        path: '/api/v1/{user_namespace}/design/locations/{location_bound}/edit',
+        operationId: 'core.design.locations.edit',
+        description: "Change visual properties of a location",
+        summary: 'Edits an existing location bound',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Location::class)),
+        tags: ['design','bounds'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'location_bound', description: "The map or shape",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: Location::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
+    public function edit_location(UserNamespace $namespace, LocationBound $bound, Request $request) {
+        $params = Location::fromRequest($request);
+        $data_out = Root\Api\Design\EditLocation::editLocation(namespace: $namespace,bound:$bound, params: $params,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $data_out->shape_bounding_box = FromBoxToArray::fromBoxtoArray($data_out->shape_bounding_box);
+            $data_out->map_bounding_box = FromBoxToArray::fromBoxtoArray($data_out->map_bounding_box);
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Location::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    #[OA\Delete(
+        path: '/api/v1/{user_namespace}/design/locations/{location_bound}/destroy',
+        operationId: 'core.design.locations.destroy',
+        description: "Destroys a location resource if its not used ",
+        summary: 'Destroy a location  ',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Location::class)),
+        tags: ['design','bounds'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'location_bound', description: "The map or shape",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: Location::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Design\DestroyLocation::class)]
+    public function destroy_location(UserNamespace $namespace,LocationBound $bound) {
+        $data_out = Root\Api\Design\DestroyLocation::destroyLocation(namespace: $namespace,bound:$bound,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Location::from($bound);
+        }
+
         return  response()->json($data_out,$http_code);
     }
 
@@ -881,159 +1034,61 @@ class DesignController extends Controller {
     /**
      * @throws \Exception
      */
-    #[OA\Post(
-        path: '/api/v1/{user_namespace}/design/location_create',
-        operationId: 'core.design.location_create',
-        description: "Makes a new geo json 2d or 3d shape",
-        summary: 'Makes a new location bound',
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
-        tags: ['design','bounds'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-        ],
-        responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: ApiLocationResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\CreateLocation::class)]
-    public function location_create(Request $request) {
-        $params = new DesignLocationParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-location']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    #[OA\Patch(
-        path: '/api/v1/{user_namespace}/design/location/{location_bound}/edit',
-        operationId: 'core.design.location_edit',
-        description: "Change visual properties of a location",
-        summary: 'Makes a new location bound',
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
-        tags: ['design','bounds'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'location_bound', description: "The map or shape",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-        ],
-        responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: ApiLocationResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
-    public function location_edit(LocationBound $bound,Request $request) {
-        $params = new DesignLocationParams(given_bound: $bound);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-location']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    #[OA\Delete(
-        path: '/api/v1/{user_namespace}/design/location/{location_bound}/destroy',
-        operationId: 'core.design.destroy_location',
-        description: "Destorys a location resource if its not used ",
-        summary: 'Destroy a location  ',
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
-        tags: ['design','bounds'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
-
-            new OA\PathParameter(  name: 'location_bound', description: "The map or shape",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
-
-        ],
-        responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: ApiLocationResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Design\DestroyLocation::class)]
-    public function destroy_location(LocationBound $bound,Request $request) {
-        $params = new DesignLocationParams(given_bound: $bound);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Design\DestroyLocation(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-location']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    #[OA\Patch(
-        path: '/api/v1/{user_namespace}/design/list_locations',
-        operationId: 'core.design.list_locatations',
+    #[OA\Get(
+        path: '/api/v1/{user_namespace}/design/locations/list',
+        operationId: 'core.design.locations.list',
         description: "Lists locations",
         summary: 'Lists locations  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListLocationParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LocationSearchParams::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: ApiLocationCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: LocationList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
     public function list_locatations(Request $request) {
-        $params = new ListLocationParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ListLocations(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-locations']);
+        $params = LocationSearchParams::fromRequest($request);
+        $data_out = Api\Design\ListLocations::listLocations(params: $params);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
+    }
 
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Patch(
+        path: '/api/v1/{user_namespace}/design/locations/{location_bound}/show',
+        operationId: 'core.design.locations.show',
+        description: "Shows a location",
+        summary: 'Gives detail about a location  ',
+        security: [['bearerAuth' => []]],
+        tags: ['design','bounds'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+            new OA\PathParameter(  name: 'location_bound', description: "The location",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: Location::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
+    public function show_location(UserNamespace $namespace, LocationBound $bound) {
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Design\ShowLocation::showLocation(given_bound: $bound);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -1050,22 +1105,19 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ApiScheduleCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ScheduleList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ListSchedules::class)]
     public function list_times(Request $request) {
         $params = ScheduleSearchParams::fromRequest($request);
-        $api = new Api\Design\ListSchedules(params: $params, is_async: false, tags: ['api-top']);
-        $data_out = $api->getDataSnapshot();
-        return  response()->json($data_out,$api->getCode());
+        $data_out = Api\Design\ListSchedules::listSchedules(params: $params);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -1112,13 +1164,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1142,13 +1194,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1174,10 +1226,10 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1203,13 +1255,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1235,13 +1287,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1267,16 +1319,16 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
             new OA\PathParameter(  name: 'attribute_rule', description: "The rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1303,16 +1355,16 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
             new OA\PathParameter(  name: 'attribute_rule', description: "The rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1334,16 +1386,16 @@ class DesignController extends Controller {
         tags: ['design','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
             new OA\PathParameter(  name: 'attribute_rule', description: "The rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1368,13 +1420,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1399,10 +1451,10 @@ class DesignController extends Controller {
         tags: ['design','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1425,10 +1477,10 @@ class DesignController extends Controller {
         tags: ['design','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1453,13 +1505,13 @@ class DesignController extends Controller {
         tags: ['design','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_rule', description: "The live rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [

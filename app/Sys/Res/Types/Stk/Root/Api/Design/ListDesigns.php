@@ -4,22 +4,19 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Types\ElementTypeData;
+use App\Data\ApiParams\Data\Types\Params\TypeSearchParams;
 use App\Enums\Types\TypeOfLifecycle;
-use App\Helpers\Utilities;
-use App\Models\ActionDatum;
-use App\Models\ElementType;
 
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
-use App\OpenApi\Params\Listing\Design\ListDesignParams;
 use App\Sys\Res\Types\Stk\Root\Api;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
+use App\Sys\Res\Types\Stk\Root\Api\ListTypeTrait;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
 
-#[ApiParamMarker( param_class: ListDesignParams::class)]
+#[ApiParamMarker( param_class: TypeSearchParams::class)]
 class ListDesigns extends Api\DesignApi
 {
+    use ListTypeTrait;
     const UUID = '8b1513d3-5a01-4e6f-979e-3584bbec14af';
     const TYPE_NAME = 'api_design_list';
 
@@ -28,64 +25,12 @@ class ListDesigns extends Api\DesignApi
         Api\DesignApi::class
     ];
 
-    public function __construct(
-        protected ?ListDesignParams $params = null,
-
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+    /**
+     * @return CursorPaginatedDataCollection<ElementTypeData>
+     */
+    public static function listDesigns(UserNamespace $calling_namespace,?TypeSearchParams $params)
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
-    }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new ListDesignParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    const PRIMARY_SNAPSHOT_KEY = 'designs';
-    const int HTTP_CODE_GOOD = CodeOf::HTTP_OK;
-
-    const FILTER_OF_LIFECYCLE = TypeOfLifecycle::DEVELOPING;
-
-    protected function getMyData() :array {
-        $belongs_to_namespaces = [];
-
-        if (!$this->params->getGivenNamespace()) {
-            $my_namespace = Utilities::getThisUserDefaultNamespace();
-            /** @uses UserNamespace::namespaces_member_of()  */
-            foreach ($my_namespace->namespaces_member_of as $member_of) {
-                $belongs_to_namespaces[] = $member_of->id;
-            }
-        }
-        $build = ElementType::buildElementType(
-            namespace_id: $this->params->getGivenNamespace()?->id,
-            in_namespace_ids: $belongs_to_namespaces,
-            lifecycle: static::FILTER_OF_LIFECYCLE
-        );
-
-        return [static::PRIMARY_SNAPSHOT_KEY=>$build->cursorPaginate(cursor: $this->params->getCursor())];
-    }
-
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiTypeCollectionResponse(
-            given_types:  $what[static::PRIMARY_SNAPSHOT_KEY],
-            namespace_levels:  $this->params->getNamespaceLevels(),
-            parent_levels:  $this->params->getParentLevels(),
-            attribute_levels:  $this->params->getAttributeLevels(),
-            inherited_attribute_levels:  $this->params->getInheritedAttributeLevels(),
-            number_time_spans:  $this->params->getNumberTimeSpans(),thing: $this->getMyThing()
-        );
+        return static::listCursoratedTypes(calling_namespace: $calling_namespace,params: $params, lifecycle: TypeOfLifecycle::DEVELOPING);
     }
 
 }

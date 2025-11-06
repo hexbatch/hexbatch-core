@@ -3,7 +3,9 @@
 namespace App\Sys\Res\Types\Stk\Root\Act;
 
 
+
 use App\Sys\Res\Types\BaseType;
+use App\Sys\Res\Types\Stk\Root\Action;
 
 class CmdNoSideEffects extends BaseType
 {
@@ -11,11 +13,11 @@ class CmdNoSideEffects extends BaseType
     const TYPE_NAME = 'command_no_side_effects';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [
-        BaseAction::class
+        Action::class
     ];
 
 

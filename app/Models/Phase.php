@@ -63,7 +63,9 @@ class Phase extends Model
      */
     protected $casts = [
         'is_default_phase'=>'boolean',
-        'is_system'=>'boolean'
+        'is_system'=>'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
 

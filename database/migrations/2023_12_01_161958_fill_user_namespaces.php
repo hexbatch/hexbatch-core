@@ -34,14 +34,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->foreignId('namespace_handle_element_id')
-                ->nullable()
-                ->default(null)
-                ->comment("Optional element for managing the namespace and its events")
-                ->index()
-                ->constrained('elements')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
 
             $table->foreignId('namespace_type_id')
                 ->nullable()->default(null)
@@ -101,9 +93,35 @@ return new class extends Migration
 
             $table->string('namespace_name',30)
                 ->nullable(false)
-                ->unique()
+                ->index()
                 ->comment("All created by this user_token is prefixed by this name");
+
+
+            $table->uuid('home_set_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('public_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('private_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('type_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+
         });
+
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_user_namespace ON user_namespaces (namespace_server_id,namespace_name) NULLS NOT DISTINCT;");
 
         DB::statement('ALTER TABLE user_namespaces ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 
@@ -126,7 +144,6 @@ return new class extends Migration
 
             $table->dropForeign(['namespace_user_id']);
             $table->dropForeign(['namespace_server_id']);
-            $table->dropForeign(['namespace_handle_element_id']);
             $table->dropForeign(['namespace_type_id']);
             $table->dropForeign(['public_element_id']);
             $table->dropForeign(['private_element_id']);
@@ -134,7 +151,6 @@ return new class extends Migration
 
             $table->dropColumn('namespace_user_id');
             $table->dropColumn('namespace_server_id');
-            $table->dropColumn('namespace_handle_element_id');
             $table->dropColumn('namespace_type_id');
             $table->dropColumn('public_element_id');
             $table->dropColumn('private_element_id');
@@ -146,6 +162,12 @@ return new class extends Migration
             $table->dropColumn('ref_uuid');
             $table->dropColumn('namespace_public_key');
             $table->dropColumn('is_system');
+
+            $table->dropColumn('home_set_uuid');
+            $table->dropColumn('public_uuid');
+            $table->dropColumn('private_uuid');
+            $table->dropColumn('type_uuid');
+
         });
 
     }

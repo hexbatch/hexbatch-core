@@ -16,9 +16,7 @@ class ElsewherePushNamespace extends Act\Cmd\Ew
     const UUID = '932ab22d-7502-438b-87fc-407002fa19f2';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_PUSH_NAMESPACE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

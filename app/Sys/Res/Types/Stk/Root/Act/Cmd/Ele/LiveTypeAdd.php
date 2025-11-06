@@ -29,9 +29,7 @@ class LiveTypeAdd extends Act\Cmd\Ele
     const UUID = '06ffa538-2d8d-460b-922e-e04efe73194e';
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_ADD;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class

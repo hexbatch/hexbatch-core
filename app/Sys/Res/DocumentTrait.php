@@ -22,10 +22,21 @@ trait DocumentTrait
         return $docs->getTitleHtml();
     }
 
+
+    public static function getHexbatchBlurb() : ?string {
+        $reflection = new \ReflectionClass(static::class);
+        $classAttributes = $reflection->getAttributes(HexbatchBlurb::class);
+        if (empty($classAttributes)) {return null;}
+        /** @var HexbatchBlurb $docs */
+        $docs =  $classAttributes[0]->newInstance();
+
+        return $docs->getBlurb();
+    }
+
     /**
      * @throws CommonMarkException
      */
-    public static function getHexbatchBlurb() : ?string {
+    public static function getHexbatchBlurbHtml() : ?string {
         $reflection = new \ReflectionClass(static::class);
         $classAttributes = $reflection->getAttributes(HexbatchBlurb::class);
         if (empty($classAttributes)) {return null;}

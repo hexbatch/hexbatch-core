@@ -2,13 +2,19 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
+use App\Data\ApiParams\Data\Types\ElementTypeData;
+use App\Data\ApiParams\Data\Types\Params\TypeSearchParams;
 use App\Enums\Types\TypeOfLifecycle;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
 
 
-class ListPublished extends Api\Design\ListDesigns
+class ListPublished extends Api\TypeApi
 {
+    use Api\ListTypeTrait;
+
     const UUID = '9439a2ea-427a-468f-9bdf-9a5fb58157b6';
     const TYPE_NAME = 'api_type_list_published';
 
@@ -21,9 +27,13 @@ class ListPublished extends Api\Design\ListDesigns
         Act\Cmd\Pa\Search::class
     ];
 
-    const FILTER_OF_LIFECYCLE = TypeOfLifecycle::PUBLISHED;
-
-    const PRIMARY_SNAPSHOT_KEY = 'published_types';
+    /**
+     * @return CursorPaginatedDataCollection<ElementTypeData>
+     */
+    public static function listPublished(UserNamespace $calling_namespace,?TypeSearchParams $params)
+    {
+        return static::listCursoratedTypes(calling_namespace: $calling_namespace,params: $params, lifecycle: TypeOfLifecycle::PUBLISHED);
+    }
 
 }
 

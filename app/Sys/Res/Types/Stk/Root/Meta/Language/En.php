@@ -11,7 +11,7 @@ class En extends Meta\Language
     const TYPE_NAME = 'english';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

@@ -2,21 +2,30 @@
 
 namespace App\Models;
 
-use App\Enums\Types\TypeOfApproval;
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
+use App\Enums\Sys\TypeOfEvent;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
+use App\Sys\Build\NewBuild;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Types\IType;
+use App\Sys\Res\Types\Stk\Root;
+use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
+use App\Sys\Res\Types\Stk\Root\Namespace\NamespaceBase;
+use App\Sys\Res\Types\Stk\Root\Namespace\PrivateType;
+use App\Sys\Res\Types\Stk\Root\Namespace\PublicType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -45,8 +54,10 @@ use Illuminate\Validation\ValidationException;
  * @property TypeOfLifecycle lifecycle
  *
  * @property UserNamespace owner_namespace
+ * @property Server type_server
  * @property Attribute[] type_attributes
  * @property ElementTypeParent[] type_parents
+ * @property ElementType[] type_children
  * @property ElementTypeServerLevel[] type_server_levels
  * @property TimeBound type_time
  *
@@ -54,7 +65,7 @@ use Illuminate\Validation\ValidationException;
  * @property string updated_at
  *
  */
-class ElementType extends Model implements IType,ISystemModel
+class ElementType extends Model implements ISystemModel
 {
 
     protected $table = 'element_types';
@@ -83,7 +94,12 @@ class ElementType extends Model implements IType,ISystemModel
      * @var array<string, string>
      */
     protected $casts = [
-        'lifecycle'=> TypeOfLifecycle::class
+        'lifecycle'=> TypeOfLifecycle::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'is_system' => 'boolean',
+        'is_final_type' => 'boolean',
+
     ];
 
     protected static function booted(): void
@@ -105,9 +121,17 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->belongsTo(UserNamespace::class,'owner_namespace_id');
     }
 
+    public function type_server() : BelongsTo {
+        return $this->belongsTo(Server::class,'imported_from_server_id');
+    }
 
-    public function type_time() : BelongsTo {
+
+    public function type_schedule() : BelongsTo {
         return $this->belongsTo(TimeBound::class,'type_time_bound_id');
+    }
+
+    public function type_handle() : BelongsTo {
+        return $this->belongsTo(Element::class,'type_handle_element_id');
     }
 
 
@@ -116,16 +140,39 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->hasMany(Attribute::class,'owner_element_type_id','id');
     }
 
+    public function type_exposed_attributes() : HasManyThrough {
+        return $this->hasManyThrough(
+            Attribute::class, //what is returned
+            ElementTypeExposedAttribute::class, //the connecting class
+            'exposed_type_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'exposed_attribute_id' // Local key on the connecting table...
+        );
+    }
+
+    public function type_ancestors() : HasManyThrough {
+        return $this->hasManyThrough(
+            ElementType::class, //what is returned
+            ElementTypeAncestor::class, //the connecting class
+            'owning_child_type_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'ancestor_type_id' // Local key on the connecting table...
+        );
+    }
+
     public function type_server_levels() : HasMany {
         return $this->hasMany(ElementTypeServerLevel::class,'server_access_type_id','id');
     }
 
     public function type_children() : HasMany {
-        return $this->hasMany(ElementTypeParent::class,'parent_type_id','id');
+        return $this->hasMany(ElementTypeParent::class,'parent_type_id','id')->with('child_type');
     }
 
     public function type_parents() : HasMany {
-        return $this->hasMany(ElementTypeParent::class,'child_type_id','id');
+        return $this->hasMany(ElementTypeParent::class,'child_type_id','id')
+            ->with(['parent_type']);
     }
 
 
@@ -137,13 +184,15 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
+        bool             $b_throw_if_missing = true
     )
-    : ElementType
+    : ?ElementType
     {
+        /** @var static|null $ret */
         $ret = static::buildElementType(id:$id,uuid: $uuid, namespace_id: $owner_namespace_id,name: $type_name,
             shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle)->first();
 
-        if (!$ret) {
+        if (!$ret && $b_throw_if_missing) {
             $arg_types = [];
             $arg_vals = [];
             if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
@@ -167,24 +216,44 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $id = null,
         ?string          $uuid = null,
         ?int             $namespace_id = null,
-        array                  $in_namespace_ids = [],
-        ?string             $name = null,
+        array            $in_namespace_ids = [],
+        ?string          $name = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
+        ?int             $handle_id = null,
+        ?bool             $is_system = null,
         ?TypeOfLifecycle $lifecycle = null,
-        array            $only_uuids = []
+        array            $only_uuids = [],
+        bool             $b_child_parent_relations = false,
+        bool             $b_server_relations = false,
+        bool            $b_schedule_relations = false,
+        bool            $b_attribute_relations = false,
     )
     : Builder
     {
 
+        /** @var Builder $build */
         $build = ElementType::select('element_types.*')
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts")
             ->selectRaw("extract(epoch from  element_types.updated_at) as updated_at_ts")
 
-            /** @uses ElementType::owner_namespace(), ElementType::type_attributes(), ElementType::type_server_levels() */
-            /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_time() */
-            ->with('owner_namespace', 'type_attributes', 'type_children', 'type_parents','type_server_levels','type_time')
             ;
+
+        if ($b_child_parent_relations) {
+            $build->with('type_children', 'type_parents','type_handle');
+        }
+
+        if ($b_schedule_relations) {
+            $build->with('type_schedule','type_schedule.time_spans');
+        }
+
+        if ($b_attribute_relations) {
+            $build->with('type_attributes','type_exposed_attributes');
+        }
+
+        if ($b_server_relations) {
+            $build->with('owner_namespace', 'type_server', 'type_server_levels');
+        }
 
         if ($id) {
             $build->where('element_types.id', $id);
@@ -201,9 +270,15 @@ class ElementType extends Model implements IType,ISystemModel
             $build->where('element_types.type_name', $name);
         }
 
-
+        if ($handle_id) {
+            $build->where('element_types.type_handle_element_id', $handle_id);
+        }
         if ($time_bound_id) {
             $build->where('element_types.type_time_bound_id', $time_bound_id);
+        }
+
+        if ($is_system !== null) {
+            $build->where('element_types.is_system', $is_system);
         }
 
         if ($lifecycle) {
@@ -249,7 +324,7 @@ class ElementType extends Model implements IType,ISystemModel
             $build = static::buildElementType(uuid: $value);
         } else {
 
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
 
             if (count($parts) === 1) {
                 if ($context_namespace_uuid) {
@@ -274,7 +349,7 @@ class ElementType extends Model implements IType,ISystemModel
                 $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
             }
         }
-
+        /** @var ElementType|null $ret $ret */
         $ret = $build?->first();
 
         if (empty($ret) && $throw_exception) {
@@ -302,7 +377,7 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
     public function getName() :string {
-        return $this->owner_namespace?->getName().UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
+        return $this->owner_namespace?->getName().ValidateNamespaceRef::NAMESPACE_SEPERATOR.$this->type_name;
     }
 
     public function isInUse() : bool {
@@ -321,10 +396,7 @@ class ElementType extends Model implements IType,ISystemModel
         $atts = $this->getAllAttributes();
         if (count($atts) === 0) {return false;}
 
-        foreach ($atts as $att) {
-            if (!$att->isPublicDomain()) {return false;}
-        }
-        return true;
+        return array_all($atts, fn($att) => $att->isPublicDomain());
     }
 
     /**
@@ -365,7 +437,6 @@ class ElementType extends Model implements IType,ISystemModel
             ->orderBy('level','desc')
             ;
 
-        /** @noinspection PhpUndefinedMethodInspection */
         $laravel_parent_uuids->withRecursiveExpression('query_parents',$query_parents);
 
 
@@ -397,30 +468,7 @@ class ElementType extends Model implements IType,ISystemModel
         return $attr_hash;
     }
 
-    /**
-     * @return Attribute[]
-     */
-    public function getChildlessAbstractAttributes() {
-        $all = $this->getAllAttributes();
-        $parent_hash = [];
-        foreach ( $all as $att) {
 
-            if ($att->attribute_parent) {
-                $parent_hash[$att->attribute_parent->ref_uuid] = $att->attribute_parent;
-            }
-        }
-
-        $fails = [];
-        foreach ($all as $att) {
-            if ($att->is_abstract) {
-                if (!isset($parent_hash[$att->ref_uuid])) {
-                    $fails[$att->is_abstract] = $att;
-                }
-            }
-        }
-
-        return array_values($fails);
-    }
 
 
 
@@ -472,38 +520,18 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
 
-    public function getTypeObject(): ?ElementType {
-        return $this;
-    }
-
     public function getUuid(): string{
         return $this->ref_uuid;
     }
 
-    public function canBePublished() : bool {
-        if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return false;}
-        foreach ($this->type_parents as $parent) {
-            if ($parent->parent_type_approval !== TypeOfApproval::DESIGN_APPROVED) {return false;}
-        }
 
-        foreach ($this->type_attributes as $att) {
-            if ($att->attribute_approval !== TypeOfApproval::DESIGN_APPROVED) {return false;}
-        }
-
-        return true;
-    }
 
     public function isPublished() : bool {
         return $this->lifecycle === TypeOfLifecycle::PUBLISHED;
     }
 
 
-    public function isParentOfThis(ElementType $type) {
-        foreach ($this->type_parents as $par) {
-            if ($type->ref_uuid === $par->parent_type->ref_uuid) {return true;}
-        }
-        return false;
-    }
+
 
     public static function validateTypeName(string $name,UserNamespace $namespace,?ElementType $me = null) {
         try {
@@ -517,8 +545,11 @@ class ElementType extends Model implements IType,ISystemModel
         }
     }
 
-    function setTypeName(string $name,? UserNamespace $namespace = null) {
-       static::validateTypeName(name:$name,namespace: $this->owner_namespace?: $namespace,me: $this);
+    function setTypeName(string $name,? UserNamespace $namespace = null,bool $b_do_check = true) {
+        if ($b_do_check) {
+            static::validateTypeName(name:$name,namespace: $this->owner_namespace?: $namespace,me: $this);
+        }
+
        $this->type_name = $name;
     }
 
@@ -528,24 +559,231 @@ class ElementType extends Model implements IType,ISystemModel
         return in_array($element_type->getUuid(),$parent_uuids);
     }
 
-    /**
-     * @return ElementType[]|\Illuminate\Database\Eloquent\Collection
-     */
-    public function getAncestorsAsFlat() {
-        $parent_uuids = $this->getParentUuids();
-        if (empty($parent_uuids)) {return [];}
-        return ElementType::buildElementType(only_uuids: $parent_uuids)->get();
+
+
+
+    public static function getRootType() : ElementType {
+        $ns_id = UserNamespace::getSystemNamespace()?->id;
+        if ($ns_id) {
+            return ElementType::where('type_name',Root::ROOT_NAME)
+                ->where('owner_namespace_id',UserNamespace::getSystemNamespace()->id)
+                ->first();
+        }
+        return ElementType::where('type_name',Root::ROOT_NAME)->first();
+    }
+
+    /** @return Collection<ElementType> */
+    public function getAllAncestorsAndMe() {
+        $ret = $this->type_ancestors;
+        $ret->add($this);
+        return $ret;
+    }
+
+    public static function getTypeIdsFromInput(
+        array $references,
+        ?string $default_ns = null,?string $default_server = null,
+        bool $b_allow_type_ids = true
+    ) : array
+    {
+        $ret = ['ids'=>[],'uuids'=>[],'names'=>[]];
+        $adjusted_refs = [];
+
+        if (!$default_server) {$default_server = config('hbc.system.server.uuid');}
+
+        foreach ($references as $ref) {
+            if (!trim($ref)) {continue;}
+
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR,$ref);
+            if (count($parts) > 3) {
+               continue;
+            }
+
+            $outs = [];
+
+            $my_id = trim($parts[0]??'');
+
+            if (count($parts) === 1 &&  ctype_digit($my_id) )
+            {
+                if (!$b_allow_type_ids) { continue;}
+                $outs = [(int)$my_id];
+            }
+            else if (count($parts) === 1 &&  Utilities::is_uuid($my_id) ) {
+                $outs = [$my_id];
+            }
+            else
+            {
+                switch (count($parts)) {
+                    case 3: {
+                        $type_ref = trim($parts[2]??'');
+                        $ns_ref = trim($parts[1]??'');
+                        $server_ref = trim($parts[0]??'');
+                        break;
+                    }
+                    case 2: {
+                        $type_ref = trim($parts[1]??'');
+                        $ns_ref = trim($parts[0]??'');
+                        $server_ref = null;
+                        break;
+                    }
+                    case 1: {
+                        $type_ref = trim($parts[0]??'');
+                        $ns_ref = null;
+                        $server_ref = null;
+                        break;
+                    }
+                    default: {
+                        throw new \LogicException("Should never get here about type search count");
+                    }
+                }
+
+
+                if (!$type_ref) {continue;}
+                if (!$ns_ref && !$default_ns) {
+                    continue;
+                }
+                if (!$ns_ref) { $ns_ref = $default_ns;}
+                if (!$server_ref) { $server_ref = $default_server;}
+
+                $outs[] = $server_ref;
+                $outs[] = $ns_ref;
+                $outs[] = $type_ref;
+            }
+
+            $adjusted_refs[] = implode(ValidateNamespaceRef::NAMESPACE_SEPERATOR,$outs);
+
+        }
+
+        if (!count($adjusted_refs)) {return $ret;}
+
+        $values_array = [];
+        foreach ($adjusted_refs as $ad) {
+            Utilities::ignoreVar($ad);
+            $values_array[] = "(?)";
+        }
+
+        $values = implode(",\n",$values_array);
+
+        $separator = ValidateNamespaceRef::NAMESPACE_SEPERATOR;
+
+        $sql = "
+            WITH
+            raw_inputs as
+                (SELECT da_input
+                 FROM (VALUES
+                           $values
+                       ) AS q (da_input))
+            SELECT t.id, t.type_name, t.ref_uuid from element_types t
+                CROSS JOIN raw_inputs
+                INNER JOIN user_namespaces u on u.id = t.owner_namespace_id
+                INNER JOIN servers s on s.id = u.namespace_server_id
+                WHERE
+                (
+                    split_part(raw_inputs.da_input, '$separator', 3) = ''
+                    AND
+                    split_part(raw_inputs.da_input, '$separator', 2) = ''
+                    AND
+                    (
+                        t.id::bigint = bigint_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                        OR
+                        t.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                    )
+                )
+                OR
+                (
+                    (
+                        -- match type uuid or name
+
+                        t.type_name = split_part(raw_inputs.da_input, '$separator', 3)::text
+                            OR
+                        t.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 3))
+
+                    )
+                    AND
+                    (
+                        -- match namespace uuid or name
+
+                        u.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 2))
+                            OR
+                        u.namespace_name = split_part(raw_inputs.da_input, '$separator', 2)::text
+                    )
+                    AND
+                    (
+                        -- match server uuid or name
+
+                        s.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                            OR
+                        s.server_name = split_part(raw_inputs.da_input, '$separator', 1)::text
+                    )
+                )
+        ;
+        ";
+
+        $what = DB::select($sql,$adjusted_refs);
+
+
+        foreach ($what as $row) {
+            $ret['ids'][] = $row->id;
+            $ret['uuids'][] = $row->ref_uuid;
+            $ret['names'][] = $row->type_name;
+        }
+        return $ret;
+
+    }
+
+
+    public static function getSystemType(bool $b_throw_on_missing = true) : ?ElementType {
+
+        /** @var static  $sys */
+        $sys = ElementType::buildElementType(uuid: Root::UUID)->first();
+        if (!$sys && $b_throw_on_missing) {
+            throw new \LogicException("No system type made");
+        }
+        return  $sys;
+    }
+
+
+    public static function getNamespaceBaseType() : ElementType {
+        return ElementType::getElementType(uuid: NamespaceBase::UUID);
+    }
+
+    public static function getNamespaceSetType() : ?ElementType {
+        return ElementType::getElementType(uuid: HomeSet::UUID);
+    }
+
+    public static function getNamespacePublicType() : ?ElementType {
+        return ElementType::getElementType(uuid: PublicType::UUID);
+    }
+
+    public static function getNamespacePrivateType() : ?ElementType {
+        return ElementType::getElementType(uuid: PrivateType::UUID);
+    }
+
+
+    public function getEventHandlerRef(TypeOfEvent $type_event) : ?IEventReference {
+        Utilities::ignoreVar($type_event);
+        return null;
     }
 
     /**
-     * @return string[]
+     * @return Collection<IEventReference>
+     *     includes this type too
      */
-    public function getTopParentUuids() : array {
-        $ret = [];
-        foreach ($this->type_parents as $par) {
-            $ret[] = $par->parent_type->ref_uuid;
-        }
-        return $ret;
+    public  function getEventHandlersFromTypeChain(TypeOfEvent $type_event) : Collection {
+        //get from attribute rules/server_events
+        Utilities::ignoreVar($type_event);
+        return new Collection;
+    }
+
+    public function getNotesAttribute(): ?string
+    {
+        $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
+        return $class?$class::getHexbatchDescriptionMarkdown(): null ;
+    }
+
+    public function getBlurbAttribute(): ?string
+    {
+        $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
+        return $class?$class::getHexbatchBlurb(): null;
     }
 
 

@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root;
 
 
 
+use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Atr\Stk\Event\Scope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ChainScope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ElementScope;
@@ -18,9 +19,8 @@ use App\Sys\Res\Types\Stk\Root;
 class Event extends BaseType
 {
     const UUID = '25df7e1f-7825-4528-b331-9e93d613a962';
-    const TYPE_NAME = 'events';
 
-
+    const EVENT_NAME = TypeOfEvent::EVENTS;
 
     const ATTRIBUTE_CLASSES = [
         Scope::class,
@@ -33,6 +33,13 @@ class Event extends BaseType
     const PARENT_CLASSES = [
         Root::class
     ];
+
+
+
+    public static function getTypeName(): string
+    {
+        return static::EVENT_NAME->value;
+    }
 
 
 }

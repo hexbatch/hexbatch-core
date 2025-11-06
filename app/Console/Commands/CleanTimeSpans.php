@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\TimeBoundSpan;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class CleanTimeSpans extends Command
@@ -26,6 +27,8 @@ class CleanTimeSpans extends Command
      */
     public function handle()
     {
-        TimeBoundSpan::cleanUpOld();
+        $count = TimeBoundSpan::cleanUpOld();
+        $now = Carbon::now()->timezone(config('hbc.system.loggging.timezone'))->toIso8601String();
+        $this->info("Ran @$now deleting $count spans ");
     }
 }

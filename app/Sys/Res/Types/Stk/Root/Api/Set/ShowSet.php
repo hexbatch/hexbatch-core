@@ -3,16 +3,20 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Set;
 
 use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Set\ApiSetResponse;
-use App\OpenApi\Params\Listing\Set\ShowSetParams;
+use App\Data\ApiParams\Data\Elements\ElementData;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Data\ApiParams\Data\Sets\SetData;
+use App\Models\Element;
+use App\Models\ElementSet;
+use App\Models\ElementValue;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Api;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
 
 
-#[ApiParamMarker( param_class: ShowSetParams::class)]
+#[ApiParamMarker( param_class: SelectElementParamData::class)]
 class ShowSet extends Api\SetApi
 {
     const UUID = 'b71a08ad-ca4f-40fa-9aac-9973a45cb44d';
@@ -23,48 +27,59 @@ class ShowSet extends Api\SetApi
     ];
 
 
-    public function __construct(
-        protected ?ShowSetParams $params = null,
 
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+
+
+    public static function showSet(ElementSet $set,SelectElementParamData $params,UserNamespace $caller_namespace)
+    : SetData|Thang
     {
 
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
-    }
+        $set->loadMissing(['defining_element']);
+        $set->loadMissing(['parent_set']);
+        $set->loadMissing(['children_sets']);
+        $set->loadMissing(['defining_type']);
 
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new ShowSetParams();
-            $this->params->fromCollection(new Collection($param_array),false);
+        $params->set_ref = $set->ref_uuid;
+        $params->phase_ref = $set->defining_element->element_phase->ref_uuid;
+        $build = Element::getBuilderFromParams(
+            params: $params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false);
+
+        /** @var Collection<Element> $members_paginated */
+        $members_paginated = $build->cursorPaginate(perPage: config('hbc.pagination.default_element_limit'), cursor: $params->cursor);
+
+
+
+        $ret =  SetData::from($set);
+
+        $el_ids = [];
+        /** @var array<Element> $element_by_ref */
+        $element_by_ref = [];
+        foreach ($members_paginated as $mem) {
+            $el_ids[] = $mem->id;
+            $element_by_ref[$mem->ref_uuid] = $mem;
         }
-    }
-
-    const PRIMARY_SNAPSHOT_KEY = 'set';
-    const int HTTP_CODE_GOOD = CodeOf::HTTP_OK;
 
 
-    protected function getMyData() :array {
-        return [static::PRIMARY_SNAPSHOT_KEY=>$this->params->getGivenSet()];
-    }
 
+        if (count($el_ids)) {
+            $values = ElementValue::readValues(set_id: $set->id,element_ids: $el_ids,caller_namespace_id: $caller_namespace->id );
+            $el_readings = [];
+            foreach ($values->data as $val) {
+                if (!isset($el_readings[$val->element_uuid])) {
+                    $el_readings[$val->element_uuid] = [];
+                }
+                $el_readings[$val->element_uuid][] = $val;
+            }
+        }
+        foreach ($element_by_ref as $el_ref => $da_el) {
+            if (isset($el_readings[$el_ref]) && count($el_readings[$el_ref])) {
+                $da_el->data_values = $el_readings[$el_ref];
+            }
+        }
 
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        return new ApiSetResponse(
-            given_set:  $this->params->getGivenSet(),
-            show_definer:  $this->params->isShowDefiner(),
-            show_parent :  $this->params->isShowParent(),
-            show_elements :  $this->params->isShowElements(),
-            definer_type_level:  $this->params->getDefinerTypeLevel(),
-            children_set_level:  $this->params->getChildrenSetLevel(),
-            parent_set_level:  $this->params->getParentSetLevel(),thing: $this->getMyThing()
-        );
+        $members = ElementData::collect($members_paginated, CursorPaginatedDataCollection::class);
+        $ret->element_members = $members;
+        return $ret;
     }
 
 }

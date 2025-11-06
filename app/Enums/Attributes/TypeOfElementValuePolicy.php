@@ -1,5 +1,6 @@
 <?php
 namespace App\Enums\Attributes;
+use App\Data\ApiParams\Enums\EnumTryTrait;
 use OpenApi\Attributes as OA;
 
 /**
@@ -7,22 +8,18 @@ use OpenApi\Attributes as OA;
  */
 #[OA\Schema(schema: 'TypeOfElementValuePolicy',title: "Element value policy")]
 enum TypeOfElementValuePolicy : string {
+
+    use EnumTryTrait;
+
     case STATIC = 'static';
 
     case PER_ELEMENT = 'per_element';
-    case PER_CHILD = 'per_set_chain';
 
     case PER_SET = 'per_set';
 
+    case PER_CHILD = 'per_set_chain';
 
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfElementValuePolicy {
-        $maybe  = TypeOfElementValuePolicy::tryFrom($test);
-        if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfElementValuePolicy::cases(),'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
-        }
-        return $maybe;
-    }
+
 }
 
 

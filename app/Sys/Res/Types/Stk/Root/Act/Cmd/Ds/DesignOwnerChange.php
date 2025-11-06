@@ -6,13 +6,16 @@ use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Types\Params\TypeOwnershipChangeParamData;
 use App\Enums\Sys\TypeOfAction;
-use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
+use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
 
 #[HexbatchTitle( title: "Change the ownership of a design")]
@@ -24,25 +27,26 @@ use Hexbatch\Things\Interfaces\IThingAction;
 
     A design can be given to some other namespace
 
-    The future type owner will get an event, and the admin group to the type has start this
+    The future type owner will get an event, and the namespace group, to the type has start this
 
 
-   * [ElementTypeTurningOff](../../../Evt/Server/TypeOwnerChanging.php)
+   * [TypeOwnerChanging](../../../Evt/Server/TypeOwnerChanging.php)
 
-   if the new owner agress, or does not have an event handler set, then the ownership is changed
+   if the new owner agrees, or does not have an event handler set, then the ownership is changed
 
    and the older and new type owners and type owners gets the following
 
-   * [ElementTypeTurnedOff](../../../Evt/Server/TypeOwnerChanged.php)
+   * [TypeOwnerChanged](../../../Evt/Server/TypeOwnerChanged.php)
+
+   These checks and events
 ')]
-#[ApiParamMarker( param_class: DesignOwnershipParams::class)]
-class DesignOwnerChange extends DesignOwnerPromote
+#[ApiParamMarker( param_class: TypeOwnershipChangeParamData::class)]
+class DesignOwnerChange extends Act\Cmd\Ds implements ICommandCallable
 {
     const UUID = '3baa3285-5dff-42b5-bd22-071ad39101db';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_OWNER_CHANGE;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
@@ -54,76 +58,58 @@ class DesignOwnerChange extends DesignOwnerPromote
     ];
 
 
-    /**
-     * @throws \Exception
-     */
-    protected function runActionInner(array $data = []): void
-    {
-        parent::runActionInner();
-        $this->checkIfAdmin($this->getGivenType()->owner_namespace);
+    #[ApiParamMarker( param_class: TypeOwnershipChangeParamData::class)]
+    public function __construct(
+        protected ElementType   $given_type,
+        protected UserNamespace $given_namespace,
+        protected UserNamespace $caller_namespace,
+        protected bool          $do_permission_check
 
+    )
+    {
 
     }
 
-    protected function postActionInner(array $data = []): void {
-        if ($this->send_event) {
-            $this->post_events_to_send = Evt\Server\TypeOwnerChanged::makeEventActions(
-                source: $this, action_data: $this->action_data,
-                type_context: $this->getGivenType()
-            );
-        }
+    protected  function toArray() :array {
+        return [
+            'given_type'=>$this->given_type,
+            'given_namespace'=>$this->given_namespace,
+            'do_permission_check'=>$this->do_permission_check,
+            'caller_namespace'=>$this->caller_namespace,
+        ];
     }
 
-
-
-    public function getChildrenTree(): ?Tree
-    {
-        if (!$this->send_event) {return null;}
-        $nodes = [];
-        $events = [];
-        if ($this->getGivenType() && $this->getGivenNamespace()) {
-            if ($this->getGivenType()->ref_uuid !== $this->getGivenNamespace()->ref_uuid) {
-                $events = Evt\Server\TypeOwnerChanging::makeEventActions(source: $this, action_data: $this->action_data,
-                    type_context: $this->getGivenType(),namespace_context: $this->getGivenNamespace());
-            }
-
-        }
-
-        foreach ($events as $event) {
-            $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(), 'action' => $event];
-        }
-
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-
-        return null;
+    protected static function fromArray(array $args) : static {
+        $given_type = $args['given_type'];
+        $given_namespace = static::getNamespaceFromArray('given_namespace',$args);
+        $caller_namespace = static::getNamespaceFromArray('caller_namespace',$args);
+        $do_permission_check = $args['do_permission_check'];
+        return new static(given_type: $given_type,given_namespace: $given_namespace,
+            caller_namespace: $caller_namespace,do_permission_check: $do_permission_check);
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
+        $work = static::fromArray($command_args);
+        $new_design = $work->changeOwner();
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $new_design->toArray());
+    }
 
+    /**
+     * @throws \Throwable
+     */
+    protected  function changeOwner() : ElementType {
 
-        if ($child instanceof Evt\Server\TypeOwnerChanging) {
+        if ($this->do_permission_check) {
+            static::checkIfGivenIsAdmin(given: $this->caller_namespace,target: $this->given_type->owner_namespace);
+        }
 
-            if ($child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            } else {
-
-                if ($this->given_type_uuid === $child->getAskedAboutType()?->ref_uuid) {
-                    if ($child->isActionFail()) {
-                        $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                    }
-                } //otherwise continue to set owner in run
-
-            }
-        } //end if this is design pending
+        $this->given_type->owner_namespace_id = $this->caller_namespace->id ;
+        $this->given_type->save();
+        return $this->given_type;
     }
 
 }

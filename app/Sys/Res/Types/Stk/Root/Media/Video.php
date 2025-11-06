@@ -11,7 +11,7 @@ class Video extends Media
     const TYPE_NAME = 'media_video';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

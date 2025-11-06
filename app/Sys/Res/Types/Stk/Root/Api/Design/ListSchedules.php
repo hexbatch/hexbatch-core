@@ -5,15 +5,15 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
-use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
-use App\Models\ActionDatum;
+use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Helpers\Utilities;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
 
 use App\Sys\Res\Types\Stk\Root\Api;
 
 use Spatie\LaravelData\CursorPaginatedDataCollection;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
+
 
 #[ApiParamMarker( param_class: ScheduleSearchParams::class)]
 class ListSchedules extends Api\DesignApi
@@ -26,46 +26,26 @@ class ListSchedules extends Api\DesignApi
         Api\DesignApi::class
     ];
 
-    public function __construct(
-        protected ?ScheduleSearchParams $params = null,
 
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
-    {
+    /**
+     * @return CursorPaginatedDataCollection<Schedule>
+     */
+    public static function listSchedules(?ScheduleSearchParams $params) {
 
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
-    }
-
-
-    const PRIMARY_SNAPSHOT_KEY = 'schedules';
-    const int HTTP_CODE_GOOD = CodeOf::HTTP_OK;
-
-    protected function getMyData() :array {
-        $namespace_id = null;
-        if ($this->params->namespace_ref) {
-            $namespace_id = UserNamespace::resolveNamespace(value: $this->params->namespace_ref)->id;
+        if ($params?->namespace_ref) {
+            $namespace_id = UserNamespace::resolveNamespace(value: $params->namespace_ref)->id;
+        } else {
+            $namespace_id = Utilities::getCurrentNamespace()?->id;
         }
         $build = TimeBound::buildTimeBound(
             namespace_id: $namespace_id,
-            after_when: $this->params->after,
-            before_when: $this->params->before,
-            during_when: $this->params->during
-        );
-
-        return [static::PRIMARY_SNAPSHOT_KEY=>$build->cursorPaginate(cursor: $this->params->cursor)];
-    }
-
-
-    public function getDataSnapshot(): CursorPaginatedDataCollection
-    {
-        $what =  $this->getMyData();
-        $schedules = $what[static::PRIMARY_SNAPSHOT_KEY];
-        $resp = ScheduleList::collect($schedules, CursorPaginatedDataCollection::class);
-        return $resp;
+            after_when: $params?->after,
+            before_when: $params?->before,
+            during_when: $params?->during,
+            with_spans: true
+        )->orderBy('created_at');
+        $cursor = $build->cursorPaginate(perPage: config('hbc.pagination.default_page_size'), cursor: $params->cursor);
+        return Schedule::collect($cursor, CursorPaginatedDataCollection::class);
     }
 
 

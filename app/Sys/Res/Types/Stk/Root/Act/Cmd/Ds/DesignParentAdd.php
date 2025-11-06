@@ -3,302 +3,161 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
 
-use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-use App\Enums\Types\TypeOfApproval;
-use App\Exceptions\HexbatchFailException;
-use App\Exceptions\RefCodes;
-use App\Models\ActionDatum;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Design\DesignParentParams;
-use App\OpenApi\Results\Types\TypeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Illuminate\Support\Facades\DB;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 
 #[HexbatchTitle( title: "Add a parent to the type")]
 #[HexbatchBlurb( blurb: "Parents can be given to types in design mode. Some parents have to agree")]
 #[HexbatchDescription( description:'')]
-class DesignParentAdd extends Act\Cmd\Ds
+class DesignParentAdd extends Act\Cmd\Ds implements ICommandCallable
 {
     const UUID = '362a3cdf-f013-4bc0-afce-315cba179544';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_ADD;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\DesignPending::class
+        Evt\Type\DesignParentAdding::class
     ];
 
 
-    protected function setDesignType(ElementType $type) : void {
-        $this->given_type_uuid = $type->ref_uuid;
-        $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->setGivenType($type,true);
-    }
-
-    protected function addToParents(ElementType $type) : void {
-        $this->given_parent_uuids = array_unique( array_merge($this->given_parent_uuids,[$type->ref_uuid]) );
-        $this->saveCollectionKeys();
-        $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
-    }
-
-
-    /**
-     * @return ElementType[]
-     */
-    public function getParents(): array
-    {
-        return $this->action_data->getCollectionOfType(ElementType::class);
-    }
-
-    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_parent_uuids','check_permission'];
-
-    const array ACTIVE_COLLECTION_KEYS = ['given_parent_uuids'=>ElementType::class];
-
-    #[ApiParamMarker( param_class: DesignParentParams::class)]
     public function __construct(
-        protected ?string              $given_type_uuid = null,
-        /**
-         * @var string[] $given_parent_uuids
-         */
-        protected array               $given_parent_uuids = [],
-        protected ?TypeOfApproval     $approval = null,
-        protected bool                $check_permission = true,
-        protected bool                $is_system = false,
-        protected bool                $send_event = true,
-        protected ?ActionDatum        $action_data = null,
-        protected ?ActionDatum        $parent_action_data = null,
-        protected ?UserNamespace      $owner_namespace = null,
-        protected bool                $b_type_init = false,
-        protected ?bool                $is_async = null,
-        protected array             $tags = []
+        protected ElementType   $given_type,
+        protected ElementType   $parent_type,
+        protected UserNamespace $caller_namespace,
+        protected bool          $do_permission_check
+
     )
     {
 
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
     }
 
-
-
-
-    /**
-     * @throws \Exception
-     */
-    protected function runActionInner(array $data = []): void
-    {
-        parent::runActionInner();
-        if (!$this->getGivenType()) {
-            throw new \InvalidArgumentException("Need type before can add parents to it");
-        }
-
-        if ($this->check_permission) {
-            $this->checkIfAdmin($this->getGivenType()->owner_namespace);
-        }
-
-
-        try {
-            DB::beginTransaction();
-            if ( $this->approval && $this->approval !== TypeOfApproval::APPROVAL_NOT_SET ) {
-                //manually make this set for all parents when creating them, else they are created in the child answers
-                foreach ($this->getParents() as $parent) {
-                    if (!$this->is_system) {
-                        if (is_subclass_of($parent , Act\SystemPrivilege::class )) {
-                            throw new \RuntimeException("Non system types cannot have system-privilege as a parent"); //
-                        }
-                        if (is_subclass_of($parent , Act\NoEventsTriggered::class )) {
-                            throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
-                        }
-
-                        if (is_subclass_of($parent , Act\CmdNoSideEffects::class )) {
-                            throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
-                        }
-                    }
-                    $b_check_parent = true;
-                    if ($this->is_system && !$this->send_event) { $b_check_parent = false;}
-                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getGivenType(), approval: $this->approval,check_parent_published: $b_check_parent);
-                }
-            }
-
-
-            //public domain parents are automatically approved for the design
-            foreach ($this->getParents() as $parent) {
-                if ($this->is_system ||$parent->isPublicDomain()
-                    || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())) {
-                    ElementTypeParent::addOrUpdateParent(parent: $parent, child: $this->getGivenType(),
-                        approval: TypeOfApproval::DESIGN_APPROVED,check_parent_published:!$this->is_system );
-                }
-            }
-
-
-            //check to see if all parents have approved this design, if so then success, else fail
-            /** @var ElementTypeParent[] $check_parents */
-            $check_parents = ElementTypeParent::buildTypeParents(child_type_id: $this->getGivenType()->id)->get();
-
-            foreach ($check_parents as $checker) {
-                if ($checker->parent_type_approval === TypeOfApproval::DESIGN_DENIED) {
-
-                    throw new HexbatchFailException( __('msg.design_parents_did_not_approve_design',['ref'=>$checker->getName(),
-                        'child'=>$this->getGivenType()->getName()]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                        RefCodes::TYPE_PARENT_DENIED_DESIGN);
-                }
-            }
-
-            DB::commit();
-        }
-
-        catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+    protected  function toArray() :array {
+        return [
+            'given_type'=>$this->given_type,
+            'parent_type'=>$this->parent_type,
+            'caller_namespace'=>$this->caller_namespace,
+            'do_permission_check'=>$this->do_permission_check,
+        ];
     }
 
-
-
-
-    protected function getMyData() :array {
-        return ['type'=>$this->getGivenType()];
-    }
-
-    public function getDataSnapshot(): array
-    {
-        $ret = [];
-        $what =  $this->getMyData();
-        if (isset($what['type'])) {
-            $ret['type'] = new TypeResponse(given_type: $what['type'],parent_levels: 1);
-        }
-        return $ret;
-    }
-
-    protected function restoreData(array $data = []) {
-        parent::restoreData($data);
-        if ($this->action_data) {
-            if ($this->action_data->collection_data?->offsetExists('approval')) {
-                $approval_string = $this->action_data->collection_data->offsetGet('approval');
-                $this->approval = TypeOfApproval::tryFromInput($approval_string);
-            }
-
-        }
-    }
-
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-        $this->setGivenType($this->given_type_uuid);
-        $this->action_data->collection_data->offsetSet('approval',$this->approval?->value);
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
-    }
-
-    public function getInitialConstantData(): array {
-        $ret = parent::getInitialConstantData();
-        $ret['approval'] = $this->approval?->value;
-        return $ret;
-    }
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-        if ($this->send_event) {
-            $events = [];
-            $nodes = [];
-            foreach ($this->getParents() as $parent) {
-                if (
-                    !
-                    ($this->is_system || $parent->isPublicDomain() || !$this->check_permission ||$parent->owner_namespace->isNamespaceAdmin($this->getNamespaceInUse())  )
-                )
-                {
-                    $events =  Evt\Server\DesignPending::makeEventActions(source: $this, action_data: $this->action_data,type_context: $parent);
-                }
-
-            }
-            foreach ($events as $event) {
-                $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
-            }
-
-            if (count($nodes)) {
-                return new Tree(
-                    $nodes,
-                    ['rootId' => -1]
-                );
-            }
-        }
-
-        return null;
+    protected static function fromArray(array $args) : static {
+        $given_type = static::getTypeFromArray('given_type',$args);
+        $parent_type = static::getTypeFromArray('parent_type',$args) ;
+        $caller_namespace =  static::getNamespaceFromArray('caller_namespace',$args) ;
+        $do_permission_check = $args['do_permission_check'];
+        return new static(given_type: $given_type,parent_type: $parent_type,
+            caller_namespace: $caller_namespace,do_permission_check: $do_permission_check);
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        $work = static::fromArray($command_args);
+        $updated_type = $work->doAddParentCall();
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $updated_type->toArray());
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected  function doAddParentCall() : ElementType {
+        if ($this->do_permission_check) {
+            static::checkIfGivenIsAdmin(given: $this->caller_namespace,target: $this->given_type->owner_namespace);
+        }
 
 
-        if ($child instanceof Evt\Server\DesignPending) {
-            if ($child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($this->given_type_uuid === $child->getAskedAboutType()?->ref_uuid) {
-                    if ($child->isActionSuccess()) {
-                        if (in_array($child->getParentType()->ref_uuid, $this->given_parent_uuids)) {
-                            if (!$this->is_system) {
-                                if (is_subclass_of($child->getParentType(), Act\SystemPrivilege::class)) {
-                                    throw new \RuntimeException("Non system types cannot have system-privilege as a parent"); //
-                                }
-                                if (is_subclass_of($child->getParentType(), Act\NoEventsTriggered::class)) {
-                                    throw new \RuntimeException("Non system types cannot have no-events as a parent"); //
-                                }
-                            }
-
-                            ElementTypeParent::addOrUpdateParent(
-                                parent: $child->getParentType(), child: $this->getGivenType(), approval: $child->getApprovalStatus());
-                        }
-                    } else if($child->isActionFail()) {
-                        ElementTypeParent::addOrUpdateParent(
-                            parent: $child->getParentType(), child: $this->getGivenType(), approval: TypeOfApproval::DESIGN_DENIED);
-                    }
-
-                }
-            }
-        } //end if this is design pending
-
-        if ($child instanceof Act\Cmd\Ds\DesignCreate) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            } else if($child->isActionSuccess()) {
-                if ($child->getGivenType()) {
-                    $this->setDesignType(type: $child->getGivenType());
-                }
+        if ($this->do_permission_check) {
+            $this->parent_type->loadMissing('type_parents');
+            //already added
+            if (array_any($this->parent_type->type_parents, fn($par) => $par->ref_uuid === $this->parent_type->ref_uuid)) {
+                return $this->given_type;
             }
         }
 
-        if ($child instanceof Act\Cmd\Ty\TypePublish) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            } else if($child->isActionSuccess()) {
-                if ($child->getPublishingType()) {
-                    $this->addToParents(type: $child->getPublishingType());
-                }
-            }
+        ElementTypeParent::addOrUpdateParent(parent: $this->parent_type, child: $this->given_type, check_parent_published: !!$this->do_permission_check);
+
+        return $this->given_type;
+    }
+
+
+    /**
+     * @throws \Throwable
+     */
+    public static function addParent(
+        UserNamespace $calling_namespace,ElementType $given_type,ElementType $parent_type, bool $do_permission_check,
+        ?IThangBuilder $builder = null
+    ) : ElementType|Thang|IThangBuilder
+    {
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
+        }
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+        $builder->setNamespace($calling_namespace);
+
+
+        if ($do_permission_check)
+        {
+            $tree = Evt\Type\DesignParentAdding::callParentTree(given_type: $given_type,parent_type: $parent_type,builder: $builder);
+
+            $tree->leaf(
+                command_class: Act\Cmd\Ds\DesignParentAdd::class,
+                command_args: new Act\Cmd\Ds\DesignParentAdd(
+                    given_type:$given_type,
+                    parent_type: $parent_type,
+                    caller_namespace: $calling_namespace,
+                    do_permission_check: true
+                )->toArray(),
+                command_tags: [Act\Cmd\Ds\DesignParentAdd::class],
+                command_priority: -1
+            );
+        } else {
+            $builder->tree(
+                command_class: Act\Cmd\Ds\DesignParentAdd::class,
+                command_args: new Act\Cmd\Ds\DesignParentAdd(
+                    given_type:$given_type,
+                    parent_type: $parent_type,
+                    caller_namespace: $calling_namespace,
+                    do_permission_check: false
+                )->toArray(),
+                command_tags: [Act\Cmd\Ds\DesignParentAdd::class]
+            );
+        }
+
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  ElementType::getElementType(uuid: $data['ref_uuid']);
+        } else {
+            return $thang;
         }
 
     }

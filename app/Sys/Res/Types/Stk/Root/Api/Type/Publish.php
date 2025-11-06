@@ -2,20 +2,23 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
-use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Set\ApiSetResponse;
-use App\OpenApi\Params\Actioning\Type\TypeParams;
+use App\Data\ApiParams\Data\Types\ElementTypeData;
+use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
 
-#[ApiParamMarker( param_class: TypeParams::class)]
-class Publish extends Api\TypeApi
+
+class Publish extends Api\TypeApi implements ICommandCallable
 {
     const UUID = '81c04881-39a5-4903-aaf2-34633b6f4f69';
     const TYPE_NAME = 'api_type_publish';
@@ -30,84 +33,50 @@ class Publish extends Api\TypeApi
     ];
 
 
-    public function __construct(
-        protected ?TypeParams $params = null,
 
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
+        Log::debug("Called api publish node");
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,data: $children_args);
     }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new TypeParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['type'=>$this->getGivenType()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiSetResponse(given_set:  $what['set'],thing: $this->getMyThing());
-    }
-
-
-
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ty\TypePublish(
-            given_type_uuid: $this->params->getTypeUuid(),
-        );
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getGivenElement()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function doPublish(
+        UserNamespace $calling_namespace,ElementType $given_type,bool $do_permission_check,
+        array $tags = [], ?IThangBuilder $builder = null
+    ) : ElementTypeData|Thang
+    {
 
-        if ($child instanceof Act\Cmd\Ele\SetCreate) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenType($child->getGivenType());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge([static::class],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($calling_namespace)
+            ->setSharedArg('namespace',$calling_namespace)
+            ->tree($my_command)
+        ;
+
+
+
+        Act\Cmd\Ty\TypePublish::publish(calling_namespace: $calling_namespace,given_type: $given_type,
+            do_permission_check: $do_permission_check,child_key_to_use:'type',builder: $builder);
+
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  ElementTypeData::from($data );
+        } else {
+            return $thang;
         }
+
     }
 
 }

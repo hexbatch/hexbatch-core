@@ -6,9 +6,10 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Server\ServerInformation;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Server;
-use App\OpenApi\ApiResults\Server\ApiServerResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use OpenApi\Attributes as OA;
@@ -24,14 +25,19 @@ class ServerController extends Controller {
         summary: 'Show this server information',
         tags: ['server','public'],
         responses: [
-            new OA\Response( response: 200, description: 'The server',content: new JsonContent(ref: ApiServerResponse::class)),
+            new OA\Response( response: 200, description: 'The server',content: new JsonContent(ref: ServerInformation::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::IS_PUBLIC)]
     #[ApiTypeMarker( Root\Api\Server\Show::class)]
     public function us() {
-
-        return response()->json(new ApiServerResponse(given_server: Server::getDefaultServer(),type_level: 1,attribute_level: 1,b_show_namespace: true), CodeOf::HTTP_OK);
+        $server = Server::getDefaultServer();
+        $server->server_type->loadMissing(['type_attributes','type_attributes.type_owner','type_schedule','type_exposed_attributes']);
+        $server_info = ServerInformation::from($server);
+        $server_info->server_version = Utilities::getVersionAsString();
+        $server_info->server_version_time = Utilities::getVersionDateAsCarbon();
+        $server_info->server_install_time = Utilities::getInstallTimeAsCarbon();
+        return response()->json($server_info, CodeOf::HTTP_OK);
     }
 
 

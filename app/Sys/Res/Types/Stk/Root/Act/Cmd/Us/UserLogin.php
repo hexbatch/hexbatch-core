@@ -12,17 +12,14 @@ class UserLogin extends Act\Cmd\Us
     const UUID = '671c5b71-847a-47b1-b34b-f32fc17ee024';
     const ACTION_NAME = TypeOfAction::CMD_USER_LOGIN;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Us::class,
-        Act\SystemPrivilege::class,
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\UserLoggingIn::class
+        Evt\Server\UserLoggingIn::class //todo passes the default namespace to event
     ];
 
 }

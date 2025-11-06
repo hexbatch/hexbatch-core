@@ -81,6 +81,8 @@ return new class extends Migration
 
 
 
+
+
         });
 
 
@@ -97,10 +99,12 @@ return new class extends Migration
             'is_private',
             'is_public',
             'is_public_domain',
-            'is_protected'
+            'is_protected',
+            'is_element_private',
+            'is_element_protected'
             );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'is_private';");
+        DB::statement("ALTER TABLE attributes Add COLUMN access_policy type_of_server_access NOT NULL default 'is_private';");
 
 
 
@@ -129,6 +133,12 @@ return new class extends Migration
 
 
         Schema::table('attributes', function (Blueprint $table) {
+
+            $table->uuid('type_uuid')
+                ->index()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
 
             $table->timestamps();
 
@@ -183,9 +193,10 @@ return new class extends Migration
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
-            $table->dropColumn('server_access_type');
+            $table->dropColumn('access_policy');
             $table->dropColumn('value_policy');
             $table->dropColumn('attribute_approval');
+            $table->dropColumn('type_uuid');
 
         });
 

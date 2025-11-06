@@ -16,9 +16,7 @@ class ElsewherePushEvent extends Act\Cmd\Ew
     const UUID = '67d4b737-528b-4747-9b7b-3b4939d01602';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_PUSH_EVENT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

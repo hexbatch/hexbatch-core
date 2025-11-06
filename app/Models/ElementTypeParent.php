@@ -46,7 +46,7 @@ class ElementTypeParent extends Model
         'child_type_id',
         'parent_type_id',
         'parent_rank',
-        'approval',
+        'parent_type_approval',
     ];
 
     /**
@@ -62,11 +62,17 @@ class ElementTypeParent extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'parent_type_approval' => TypeOfApproval::class
+        'parent_type_approval' => TypeOfApproval::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     public function parent_type() : BelongsTo {
         return $this->belongsTo(ElementType::class,'parent_type_id','id');
+    }
+
+    public function child_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'child_type_id','id');
     }
 
     public function getName() :string {
@@ -86,6 +92,7 @@ class ElementTypeParent extends Model
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     public static function addOrUpdateParent(ElementType $parent, ElementType $child, TypeOfApproval $approval = TypeOfApproval::PENDING_DESIGN_APPROVAL
         , bool                                           $check_parent_published = true)
@@ -179,6 +186,46 @@ class ElementTypeParent extends Model
 
 
         return $build;
+    }
+
+
+
+    public static function getInheritanceChains(ElementType $type) : array  {
+        $my_id = $type->id;
+        $what = DB::select("
+            WITH RECURSIVE rec (level) as (
+                SELECT 0 as level, t.id::text as chain,
+                       t.id as type_id, t.type_name,u.namespace_name
+                from element_types t
+                         LEFT JOIN user_namespaces u ON u.id = t.owner_namespace_id
+                WHERE t.id = $my_id
+                UNION ALL
+
+                SELECT rec.level + 1 as level,
+                       concat(rec.chain,',',par.parent_type_id) as chain,
+                       par.parent_type_id as type_id,
+                       t.type_name,u.namespace_name
+
+                from rec
+                         INNER JOIN element_type_parents par ON par.child_type_id = rec.type_id
+                         INNER JOIN element_types t ON t.id = par.parent_type_id
+                         LEFT JOIN user_namespaces u ON u.id = t.owner_namespace_id
+
+            )
+            SELECT  distinct rec.level,rec.type_name,rec.namespace_name,rec.type_id,rec.chain
+            FROM rec
+            order by rec.level,rec.type_id
+            ;
+        ");
+        $root_id = ElementType::getRootType()->id;
+        $ret = [];
+        foreach ($what as $row) {
+            $chain = explode(',',$row->chain);
+            $last = (int)array_last($chain);
+            if ($last !== $root_id) {continue;}
+            $ret[] = $chain;
+        }
+        return $ret;
     }
 
 

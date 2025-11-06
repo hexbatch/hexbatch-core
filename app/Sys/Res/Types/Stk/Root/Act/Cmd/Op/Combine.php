@@ -18,7 +18,7 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 
 when an element is removed from its last set, it is automatically destroyed
 
-when adding or removing elements, can to be cancelled with the enter and leave set events
+when adding or removing elements, can to be canceled with the enter and leave set events
 also, need to pay attention to the clipping of the location bounds, the clipping also applies to up-set boundaries too
 
 after all permissions given, for each remaining removal,
@@ -36,16 +36,15 @@ class Combine extends Act\Cmd\Op
     const UUID = 'c8833a43-8e2a-4a88-995f-f27c816dc073';
     const ACTION_NAME = TypeOfAction::OP_COMBINE;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetEnter::class,
-        Evt\Set\SetLeave::class,
+        Evt\Set\SetEntering::class,
+        Evt\Set\SetLeaving::class,
     ];
 
 }

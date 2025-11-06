@@ -53,7 +53,7 @@ class AttributeResource extends JsonResource
                 'is_system' => $this->is_system,
                 'is_final_attribute' => $this->is_final_attribute,
             ],
-            'server_access_type'=> $this->server_access_type->value
+            'access_policy'=> $this->access_policy->value
 
 
         ];

@@ -3,28 +3,30 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
-use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Type\ApiTypeResponse;
-use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
+use App\Annotations\ApiEventMarker;
+use App\Data\ApiParams\Data\Types\Params\TypeOwnershipChangeParamData;
+use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IHookCode;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
+use App\Sys\Res\Types\Stk\Root\Evt;
 
 
-#[ApiParamMarker( param_class: DesignOwnershipParams::class)]
-class ChangeOwner extends Api\DesignApi implements IHookCode
+#[ApiEventMarker( Evt\Server\TypeOwnerChanging::class)]
+#[ApiEventMarker( Evt\Server\TypeOwnerChanged::class)]
+class ChangeOwner extends Api\DesignApi implements ICommandCallable
 {
     const UUID = '1a222e21-c548-4555-95ad-74aee1387f17';
     const TYPE_NAME = 'api_design_change_owner';
-
-
-
 
 
     const PARENT_CLASSES = [
@@ -32,88 +34,88 @@ class ChangeOwner extends Api\DesignApi implements IHookCode
         Act\Cmd\Ds\DesignOwnerChange::class,
     ];
 
-    public function __construct(
-        protected ?DesignOwnershipParams $params = null,
 
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        Log::debug("Called api create type node");
+        return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
+            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved]);
     }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new DesignOwnershipParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['type'=>$this->getGivenType(),'namespace'=>$this->getGivenNamespace()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiTypeResponse(given_type:  $what['type'],thing: $this->getMyThing());
-    }
-
-
-
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ds\DesignOwnerChange(
-            given_type_uuid: $this->params->getTypeUuid(), given_namespace_uuid: $this->params->getNamespaceUuid(),
-            parent_action_data: $this->action_data,
-            tags: ['changing owner from api']);
-
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function changeOwner(
+        UserNamespace $calling_namespace,TypeOwnershipChangeParamData $params,ElementType $given_type,bool $do_permission_check,
+        array $tags = [], ?IThangBuilder $builder = null
+    ) : ElementType|Thang
+    {
+        if ($params->namespace_uuid === $calling_namespace->ref_uuid) { return $given_type;}
 
-        if ($child instanceof Act\Cmd\Ds\DesignOwnerChange) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenType($child->getGivenType());
-                    $this->setGivenNamespace($child->getGivenNamespace());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+        $given_namespace = UserNamespace::getThisNamespace(uuid: $params->namespace_uuid);
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['change-design-owner'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($calling_namespace)
+            ->setSharedArg('namespace',$calling_namespace)
+            ->tree($my_command)
+            ;
+
+        if ($do_permission_check)
+        {
+            $builder->tree(
+                command_class: Evt\Server\TypeOwnerChanged::class,
+                command_args: new Evt\Server\TypeOwnerChanged(
+                    given_type:$given_type,
+                    given_namespace:$given_namespace,
+                    old_namespace: $given_type->owner_namespace
+                )->toArray(),
+                command_tags: [Evt\Server\TypeOwnerChanged::class]
+            );
         }
+
+
+        $builder->tree(
+            command_class: Act\Cmd\Ds\DesignOwnerChange::class,
+            command_args: new Act\Cmd\Ds\DesignOwnerChange(
+                given_type:$given_type,
+                given_namespace:$given_namespace,
+                caller_namespace: $calling_namespace,
+                do_permission_check: $do_permission_check
+            )->toArray(),
+            command_tags: [Act\Cmd\Ds\DesignOwnerChange::class]
+        );
+
+        if ($do_permission_check)
+        {
+            $builder
+            ->tree(
+                command_class: Evt\Server\TypeOwnerChanging::class,
+                command_args: new Evt\Server\TypeOwnerChanging(
+                    given_type:$given_type,
+                    given_namespace:$given_namespace,
+                    old_namespace: $given_type->owner_namespace
+                )->toArray(),
+                command_tags: [Evt\Server\TypeOwnerChanging::class]
+            );
+        }
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  ElementType::getElementType(uuid: $data['ref_uuid']);
+        } else {
+            return $thang;
+        }
+
     }
+
 
 }
 

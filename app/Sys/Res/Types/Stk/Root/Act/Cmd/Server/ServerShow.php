@@ -14,9 +14,7 @@ class ServerShow extends Act\Cmd\Server
     const UUID = '0c3dd596-4636-4be2-9e89-00de6e97425b';
     const ACTION_NAME = TypeOfAction::CMD_SERVER_SHOW;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Server::class
