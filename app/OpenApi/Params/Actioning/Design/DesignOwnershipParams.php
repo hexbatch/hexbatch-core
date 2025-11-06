@@ -3,6 +3,8 @@
 namespace App\OpenApi\Params\Actioning\Design;
 
 
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Exceptions\HexbatchBadParamException;
 use App\Exceptions\HexbatchMissingParamException;
 use App\Exceptions\RefCodes;
@@ -10,8 +12,6 @@ use App\Helpers\Utilities;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\OpenApi\ApiCallBase;
-use App\OpenApi\Common\Resources\HexbatchNamespace;
-use App\OpenApi\Common\Resources\HexbatchResource;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 

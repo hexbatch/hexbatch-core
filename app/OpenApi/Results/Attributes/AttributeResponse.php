@@ -6,7 +6,7 @@ use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfApproval;
 use App\Models\Attribute;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\Bounds\LocationResponse;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;

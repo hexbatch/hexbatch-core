@@ -3,6 +3,7 @@
 namespace App\OpenApi\Params\Actioning\Design;
 
 
+use App\Data\ApiParams\OpenApi\Common\HexbatchResourceName;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Helpers\Utilities;
 use App\Models\LocationBound;
@@ -14,18 +15,18 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'DesignLocationParams')]
 class DesignLocationParams extends ApiCallBase
 {
-    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Name', description: 'Name of the bound', nullable: true)]
+    #[OA\Property(title: 'Name', description: 'Name of the bound', type: HexbatchResourceName::class, nullable: true)]
     protected ?string $bound_name = null;
 
 
     #[OA\Property( title: 'Location type',description: "Locations are maps or shapes")]
     protected TypeOfLocation $location_type ;
 
-    #[OA\Property( title: 'Geo Json',description: "Geo json supported", nullable: true)]
+    #[OA\Property( title: 'Geo Json',description: "Geo json supported", items: new OA\Items(),nullable: true)]
     /** @var mixed[] $geo_json */
     protected array $geo_json = [];
 
-    #[OA\Property( title: 'Display info',description: "Add color and texture here", nullable: true)]
+    #[OA\Property( title: 'Display info',description: "Add color and texture here",items: new OA\Items(), nullable: true)]
     /** @var mixed[] $display */
     protected array $display = [];
 

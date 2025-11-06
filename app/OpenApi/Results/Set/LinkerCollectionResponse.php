@@ -5,7 +5,7 @@ namespace App\OpenApi\Results\Set;
 use App\Models\Element;
 use App\Models\ElementLink;
 use App\Models\ElementSet;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\Elements\ElementResponse;
 use App\OpenApi\Results\ResultCursorBase;
 use OpenApi\Attributes as OA;

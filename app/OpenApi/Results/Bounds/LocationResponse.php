@@ -5,7 +5,7 @@ namespace App\OpenApi\Results\Bounds;
 use App\Enums\Bounds\TypeOfLocation;
 use App\Helpers\Utilities;
 use App\Models\LocationBound;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;
 

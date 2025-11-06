@@ -4,7 +4,7 @@ namespace App\OpenApi\Results\Types;
 
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Models\ElementTypeServerLevel;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Servers\ServerResponse;
 use Carbon\Carbon;

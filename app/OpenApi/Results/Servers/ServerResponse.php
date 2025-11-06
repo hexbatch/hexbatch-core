@@ -5,7 +5,7 @@ namespace App\OpenApi\Results\Servers;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Helpers\Utilities;
 use App\Models\Server;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;

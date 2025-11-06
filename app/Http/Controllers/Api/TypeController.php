@@ -6,6 +6,8 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
 use App\Models\ElementType;
 use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
@@ -43,10 +45,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -79,7 +81,7 @@ class TypeController extends Controller {
         parameters: [
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -106,7 +108,7 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ApiTypeCollectionResponse::class)),
@@ -141,7 +143,7 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
         ],
         responses: [
@@ -196,10 +198,10 @@ class TypeController extends Controller {
         tags: ['type','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -226,10 +228,10 @@ class TypeController extends Controller {
         tags: ['type','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -265,10 +267,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -292,10 +294,10 @@ class TypeController extends Controller {
         tags: ['type','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -324,10 +326,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -353,10 +355,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -386,10 +388,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -415,10 +417,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -443,10 +445,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -470,10 +472,10 @@ class TypeController extends Controller {
         tags: ['type','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -499,10 +501,10 @@ class TypeController extends Controller {
         tags: ['type','event'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -538,10 +540,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -580,10 +582,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -608,10 +610,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -637,10 +639,10 @@ class TypeController extends Controller {
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -668,10 +670,10 @@ class TypeController extends Controller {
         tags: ['type','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -712,10 +714,10 @@ class TypeController extends Controller {
         tags: ['type','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [

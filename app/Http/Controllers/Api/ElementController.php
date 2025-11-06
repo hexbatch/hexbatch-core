@@ -6,6 +6,8 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Element;
@@ -47,10 +49,10 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Owner changed', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
@@ -92,10 +94,10 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -138,10 +140,10 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -184,13 +186,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -221,13 +223,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -253,13 +255,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -288,13 +290,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -336,13 +338,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -373,13 +375,13 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -411,16 +413,16 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_type', description: "The live type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -451,16 +453,16 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_type', description: "The live type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -486,13 +488,13 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
 
         ],
@@ -515,16 +517,16 @@ class ElementController extends Controller {
         tags: ['element','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_type', description: "The live type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -550,13 +552,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -583,10 +585,10 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -629,10 +631,10 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -674,16 +676,16 @@ class ElementController extends Controller {
         tags: ['element','set','link'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -726,13 +728,13 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -768,10 +770,10 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -825,13 +827,13 @@ class ElementController extends Controller {
         tags: ['element','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -870,13 +872,13 @@ class ElementController extends Controller {
         tags: ['element','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [

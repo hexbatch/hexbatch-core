@@ -1027,7 +1027,7 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/create_time':
+  '/api/v1/{user_namespace}/design/schedules/create':
     post:
       tags:
         - design
@@ -1048,14 +1048,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DesignTimeParams'
+              $ref: '#/components/schemas/Schedule'
       responses:
         '202':
           description: 'Schedule created'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiScheduleResponse'
+                $ref: '#/components/schemas/Schedule'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1077,14 +1077,14 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/time/{time_bound}/edit':
-    patch:
+  '/api/v1/{user_namespace}/design/schedules/{time_bound}/show':
+    get:
       tags:
         - design
         - bounds
-      summary: 'Edits a schedule'
+      summary: 'shows a schedule'
       description: 'Schedules can be changed'
-      operationId: core.design.time_edit
+      operationId: core.design.schedules.show
       parameters:
         -
           name: user_namespace
@@ -1105,14 +1105,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DesignTimeParams'
+              $ref: '#/components/schemas/Schedule'
       responses:
         '202':
           description: 'Schedule edited'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiScheduleResponse'
+                $ref: '#/components/schemas/Schedule'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1134,14 +1134,14 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/time/{time_bound}/destroy':
-    delete:
+  '/api/v1/{user_namespace}/design/schedules/{time_bound}/edit':
+    patch:
       tags:
         - design
         - bounds
-      summary: 'Remove a time resource  '
-      description: 'Destroys a time resource, but only if its not used. '
-      operationId: core.design.destroy_time
+      summary: 'Edits a schedule'
+      description: 'Schedules can be changed'
+      operationId: core.design.schedules.edit
       parameters:
         -
           name: user_namespace
@@ -1162,14 +1162,65 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DesignTimeParams'
+              $ref: '#/components/schemas/Schedule'
+      responses:
+        '202':
+          description: 'Schedule edited'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Schedule'
+        '200':
+          description: 'Thing is processing|waiting'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThingResponse'
+        '201':
+          description: 'Success but other callbacks'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HexbatchCallbackCollectionResponse'
+        '400':
+          description: 'There was an issue'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThingResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/v1/{user_namespace}/design/schedules/{time_bound}/destroy':
+    delete:
+      tags:
+        - design
+        - bounds
+      summary: 'Remove a time resource  '
+      description: 'Destroys a time resource, but only if its not used. '
+      operationId: core.design.schedules.destroy
+      parameters:
+        -
+          name: user_namespace
+          in: path
+          description: 'Namespace this is run under'
+          required: true
+          schema:
+            $ref: '#/components/schemas/HexbatchNamespace'
+        -
+          name: time_bound
+          in: path
+          description: 'The schedule'
+          required: true
+          schema:
+            $ref: '#/components/schemas/HexbatchResource'
       responses:
         '202':
           description: 'Schedule destroyed'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiScheduleResponse'
+                $ref: '#/components/schemas/Schedule'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1414,14 +1465,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ListScheduleParams'
+              $ref: '#/components/schemas/ScheduleSearchParams'
       responses:
         '200':
           description: 'Schedule results returned'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiScheduleCollectionResponse'
+                $ref: '#/components/schemas/ScheduleList'
         '400':
           description: 'There was an issue'
           content:
@@ -7546,8 +7597,217 @@ paths:
       security:
         -
           bearerAuth: []
+  /api/hbc-thangs/v1/tests/health:
+    get:
+      tags:
+        - health
+      summary: 'Shows the health'
+      description: ''
+      operationId: hbc-thangs.tests.health
+      responses:
+        '200':
+          description: 'Its alive!'
+        '503':
+          description: 'Something is wrong'
+      security:
+        -
+          bearerAuth: []
 components:
   schemas:
+    CursoratedMetaData:
+      properties:
+        per_page:
+          type: integer
+        next_cursor:
+          type:
+            - string
+            - 'null'
+        next_page_url:
+          type:
+            - string
+            - 'null'
+        prev_cursor:
+          type:
+            - string
+            - 'null'
+        prev_page_url:
+          type:
+            - string
+            - 'null'
+      type: object
+    HexbatchCron:
+      title: 'Linux crontab schedule'
+      description: 'Defines the cron format'
+      type: string
+      maxLength: 36
+      minLength: 36
+      pattern: '^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+(L|W)?|\*(\/\d+)?|L(-\d+|W)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})|(@(annually|yearly|monthly|weekly|daily|hourly))$'
+      example:
+        -
+          summary: 'Example cron'
+          value: '15 5 * * THU'
+    HexbatchResourceName:
+      title: 'Resource Name'
+      description: 'Defines a resource name by itself'
+      type: string
+      maxLength: 30
+      minLength: 3
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'No capital letters, no punctuation, underscores allowed, numbers allowed after first letter'
+          value: my_first_user221
+    HexbatchUuid:
+      title: 'Unique reference'
+      description: 'Defines a regular uuid'
+      type: string
+      maxLength: 36
+      minLength: 36
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      example:
+        -
+          summary: 'Should be unique across the world'
+          value: 59714b32-a017-4300-afbc-f910886a2589
+    Namespace:
+      properties:
+        uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        namespace_name:
+          $ref: '#/components/schemas/HexbatchResourceName'
+        namespace_public_key:
+          title: 'Public key'
+          type:
+            - string
+            - 'null'
+        is_system:
+          title: 'Is system'
+          type: boolean
+        home_set_uuid:
+          title: 'Home set uuid'
+          format: uuid
+        public_uuid:
+          title: 'Public uuid'
+          format: uuid
+        private_uuid:
+          title: 'Private uuid'
+          format: uuid
+        type_uuid:
+          title: 'Type uuid'
+          format: uuid
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
+      type: object
+    ScheduleSearchParams:
+      properties:
+        namespace_ref:
+          title: Namespace
+          description: 'The schedule is in this namespace. Can be uuid or name.'
+        before:
+          title: 'Scheduled before'
+          description: 'Iso 8601 datetime, to see if the schedule is before this'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        after:
+          title: 'Scheduled before'
+          description: 'Iso 8601 datetime, to see if the schedule is after this'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        during:
+          title: 'Scheduled during'
+          description: 'Iso 8601 datetime, to see if the schedule includes this'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        cursor:
+          title: Cursor
+      type: object
+    ScheduleList:
+      properties:
+        data:
+          title: Schedules
+          description: 'list of schedules'
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedule'
+        meta:
+          $ref: '#/components/schemas/CursoratedMetaData'
+      type: object
+    Schedule:
+      properties:
+        bound_name:
+          $ref: '#/components/schemas/HexbatchResourceName'
+          description: 'Name of the bound'
+        bound_start:
+          title: 'Starting at'
+          description: 'Optional Iso 8601 datetime'
+          format: datetime
+          example: '2025-01-25T15:00:59-06:00'
+        bound_stop:
+          title: 'Stopping at'
+          description: 'Optional Iso 8601 datetime'
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        bound_cron:
+          oneOf:
+            -
+              $ref: '#/components/schemas/HexbatchCron'
+              description: 'Optional linux cronjob tab string'
+            -
+              type: 'null'
+          title: Cron
+          description: 'Optional linux cronjob tab string'
+        bound_cron_timezone:
+          title: 'Cron Timezone'
+          description: 'The timezone the cron is running in'
+        bound_period_length:
+          title: 'Cron period length'
+          description: 'The amount of seconds after each cron match'
+          minimum: 1
+        uuid:
+          oneOf:
+            -
+              $ref: '#/components/schemas/HexbatchUuid'
+            -
+              type: 'null'
+          title: 'Schedule uuid'
+        time_spans:
+          title: 'Time spans'
+          description: 'the generated time spans'
+          type:
+            - array
+            - 'null'
+          items:
+            $ref: '#/components/schemas/ScheduleSpan'
+      type: object
+    ScheduleSpan:
+      properties:
+        start:
+          title: 'Starting at'
+          description: 'Optional Iso 8601 datetime'
+          format: datetime
+          example: '2025-01-25T15:00:59-06:00'
+        stop:
+          title: 'Stopping at'
+          description: 'Optional Iso 8601 datetime'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+      type: object
     TypeOfElementValuePolicy:
       title: 'Element value policy'
       description: 'postgres enum type_of_element_value_policy'
@@ -7733,32 +7993,6 @@ components:
               type: 'null'
           title: Thing
       type: object
-    ApiScheduleCollectionResponse:
-      description: 'Shows the schedule list and thing for the api call'
-      properties:
-        schedule_collection:
-          $ref: '#/components/schemas/ScheduleCollectionResponse'
-        thing:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ApiThingResponse'
-            -
-              type: 'null'
-          title: Thing
-      type: object
-    ApiScheduleResponse:
-      description: 'Shows the time bound and thing for the api call'
-      properties:
-        schedule:
-          $ref: '#/components/schemas/ScheduleResponse'
-        thing:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ApiThingResponse'
-            -
-              type: 'null'
-          title: Thing
-      type: object
     ApiElementActionResponse:
       description: 'Shows the element details and thing for the api call'
       properties:
@@ -7928,17 +8162,6 @@ components:
               type: 'null'
           title: Thing
       type: object
-    HexbatchCron:
-      title: 'Linux crontab schedule'
-      description: 'Defines the cron format'
-      type: string
-      maxLength: 36
-      minLength: 36
-      pattern: '^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+(L|W)?|\*(\/\d+)?|L(-\d+|W)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})|(@(annually|yearly|monthly|weekly|daily|hourly))$'
-      example:
-        -
-          summary: 'Example cron'
-          value: '15 5 * * THU'
     HexbatchSecondsToLive:
       title: 'Seconds to live'
       description: 'When needing to give a length in seconds up to a year'
@@ -7960,17 +8183,6 @@ components:
         -
           summary: 'Tokens look like this, but not always'
           value: 2|jY8m3acW2GdDZlgJOxX2hWCjlRJ6lcu4OA3q3XWcc4cbc545
-    HexbatchUuid:
-      title: 'Unique reference'
-      description: 'Defines a regular uuid'
-      type: string
-      maxLength: 36
-      minLength: 36
-      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
-      example:
-        -
-          summary: 'Should be unique across the world'
-          value: 59714b32-a017-4300-afbc-f910886a2589
     HexbatchDomainTypeAttribute:
       title: Attribute
       description: 'Defines a domain:type:attribute'
@@ -8109,52 +8321,6 @@ components:
       type: string
       maxLength: 327
       minLength: 11
-      example:
-        -
-          summary: 'A type with a colon then a uuid'
-          value: 'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A uuid with a colon then an attribute'
-          value: '3fabcde3-aaaa-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A type with a colon then an attribute'
-          value: 'cats:first_kittens99'
-        -
-          summary: 'A  namespace with a colon then a type name  with a colon then an attribute'
-          value: 'cats:feral:color'
-        -
-          summary: 'A  namespace with a colon then a type name  with a colon then a uuid'
-          value: 'cats:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A  namespace with a colon then a uuid  with a colon then an attribute'
-          value: 'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
-        -
-          summary: 'A  namespace with a colon then a uuid with a colon then a uuid'
-          value: 'cats:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A uuid  with a colon then a type name  with a colon then an attribute'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:color'
-        -
-          summary: 'A uuid with a colon then a type name  with a colon then a uuid'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A uuid with a colon then a uuid  with a colon then an attribute'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
-        -
-          summary: 'A uuid with a colon then a uuid with a colon then a uuid'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A domain with a colon then a type name  with a colon then an attribute'
-          value: 'top.example.com:feral:color'
-        -
-          summary: 'A domain with a colon then a type name  with a colon then a uuid'
-          value: 'top.example.com:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A domain with a colon then a uuid  with a colon then an attribute'
-          value: 'top.example.com:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
-        -
-          summary: 'A domain with a colon then a uuid with a colon then a uuid'
-          value: 'top.example.com:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
       oneOf:
         -
           $ref: '#/components/schemas/HexbatchNamespacedUuid'
@@ -8214,13 +8380,6 @@ components:
       type: string
       maxLength: 36
       minLength: 3
-      example:
-        -
-          summary: 'A name by itself'
-          value: my_first_user221
-        -
-          summary: 'A uuid by itself'
-          value: 3fabcde3-e732-41b0-88c6-3d3f45e83bf4
       oneOf:
         -
           $ref: '#/components/schemas/HexbatchResourceName'
@@ -8254,28 +8413,6 @@ components:
       type: string
       maxLength: 290
       minLength: 3
-      example:
-        -
-          summary: 'A name by itself'
-          value: my_first_user221
-        -
-          summary: 'A name with a namespace'
-          value: 'cats:envy'
-        -
-          summary: 'A uuid by itself'
-          value: 3fabcde3-e732-41b0-88c6-3d3f45e83bf4
-        -
-          summary: 'A uuid with a namespace'
-          value: 'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A uuid with a namespace in uuid form'
-          value: '3fabcde3-aaaa-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A domain or subdomain with a colon then a uuid'
-          value: 'top.gun.org:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-        -
-          summary: 'A domain or subdomain with a colon then a resource name'
-          value: 'top.gun.org:first_kittens99'
       oneOf:
         -
           $ref: '#/components/schemas/HexbatchResourceName'
@@ -8291,17 +8428,6 @@ components:
           $ref: '#/components/schemas/HexbatchDomainedUuid'
         -
           $ref: '#/components/schemas/HexbatchDomainedName'
-    HexbatchResourceName:
-      title: 'Resource Name'
-      description: 'Defines a resource name by itself'
-      type: string
-      maxLength: 30
-      minLength: 3
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'No capital letters, no punctuation, underscores allowed, numbers allowed after first letter'
-          value: my_first_user221
     HexbatchUuidUuid:
       title: 'Namespaced name with both in uuid format'
       description: 'Defines a uuid:uuid'
@@ -8518,44 +8644,6 @@ components:
             - 'null'
           items:
             $ref: '#/components/schemas/HexbatchResource'
-      type: object
-    DesignTimeParams:
-      properties:
-        bound_name:
-          $ref: '#/components/schemas/HexbatchResourceName'
-          description: 'Name of the bound'
-        bound_start:
-          title: 'Starting at'
-          description: 'Optional Iso 8601 datetime'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-01-25T15:00:59-06:00'
-        bound_stop:
-          title: 'Stopping at'
-          description: 'Optional Iso 8601 datetime'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-02-25T15:00:59-06:00'
-        bound_cron:
-          $ref: '#/components/schemas/HexbatchCron'
-          description: 'Optional linux cronjob tab string'
-        bound_cron_timezone:
-          title: 'Cron Timezone'
-          description: 'The timezone the cron is running in'
-          type:
-            - string
-            - 'null'
-        bound_period_length:
-          title: 'Cron period length'
-          description: 'The amount of seconds after each cron match'
-          type:
-            - integer
-            - 'null'
-          minimum: 1
       type: object
     ChangeElementOwnerParams:
       properties:
@@ -8778,44 +8866,6 @@ components:
             - string
             - 'null'
       type: object
-    ListScheduleParams:
-      properties:
-        cursor:
-          title: Cursor
-          type:
-            - string
-            - 'null'
-        namespace_ref:
-          title: Namespace
-          description: 'The schedule is in this namespace. Can be uuid or name.'
-          type:
-            - string
-            - 'null'
-        before:
-          title: 'Scheduled before'
-          description: 'Iso 8601 datetime, to see if the schedule is before this'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-02-25T15:00:59-06:00'
-        after:
-          title: 'Scheduled before'
-          description: 'Iso 8601 datetime, to see if the schedule is after this'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-02-25T15:00:59-06:00'
-        during:
-          title: 'Scheduled during'
-          description: 'Iso 8601 datetime, to see if the schedule includes this'
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-02-25T15:00:59-06:00'
-      type: object
     ShowAttributeParams:
       properties:
         cursor:
@@ -8998,7 +9048,7 @@ components:
       properties:
         passthrough:
           title: 'Passthrough data (optional)'
-          description: $response
+          description: $passthrough
           type:
             - array
             - 'null'
@@ -9184,96 +9234,6 @@ components:
           items: {  }
         created_at:
           title: 'Location created at'
-          type:
-            - string
-            - 'null'
-          format: date-time
-      type: object
-    ScheduleCollectionResponse:
-      title: Schedules
-      description: 'A collection of time bounds'
-      properties:
-        cursor:
-          title: Cursor
-          type:
-            - string
-            - 'null'
-        schedules:
-          title: 'List of Schedules'
-          description: $schedules
-          type: array
-          items:
-            $ref: '#/components/schemas/ScheduleResponse'
-      type: object
-    ScheduleResponse:
-      description: 'Show details about a time schedule'
-      properties:
-        uuid:
-          $ref: '#/components/schemas/HexbatchUuid'
-        name:
-          title: Name
-          type: string
-        start:
-          title: 'Start at'
-          type:
-            - string
-            - 'null'
-          format: date-time
-        stop:
-          title: 'Stop at'
-          type:
-            - string
-            - 'null'
-          format: date-time
-        period_length:
-          title: 'Period Length'
-          type:
-            - integer
-            - 'null'
-        cron_string:
-          title: 'Cron string'
-          type:
-            - string
-            - 'null'
-        cron_timezone:
-          title: 'Cron string'
-          type:
-            - string
-            - 'null'
-        created_at:
-          title: 'Schedule created at'
-          type:
-            - string
-            - 'null'
-          format: date-time
-        updated_at:
-          title: 'Schedule updated at'
-          type:
-            - string
-            - 'null'
-          format: date-time
-        is_on_now:
-          title: 'Is schedule on now'
-          type: boolean
-          format: date-time
-        spans:
-          title: 'Time spans'
-          description: $spans
-          type: array
-          items:
-            $ref: '#/components/schemas/ScheduleSpanResponse'
-      type: object
-    ScheduleSpanResponse:
-      description: 'Show details about a time schedule'
-      properties:
-        start:
-          title: 'Start at'
-          type:
-            - string
-            - 'null'
-          format: date-time
-        stop:
-          title: 'Stop at'
           type:
             - string
             - 'null'
@@ -9609,10 +9569,11 @@ components:
           items:
             $ref: '#/components/schemas/SetResponse'
         member_elements:
-          title: 'Children sets'
+          title: 'Member elements'
           description: $member_elements
           type: array
-          items: {  }
+          items:
+            $ref: '#/components/schemas/ElementResponse'
         created_at:
           title: 'Namespace created at'
           type:
@@ -9689,8 +9650,7 @@ components:
         uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         name:
-          title: 'Type name'
-          type: string
+          $ref: '#/components/schemas/HexbatchResourceName'
         parents:
           title: Parents
           description: $parents
@@ -9736,7 +9696,7 @@ components:
         schedule:
           oneOf:
             -
-              $ref: '#/components/schemas/ScheduleResponse'
+              $ref: '#/components/schemas/Schedule'
             -
               type: 'null'
           title: Schedule
@@ -9785,6 +9745,12 @@ components:
           type: string
         auth_token:
           $ref: '#/components/schemas/HexbatchToken'
+        token_expires_at:
+          title: 'When the current token expires'
+          type:
+            - string
+            - 'null'
+          format: date-time
       type: object
     Me:
       description: 'Show details about the logged-in user'
@@ -9796,6 +9762,12 @@ components:
           type: string
         registered_at:
           title: 'When the user was registered'
+          type:
+            - string
+            - 'null'
+          format: date-time
+        token_expires_at:
+          title: 'When the current token expires'
           type:
             - string
             - 'null'
@@ -10799,6 +10771,285 @@ components:
           format: datetime
           example: '2025-01-25T15:00:59-06:00'
       type: object
+    ThangCallback:
+      properties:
+        thang_command_ref:
+          title: Uuid
+          type: string
+          format: uuid
+        callback_http_code:
+          title: 'Http code'
+          type:
+            - integer
+            - 'null'
+          example: '200'
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
+        ref_uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        callback_data:
+          title: 'Callback data'
+          description: $callback_data
+          type:
+            - array
+            - 'null'
+          items: {  }
+        thang_callback_status:
+          $ref: '#/components/schemas/TypeOfThangCallbackStatus'
+      type: object
+    ThangCommand:
+      properties:
+        is_async:
+          title: Async
+          type: boolean
+        command_priority:
+          title: Priority
+          type: integer
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
+        ref_uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        parent_ref_uuid:
+          title: 'Parent uuid'
+          type:
+            - string
+            - 'null'
+          format: uuid
+        command_args:
+          title: 'Command args'
+          description: $command_args
+          type:
+            - array
+            - 'null'
+          items: {  }
+        command_tags:
+          title: 'Command tags'
+          description: $command_tags
+          type:
+            - array
+            - 'null'
+          items: {  }
+        command_class:
+          title: 'Command class'
+          type:
+            - string
+            - 'null'
+        parent_command:
+          $ref: '#/components/schemas/ThangCallback'
+        command_hooks:
+          title: Hooks
+          type: array
+          items:
+            $ref: '#/components/schemas/ThangHook'
+        command_callbacks:
+          title: Callbacks
+          type: array
+          items:
+            $ref: '#/components/schemas/ThangCallback'
+      type: object
+    Thang:
+      properties:
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
+        ref_uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        finished_data:
+          title: 'Finished data'
+          description: $finished_data
+          type:
+            - array
+            - 'null'
+          items: {  }
+        thang_tags:
+          title: Tags
+          description: $thang_tags
+          type:
+            - array
+            - 'null'
+          items: {  }
+        thang_commands:
+          title: Hooks
+          type:
+            - array
+            - 'null'
+          items:
+            $ref: '#/components/schemas/ThangCommand'
+        thang_status:
+          $ref: '#/components/schemas/TypeOfThangStatus'
+        owning_namespace:
+          $ref: '#/components/schemas/Namespace'
+        notification_callback:
+          oneOf:
+            -
+              $ref: '#/components/schemas/ThangCallback'
+            -
+              type: 'null'
+          title: 'Completion callback'
+        commands:
+          title: Commands
+          type: array
+          items:
+            $ref: '#/components/schemas/ThangCommand'
+      type: object
+    ThangHook:
+      properties:
+        is_on:
+          title: 'On'
+          type: boolean
+        is_async:
+          title: Async
+          type: boolean
+        is_pre:
+          title: 'Before action'
+          type: boolean
+        is_public:
+          title: Public
+          type: boolean
+        hook_priority:
+          title: Priority
+          type: integer
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
+        ref_uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        hook_data:
+          title: Data
+          description: $hook_data
+          type:
+            - array
+            - 'null'
+          items: {  }
+        hook_notes:
+          title: Notes
+          type:
+            - string
+            - 'null'
+        hook_name:
+          title: Name
+          type: string
+        event_name:
+          title: Event
+          type: string
+        owning_namespace:
+          $ref: '#/components/schemas/Namespace'
+        hook_keywords:
+          title: Keywords
+          type: array
+          items:
+            $ref: '#/components/schemas/ThangHookKeys'
+      type: object
+    ThangHookKeys:
+      properties:
+        key_name:
+          title: Key
+          type: string
+        key_val:
+          title: Value
+          type:
+            - string
+            - 'null'
+        is_value_regex:
+          title: 'Is regex'
+          description: 'The value is a regex string and not a literal'
+          type: boolean
+        is_required:
+          title: Reuired
+          type: boolean
+        ref_uuid:
+          title: Uuid
+          format: uuid
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
+      type: object
+    TypeOfThangCallbackStatus:
+      description: 'postgres enum type_of_thang_callback_status'
+      type: string
+      enum:
+        - BUILDING
+        - MANUAL
+        - SUCCESSFUL
+        - FAIL
+        - ERROR
+    TypeOfThangStatus:
+      description: 'postgres enum type_of_thang_status'
+      type: string
+      enum:
+        - THANG_BUILDING
+        - THANG_WAITING
+        - THANG_PENDING
+        - THANG_RUNNING
+        - THANG_SUCCESS
+        - THANG_FAIL
+        - THANG_INVALID
+        - THANG_ERROR
   securitySchemes:
     bearerAuth:
       type: http
@@ -10880,3 +11131,6 @@ tags:
   -
     name: thing
     description: 'About things'
+  -
+    name: health
+    description: health

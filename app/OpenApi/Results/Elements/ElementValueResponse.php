@@ -6,7 +6,7 @@ use App\Models\Attribute;
 use App\Models\ElementSetMember;
 use App\Models\ElementType;
 use App\Models\ElementValue;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\OpenApi\Results\ResultBase;
 use OpenApi\Attributes as OA;

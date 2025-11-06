@@ -3,7 +3,7 @@
 namespace App\OpenApi\Results\Set;
 
 use App\Models\ElementLink;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\Elements\ElementResponse;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;

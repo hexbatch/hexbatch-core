@@ -6,6 +6,7 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Http\Controllers\Controller;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -24,7 +25,7 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -60,7 +61,7 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -96,7 +97,7 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -120,7 +121,7 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -156,7 +157,7 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -194,7 +195,7 @@ class OperationController extends Controller {
         tags: ['operation'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')

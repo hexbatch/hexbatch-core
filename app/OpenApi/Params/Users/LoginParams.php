@@ -3,6 +3,7 @@
 namespace App\OpenApi\Params\Users;
 
 
+use App\Data\ApiParams\OpenApi\Common\HexbatchResourceName;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\OpenApi\ApiDataTrait;
@@ -22,7 +23,7 @@ class LoginParams
 {
     use ApiDataTrait;
 
-    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'User Name',
+    #[OA\Property( title: 'User Name', type: HexbatchResourceName::class,
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]
 
     )]

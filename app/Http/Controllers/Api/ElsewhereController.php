@@ -6,6 +6,8 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -65,10 +67,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -93,10 +95,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -120,10 +122,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -150,10 +152,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','namespace'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -176,10 +178,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -204,10 +206,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -231,10 +233,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','event'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -258,10 +260,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -286,10 +288,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -317,10 +319,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -344,10 +346,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -371,10 +373,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -397,10 +399,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -426,10 +428,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -452,10 +454,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -478,10 +480,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','namespace'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -505,10 +507,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -533,10 +535,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','event'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -561,10 +563,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -590,10 +592,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -619,10 +621,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','namespace'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -663,7 +665,7 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere','public'],
         parameters: [
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -685,10 +687,10 @@ class ElsewhereController extends Controller {
         tags: ['elsewhere'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'server', description: "The server",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')

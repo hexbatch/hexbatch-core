@@ -2,9 +2,9 @@
 
 namespace App\OpenApi\Results\Set;
 
-use App\Models\Element;
+
 use App\Models\ElementSet;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\Elements\ElementResponse;
 use App\OpenApi\Results\ResultBase;
 use Carbon\Carbon;
@@ -39,8 +39,8 @@ class SetResponse extends ResultBase
     /** @var SetResponse[] $children_sets */
     public array $children_sets = []  ;
 
-    #[OA\Property(title: 'Children sets')]
-    /** @var Element[] $member_elements */
+    #[OA\Property(title: 'Member elements')]
+    /** @var ElementResponse[] $member_elements */
     public array $member_elements = []  ;
 
 

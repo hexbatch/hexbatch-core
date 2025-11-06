@@ -3,6 +3,7 @@
 namespace App\OpenApi\Results\Users;
 
 
+use App\Data\ApiParams\OpenApi\Common\HexbatchToken;
 use App\OpenApi\Results\ResultBase;
 use OpenApi\Attributes as OA;
 
@@ -15,7 +16,7 @@ class LoginResponse extends ResultBase
     #[OA\Property(title: 'Message')]
     public string $message;
 
-    #[OA\Property(ref: '#/components/schemas/HexbatchToken', title: 'Auth Token', type: 'password')]
+    #[OA\Property(title: 'Auth Token', type: HexbatchToken::class)]
     public string $auth_token;
 
     #[OA\Property(title: 'When the current token expires',format: 'date-time')]

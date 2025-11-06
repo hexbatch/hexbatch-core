@@ -6,6 +6,8 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
 use App\Models\ElementLink;
 use App\OpenApi\ApiResults\Set\ApiLinkerCollectionResponse;
@@ -37,13 +39,13 @@ class LinkController extends Controller {
         tags: ['link'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase used",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_link', description: "The link",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -83,10 +85,10 @@ class LinkController extends Controller {
         tags: ['link'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase used",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -110,13 +112,13 @@ class LinkController extends Controller {
         tags: ['link'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'working_phase', description: "The phase used",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_link', description: "The link",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [

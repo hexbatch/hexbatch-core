@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
 use App\Sys\Res\Types\Stk\Root;
 use OpenApi\Attributes as OA;
@@ -24,10 +26,10 @@ class PhaseController extends Controller {
         tags: ['phase'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'phase', description: "The phase",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -50,7 +52,7 @@ class PhaseController extends Controller {
         tags: ['phase'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
         ],
         responses: [

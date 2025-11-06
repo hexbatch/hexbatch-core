@@ -8,7 +8,11 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
+use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchAttribute;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
@@ -19,7 +23,6 @@ use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
 use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
 use App\OpenApi\ApiResults\Bounds\ApiLocationCollectionResponse;
 use App\OpenApi\ApiResults\Bounds\ApiLocationResponse;
-use App\OpenApi\ApiResults\Bounds\ApiScheduleCollectionResponse;
 use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
 use App\OpenApi\ApiResults\Type\ApiTypeResponse;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
@@ -34,7 +37,6 @@ use App\OpenApi\Params\Listing\Design\ListDesignParams;
 use App\OpenApi\Params\Listing\Design\ListLocationParams;
 use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
-
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Api;
@@ -67,10 +69,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -111,10 +113,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -154,10 +156,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -200,10 +202,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -244,7 +246,7 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: ApiTypeResponse::class)),
@@ -284,10 +286,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -328,10 +330,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -368,7 +370,7 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') )
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
@@ -407,13 +409,13 @@ class DesignController extends Controller {
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -449,7 +451,7 @@ class DesignController extends Controller {
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: ApiAttributeCollectionResponse::class)),
@@ -485,13 +487,13 @@ class DesignController extends Controller {
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -538,10 +540,10 @@ class DesignController extends Controller {
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -582,13 +584,13 @@ class DesignController extends Controller {
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -636,10 +638,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -682,10 +684,10 @@ class DesignController extends Controller {
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') )
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) )
 
         ],
         responses: [
@@ -729,7 +731,7 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
         ],
         responses: [
@@ -768,10 +770,10 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'time_bound', description: "The schedule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -809,10 +811,10 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'time_bound', description: "The schedule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -850,10 +852,10 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'time_bound', description: "The schedule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -891,7 +893,7 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: ApiLocationResponse::class)),
@@ -929,10 +931,10 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'location_bound', description: "The map or shape",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -972,10 +974,10 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'location_bound', description: "The map or shape",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1015,7 +1017,7 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: ApiLocationCollectionResponse::class)),
@@ -1050,10 +1052,10 @@ class DesignController extends Controller {
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ApiScheduleCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ScheduleList::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -1112,13 +1114,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1142,13 +1144,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1174,10 +1176,10 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1203,13 +1205,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1235,13 +1237,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1267,16 +1269,16 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
             new OA\PathParameter(  name: 'attribute_rule', description: "The rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1303,16 +1305,16 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
             new OA\PathParameter(  name: 'attribute_rule', description: "The rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1334,16 +1336,16 @@ class DesignController extends Controller {
         tags: ['design','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
             new OA\PathParameter(  name: 'attribute_rule', description: "The rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1368,13 +1370,13 @@ class DesignController extends Controller {
         tags: ['design','attribute','rule'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'attribute', description: "The attribute",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchAttribute') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchAttribute::class) ),
 
         ],
         responses: [
@@ -1399,10 +1401,10 @@ class DesignController extends Controller {
         tags: ['design','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1425,10 +1427,10 @@ class DesignController extends Controller {
         tags: ['design','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
@@ -1453,13 +1455,13 @@ class DesignController extends Controller {
         tags: ['design','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchNamespace') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
             new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'live_rule', description: "The live rule",
-                in: 'path', required: true,  schema: new OA\Schema(ref: '#/components/schemas/HexbatchResource') ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [

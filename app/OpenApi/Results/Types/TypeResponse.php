@@ -2,10 +2,11 @@
 
 namespace App\OpenApi\Results\Types;
 
+use App\Data\ApiParams\Common\HexbatchUuid;
+use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Data\ApiParams\OpenApi\Common\HexbatchResourceName;
 use App\Models\ElementType;
-use App\OpenApi\Common\HexbatchUuid;
 use App\OpenApi\Results\Attributes\AttributeResponse;
-use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\UserNamespaces\UserNamespaceResponse;
 use Carbon\Carbon;
@@ -22,7 +23,7 @@ class TypeResponse extends ResultBase
     #[OA\Property(title: 'Type uuid',type: HexbatchUuid::class)]
     public string $uuid = '';
 
-    #[OA\Property(title: 'Type name')]
+    #[OA\Property(title: 'Type name',type: HexbatchResourceName::class)]
     public string $name = '';
 
 
@@ -63,14 +64,13 @@ class TypeResponse extends ResultBase
     public array $access = [] ;
 
     #[OA\Property( title: 'Schedule')]
-    public ?ScheduleResponse $schedule = null ;
+    public ?Schedule $schedule = null ;
 
 
 
     public function __construct(
         ElementType $given_type,int $namespace_levels = 0,int $parent_levels = 0,
-        int $attribute_levels = 0, int $inherited_attribute_levels = 0,
-        $number_time_spans = 1
+        int $attribute_levels = 0, int $inherited_attribute_levels = 0
     )
     {
         parent::__construct();
@@ -111,7 +111,7 @@ class TypeResponse extends ResultBase
 
         $this->schedule = null;
         if ($given_type->type_time) {
-            $this->schedule = new ScheduleResponse(given_time: $given_type->type_time,number_spans: $number_time_spans);
+            $this->schedule = Schedule::from($given_type->type_time);
         }
 
     }

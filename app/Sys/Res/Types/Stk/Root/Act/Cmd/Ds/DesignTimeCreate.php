@@ -13,7 +13,6 @@ use App\Exceptions\RefCodes;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Results\Bounds\ScheduleResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Illuminate\Support\Collection;
@@ -150,7 +149,7 @@ class DesignTimeCreate extends Act\Cmd\Ds
         $ret = [];
         $what =  $this->getMyData();
         if (isset($what['bound'])) {
-            $ret['bound'] = new ScheduleResponse(given_time: $what['bound']);
+            $ret['bound'] = Schedule::from($what['bound']);
         }
         return $ret;
     }

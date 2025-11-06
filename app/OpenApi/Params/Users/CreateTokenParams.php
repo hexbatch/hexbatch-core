@@ -2,11 +2,11 @@
 
 namespace App\OpenApi\Params\Users;
 
+use App\Data\ApiParams\OpenApi\Common\HexbatchSecondsToLive;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\OpenApi\ApiDataTrait;
-use App\OpenApi\Common\HexbatchSecondsToLive;
 use OpenApi\Attributes as OA;
 
 /**
@@ -20,11 +20,11 @@ class CreateTokenParams
     use ApiDataTrait;
     const int|float MAX_PASSTHROUGH_SIZE = 1024*20; //20k
 
-    #[OA\Property( title: "Passthrough data (optional)",  nullable: true)]
-    /** @var mixed[] $response */
+    #[OA\Property( title: "Passthrough data (optional)",items: new OA\Items(),  nullable: true)]
+    /** @var mixed[] $passthrough */
     protected array $passthrough;
 
-    #[OA\Property(ref: '#/components/schemas/HexbatchSecondsToLive', title: 'Seconds to live',description: "leave empty to not have an expiration date", nullable: true)]
+    #[OA\Property(title: 'Seconds to live', description: "leave empty to not have an expiration date", type: HexbatchSecondsToLive::class, nullable: true)]
     protected ?int $seconds = null;
 
 

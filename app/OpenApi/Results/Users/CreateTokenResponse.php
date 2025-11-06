@@ -2,6 +2,7 @@
 
 namespace App\OpenApi\Results\Users;
 
+use App\Data\ApiParams\OpenApi\Common\HexbatchToken;
 use App\OpenApi\Results\ResultBase;
 use OpenApi\Attributes as OA;
 
@@ -12,7 +13,7 @@ use OpenApi\Attributes as OA;
 class CreateTokenResponse extends ResultBase
 {
 
-    #[OA\Property(ref: '#/components/schemas/HexbatchToken', title: 'Auth Token', type: 'string')]
+    #[OA\Property(title: 'Auth Token', type: HexbatchToken::class)]
     public string $auth_token;
 
     public function __construct(string $auth_token)

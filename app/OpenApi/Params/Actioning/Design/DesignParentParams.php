@@ -3,6 +3,7 @@
 namespace App\OpenApi\Params\Actioning\Design;
 
 
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Exceptions\HexbatchBadParamException;
 use App\Exceptions\RefCodes;
 use App\Models\ElementType;
@@ -27,7 +28,7 @@ class DesignParentParams extends ApiCallBase
     public function __construct(
         protected ?ElementType $given_type = null,
 
-        #[OA\Property( title:"Parents",items:  new OA\Items(ref: '#/components/schemas/HexbatchResource'),nullable: true)]
+        #[OA\Property( title:"Parents",items:  new OA\Items(type: HexbatchResource::class),nullable: true)]
         protected array $parents = []
     )
     {

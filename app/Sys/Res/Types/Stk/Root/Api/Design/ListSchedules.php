@@ -6,6 +6,7 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 use App\Annotations\ApiParamMarker;
 use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
 use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
+use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
@@ -64,7 +65,7 @@ class ListSchedules extends Api\DesignApi
     {
         $what =  $this->getMyData();
         $schedules = $what[static::PRIMARY_SNAPSHOT_KEY];
-        $resp = ScheduleList::collect($schedules, CursorPaginatedDataCollection::class);
+        $resp = Schedule::collect($schedules, CursorPaginatedDataCollection::class);
         return $resp;
     }
 

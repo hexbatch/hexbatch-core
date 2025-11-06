@@ -4,7 +4,7 @@ namespace App\OpenApi\Results\Elements;
 
 use App\Models\Element;
 use App\Models\ElementSetMember;
-use App\OpenApi\Common\HexbatchUuid;
+use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\Phase\PhaseResponse;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;

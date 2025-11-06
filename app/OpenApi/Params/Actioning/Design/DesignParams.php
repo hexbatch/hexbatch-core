@@ -3,13 +3,14 @@
 namespace App\OpenApi\Params\Actioning\Design;
 
 
+use App\Data\ApiParams\OpenApi\Common\HexbatchResourceName;
+use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Helpers\Utilities;
 use App\Models\ElementType;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use App\OpenApi\ApiCallBase;
-use App\OpenApi\Common\Resources\HexbatchResource;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 
@@ -19,7 +20,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(schema: 'DesignParams')]
 class DesignParams extends ApiCallBase
 {
-    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'Type name',
+    #[OA\Property( title: 'Type name', type: HexbatchResourceName::class,
         example: [new OA\Examples(summary: "name example", value:'he312345') ]
 
     )]

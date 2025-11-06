@@ -3,6 +3,7 @@
 namespace App\OpenApi\Params\Actioning\Registration;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Data\ApiParams\OpenApi\Common\HexbatchResourceName;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\User;
@@ -23,7 +24,7 @@ use OpenApi\Attributes as OA;
 
 class RegistrationParams extends ApiCallBase
 {
-    #[OA\Property(ref: '#/components/schemas/HexbatchResourceName', title: 'User Name',
+    #[OA\Property( title: 'User Name', type: HexbatchResourceName::class,
         example: [new OA\Examples(summary: "user name example", value:'will_fart') ]
 
     )]
