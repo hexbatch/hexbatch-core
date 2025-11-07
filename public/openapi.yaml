@@ -7635,28 +7635,6 @@ components:
             - string
             - 'null'
       type: object
-    HexbatchCron:
-      title: 'Linux crontab schedule'
-      description: 'Defines the cron format'
-      type: string
-      maxLength: 36
-      minLength: 36
-      pattern: '^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+(L|W)?|\*(\/\d+)?|L(-\d+|W)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})|(@(annually|yearly|monthly|weekly|daily|hourly))$'
-      example:
-        -
-          summary: 'Example cron'
-          value: '15 5 * * THU'
-    HexbatchResourceName:
-      title: 'Resource Name'
-      description: 'Defines a resource name by itself'
-      type: string
-      maxLength: 30
-      minLength: 3
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'No capital letters, no punctuation, underscores allowed, numbers allowed after first letter'
-          value: my_first_user221
     HexbatchUuid:
       title: 'Unique reference'
       description: 'Defines a regular uuid'
@@ -7808,6 +7786,305 @@ components:
           format: datetime
           example: '2025-02-25T15:00:59-06:00'
       type: object
+    HexbatchCron:
+      title: 'Linux crontab schedule'
+      description: 'Defines the cron format'
+      type: string
+      maxLength: 36
+      minLength: 36
+      pattern: '^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+(L|W)?|\*(\/\d+)?|L(-\d+|W)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,7})|(@(annually|yearly|monthly|weekly|daily|hourly))$'
+      example:
+        -
+          summary: 'Example cron'
+          value: '15 5 * * THU'
+    HexbatchResourceName:
+      title: 'Resource Name'
+      description: 'Defines a resource name by itself'
+      type: string
+      maxLength: 30
+      minLength: 3
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'No capital letters, no punctuation, underscores allowed, numbers allowed after first letter'
+          value: my_first_user221
+    HexbatchSecondsToLive:
+      title: 'Seconds to live'
+      description: 'When needing to give a length in seconds up to a year'
+      type: integer
+      format: int32
+      maxLength: 31536000
+      minLength: 1
+      example:
+        -
+          summary: 'A lifetime of 6 months'
+          value: '15768000'
+    HexbatchToken:
+      title: 'A token used to authenticate'
+      description: 'Defines a regular uuid'
+      type: string
+      maxLength: 60
+      minLength: 40
+      example:
+        -
+          summary: 'Tokens look like this, but not always'
+          value: 2|jY8m3acW2GdDZlgJOxX2hWCjlRJ6lcu4OA3q3XWcc4cbc545
+    HexbatchDomainTypeAttribute:
+      title: Attribute
+      description: 'Defines a domain:type:attribute'
+      type: string
+      maxLength: 315
+      minLength: 11
+      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A domain with a colon then a type name  with a colon then an attribute'
+          value: 'top.example.com:feral:color'
+    HexbatchDomainTypeUuid:
+      title: Attribute
+      description: 'Defines a domain:type:uuid'
+      type: string
+      maxLength: 321
+      minLength: 44
+      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A domain with a colon then a type name  with a colon then a uuid'
+          value: 'top.example.com:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchDomainUuidAttribute:
+      title: Attribute
+      description: 'Defines a domain:uuid:attribute'
+      type: string
+      maxLength: 321
+      minLength: 44
+      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A domain with a colon then a uuid  with a colon then an attribute'
+          value: 'top.example.com:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
+    HexbatchDomainUuidUuid:
+      title: Attribute
+      description: 'Defines a domain:uuid:uuid'
+      type: string
+      maxLength: 327
+      minLength: 77
+      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A domain with a colon then a uuid with a colon then a uuid'
+          value: 'top.example.com:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchNamespaceTypeAttribute:
+      title: Attribute
+      description: 'Defines a namespace:type:attribute'
+      type: string
+      maxLength: 92
+      minLength: 11
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A  namespace with a colon then a type name  with a colon then an attribute'
+          value: 'cats:feral:color'
+    HexbatchNamespaceTypeUuid:
+      title: Attribute
+      description: 'Defines a namespace:type:uuid'
+      type: string
+      maxLength: 98
+      minLength: 44
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A  namespace with a colon then a type name  with a colon then a uuid'
+          value: 'cats:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchNamespaceUuidAttribute:
+      title: Attribute
+      description: 'Defines a namespace:uuid:attribute'
+      type: string
+      maxLength: 98
+      minLength: 44
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A  namespace with a colon then a uuid  with a colon then an attribute'
+          value: 'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
+    HexbatchNamespaceUuidUuid:
+      title: Attribute
+      description: 'Defines a namespace:uuid:uuid'
+      type: string
+      maxLength: 104
+      minLength: 77
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A  namespace with a colon then a uuid with a colon then a uuid'
+          value: 'cats:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchUuidTypeAttribute:
+      title: Attribute
+      description: 'Defines a namespace:type:attribute'
+      type: string
+      maxLength: 98
+      minLength: 44
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A uuid  with a colon then a type name  with a colon then an attribute'
+          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:color'
+    HexbatchUuidTypeUuid:
+      title: Attribute
+      description: 'Defines a namespace:type:uuid'
+      type: string
+      maxLength: 104
+      minLength: 77
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A uuid with a colon then a type name  with a colon then a uuid'
+          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchUuidUuidAttribute:
+      title: Attribute
+      description: 'Defines a namespace:uuid:attribute'
+      type: string
+      maxLength: 104
+      minLength: 77
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A uuid with a colon then a uuid  with a colon then an attribute'
+          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
+    HexbatchUuidUuidUuid:
+      title: Attribute
+      description: 'Defines a namespace:uuid:uuid'
+      type: string
+      maxLength: 110
+      minLength: 110
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A uuid with a colon then a uuid with a colon then a uuid'
+          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchAttribute:
+      title: 'Attribute that is defined by a namespace:type:attribute in name or uuid parts '
+      description: 'Names an attribute'
+      type: string
+      maxLength: 327
+      minLength: 11
+      oneOf:
+        -
+          $ref: '#/components/schemas/HexbatchNamespacedUuid'
+        -
+          $ref: '#/components/schemas/HexbatchUuidUuid'
+        -
+          $ref: '#/components/schemas/HexbatchNamespacedName'
+        -
+          $ref: '#/components/schemas/HexbatchNamespaceTypeAttribute'
+        -
+          $ref: '#/components/schemas/HexbatchNamespaceTypeUuid'
+        -
+          $ref: '#/components/schemas/HexbatchNamespaceUuidAttribute'
+        -
+          $ref: '#/components/schemas/HexbatchNamespaceUuidUuid'
+        -
+          $ref: '#/components/schemas/HexbatchUuidTypeAttribute'
+        -
+          $ref: '#/components/schemas/HexbatchUuidTypeUuid'
+        -
+          $ref: '#/components/schemas/HexbatchUuidUuidAttribute'
+        -
+          $ref: '#/components/schemas/HexbatchUuidUuidUuid'
+        -
+          $ref: '#/components/schemas/HexbatchDomainTypeAttribute'
+        -
+          $ref: '#/components/schemas/HexbatchDomainTypeUuid'
+        -
+          $ref: '#/components/schemas/HexbatchDomainUuidAttribute'
+        -
+          $ref: '#/components/schemas/HexbatchDomainUuidUuid'
+    HexbatchDomainedName:
+      title: 'Domained name'
+      description: 'Defines a domain:name'
+      type: string
+      maxLength: 284
+      minLength: 7
+      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A domain or subdomain with a colon then a resource name'
+          value: 'top.example.com:first_kittens99'
+    HexbatchDomainedUuid:
+      title: 'Domained uuid'
+      description: 'Defines a domain:uuid'
+      type: string
+      maxLength: 290
+      minLength: 40
+      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A domain or subdomain with a colon then a uuid'
+          value: 'top.example.com:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchNamespace:
+      title: 'A namespace '
+      description: 'A namespace has the same rules as a resource, and is used to organize resources'
+      type: string
+      maxLength: 36
+      minLength: 3
+      oneOf:
+        -
+          $ref: '#/components/schemas/HexbatchResourceName'
+        -
+          $ref: '#/components/schemas/HexbatchUuid'
+    HexbatchNamespacedName:
+      title: 'Namespaced name'
+      description: 'Defines a namespace:name'
+      type: string
+      maxLength: 61
+      minLength: 7
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
+      example:
+        -
+          summary: 'A namespace with a colon then a resource name'
+          value: 'cats:first_kittens99'
+    HexbatchNamespacedUuid:
+      title: 'Namespaced uuid'
+      description: 'Defines a namespace:uuid'
+      type: string
+      maxLength: 67
+      minLength: 40
+      pattern: '^\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A namespace with a colon then a uuid'
+          value: 'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
+    HexbatchResource:
+      title: 'Resource Name or uuid that can be namespaced '
+      description: 'Names a resource'
+      type: string
+      maxLength: 290
+      minLength: 3
+      oneOf:
+        -
+          $ref: '#/components/schemas/HexbatchResourceName'
+        -
+          $ref: '#/components/schemas/HexbatchUuid'
+        -
+          $ref: '#/components/schemas/HexbatchNamespacedUuid'
+        -
+          $ref: '#/components/schemas/HexbatchUuidUuid'
+        -
+          $ref: '#/components/schemas/HexbatchNamespacedName'
+        -
+          $ref: '#/components/schemas/HexbatchDomainedUuid'
+        -
+          $ref: '#/components/schemas/HexbatchDomainedName'
+    HexbatchUuidUuid:
+      title: 'Namespaced name with both in uuid format'
+      description: 'Defines a uuid:uuid'
+      type: string
+      maxLength: 73
+      minLength: 73
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example:
+        -
+          summary: 'A uuid with a colon then a uuid'
+          value: '3fabcde3-aaaa-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
     TypeOfElementValuePolicy:
       title: 'Element value policy'
       description: 'postgres enum type_of_element_value_policy'
@@ -8162,283 +8439,6 @@ components:
               type: 'null'
           title: Thing
       type: object
-    HexbatchSecondsToLive:
-      title: 'Seconds to live'
-      description: 'When needing to give a length in seconds up to a year'
-      type: integer
-      format: int32
-      maxLength: 31536000
-      minLength: 1
-      example:
-        -
-          summary: 'A lifetime of 6 months'
-          value: '15768000'
-    HexbatchToken:
-      title: 'A token used to authenticate'
-      description: 'Defines a regular uuid'
-      type: string
-      maxLength: 60
-      minLength: 40
-      example:
-        -
-          summary: 'Tokens look like this, but not always'
-          value: 2|jY8m3acW2GdDZlgJOxX2hWCjlRJ6lcu4OA3q3XWcc4cbc545
-    HexbatchDomainTypeAttribute:
-      title: Attribute
-      description: 'Defines a domain:type:attribute'
-      type: string
-      maxLength: 315
-      minLength: 11
-      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A domain with a colon then a type name  with a colon then an attribute'
-          value: 'top.example.com:feral:color'
-    HexbatchDomainTypeUuid:
-      title: Attribute
-      description: 'Defines a domain:type:uuid'
-      type: string
-      maxLength: 321
-      minLength: 44
-      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A domain with a colon then a type name  with a colon then a uuid'
-          value: 'top.example.com:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchDomainUuidAttribute:
-      title: Attribute
-      description: 'Defines a domain:uuid:attribute'
-      type: string
-      maxLength: 321
-      minLength: 44
-      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A domain with a colon then a uuid  with a colon then an attribute'
-          value: 'top.example.com:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
-    HexbatchDomainUuidUuid:
-      title: Attribute
-      description: 'Defines a domain:uuid:uuid'
-      type: string
-      maxLength: 327
-      minLength: 77
-      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A domain with a colon then a uuid with a colon then a uuid'
-          value: 'top.example.com:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchNamespaceTypeAttribute:
-      title: Attribute
-      description: 'Defines a namespace:type:attribute'
-      type: string
-      maxLength: 92
-      minLength: 11
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A  namespace with a colon then a type name  with a colon then an attribute'
-          value: 'cats:feral:color'
-    HexbatchNamespaceTypeUuid:
-      title: Attribute
-      description: 'Defines a namespace:type:uuid'
-      type: string
-      maxLength: 98
-      minLength: 44
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A  namespace with a colon then a type name  with a colon then a uuid'
-          value: 'cats:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchNamespaceUuidAttribute:
-      title: Attribute
-      description: 'Defines a namespace:uuid:attribute'
-      type: string
-      maxLength: 98
-      minLength: 44
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A  namespace with a colon then a uuid  with a colon then an attribute'
-          value: 'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
-    HexbatchNamespaceUuidUuid:
-      title: Attribute
-      description: 'Defines a namespace:uuid:uuid'
-      type: string
-      maxLength: 104
-      minLength: 77
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A  namespace with a colon then a uuid with a colon then a uuid'
-          value: 'cats:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchUuidTypeAttribute:
-      title: Attribute
-      description: 'Defines a namespace:type:attribute'
-      type: string
-      maxLength: 98
-      minLength: 44
-      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A uuid  with a colon then a type name  with a colon then an attribute'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:color'
-    HexbatchUuidTypeUuid:
-      title: Attribute
-      description: 'Defines a namespace:type:uuid'
-      type: string
-      maxLength: 104
-      minLength: 77
-      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A uuid with a colon then a type name  with a colon then a uuid'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:feral:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchUuidUuidAttribute:
-      title: Attribute
-      description: 'Defines a namespace:uuid:attribute'
-      type: string
-      maxLength: 104
-      minLength: 77
-      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A uuid with a colon then a uuid  with a colon then an attribute'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4:color'
-    HexbatchUuidUuidUuid:
-      title: Attribute
-      description: 'Defines a namespace:uuid:uuid'
-      type: string
-      maxLength: 110
-      minLength: 110
-      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A uuid with a colon then a uuid with a colon then a uuid'
-          value: '5feda9e3-e732-41b0-88c6-3d3f45e83bf4:4feda9e3-e732-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchAttribute:
-      title: 'Attribute that is defined by a namespace:type:attribute in name or uuid parts '
-      description: 'Names an attribute'
-      type: string
-      maxLength: 327
-      minLength: 11
-      oneOf:
-        -
-          $ref: '#/components/schemas/HexbatchNamespacedUuid'
-        -
-          $ref: '#/components/schemas/HexbatchUuidUuid'
-        -
-          $ref: '#/components/schemas/HexbatchNamespacedName'
-        -
-          $ref: '#/components/schemas/HexbatchNamespaceTypeAttribute'
-        -
-          $ref: '#/components/schemas/HexbatchNamespaceTypeUuid'
-        -
-          $ref: '#/components/schemas/HexbatchNamespaceUuidAttribute'
-        -
-          $ref: '#/components/schemas/HexbatchNamespaceUuidUuid'
-        -
-          $ref: '#/components/schemas/HexbatchUuidTypeAttribute'
-        -
-          $ref: '#/components/schemas/HexbatchUuidTypeUuid'
-        -
-          $ref: '#/components/schemas/HexbatchUuidUuidAttribute'
-        -
-          $ref: '#/components/schemas/HexbatchUuidUuidUuid'
-        -
-          $ref: '#/components/schemas/HexbatchDomainTypeAttribute'
-        -
-          $ref: '#/components/schemas/HexbatchDomainTypeUuid'
-        -
-          $ref: '#/components/schemas/HexbatchDomainUuidAttribute'
-        -
-          $ref: '#/components/schemas/HexbatchDomainUuidUuid'
-    HexbatchDomainedName:
-      title: 'Domained name'
-      description: 'Defines a domain:name'
-      type: string
-      maxLength: 284
-      minLength: 7
-      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A domain or subdomain with a colon then a resource name'
-          value: 'top.example.com:first_kittens99'
-    HexbatchDomainedUuid:
-      title: 'Domained uuid'
-      description: 'Defines a domain:uuid'
-      type: string
-      maxLength: 290
-      minLength: 40
-      pattern: '^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A domain or subdomain with a colon then a uuid'
-          value: 'top.example.com:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchNamespace:
-      title: 'A namespace '
-      description: 'A namespace has the same rules as a resource, and is used to organize resources'
-      type: string
-      maxLength: 36
-      minLength: 3
-      oneOf:
-        -
-          $ref: '#/components/schemas/HexbatchResourceName'
-        -
-          $ref: '#/components/schemas/HexbatchUuid'
-    HexbatchNamespacedName:
-      title: 'Namespaced name'
-      description: 'Defines a namespace:name'
-      type: string
-      maxLength: 61
-      minLength: 7
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}:\p{L}[\p{L}0-9_]{2,29}$'
-      example:
-        -
-          summary: 'A namespace with a colon then a resource name'
-          value: 'cats:first_kittens99'
-    HexbatchNamespacedUuid:
-      title: 'Namespaced uuid'
-      description: 'Defines a namespace:uuid'
-      type: string
-      maxLength: 67
-      minLength: 40
-      pattern: '^\p{L}[\p{L}0-9_]{2,29}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A namespace with a colon then a uuid'
-          value: 'cats:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
-    HexbatchResource:
-      title: 'Resource Name or uuid that can be namespaced '
-      description: 'Names a resource'
-      type: string
-      maxLength: 290
-      minLength: 3
-      oneOf:
-        -
-          $ref: '#/components/schemas/HexbatchResourceName'
-        -
-          $ref: '#/components/schemas/HexbatchUuid'
-        -
-          $ref: '#/components/schemas/HexbatchNamespacedUuid'
-        -
-          $ref: '#/components/schemas/HexbatchUuidUuid'
-        -
-          $ref: '#/components/schemas/HexbatchNamespacedName'
-        -
-          $ref: '#/components/schemas/HexbatchDomainedUuid'
-        -
-          $ref: '#/components/schemas/HexbatchDomainedName'
-    HexbatchUuidUuid:
-      title: 'Namespaced name with both in uuid format'
-      description: 'Defines a uuid:uuid'
-      type: string
-      maxLength: 73
-      minLength: 73
-      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}:[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
-      example:
-        -
-          summary: 'A uuid with a colon then a uuid'
-          value: '3fabcde3-aaaa-41b0-88c6-3d3f45e83bf4:3fabcde3-e732-41b0-88c6-3d3f45e83bf4'
     ErrorResponse:
       title: Error
       description: 'All errors will have this format'
@@ -10771,6 +10771,31 @@ components:
           format: datetime
           example: '2025-01-25T15:00:59-06:00'
       type: object
+    CommandParams:
+      properties:
+        command_class:
+          title: 'Command class'
+          type:
+            - string
+            - 'null'
+        is_async:
+          title: Async
+          type: boolean
+        command_args:
+          title: 'Command args'
+          description: $command_args
+          type:
+            - array
+            - 'null'
+          items: {  }
+        command_tags:
+          title: 'Command tags'
+          description: $command_tags
+          type:
+            - array
+            - 'null'
+          items: {  }
+      type: object
     ThangCallback:
       properties:
         thang_command_ref:
@@ -10812,69 +10837,52 @@ components:
           $ref: '#/components/schemas/TypeOfThangCallbackStatus'
       type: object
     ThangCommand:
-      properties:
-        is_async:
-          title: Async
-          type: boolean
-        command_priority:
-          title: Priority
-          type: integer
-        created_at:
-          title: Created
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-02-25T15:00:59-06:00'
-        updated_at:
-          title: Updated
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-03-25T15:00:59-06:00'
-        ref_uuid:
-          title: Uuid
-          type: string
-          format: uuid
-        parent_ref_uuid:
-          title: 'Parent uuid'
-          type:
-            - string
-            - 'null'
-          format: uuid
-        command_args:
-          title: 'Command args'
-          description: $command_args
-          type:
-            - array
-            - 'null'
-          items: {  }
-        command_tags:
-          title: 'Command tags'
-          description: $command_tags
-          type:
-            - array
-            - 'null'
-          items: {  }
-        command_class:
-          title: 'Command class'
-          type:
-            - string
-            - 'null'
-        parent_command:
-          $ref: '#/components/schemas/ThangCallback'
-        command_hooks:
-          title: Hooks
-          type: array
-          items:
-            $ref: '#/components/schemas/ThangHook'
-        command_callbacks:
-          title: Callbacks
-          type: array
-          items:
-            $ref: '#/components/schemas/ThangCallback'
       type: object
+      allOf:
+        -
+          $ref: '#/components/schemas/CommandParams'
+        -
+          properties:
+            command_priority:
+              title: Priority
+              type: integer
+            created_at:
+              title: Created
+              type:
+                - string
+                - 'null'
+              format: datetime
+              example: '2025-02-25T15:00:59-06:00'
+            updated_at:
+              title: Updated
+              type:
+                - string
+                - 'null'
+              format: datetime
+              example: '2025-03-25T15:00:59-06:00'
+            ref_uuid:
+              title: Uuid
+              type: string
+              format: uuid
+            parent_ref_uuid:
+              title: 'Parent uuid'
+              type:
+                - string
+                - 'null'
+              format: uuid
+            parent_command:
+              $ref: '#/components/schemas/ThangCommand'
+            command_hooks:
+              title: Hooks
+              type: array
+              items:
+                $ref: '#/components/schemas/ThangHook'
+            command_callbacks:
+              title: Callbacks
+              type: array
+              items:
+                $ref: '#/components/schemas/ThangCallback'
+          type: object
     Thang:
       properties:
         created_at:
@@ -10908,9 +10916,10 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: string
         thang_commands:
-          title: Hooks
+          title: 'Command data'
           type:
             - array
             - 'null'
@@ -10975,6 +10984,14 @@ components:
             - array
             - 'null'
           items: {  }
+        hook_tags:
+          title: Tags
+          description: $hook_tags
+          type:
+            - array
+            - 'null'
+          items:
+            type: string
         hook_notes:
           title: Notes
           type:
@@ -10988,46 +11005,6 @@ components:
           type: string
         owning_namespace:
           $ref: '#/components/schemas/Namespace'
-        hook_keywords:
-          title: Keywords
-          type: array
-          items:
-            $ref: '#/components/schemas/ThangHookKeys'
-      type: object
-    ThangHookKeys:
-      properties:
-        key_name:
-          title: Key
-          type: string
-        key_val:
-          title: Value
-          type:
-            - string
-            - 'null'
-        is_value_regex:
-          title: 'Is regex'
-          description: 'The value is a regex string and not a literal'
-          type: boolean
-        is_required:
-          title: Reuired
-          type: boolean
-        ref_uuid:
-          title: Uuid
-          format: uuid
-        created_at:
-          title: Created
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-02-25T15:00:59-06:00'
-        updated_at:
-          title: Updated
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-03-25T15:00:59-06:00'
       type: object
     TypeOfThangCallbackStatus:
       description: 'postgres enum type_of_thang_callback_status'

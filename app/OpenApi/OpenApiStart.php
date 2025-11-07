@@ -1,6 +1,6 @@
 <?php
 /*
- ./vendor/bin/openapi   app/Enums app/OpenApi app/Http app/Data libs/thangs --version 3.1.0 -o  public/openapi.yaml
+ ./vendor/bin/openapi   app/Enums app/OpenApi app/Http app/Data libs --version 3.1.0 -o  public/openapi.yaml
  ./vendor/bin/openapi   app/Enums app/OpenApi app/Http app/Data libs --version 3.1.0 -f json -o  public/openapi.json
 
 https://redocly.com/docs/cli/installation
