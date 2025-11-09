@@ -10802,10 +10802,6 @@ components:
           title: Uuid
           type: string
           format: uuid
-        source_thang_ref:
-          title: 'Thang uuid'
-          type: string
-          format: uuid
         owning_hook_ref:
           title: 'Hook uuid'
           type: string
@@ -10849,65 +10845,82 @@ components:
           example: '2025-03-25T15:00:59-06:00'
       type: object
     ThangCommand:
+      properties:
+        ref_uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        parent_ref_uuid:
+          title: 'Parent uuid'
+          type:
+            - string
+            - 'null'
+          format: uuid
+        parent_command:
+          $ref: '#/components/schemas/ThangCommand'
+        command_class:
+          title: 'Command class'
+          type:
+            - string
+            - 'null'
+        command_hooks:
+          title: Hooks
+          type: array
+          items:
+            $ref: '#/components/schemas/ThangHook'
+        command_callbacks:
+          title: Callbacks
+          type: array
+          items:
+            $ref: '#/components/schemas/ThangCallback'
+        is_async:
+          title: Async
+          type: boolean
+        command_args:
+          title: 'Command args'
+          description: $command_args
+          type:
+            - array
+            - 'null'
+          items: {  }
+        command_tags:
+          title: 'Command tags'
+          description: $command_tags
+          type:
+            - array
+            - 'null'
+          items: {  }
+        staging_data_from_children:
+          title: Staging
+          description: $staging_data_from_children
+          type:
+            - array
+            - 'null'
+          items: {  }
+        command_errors:
+          title: Errors
+          description: $command_errors
+          type:
+            - array
+            - 'null'
+          items: {  }
+        command_status:
+          $ref: '#/components/schemas/TypeOfCmdStatus'
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
       type: object
-      allOf:
-        -
-          $ref: '#/components/schemas/CommandParams'
-        -
-          properties:
-            ref_uuid:
-              title: Uuid
-              type: string
-              format: uuid
-            parent_ref_uuid:
-              title: 'Parent uuid'
-              type:
-                - string
-                - 'null'
-              format: uuid
-            parent_command:
-              $ref: '#/components/schemas/ThangCommand'
-            command_hooks:
-              title: Hooks
-              type: array
-              items:
-                $ref: '#/components/schemas/ThangHook'
-            command_callbacks:
-              title: Callbacks
-              type: array
-              items:
-                $ref: '#/components/schemas/ThangCallback'
-            staging_data_from_children:
-              title: Staging
-              description: $staging_data_from_children
-              type:
-                - array
-                - 'null'
-              items: {  }
-            command_errors:
-              title: Errors
-              description: $command_errors
-              type:
-                - array
-                - 'null'
-              items: {  }
-            command_status:
-              $ref: '#/components/schemas/TypeOfCmdStatus'
-            created_at:
-              title: Created
-              type:
-                - string
-                - 'null'
-              format: datetime
-              example: '2025-02-25T15:00:59-06:00'
-            updated_at:
-              title: Updated
-              type:
-                - string
-                - 'null'
-              format: datetime
-              example: '2025-03-25T15:00:59-06:00'
-          type: object
     Thang:
       properties:
         created_at:
@@ -10941,13 +10954,6 @@ components:
           $ref: '#/components/schemas/TypeOfThangAsyncPolicy'
         owning_namespace:
           $ref: '#/components/schemas/Namespace'
-        notification_callback:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ThangCallback'
-            -
-              type: 'null'
-          title: 'Completion callback'
         commands:
           title: Commands
           type: array

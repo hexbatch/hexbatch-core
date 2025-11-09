@@ -5,6 +5,7 @@ namespace App\OpenApi;
 
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\RefCodes;
+
 use App\OpenApi\Results\Users\MeResponse;
 use Carbon\Carbon;
 use Hexbatch\Things\Models\ThingCallback;
@@ -74,6 +75,14 @@ class ErrorResponse extends ApiCollectionBase
 
             $ret->status = $e->status;
             $ret->message = $e->getMessage();
+            $ret->other_errors = [];
+            foreach ($e->errors() as $ke => $err_array) {
+                $sub_message = "$ke:    ";
+                if (is_string($err_array)) { $err_array = [$err_array];}
+                $issues = implode(" | ",$err_array);
+                $sub_message .= $issues;
+                $ret->other_errors[] = $sub_message;
+            }
             $ret->instance = RefCodes::VALIDATION;
 
             $other = $e->getPrevious();
