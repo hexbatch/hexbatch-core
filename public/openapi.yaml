@@ -10798,8 +10798,16 @@ components:
       type: object
     ThangCallback:
       properties:
-        thang_command_ref:
+        source_command_ref:
           title: Uuid
+          type: string
+          format: uuid
+        source_thang_ref:
+          title: 'Thang uuid'
+          type: string
+          format: uuid
+        owning_hook_ref:
+          title: 'Hook uuid'
           type: string
           format: uuid
         callback_http_code:
@@ -10808,6 +10816,23 @@ components:
             - integer
             - 'null'
           example: '200'
+        ref_uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        callback_data:
+          title: 'Callback data'
+          description: $callback_data
+          type:
+            - array
+            - 'null'
+          items: {  }
+        callback_status:
+          $ref: '#/components/schemas/TypeOfThangCallbackStatus'
+        owning_hook:
+          $ref: '#/components/schemas/ThangHook'
+        source_command:
+          $ref: '#/components/schemas/ThangCommand'
         created_at:
           title: Created
           type:
@@ -10822,19 +10847,6 @@ components:
             - 'null'
           format: datetime
           example: '2025-03-25T15:00:59-06:00'
-        ref_uuid:
-          title: Uuid
-          type: string
-          format: uuid
-        callback_data:
-          title: 'Callback data'
-          description: $callback_data
-          type:
-            - array
-            - 'null'
-          items: {  }
-        thang_callback_status:
-          $ref: '#/components/schemas/TypeOfThangCallbackStatus'
       type: object
     ThangCommand:
       type: object
@@ -10843,23 +10855,6 @@ components:
           $ref: '#/components/schemas/CommandParams'
         -
           properties:
-            command_priority:
-              title: Priority
-              type: integer
-            created_at:
-              title: Created
-              type:
-                - string
-                - 'null'
-              format: datetime
-              example: '2025-02-25T15:00:59-06:00'
-            updated_at:
-              title: Updated
-              type:
-                - string
-                - 'null'
-              format: datetime
-              example: '2025-03-25T15:00:59-06:00'
             ref_uuid:
               title: Uuid
               type: string
@@ -10882,6 +10877,36 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ThangCallback'
+            staging_data_from_children:
+              title: Staging
+              description: $staging_data_from_children
+              type:
+                - array
+                - 'null'
+              items: {  }
+            command_errors:
+              title: Errors
+              description: $command_errors
+              type:
+                - array
+                - 'null'
+              items: {  }
+            command_status:
+              $ref: '#/components/schemas/TypeOfCmdStatus'
+            created_at:
+              title: Created
+              type:
+                - string
+                - 'null'
+              format: datetime
+              example: '2025-02-25T15:00:59-06:00'
+            updated_at:
+              title: Updated
+              type:
+                - string
+                - 'null'
+              format: datetime
+              example: '2025-03-25T15:00:59-06:00'
           type: object
     Thang:
       properties:
@@ -10910,23 +10935,10 @@ components:
             - array
             - 'null'
           items: {  }
-        thang_tags:
-          title: Tags
-          description: $thang_tags
-          type:
-            - array
-            - 'null'
-          items:
-            type: string
-        thang_commands:
-          title: 'Command data'
-          type:
-            - array
-            - 'null'
-          items:
-            $ref: '#/components/schemas/ThangCommand'
-        thang_status:
-          $ref: '#/components/schemas/TypeOfThangStatus'
+        thang_save_policy:
+          $ref: '#/components/schemas/TypeOfThangSavePolicy'
+        thang_async_policy:
+          $ref: '#/components/schemas/TypeOfThangAsyncPolicy'
         owning_namespace:
           $ref: '#/components/schemas/Namespace'
         notification_callback:
@@ -10953,26 +10965,9 @@ components:
         is_pre:
           title: 'Before action'
           type: boolean
-        is_public:
-          title: Public
-          type: boolean
         hook_priority:
           title: Priority
           type: integer
-        created_at:
-          title: Created
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-02-25T15:00:59-06:00'
-        updated_at:
-          title: Updated
-          type:
-            - string
-            - 'null'
-          format: datetime
-          example: '2025-03-25T15:00:59-06:00'
         ref_uuid:
           title: Uuid
           type: string
@@ -11005,28 +11000,54 @@ components:
           type: string
         owning_namespace:
           $ref: '#/components/schemas/Namespace'
+        created_at:
+          title: Created
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: Updated
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-03-25T15:00:59-06:00'
       type: object
+    TypeOfCmdStatus:
+      description: 'postgres enum type_of_cmd_status'
+      type: string
+      enum:
+        - CMD_WAITING
+        - CMD_FAIL
+        - CMD_SUCCESS
+        - CMD_ERROR
+        - CMD_RUNNING
+    TypeOfThangAsyncPolicy:
+      description: 'postgres enum type_of_thang_async_policy'
+      type: string
+      enum:
+        - NEVER_ASYNC
+        - ALWAYS_ASYNC
+        - AUTO_ASYNC
     TypeOfThangCallbackStatus:
       description: 'postgres enum type_of_thang_callback_status'
       type: string
       enum:
         - BUILDING
+        - RUNNING
         - MANUAL
         - SUCCESSFUL
         - FAIL
         - ERROR
-    TypeOfThangStatus:
-      description: 'postgres enum type_of_thang_status'
+    TypeOfThangSavePolicy:
+      description: 'postgres type_of_thang_save_policy'
       type: string
       enum:
-        - THANG_BUILDING
-        - THANG_WAITING
-        - THANG_PENDING
-        - THANG_RUNNING
-        - THANG_SUCCESS
-        - THANG_FAIL
-        - THANG_INVALID
-        - THANG_ERROR
+        - NEVER_SAVE
+        - ALWAYS_SAVE
+        - AUTO_SAVE
   securitySchemes:
     bearerAuth:
       type: http

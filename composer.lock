@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d260b9f3ec6ab1722206fdfe61c5edc",
+    "content-hash": "f29e3ba86586f3b80db4e6f310e4eda6",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4389,6 +4389,60 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.1"
             },
             "time": "2025-09-04T20:59:21+00:00"
+        },
+        {
+            "name": "ranium/laravel-seedonce",
+            "version": "v1.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ranium/laravel-seedonce.git",
+                "reference": "c3f2b28dab26f9a416303cc30b0198f929852939"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ranium/laravel-seedonce/zipball/c3f2b28dab26f9a416303cc30b0198f929852939",
+                "reference": "c3f2b28dab26f9a416303cc30b0198f929852939",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "php": "^7.2|^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^3.8|^4.0|^5.0|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "phpunit/phpunit": "^8.0|^9.0|^10.0|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Ranium\\SeedOnce\\SeedOnceServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ranium\\SeedOnce\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Abbas Ali",
+                    "email": "abbas@ranium.in",
+                    "homepage": "https://ranium.in",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Laravel package to run seeders only once",
+            "support": {
+                "issues": "https://github.com/ranium/laravel-seedonce/issues",
+                "source": "https://github.com/ranium/laravel-seedonce/tree/v1.7.0"
+            },
+            "time": "2025-04-16T10:07:46+00:00"
         },
         {
             "name": "relisten/forceutf8",

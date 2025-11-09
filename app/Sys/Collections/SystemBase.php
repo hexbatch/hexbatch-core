@@ -7,6 +7,7 @@ use App\Sys\Build\SystemResources;
 use App\Sys\Res\ISystemModel;
 use App\Sys\Res\ISystemResource;
 
+use Hexbatch\Thangs\HexbatchThangsProvider;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RegexIterator;
@@ -173,19 +174,7 @@ abstract class SystemBase
     }
 
     public static function extract_namespace($file) {
-        $ns = NULL;
-        $handle = fopen($file, "r");
-        if ($handle) {
-            while (($line = fgets($handle)) !== false) {
-                if (str_starts_with($line, 'namespace')) {
-                    $parts = explode(' ', $line);
-                    $ns = rtrim(trim($parts[1]), ';');
-                    break;
-                }
-            }
-            fclose($handle);
-        }
-        return $ns;
+        return HexbatchThangsProvider::extract_namespace($file);
     }
 
     /**
