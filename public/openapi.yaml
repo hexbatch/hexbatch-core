@@ -7648,7 +7648,7 @@ components:
           value: 59714b32-a017-4300-afbc-f910886a2589
     Namespace:
       properties:
-        uuid:
+        ref_uuid:
           title: Uuid
           type: string
           format: uuid
@@ -7742,13 +7742,7 @@ components:
           format: datetime
           example: '2025-02-25T15:00:59-06:00'
         bound_cron:
-          oneOf:
-            -
-              $ref: '#/components/schemas/HexbatchCron'
-              description: 'Optional linux cronjob tab string'
-            -
-              type: 'null'
-          title: Cron
+          $ref: '#/components/schemas/HexbatchCron'
           description: 'Optional linux cronjob tab string'
         bound_cron_timezone:
           title: 'Cron Timezone'
@@ -7758,18 +7752,11 @@ components:
           description: 'The amount of seconds after each cron match'
           minimum: 1
         uuid:
-          oneOf:
-            -
-              $ref: '#/components/schemas/HexbatchUuid'
-            -
-              type: 'null'
-          title: 'Schedule uuid'
+          $ref: '#/components/schemas/HexbatchUuid'
         time_spans:
           title: 'Time spans'
           description: 'the generated time spans'
-          type:
-            - array
-            - 'null'
+          type: array
           items:
             $ref: '#/components/schemas/ScheduleSpan'
       type: object
@@ -8558,7 +8545,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         attribute_name:
           title: 'Attribute name'
           type:
@@ -8587,28 +8575,21 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         display:
           title: 'Display info'
           description: 'Add color and texture here'
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
       type: object
     DesignOwnershipParams:
       properties:
         type:
-          oneOf:
-            -
-              $ref: '#/components/schemas/HexbatchResource'
-            -
-              type: 'null'
-          title: 'The type to transfer'
-          example:
-            -
-              summary: 'type example'
-              value: birds
+          $ref: '#/components/schemas/HexbatchResource'
         namespace:
           oneOf:
             -
@@ -9052,7 +9033,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         seconds:
           oneOf:
             -
@@ -9180,7 +9162,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         created_at:
           title: 'Attribute created at'
           type:
@@ -9219,19 +9202,22 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         location_display:
           title: Display
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         location_bounding_box:
           title: 'Bounding box'
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         created_at:
           title: 'Location created at'
           type:
@@ -9305,7 +9291,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
       type: object
     ElementCollectionResponse:
       description: 'A collection of elements'
@@ -9380,7 +9367,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
       type: object
     PhaseResponse:
       description: 'Show details about a phase'
@@ -9905,21 +9893,24 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         headers_sent:
           title: 'Headers sent'
           description: $headers_sent
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         data_sent:
           title: 'Data sent'
           description: $data_sent
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         status:
           $ref: '#/components/schemas/TypeOfCallbackStatus'
         hook:
@@ -10122,7 +10113,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
       type: object
     ThingErrorCollectionResponse:
       title: 'Thing with errors'
@@ -10255,7 +10247,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         hook_on:
           title: Active
           description: 'If false, the callback is not used until this is changed.'
@@ -10319,14 +10312,16 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         header_template:
           title: 'Header template'
           description: 'The keys that make up the header for the http requests'
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         address:
           title: Address
           description: 'the url|callable|evemt'
@@ -10469,7 +10464,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         callback_type:
           oneOf:
             -
@@ -10629,7 +10625,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         hooks:
           oneOf:
             -
@@ -10706,7 +10703,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         status:
           oneOf:
             -
@@ -10778,33 +10776,42 @@ components:
           type:
             - string
             - 'null'
-        is_async:
-          title: Async
-          type: boolean
         command_args:
           title: 'Command args'
           description: $command_args
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         command_tags:
           title: 'Command tags'
           description: $command_tags
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
+        is_async:
+          title: Async
+          type: boolean
+        bubble_exceptions:
+          title: 'Bubble exceptions'
+          type: boolean
       type: object
     ThangCallback:
       properties:
         source_command_ref:
           title: Uuid
-          type: string
+          type:
+            - string
+            - 'null'
           format: uuid
         owning_hook_ref:
           title: 'Hook uuid'
-          type: string
+          type:
+            - string
+            - 'null'
           format: uuid
         callback_http_code:
           title: 'Http code'
@@ -10822,7 +10829,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         callback_status:
           $ref: '#/components/schemas/TypeOfThangCallbackStatus'
         owning_hook:
@@ -10863,18 +10871,17 @@ components:
           type:
             - string
             - 'null'
-        command_hooks:
-          title: Hooks
-          type: array
-          items:
-            $ref: '#/components/schemas/ThangHook'
         command_callbacks:
           title: Callbacks
+          description: $command_callbacks
           type: array
           items:
             $ref: '#/components/schemas/ThangCallback'
         is_async:
           title: Async
+          type: boolean
+        bubble_exceptions:
+          title: 'Bubble exceptions'
           type: boolean
         command_args:
           title: 'Command args'
@@ -10882,28 +10889,32 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         command_tags:
           title: 'Command tags'
           description: $command_tags
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         staging_data_from_children:
           title: Staging
           description: $staging_data_from_children
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         command_errors:
           title: Errors
           description: $command_errors
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         command_status:
           $ref: '#/components/schemas/TypeOfCmdStatus'
         created_at:
@@ -10947,7 +10958,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         thang_save_policy:
           $ref: '#/components/schemas/TypeOfThangSavePolicy'
         thang_async_policy:
@@ -10984,7 +10996,8 @@ components:
           type:
             - array
             - 'null'
-          items: {  }
+          items:
+            type: mixed
         hook_tags:
           title: Tags
           description: $hook_tags
