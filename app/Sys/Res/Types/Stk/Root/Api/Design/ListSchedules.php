@@ -5,8 +5,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
-use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
@@ -67,6 +67,26 @@ class ListSchedules extends Api\DesignApi
         $schedules = $what[static::PRIMARY_SNAPSHOT_KEY];
         $resp = Schedule::collect($schedules, CursorPaginatedDataCollection::class);
         return $resp;
+    }
+
+    /**
+     * @return CursorPaginatedDataCollection<Schedule>
+     */
+    public static function listSchedules(?ScheduleSearchParams $params) {
+
+        if ($params?->namespace_ref) {
+            $namespace_id = UserNamespace::resolveNamespace(value: $params->namespace_ref)->id;
+        } else {
+            $namespace_id = Utilities::getCurrentNamespace()?->id;
+        }
+        $build = TimeBound::buildTimeBound(
+            namespace_id: $namespace_id,
+            after_when: $params?->after,
+            before_when: $params?->before,
+            during_when: $params?->during
+        );
+        $cursor = $build->cursorPaginate(cursor: $params->cursor);
+        return Schedule::collect($cursor, CursorPaginatedDataCollection::class);
     }
 
 

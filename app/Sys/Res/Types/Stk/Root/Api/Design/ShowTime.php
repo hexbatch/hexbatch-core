@@ -4,7 +4,6 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 
-use App\Data\ApiParams\Common\IResponse;
 use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
@@ -44,6 +43,10 @@ class ShowTime extends Api\DesignApi
     {
         $what =  $this->getMyData();
         return Schedule::validateAndCreate($what['bound']->toArray());
+    }
+
+    public static function showSchedule(TimeBound $bound) {
+        return Schedule::validateAndCreate($bound);
     }
 
 }

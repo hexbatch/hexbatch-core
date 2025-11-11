@@ -41,6 +41,7 @@ use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -715,11 +716,9 @@ class DesignController extends Controller {
     }
 
 
-
-
-
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/schedules/create',
@@ -750,9 +749,9 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\CreateTime::class)]
     public function create_time(Request $request) {
         $params = Schedule::fromRequest($request);
-        $api = new Root\Api\Design\CreateTime(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-schedule']);
-        $data_out = $api->getCallbackResponse($http_code);
+        $data_out = Root\Api\Design\CreateTime::makeSchedule(params: $params,tags: ['api-top']);
+        $http_code = CodeOf::HTTP_ACCEPTED;
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
         return  response()->json($data_out,$http_code);
     }
 
@@ -792,14 +791,14 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
     public function show_schedule(TimeBound $bound) {
 
-        $api = new Root\Api\Design\ShowTime(bound: $bound, is_async: false, tags: ['api-top']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Root\Api\Design\ShowTime::showSchedule(bound: $bound);
+        return  response()->json(['response'=>$data_out],CodeOf::HTTP_OK);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
         path: '/api/v1/{user_namespace}/design/schedules/{time_bound}/edit',
@@ -833,15 +832,16 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
     public function edit_schedule(TimeBound $bound, Request $request) {
         $params = Schedule::validateAndCreate($request->request->all());
-        $api = new Root\Api\Design\EditTime(bound: $bound,params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-schedule']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Root\Api\Design\EditTime::editSchedule(bound:$bound, params: $params,tags: ['api-top']);
+        $http_code = CodeOf::HTTP_ACCEPTED;
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/schedules/{time_bound}/destroy',
@@ -873,9 +873,12 @@ class DesignController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\DestroyTime::class)]
     public function destroy_schedule(TimeBound $bound) {
-        $api = new Root\Api\Design\DestroyTime(bound: $bound, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-schedule']);
-        $data_out = $api->getCallbackResponse($http_code);
+
+        $data_out = Root\Api\Design\DestroyTime::destroySchedule(bound:$bound,tags: ['api-top']);
+        $http_code = CodeOf::HTTP_ACCEPTED;
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        else if(empty($data_out)) { $data_out = ['uuid'=>$bound->ref_uuid];}
+
         return  response()->json($data_out,$http_code);
     }
 
@@ -1065,9 +1068,8 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\ListSchedules::class)]
     public function list_times(Request $request) {
         $params = ScheduleSearchParams::fromRequest($request);
-        $api = new Api\Design\ListSchedules(params: $params, is_async: false, tags: ['api-top']);
-        $data_out = $api->getDataSnapshot();
-        return  response()->json($data_out,$api->getCode());
+        $data_out = Api\Design\ListSchedules::listSchedules(params: $params);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 

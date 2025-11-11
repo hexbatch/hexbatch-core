@@ -449,7 +449,7 @@ class TimeBound extends Model
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     public static function collectTimeBound(Collection|string $collect, ?UserNamespace $namespace = null,?TimeBound $bound = null)
     : TimeBound

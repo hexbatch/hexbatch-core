@@ -67,9 +67,11 @@ class Utilities {
     }
 
     public static function boolishToBool($val) : bool {
+        if (is_bool($val)) {return $val;}
         if (empty($val)) {return false;}
         $boolval = ( is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : (bool) $val );
-        return ( $boolval===null  ? false : $boolval );
+        if ($boolval === null) {throw new LogicException(sprintf("Invalid boolean value: %s",json_encode($val)) );}
+        return  $boolval;
     }
 
     public static function negativeBoolWords($val) : bool {

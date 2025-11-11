@@ -5,17 +5,26 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Illuminate\Support\Facades\Log;
 
 
-
-class DestroyTime extends Api\DesignApi
+class DestroyTime extends Api\DesignApi implements ICommandCallable
 {
     const UUID = 'd55e0d09-0830-4723-acbc-acb3595b7d57';
     const TYPE_NAME = 'api_design_destroy_time';
@@ -93,6 +102,41 @@ class DestroyTime extends Api\DesignApi
                 }
             }
         }
+    }
+
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        Log::debug("Called api destroy time node");
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $children_args);
+    }
+
+    /** @throws \Throwable */
+    public static function destroySchedule(TimeBound $bound, array $tags = [], ?IThangBuilder $builder = null)
+    : array|null|Thang
+    {
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['destroy-schedule'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->tree($my_command)
+            ->leaf([
+                'command_class' =>Act\Cmd\Ds\DesignTimeCreate::class,
+                'command_args' =>[
+                    'namespace'=>Utilities::getCurrentNamespace(),
+                    'given_bound'=>$bound
+                ],
+                'command_tags' =>[Act\Cmd\Ds\DesignTimeDestroy::class]
+            ]);
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            return null;
+        } else {
+            return $thang;
+        }
+
     }
 }
 
