@@ -10799,6 +10799,24 @@ components:
           title: 'Bubble exceptions'
           type: boolean
       type: object
+    ManualCallbackParams:
+      description: 'When completing a manual thang callback'
+      properties:
+        callback_http_code:
+          title: 'Http code'
+          description: 'set a 2xx for successful, 4xx for failing, 5xx for an error'
+          type: integer
+          maximum: 599
+          minimum: 0
+          example: '200'
+        data:
+          title: Data
+          description: 'Optionally pass back data'
+          type:
+            - array
+            - 'null'
+          items: {  }
+      type: object
     ThangCallback:
       properties:
         source_command_ref:
