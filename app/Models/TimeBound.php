@@ -65,7 +65,19 @@ class TimeBound extends Model
         'bound_start',
         'bound_stop',
         'bound_period_length',
-        'boundscron'
+        'boundscron',
+    ];
+
+
+    /**
+     * The attributes that should be cast.
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'bound_start' => 'datetime',
+        'bound_stop' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     const MAKE_PERIOD_SECONDS = 60*60*6;
@@ -81,7 +93,7 @@ class TimeBound extends Model
         return $this->hasMany(TimeBoundSpan::class)
             ->select('*')
             ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts, extract(epoch from upper(time_slice_range)) as bound_stop_ts")
-            ->orderBy('span_start');
+            ->orderBy('bound_start_ts');
     }
 
 
@@ -140,7 +152,7 @@ class TimeBound extends Model
 
     public function makeSpansUntil(int $unix_timestamp) {
         try {
-            if ($this->bound_cron) {
+            if ($this->bound_cron && ($this->bound_cron !== static::EMPTY_CRON)) {
                 $cron = new \Cron\CronExpression($this->bound_cron);
                 $next_time_ts = time();
                 $skip = 0;
@@ -150,7 +162,10 @@ class TimeBound extends Model
                     $this->insertSpan($next_time_ts, $next_time_ts + ($this->bound_period_length ?? 1));
                 }
             } else {
-                $this->insertSpan($this->bound_start_ts, $this->bound_stop_ts);
+
+                $first_time_ts = Carbon::create($this->bound_start)->unix();
+                $next_time_ts = Carbon::create($this->bound_stop)->unix();
+                $this->insertSpan($first_time_ts, $next_time_ts);
             }
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(),$e->getCode(),$e);
@@ -377,18 +392,20 @@ class TimeBound extends Model
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::BOUND_INVALID_START_STOP);
         }
-        $this->bound_start = TimeBound::convertTsToSqlTime($bound_start_ts);
-        $this->bound_stop = TimeBound::convertTsToSqlTime($bound_stop_ts);
+        $this->bound_start = Carbon::create($start)->toIso8601String();
+        $this->bound_stop = Carbon::create($stop)->toIso8601String();
 
         $this->bound_cron = $bound_cron;
-        if ($bound_cron) {
+        if ($bound_cron && ($bound_cron !== static::EMPTY_CRON)) {
             $this->setCronString($bound_cron) ;
-            $this->setPeriodLength($period_length);
+            $this-> setPeriodLength($period_length);
         }
         $this->setTimezone($bound_cron_timezone);
         $this->save();
-        $this->redoTimeSpans();
+       $this->redoTimeSpans();
     }
+
+    const string EMPTY_CRON = '* * * * *';
 
 
     public function redoTimeSpans() {
@@ -491,6 +508,8 @@ class TimeBound extends Model
                     $test = $collect->get('bound_start');
                     if (is_string($test) && Str::trim($test)) {
                         $bound->bound_start = Str::trim($test);
+                    } elseif ($test instanceof Carbon) {
+                        $bound->bound_start = $test->toIso8601String();
                     }
                 }
 
@@ -498,6 +517,8 @@ class TimeBound extends Model
                     $test = $collect->get('bound_stop');
                     if (is_string($test) && Str::trim($test)) {
                         $bound->bound_stop = Str::trim($test);
+                    } elseif ($test instanceof Carbon) {
+                        $bound->bound_stop = $test->toIso8601String();
                     }
                 }
 
@@ -535,12 +556,6 @@ class TimeBound extends Model
             }
 
             $bound->refresh();
-
-            $bound = TimeBound::buildTimeBound(me_id: $bound->id)->first();
-
-
-
-
 
             DB::commit();
             return $bound;

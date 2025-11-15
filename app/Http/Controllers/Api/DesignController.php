@@ -19,6 +19,7 @@ use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
+use App\Models\UserNamespace;
 use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
 use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
 use App\OpenApi\ApiResults\Bounds\ApiLocationCollectionResponse;
@@ -749,9 +750,17 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\CreateTime::class)]
     public function create_time(Request $request) {
         $params = Schedule::fromRequest($request);
-        $data_out = Root\Api\Design\CreateTime::makeSchedule(params: $params,tags: ['api-top']);
-        $http_code = CodeOf::HTTP_ACCEPTED;
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        $data = Root\Api\Design\CreateTime::makeSchedule(
+            namespace:Utilities::getCurrentOrUserNamespace(),params: $params,tags: ['api-top']);
+
+        if ($data instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = $data;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::validateAndCreate($data);
+        }
         return  response()->json($data_out,$http_code);
     }
 
@@ -789,8 +798,8 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
-    public function show_schedule(TimeBound $bound) {
-
+    public function show_schedule(UserNamespace $namespace, TimeBound $bound) {
+        Utilities::ignoreVar($namespace);
         $data_out = Root\Api\Design\ShowTime::showSchedule(bound: $bound);
         return  response()->json(['response'=>$data_out],CodeOf::HTTP_OK);
     }
@@ -1011,7 +1020,7 @@ class DesignController extends Controller {
      * @throws \Exception
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/design/list_locations',
+        path: '/api/v1/{user_namespace}/design/locations/list',
         operationId: 'core.design.list_locatations',
         description: "Lists locations",
         summary: 'Lists locations  ',
@@ -1039,6 +1048,37 @@ class DesignController extends Controller {
 
         $data_out = $api->getDataSnapshot();
         return  response()->json(['response'=>$data_out],$api->getCode());
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    #[OA\Patch(
+        path: '/api/v1/{user_namespace}/design/locations/{location_bound}/show',
+        operationId: 'core.design.locations.show',
+        description: "Shows a location",
+        summary: 'Gives detail about a location  ',
+        security: [['bearerAuth' => []]],
+        tags: ['design','bounds'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+            new OA\PathParameter(  name: 'location_bound', description: "The location",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: ApiLocationCollectionResponse::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
+                content: new JsonContent(ref: ThingResponse::class))
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
+    public function show_location(UserNamespace $namespace, LocationBound $bound) {
+        Utilities::ignoreVar($namespace,$bound);
+        abort(CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 

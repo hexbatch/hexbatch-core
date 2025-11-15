@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('time_bound_id')
                 ->nullable()
                 ->default(null)
-                ->comment("The time bounds this is for")
+                ->comment("the time bound this slice of time is for")
                 ->index('idx_time_bound_span_parent')
                 ->constrained('time_bounds')
                 ->cascadeOnUpdate()
@@ -27,7 +27,7 @@ return new class extends Migration
         });
         DB::statement(/** @lang text */ "
                 ALTER TABLE time_bound_spans
-                ADD COLUMN time_slice_range daterange NOT NULL;
+                ADD COLUMN time_slice_range tstzrange NOT NULL;
         ");
 
         DB::statement("

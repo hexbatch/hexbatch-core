@@ -164,7 +164,7 @@ class DesignTimeCreate extends Act\Cmd\Ds implements ICommandCallable
 
 
     /** @throws \Throwable */
-    protected static function createScheduleBound(Schedule $params, UserNamespace $namespace, ?TimeBound $given_bound = null) : Schedule
+    protected static function createScheduleBound(Schedule $params, UserNamespace $namespace, ?TimeBound $given_bound = null) : TimeBound
     {
         if ($given_bound) {
             static::checkIfGivenIsAdmin(given: $namespace,target: $given_bound->schedule_namespace);
@@ -186,7 +186,7 @@ class DesignTimeCreate extends Act\Cmd\Ds implements ICommandCallable
                 $given_bound = TimeBound::collectTimeBound(collect: $collect,namespace: $namespace);
             }
         });
-        return Schedule::from($given_bound);
+        return $given_bound;
     }
 
     /** @throws \Throwable */

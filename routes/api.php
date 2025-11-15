@@ -506,29 +506,44 @@ Route::prefix('v1')->group(function () {
                 Route::get('list_attributes', [Api\DesignController::class, 'list_attributes'])->name('core.design.list_attributes');
                 Route::get('list', [Api\DesignController::class, 'list_designs'])->name('core.design.list');
 
-                Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group( function () {
+                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
                     Route::post('create', [Api\DesignController::class, 'create_design'])->name('core.design.create');
+                });
 
-                    Route::prefix('schedules')->group(function () {
-                        Route::get('list', [Api\DesignController::class, 'list_times'])->name('core.design.schedules.list');
+
+                Route::prefix('schedules')->group(function () {
+                    Route::get('list', [Api\DesignController::class, 'list_times'])->name('core.design.schedules.list');
+                    Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
                         Route::post('create', [Api\DesignController::class, 'create_time'])->name('core.design.schedules.create');
-                        Route::prefix('{time_bound}')->group(function () {
-                            Route::get('show', [Api\DesignController::class, 'show_schedule'])->name('core.design.schedules.show');
+                    });
+
+                    Route::prefix('{time_bound}')->group(function () {
+                        Route::get('show', [Api\DesignController::class, 'show_schedule'])->name('core.design.schedules.show');
+
+                        Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group( function () {
                             Route::patch('edit', [Api\DesignController::class, 'edit_schedule'])->name('core.design.schedules.edit');
                             Route::delete('destroy', [Api\DesignController::class, 'destroy_schedule'])->name('core.design.schedules.destroy');
                         });
                     });
+                });
 
-                    Route::prefix('locations')->group(function () {
-                        Route::get('list', [Api\DesignController::class, 'list_locatations'])->name('core.design.locations.list');
+                Route::prefix('locations')->group(function () {
+                    Route::get('list', [Api\DesignController::class, 'list_locatations'])->name('core.design.locations.list');
+                    Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
                         Route::post('create', [Api\DesignController::class, 'location_create'])->name('core.design.locations.create');
-                        Route::prefix('{location_bound}')->group(function () {
+                    });
+
+                    Route::prefix('{location_bound}')->group(function () {
+
+                        Route::get('show', [Api\DesignController::class, 'show_location'])->name('core.design.locations.show');
+                        Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group( function () {
                             Route::delete('destroy', [Api\DesignController::class, 'destroy_location'])->name('core.design.locations.destroy');
                             Route::patch('edit', [Api\DesignController::class, 'location_edit'])->name('core.design.locations.edit');
                         });
                     });
-
                 });
+
+
 
 
 

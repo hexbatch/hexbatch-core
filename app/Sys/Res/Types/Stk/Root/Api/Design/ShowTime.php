@@ -46,6 +46,7 @@ class ShowTime extends Api\DesignApi
     }
 
     public static function showSchedule(TimeBound $bound) {
+        $bound->loadMissing('time_spans');
         return Schedule::validateAndCreate($bound);
     }
 

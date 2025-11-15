@@ -14,7 +14,7 @@
     "support": {
         "issues": "https://github.com/hexbatch/hexbatch-core/issues"
     },
-    "version": "0.3.2",
+    "version": "0.3.3",
     "license": "Apache-2.0",
     "require": {
         "php": "^8.3",

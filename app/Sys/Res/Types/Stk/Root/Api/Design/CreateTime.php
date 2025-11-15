@@ -8,6 +8,8 @@ use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 
+use App\Models\TimeBound;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -121,24 +123,31 @@ class CreateTime extends Api\DesignApi implements ICommandCallable
     }
 
     /** @throws \Throwable */
-    public static function makeSchedule(?Schedule $params = null, array $tags = [], ?IThangBuilder $builder = null)
-    : Schedule|Thang
+    public static function makeSchedule(UserNamespace $namespace,?Schedule $params = null, array $tags = [], ?IThangBuilder $builder = null)
+    : TimeBound|Thang
     {
         $my_command =  CommandParams::validateAndCreate([
             'command_class' =>static::class,
             'command_tags' =>array_merge(['create-schedule'],$tags)
         ]);
         ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($namespace)
+            ->setSharedArg('namespace',$namespace)
             ->tree($my_command)
-            ->leaf([
-                'command_class' =>Act\Cmd\Ds\DesignTimeCreate::class,
-                'command_args' =>['schedule_params'=>$params->toArray(),'namespace'=>Utilities::getCurrentNamespace()],
-                'command_tags' =>[Act\Cmd\Ds\DesignTimeCreate::class]
-            ]);
+            ->leaf(
+                command_class: Act\Cmd\Ds\DesignTimeCreate::class,
+                command_args: [
+                    'schedule_params'=>$params->toArray(),
+                    'namespace_uuid'=>Utilities::getCurrentNamespace()->ref_uuid
+                ],
+                command_tags: [Act\Cmd\Ds\DesignTimeCreate::class]
+            );
 
         $thang = $builder->execute()->getThang();
         if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
-            return Schedule::validateAndCreate($thang->finished_data);
+            $data = $thang->finished_data;
+            $time_bound = TimeBound::buildTimeBound(uuid: $data['ref_uuid'],with_spans: true)->first();
+            return $time_bound;
         } else {
             return $thang;
         }
