@@ -53,6 +53,9 @@ return [
             'domain' => env('HBC_SYSTEM_SERVER_DOMAIN',''),
             'url' => env('HBC_SYSTEM_SERVER_URL',''),
             'name' => env('HBC_SYSTEM_SERVER_NAME',''),
+        ],
+        'loggging' => [
+            'timezone' => env('HBC_LOGGING_TIMEZONE','UTC'),
         ]
     ]
 ];

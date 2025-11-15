@@ -81,7 +81,6 @@ class TimeBound extends Model
     ];
 
     const MAKE_PERIOD_SECONDS = 60*60*6;
-    const MAKE_REPEAT_SECONDS = 60*30;
 
 
     public function scheduled_types() : HasMany {
@@ -92,7 +91,8 @@ class TimeBound extends Model
     public function time_spans() : HasMany {
         return $this->hasMany(TimeBoundSpan::class)
             ->select('*')
-            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts, extract(epoch from upper(time_slice_range)) as bound_stop_ts")
+            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts")
+            ->selectRaw(" extract(epoch from upper(time_slice_range)) as bound_stop_ts")
             ->orderBy('bound_start_ts');
     }
 
@@ -108,68 +108,80 @@ class TimeBound extends Model
 
     /**
      * @param int[] $only_ids
-
+        make spans for any bound that has an ending time greater than now, whose last span is less than the max time
      */
-    public static function generateSpans(array $only_ids = []) : void {
+    public static function generateSpans(array $only_ids = []) : array {
 
         $now_ts = time();
         $unix_timestamp = $now_ts + static::MAKE_PERIOD_SECONDS;
-        $query = TimeBound::select('*')
-            ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts, extract(epoch from upper(time_slice_range)) as bound_stop_ts")
-            ->whereRaw('upper(time_slice_range) >= NOW()')
-            ->join('time_bound_spans',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use($now_ts) {
-                    $join
-                        ->on('time_bounds.id','=','time_bound_spans.time_bound_id')
-                        ->where('time_bound_spans.span_start','>',$now_ts + TimeBound::MAKE_REPEAT_SECONDS);
-                }
+
+        $query = TimeBound::select('time_bounds.*')
+            ->selectRaw("max_spans.max_upper_time,max_spans.max_span_id,to_timestamp($unix_timestamp) as my_time")
+            ->joinSub(
+                query:
+                    "
+                        SELECT MAX(s.id) as max_span_id,s.time_bound_id ,MAX(upper(s.time_slice_range)) as max_upper_time
+                        FROM time_bound_spans s
+                        GROUP BY s.time_bound_id
+                    ",
+                as: 'max_spans',
+                first: 'max_spans.time_bound_id',
+                operator: '=',
+                second: 'time_bounds.id'
             )
-            ->whereNull('time_bound_spans.id')
-            ->where('time_bounds.bound_stop','>',$now_ts)
-            ->orderBy('time_bounds.id');
+            ->whereRaw("time_bounds.bound_stop >= current_timestamp")
+            ->whereRaw("max_upper_time < to_timestamp($unix_timestamp)::timestamptz")
+            ->orderBy('time_bounds.id')
+
+            ;
+
 
         if (count($only_ids)) {
-            $query->whereIn('id',$only_ids);
+            $query->whereIn('time_bounds.id',$only_ids);
         }
-        $paginator = $query->cursorPaginate(20, ['*'], 'timeSpanCursorId');
 
-        do  {
-            /**
-             * @var static $item
-             */
-            foreach ($paginator->items() as $item) {
-                $item->makeSpansUntil($unix_timestamp);
+        $counter = 0;
+        $total = 0;
+        $query->chunkById(200, function (Collection $flights) use($unix_timestamp,&$counter,&$total)
+        {
+            /** @var static $item */
+            foreach ($flights as $item) {
+                $total += $item->makeSpansUntil($unix_timestamp);
+                $counter++;
             }
+        }, column: 'id');
 
-            $next = $paginator->nextCursor();
-            $paginator = $query->cursorPaginate(20, ['*'], 'timeSpanCursorId', $next);
-        } while( $paginator->hasPages() );
+        return [$counter,$total];
     }
 
 
-    public function makeSpansUntil(int $unix_timestamp) {
-        try {
+    /**
+     * @throws \Throwable
+     */
+    public function makeSpansUntil(int $unix_timestamp) : int
+    {
+        $counter = 0;
+        DB::transaction(function () use($unix_timestamp,&$counter)
+        {
             if ($this->bound_cron && ($this->bound_cron !== static::EMPTY_CRON)) {
                 $cron = new \Cron\CronExpression($this->bound_cron);
                 $next_time_ts = time();
                 $skip = 0;
-                while ($next_time_ts < $unix_timestamp) {
+                while ($next_time_ts < $unix_timestamp ) {
                     $next_date_time = $cron->getNextRunDate('now', $skip++, true, $this->bound_cron_timezone);
                     $next_time_ts = Carbon::create($next_date_time)->unix();
                     $this->insertSpan($next_time_ts, $next_time_ts + ($this->bound_period_length ?? 1));
+                    $counter++;
                 }
             } else {
 
                 $first_time_ts = Carbon::create($this->bound_start)->unix();
                 $next_time_ts = Carbon::create($this->bound_stop)->unix();
                 $this->insertSpan($first_time_ts, $next_time_ts);
+                $counter++;
             }
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(),$e->getCode(),$e);
-        }
+        });
+        return $counter;
     }
 
     protected function insertSpan(int $from_ts,int $to_ts) {
@@ -186,9 +198,6 @@ class TimeBound extends Model
         );
     }
 
-    public static function convertTsToSqlTime(int $unix_ts) : string  {
-        return DB::selectOne("SELECT to_timestamp(:unix_ts) as da_time",['unix_ts'=>$unix_ts])->da_time;
-    }
 
 
     public static function buildTimeBound(?int                   $me_id = null, ?int $type_id = null,
@@ -274,7 +283,8 @@ class TimeBound extends Model
                 function (JoinClause $join) use($date_string) {
                     $join
                         ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
-                        ->where('time_bound_spans.time_slice_range','>',$date_string);
+                        ->whereRaw('upper(s.time_slice_range) < :my_time::timestamptz',['my_time'=>$date_string])
+                        ;
                 }
             );
         }
@@ -288,7 +298,7 @@ class TimeBound extends Model
                 function (JoinClause $join) use($date_string) {
                     $join
                         ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
-                        ->where('time_bound_spans.time_slice_range','<',$date_string);
+                        ->whereRaw('lower(s.time_slice_range) > :my_time::timestamptz',['my_time'=>$date_string]);
                 }
             );
         }
@@ -302,7 +312,7 @@ class TimeBound extends Model
                 function (JoinClause $join) use($date_string) {
                     $join
                         ->on('time_bound_spans.time_bound_id','=','time_bounds.id')
-                        ->where('time_bound_spans.time_slice_range','@>',$date_string);
+                        ->whereRaw('s.time_slice_range  @> :my_time::timestamptz',['my_time'=>$date_string]);
                 }
             );
         }
@@ -368,8 +378,11 @@ class TimeBound extends Model
     }
 
 
+    /**
+     * @throws \Throwable
+     */
     public function setTimes(string|int $start, string|int $stop,
-                             ?string $bound_cron = null, ?int $period_length = null,?string $bound_cron_timezone = null
+                             ?string    $bound_cron = null, ?int $period_length = null, ?string $bound_cron_timezone = null
     ) :void
     {
         if (empty($start) || empty($stop)) {
@@ -408,6 +421,9 @@ class TimeBound extends Model
     const string EMPTY_CRON = '* * * * *';
 
 
+    /**
+     * @throws \Throwable
+     */
     public function redoTimeSpans() {
         TimeBoundSpan::where('time_bound_id',$this->id)->delete();
         $this->makeSpansUntil(time() + TimeBound::MAKE_PERIOD_SECONDS);

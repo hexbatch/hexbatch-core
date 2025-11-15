@@ -29,8 +29,12 @@ class TimeBoundSpan extends Model
 
     protected $casts = [];
 
-    public static function cleanUpOld() {
-        static::whereRaw("tstzrange( null,now() - interval '1 hour') &&  time_slice_range ")->delete();
+    public static function cleanUpOld() : int {
+
+        $laravel = static::whereRaw("upper(time_slice_range) < current_timestamp::timestamptz");
+        $count = $laravel->count();
+        $laravel->delete();
+        return $count;
     }
 }
 
