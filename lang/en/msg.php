@@ -22,6 +22,7 @@ return [
     'invalid_time_with_message' => 'Invalid time: was given :ref : :msg',
     'invalid_cursor' => 'Invalid cursor was given:  :ref',
     'invalid_encryption_with_msg' => 'Invalid encrypted string was given: :msg :ref ',
+    'cannot_convert_time' => 'Cannot convert :field time to iso8601 :msg',
 
 
     //users
@@ -56,10 +57,12 @@ return [
     //time bounds
     'time_bound_not_found_by' => 'Schedule not found using :types : :values ',
     'time_bound_period_must_be_with_cron' => 'Time bound must have a period defined when a cron string is defined',
+    'time_bound_period_must_be_less_than_cron_period' => 'Time bound has a period :period_seconds that is more than the cron cycle of :cron_seconds',
     'time_bounds_valid_stop_start' => 'Time bounds must have a valid start and stop, and the start happens before the stop',
     'time_bounds_invalid_cron_string' => 'Time bounds was given an invalid cron string',
     'time_bounds_invalid_time_zone' => 'Time zone is not valid',
     'time_bounds_needs_minimum_info' => 'Time bounds require at least name,start and stop',
+
 
     //location bounds
     'location_bound_not_found_by' => 'Location not found using :types : :values ',

@@ -32,7 +32,10 @@ class Cmd extends BaseAction
 
 
     protected static function checkIfGivenIsAdmin(UserNamespace $given , ?UserNamespace $target) {
-        if (!$target?->isNamespaceAdmin($given)  ) {
+        if (!$target) {
+            throw new \LogicException("target namespace is null");
+        }
+        if (!$target->isNamespaceAdmin($given)  ) {
             throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target?->getName()]),
                 Response::HTTP_FORBIDDEN,
                 RefCodes::NAMESPACE_NOT_ADMIN);

@@ -785,12 +785,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'The schedule and its spans', content: new JsonContent(ref: Schedule::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -801,7 +796,7 @@ class DesignController extends Controller {
     public function show_schedule(UserNamespace $namespace, TimeBound $bound) {
         Utilities::ignoreVar($namespace);
         $data_out = Root\Api\Design\ShowTime::showSchedule(bound: $bound);
-        return  response()->json(['response'=>$data_out],CodeOf::HTTP_OK);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -839,11 +834,15 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
-    public function edit_schedule(TimeBound $bound, Request $request) {
-        $params = Schedule::validateAndCreate($request->request->all());
-        $data_out = Root\Api\Design\EditTime::editSchedule(bound:$bound, params: $params,tags: ['api-top']);
-        $http_code = CodeOf::HTTP_ACCEPTED;
+    public function edit_schedule(UserNamespace $namespace, TimeBound $bound, Request $request) {
+        $params = Schedule::fromRequest($request);
+        $data_out = Root\Api\Design\EditTime::editSchedule(namespace: $namespace,bound:$bound, params: $params,tags: ['api-top']);
+
         if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($data_out);
+        }
         return  response()->json($data_out,$http_code);
     }
 
@@ -881,12 +880,15 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\DestroyTime::class)]
-    public function destroy_schedule(TimeBound $bound) {
+    public function destroy_schedule(UserNamespace $namespace,TimeBound $bound) {
 
-        $data_out = Root\Api\Design\DestroyTime::destroySchedule(bound:$bound,tags: ['api-top']);
-        $http_code = CodeOf::HTTP_ACCEPTED;
+        $data_out = Root\Api\Design\DestroyTime::destroySchedule(namespace: $namespace,bound:$bound,tags: ['api-top']);
+
         if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
-        else if(empty($data_out)) { $data_out = ['uuid'=>$bound->ref_uuid];}
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($bound);
+        }
 
         return  response()->json($data_out,$http_code);
     }

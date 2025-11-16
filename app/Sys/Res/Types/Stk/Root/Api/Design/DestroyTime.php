@@ -8,6 +8,7 @@ use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\TimeBound;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -112,20 +113,23 @@ class DestroyTime extends Api\DesignApi implements ICommandCallable
     }
 
     /** @throws \Throwable */
-    public static function destroySchedule(TimeBound $bound, array $tags = [], ?IThangBuilder $builder = null)
-    : array|null|Thang
+    public static function destroySchedule(UserNamespace $namespace,TimeBound $bound, array $tags = [], ?IThangBuilder $builder = null)
+    : null|Thang
     {
         $my_command =  CommandParams::validateAndCreate([
             'command_class' =>static::class,
             'command_tags' =>array_merge(['destroy-schedule'],$tags)
         ]);
         ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($namespace)
+            ->setSharedArg('namespace',$namespace)
+            ->setSharedArg('given_bound',$bound)
             ->tree($my_command)
             ->leaf([
-                'command_class' =>Act\Cmd\Ds\DesignTimeCreate::class,
+                'command_class' =>Act\Cmd\Ds\DesignTimeDestroy::class,
                 'command_args' =>[
-                    'namespace'=>Utilities::getCurrentNamespace(),
-                    'given_bound'=>$bound
+                    'namespace_uuid'=>Utilities::getCurrentNamespace()->ref_uuid,
+                    'bound_uuid'=>$bound->ref_uuid
                 ],
                 'command_tags' =>[Act\Cmd\Ds\DesignTimeDestroy::class]
             ]);

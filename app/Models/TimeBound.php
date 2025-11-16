@@ -98,7 +98,7 @@ class TimeBound extends Model
 
 
     public function schedule_namespace() : BelongsTo {
-        return $this->belongsTo(UserNamespace::class,'location_bound_namespace_id');
+        return $this->belongsTo(UserNamespace::class,'time_bound_namespace_id');
     }
     public function getName() {
         return $this->bound_name;
@@ -166,27 +166,34 @@ class TimeBound extends Model
             if ($this->bound_cron && ($this->bound_cron !== static::EMPTY_CRON)) {
                 $cron = new \Cron\CronExpression($this->bound_cron);
                 $next_time_ts = time();
+                $old_cron_time_ts = null;
                 $skip = 0;
                 while ($next_time_ts < $unix_timestamp ) {
                     $next_date_time = $cron->getNextRunDate('now', $skip++, true, $this->bound_cron_timezone);
+
                     $next_time_ts = Carbon::create($next_date_time)->unix();
-                    $this->insertSpan($next_time_ts, $next_time_ts + ($this->bound_period_length ?? 1));
-                    $counter++;
+                    if ( $old_cron_time_ts && ($next_time_ts - $old_cron_time_ts) < ($this->bound_period_length??1) ) {
+                        throw ValidationException::withMessages(
+                            ['bound_period_length' => __("msg.time_bound_period_must_be_less_than_cron_period",
+                                ['period_seconds'=>$this->bound_period_length??1,'cron_seconds'=>$next_time_ts - $old_cron_time_ts])]);
+                    }
+                    $old_cron_time_ts = $next_time_ts;
+                    $counter+=$this->insertSpan($next_time_ts, $next_time_ts + ($this->bound_period_length ?? 1));
                 }
             } else {
 
                 $first_time_ts = Carbon::create($this->bound_start)->unix();
                 $next_time_ts = Carbon::create($this->bound_stop)->unix();
-                $this->insertSpan($first_time_ts, $next_time_ts);
-                $counter++;
+                $counter += $this->insertSpan($first_time_ts, $next_time_ts);
             }
         });
         return $counter;
     }
 
-    protected function insertSpan(int $from_ts,int $to_ts) {
+    protected function insertSpan(int $from_ts,int $to_ts) :int
+    {
 
-        DB::affectingStatement("
+        return DB::affectingStatement("
                 INSERT INTO time_bound_spans(time_bound_id,time_slice_range)
                 SELECT :bounds_id,tstzrange( to_timestamp(:start_at),to_timestamp(:stop_at) )
                 WHERE
@@ -448,7 +455,7 @@ class TimeBound extends Model
         $build = null;
 
         if (Utilities::is_uuid($value)) {
-            $build = static::buildTimeBound(uuid: $value);
+            $build = static::buildTimeBound(uuid: $value,with_namespace: true);
         } else {
 
             $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
@@ -459,7 +466,7 @@ class TimeBound extends Model
                  * @var UserNamespace $owner
                  */
                 $owner = UserNamespace::resolveNamespace($owner_hint);
-                $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name);
+                $build = static::buildTimeBound(namespace_id: $owner->id,name: $maybe_name,with_namespace: true);
             }
         }
 
