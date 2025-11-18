@@ -86,7 +86,7 @@ class ListSchedules extends Api\DesignApi
             during_when: $params?->during,
             with_spans: true
         )->orderBy('created_at');
-        $cursor = $build->cursorPaginate(perPage: 2, cursor: $params->cursor);
+        $cursor = $build->cursorPaginate(perPage: 15, cursor: $params->cursor);
         return Schedule::collect($cursor, CursorPaginatedDataCollection::class);
     }
 
