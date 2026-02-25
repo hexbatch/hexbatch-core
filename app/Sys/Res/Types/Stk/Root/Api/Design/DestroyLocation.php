@@ -3,16 +3,27 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
-use App\Annotations\ApiParamMarker;
-use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
+use App\Data\ApiParams\Data\Locations\Location;
+use App\Helpers\Utilities;
+use App\Models\ActionDatum;
+use App\Models\LocationBound;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+use Illuminate\Support\Facades\Log;
 
-#[ApiParamMarker( param_class: DesignLocationParams::class)]
-class DestroyLocation extends CreateLocation
+class DestroyLocation extends Api\DesignApi implements ICommandCallable
 {
     const UUID = '375b019a-399e-420b-b48c-747c3319115e';
     const TYPE_NAME = 'api_design_location_destroy';
@@ -20,8 +31,31 @@ class DestroyLocation extends CreateLocation
 
     const PARENT_CLASSES = [
         Api\DesignApi::class,
-        Act\Cmd\Ds\DesignLocationDestroy::class,
     ];
+
+    public function __construct(
+        protected LocationBound $bound,
+
+        protected ?ActionDatum   $action_data = null,
+        protected bool $b_type_init = false,
+        protected ?bool $is_async = null,
+        protected array          $tags = []
+    )
+    {
+
+        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
+            is_async: $this->is_async,tags: $this->tags);
+    }
+
+    protected function getMyData() :array {
+        return ['bound'=>$this->bound];
+    }
+
+    public function getDataSnapshot(): Location
+    {
+        $what =  $this->getMyData();
+        return Location::validateAndCreate($what['bound']->toArray());
+    }
 
     public function getChildrenTree(): ?Tree
     {
@@ -29,8 +63,8 @@ class DestroyLocation extends CreateLocation
 
         $nodes = [];
         $creator = new Act\Cmd\Ds\DesignLocationDestroy(
-            given_location_uuid: $this->params->getBoundUuid(),
-            parent_action_data: $this->action_data,tags: ['destroy location bound from api']);
+            given_location_uuid: $this->bound->ref_uuid,
+            tags: ['destroy location bound from api']);
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 
 
@@ -64,6 +98,43 @@ class DestroyLocation extends CreateLocation
                 }
             }
         }
+    }
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        Log::debug("Called api destroy location node");
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $children_args);
+    }
+
+    /** @throws \Throwable */
+    public static function destroyLocation(UserNamespace $namespace,LocationBound $bound, array $tags = [], ?IThangBuilder $builder = null)
+    : null|Thang
+    {
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['destroy-location'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($namespace)
+            ->setSharedArg('namespace',$namespace)
+            ->setSharedArg('given_bound',$bound)
+            ->tree($my_command)
+            ->leaf([
+                'command_class' =>Act\Cmd\Ds\DesignLocationDestroy::class,
+                'command_args' =>[
+                    'namespace_uuid'=>Utilities::getCurrentNamespace()->ref_uuid,
+                    'bound_uuid'=>$bound->ref_uuid
+                ],
+                'command_tags' =>[Act\Cmd\Ds\DesignLocationDestroy::class]
+            ]);
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            return null;
+        } else {
+            return $thang;
+        }
+
     }
 
 }

@@ -7,6 +7,10 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Casts\FromBoxToArray;
+use App\Data\ApiParams\Data\Locations\Location;
+use App\Data\ApiParams\Data\Locations\Params\LocationSearchParams;
+use App\Data\ApiParams\Data\Locations\Responses\LocationList;
 use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
 use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
@@ -22,20 +26,16 @@ use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
 use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
-use App\OpenApi\ApiResults\Bounds\ApiLocationCollectionResponse;
-use App\OpenApi\ApiResults\Bounds\ApiLocationResponse;
 use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
 use App\OpenApi\ApiResults\Type\ApiTypeResponse;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
 use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
-use App\OpenApi\Params\Actioning\Design\DesignLocationParams;
 use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Actioning\Design\DesignParams;
 use App\OpenApi\Params\Actioning\Design\DesignParentParams;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
 use App\OpenApi\Params\Listing\Design\ListAttributeParams;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
-use App\OpenApi\Params\Listing\Design\ListLocationParams;
 use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
@@ -896,21 +896,22 @@ class DesignController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
-        path: '/api/v1/{user_namespace}/design/location_create',
-        operationId: 'core.design.location_create',
+        path: '/api/v1/{user_namespace}/design/locations/create',
+        operationId: 'core.design.locations.create',
         description: "Makes a new geo json 2d or 3d shape",
         summary: 'Makes a new location bound',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Location::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: ApiLocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: Location::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -924,24 +925,35 @@ class DesignController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateLocation::class)]
     public function location_create(Request $request) {
-        $params = new DesignLocationParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-location']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+
+        $params = Location::fromRequest($request);
+        $data = Root\Api\Design\CreateLocation::makeLocation(
+            namespace:Utilities::getCurrentOrUserNamespace(),params: $params,tags: ['api-top']);
+
+        if ($data instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = $data;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data->shape_bounding_box = FromBoxToArray::fromBoxtoArray($data->shape_bounding_box);
+            $data->map_bounding_box = FromBoxToArray::fromBoxtoArray($data->map_bounding_box);
+            $data_out = Location::validateAndCreate($data);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/design/location/{location_bound}/edit',
-        operationId: 'core.design.location_edit',
+        path: '/api/v1/{user_namespace}/design/locations/{location_bound}/edit',
+        operationId: 'core.design.locations.edit',
         description: "Change visual properties of a location",
-        summary: 'Makes a new location bound',
+        summary: 'Edits an existing location bound',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Location::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -952,7 +964,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: ApiLocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: Location::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -965,26 +977,32 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
-    public function location_edit(LocationBound $bound,Request $request) {
-        $params = new DesignLocationParams(given_bound: $bound);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Design\EditLocation(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-location']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function location_edit(UserNamespace $namespace,LocationBound $bound,Request $request) {
+        $params = Location::fromRequest($request);
+        $data_out = Root\Api\Design\EditLocation::editLocation(namespace: $namespace,bound:$bound, params: $params,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        else {
+            $data_out->shape_bounding_box = FromBoxToArray::fromBoxtoArray($data_out->shape_bounding_box);
+            $data_out->map_bounding_box = FromBoxToArray::fromBoxtoArray($data_out->map_bounding_box);
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Location::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
-        path: '/api/v1/{user_namespace}/design/location/{location_bound}/destroy',
-        operationId: 'core.design.destroy_location',
-        description: "Destorys a location resource if its not used ",
+        path: '/api/v1/{user_namespace}/design/locations/{location_bound}/destroy',
+        operationId: 'core.design.locations.destroy',
+        description: "Destroys a location resource if its not used ",
         summary: 'Destroy a location  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignLocationParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: Location::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -995,7 +1013,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: ApiLocationResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: Location::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
@@ -1008,33 +1026,36 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\DestroyLocation::class)]
-    public function destroy_location(LocationBound $bound,Request $request) {
-        $params = new DesignLocationParams(given_bound: $bound);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Design\DestroyLocation(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-location']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function destroy_location(UserNamespace $namespace,LocationBound $bound) {
+        $data_out = Root\Api\Design\DestroyLocation::destroyLocation(namespace: $namespace,bound:$bound,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Location::from($bound);
+        }
+
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
      */
-    #[OA\Patch(
+    #[OA\Get(
         path: '/api/v1/{user_namespace}/design/locations/list',
-        operationId: 'core.design.list_locatations',
+        operationId: 'core.design.locations.list',
         description: "Lists locations",
         summary: 'Lists locations  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListLocationParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LocationSearchParams::class)),
         tags: ['design','bounds'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: ApiLocationCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: LocationList::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -1043,13 +1064,9 @@ class DesignController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
     public function list_locatations(Request $request) {
-        $params = new ListLocationParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ListLocations(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-locations']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+        $params = LocationSearchParams::fromRequest($request);
+        $data_out = Api\Design\ListLocations::listLocations(params: $params);//todo here
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -1070,7 +1087,7 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: ApiLocationCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: Location::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -1079,8 +1096,9 @@ class DesignController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
     public function show_location(UserNamespace $namespace, LocationBound $bound) {
-        Utilities::ignoreVar($namespace,$bound);
-        abort(CodeOf::HTTP_NOT_IMPLEMENTED);
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Design\ShowLocation::showSchedule(bound: $bound);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 

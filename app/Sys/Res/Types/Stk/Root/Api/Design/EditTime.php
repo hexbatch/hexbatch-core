@@ -123,7 +123,7 @@ class EditTime extends CreateTime
             ->leaf([
                 'command_class' =>Act\Cmd\Ds\DesignTimeEdit::class,
                 'command_args' =>[
-                    'schedule_params'=>$params->toArray(),
+                    'schedule_params'=>$params?->toArray(),
                     'namespace_uuid'=>Utilities::getCurrentNamespace()->ref_uuid
                 ],
                 'command_tags' =>[Act\Cmd\Ds\DesignTimeEdit::class]
@@ -132,6 +132,7 @@ class EditTime extends CreateTime
         $thang = $builder->execute()->getThang();
         if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
             $data = $thang->finished_data;
+            /** @var TimeBound|null $time_bound */
             $time_bound = TimeBound::buildTimeBound(uuid: $data['ref_uuid'],with_spans: true)->first();
             return $time_bound;
         } else {

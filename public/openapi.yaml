@@ -1107,24 +1107,12 @@ paths:
             schema:
               $ref: '#/components/schemas/Schedule'
       responses:
-        '202':
-          description: 'Schedule edited'
+        '200':
+          description: 'The schedule and its spans'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Schedule'
-        '200':
-          description: 'Thing is processing|waiting'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ThingResponse'
-        '201':
-          description: 'Success but other callbacks'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HexbatchCallbackCollectionResponse'
         '400':
           description: 'There was an issue'
           content:
@@ -1242,14 +1230,14 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/location_create':
+  '/api/v1/{user_namespace}/design/locations/create':
     post:
       tags:
         - design
         - bounds
       summary: 'Makes a new location bound'
       description: 'Makes a new geo json 2d or 3d shape'
-      operationId: core.design.location_create
+      operationId: core.design.locations.create
       parameters:
         -
           name: user_namespace
@@ -1263,14 +1251,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DesignLocationParams'
+              $ref: '#/components/schemas/Location'
       responses:
         '202':
           description: 'Location created'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiLocationResponse'
+                $ref: '#/components/schemas/Location'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1292,14 +1280,14 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/location/{location_bound}/edit':
+  '/api/v1/{user_namespace}/design/locations/{location_bound}/edit':
     patch:
       tags:
         - design
         - bounds
-      summary: 'Makes a new location bound'
+      summary: 'Edits an existing location bound'
       description: 'Change visual properties of a location'
-      operationId: core.design.location_edit
+      operationId: core.design.locations.edit
       parameters:
         -
           name: user_namespace
@@ -1320,14 +1308,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DesignLocationParams'
+              $ref: '#/components/schemas/Location'
       responses:
         '202':
           description: 'Location edited'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiLocationResponse'
+                $ref: '#/components/schemas/Location'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1349,14 +1337,14 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/location/{location_bound}/destroy':
+  '/api/v1/{user_namespace}/design/locations/{location_bound}/destroy':
     delete:
       tags:
         - design
         - bounds
       summary: 'Destroy a location  '
-      description: 'Destorys a location resource if its not used '
-      operationId: core.design.destroy_location
+      description: 'Destroys a location resource if its not used '
+      operationId: core.design.locations.destroy
       parameters:
         -
           name: user_namespace
@@ -1377,14 +1365,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DesignLocationParams'
+              $ref: '#/components/schemas/Location'
       responses:
         '202':
           description: 'Location destroyed'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiLocationResponse'
+                $ref: '#/components/schemas/Location'
         '200':
           description: 'Thing is processing|waiting'
           content:
@@ -1406,14 +1394,14 @@ paths:
       security:
         -
           bearerAuth: []
-  '/api/v1/{user_namespace}/design/list_locations':
-    patch:
+  '/api/v1/{user_namespace}/design/locations/list':
+    get:
       tags:
         - design
         - bounds
       summary: 'Lists locations  '
       description: 'Lists locations'
-      operationId: core.design.list_locatations
+      operationId: core.design.locations.list
       parameters:
         -
           name: user_namespace
@@ -1427,14 +1415,53 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ListLocationParams'
+              $ref: '#/components/schemas/LocationSearchParams'
       responses:
         '200':
           description: 'Location results returned'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiLocationCollectionResponse'
+                $ref: '#/components/schemas/LocationList'
+        '400':
+          description: 'There was an issue'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThingResponse'
+      security:
+        -
+          bearerAuth: []
+  '/api/v1/{user_namespace}/design/locations/{location_bound}/show':
+    patch:
+      tags:
+        - design
+        - bounds
+      summary: 'Gives detail about a location  '
+      description: 'Shows a location'
+      operationId: core.design.locations.show
+      parameters:
+        -
+          name: user_namespace
+          in: path
+          description: 'Namespace this is run under'
+          required: true
+          schema:
+            $ref: '#/components/schemas/HexbatchNamespace'
+        -
+          name: location_bound
+          in: path
+          description: 'The location'
+          required: true
+          schema:
+            $ref: '#/components/schemas/HexbatchResource'
+      responses:
+        '200':
+          description: 'Location results returned'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
         '400':
           description: 'There was an issue'
           content:
@@ -7646,6 +7673,87 @@ components:
         -
           summary: 'Should be unique across the world'
           value: 59714b32-a017-4300-afbc-f910886a2589
+    Location:
+      description: 'Show details about a map or shape'
+      properties:
+        bound_name:
+          $ref: '#/components/schemas/HexbatchResourceName'
+          description: 'Name of the bound'
+        location_type:
+          oneOf:
+            -
+              $ref: '#/components/schemas/TypeOfLocation'
+            -
+              type: 'null'
+          title: 'Location Type'
+        ref_uuid:
+          $ref: '#/components/schemas/HexbatchUuid'
+        geo_json:
+          title: 'Geo Json'
+          type:
+            - array
+            - 'null'
+          items:
+            type: mixed
+        location_display:
+          title: Display
+          type:
+            - array
+            - 'null'
+          items:
+            type: mixed
+        shape_bounding_box:
+          title: 'Shape bounding box'
+          type:
+            - array
+            - 'null'
+          items:
+            type: mixed
+        map_bounding_box:
+          title: 'Map bounding box'
+          type:
+            - array
+            - 'null'
+          items:
+            type: mixed
+        created_at:
+          title: 'Created at'
+          description: 'When this was created'
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        updated_at:
+          title: 'Created at'
+          description: 'When this was created'
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        location_namespace:
+          $ref: '#/components/schemas/Namespace'
+      type: object
+    LocationSearchParams:
+      properties:
+        namespace_ref:
+          title: Namespace
+          description: 'The schedule is in this namespace. Can be uuid or name.'
+        cursor:
+          title: Cursor
+      type: object
+    LocationList:
+      properties:
+        data:
+          title: Locations
+          description: 'list of locations'
+          type: array
+          items:
+            $ref: '#/components/schemas/Location'
+        meta:
+          $ref: '#/components/schemas/CursoratedMetaData'
+      type: object
     Namespace:
       properties:
         ref_uuid:
@@ -7751,7 +7859,17 @@ components:
           title: 'Cron period length'
           description: 'The amount of seconds after each cron match'
           minimum: 1
-        uuid:
+        schedule_namespace:
+          $ref: '#/components/schemas/Namespace'
+        created_at:
+          title: 'Created at'
+          description: 'When this was created'
+          type:
+            - string
+            - 'null'
+          format: datetime
+          example: '2025-02-25T15:00:59-06:00'
+        ref_uuid:
           $ref: '#/components/schemas/HexbatchUuid'
         time_spans:
           title: 'Time spans'
@@ -8231,32 +8349,6 @@ components:
               type: 'null'
           title: Thing
       type: object
-    ApiLocationCollectionResponse:
-      description: 'Shows the location bounds list and thing for the api call'
-      properties:
-        location_collection:
-          $ref: '#/components/schemas/LocationCollectionResponse'
-        thing:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ApiThingResponse'
-            -
-              type: 'null'
-          title: Thing
-      type: object
-    ApiLocationResponse:
-      description: 'Shows the location bound and thing for the api call'
-      properties:
-        location:
-          $ref: '#/components/schemas/LocationResponse'
-        thing:
-          oneOf:
-            -
-              $ref: '#/components/schemas/ApiThingResponse'
-            -
-              type: 'null'
-          title: Thing
-      type: object
     ApiElementActionResponse:
       description: 'Shows the element details and thing for the api call'
       properties:
@@ -8554,37 +8646,6 @@ components:
             - 'null'
           maxLength: 40
           minLength: 3
-      type: object
-    DesignLocationParams:
-      properties:
-        bound_name:
-          oneOf:
-            -
-              $ref: '#/components/schemas/HexbatchResourceName'
-              description: 'Name of the bound'
-            -
-              type: 'null'
-          title: Name
-          description: 'Name of the bound'
-        location_type:
-          $ref: '#/components/schemas/TypeOfLocation'
-          description: 'Locations are maps or shapes'
-        geo_json:
-          title: 'Geo Json'
-          description: 'Geo json supported'
-          type:
-            - array
-            - 'null'
-          items:
-            type: mixed
-        display:
-          title: 'Display info'
-          description: 'Add color and texture here'
-          type:
-            - array
-            - 'null'
-          items:
-            type: mixed
       type: object
     DesignOwnershipParams:
       properties:
@@ -9128,7 +9189,7 @@ components:
         location:
           oneOf:
             -
-              $ref: '#/components/schemas/LocationResponse'
+              $ref: '#/components/schemas/Location'
             -
               type: 'null'
           title: Location
@@ -9166,60 +9227,6 @@ components:
             type: mixed
         created_at:
           title: 'Attribute created at'
-          type:
-            - string
-            - 'null'
-          format: date-time
-      type: object
-    LocationCollectionResponse:
-      title: Locations
-      description: 'A collection of time bounds'
-      properties:
-        cursor:
-          title: Cursor
-          type:
-            - string
-            - 'null'
-        locations:
-          title: 'List of Schedules'
-          description: $locations
-          type: array
-          items:
-            $ref: '#/components/schemas/LocationResponse'
-      type: object
-    LocationResponse:
-      description: 'Show details about a map or shape location'
-      properties:
-        uuid:
-          $ref: '#/components/schemas/HexbatchUuid'
-        name:
-          title: Name
-          type: string
-        location_type:
-          $ref: '#/components/schemas/TypeOfLocation'
-        geo_json:
-          title: 'Geo Json'
-          type:
-            - array
-            - 'null'
-          items:
-            type: mixed
-        location_display:
-          title: Display
-          type:
-            - array
-            - 'null'
-          items:
-            type: mixed
-        location_bounding_box:
-          title: 'Bounding box'
-          type:
-            - array
-            - 'null'
-          items:
-            type: mixed
-        created_at:
-          title: 'Location created at'
           type:
             - string
             - 'null'
@@ -10797,7 +10804,9 @@ components:
           type: boolean
         bubble_exceptions:
           title: 'Bubble exceptions'
-          type: boolean
+          type:
+            - boolean
+            - 'null'
       type: object
     ManualCallbackParams:
       description: 'When completing a manual thang callback'

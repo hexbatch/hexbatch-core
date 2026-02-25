@@ -36,7 +36,7 @@ class Cmd extends BaseAction
             throw new \LogicException("target namespace is null");
         }
         if (!$target->isNamespaceAdmin($given)  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target?->getName()]),
+            throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target->getName()]),
                 Response::HTTP_FORBIDDEN,
                 RefCodes::NAMESPACE_NOT_ADMIN);
         }

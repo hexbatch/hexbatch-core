@@ -146,6 +146,7 @@ class CreateTime extends Api\DesignApi implements ICommandCallable
         $thang = $builder->execute()->getThang();
         if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
             $data = $thang->finished_data;
+            /** @var TimeBound $time_bound|null $time_bound */
             $time_bound = TimeBound::buildTimeBound(uuid: $data['ref_uuid'],with_spans: true)->first();
             return $time_bound;
         } else {

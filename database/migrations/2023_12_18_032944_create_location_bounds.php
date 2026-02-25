@@ -80,7 +80,7 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
             BEGIN
                 NEW.geom = ST_AsText(ST_GeomFromGeoJSON(New.geo_json));
-                IF location_type = 'shape' THEN
+                IF NEW.location_type = 'shape' THEN
                   NEW.shape_bounding_box = ST_3DExtent(NEW.geom);
                 ELSE
                   NEW.map_bounding_box = ST_Extent(NEW.geom);

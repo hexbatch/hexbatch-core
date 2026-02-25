@@ -2,12 +2,12 @@
 
 namespace App\OpenApi\Results\Attributes;
 
+use App\Data\ApiParams\Data\Locations\Location;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Types\TypeOfApproval;
 use App\Models\Attribute;
 use App\Data\ApiParams\Common\HexbatchUuid;
-use App\OpenApi\Results\Bounds\LocationResponse;
 use App\OpenApi\Results\ResultBase;
 use App\OpenApi\Results\Types\TypeResponse;
 use Carbon\Carbon;
@@ -44,7 +44,7 @@ class AttributeResponse extends ResultBase
     public ?AttributeResponse $design = null;
 
     #[OA\Property(title: 'Location')]
-    public ?LocationResponse $location = null;
+    public ?Location $location = null;
 
 
     #[OA\Property(title: 'Is system')]
@@ -113,7 +113,7 @@ class AttributeResponse extends ResultBase
         }
 
         if($given_attribute->attribute_shape_bound) {
-            $this->location = new LocationResponse(given_location: $given_attribute->attribute_shape_bound);
+            $this->location = Location::validateAndCreate($given_attribute->attribute_shape_bound);
         }
         $this->is_system = $given_attribute->is_system;
         $this->is_abstract = $given_attribute->is_abstract;
@@ -157,7 +157,7 @@ class AttributeResponse extends ResultBase
         }
 
         if ($this->location) {
-            $ret['location'] = $this->location;
+            $ret['location'] = $this->location->toArray();
         }
 
         if ($this->design) {

@@ -69,7 +69,7 @@ class DestroyTime extends Api\DesignApi implements ICommandCallable
         $nodes = [];
         $creator = new Act\Cmd\Ds\DesignTimeDestroy(
             given_time_uuid: $this->bound->ref_uuid,
-             tags: ['edit time bound from api']);
+             tags: ['destroy time bound from api']);
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 
 

@@ -4,15 +4,17 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Locations\Location;
+use App\Data\ApiParams\Data\Locations\Params\LocationSearchParams;
+use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\LocationBound;
-use App\OpenApi\ApiResults\Bounds\ApiLocationCollectionResponse;
+use App\Models\UserNamespace;
 use App\OpenApi\Params\Listing\Design\ListLocationParams;
 
 use App\Sys\Res\Types\Stk\Root\Api;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
 
 #[ApiParamMarker( param_class: ListLocationParams::class)]
 class ListLocations extends Api\DesignApi
@@ -27,7 +29,7 @@ class ListLocations extends Api\DesignApi
 
 
     public function __construct(
-        protected ?ListLocationParams $params = null,
+        protected ?LocationSearchParams $params = null,
 
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
@@ -40,30 +42,44 @@ class ListLocations extends Api\DesignApi
             is_async: $this->is_async,tags: $this->tags);
     }
 
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new ListLocationParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    const PRIMARY_SNAPSHOT_KEY = 'locations';
-    const int HTTP_CODE_GOOD = CodeOf::HTTP_OK;
-
     protected function getMyData() :array {
+        $namespace_id = null;
+        if ($this->params->namespace_ref) {
+            $namespace_id = UserNamespace::resolveNamespace(value: $this->params->namespace_ref)->id;
+        }
         $build = LocationBound::buildLocationBound(
-            namespace_id: $this->params->getGivenNamespace()?->id
+            namespace_id: $namespace_id
         );
 
-        return [static::PRIMARY_SNAPSHOT_KEY=>$build->cursorPaginate(cursor: $this->params->getCursor())];
+        return [static::PRIMARY_SNAPSHOT_KEY=>$build->cursorPaginate(cursor: $this->params->cursor)];
     }
 
 
-    public function getDataSnapshot(): array|IThingBaseResponse
+    public function getDataSnapshot(): CursorPaginatedDataCollection
     {
         $what =  $this->getMyData();
-        return new ApiLocationCollectionResponse(given_locations:  $what[static::PRIMARY_SNAPSHOT_KEY],thing: $this->getMyThing());
+        $locs = $what[static::PRIMARY_SNAPSHOT_KEY];
+        $resp = Location::collect($locs, CursorPaginatedDataCollection::class);
+        return $resp;
+    }
+
+
+    /**
+     * @return CursorPaginatedDataCollection<Schedule>
+     */
+    public static function listLocations(?LocationSearchParams $params) {
+
+        if ($params?->namespace_ref) {
+            $namespace_id = UserNamespace::resolveNamespace(value: $params->namespace_ref)->id;
+        } else {
+            $namespace_id = Utilities::getCurrentNamespace()?->id;
+        }
+        $build = LocationBound::buildLocationBound(
+            namespace_id: $namespace_id,
+            with_namespace: true
+        )->orderBy('created_at');
+        $cursor = $build->cursorPaginate(perPage: 15, cursor: $params->cursor);
+        return Location::collect($cursor, CursorPaginatedDataCollection::class);
     }
 
 }

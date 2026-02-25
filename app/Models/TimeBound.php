@@ -470,6 +470,7 @@ class TimeBound extends Model
             }
         }
 
+        /** @var TimeBound|null $ret */
         $ret = $build?->first();
 
         if (empty($ret) && $throw_exception) {

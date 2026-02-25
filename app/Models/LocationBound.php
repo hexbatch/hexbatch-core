@@ -71,6 +71,8 @@ class LocationBound extends Model
         'display_json' => AsArrayObject::class,
         'geo_json' => AsArrayObject::class,
         'location_type' => TypeOfLocation::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     public function location_attributes() : HasMany {
@@ -159,7 +161,7 @@ class LocationBound extends Model
          }
 
          if ($name) {
-             $build->where('location_bounds.bound_name',$build);
+             $build->where('location_bounds.bound_name',$name);
          }
 
         return $build;
@@ -250,31 +252,42 @@ class LocationBound extends Model
                     RefCodes::BOUND_TYPE_DEF);
             }
 
-            $long_sign = null;
+
+
+            $checkCoordinates = function (float $lat,float $long) {
+                $long_sign = null;
+                /**
+                 * checking for dateline: see if any of the long in each polygon is a different sign
+                 * checking poles, make sure all lat is in 1 degree max of each pole, so up to 89 north and -89 south
+                 *
+                 */
+                if ($long < -180 || $long > 180 || $lat > 89 || $lat < -89) {
+                    throw new HexbatchNotPossibleException(__("msg.location_bound_json_invalid_geo_json",['msg'=>__("msg.location_out_of_bounds")]),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::BOUND_TYPE_DEF);
+                }
+                if ($long_sign === null) {
+                    $long_sign = $long < 0;
+                }
+                if ($long_sign !== ($long < 0)) {
+                    throw new HexbatchNotPossibleException(__("msg.location_bounds_map_is_2d"),
+                        \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                        RefCodes::BOUND_TYPE_DEF);
+                }
+            };
             if ($geometry->getType() === 'Polygon') {
                 foreach ($geometry->getCoordinates() as $coord_array) {
                     foreach ($coord_array as $coordinates) {
-                        foreach ($coordinates as $coord) {
-                            $long = $coord[0];
-                            $lat = $coord[1];
-                            /**
-                             * checking for dateline: see if any of the long in each polygon is a different sign
-                             * checking poles, make sure all lat is in 1 degree max of each pole, so up to 89 north and -89 south
-                             *
-                             */
-                            if ($long < -180 || $long > 180 || $lat > 89 || $lat < -89) {
-                                throw new HexbatchNotPossibleException(__("msg.location_bound_json_invalid_geo_json",['msg'=>__("msg.location_out_of_bounds")]),
-                                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                    RefCodes::BOUND_TYPE_DEF);
+                        if (is_array($coordinates[0])) {
+                            foreach ($coordinates as $coord) {
+                                $long = $coord[0];
+                                $lat = $coord[1];
+                                $checkCoordinates($lat,$long);
                             }
-                            if ($long_sign === null) {
-                                $long_sign = $long < 0;
-                            }
-                            if ($long_sign !== ($long < 0)) {
-                                throw new HexbatchNotPossibleException(__("msg.location_bounds_map_is_2d"),
-                                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                                    RefCodes::BOUND_TYPE_DEF);
-                            }
+                        } else {
+                            $long = $coordinates[0];
+                            $lat = $coordinates[1];
+                            $checkCoordinates($lat,$long);
                         }
                     }
                 }
@@ -336,10 +349,13 @@ class LocationBound extends Model
                  */
                 $owner = UserNamespace::resolveNamespace($owner_hint);
                 $build = static::buildLocationBound(namespace_id: $owner->id,name: $maybe_name);
+            } else if(count($parts) === 1) {
+                $owner = Utilities::getCurrentNamespace();
+                $build = static::buildLocationBound(namespace_id: $owner->id,name: $parts[0]);
             }
 
         }
-
+        /** @var LocationBound|null $ret $ret */
         $ret = $build?->first();
 
         if (empty($ret) && $throw_exception) {
@@ -359,7 +375,7 @@ class LocationBound extends Model
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     public static function collectLocationBound(Collection|string $collect, ?UserNamespace $namespace = null,?LocationBound $bound = null)
     : LocationBound
@@ -380,7 +396,7 @@ class LocationBound extends Model
                 $bound->location_bound_namespace_id = $namespace->id;
             }
 
-            if ($collect->has('bound_name')) {
+            if ($collect->has('bound_name') && $collect->get('bound_name')) {
                 $name  = $collect->get('bound_name');
                 if (is_string($name) && Str::trim($name)) {
                     try {
@@ -397,7 +413,7 @@ class LocationBound extends Model
             }
 
             if (!$bound->isInUse()) {
-                if ($collect->has('location_type')) {
+                if ($collect->has('location_type') && $collect->get('location_type')) {
                     $test_string = $collect->get('location_type');
                     if ($test_string instanceof TypeOfLocation) {
                         $bound->location_type = $test_string;
@@ -408,7 +424,7 @@ class LocationBound extends Model
                 }
 
 
-                if ($collect->has('geo_json')) {
+                if ($collect->has('geo_json') && !empty($collect->get('geo_json'))) {
                     $what_geo = $collect->get('geo_json');
                     if (Str::isJson($what_geo)) {
                         $what_geo = Utilities::maybeDecodeJson($what_geo,b_associative: true);
@@ -419,7 +435,7 @@ class LocationBound extends Model
                 }
             }
 
-            if ($collect->has('display')) {
+            if ($collect->has('display') && !empty($collect->get('display'))) {
                 $what_display = $collect->get('display');
                 if (Str::isJson($what_display)) {
                     $what_display = Utilities::maybeDecodeJson($what_display,b_associative: true);
@@ -443,7 +459,7 @@ class LocationBound extends Model
             $bound->save();
             $bound->refresh();
             /** @var LocationBound $bound */
-            $bound = LocationBound::buildLocationBound(me_id:$bound->id);
+            $bound = LocationBound::buildLocationBound(me_id:$bound->id)->first();
 
             DB::commit();
             return $bound;
@@ -459,16 +475,6 @@ class LocationBound extends Model
             return Attribute::buildAttribute(shape_id: $this->id)->exists();
         }
         return false;
-    }
-
-    public function getBoundingBox(): ?array
-    {
-        if ($this->location_type === TypeOfLocation::MAP) {
-            return Utilities::maybeDecodeJson($this->map_bounding_box);
-        }
-
-        return Utilities::maybeDecodeJson($this->shape_bounding_box);
-
     }
 
 }
