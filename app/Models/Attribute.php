@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
-use App\Enums\Bounds\TypeOfLocation;
+use App\Data\ApiParams\Enums\TypeOfLocation;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;

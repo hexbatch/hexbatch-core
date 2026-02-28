@@ -65,7 +65,7 @@ class ListLocations extends Api\DesignApi
 
 
     /**
-     * @return CursorPaginatedDataCollection<Schedule>
+     * @return CursorPaginatedDataCollection<Location>
      */
     public static function listLocations(?LocationSearchParams $params) {
 

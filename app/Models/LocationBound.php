@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\Bounds\TypeOfLocation;
+use App\Data\ApiParams\Enums\TypeOfLocation;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;

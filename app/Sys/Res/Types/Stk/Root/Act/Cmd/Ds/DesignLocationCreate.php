@@ -7,7 +7,7 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Data\ApiParams\Data\Locations\Location;
-use App\Enums\Bounds\TypeOfLocation;
+use App\Data\ApiParams\Enums\TypeOfLocation;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\LocationBound;

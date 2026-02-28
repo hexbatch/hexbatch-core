@@ -3,7 +3,7 @@
 namespace App\Models;
 
 
-use App\Enums\Bounds\TypeOfLocation;
+use App\Data\ApiParams\Enums\TypeOfLocation;
 use App\Enums\Types\TypeOfIntersectionCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
