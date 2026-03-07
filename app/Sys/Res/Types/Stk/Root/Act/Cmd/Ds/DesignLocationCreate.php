@@ -202,7 +202,7 @@ class DesignLocationCreate extends Act\Cmd\Ds implements ICommandCallable
                     'bound_name' => $params->bound_name,
                     'location_type' => $params->location_type,
                     'geo_json' => $params->geo_json,
-                    'display' => $params->location_display
+                    'display' => $params->display_json
                 ]
             );
             if ($given_bound) {

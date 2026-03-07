@@ -73,7 +73,7 @@ class CreateLocation extends Api\DesignApi implements ICommandCallable
             bound_name: $this->params->bound_name,
             location_type: $this->params->location_type,
             geo_json: $this->params->geo_json,
-            display: $this->params->location_display,
+            display: $this->params->display_json,
             parent_action_data: $this->action_data,tags: ['create location bound from api']);
         $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
 
