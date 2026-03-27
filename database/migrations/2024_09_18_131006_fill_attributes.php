@@ -100,7 +100,7 @@ return new class extends Migration
             'is_protected'
             );");
 
-        DB::statement("ALTER TABLE attributes Add COLUMN server_access_type type_of_server_access NOT NULL default 'is_private';");
+        DB::statement("ALTER TABLE attributes Add COLUMN access_policy type_of_server_access NOT NULL default 'is_private';");
 
 
 
@@ -183,7 +183,7 @@ return new class extends Migration
             $table->dropColumn('attribute_name');
             $table->dropColumn('created_at');
             $table->dropColumn('updated_at');
-            $table->dropColumn('server_access_type');
+            $table->dropColumn('access_policy');
             $table->dropColumn('value_policy');
             $table->dropColumn('attribute_approval');
 

@@ -112,13 +112,13 @@ class AttributeResponse extends ResultBase
             }
         }
 
-        if($given_attribute->attribute_shape_bound) {
-            $this->location = Location::validateAndCreate($given_attribute->attribute_shape_bound);
+        if($given_attribute->attribute_location) {
+            $this->location = Location::validateAndCreate($given_attribute->attribute_location);
         }
         $this->is_system = $given_attribute->is_system;
         $this->is_abstract = $given_attribute->is_abstract;
         $this->is_final = $given_attribute->is_final_attribute;
-        $this->access = $given_attribute->server_access_type;
+        $this->access = $given_attribute->access_policy;
         $this->value_policy = $given_attribute->value_policy;
         $this->approval = $given_attribute->attribute_approval;
         $this->read_json_path = $given_attribute->read_json_path;

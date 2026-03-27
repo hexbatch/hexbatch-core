@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Enums\Types\TypeOfApproval;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
@@ -12,19 +11,10 @@ use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Illuminate\Support\Facades\Log;
 
 
-class DesignPending extends Evt\ScopeServer implements ICommandCallable
+class AttributePending extends Evt\ScopeServer implements ICommandCallable
 {
-    const UUID = 'be5621ec-355d-48c4-a838-a3e0735fb3af';
-    const EVENT_NAME = TypeOfEvent::DESIGN_PENDING;
-
-
-
-
-    public function getApprovalStatus(): TypeOfApproval
-    {
-        return TypeOfApproval::PUBLISHING_APPROVED;  //todo this is stubbed
-    }
-
+    const UUID = 'cc9de75b-2bf7-4cd2-b2a8-9567f10a8747';
+    const EVENT_NAME = TypeOfEvent::ATTRIBUTE_PENDING;
 
 
 
@@ -36,7 +26,7 @@ class DesignPending extends Evt\ScopeServer implements ICommandCallable
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         //todo if not any parent here do not do anything
-        Log::debug("Called event design pending node");
+        Log::debug("Called event attribute pending node");
         return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $children_args);
     }
 }

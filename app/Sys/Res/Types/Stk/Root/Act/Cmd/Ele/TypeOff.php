@@ -137,7 +137,7 @@ class TypeOff extends Act\Cmd\Ele
                 foreach ($this->getGivenType()->getAllAttributes() as $att)
                 {
 
-                    switch ($att->server_access_type) {
+                    switch ($att->access_policy) {
                         case TypeOfServerAccess::IS_PUBLIC_DOMAIN: {
                             break;
                         }

@@ -54,6 +54,17 @@ class Cmd extends BaseAction
 
     }
 
+    protected static function checkIfGivenIsMember(UserNamespace $given , ?UserNamespace $target) {
+        if (!$target) {
+            throw new \LogicException("target namespace is null");
+        }
+        if (!$target->isNamespaceMember($given)  ) {
+            throw new HexbatchPermissionException(__("msg.namespace_not_member",['ref'=>$target->getName()]),
+                Response::HTTP_FORBIDDEN,
+                RefCodes::NAMESPACE_NOT_ADMIN);
+        }
+    }
+
     protected function checkIfMember(UserNamespace $target) {
 
         if (!$target->isNamespaceMember($this->getNamespaceInUse())  ) {

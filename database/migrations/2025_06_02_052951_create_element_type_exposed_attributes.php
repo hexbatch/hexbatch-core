@@ -54,13 +54,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('exposed_parent_attribute_id')
-                ->nullable()->default(null)
-                ->comment("The parent attribute id")
-                ->index()
-                ->constrained('attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->foreignId('exposed_parent_type_id')
                 ->nullable()->default(null)
@@ -70,13 +63,6 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
-            $table->foreignId('inherits_exposed_id')
-                ->nullable()->default(null)
-                ->comment("Types inherit attributes from other types. This means this type attribute comes from an exposed parent attribute")
-                ->index()
-                ->constrained('element_type_exposed_attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
             $table->timestamp('created_at')
                 ->default(DB::raw('NOW()'))

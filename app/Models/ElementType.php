@@ -12,10 +12,12 @@ use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
 use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Types\IType;
+use App\Sys\Res\Types\Stk\Root;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -45,8 +47,10 @@ use Illuminate\Validation\ValidationException;
  * @property TypeOfLifecycle lifecycle
  *
  * @property UserNamespace owner_namespace
+ * @property Server type_server
  * @property Attribute[] type_attributes
  * @property ElementTypeParent[] type_parents
+ * @property ElementType[] type_children
  * @property ElementTypeServerLevel[] type_server_levels
  * @property TimeBound type_time
  *
@@ -83,7 +87,9 @@ class ElementType extends Model implements IType,ISystemModel
      * @var array<string, string>
      */
     protected $casts = [
-        'lifecycle'=> TypeOfLifecycle::class
+        'lifecycle'=> TypeOfLifecycle::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     protected static function booted(): void
@@ -105,9 +111,17 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->belongsTo(UserNamespace::class,'owner_namespace_id');
     }
 
+    public function type_server() : BelongsTo {
+        return $this->belongsTo(Server::class,'imported_from_server_id');
+    }
 
-    public function type_time() : BelongsTo {
+
+    public function type_schedule() : BelongsTo {
         return $this->belongsTo(TimeBound::class,'type_time_bound_id');
+    }
+
+    public function type_handle() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'type_handle_element_id');
     }
 
 
@@ -116,16 +130,28 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->hasMany(Attribute::class,'owner_element_type_id','id');
     }
 
+    public function type_exposed_attributes() : HasManyThrough {
+        return $this->hasManyThrough(
+            Attribute::class, //what is returned
+            ElementTypeExposedAttribute::class, //the connecting class
+            'exposed_type_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'exposed_attribute_id' // Local key on the connecting table...
+        );
+    }
+
     public function type_server_levels() : HasMany {
         return $this->hasMany(ElementTypeServerLevel::class,'server_access_type_id','id');
     }
 
     public function type_children() : HasMany {
-        return $this->hasMany(ElementTypeParent::class,'parent_type_id','id');
+        return $this->hasMany(ElementTypeParent::class,'parent_type_id','id')->with('child_type');
     }
 
     public function type_parents() : HasMany {
-        return $this->hasMany(ElementTypeParent::class,'child_type_id','id');
+        return $this->hasMany(ElementTypeParent::class,'child_type_id','id')
+            ->with(['parent_type','parent_type.type_attributes','parent_type.type_attributes.type_owner','parent_type.type_schedule','parent_type.type_parents']);
     }
 
 
@@ -167,12 +193,14 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $id = null,
         ?string          $uuid = null,
         ?int             $namespace_id = null,
-        array                  $in_namespace_ids = [],
-        ?string             $name = null,
+        array            $in_namespace_ids = [],
+        ?string          $name = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
-        array            $only_uuids = []
+        array            $only_uuids = [],
+        bool             $b_child_parent_relations = false,
+        bool             $b_server_relations = false,
     )
     : Builder
     {
@@ -181,10 +209,16 @@ class ElementType extends Model implements IType,ISystemModel
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts")
             ->selectRaw("extract(epoch from  element_types.updated_at) as updated_at_ts")
 
-            /** @uses ElementType::owner_namespace(), ElementType::type_attributes(), ElementType::type_server_levels() */
-            /** @uses ElementType::type_children(),ElementType::type_parents(),ElementType::type_time() */
-            ->with('owner_namespace', 'type_attributes', 'type_children', 'type_parents','type_server_levels','type_time')
+            ->with( 'type_attributes','type_schedule','type_exposed_attributes')
             ;
+
+        if ($b_child_parent_relations) {
+            $build->with('type_children', 'type_parents','type_handle');
+        }
+
+        if ($b_server_relations) {
+            $build->with('owner_namespace', 'type_server', 'type_server_levels');
+        }
 
         if ($id) {
             $build->where('element_types.id', $id);
@@ -274,7 +308,7 @@ class ElementType extends Model implements IType,ISystemModel
                 $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
             }
         }
-
+        /** @var ElementType|null $ret $ret */
         $ret = $build?->first();
 
         if (empty($ret) && $throw_exception) {
@@ -498,12 +532,7 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
 
-    public function isParentOfThis(ElementType $type) {
-        foreach ($this->type_parents as $par) {
-            if ($type->ref_uuid === $par->parent_type->ref_uuid) {return true;}
-        }
-        return false;
-    }
+
 
     public static function validateTypeName(string $name,UserNamespace $namespace,?ElementType $me = null) {
         try {
@@ -528,14 +557,7 @@ class ElementType extends Model implements IType,ISystemModel
         return in_array($element_type->getUuid(),$parent_uuids);
     }
 
-    /**
-     * @return ElementType[]|\Illuminate\Database\Eloquent\Collection
-     */
-    public function getAncestorsAsFlat() {
-        $parent_uuids = $this->getParentUuids();
-        if (empty($parent_uuids)) {return [];}
-        return ElementType::buildElementType(only_uuids: $parent_uuids)->get();
-    }
+
 
     /**
      * @return string[]
@@ -546,6 +568,12 @@ class ElementType extends Model implements IType,ISystemModel
             $ret[] = $par->parent_type->ref_uuid;
         }
         return $ret;
+    }
+
+    public static function getRootType() : ElementType {
+        return ElementType::where('type_name',Root::TYPE_NAME)
+            ->where('owner_namespace_id',UserNamespace::getSystemNamespace()->id)
+            ->first();
     }
 
 

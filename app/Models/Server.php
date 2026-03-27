@@ -104,6 +104,8 @@ class Server extends Model implements IServer,ISystemModel
      */
     protected $casts = [
         'server_status' => TypeOfServerStatus::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     public function owning_namespace() : BelongsTo {
@@ -129,7 +131,8 @@ class Server extends Model implements IServer,ISystemModel
         /**
          * @var Builder $build
          */
-        $build = Server::select('servers.*');
+        $build = Server::select('servers.*')
+            ->with('owning_namespace','server_type');
 
         if ($me_id) {
             $build->where('servers.id', $me_id);
@@ -155,10 +158,6 @@ class Server extends Model implements IServer,ISystemModel
             $build->where('is_system',$is_system);
         }
 
-        /**
-         * @uses Server::owning_namespace()
-         */
-        $build->with('owning_namespace');
 
         return $build;
     }

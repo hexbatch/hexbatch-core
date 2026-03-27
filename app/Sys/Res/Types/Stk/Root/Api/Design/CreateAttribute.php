@@ -3,20 +3,31 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
+use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeParamData;
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
+use App\Models\Attribute;
+use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 
-#[ApiParamMarker( param_class: DesignAttributeParams::class)]
-class CreateAttribute extends Api\DesignApi
+use Illuminate\Support\Facades\Log;
+use App\Sys\Res\Types\Stk\Root\Evt;
+
+#[ApiParamMarker( param_class: AttributeParamData::class)]
+#[ApiEventMarker( Evt\Server\AttributePending::class)]
+class CreateAttribute extends Api\DesignApi implements ICommandCallable
 {
     const UUID = '745c1851-68af-4420-b6f9-037aa63bebc7';
     const TYPE_NAME = 'api_design_create_attribute';
@@ -32,7 +43,8 @@ class CreateAttribute extends Api\DesignApi
 
 
     public function __construct(
-        protected ?DesignAttributeParams $params = null,
+        protected AttributeParamData $params,
+        protected ElementType $given_type,
 
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
@@ -45,82 +57,58 @@ class CreateAttribute extends Api\DesignApi
             is_async: $this->is_async,tags: $this->tags);
     }
 
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new DesignAttributeParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
 
-    protected function getMyData() :array {
-        return ['attribute'=>$this->getGivenAttribute()];
-    }
 
-    public function getDataSnapshot(): array|IThingBaseResponse
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        $what =  $this->getMyData();
-        return new ApiAttributeResponse(given_attribute:  $what['attribute'],thing: $this->getMyThing());
+        Log::debug("Called api create attribute node");
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $children_args);
     }
-
-
-
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ds\DesignAttributeCreate(
-            given_design_uuid: $this->params->getDesignUuid(),
-            attribute_name: $this->params->getAttributeName(),
-            owner_type_uuid: $this->params->getTypeUuid(),
-            parent_attribute_uuid: $this->params->getParentUuid(),
-            design_attribute_uuid: $this->params->getDesignUuid(),
-            location_uuid: $this->params->getLocationUuid(),
-            is_final: $this->params->isFinal(),
-            is_abstract: $this->params->isAbstract(),
-            read_json_path: $this->params->getReadJsonPath(),
-            validate_json_path: $this->params->getValidateJsonPath(),
-            default_value: $this->params->getDefaultValue(),
-            access: $this->params->getAccess(),
-            value_policy: $this->params->getValuePolicy(),
-            parent_action_data: $this->action_data,tags: ['create attribute from api']);
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function createAttribute(UserNamespace      $namespace, ElementType $given_type,
+                                         AttributeParamData $params , array $tags = [], ?IThangBuilder $builder = null)
+    : Attribute|Thang
+    {
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['create-attribute'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($namespace)
+            ->setSharedArg('namespace',$namespace)
+            ->tree($my_command)
+            ->leaf(
+                command_class: Evt\Server\DesignPending::class,
+                command_args: [
+                    'attribute_params'=>$params->toArray(),
+                    'namespace_uuid'=>Utilities::getCurrentNamespace()->ref_uuid,
+                    'namespace'=>Utilities::getCurrentNamespace(),
+                    'given_type'=>$given_type,
+                ],
+                command_tags: [Evt\Server\DesignPending::class]
+            )
+            ->tree(
+                command_class: Act\Cmd\Ds\DesignAttributeCreate::class,
+                command_args: [
+                    'attribute_params'=>$params->toArray(),
+                    'namespace'=>Utilities::getCurrentNamespace(),
+                    'namespace_uuid'=>Utilities::getCurrentNamespace()->ref_uuid,
+                    'given_type'=>$given_type,
+                ],
+                command_tags: [Act\Cmd\Ds\DesignAttributeCreate::class]
+            );
 
-        if ($child instanceof Act\Cmd\Ds\DesignAttributeCreate) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenAttribute($child->getGivenAttribute());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  Attribute::getThisAttribute(uuid: $data['ref_uuid'],b_do_relations: true);
+        } else {
+            return $thang;
         }
+
     }
 
 }

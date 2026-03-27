@@ -162,7 +162,8 @@ enum TypeOfEvent: string
     case TYPE_OWNER_CHANGING = 'type_owner_changing'; //type given different ownership from what it started as, parents can block
     case TYPE_OWNER_CHANGED = 'type_owner_changed'; //after type given different ownership
 
-    case DESIGN_PENDING = 'design_pending'; //when a design uses a base attribute or parent type. Goes to all listeners in the inheritance chain
+    case DESIGN_PENDING = 'design_pending'; //when a design uses a parent type. Goes to all listeners in the inheritance chain
+    case ATTRIBUTE_PENDING = 'attribute_pending'; //when a design uses a base attribute. Goes to all listeners in the inheritance chain
     case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
     case TYPE_RETIRED = 'type_retired'; //type or type ancestor ns admin
     case TYPE_SUSPENDED = 'type_suspended'; //only system admin group

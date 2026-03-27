@@ -24,7 +24,7 @@ class ServerResponse extends ResultBase
     public string $uuid = '';
 
     #[OA\Property(title: 'Namespace uuid',type: HexbatchUuid::class)]
-    public string $namespace_uuid = '';
+    public string $namespace_uuid = '';//cp
 
     #[OA\Property(title: 'Type uuid',type: HexbatchUuid::class)]
     public string $type_uuid = '';

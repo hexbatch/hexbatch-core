@@ -50,7 +50,7 @@ class LinkController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Unlinked', content: new JsonContent(ref: ApiLinkerResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',

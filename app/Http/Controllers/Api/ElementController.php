@@ -56,7 +56,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Owner changed', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -102,7 +102,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type on', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -148,7 +148,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type off', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -301,7 +301,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Write attribute', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -593,7 +593,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements destroyed', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -639,7 +639,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements purged', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -690,7 +690,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: ApiLinkerResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -838,7 +838,7 @@ class ElementController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiSetResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',

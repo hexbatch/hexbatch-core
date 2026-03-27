@@ -8,12 +8,17 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Casts\FromBoxToArray;
+use App\Data\ApiParams\Data\Attributes\AttributeData;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeParamData;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeSearchParams;
+use App\Data\ApiParams\Data\Attributes\Responses\AttributeList;
 use App\Data\ApiParams\Data\Locations\Location;
 use App\Data\ApiParams\Data\Locations\Params\LocationSearchParams;
 use App\Data\ApiParams\Data\Locations\Responses\LocationList;
 use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
 use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Data\ApiParams\Data\Types\ElementTypeData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchAttribute;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
@@ -24,19 +29,12 @@ use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
-use App\OpenApi\ApiResults\Attribute\ApiAttributeResponse;
 use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
-use App\OpenApi\ApiResults\Type\ApiTypeResponse;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeDestroyParams;
-use App\OpenApi\Params\Actioning\Design\DesignAttributeParams;
 use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
 use App\OpenApi\Params\Actioning\Design\DesignParams;
 use App\OpenApi\Params\Actioning\Design\DesignParentParams;
 use App\OpenApi\Params\Actioning\Type\TypeParams;
-use App\OpenApi\Params\Listing\Design\ListAttributeParams;
 use App\OpenApi\Params\Listing\Design\ListDesignParams;
-use App\OpenApi\Params\Listing\Design\ShowAttributeParams;
 use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
@@ -78,8 +76,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -122,8 +120,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -165,8 +163,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -211,8 +209,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -251,8 +249,8 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -295,8 +293,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -339,7 +337,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ApiTypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ElementTypeData::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -407,7 +405,6 @@ class DesignController extends Controller {
                     " \notherwise the members of the owning namesapce can ",
         summary: 'Information about a single attribute on a type  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowAttributeParams::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -421,7 +418,7 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: ApiAttributeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeData::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -429,14 +426,10 @@ class DesignController extends Controller {
     )]
     #[ApiTypeMarker( Root\Api\Design\ShowAttribute::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function show_attribute(Request $request,Attribute $attribute) {
-        $params = new ShowAttributeParams(given_attribute: $attribute);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ShowAttribute(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-attribute']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function show_attribute(UserNamespace $namespace,Attribute $attribute) {
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Design\ShowAttribute::showAttribute($attribute);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -449,14 +442,14 @@ class DesignController extends Controller {
         description: "See a list of attributes in namespaces that one belongs to",
         summary: 'Lists attributes with optional search',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListAttributeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AttributeSearchParams::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: ApiAttributeCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeList::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -464,19 +457,16 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Design\ListAttributes::class)]
-    public function list_attributes(Request $request) {
-        $params = new ListAttributeParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ListAttributes(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-attributes']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_attributes(UserNamespace $namespace,Request $request) {
+        $params = AttributeSearchParams::fromRequest($request);
+        $data_out = Api\Design\ListAttributes::listAttributes(params: $params, caller_namespace: $namespace);//todo here
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/{element_type}/attribute/{attribute}/destroy',
@@ -485,7 +475,6 @@ class DesignController extends Controller {
         "\nRemoving design attributes does not generate any event",
         summary: 'Delete an attribute',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeDestroyParams::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -499,12 +488,10 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Attribute destroyed', content: new JsonContent(ref: AttributeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -512,25 +499,25 @@ class DesignController extends Controller {
     )]
     #[ApiTypeMarker( Root\Api\Design\DestroyAttribute::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    public function destroy_attribute(Request $request,Attribute $attribute) {
-        $params = new DesignAttributeDestroyParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\DestroyAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-attribute']);
+    public function destroy_attribute(UserNamespace $namespace,Attribute $attribute) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Root\Api\Design\DestroyAttribute::destoryAttribute(namespace: $namespace,given_attribute:$attribute, tags: ['api-top']);
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = AttributeData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
-
-
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\CreateAttribute::class)]
-    #[ApiEventMarker( Evt\Server\DesignPending::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
+    #[ApiEventMarker( Evt\Server\AttributePending::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/create_attribute',
         operationId: 'core.design.create_attribute',
@@ -538,7 +525,7 @@ class DesignController extends Controller {
         "\nBut the design can only be published if the inheritance chain does not block this using the design_pending event",
         summary: 'Creates a new attribute on a design',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AttributeParamData::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -549,8 +536,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -560,20 +547,22 @@ class DesignController extends Controller {
                 content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function create_attribute(Request $request,ElementType $type) {
-        $params = new DesignAttributeParams(given_type: $type,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\CreateAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-attribute']);
+    public function create_attribute(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = AttributeParamData::fromRequest($request);
+        $data_out = Root\Api\Design\CreateAttribute::createAttribute(namespace: $namespace,given_type:$type, params: $params,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = AttributeData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
-
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
         path: '/api/v1/{user_namespace}/design/{element_type}/attribute/{attribute}/edit',
@@ -582,7 +571,7 @@ class DesignController extends Controller {
         "\nparent, boolean properties, merge methods, access, value policy, value rules, initial value",
         summary: 'Edits the properites of an unpublished attribute  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignAttributeParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AttributeParamData::class)),
         tags: ['design','attribute'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -596,12 +585,10 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiAttributeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Attribute created', content: new JsonContent(ref: AttributeData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
+                content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -609,14 +596,17 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditAttribute::class)]
-    public function edit_attribute(Request $request,Attribute $attribute) {
-        $params = new DesignAttributeParams(given_attribute: $attribute,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\EditAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-attribute']);
+    #[ApiEventMarker( Evt\Server\AttributePending::class)]
+    public function edit_attribute(UserNamespace $namespace,Attribute $attribute,Request $request) {
+        $params = AttributeParamData::fromRequest($request);
+        $data_out = Root\Api\Design\EditAttribute::editAttribute(namespace: $namespace,given_attribute:$attribute, params: $params,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = AttributeData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -647,8 +637,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -693,8 +683,8 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents added', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents added', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -736,7 +726,7 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule created', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -822,11 +812,8 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -868,7 +855,7 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule destroyed', content: new JsonContent(ref: Schedule::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -912,7 +899,7 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: Location::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -965,7 +952,7 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: Location::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
@@ -1014,7 +1001,7 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: Location::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',

@@ -97,7 +97,7 @@ class Write extends Act\Cmd\Ele
             //must have flag set or be in admin group
             if (!$this->hasFlag(TypeOfFlag::CAN_WRITE)) {
                 $att = $this->getGivenAttribute();
-                switch ($att->server_access_type) {
+                switch ($att->access_policy) {
                     case TypeOfServerAccess::IS_PUBLIC_DOMAIN:
                     case TypeOfServerAccess::IS_PUBLIC:
                     case TypeOfServerAccess::IS_PROTECTED: {

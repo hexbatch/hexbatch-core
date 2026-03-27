@@ -29,7 +29,7 @@ use Hexbatch\Things\Interfaces\IThingAction;
 
    * [ElementTypeTurningOff](../../../Evt/Server/TypeOwnerChanging.php)
 
-   if the new owner agress, or does not have an event handler set, then the ownership is changed
+   if the new owner agrees, or does not have an event handler set, then the ownership is changed
 
    and the older and new type owners and type owners gets the following
 

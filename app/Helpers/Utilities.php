@@ -12,6 +12,7 @@ use App\Models\UserNamespace;
 use App\Rules\ResourceNameReq;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Servers\Stock\ThisServer;
+use Carbon\Carbon;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -362,10 +363,15 @@ class Utilities {
         return $composer['version']??'';
     }
 
-    public static function getInstallTimeStamp() : ?int {
+    public static function getVersionDateAsCarbon() : Carbon {
+        $composer = static::getComposer();
+        $time = $composer['time']??time();
+        return Carbon::parse( $time );
+    }
+
+    public static function getInstallTimeAsCarbon() : ?Carbon {
         $what =  filemtime(self::getComposerPath());
-        if (!$what) {return null;}
-        return $what;
+        return Carbon::createFromTimestampUTC( $what );
     }
 
 

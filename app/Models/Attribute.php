@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +38,7 @@ use Illuminate\Validation\ValidationException;
  * @property bool is_system
  * @property bool is_final_attribute
  * @property bool is_abstract
- * @property TypeOfServerAccess server_access_type
+ * @property TypeOfServerAccess access_policy
  * @property string ref_uuid
  * @property string read_json_path
  * @property string validate_json_path
@@ -56,8 +58,7 @@ use Illuminate\Validation\ValidationException;
  * @property Attribute attribute_design
  * @property ElementType type_owner
  *
- * @property TimeBound attribute_time_bound
- * @property LocationBound attribute_shape_bound
+ * @property LocationBound attribute_location
  * @property ServerEvent attached_event
  */
 class Attribute extends Model implements IAttribute,ISystemModel
@@ -86,10 +87,15 @@ class Attribute extends Model implements IAttribute,ISystemModel
      * @var array<string, string>
      */
     protected $casts = [
-        'server_access_type' => TypeOfServerAccess::class,
+        'is_system' => 'boolean',
+        'is_final_attribute' => 'boolean',
+        'is_abstract' => 'boolean',
+        'access_policy' => TypeOfServerAccess::class,
         'value_policy' => TypeOfElementValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,
         'attribute_default_value' => AsArrayObject::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
 
@@ -116,10 +122,23 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
 
 
+    public function attribute_ancestors() : HasManyThrough {
+        return $this->hasManyThrough(
+            Attribute::class, //what is returned
+            AttributeAncestor::class, //the connecting class
+            'child_attribute_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'ancestor_attribute_id' // Local key on the connecting table...
+        );
+    }
 
 
 
-    public function attribute_shape_bound() : BelongsTo {
+
+
+
+    public function attribute_location() : BelongsTo {
         return $this->belongsTo(LocationBound::class,'attribute_location_bound_id')
             ->where('location_type',TypeOfLocation::SHAPE);
     }
@@ -193,11 +212,17 @@ class Attribute extends Model implements IAttribute,ISystemModel
     public static function buildAttribute(
         ?int    $me_id = null,
         ?int    $namespace_id = null,
-        array    $in_namespace_ids = [],
+        ?int    $member_of_namespace_id = null,
+        ?int    $parent_id = null,
+        array   $in_namespace_ids = [],
+        array   $in_type_ids = [],
         ?int    $type_id = null,
         ?int    $shape_id = null,
+        ?int    $design_id = null,
         ?string $uuid = null,
+        ?bool   $is_system = null,
         bool    $b_do_relations = false,
+        bool    $b_do_ancestors = false,
         ?string $name = null
     )
     : Builder
@@ -209,10 +234,16 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
         if ($b_do_relations)
         {
-            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_shape_bound() */
-            /** @uses Attribute::attached_event() */
+            /** @uses Attribute::attribute_parent(),Attribute::type_owner(),Attribute::attribute_location() */
+            /** @uses Attribute::attached_event(),Attribute::attribute_design() */
             $build->
-                with('attribute_parent', 'type_owner', 'attribute_shape_bound', 'attached_event');
+                with('attribute_parent', 'type_owner', 'attribute_location', 'attached_event','attribute_design');
+        }
+
+        if ($b_do_ancestors)
+        {
+            /** @uses Attribute::attribute_ancestors() */
+            $build->with('attribute_ancestors');
         }
 
 
@@ -220,8 +251,20 @@ class Attribute extends Model implements IAttribute,ISystemModel
             $build->where('attributes.id',$me_id);
         }
 
+        if ($parent_id) {
+            $build->where('attributes.parent_attribute_id',$me_id);
+        }
+
+        if ($design_id) {
+            $build->where('attributes.design_attribute_id',$design_id);
+        }
+
         if ($type_id) {
             $build->where('attributes.owner_element_type_id',$type_id);
+        }
+
+        if (count($in_type_ids)) {
+            $build->whereIn('attributes.owner_element_type_id',$in_type_ids);
         }
 
         if ($uuid) {
@@ -234,6 +277,10 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
         if ($name) {
             $build->where('attributes.attribute_name',$name);
+        }
+
+        if ($is_system !== null ) {
+            $build->where('attributes.is_system',$is_system);
         }
 
         if ($namespace_id) {
@@ -266,6 +313,31 @@ class Attribute extends Model implements IAttribute,ISystemModel
             );
         }
 
+        if ($member_of_namespace_id) {
+
+            $build->join('element_types otm',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($namespace_id) {
+                    $join
+                        ->on('otm.id','=','attributes.owner_element_type_id')
+                        ->where('otm.owner_namespace_id',$namespace_id);
+                }
+            );
+
+            $build->join('user_namespace_members as ms',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($member_of_namespace_id) {
+                    $join
+                        ->on('otm.owner_namespace_id', '=', 'ms.parent_namespace_id')
+                        ->where('ms.member_namespace_id', $member_of_namespace_id);
+                }
+            );
+        }
+
 
 
         return $build;
@@ -273,11 +345,12 @@ class Attribute extends Model implements IAttribute,ISystemModel
 
     public static function getThisAttribute(
         ?int             $id = null,
-        ?string          $uuid = null
+        ?string          $uuid = null,
+        bool        $b_do_relations = false
     )
     : Attribute
     {
-        $ret = static::buildAttribute(me_id:$id,uuid: $uuid)->first();
+        $ret = static::buildAttribute(me_id:$id,uuid: $uuid,b_do_relations: $b_do_relations)->first();
 
         if (!$ret) {
             $arg_types = []; $arg_vals = [];
@@ -294,15 +367,16 @@ class Attribute extends Model implements IAttribute,ISystemModel
         return $ret;
     }
 
-    public static function resolveAttribute(?string $value, bool $throw_exception = true)
+    public static function resolveAttribute(?string $value, bool $throw_exception = true, bool $do_relations = false)
     : ?static
     {
-        if (!$value) {return null;}
+
+         if (!$value) {return null;}
         /** @var Builder $build */
         $build = null;
 
         if (Utilities::is_uuid($value)) {
-            $build = static::buildAttribute(uuid: $value);
+            $build = static::buildAttribute(uuid: $value,b_do_relations: $do_relations);
         } else {
 
             $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
@@ -313,19 +387,18 @@ class Attribute extends Model implements IAttribute,ISystemModel
                  * @var UserNamespace $owner
                  */
                 $owner = ElementType::resolveType($type_hint);
-                $build = static::buildAttribute(type_id: $owner->id,name: $attr_name);
-            }
-
-            if (count($parts) === 3) {
+                $build = static::buildAttribute(type_id: $owner->id, b_do_relations: $do_relations, name: $attr_name);
+            } else if (count($parts) === 3) {
                 $namespace_hint = $parts[0];
                 $type_hint = $parts[1];
                 $attr_name = $parts[2];
                 $owner = ElementType::resolveType($namespace_hint . UserNamespace::NAMESPACE_SEPERATOR.$type_hint);
-                $build = static::buildAttribute(type_id: $owner->id,name: $attr_name);
+                $build = static::buildAttribute(type_id: $owner->id, b_do_relations: $do_relations,name: $attr_name);
             }
 
         }
 
+        /** @var Attribute|null $ret */
         $ret = $build?->first();
 
         if (empty($ret) && $throw_exception) {
@@ -471,7 +544,12 @@ class Attribute extends Model implements IAttribute,ISystemModel
     }
 
     public function isPublicDomain() {
-        return $this->server_access_type === TypeOfServerAccess::IS_PUBLIC_DOMAIN;
+        return $this->access_policy === TypeOfServerAccess::IS_PUBLIC_DOMAIN;
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return $this->getName(short_name: false);
     }
 
 

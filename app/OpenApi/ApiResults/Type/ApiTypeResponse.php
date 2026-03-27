@@ -30,13 +30,12 @@ class ApiTypeResponse extends ApiCollectionBase implements IThingBaseResponse
     public function __construct(
         ElementType $given_type,int $namespace_levels = 0,int $parent_levels = 0,
         int $attribute_levels = 0, int $inherited_attribute_levels = 0,
-                    $number_time_spans = 1,
          ?Thing $thing = null
     )
     {
         $this->type = new TypeResponse(given_type: $given_type,namespace_levels: $namespace_levels,parent_levels: $parent_levels,
                                         attribute_levels: $attribute_levels,
-                                        inherited_attribute_levels: $inherited_attribute_levels,number_time_spans: $number_time_spans);
+                                        inherited_attribute_levels: $inherited_attribute_levels);
 
         if ($thing) {
             $this->thing = new ApiThingResponse(thing:$thing);

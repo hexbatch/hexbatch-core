@@ -5,19 +5,18 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 use App\Annotations\ApiParamMarker;
 
-use App\Helpers\Utilities;
+use App\Data\ApiParams\Data\Attributes\AttributeData;
+use App\Data\ApiParams\Data\Attributes\Params\AttributeSearchParams;
 use App\Models\ActionDatum;
 use App\Models\Attribute;
-use App\OpenApi\ApiResults\Attribute\ApiAttributeCollectionResponse;
-use App\OpenApi\Params\Listing\Design\ListAttributeParams;
-
+use App\Models\ElementType;
+use App\Models\LocationBound;
+use App\Models\UserNamespace;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
 use App\Sys\Res\Types\Stk\Root\Api;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 
-#[ApiParamMarker( param_class: ListAttributeParams::class)]
+#[ApiParamMarker( param_class: AttributeSearchParams::class)]
 class ListAttributes extends Api\DesignApi
 {
     const UUID = '293ec496-e455-4dbe-8058-c6b528370268';
@@ -29,7 +28,7 @@ class ListAttributes extends Api\DesignApi
     ];
 
     public function __construct(
-        protected ?ListAttributeParams $params = null,
+        protected ?AttributeSearchParams $params = null,
 
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
@@ -42,48 +41,55 @@ class ListAttributes extends Api\DesignApi
             is_async: $this->is_async,tags: $this->tags);
     }
 
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new ListAttributeParams();
-            $this->params->fromCollection(new Collection($param_array),false);
+
+
+
+
+    /**
+     * @return CursorPaginatedDataCollection<ActionDatum>
+     */
+    public static function listAttributes(AttributeSearchParams $params,UserNamespace $caller_namespace) {
+
+        $namespace_id = null;
+        if ($params->namespace_uuid) {
+            $namespace_id = UserNamespace::resolveNamespace(value: $params->namespace_uuid)->id;
         }
-    }
 
-    const PRIMARY_SNAPSHOT_KEY = 'attributes';
-    const int HTTP_CODE_GOOD = CodeOf::HTTP_OK;
-
-
-    protected function getMyData() :array {
-        $belongs_to_namespaces = [];
-
-        if (!$this->params->getGivenNamespace()) {
-            $my_namespace = Utilities::getThisUserDefaultNamespace();
-            /** @uses UserNamespace::namespaces_member_of()  */
-            foreach ($my_namespace->namespaces_member_of as $member_of) {
-                $belongs_to_namespaces[] = $member_of->id;
-            }
+        $parent_id = null;
+        if ($params->parent_uuid) {
+            $parent_id = Attribute::resolveAttribute(value: $params->parent_uuid)->id;
         }
+
+        $type_id = null;
+        if ($params->type_uuid) {
+            $type_id = ElementType::resolveType(value: $params->type_uuid)->id;
+        }
+
+        $shape_id = null;
+        if ($params->location_uuid) {
+            $shape_id = LocationBound::resolveLocation(value: $params->location_uuid)->id;
+        }
+
+        $design_id = null;
+        if ($params->design_uuid) {
+            $design_id = ElementType::resolveType(value: $params->design_uuid)->id;
+        }
+
+
         $build = Attribute::buildAttribute(
-            namespace_id: $this->params->getGivenNamespace()?->id,
-            in_namespace_ids: $belongs_to_namespaces,
-            shape_id: $this->params->getGivenLocation()?->id
-        );
+            namespace_id: $namespace_id,
+            member_of_namespace_id: $caller_namespace->id,
+            parent_id: $parent_id,
+            type_id: $type_id,
+            shape_id: $shape_id,
+            design_id: $design_id,
+            is_system: $params->is_system,
+            b_do_relations: true,
+            name: $params->attribute_name
+        )->orderBy('created_at');
 
-        return [static::PRIMARY_SNAPSHOT_KEY=>$build->cursorPaginate(cursor: $this->params->getCursor())];
-    }
-
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiAttributeCollectionResponse(
-            given_attributes:  $what[static::PRIMARY_SNAPSHOT_KEY],
-            attribute_levels:  $this->params->getAttributeLevels(),
-            owning_type_levels:  $this->params->getOwningTypeLevels(),
-            design_levels:  $this->params->getDesignLevels(),
-            thing: $this->getMyThing()
-        );
+        $cursor = $build->cursorPaginate(perPage: 15, cursor: $params->cursor);
+        return AttributeData::collect($cursor, CursorPaginatedDataCollection::class);
     }
 
 }

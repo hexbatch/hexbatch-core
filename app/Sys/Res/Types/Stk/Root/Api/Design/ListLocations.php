@@ -6,17 +6,15 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 use App\Annotations\ApiParamMarker;
 use App\Data\ApiParams\Data\Locations\Location;
 use App\Data\ApiParams\Data\Locations\Params\LocationSearchParams;
-use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Listing\Design\ListLocationParams;
 
 use App\Sys\Res\Types\Stk\Root\Api;
 use Spatie\LaravelData\CursorPaginatedDataCollection;
 
-#[ApiParamMarker( param_class: ListLocationParams::class)]
+#[ApiParamMarker( param_class: LocationSearchParams::class)]
 class ListLocations extends Api\DesignApi
 {
     const UUID = 'db5971de-fe4e-498e-b2a5-12990cdb2b26';

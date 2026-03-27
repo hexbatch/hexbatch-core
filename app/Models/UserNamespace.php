@@ -523,4 +523,8 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         Thing::registerOwnerType(static::class);
         ThingHook::registerOwnerType(static::class);
     }
+
+    public static function getSystemNamespace() : UserNamespace {
+        return UserNamespace::where('ref_uuid',config('hbc.system.namespace.uuid') )->first();
+    }
 }

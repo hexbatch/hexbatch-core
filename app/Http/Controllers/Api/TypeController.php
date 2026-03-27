@@ -509,7 +509,7 @@ class TypeController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -548,7 +548,7 @@ class TypeController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
@@ -678,7 +678,7 @@ class TypeController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements created', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Thing is processing|waiting',
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
