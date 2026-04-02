@@ -52,7 +52,6 @@ enum TypeOfEvent: string
 
 
     case ELEMENT_RECIEVED = 'element_recieved';
-    case ELEMENT_RECIEVED_BATCH = 'element_recieved_batch';
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._

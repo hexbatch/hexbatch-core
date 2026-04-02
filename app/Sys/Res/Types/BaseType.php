@@ -582,8 +582,8 @@ abstract class BaseType implements IDocument, \JsonSerializable
     }
 
 
-    protected static function getNamespaceFromArray(string $array_key, array $source) : ?UserNamespace {
-        if (!isset($source[$array_key])) {return null;}
+    protected static function getNamespaceFromArray(string $array_key, array $source) : UserNamespace {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set namespace");}
         if ( ($found = $source[$array_key])  instanceof UserNamespace) {return $found;}
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
@@ -594,8 +594,15 @@ abstract class BaseType implements IDocument, \JsonSerializable
         throw new \LogicException("Could not find namespace in $array_key");
     }
 
-    protected static function getServerFromArray(string $array_key, array $source) : ?Server {
-        if (!isset($source[$array_key])) {return null;}
+    protected static function getServerFromArray(string $array_key, array $source,bool $b_throw_exception = false) : ?Server {
+        if (!isset($source[$array_key])) {
+            if ($b_throw_exception) {
+                throw new \LogicException("No array key set for server");
+            } else {
+                return null;
+            }
+
+        }
         if ( ($found = $source[$array_key])  instanceof Server) {return $found;}
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
@@ -608,8 +615,8 @@ abstract class BaseType implements IDocument, \JsonSerializable
 
 
 
-    protected static function getTypeFromArray(string $array_key, array $source) : ?ElementType {
-        if (!isset($source[$array_key])) {return null;}
+    protected static function getTypeFromArray(string $array_key, array $source) : ElementType {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for type");}
         if ( ($found = $source[$array_key])  instanceof ElementType) {return $found;}
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
@@ -620,8 +627,49 @@ abstract class BaseType implements IDocument, \JsonSerializable
         throw new \LogicException("Could not find element type in $array_key");
     }
 
+    protected static function getElementFromArray(?string $array_key, array $source) : Element {
+        if ($array_key)
+        {
+            if (!isset($source[$array_key])) {throw new \LogicException("No array key set for element");}
+            if ( ($found = $source[$array_key])  instanceof Element) {return $found;}
+        } else {
+            $found = $source;
+        }
+
+        $ref = null;
+        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
+        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
+        if ($ref) {
+            return Element::getThisElement(uuid: $ref );
+        }
+        throw new \LogicException("Could not find element in $array_key");
+    }
+
+    /**
+     * @return Collection<Element>
+     */
+    protected static function getElementCollectionFromArray(string $array_key, array $source) : Collection {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for collection");}
+        /** @var Collection $found */
+        if ( ($found = $source[$array_key])  instanceof Collection) {
+            if ($found->isEmpty() || $found->first() instanceof Element) {
+                return $found;
+            }
+        }
+        //might be array of stuff that has ref
+        if (is_array($found) || is_iterable($found)) {
+            $ret = new Collection;
+            foreach ($found as $what) {
+                $ret->add(static::getElementFromArray(null,$what));
+            }
+            return $ret;
+        }
+        throw new \LogicException("Could not find element collection in $array_key");
+
+    }
+
     protected static function getLocationFromArray(string $array_key, array $source) : ?LocationBound {
-        if (!isset($source[$array_key])) {return null;}
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for location");}
         if ( ($found = $source[$array_key])  instanceof LocationBound) {return $found;}
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
@@ -633,7 +681,7 @@ abstract class BaseType implements IDocument, \JsonSerializable
     }
 
     protected static function getScheduleFromArray(string $array_key, array $source) : ?TimeBound {
-        if (!isset($source[$array_key])) {return null;}
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for schedule");}
         if ( ($found = $source[$array_key])  instanceof TimeBound) {return $found;}
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
@@ -645,7 +693,7 @@ abstract class BaseType implements IDocument, \JsonSerializable
     }
 
     protected static function getAttributeFromArray(string $array_key, array $source) : ?Attribute {
-        if (!isset($source[$array_key])) {return null;}
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for attribute");}
         if ( ($found = $source[$array_key])  instanceof Attribute) {return $found;}
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}

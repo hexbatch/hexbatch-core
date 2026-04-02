@@ -77,7 +77,6 @@ class ElementCreate extends Act\Cmd\Ele
         Evt\Type\ElementCreation::class,
         Evt\Type\ElementOwnerChange::class,
         Evt\Type\ElementRecieved::class,
-        Evt\Type\ElementRecievedBatch::class
     ];
 
     /**
@@ -194,18 +193,10 @@ class ElementCreate extends Act\Cmd\Ele
             } //end non set creation
 
 
-            if (count($this->created_element_uuids) > 1 ) {
-                if ($this->send_event) {
-                    $this->post_events_to_send =
-                        Evt\Type\ElementRecievedBatch::makeEventActions(
-                            source: $this, action_data: $this->action_data,important_array: $this->getElementsCreated());
-                }
-            } else if(count($this->created_element_uuids) === 1) {
-                if ($this->send_event) {
-                    $this->post_events_to_send =
-                        Evt\Type\ElementRecieved::makeEventActions(
-                            source: $this, action_data: $this->action_data,important_array: $this->getElementsCreated());
-                }
+            if ($this->send_event) {
+                $this->post_events_to_send =
+                    Evt\Type\ElementRecieved::makeEventActions(
+                        source: $this, action_data: $this->action_data,important_array: $this->getElementsCreated());
             }
 
 

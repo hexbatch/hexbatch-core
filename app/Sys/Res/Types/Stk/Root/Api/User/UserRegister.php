@@ -6,11 +6,11 @@ namespace App\Sys\Res\Types\Stk\Root\Api\User;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\User\Params\RegistrationParamData;
+use App\Data\ApiParams\Data\User\Response\MeResponseData;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Users\ApiMeResponse;
-use App\OpenApi\Params\Actioning\Registration\RegistrationParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
 use BlueM\Tree;
@@ -68,17 +68,17 @@ class UserRegister extends Api\UserApi implements IHookCode
         return ['user'=>$this->getCreatedUser(),'namespace'=>$this->getCreatedNamespace()];
     }
 
-    public function getDataSnapshot(): array|IThingBaseResponse
+    public function getDataSnapshot(): array|IThingBaseResponse|MeResponseData
     {
         $what =  $this->getMyData();
-        return new ApiMeResponse(user:  $what['user'],show_namespace: true,thing: $this->getMyThing());
+        return MeResponseData::fromModel($what['user']);
     }
 
     public function __construct(
         protected ?ActionDatum   $action_data = null,
         protected bool $b_type_init = false,
         protected ?bool $is_async = null,
-        protected ?RegistrationParams $params = null,
+        protected ?RegistrationParamData $params = null,
         protected array          $tags = []
     )
     {
@@ -89,8 +89,7 @@ class UserRegister extends Api\UserApi implements IHookCode
     protected function restoreParams(array $param_array) {
         parent::restoreParams($param_array);
         if(!$this->params) {
-            $this->params = new RegistrationParams();
-            $this->params->fromCollection(new Collection($param_array));
+            $this->params = RegistrationParamData::from($param_array);
         }
     }
 

@@ -6,6 +6,7 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Elements\Params\CreateElementParamData;
 use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Data\ApiParams\Data\Types\ElementTypeData;
 use App\Data\ApiParams\Data\Types\Params\TypeParamData;
@@ -648,7 +649,7 @@ class TypeController extends Controller {
         description: "Type admin can create one or more elements going to one or more namespaces. The namespace can reject. The inherited types can reject",
         summary: 'Creates one or more new elements from a type',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: CreateElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: CreateElementParamData::class)),
         tags: ['type','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",

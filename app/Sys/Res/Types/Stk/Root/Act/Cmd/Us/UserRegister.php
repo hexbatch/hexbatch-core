@@ -3,11 +3,11 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Us;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Data\ApiParams\Data\User\Response\MeResponseData;
 use App\Enums\Sys\TypeOfAction;
 use App\Models\ActionDatum;
 use App\Models\User;
 use App\Models\UserNamespace;
-use App\OpenApi\Results\Users\MeResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use BlueM\Tree;
@@ -128,7 +128,7 @@ class UserRegister extends Act\Cmd\Us
         $what =  $this->getMyData();
         $ret = [];
         if (isset($what['user'])) {
-            $ret['user'] = new MeResponse(user:  $what['user']);
+            $ret['user'] = MeResponseData::fromModel($what['user']);
         }
 
         return $ret;

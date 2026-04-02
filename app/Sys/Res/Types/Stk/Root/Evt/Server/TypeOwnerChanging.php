@@ -41,7 +41,7 @@ class TypeOwnerChanging extends Evt\ScopeServer implements ICommandCallable
     }
 
     protected static function fromArray(array $args) : static {
-        $given_type = static::getTypeFromArray('given_type',$args);;
+        $given_type = static::getTypeFromArray('given_type',$args);
         $new_namespace = static::getNamespaceFromArray('new_namespace',$args) ;
         $old_namespace = static::getNamespaceFromArray('old_namespace',$args) ;
 
