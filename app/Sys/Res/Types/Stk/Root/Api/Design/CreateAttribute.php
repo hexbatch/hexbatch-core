@@ -81,14 +81,14 @@ class CreateAttribute extends Api\DesignApi implements ICommandCallable
             ->setSharedArg('namespace',$namespace)
             ->tree($my_command)
             ->leaf(
-                command_class: Evt\Server\DesignPending::class,
+                command_class: Evt\Server\AttributePending::class,
                 command_args: [
                     'attribute_params'=>$params->toArray(),
                     'namespace_uuid'=>Utilities::getCurrentNamespace()->ref_uuid,
                     'namespace'=>Utilities::getCurrentNamespace(),
                     'given_type'=>$given_type,
                 ],
-                command_tags: [Evt\Server\DesignPending::class]
+                command_tags: [Evt\Server\AttributePending::class]
             )
             ->tree(
                 command_class: Act\Cmd\Ds\DesignAttributeCreate::class,

@@ -19,6 +19,11 @@ use App\Data\ApiParams\Data\Schedules\Params\ScheduleSearchParams;
 use App\Data\ApiParams\Data\Schedules\Responses\ScheduleList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Data\ApiParams\Data\Types\ElementTypeData;
+use App\Data\ApiParams\Data\Types\Params\TypeOwnershipChangeParamData;
+use App\Data\ApiParams\Data\Types\Params\TypeParamData;
+use App\Data\ApiParams\Data\Types\Params\TypeParentsParamData;
+use App\Data\ApiParams\Data\Types\Params\TypeSearchParams;
+use App\Data\ApiParams\Data\Types\Responses\ElementTypeList;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchAttribute;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
@@ -29,21 +34,12 @@ use App\Models\ElementType;
 use App\Models\LocationBound;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
-use App\OpenApi\Params\Actioning\Design\DesignOwnershipParams;
-use App\OpenApi\Params\Actioning\Design\DesignParams;
-use App\OpenApi\Params\Actioning\Design\DesignParentParams;
-use App\OpenApi\Params\Actioning\Type\TypeParams;
-use App\OpenApi\Params\Listing\Design\ListDesignParams;
-use App\OpenApi\Params\Listing\Design\ShowDesignParams;
-use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Data\ThangData;
 use Hexbatch\Thangs\Models\Thang;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
@@ -52,7 +48,7 @@ class DesignController extends Controller {
 
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\ChangeOwner::class)]
     #[ApiEventMarker( Evt\Server\TypeOwnerChanging::class)]
@@ -65,7 +61,7 @@ class DesignController extends Controller {
                     " Owners of subtypes can deny this change by listening to the type_owner_change event raised by this action",
         summary: 'Changes the ownership of a type before its published.  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignOwnershipParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeOwnershipChangeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -78,30 +74,34 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ElementTypeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
-    public function change_design_owner(Request $request,ElementType $type) {
-        $params = new DesignOwnershipParams(type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['change-owner']);
+    public function change_design_owner(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeOwnershipChangeParamData::fromRequest($request);
+        $data_out = Api\Design\ChangeOwner::changeOwner(calling_namespace: $namespace, params: $params, given_type: $type,
+            do_permission_check: true, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
-    #[ApiTypeMarker( Root\Api\Design\PromoteOwner::class)]
+    #[ApiTypeMarker( Root\Api\Design\ChangeOwner::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/promote_owner',
@@ -109,7 +109,7 @@ class DesignController extends Controller {
         description: 'The system can transfer this design to be managed by another namespace. No events are raised that can deny the change.',
         summary: 'Changes the ownership of a type before its published. ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeOwnershipChangeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -122,37 +122,39 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Ownership changed', content: new JsonContent(ref: ElementTypeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
         ]
     )]
-    public function promote_design_owner(Request $request,ElementType $type) {
-        $params = new DesignOwnershipParams(type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\PromoteOwner(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['promote-owner']);
+    public function promote_design_owner(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeOwnershipChangeParamData::fromRequest($request);
+        $data_out = Api\Design\ChangeOwner::changeOwner(calling_namespace: $namespace, params: $params, given_type: $type,
+            do_permission_check: false, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
-    #[ApiTypeMarker( Root\Api\Design\Purge::class)]
+    #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/{element_type}/purge',
         operationId: 'core.design.purge',
         description: 'The system can delete any design, owned by anyone, before publishing, without raising any events',
         summary: 'Purges an unpublished type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -164,31 +166,31 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design purged', content: new JsonContent(ref: ElementTypeData::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
-    #[ApiTypeMarker( Root\Api\Design\Purge::class)]
+    #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    public function purge_design(Request $request,ElementType $type) {
-        $params = new TypeParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Purge(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['purge-design']);
+    public function purge_design(UserNamespace $namespace,ElementType $type) {
+        $data_out = Api\Design\Destroy::destroyDesign(namespace: $namespace, given_type: $type,do_permission_check: false,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\Destroy::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
@@ -198,7 +200,6 @@ class DesignController extends Controller {
         description: 'A namespace can delete a new design, before publishing, without raising any events',
         summary: 'Deletes an unpublished type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -211,28 +212,30 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Design destroyed', content: new JsonContent(ref: ElementTypeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
-    public function destroy_design(Request $request,ElementType $type) {
-        $params = new TypeParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Destroy(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-design']);
+    public function destroy_design(UserNamespace $namespace,ElementType $type) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Api\Design\Destroy::destroyDesign(namespace: $namespace, given_type: $type,do_permission_check: true,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementType::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\Create::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_OWNER)]
@@ -242,7 +245,7 @@ class DesignController extends Controller {
         description: 'A namespace can make a new design, they are the owner. No events are raised',
         summary: 'Makes a new design type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -251,28 +254,31 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type created', content: new JsonContent(ref: ElementTypeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    public function create_design(Request $request) {
-        $params = new DesignParams(namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Create(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-design']);
+    public function create_design(UserNamespace $namespace,Request $request) {
+        $params = TypeParamData::fromRequest($request);
+        $data_out = Api\Design\Create::createDesign(namespace: $namespace, params: $params,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\Edit::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
@@ -283,6 +289,7 @@ class DesignController extends Controller {
                         "\nNo events are raised",
         summary: 'Edits the name, final type, access ',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -293,25 +300,27 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type edited', content: new JsonContent(ref: ElementTypeData::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Type edited', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    public function edit_design(Request $request,ElementType $type) {
-        $params = new DesignParams(edit_type: $type, namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\Edit(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['edit-design']);
+    public function edit_design(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeParamData::fromRequest($request);
+        $data_out = Api\Design\Edit::editDesign(namespace: $namespace, params: $params,given_type: $type,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -326,7 +335,6 @@ class DesignController extends Controller {
         "\nTo see more detail about any one of these, use the show api for that reference",
         summary: 'Shows information about a type ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowDesignParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -338,21 +346,16 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ElementTypeData::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\ShowDesign::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function show_design(Request $request,ElementType $type) {
-        $params = new ShowDesignParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ShowDesign(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-design']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function show_design(UserNamespace $namespace,ElementType $type) {
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Design\ShowDesign::showDesign($type);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -366,7 +369,7 @@ class DesignController extends Controller {
                 "\nCan see the name, uuid, the status and how many attributes, listeners, requirements and rules there are",
         summary: 'Lists all the designed owned or managed  ',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeSearchParams::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -374,22 +377,16 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ApiTypeCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ElementTypeList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\ListDesigns::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    public function list_designs(Request $request) {
-        $params = new ListDesignParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\ListDesigns(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-designs']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_designs(UserNamespace $namespace,Request $request) {
+        $params = TypeSearchParams::fromRequest($request);
+        $data_out = Api\Design\ListDesigns::listDesigns(calling_namespace: $namespace,params: $params);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -420,8 +417,8 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found'),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\ShowAttribute::class)]
@@ -450,9 +447,6 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Attribute info returned', content: new JsonContent(ref: AttributeList::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
@@ -490,11 +484,11 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Attribute destroyed', content: new JsonContent(ref: AttributeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiTypeMarker( Root\Api\Design\DestroyAttribute::class)]
@@ -502,7 +496,10 @@ class DesignController extends Controller {
     public function destroy_attribute(UserNamespace $namespace,Attribute $attribute) {
 
         $data_out = Root\Api\Design\DestroyAttribute::destoryAttribute(namespace: $namespace,given_attribute:$attribute, tags: ['api-top']);
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
         else {
             $http_code = CodeOf::HTTP_ACCEPTED;
             $data_out = AttributeData::from($data_out);
@@ -537,21 +534,21 @@ class DesignController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: AttributeData::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     public function create_attribute(UserNamespace $namespace,ElementType $type,Request $request) {
         $params = AttributeParamData::fromRequest($request);
         $data_out = Root\Api\Design\CreateAttribute::createAttribute(namespace: $namespace,given_type:$type, params: $params,tags: ['api-top']);
 
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
         else {
             $http_code = CodeOf::HTTP_CREATED;
             $data_out = AttributeData::from($data_out);
@@ -588,10 +585,11 @@ class DesignController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Attribute created', content: new JsonContent(ref: AttributeData::class)),
 
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
@@ -601,7 +599,10 @@ class DesignController extends Controller {
         $params = AttributeParamData::fromRequest($request);
         $data_out = Root\Api\Design\EditAttribute::editAttribute(namespace: $namespace,given_attribute:$attribute, params: $params,tags: ['api-top']);
 
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
         else {
             $http_code = CodeOf::HTTP_ACCEPTED;
             $data_out = AttributeData::from($data_out);
@@ -610,13 +611,9 @@ class DesignController extends Controller {
     }
 
 
-
-
-
-
-
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/design/{element_type}/remove_parent',
@@ -626,7 +623,7 @@ class DesignController extends Controller {
         "\nParents need approval to use, but do not notify the inheritance chain of design changes when dropping that parent",
         summary: 'Removes a parent',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParentParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParentsParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -639,29 +636,34 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents removed', content: new JsonContent(ref: ElementTypeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\RemoveParent::class)]
-    public function remove_parent(Request $request,ElementType $type) {
-        $params = new DesignParentParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\AddParent(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['remove-parent']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function remove_parent(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeParentsParamData::fromRequest($request);
+        $data_out = Root\Api\Design\RemoveParent::removeParent(calling_namespace: $namespace, params: $params,given_type: $type,do_permission_check: true ,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/add_parent',
@@ -672,7 +674,7 @@ class DesignController extends Controller {
         "\nParents need approval to use in the design, and later to publish, to look over any conflicts after the design allowed",
         summary: 'Adds a parent',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DesignParentParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParentsParamData::class)),
         tags: ['design'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -683,27 +685,31 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Parents added', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Parents added', content: new JsonContent(ref: ElementTypeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiEventMarker( Evt\Server\DesignPending::class)]
+    #[ApiEventMarker( Evt\Server\DesignParentAdding::class)]
     #[ApiTypeMarker( Root\Api\Design\AddParent::class)]
-    public function add_parent(Request $request,ElementType $type) {
-        $params = new DesignParentParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Api\Design\RemoveParent(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['add-parent']);
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function add_parent(UserNamespace $namespace,ElementType $type,Request $request) {
+        $params = TypeParentsParamData::fromRequest($request);
+        $data_out = Root\Api\Design\AddParent::addParent(calling_namespace: $namespace, params: $params,given_type: $type,do_permission_check: true ,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = Schedule::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -725,30 +731,25 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule created', content: new JsonContent(ref: Schedule::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Schedule created', content: new JsonContent(ref: Schedule::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateTime::class)]
-    public function create_time(Request $request) {
+    public function create_time(UserNamespace $namespace,Request $request) {
         $params = Schedule::fromRequest($request);
-        $data = Root\Api\Design\CreateTime::makeSchedule(
-            namespace:Utilities::getCurrentOrUserNamespace(),params: $params,tags: ['api-top']);
+        $data = Root\Api\Design\CreateTime::makeSchedule(namespace:$namespace,params: $params,tags: ['api-top']);
 
         if ($data instanceof Thang) {
             $http_code = CodeOf::HTTP_OK;
             $data_out = $data;
         }
         else {
-            $http_code = CodeOf::HTTP_ACCEPTED;
+            $http_code = CodeOf::HTTP_CREATED;
             $data_out = Schedule::validateAndCreate($data);
         }
         return  response()->json($data_out,$http_code);
@@ -777,8 +778,8 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'The schedule and its spans', content: new JsonContent(ref: Schedule::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
@@ -813,10 +814,11 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule edited', content: new JsonContent(ref: Schedule::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
@@ -825,7 +827,10 @@ class DesignController extends Controller {
         $params = Schedule::fromRequest($request);
         $data_out = Root\Api\Design\EditTime::editSchedule(namespace: $namespace,bound:$bound, params: $params,tags: ['api-top']);
 
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
         else {
             $http_code = CodeOf::HTTP_ACCEPTED;
             $data_out = Schedule::from($data_out);
@@ -856,13 +861,10 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Schedule destroyed', content: new JsonContent(ref: Schedule::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
@@ -871,7 +873,10 @@ class DesignController extends Controller {
 
         $data_out = Root\Api\Design\DestroyTime::destroySchedule(namespace: $namespace,bound:$bound,tags: ['api-top']);
 
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
         else {
             $http_code = CodeOf::HTTP_ACCEPTED;
             $data_out = Schedule::from($bound);
@@ -898,20 +903,16 @@ class DesignController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location created', content: new JsonContent(ref: Location::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Location created', content: new JsonContent(ref: Location::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\CreateLocation::class)]
-    public function location_create(Request $request) {
+    public function create_location(Request $request) {
 
         $params = Location::fromRequest($request);
         $data = Root\Api\Design\CreateLocation::makeLocation(
@@ -922,7 +923,7 @@ class DesignController extends Controller {
             $data_out = $data;
         }
         else {
-            $http_code = CodeOf::HTTP_ACCEPTED;
+            $http_code = CodeOf::HTTP_CREATED;
             $data->shape_bounding_box = FromBoxToArray::fromBoxtoArray($data->shape_bounding_box);
             $data->map_bounding_box = FromBoxToArray::fromBoxtoArray($data->map_bounding_box);
             $data_out = Location::validateAndCreate($data);
@@ -953,22 +954,23 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location edited', content: new JsonContent(ref: Location::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditLocation::class)]
-    public function location_edit(UserNamespace $namespace,LocationBound $bound,Request $request) {
+    public function edit_location(UserNamespace $namespace, LocationBound $bound, Request $request) {
         $params = Location::fromRequest($request);
         $data_out = Root\Api\Design\EditLocation::editLocation(namespace: $namespace,bound:$bound, params: $params,tags: ['api-top']);
 
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
         else {
             $data_out->shape_bounding_box = FromBoxToArray::fromBoxtoArray($data_out->shape_bounding_box);
             $data_out->map_bounding_box = FromBoxToArray::fromBoxtoArray($data_out->map_bounding_box);
@@ -1002,13 +1004,11 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Location destroyed', content: new JsonContent(ref: Location::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
@@ -1016,7 +1016,10 @@ class DesignController extends Controller {
     public function destroy_location(UserNamespace $namespace,LocationBound $bound) {
         $data_out = Root\Api\Design\DestroyLocation::destroyLocation(namespace: $namespace,bound:$bound,tags: ['api-top']);
 
-        if ($data_out instanceof Thang) { $http_code = CodeOf::HTTP_OK;}
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
         else {
             $http_code = CodeOf::HTTP_ACCEPTED;
             $data_out = Location::from($bound);
@@ -1044,8 +1047,6 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: LocationList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
@@ -1076,8 +1077,8 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: Location::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
@@ -1107,8 +1108,6 @@ class DesignController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Schedule results returned', content: new JsonContent(ref: ScheduleList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]

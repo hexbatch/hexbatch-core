@@ -4,11 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Act;
 
 
 use App\Enums\Sys\TypeOfAction;
-use App\Exceptions\HexbatchPermissionException;
-use App\Exceptions\RefCodes;
-use App\Models\UserNamespace;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Symfony\Component\HttpFoundation\Response;
+
 
 
 class Cmd extends BaseAction
@@ -22,57 +18,6 @@ class Cmd extends BaseAction
         BaseAction::class
     ];
 
-    public function getNamespaceInUse(): ?UserNamespace
-    {
-        if (!$this->action_data?->data_owner_namespace) {
-            $this->action_data?->data_owner_namespace?->refresh();
-        }
-        return $this->action_data?->data_owner_namespace;
-    }
-
-
-    protected static function checkIfGivenIsAdmin(UserNamespace $given , ?UserNamespace $target) {
-        if (!$target) {
-            throw new \LogicException("target namespace is null");
-        }
-        if (!$target->isNamespaceAdmin($given)  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target->getName()]),
-                Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
-        }
-    }
-
-    protected function checkIfAdmin(?UserNamespace $target) {
-
-        if ($this->is_system) {return; }
-        if (!$target?->isNamespaceAdmin($this->getNamespaceInUse())  ) {
-            $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target?->getName()]),
-                Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
-        }
-
-    }
-
-    protected static function checkIfGivenIsMember(UserNamespace $given , ?UserNamespace $target) {
-        if (!$target) {
-            throw new \LogicException("target namespace is null");
-        }
-        if (!$target->isNamespaceMember($given)  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_member",['ref'=>$target->getName()]),
-                Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
-        }
-    }
-
-    protected function checkIfMember(UserNamespace $target) {
-
-        if (!$target->isNamespaceMember($this->getNamespaceInUse())  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_member",['ref'=>$target->getName()]),
-                Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
-        }
-    }
 
 
 }

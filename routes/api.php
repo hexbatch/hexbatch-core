@@ -530,7 +530,7 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('locations')->group(function () {
                     Route::get('list', [Api\DesignController::class, 'list_locatations'])->name('core.design.locations.list');
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group( function () {
-                        Route::post('create', [Api\DesignController::class, 'location_create'])->name('core.design.locations.create');
+                        Route::post('create', [Api\DesignController::class, 'create_location'])->name('core.design.locations.create');
                     });
 
                     Route::prefix('{location_bound}')->group(function () {
@@ -538,7 +538,7 @@ Route::prefix('v1')->group(function () {
                         Route::get('show', [Api\DesignController::class, 'show_location'])->name('core.design.locations.show');
                         Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group( function () {
                             Route::delete('destroy', [Api\DesignController::class, 'destroy_location'])->name('core.design.locations.destroy');
-                            Route::patch('edit', [Api\DesignController::class, 'location_edit'])->name('core.design.locations.edit');
+                            Route::patch('edit', [Api\DesignController::class, 'edit_location'])->name('core.design.locations.edit');
                         });
                     });
                 });

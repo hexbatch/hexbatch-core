@@ -11,7 +11,6 @@ use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 
@@ -93,6 +92,7 @@ class ElementTypeParent extends Model
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     public static function addOrUpdateParent(ElementType $parent, ElementType $child, TypeOfApproval $approval = TypeOfApproval::PENDING_DESIGN_APPROVAL
         , bool                                           $check_parent_published = true)

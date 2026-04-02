@@ -23,6 +23,7 @@ enum TypeOfEvent: string
 {
     case NOTHING = 'nothing';
     case BASE_EVENT = 'base_event';
+    case EVENT_HANDLER = 'event_handler';
     case EVENT_SCOPE_ELEMENT = 'event_scope_element';
     case EVENT_SCOPE_ELSEWHERE = 'event_scope_elsewhere';
     case EVENT_SCOPE_SET = 'event_scope_set';
@@ -162,9 +163,9 @@ enum TypeOfEvent: string
     case TYPE_OWNER_CHANGING = 'type_owner_changing'; //type given different ownership from what it started as, parents can block
     case TYPE_OWNER_CHANGED = 'type_owner_changed'; //after type given different ownership
 
-    case DESIGN_PENDING = 'design_pending'; //when a design uses a parent type. Goes to all listeners in the inheritance chain
+    case DESIGN_PARENT_ADDING = 'design_parent_adding'; //when a design uses a parent type. Goes to all listeners in the inheritance chain
     case ATTRIBUTE_PENDING = 'attribute_pending'; //when a design uses a base attribute. Goes to all listeners in the inheritance chain
-    case TYPE_PUBLISHED = 'type_published'; //covers both parent types and parent attributes: type or type ancestor ns admin
+    case TYPE_PUBLISHING = 'type_publishing'; //covers both parent types and parent attributes: type or type ancestor ns admin
     case TYPE_RETIRED = 'type_retired'; //type or type ancestor ns admin
     case TYPE_SUSPENDED = 'type_suspended'; //only system admin group
     case TYPE_DELETED = 'type_deleted'; //only system admin group

@@ -202,6 +202,7 @@ return [
 
 
     //design
+    'attribute_parents_did_not_approve_design' => 'Type :ref cannot be published because at least one attribute parent did not approve design of :child',
     'design_parents_did_not_approve_design' => 'The parents :ref did not approve design of :child',
     'design_parents_did_not_approve_publishing' => 'The parents :ref did not approve publishing of :child',
     'design_single_parent_did_not_approve_publishing' => 'The parent :ref did not approve publishing of :child',

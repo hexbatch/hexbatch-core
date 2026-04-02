@@ -6,21 +6,24 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Schedules\Schedule;
+use App\Data\ApiParams\Data\Types\ElementTypeData;
+use App\Data\ApiParams\Data\Types\Params\TypeParamData;
+use App\Data\ApiParams\Data\Types\Params\TypeSearchParams;
+use App\Data\ApiParams\Data\Types\Responses\ElementTypeList;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
-use App\OpenApi\ApiResults\Type\ApiTypeCollectionResponse;
-use App\OpenApi\ApiResults\Type\ApiTypeResponse;
 use App\OpenApi\Params\Actioning\Type\CreateElementParams;
-use App\OpenApi\Params\Actioning\Type\TypeParams;
-use App\OpenApi\Params\Listing\Design\ListDesignParams;
-use App\OpenApi\Params\Listing\Design\ShowDesignParams;
 use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -41,7 +44,6 @@ class TypeController extends Controller {
         description: "See information about a type if one is a member, admin or owner ",
         summary: 'Show information about a type',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowDesignParams::class)),
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -52,22 +54,18 @@ class TypeController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ApiTypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info returned', content: new JsonContent(ref: ElementTypeData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Type\ShowType::class)]
-    public function show_type(Request $request) {
-        $params = new ShowDesignParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Type\ShowType(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-type']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function show_type(UserNamespace $namespace,ElementType $type) {
+        Utilities::ignoreVar($namespace);
+        $data_out = Root\Api\Type\ShowType::showType($type);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -104,29 +102,23 @@ class TypeController extends Controller {
         description: "Can see any published types where one is a member, admin or owner ",
         summary: 'List published types',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParamData::class)),
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ApiTypeCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ElementTypeList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Type\ListPublished::class)]
-    public function list_published(Request $request) {
-        $params = new ListDesignParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Type\ListPublished(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-published']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_published(UserNamespace $namespace,Request $request) {
+        $params = TypeSearchParams::fromRequest($request);
+        $data_out = Root\Api\Type\ListPublished::listPublished(calling_namespace: $namespace,params: $params);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -139,7 +131,7 @@ class TypeController extends Controller {
         description: "Can see any suspended types where one is a member, admin or owner ",
         summary: 'List suspended types',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListDesignParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParamData::class)),
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -147,7 +139,7 @@ class TypeController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ApiTypeCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ElementTypeList::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -155,14 +147,10 @@ class TypeController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Type\ListSuspended::class)]
-    public function list_suspended(Request $request) {
-        $params = new ListDesignParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Type\ListSuspended(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-suspended']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_suspended(UserNamespace $namespace,Request $request) {
+        $params = TypeSearchParams::fromRequest($request);
+        $data_out = Root\Api\Type\ListSuspended::listSuspended(calling_namespace: $namespace,params: $params);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -508,15 +496,7 @@ class TypeController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: ApiTypeResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not implemented')
         ]
     )]
     #[ApiEventMarker( Evt\Server\CustomEventFired::class)]
@@ -529,6 +509,7 @@ class TypeController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
         path: '/api/v1/{user_namespace}/types/{element_type}/publish',
@@ -536,7 +517,6 @@ class TypeController extends Controller {
         description: "Type admins do unpublished design and mark it as ready for use. Events from inherited types and attributes can block",
         summary: 'Publishes a design',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: TypeParams::class)),
         tags: ['type'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -547,28 +527,30 @@ class TypeController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type Published', content: new JsonContent(ref: ApiTypeResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Type Published', content: new JsonContent(ref: ElementTypeData::class)),
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
                 content: new JsonContent(ref: ThingResponse::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Server\TypePublished::class)]
+    #[ApiEventMarker( Evt\Server\TypePublishing::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Type\Publish::class)]
-    public function publish_type(Request $request,ElementType $type) {
-        $params = new TypeParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Type\Publish(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['publish-type']);
+    public function publish_type(UserNamespace $namespace,ElementType $type) {
+        $data = Root\Api\Type\Publish::doPublish(
+            calling_namespace: $namespace,given_type: $type,do_permission_check: true ,tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data instanceof Thang) {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = $data;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = Schedule::validateAndCreate($data);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 

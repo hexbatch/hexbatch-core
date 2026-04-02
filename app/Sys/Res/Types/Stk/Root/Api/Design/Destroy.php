@@ -3,22 +3,22 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
-use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Type\ApiTypeResponse;
-use App\OpenApi\Params\Actioning\Type\TypeParams;
+use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IHookCode;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
 
 
-#[ApiParamMarker( param_class: TypeParams::class)]
-class Destroy extends Api\DesignApi implements IHookCode
+class Destroy extends Api\DesignApi implements ICommandCallable
 {
     const UUID = '74ff2b6e-4b93-4db1-b8fe-c3eb672cc16b';
     const TYPE_NAME = 'api_design_destroy';
@@ -33,83 +33,49 @@ class Destroy extends Api\DesignApi implements IHookCode
     ];
 
 
-    public function __construct(
-        protected ?TypeParams $params = null,
-
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
+        Log::debug("Called api destroy type node");
+        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $children_args);
     }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new TypeParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['type_uuid'=>$this->params->getTypeUuid()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        return new ApiTypeResponse(given_type: $this->params->getGivenType(),thing: $this->getMyThing());
-    }
-
-
-
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ds\DesignDestroy(
-            given_type_uuid: $this->params->getTypeUuid(), parent_action_data: $this->action_data,
-            tags: ['deleting design']
-        );
-
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function destroyDesign(
+        UserNamespace $namespace,ElementType $given_type,bool $do_permission_check, array $tags = [], ?IThangBuilder $builder = null
+    ) : ElementType|Thang
+    {
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['destroy-design'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($namespace)
+            ->setSharedArg('namespace',$namespace)
+            ->tree($my_command)
+            ->leaf(
+                command_class: Act\Cmd\Ds\DesignDestroy::class,
+                command_args: (array)new Act\Cmd\Ds\DesignDestroy(
+                    given_type: $given_type,
+                    caller_namespace: $namespace,
+                    do_permission_check: $do_permission_check
+                ),
+                command_tags: [Act\Cmd\Ds\DesignDestroy::class]
+            );
 
-        if ($child instanceof Act\Cmd\Ds\DesignDestroy) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess()) {
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                }
-            }
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            /** @var ElementType $data */
+            $data = $thang->finished_data;
+            return  $data;
+        } else {
+            return $thang;
         }
+
     }
+
+
 
 }
 

@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\Types\TypeOfApproval;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 
@@ -45,6 +46,15 @@ class ElementTypeAncestor extends Model
      * @var array<string, string>
      */
     protected $casts = [];
+
+
+    public function type_ancestor() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'ancestor_type_id');
+    }
+
+    public function type_descendant() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'owning_child_type_id');
+    }
 
     public static function makeRecordsForType(ElementType $type) {
         $type_id = $type->id;

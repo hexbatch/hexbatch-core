@@ -37,8 +37,8 @@ class SemaphoreMasterCreate extends Act\Cmd\Wa
         Evt\Type\ElementCreation::class,
         Evt\Server\SetCreated::class,
         Evt\Server\TypeOwnerChanging::class,
-        Evt\Server\DesignPending::class,
-        Evt\Server\TypePublished::class,
+        Evt\Server\DesignParentAdding::class,
+        Evt\Server\TypePublishing::class,
     ];
 
 }

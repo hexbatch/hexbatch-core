@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Sys\TypeOfEvent;
 use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotFound;
@@ -121,7 +122,7 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
     public function type_handle() : BelongsTo {
-        return $this->belongsTo(ElementType::class,'type_handle_element_id');
+        return $this->belongsTo(Element::class,'type_handle_element_id');
     }
 
 
@@ -138,6 +139,17 @@ class ElementType extends Model implements IType,ISystemModel
             'id', // Foreign key on the returned table...
             'id', // Local key on this class table...
             'exposed_attribute_id' // Local key on the connecting table...
+        );
+    }
+
+    public function type_ancestors() : HasManyThrough {
+        return $this->hasManyThrough(
+            ElementType::class, //what is returned
+            ElementTypeAncestor::class, //the connecting class
+            'owning_child_type_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'ancestor_type_id' // Local key on the connecting table...
         );
     }
 
@@ -197,6 +209,8 @@ class ElementType extends Model implements IType,ISystemModel
         ?string          $name = null,
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
+        ?int             $handle_id = null,
+        ?bool             $is_system = null,
         ?TypeOfLifecycle $lifecycle = null,
         array            $only_uuids = [],
         bool             $b_child_parent_relations = false,
@@ -235,9 +249,15 @@ class ElementType extends Model implements IType,ISystemModel
             $build->where('element_types.type_name', $name);
         }
 
-
+        if ($handle_id) {
+            $build->where('element_types.type_handle_element_id', $handle_id);
+        }
         if ($time_bound_id) {
             $build->where('element_types.type_time_bound_id', $time_bound_id);
+        }
+
+        if ($is_system !== null) {
+            $build->where('element_types.is_system', $is_system);
         }
 
         if ($lifecycle) {
@@ -574,6 +594,10 @@ class ElementType extends Model implements IType,ISystemModel
         return ElementType::where('type_name',Root::TYPE_NAME)
             ->where('owner_namespace_id',UserNamespace::getSystemNamespace()->id)
             ->first();
+    }
+
+    public function getEventHandlerRef(TypeOfEvent $type_event) : ?string {
+        return '';
     }
 
 

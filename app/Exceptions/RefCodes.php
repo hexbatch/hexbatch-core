@@ -102,6 +102,7 @@ class RefCodes {
 
 
     const int TYPE_PARENT_DENIED_DESIGN = 7200;
+    const int ATTRIBUTE_PARENT_DENIED_DESIGN = 7201;
     const int TYPE_PARENT_DENIED_PUBLISHING = 7250;
     const int TYPE_PARENT_CANNOT_BE_REMOVED = 7270;
 
@@ -208,6 +209,7 @@ class RefCodes {
         self::TYPE_ALREADY_PUBLISHED => '',
         self::TYPE_CANNOT_PUBLISH_ABSTRACT => '',
         self::TYPE_PARENT_DENIED_DESIGN => '',
+        self::ATTRIBUTE_PARENT_DENIED_DESIGN => '',
         self::TYPE_PARENT_DENIED_PUBLISHING => '',
         self::TYPE_PARENT_CANNOT_BE_REMOVED => '',
         self::TYPE_GIVEN_ZERO_TO_MAKE => '',

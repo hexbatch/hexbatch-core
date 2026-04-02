@@ -72,25 +72,7 @@ class Api extends BaseType implements ICallResponse
         protected array          $tags = []
     )
     {
-        if (!$this->owner_namespace ) {
-            if ($this->action_data?->data_owner_namespace) {
-                $this->owner_namespace = $this->action_data->data_owner_namespace;
-            }
-        }
-        if (!$this->owner_namespace ) {
-            $this->owner_namespace = Utilities::getCurrentNamespace();
-        }
 
-        if (!$this->owner_namespace) {
-            $this->owner_namespace = Utilities::getSystemNamespace();
-        }
-
-
-
-        // always the top of the food chain, so never has a parent data structure
-        parent::__construct(action_data: $this->action_data, owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system,
-            send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
 
     }
 

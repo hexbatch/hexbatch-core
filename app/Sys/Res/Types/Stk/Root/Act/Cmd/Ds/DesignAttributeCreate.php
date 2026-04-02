@@ -48,7 +48,7 @@ use Illuminate\Support\Facades\Log;
 
 the type owner of the optional attribute parent will get a notice before creation
 
-* [ElementTypeTurningOn](../../../Evt/Server/DesignPending.php)
+* [AttributePending](../../../Evt/Server/AttributePending.php)
 
 This can decide to accept the new design using the parent or not, if they deny, the attribute is still created,
  but without the parent being approved, and it will be impossible to publish until this is changed
@@ -67,30 +67,11 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\DesignPending::class
+        Evt\Server\DesignParentAdding::class
     ];
 
 
     #[ApiParamMarker( param_class: AttributeParamData::class)]
-    public function __construct(
-        protected AttributeParamData       $params,
-
-        protected ?bool                    $is_async = null,
-        protected bool                     $is_system = false,
-        protected bool                     $send_event = true,
-        protected ?ActionDatum             $action_data = null,
-        protected ?ActionDatum             $parent_action_data = null,
-        protected ?UserNamespace           $owner_namespace = null,
-        protected bool                     $b_type_init = false,
-        protected array                    $tags = []
-    )
-    {
-
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
-    }
-
-
     protected static function createAttribute(AttributeParamData $params,ElementType $given_type,UserNamespace $namespace)
     : Attribute
     {

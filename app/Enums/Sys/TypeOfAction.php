@@ -62,7 +62,6 @@ enum TypeOfAction: string
 
     case CMD_DESIGN_CREATE = 'cmd_type_create';
     case CMD_DESIGN_DESTROY = 'cmd_design_destroy';
-    case CMD_DESIGN_PURGE = 'cmd_design_purge';
 
 
 
@@ -99,7 +98,6 @@ enum TypeOfAction: string
     case CMD_DESIGN_REQUIREMENT_REMOVE = 'cmd_design_requirement_remove';
 
     case CMD_DESIGN_OWNER_CHANGE = 'cmd_design_owner_change';
-    case CMD_DESIGN_OWNER_PROMOTE = 'cmd_design_owner_promote';
 
 
     case CMD_TYPE_PUBLISH = 'cmd_type_publish';

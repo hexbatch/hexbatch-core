@@ -52,7 +52,7 @@ class DesignAttributeEdit extends Act\Cmd\Ds implements ICommandCallable
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\DesignPending::class
+        Evt\Server\DesignParentAdding::class
     ];
 
     #[ApiParamMarker( param_class: AttributeParamData::class)]
