@@ -58,7 +58,7 @@ class TypePublishing extends Evt\ScopeServer implements ICommandCallable
         $work = static::fromArray($command_args);
         $did_pass = $work->doWork($children_args);
 
-        return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: [static::CHILD_DECISION_KEY]);
+        return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: [static::CHILD_DECISION_KEY=>$did_pass]);
     }
 
     protected function doWork(array $children_args) : bool

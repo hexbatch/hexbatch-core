@@ -76,14 +76,14 @@ class DesignOwnerChange extends Act\Cmd\Ds implements ICommandCallable
             'given_type'=>$this->given_type,
             'given_namespace'=>$this->given_namespace,
             'do_permission_check'=>$this->do_permission_check,
-            'namespace'=>$this->caller_namespace,
+            'caller_namespace'=>$this->caller_namespace,
         ];
     }
 
     protected static function fromArray(array $args) : static {
         $given_type = $args['given_type'];
         $given_namespace = static::getNamespaceFromArray('given_namespace',$args);
-        $caller_namespace = static::getNamespaceFromArray('namespace',$args);
+        $caller_namespace = static::getNamespaceFromArray('caller_namespace',$args);
         $do_permission_check = $args['do_permission_check'];
         return new static(given_type: $given_type,given_namespace: $given_namespace,
             caller_namespace: $caller_namespace,do_permission_check: $do_permission_check);

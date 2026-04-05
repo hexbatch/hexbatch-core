@@ -88,6 +88,9 @@ class User extends Authenticatable implements ISystemModel
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_system' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
 

@@ -570,6 +570,17 @@ abstract class BaseType implements IDocument, \JsonSerializable
         }
     }
 
+    protected static function checkIfGivenIsOwner(UserNamespace $given , ?UserNamespace $target) {
+        if (!$target) {
+            throw new \LogicException("target namespace is null");
+        }
+        if (!$target->isNamespaceOwner($given)  ) {
+            throw new HexbatchPermissionException(__("msg.namespace_not_owner",['ref'=>$target->getName()]),
+                Response::HTTP_FORBIDDEN,
+                RefCodes::NAMESPACE_NOT_ADMIN);
+        }
+    }
+
     protected static function checkIfGivenIsMember(UserNamespace $given , ?UserNamespace $target) {
         if (!$target) {
             throw new \LogicException("target namespace is null");
@@ -592,6 +603,18 @@ abstract class BaseType implements IDocument, \JsonSerializable
             return UserNamespace::getThisNamespace(uuid: $ref );
         }
         throw new \LogicException("Could not find namespace in $array_key");
+    }
+
+    protected static function getPhaseFromArray(string $array_key, array $source) : Phase {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for phase");}
+        if ( ($found = $source[$array_key])  instanceof UserNamespace) {return $found;}
+        $ref = null;
+        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
+        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
+        if ($ref) {
+            return Phase::getThisPhase(uuid: $ref );
+        }
+        throw new \LogicException("Could not find phase in $array_key");
     }
 
     protected static function getServerFromArray(string $array_key, array $source,bool $b_throw_exception = false) : ?Server {

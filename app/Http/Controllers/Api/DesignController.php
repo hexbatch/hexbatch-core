@@ -543,7 +543,8 @@ class DesignController extends Controller {
     )]
     public function create_attribute(UserNamespace $namespace,ElementType $type,Request $request) {
         $params = AttributeParamData::fromRequest($request);
-        $data_out = Root\Api\Design\CreateAttribute::createAttribute(namespace: $namespace,given_type:$type, params: $params,tags: ['api-top']);
+        $data_out = Root\Api\Design\CreateAttribute::createAttribute(
+            calling_namespace: $namespace,given_type:$type, is_system: false,use_ref: null ,params: $params,tags: ['api-top']);
 
         if ($data_out instanceof Thang) {
             $data_out = ThangData::from($data_out);
@@ -597,7 +598,8 @@ class DesignController extends Controller {
     #[ApiEventMarker( Evt\Server\AttributePending::class)]
     public function edit_attribute(UserNamespace $namespace,Attribute $attribute,Request $request) {
         $params = AttributeParamData::fromRequest($request);
-        $data_out = Root\Api\Design\EditAttribute::editAttribute(namespace: $namespace,given_attribute:$attribute, params: $params,tags: ['api-top']);
+        $data_out = Root\Api\Design\EditAttribute::editAttribute(
+            calling_namespace: $namespace,given_attribute:$attribute, params: $params,tags: ['api-top']);
 
         if ($data_out instanceof Thang) {
             $http_code = CodeOf::HTTP_OK;

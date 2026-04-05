@@ -10,6 +10,7 @@ use App\Annotations\Documentation\HexbatchTitle;
 use App\Data\ApiParams\Data\Types\Params\TypeParamData;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
+use App\Helpers\Utilities;
 use App\Models\Element;
 use App\Models\ElementType;
 use App\Models\ElementTypeServerLevel;
@@ -59,6 +60,7 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
     public function __construct(
         protected TypeParamData     $params,
         protected bool              $is_system,
+        protected ?string              $use_ref,
         protected UserNamespace      $owner_namespace,
         protected Server            $server
 
@@ -70,6 +72,7 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
     protected  function toArray() :array {
         return [
             'design_params'=>$this->params->toArray(),
+            'use_ref'=>$this->use_ref,
             'is_system'=>$this->is_system,
             'namespace'=>$this->owner_namespace,
             'server'=>$this->server,
@@ -78,9 +81,10 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
     protected static function fromArray(array $args) : static{
         $params = TypeParamData::from($args['design_params']);
         $is_system = (bool)$args['is_system'];
+        $use_ref = $args['use_ref'];
         $owner_namespace = static::getNamespaceFromArray('namespace',$args);
         $server = static::getServerFromArray('server',$args);
-        return new DesignCreate(params: $params,is_system: $is_system,owner_namespace: $owner_namespace,server: $server);
+        return new DesignCreate(params: $params,is_system: $is_system,use_ref: $use_ref,owner_namespace: $owner_namespace,server: $server);
     }
 
     /**
@@ -97,6 +101,11 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
      * @throws \Throwable
      */
     protected  function createDesign() : ElementType {
+        if ($this->use_ref) {
+            if (!Utilities::is_uuid($this->use_ref)) {
+                throw new \LogicException("Type use ref is not uuid ". $this->use_ref);
+            }
+        }
         try {
             DB::beginTransaction();
 
@@ -105,6 +114,7 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
             if ($this->params->schedule_ref_uuid) {
                 $type->type_time_bound_id = TimeBound::getThisSchedule($this->params->schedule_ref_uuid)->id;
             }
+            $type->ref_uuid = $this->use_ref;
             $type->owner_namespace_id = $this->owner_namespace->id;
             $type->imported_from_server_id = $this->server->id;
 

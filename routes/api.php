@@ -332,7 +332,7 @@ Route::prefix('v1')->group(function () {
 
                 Route::prefix('{element}')->group(function () {
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
-                        Route::patch('change_owner', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
+                        Route::patch('change_owner/{target_namespace}', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
                         Route::delete('destroy', [Api\ElementController::class, 'destroy_element'])->name('core.elements.destroy');
                     });
 
@@ -462,7 +462,7 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('{element_type}')->group(function () {
 
                     Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
-                        Route::patch('promote_owner', [Api\TypeController::class, 'promote_owner'])->name('core.types.promote_owner');
+                        Route::patch('promote_owner/{target_namespace}', [Api\TypeController::class, 'promote_owner'])->name('core.types.promote_owner');
                         Route::patch('purge', [Api\TypeController::class, 'purge_type'])->name('core.types.purge');
                         Route::patch('promote_publish', [Api\TypeController::class, 'publish_type_promote'])->name('core.types.promote_publish');
                         Route::patch('suspend', [Api\TypeController::class, 'suspend_type'])->name('core.types.suspend');

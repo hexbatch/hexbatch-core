@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\Params\CreateElementParamData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Data\ApiParams\Data\Types\ElementTypeData;
 use App\Data\ApiParams\Data\Types\Params\TypeParamData;
@@ -19,11 +20,10 @@ use App\Http\Controllers\Controller;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
-use App\OpenApi\Params\Actioning\Type\CreateElementParams;
 use App\OpenApi\Params\Listing\Elements\ListElementParams;
-use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Data\ThangData;
 use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
@@ -398,7 +398,7 @@ class TypeController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/types/{element_type}/promote_owner',
+        path: '/api/v1/{user_namespace}/types/{element_type}/promote_owner/{target_namespace}',
         operationId: 'core.types.promote_owner',
         description: "Type owners can be changed by the system without events or permission",
         summary: 'System can change the type owner',
@@ -411,6 +411,9 @@ class TypeController extends Controller {
             new OA\PathParameter(  name: 'element_type', description: "The type",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
+            new OA\PathParameter(  name: 'target_namespace', description: "The new namespace",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+
         ],
         responses: [
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
@@ -418,7 +421,7 @@ class TypeController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[ApiTypeMarker( Root\Api\Type\PromoteOwner::class)]
-    public function promote_owner() {
+    public function promote_owner(UserNamespace $namespace,ElementType $element_type,UserNamespace $target_namespace) {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
@@ -529,9 +532,9 @@ class TypeController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Type Published', content: new JsonContent(ref: ElementTypeData::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'If abstract attributes'),
             new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
             new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
@@ -555,7 +558,9 @@ class TypeController extends Controller {
     }
 
 
-
+    /**
+     * @throws \Throwable
+     */
     #[OA\Patch(
         path: '/api/v1/{user_namespace}/types/{element_type}/promote_publish',
         operationId: 'core.types.promote_publish',
@@ -572,13 +577,27 @@ class TypeController extends Controller {
 
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Type Published', content: new JsonContent(ref: ElementTypeData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[ApiTypeMarker( Root\Api\Type\PromotePublish::class)]
-    public function publish_type_promote() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function publish_type_promote(UserNamespace $namespace,ElementType $type) {
+        $data = Root\Api\Type\Publish::doPublish(
+            calling_namespace: $namespace,given_type: $type,do_permission_check: false ,tags: ['api-top']);
+
+        if ($data instanceof Thang) {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = $data;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+            $data_out = Schedule::validateAndCreate($data);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -642,6 +661,7 @@ class TypeController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/types/{element_type}/create_element',
@@ -660,15 +680,12 @@ class TypeController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements created', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements created', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
@@ -677,14 +694,20 @@ class TypeController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
 
     #[ApiTypeMarker( Root\Api\Type\CreateElement::class)]
-    public function create_element(Request $request,ElementType $type) {
-        $params = new CreateElementParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Type\CreateElement(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-elements']);
+    public function create_element(UserNamespace $namespace,ElementType $type,Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = CreateElementParamData::fromRequest($request);
+        $data_out = Root\Api\Type\CreateElement::doElementCreation(
+            calling_namespace: $namespace,given_type:$type,is_system: false, params: $params,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 

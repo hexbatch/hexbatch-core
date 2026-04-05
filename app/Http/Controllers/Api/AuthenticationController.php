@@ -53,9 +53,7 @@ class AuthenticationController extends Controller
         ]
     )]
     public function me(Request $request) {
-        /** @var User  $user */
-        $user = User::buildUser($request->user()->id)->first();
-        $out = MeResponseData::fromModel($user);
+        $out = MeResponseData::fromModel($request->user());
         return response()->json($out, CodeOf::HTTP_OK);
     }
 

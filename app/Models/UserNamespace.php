@@ -324,6 +324,13 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return $this->isNamespaceMember($namespace,true);
     }
 
+    public function isNamespaceOwner(?UserNamespace $namespace) : ?UserNamespaceMember {
+        if ( $this->namespace_user_id !== $namespace->namespace_user_id) {
+            return null;
+        }
+        return $this->isNamespaceAdmin($namespace);
+    }
+
     public function isNamespaceMember(?UserNamespace $namespace,bool $b_admin= false) : ?UserNamespaceMember {
         if (!$namespace?->id ) {return null;}
         // a user is a member if any of his namespaces he owns is in the membership

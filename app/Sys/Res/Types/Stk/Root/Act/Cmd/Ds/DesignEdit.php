@@ -66,7 +66,7 @@ class DesignEdit extends Act\Cmd\Ds implements ICommandCallable
         return [
             'given_type'=>$this->given_type,
             'design_params'=>$this->params->toArray(),
-            'namespace'=>$this->caller_namespace,
+            'caller_namespace'=>$this->caller_namespace,
             'server'=>$this->server
         ];
     }
@@ -74,7 +74,7 @@ class DesignEdit extends Act\Cmd\Ds implements ICommandCallable
     protected static function fromArray(array $args) : static {
         $params = TypeParamData::from($args['design_params']);
         $given_type = static::getTypeFromArray('given_type',$args);;
-        $caller_namespace =  static::getNamespaceFromArray('namespace',$args);
+        $caller_namespace =  static::getNamespaceFromArray('caller_namespace',$args);
         $server = static::getServerFromArray('server',$args);;
         return new static(given_type: $given_type,params: $params,caller_namespace: $caller_namespace,server: $server);
     }

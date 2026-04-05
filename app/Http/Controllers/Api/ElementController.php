@@ -6,6 +6,7 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Helpers\Utilities;
@@ -13,12 +14,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Element;
 use App\Models\ElementSet;
 use App\Models\Phase;
+use App\Models\UserNamespace;
 use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
 use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
 use App\OpenApi\ApiResults\Elements\ApiElementResponse;
 use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
 use App\OpenApi\ApiResults\Set\ApiSetResponse;
-use App\OpenApi\Params\Actioning\Element\ChangeElementOwnerParams;
 use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
 use App\OpenApi\Params\Actioning\Set\SetCreateParams;
@@ -27,6 +28,8 @@ use App\OpenApi\Params\Listing\Elements\ShowElementParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Data\ThangData;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -37,15 +40,14 @@ use Symfony\Component\HttpFoundation\Response as CodeOf;
 class ElementController extends Controller {
 
     /**
-     * @throws \Exception
+     * @throws \Exception|\Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/{element}/change_owner',
+        path: '/api/v1/{user_namespace}/elements/{element}/change_owner/{target_namespace}',
         operationId: 'core.elements.change_owner',
         description: "Element owner can give ownership to another namespace at any time. Any number of elements can be included with a path ",
         summary: 'Change the element owner',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ChangeElementOwnerParams::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -53,31 +55,38 @@ class ElementController extends Controller {
 
             new OA\PathParameter(  name: 'element', description: "The element",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+
+            new OA\PathParameter(  name: 'target_namespace', description: "The new namespace",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Owner changed', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Owner changed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementOwnerChange::class)]
     #[ApiEventMarker( Evt\Type\ElementRecieved::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_OWNER)]
     #[ApiTypeMarker( Root\Api\Element\ChangeOwner::class)]
-    public function change_owner(Request $request) {
-        $params = new ChangeElementOwnerParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\ChangeOwner(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['change-element-owner']);
+    public function change_owner(UserNamespace $namespace,Element $element,UserNamespace $target_namespace) {
+        $col = new Collection();
+        $col->add($element);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $data_out = Root\Api\Element\ChangeOwner::doElementChangeOwner(
+            owner_namespace: $target_namespace,
+            calling_namespace: $namespace,is_system: false ,given_elements:$col,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 

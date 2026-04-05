@@ -12,16 +12,19 @@ use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\Log;
 
 #[HexbatchTitle( title: "Edit an attribute")]
@@ -57,121 +60,181 @@ class DesignAttributeEdit extends Act\Cmd\Ds implements ICommandCallable
 
     #[ApiParamMarker( param_class: AttributeParamData::class)]
     public function __construct(
-        protected AttributeParamData       $params,
+        protected AttributeParamData     $params,
+        protected Attribute $given_attribute  ,
+        protected UserNamespace      $calling_namespace,
 
-        protected ?bool                    $is_async = null,
-        protected bool                     $is_system = false,
-        protected bool                     $send_event = true,
-        protected ?ActionDatum             $action_data = null,
-        protected ?ActionDatum             $parent_action_data = null,
-        protected ?UserNamespace           $owner_namespace = null,
-        protected bool                     $b_type_init = false,
-        protected array                    $tags = []
     )
     {
 
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
+    }
+
+    protected  function toArray() :array {
+        return [
+            'params'=>$this->params->toArray(),
+            'given_attribute'=>$this->given_attribute,
+            'calling_namespace'=>$this->calling_namespace,
+        ];
+    }
+    protected static function fromArray(array $args) : static{
+        $params = AttributeParamData::from($args['params']);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $given_attribute = static::getAttributeFromArray('given_attribute',$args);
+        return new static(params: $params,given_attribute: $given_attribute,calling_namespace: $calling_namespace);
     }
 
 
 
-    protected static function editAttribute(AttributeParamData $params,Attribute $given_attribute,UserNamespace $namespace)
+    protected function editAttribute()
     : Attribute
     {
 
-        static::checkIfGivenIsAdmin(given: $namespace,target: $given_attribute->type_owner->owner_namespace);
+        static::checkIfGivenIsAdmin(given: $this->calling_namespace,target: $this->given_attribute->type_owner->owner_namespace);
 
-        if ($given_attribute->lifecycle === TypeOfLifecycle::PUBLISHED) {
+        if ($this->given_attribute->lifecycle === TypeOfLifecycle::PUBLISHED) {
 
-            throw new HexbatchNotPossibleException(__('msg.design_cannot_add_attribute_to_published',['ref'=>$given_attribute->getName()]),
+            throw new HexbatchNotPossibleException(__('msg.design_cannot_add_attribute_to_published',['ref'=>$this->given_attribute->getName()]),
                 \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                 RefCodes::TYPE_SCHEMA_ISSUE);
         }
 
 
 
-        if ($params->parent_ref_uuid) {
-            $parent = Attribute::getThisAttribute(uuid: $params->parent_ref_uuid);
+        if ($this->params->parent_ref_uuid) {
+            $parent = Attribute::getThisAttribute(uuid: $this->params->parent_ref_uuid);
             if ($parent->is_final_attribute) {
                 throw new HexbatchNotPossibleException(__('msg.attribute_parent_is_final',['ref'=>$parent->getName()]),
                     \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
                     RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
             }
 
-            if ($given_attribute->parent_attribute_id !== $parent->id)
+            if ($this->given_attribute->parent_attribute_id !== $parent->id)
             {
-                $given_attribute->parent_attribute_id = $parent->id;
+                $this->given_attribute->parent_attribute_id = $parent->id;
             }
         }
 
-        if ($params->unset_parent) {
-            $given_attribute->parent_attribute_id = null;
+        if ($this->params->unset_parent) {
+            $this->given_attribute->parent_attribute_id = null;
         }
 
-        if ($params->location_uuid) {
-            $shape_id = LocationBound::getThisLocation(uuid: $params->location_uuid)->id;
-            $given_attribute->attribute_shape_id = $shape_id;
+        if ($this->params->location_uuid) {
+            $shape_id = LocationBound::getThisLocation(uuid: $this->params->location_uuid)->id;
+            $this->given_attribute->attribute_shape_id = $shape_id;
         }
 
-        if ($params->attribute_name) {
-            $given_attribute->setAttributeName($params->attribute_name);
+        if ($this->params->attribute_name) {
+            $this->given_attribute->setAttributeName($this->params->attribute_name);
         }
 
-        if( $params->design_ref_uuid) {
-            $design_attribute = Attribute::getThisAttribute(uuid: $params->design_ref_uuid);
-            if (!($given_attribute->is_system || $design_attribute->isPublicDomain()) ) {
-                static::checkIfGivenIsMember(given: $namespace,target: $design_attribute->type_owner->owner_namespace );
+        if( $this->params->design_ref_uuid) {
+            $design_attribute = Attribute::getThisAttribute(uuid: $this->params->design_ref_uuid);
+            if (!($this->given_attribute->is_system || $design_attribute->isPublicDomain()) ) {
+                static::checkIfGivenIsMember(given: $this->calling_namespace,target: $design_attribute->type_owner->owner_namespace );
             }
-            $given_attribute->design_attribute_id = $design_attribute->id ;
+            $this->given_attribute->design_attribute_id = $design_attribute->id ;
         }
 
-        if ($params->access_policy) {
-            $given_attribute->access_policy = $params->access_policy ;
+        if ($this->params->access_policy) {
+            $this->given_attribute->access_policy = $this->params->access_policy ;
         }
 
-        if ($params->value_policy) {
-            $given_attribute->value_policy = $params->value_policy ;
+        if ($this->params->value_policy) {
+            $this->given_attribute->value_policy = $this->params->value_policy ;
         }
 
-        if ($params->read_json_path) {
-            $given_attribute->read_json_path = $params->read_json_path ;
+        if ($this->params->read_json_path) {
+            $this->given_attribute->read_json_path = $this->params->read_json_path ;
         }
 
-        if ($params->validate_json_path) {
-            $given_attribute->validate_json_path = $params->validate_json_path ;
+        if ($this->params->validate_json_path) {
+            $this->given_attribute->validate_json_path = $this->params->validate_json_path ;
         }
 
-        if (!empty($params->default_value)) {
-            $given_attribute->setDefaultValue($params->default_value);
+        if (!empty($this->params->default_value)) {
+            $this->given_attribute->setDefaultValue($this->params->default_value);
         }
 
-        if ($params->is_final_attribute !== null ) {
-            $given_attribute->is_final_attribute = $params->is_final_attribute ;
+        if ($this->params->is_final_attribute !== null ) {
+            $this->given_attribute->is_final_attribute = $this->params->is_final_attribute ;
         }
 
 
-        if ($params->is_abstract !== null ) {
-            $given_attribute->is_abstract = $params->is_abstract ;
+        if ($this->params->is_abstract !== null ) {
+            $this->given_attribute->is_abstract = $this->params->is_abstract ;
         }
 
-        if ($given_attribute->isDirty()) {
-            $given_attribute->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
+        if ($this->given_attribute->isDirty()) {
+            $this->given_attribute->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
         }
 
-        $given_attribute->save();
-        $given_attribute->refresh();
-        return $given_attribute;
+        $this->given_attribute->save();
+        $this->given_attribute->refresh();
+        return $this->given_attribute;
     }
+
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        $params = AttributeParamData::validateAndCreate($command_args['attribute_params']);
-        $attribute = $command_args['attribute']??null;
-        $namespace = $command_args['namespace'];
-        $edited_attribute = static::editAttribute(params: $params, given_attribute: $attribute, namespace: $namespace);
-        Log::debug("Called design attribute edit node",['args'=>$command_args,'attribute'=>$edited_attribute]);
-        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $edited_attribute->toArray());
+        $work = static::fromArray($command_args);
+        $b_approved = true;
+        if (count($children_args)) {
+            $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        }
+        if ($work->given_attribute) {
+            if ($b_approved) {
+                $work->given_attribute->attribute_approval = TypeOfApproval::DESIGN_APPROVED;
+            } else {
+                $work->given_attribute->attribute_approval = TypeOfApproval::DESIGN_DENIED;
+            }
+            $work->given_attribute->save();
+
+        }
+
+        Log::debug("Called design attribute edit node",['args'=>$command_args,'children'=>$children_args]);
+        return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
+            data: ['work'=>$work->toArray(),static::CHILD_DECISION_KEY=>$b_approved]);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function makeEditAttributeTree(
+         AttributeParamData     $params,
+         Attribute              $given_attribute  ,
+        UserNamespace          $calling_namespace,
+        ?IThangBuilder         $builder = null
+    ) : Thang|IThangBuilder|null
+    {
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
+        }
+
+        $me = new static(params: $params,given_attribute: $given_attribute, calling_namespace: $calling_namespace);
+
+        $attribute = $me->editAttribute();
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+
+
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>[static::class],
+            'command_args' => $me->toArray()
+        ]);
+        $builder->tree($my_command);
+        if ($attribute->attribute_parent) {
+            Evt\Server\AttributePending::callParentTree(ancestor_attribute: $attribute->attribute_parent, given_attribute: $attribute, builder: $builder);
+        }
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        return  $builder->execute()->getThang();
+
     }
 }
 

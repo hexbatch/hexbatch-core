@@ -4,22 +4,32 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
 
 use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
-use App\OpenApi\Params\Actioning\Type\CreateElementParams;
+use App\Data\ApiParams\Data\Elements\ElementData;
+use App\Data\ApiParams\Data\Elements\Params\CreateElementParamData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Models\Element;
+use App\Models\ElementType;
+use App\Models\Phase;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
 
 /**
  *   if no set provided, it will put new element in the caller's home set.
  */
-#[ApiParamMarker( param_class: CreateElementParams::class)]
-class CreateElement extends Api\ElementApi
+#[ApiParamMarker( param_class: CreateElementParamData::class)]
+class CreateElement extends Api\ElementApi implements ICommandCallable
 {
     const UUID = 'bad981d1-f817-4f89-879c-3d2d9c6443b6';
     const TYPE_NAME = 'api_types_create_element';
@@ -33,87 +43,67 @@ class CreateElement extends Api\ElementApi
         Act\Cmd\Ty\ElementCreate::class,
     ];
 
-    public function __construct(
-        protected ?CreateElementParams $params = null,
-
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
+        Log::debug("Called api create element node");
+        $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,data: $children_args);
     }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new CreateElementParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['elements'=>$this->getGivenElements()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiElementCollectionResponse(given_elements:  $what['elements'],thing: $this->getMyThing());
-    }
-
-
-
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ty\ElementCreate(
-            given_type_uuid: $this->params->getTypeRef(),
-            given_namespace_uuid: $this->params->getNamespaceRef(),
-            given_phase_uuid: $this->params->getPhaseRef(),
-            number_to_create: $this->params->getNumberToCreate(),
-        );
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => 'Elements of '. $creator->getGivenType()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function doElementCreation(
+        UserNamespace $calling_namespace,ElementType $given_type,bool $is_system,
+        CreateElementParamData $params,
+        array $tags = [], ?IThangBuilder $builder = null
+    ) : ElementList|Thang|CursorPaginatedDataCollection
+    {
 
-        if ($child instanceof Act\Cmd\Ty\ElementCreate) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenElements($child->getGivenElements());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+
+        $my_command = CommandParams::validateAndCreate([
+            'command_class' => static::class,
+            'command_tags' => array_merge([static::class], $tags)
+        ]);
+        ($builder ?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($calling_namespace)
+            ->setSharedArg('namespace', $calling_namespace)
+            ->tree($my_command);
+        if ($params->phase_ref) {
+            $phase = Phase::getThisPhase(uuid: $params->phase_ref);
+        } else {
+            $phase = Phase::getDefaultPhase();
         }
+
+        $owner_namespace = $calling_namespace;
+        if ($params->namespace_ref && $owner_namespace->ref_uuid !== $params->namespace_ref) {
+            $owner_namespace = UserNamespace::getThisNamespace(uuid: $params->namespace_ref);
+        }
+
+        $number_to_create = $params->number_to_create ?? 1;
+        Act\Cmd\Ty\ElementCreate::createElementTree(element_type: $given_type, phase: $phase, number_to_create: $number_to_create,
+            owner_namespace: $owner_namespace, is_system: $is_system, calling_namespace: $calling_namespace, builder: $builder);
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            /** @var Collection<Element> $elements */
+            $elements = $data['elements'];
+            $refs = [];
+            foreach ($elements as $el) {
+                $refs[] = $el->ref_uuid;
+            }
+            $build = Element::buildElement(
+                given_uuids: $refs
+            )->orderBy('id')
+            ;
+            $cursor = $build->cursorPaginate(perPage: $number_to_create);
+            return ElementData::collect($cursor, CursorPaginatedDataCollection::class);
+        } else {
+            return $thang;
+        }
+
     }
 
 }

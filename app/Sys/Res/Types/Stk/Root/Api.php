@@ -62,19 +62,6 @@ class Api extends BaseType implements ICallResponse
     ];
 
 
-    public function __construct(
-        protected ?ActionDatum   $action_data = null,
-        protected ?UserNamespace $owner_namespace = null,
-        protected bool           $b_type_init = false,
-        protected bool           $is_system = false,
-        protected bool           $send_event = true,
-        protected ?bool           $is_async = null,
-        protected array          $tags = []
-    )
-    {
-
-
-    }
 
 
 

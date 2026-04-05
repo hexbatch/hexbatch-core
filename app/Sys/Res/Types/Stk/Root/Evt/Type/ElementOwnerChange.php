@@ -3,13 +3,16 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Helpers\Utilities;
-use App\Models\ElementType;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -26,8 +29,9 @@ class ElementOwnerChange extends Evt\ScopeType implements ICommandCallable
     ];
 
     public function __construct(
-        protected ElementType $type_of_elements,
-        protected Collection  $given_elements
+        protected UserNamespace $recipient_namespace,
+        protected Collection  $given_elements,
+        protected int  $number_of_elements
     )
     {
 
@@ -36,35 +40,79 @@ class ElementOwnerChange extends Evt\ScopeType implements ICommandCallable
     protected  function toArray() :array {
         return [
             'given_elements'=>$this->given_elements->toArray(),
-            'type_of_elements'=>$this->type_of_elements,
+            'number_of_elements'=>$this->number_of_elements,
+            'recipient_namespace'=>$this->recipient_namespace->toArray(),
         ];
     }
 
     protected static function fromArray(array $args) : static {
         $given_elements = static::getElementCollectionFromArray('given_elements',$args);
-        $type_of_elements = static::getTypeFromArray('type_of_elements',$args);
-        return new static(type_of_elements: $type_of_elements,given_elements: $given_elements);
+        $number_of_elements = $args['number_of_elements'];
+        $recipient_namespace = static::getNamespaceFromArray('recipient_namespace',$args);
+        return new static(recipient_namespace: $recipient_namespace,
+            given_elements: $given_elements,number_of_elements: $number_of_elements);
     }
 
 
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
+        $did_pass = $children_args[static::CHILD_DECISION_KEY]??false;
         Log::debug("Called ElementOwnerChange node");
-        $work = static::fromArray($command_args);
-        $did_pass = $work->doWork($children_args);
 
-        return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: [static::CHILD_DECISION_KEY]);
+        return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: $children_args);
     }
 
-    protected function doWork(array $children_args) : bool
+
+
+    /**
+     * @throws \Throwable
+     */
+    public static function callOwnerTree(
+
+         Collection  $given_elements,
+         UserNamespace $recipient_namespace,
+         int  $number_of_elements,
+        ?IThangBuilder $builder = null
+    ) : Thang|IThangBuilder
     {
-        //all children must agree
-        foreach ($children_args as $key=>$val) {
-            Utilities::ignoreVar($key);
-            if (!$val) { return false;}
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
         }
-        return true;
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>[static::class]
+        ]);
+        $builder->tree($my_command);
+
+
+        $ref = $recipient_namespace->namespace_base_type->getEventHandlerRef(TypeOfEvent::ELEMENT_OWNER_CHANGE);
+        if ($ref)
+        {
+            $builder->leaf(
+                command_class: Evt\EventHandler::class,
+                command_args: (array)new Evt\EventHandler(
+                    ref: $ref,
+                    namespace_context: $recipient_namespace,
+                    collection_context: $given_elements,
+                    important_value: $number_of_elements
+                ),
+                command_tags: [Evt\EventHandler::class]
+            );
+        }
+
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        return  $builder->execute()->getThang();
+
     }
 
 }

@@ -9,6 +9,7 @@ use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
+use App\Helpers\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
 use App\Sys\Res\ISystemModel;
@@ -596,8 +597,8 @@ class ElementType extends Model implements IType,ISystemModel
             ->first();
     }
 
-    public function getEventHandlerRef(TypeOfEvent $type_event) : ?string {
-        return '';
+    public function getEventHandlerRef(TypeOfEvent $type_event) : ?IEventReference {
+        return null;
     }
 
 

@@ -61,18 +61,19 @@ abstract class BaseServer implements ISystemServer
        if ($this->server) {return $this->server;}
        try
        {
-           $creator = new ServerPromote(
-             given_type_uuid:   $this->getISystemServer()::getSystemTypeClass()::getDictionaryObject()->getTypeObject()->getUuid(),
-             given_namespace_uuid:  $this->getISystemServer()->getServerSystemNamespace()?->getNamespaceObject()?->getUuid(),
-             server_name:   static::getServerName(),
+
+           $what =  ServerPromote::createServer(
+               given_type: $this->getISystemServer()::getSystemTypeClass()::getDictionaryObject()->getTypeObject(),
+               given_namespace: $this->getISystemServer()->getServerSystemNamespace()?->getNamespaceObject(),
+               server_name:   static::getServerName(),
                server_domain: static::getServerDomain(),
                server_url: static::getServerUrl(),
                server_status: TypeOfServerStatus::ALLOWED_SERVER,
-               uuid: static::getClassUuid(),is_system: true,send_event: false
-           );
+               uuid: static::getClassUuid(),
+               is_system: true
 
-           $creator->runAction();
-           $what =  $creator->getCreatedServer();
+
+           );
            $this->b_did_create_model = true;
            return $what;
 
