@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Helpers\Utilities;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
@@ -54,17 +53,12 @@ class ElementRecieved extends Evt\ScopeElement implements ICommandCallable
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         Log::debug("Called ElementRecieved node");
-        $work = static::fromArray($command_args);
-        $did_pass = $work->doWork($children_args);
+        $did_pass = static::getDecisionUsingAndLogic($children_args);
 
         return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS, data: [static::CHILD_DECISION_KEY=>$did_pass]);
     }
 
-    protected function doWork(array $children_args) : bool
-    {
-        Utilities::ignoreVar($children_args);
-        return true;
-    }
+
 
 
     /**

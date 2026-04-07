@@ -55,10 +55,7 @@ class AttributePending extends Evt\ScopeServer implements ICommandCallable
     {
 
         $work = static::fromArray($command_args);
-        $b_approved = true;
-        if (count($children_args)) {
-            $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
-        }
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         if ($b_approved) {
             $b_approved = $work->decide();
         }
@@ -104,6 +101,18 @@ class AttributePending extends Evt\ScopeServer implements ICommandCallable
             'command_args' => $me->toArray()
         ]);
         $builder->tree($my_command);
+
+        if (($ref = $ancestor_attribute->type_owner->getEventHandlerRef(TypeOfEvent::ATTRIBUTE_PENDING)))
+        {
+            $builder->leaf(
+                command_class: Evt\EventHandler::class,
+                command_args: (array)new Evt\EventHandler(
+                    ref: $ref,
+                    attribute_context: $given_attribute
+                ),
+                command_tags: [Evt\EventHandler::class]
+            );
+        }
         $dad = $ancestor_attribute->attribute_parent;
         static::callParentTree(ancestor_attribute: $dad,given_attribute: $given_attribute,builder: $builder);
 

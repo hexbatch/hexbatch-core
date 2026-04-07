@@ -99,7 +99,8 @@ class User extends Authenticatable implements ISystemModel
     }
 
     public function default_namespace() : BelongsTo {
-        return $this->belongsTo(UserNamespace::class,'default_namespace_id');
+        return $this->belongsTo(UserNamespace::class,'default_namespace_id')
+            ->with('home_set','home_set.defining_element','home_set.defining_element.element_parent_type');
     }
 
     /**
@@ -132,11 +133,9 @@ class User extends Authenticatable implements ISystemModel
                     \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
                     RefCodes::USER_NOT_FOUND
                 );
-            } else {
-                $out = User::buildUser($ret->id)->first();
             }
         }
-        return $out;
+        return $ret;
 
     }
 
@@ -196,6 +195,14 @@ class User extends Authenticatable implements ISystemModel
 
     public function getUuid(): string {
         return $this->ref_uuid;
+    }
+
+    protected function tokenExpiresAt(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $this->currentAccessToken()->expires_at??null,
+        );
     }
 
 

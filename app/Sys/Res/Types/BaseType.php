@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types;
 
 
-use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfFlag;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
@@ -36,7 +35,6 @@ use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Servers\ISystemServer;
 use App\Sys\Res\Servers\Stock\ThisServer;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignCreate;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignParentAdd;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
 use Illuminate\Support\Collection;
@@ -668,6 +666,34 @@ abstract class BaseType implements IDocument, \JsonSerializable
         throw new \LogicException("Could not find element in $array_key");
     }
 
+    protected static function getSetFromArray(?string $array_key, array $source,bool $throw_if_missing = true)
+    : null|ElementSet
+    {
+        if ($array_key)
+        {
+            if (!isset($source[$array_key])) {
+                if ($throw_if_missing)
+                {
+                    throw new \LogicException("No array key made for set");
+                } else {
+                    return null;
+                }
+
+            }
+            if ( ($found = $source[$array_key])  instanceof ElementSet) {return $found;}
+        } else {
+            $found = $source;
+        }
+
+        $ref = null;
+        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
+        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
+        if ($ref) {
+            return ElementSet::getThisSet(uuid: $ref );
+        }
+        throw new \LogicException("Could not find set in $array_key");
+    }
+
     /**
      * @return Collection<Element>
      */
@@ -728,6 +754,28 @@ abstract class BaseType implements IDocument, \JsonSerializable
     }
 
     const CHILD_DECISION_KEY = 'child_decision';
+
+    protected static function getDecisionUsingAndLogic(array $children_args) : bool {
+        if (empty($children_args)) {return true;}
+
+        foreach ($children_args as $key => $part) {
+            if ($key === static::CHILD_DECISION_KEY) {
+                if ($part === false) {
+                    return false;
+                }
+            }
+            if (is_array($part)) {
+                foreach ($part as $p_key => $p_part) {
+                    if ($p_key === static::CHILD_DECISION_KEY) {
+                        if ($p_part === false) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+       return true;
+    }
 
 }
 

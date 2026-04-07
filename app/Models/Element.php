@@ -71,7 +71,10 @@ class Element extends Model implements ISystemModel
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
 
     public function element_namespace() : BelongsTo {
@@ -254,29 +257,6 @@ class Element extends Model implements ISystemModel
         return $ret;
     }
 
-    public static function resolveElement(string $value, bool $throw_exception = true)
-    : static
-    {
-
-        /** @var Builder $build */
-        $build = null;
-
-        if (Utilities::is_uuid($value)) {
-            return static::getThisElement(uuid: $value);
-        }
-
-        $ret = $build?->first();
-
-        if (empty($ret) && $throw_exception) {
-            throw new HexbatchNotFound(
-                __('msg.element_not_found',['ref'=>$value]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::ELEMENT_NOT_FOUND
-            );
-        }
-
-        return $ret;
-    }
 
     public static function getThisElement(
         ?int             $id = null,
@@ -310,7 +290,15 @@ class Element extends Model implements ISystemModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return static::resolveElement($value);
+        if (Utilities::is_uuid($value)) {
+            return static::getThisElement(uuid: $value);
+        }
+
+        throw new HexbatchNotFound(
+            __('msg.element_not_found',['ref'=>$value]),
+            \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+            RefCodes::ELEMENT_NOT_FOUND
+        );
 
     }
 
@@ -324,10 +312,6 @@ class Element extends Model implements ISystemModel
         return $this->ref_uuid;
     }
 
-    public function changeOwners(UserNamespace $namespace) {
-        $this->element_namespace_id = $namespace->id;
-        $this->save();
-    }
 
     public function destroyElement() {
         $this->delete();

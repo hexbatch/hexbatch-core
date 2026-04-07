@@ -172,7 +172,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
         $attribute = null;
         $b_approved = true;
         if (count($children_args)) {
-            $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+            $b_approved = static::getDecisionUsingAndLogic($children_args);
             /** @var Attribute $attribute */
             $attribute = $children_args['attribute'];
         }

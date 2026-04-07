@@ -57,7 +57,7 @@ class ElementOwnerChange extends Evt\ScopeType implements ICommandCallable
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        $did_pass = $children_args[static::CHILD_DECISION_KEY]??false;
+        $did_pass = static::getDecisionUsingAndLogic($children_args);
         Log::debug("Called ElementOwnerChange node");
 
         return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: $children_args);

@@ -177,10 +177,7 @@ class DesignAttributeEdit extends Act\Cmd\Ds implements ICommandCallable
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         $work = static::fromArray($command_args);
-        $b_approved = true;
-        if (count($children_args)) {
-            $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
-        }
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         if ($work->given_attribute) {
             if ($b_approved) {
                 $work->given_attribute->attribute_approval = TypeOfApproval::DESIGN_APPROVED;

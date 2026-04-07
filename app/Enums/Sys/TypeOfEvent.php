@@ -80,6 +80,7 @@ enum TypeOfEvent: string
     case SET_CHILD_DESTROYED = 'set_child_destroyed';
 
     case SET_CREATED = 'set_created';
+    case SET_CREATING = 'set_creating';
 
     case SET_DESTROYED = 'set_destroyed';
     case SET_DESTROYING = 'set_destroying';

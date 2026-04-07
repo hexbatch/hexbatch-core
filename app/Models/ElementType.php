@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Enums\Types\TypeOfApproval;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
-use App\Helpers\IEventReference;
+use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
 use App\Sys\Res\ISystemModel;
@@ -21,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -420,7 +420,6 @@ class ElementType extends Model implements IType,ISystemModel
             ->orderBy('level','desc')
             ;
 
-        /** @noinspection PhpUndefinedMethodInspection */
         $laravel_parent_uuids->withRecursiveExpression('query_parents',$query_parents);
 
 
@@ -452,30 +451,7 @@ class ElementType extends Model implements IType,ISystemModel
         return $attr_hash;
     }
 
-    /**
-     * @return Attribute[]
-     */
-    public function getChildlessAbstractAttributes() {
-        $all = $this->getAllAttributes();
-        $parent_hash = [];
-        foreach ( $all as $att) {
 
-            if ($att->attribute_parent) {
-                $parent_hash[$att->attribute_parent->ref_uuid] = $att->attribute_parent;
-            }
-        }
-
-        $fails = [];
-        foreach ($all as $att) {
-            if ($att->is_abstract) {
-                if (!isset($parent_hash[$att->ref_uuid])) {
-                    $fails[$att->is_abstract] = $att;
-                }
-            }
-        }
-
-        return array_values($fails);
-    }
 
 
 
@@ -535,18 +511,7 @@ class ElementType extends Model implements IType,ISystemModel
         return $this->ref_uuid;
     }
 
-    public function canBePublished() : bool {
-        if ($this->lifecycle !== TypeOfLifecycle::DEVELOPING) {return false;}
-        foreach ($this->type_parents as $parent) {
-            if ($parent->parent_type_approval !== TypeOfApproval::DESIGN_APPROVED) {return false;}
-        }
 
-        foreach ($this->type_attributes as $att) {
-            if ($att->attribute_approval !== TypeOfApproval::DESIGN_APPROVED) {return false;}
-        }
-
-        return true;
-    }
 
     public function isPublished() : bool {
         return $this->lifecycle === TypeOfLifecycle::PUBLISHED;
@@ -580,16 +545,6 @@ class ElementType extends Model implements IType,ISystemModel
 
 
 
-    /**
-     * @return string[]
-     */
-    public function getTopParentUuids() : array {
-        $ret = [];
-        foreach ($this->type_parents as $par) {
-            $ret[] = $par->parent_type->ref_uuid;
-        }
-        return $ret;
-    }
 
     public static function getRootType() : ElementType {
         return ElementType::where('type_name',Root::TYPE_NAME)
@@ -597,9 +552,18 @@ class ElementType extends Model implements IType,ISystemModel
             ->first();
     }
 
+    /** @return Collection<ElementType> */
+    public function getAllAncestorsAndMe() {
+        $ret = $this->type_ancestors;
+        $ret->add($this);
+        return $ret;
+    }
+
     public function getEventHandlerRef(TypeOfEvent $type_event) : ?IEventReference {
+        Utilities::ignoreVar($type_event);
         return null;
     }
+
 
 
 }

@@ -6,10 +6,12 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Elements\ElementData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\Sets\Params\CreateSetParamData;
+use App\Data\ApiParams\Data\Sets\SetData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
-use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\Element;
 use App\Models\ElementSet;
@@ -19,10 +21,8 @@ use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
 use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
 use App\OpenApi\ApiResults\Elements\ApiElementResponse;
 use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
-use App\OpenApi\ApiResults\Set\ApiSetResponse;
 use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Params\Actioning\Set\SetCreateParams;
 use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Params\Listing\Elements\ShowElementParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
@@ -825,6 +825,7 @@ class ElementController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/create_set',
@@ -832,7 +833,7 @@ class ElementController extends Controller {
         description: "Element namespace admins can create sets out of those elements. Inheritied types can deny. Sets can be created a children of other sets",
         summary: 'Create a set from element',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SetCreateParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: CreateSetParamData::class)),
         tags: ['element','set'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -846,29 +847,31 @@ class ElementController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Attribute created', content: new JsonContent(ref: ApiSetResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Set created', content: new JsonContent(ref: ElementData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Server\SetCreated::class)]
     #[ApiEventMarker( Evt\Set\SetChildCreated::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\CreateSet::class)]
-    public function create_set(Request $request,Element $element) {
-        $params = new SetCreateParams(given_element: $element,namespace: Utilities::getCurrentOrUserNamespace());
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\CreateSet(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-set']);
+    public function create_set(UserNamespace $namespace,Element $element,Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = CreateSetParamData::fromRequest($request);
+        $data_out = Root\Api\Element\CreateSet::doSetCreation(calling_namespace: $namespace, defining_element: $element,
+            is_system: false,params: $params, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = SetData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 

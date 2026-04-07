@@ -37,7 +37,7 @@ class Publish extends Api\TypeApi implements ICommandCallable
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         Log::debug("Called api publish node");
-        $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,data: $children_args);
     }
 

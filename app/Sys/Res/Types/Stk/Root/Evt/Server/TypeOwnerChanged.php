@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 class TypeOwnerChanged extends Evt\ScopeServer implements ICommandCallable
 {
+    //todo change to have own tree
     const UUID = '451b9426-15cc-48f7-92f0-e361b5a0ab2a';
     const EVENT_NAME = TypeOfEvent::TYPE_OWNER_CHANGED;
 

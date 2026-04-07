@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
+use App\Helpers\Events\EventFilter;
+use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Servers\IServer;
@@ -12,6 +14,7 @@ use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\MasterSemaphore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 /**
  * Communication with elsewhere uses @uses MasterSemaphore
@@ -176,6 +179,7 @@ class Server extends Model implements IServer,ISystemModel
 
             }
         }
+        /** @var Server|null $server */
         $server = $build?->first();
         if (empty($server) && $throw_exception) {
             throw new HexbatchNotFound(
@@ -248,6 +252,14 @@ class Server extends Model implements IServer,ISystemModel
             throw new \LogicException("No system server made");
         }
         return static::$default_server = $server;
+    }
+
+    /**
+     * @return Collection<IEventReference>
+     */
+    public static function getEventHandlerRefs(EventFilter $event_filter) : Collection {
+        Utilities::ignoreVar($event_filter);
+        return new Collection;
     }
 
 

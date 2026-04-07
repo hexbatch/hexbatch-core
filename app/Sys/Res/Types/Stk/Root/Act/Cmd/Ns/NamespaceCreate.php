@@ -429,8 +429,8 @@ class NamespaceCreate extends Act\Cmd\Ns
                 $this->getGeneratedSet()->defining_element->element_namespace_id = $created_namespace->id;
                 $this->getGeneratedSet()->defining_element->save();
 
-                $this->getGeneratedSet()->defining_element->element_parent_type->owner_namespace_id =  $created_namespace->id;
-                $this->getGeneratedSet()->defining_element->element_parent_type->save();
+                $this->getGeneratedSet()->defining_type->owner_namespace_id =  $created_namespace->id;
+                $this->getGeneratedSet()->defining_type->save();
             }
 
             if ($this->getBaseType()) {

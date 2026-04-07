@@ -86,7 +86,10 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
     public function owner_user() : BelongsTo {
         return $this->belongsTo(User::class,'namespace_user_id');
@@ -114,9 +117,9 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
     }
 
     public function namespace_members() : HasMany {
-        return $this->hasMany(UserNamespaceMember::class)
+        return $this->hasMany(UserNamespaceMember::class,'member_namespace_id','id')
             /** @uses UserNamespaceMember::namespace_member */
-            ->with('member_user')
+            ->with('namespace_member')
             ->orderBy('created_at');
     }
 
@@ -475,8 +478,6 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 
 
 
-
-        /** @noinspection PhpPossiblePolymorphicInvocationInspection */
         $builder->withExpression('members_only',$query_members);
 
         if ($hint !== TypeOfOwnerGroup::HOOK_CALLBACK_CREATION) {
@@ -534,4 +535,34 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
     public static function getSystemNamespace() : UserNamespace {
         return UserNamespace::where('ref_uuid',config('hbc.system.namespace.uuid') )->first();
     }
+
+
+    protected function homeSetUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $this->home_set?->ref_uuid??null,
+        );
+    }
+
+    protected function typeUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $this->namespace_base_type?->ref_uuid??null,
+        );
+    }
+
+    protected function publicUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $this->public_element?->ref_uuid??null,
+        );
+    }
+
+    protected function privateUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $this->private_element?->ref_uuid??null,
+        );
+    }
+
 }

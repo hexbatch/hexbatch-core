@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
+namespace App\Sys\Res\Types\Stk\Root\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Helpers\Events\EventFilter;
+use App\Models\Element;
 use App\Models\ElementSet;
-use App\Models\Server;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\SetCreate;
 use App\Sys\Res\Types\Stk\Root\Evt;
-
 use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
@@ -19,18 +17,18 @@ use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\Log;
 
 
-class SetCreated extends Evt\ScopeServer implements ICommandCallable
+class SetCreating extends Evt\ScopeType implements ICommandCallable
 {
-    const UUID = '21dcf822-13a1-4abd-a400-3c6b1e74b82b';
-    const EVENT_NAME = TypeOfEvent::SET_CREATED;
-
+    const UUID = '26e8e548-cfe7-4d77-8d57-6ec164751a83';
+    const EVENT_NAME = TypeOfEvent::SET_CREATING;
 
     const PARENT_CLASSES = [
-        Evt\ScopeServer::class
+        Evt\ScopeType::class
     ];
 
     public function __construct(
-        protected ?ElementSet $created_set = null
+        protected Element $defining_element,
+        protected ?ElementSet $parent_set = null
     )
     {
 
@@ -38,45 +36,34 @@ class SetCreated extends Evt\ScopeServer implements ICommandCallable
 
     protected  function toArray() :array {
         return [
-            'created_set'=>$this->created_set?->toArray(),
+            'parent_set'=>$this->parent_set?->toArray(),
+            'defining_element'=>$this->defining_element->toArray(),
         ];
     }
 
     protected static function fromArray(array $args) : static {
-        $set = static::getSetFromArray('created_set',$args,false);
-        return new static(created_set: $set);
+        $parent_set = static::getSetFromArray('parent_set',$args,false);
+        $defining_element = static::getElementFromArray('defining_element',$args);
+        return new static(defining_element: $defining_element,parent_set: $parent_set);
     }
 
 
-    /**
-     * @throws \Throwable
-     */
+
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         $did_pass = static::getDecisionUsingAndLogic($children_args);
-        if ($did_pass) {
-            $work = static::fromArray($command_args);
-            $work->doWork($children_args);
-        }
-        Log::debug("Called SetCreated node");
+        Log::debug("Called SetCreating node");
 
         return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: $children_args);
     }
 
-    /**
-     * @throws \Throwable
-     */
-    protected function doWork(array $children_args) {
-        $this->created_set = $children_args[SetCreate::SET_KEY_IN_ARGS]??null;
-        if (!$this->created_set) {throw new \LogicException("Did not find set in event");}
-        $this->callEventTree();
-    }
-
 
     /**
      * @throws \Throwable
      */
-    protected function callEventTree(
+    public static function callEventTree(
+         Element $defining_element,
+         ?ElementSet $parent_set = null,
         ?IThangBuilder $builder = null
     ) : Thang|IThangBuilder
     {
@@ -87,24 +74,30 @@ class SetCreated extends Evt\ScopeServer implements ICommandCallable
 
         $builder?: $builder = ThangBuilder::createBuilder();
 
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>[static::class]
+        ]);
+        $builder->tree($my_command);
 
 
-        if ( $col = Server::getEventHandlerRefs(
-            new EventFilter(event_type: TypeOfEvent::SET_CREATED, type_context: $this->created_set->defining_type, element_context: $this->created_set->defining_element))
-        ) {
-            foreach ($col as $ref) {
-                $builder->tree(
+        $defining_element->element_parent_type->loadMissing('type_ancestors');
+        $parent_set?->defining_type?->loadMissing('type_ancestors');
+
+        foreach ($defining_element->element_parent_type->getAllAncestorsAndMe() as $ancestor) {
+            if (($ref = $ancestor->getEventHandlerRef(TypeOfEvent::SET_CREATING)))
+            {
+                $builder->leaf(
                     command_class: Evt\EventHandler::class,
                     command_args: (array)new Evt\EventHandler(
                         ref: $ref,
-                        set_context: $this->created_set,
+                        type_context: $defining_element->element_parent_type,
+                        parent_type_context: $parent_set?->defining_type
                     ),
                     command_tags: [Evt\EventHandler::class]
                 );
             }
         }
-
-
 
         if ($ret_builder) {
             return $builder;

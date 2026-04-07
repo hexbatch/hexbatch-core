@@ -59,7 +59,7 @@ class ElementCreation extends Evt\ScopeType implements ICommandCallable
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        $did_pass = $children_args[static::CHILD_DECISION_KEY]??false;
+        $did_pass = static::getDecisionUsingAndLogic($children_args);
         Log::debug("Called ElementCreation node");
 
         return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: $children_args);
@@ -91,25 +91,10 @@ class ElementCreation extends Evt\ScopeType implements ICommandCallable
         $builder->tree($my_command);
 
 
-        if ( ($ref = $element_type->getEventHandlerRef(TypeOfEvent::ELEMENT_CREATION)))
-        {
-            $builder->leaf(
-                command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
-                    ref: $ref,
-                    type_context: $element_type,
-                    namespace_context: $recipient_namespace,
-                    collection_context: $given_elements,
-                    important_value: $number_of_elements,
-                ),
-                command_tags: [Evt\EventHandler::class]
-            );
-        }
 
         $element_type->loadMissing('type_ancestors');
-        $ancestors = $element_type->type_ancestors;
-        foreach ($ancestors as $ant) {
-            if ( ($ref = $ant->getEventHandlerRef(TypeOfEvent::DESIGN_PARENT_ADDING)))
+        foreach ($element_type->getAllAncestorsAndMe() as $ant) {
+            if ( ($ref = $ant->getEventHandlerRef(TypeOfEvent::ELEMENT_CREATION)))
             {
                 $builder->leaf(
                     command_class: Evt\EventHandler::class,

@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Helpers\Utilities;
 use App\Models\ElementType;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
@@ -55,24 +54,11 @@ class TypePublishing extends Evt\ScopeServer implements ICommandCallable
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         Log::debug("Called event type published node");
-        $work = static::fromArray($command_args);
-        $did_pass = $work->doWork($children_args);
+        $did_pass = static::getDecisionUsingAndLogic($children_args);
 
         return new CallableReturnStub(status: $did_pass? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL, data: [static::CHILD_DECISION_KEY=>$did_pass]);
     }
 
-    protected function doWork(array $children_args) : bool
-    {
-        //all children must agree
-        foreach ($children_args as $key=>$val) {
-            Utilities::ignoreVar($key);
-            if (!$val) {
-
-                return false;
-            }
-        }
-        return true;
-    }
 
 
     /**

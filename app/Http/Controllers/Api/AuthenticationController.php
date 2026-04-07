@@ -53,7 +53,19 @@ class AuthenticationController extends Controller
         ]
     )]
     public function me(Request $request) {
-        $out = MeResponseData::fromModel($request->user());
+        $user = $request->user();
+        $user->loadMissing(
+            'default_namespace',
+            'default_namespace.namespace_members',
+            'default_namespace.home_set.element_members',
+            'default_namespace.home_set.element_members.element_parent_type',
+            'default_namespace.home_set.children_sets',
+            'default_namespace.public_element',
+            'default_namespace.public_element.element_parent_type',
+            'default_namespace.private_element',
+            'default_namespace.private_element.element_parent_type',
+        );
+        $out = MeResponseData::from($user);
         return response()->json($out, CodeOf::HTTP_OK);
     }
 
