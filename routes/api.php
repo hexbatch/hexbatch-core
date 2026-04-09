@@ -330,14 +330,16 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('elements')->group(function () {
 
+                Route::delete('destroy', [Api\ElementController::class, 'destroy_elements'])->name('core.elements.destroy');
+                Route::delete('purge', [Api\ElementController::class, 'purge_elements'])->name('core.elements.purge');
                 Route::prefix('{element}')->group(function () {
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
                         Route::patch('change_owner/{target_namespace}', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
-                        Route::delete('destroy', [Api\ElementController::class, 'destroy_element'])->name('core.elements.destroy');
+
                     });
 
                     Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
-                        Route::delete('purge', [Api\ElementController::class, 'purge_element'])->name('core.elements.purge');
+
                     });
                 });
 

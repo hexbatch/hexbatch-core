@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\ElementData;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
 use App\Data\ApiParams\Data\Sets\Params\CreateSetParamData;
 use App\Data\ApiParams\Data\Sets\SetData;
@@ -583,55 +584,55 @@ class ElementController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
-        path: '/api/v1/{user_namespace}/elements/{element}/destroy',
+        path: '/api/v1/{user_namespace}/elements/destroy',
         operationId: 'core.elements.destroy_element',
         description: "Element admin can destroy one or more elements, the type or parent types can reject this",
         summary: 'Destroys one or more elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements destroyed', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Elements destroyed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed')
         ]
     )]
     #[ApiEventMarker( Evt\Type\ElementDestruction::class)]
     #[ApiEventMarker( Evt\Type\ElementDestroyed::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Destroy::class)]
-    public function destroy_element(Request $request) {
-        $params = new ElementSelectParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\Destroy(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['destroy-elements']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+    public function destroy_elements(UserNamespace $namespace,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\Destroy::destroyElements(params: $params, is_system: false,caller_namespace: $namespace, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementData::collect($data_out, Collection::class);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Delete(
-        path: '/api/v1/{user_namespace}/elements/{element}/purge',
+        path: '/api/v1/{user_namespace}/elements/purge',
         operationId: 'core.elements.purge_element',
         description: "System can destroy one or more elements without permission or events",
         summary: 'System Destroy one or more elements',
@@ -640,10 +641,7 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
@@ -659,15 +657,20 @@ class ElementController extends Controller {
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Element\Purge::class)]
-    public function purge_element(Request $request) {
-        $params = new ElementSelectParams();
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\Purge(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['purge-elements']);
+    #[ApiTypeMarker( Root\Api\Element\Destroy::class)]
+    public function purge_elements(UserNamespace $namespace,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\Destroy::destroyElements(params: $params, is_system: true,caller_namespace: $namespace, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = ElementData::collect($data_out, Collection::class);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 

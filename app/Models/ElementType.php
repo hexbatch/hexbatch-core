@@ -564,6 +564,14 @@ class ElementType extends Model implements IType,ISystemModel
         return null;
     }
 
+    /**
+     * @return Collection<IEventReference>
+     */
+    public  function getEventHandlersFromTypeChain(TypeOfEvent $type_event) : Collection {
+        Utilities::ignoreVar($type_event);
+        return new Collection;
+    }
+
 
 
 }

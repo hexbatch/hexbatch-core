@@ -27,19 +27,7 @@ class ListAttributes extends Api\DesignApi
         Api\DesignApi::class,
     ];
 
-    public function __construct(
-        protected ?AttributeSearchParams $params = null,
 
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
-    {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
-    }
 
 
 

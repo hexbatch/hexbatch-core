@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
@@ -102,7 +103,13 @@ class Element extends Model implements ISystemModel
         ?bool   $is_set = null,
         ?string $uuid = null,
         array   $given_uuids = [],
-        bool    $b_do_relations = false
+        ?string    $set_ref = null,
+        ?string    $phase_ref = null,
+        ?string    $type_ref = null,
+        ?string    $namespace_ref = null,
+        bool $b_do_namespace_relation = false,
+        bool $b_do_namespace_type_relation = false,
+        bool $b_do_type_relation = false,
 
     ): Builder
     {
@@ -130,6 +137,16 @@ class Element extends Model implements ISystemModel
             $build->where('elements.element_phase_id', $phase_id);
         }
 
+        if ($phase_ref) {
+            $build->join('phases p',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($phase_ref) {
+                    $join->on('p.id', '=', 'elements.element_phase_id')
+                        ->where('p.ref_uuid', $phase_ref);
+                }
+            );
+        }
+
         if ($namespace_id) {
             $build->where('elements.element_namespace_id', $namespace_id);
         }
@@ -138,8 +155,30 @@ class Element extends Model implements ISystemModel
             $build->whereIn('elements.element_namespace_id', $in_namespace_ids);
         }
 
+
+        if ($namespace_ref) {
+            $build->join('user_namespaces nee',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($namespace_ref) {
+                    $join->on('nee.id', '=', 'elements.element_namespace_id')
+                        ->where('nee.ref_uuid', $namespace_ref);
+                }
+            );
+        }
+
         if($type_id) {
             $build->where('elements.element_parent_type_id', $type_id);
+        }
+
+
+        if ($type_ref) {
+            $build->join('element_types tee',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($type_ref) {
+                    $join->on('nee.id', '=', 'elements.element_parent_type_id')
+                        ->where('nee.ref_uuid', $type_ref);
+                }
+            );
         }
 
         if ($is_set !== null) {
@@ -180,6 +219,23 @@ class Element extends Model implements ISystemModel
             );
         }
 
+        if ($set_ref) {
+            $build->join('element_set_members semp',
+                /** @param JoinClause $join */
+                function (JoinClause $join)  {
+                    $join->on('semp.member_element_id', '=', 'elements.id');
+                }
+            );
+
+            $build->join('element_sets sempe',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($set_ref) {
+                    $join->on('semp.holder_set_id', '=', 'sempe.id')
+                        ->where('sem.ref_uuid', $set_ref);
+                }
+            );
+        }
+
         if ($attribute_id) {
             $build->join('attributes att',
                 /**
@@ -206,9 +262,19 @@ class Element extends Model implements ISystemModel
             );
         }
 
-        if ($b_do_relations) {
-            /** @uses Element::element_namespace(),Element::element_parent_type() */
-            $build->with('element_namespace','element_parent_type');
+        if ($b_do_namespace_relation) {
+            /** @uses Element::element_namespace() */
+            $build->with('element_namespace');
+        }
+
+        if ($b_do_namespace_type_relation) {
+            /** @uses Element::element_namespace(),UserNamespace::namespace_base_type() */
+            $build->with('element_namespace.namespace_base_type');
+        }
+
+        if ($b_do_type_relation) {
+            /** @uses Element::element_parent_type() */
+            $build->with('element_parent_type');
         }
 
 
@@ -315,6 +381,17 @@ class Element extends Model implements ISystemModel
 
     public function destroyElement() {
         $this->delete();
+    }
+
+    /** @return Collection<Element> */
+    public function getElementsFromParams(SelectElementParamData $params,
+                                          bool $b_ns_relations,bool $b_type_relations,bool $b_ns_type_relations) {
+        return static::buildElement(
+            given_uuids: $params->element_refs, set_ref: $params->set_ref, phase_ref: $params->phase_ref,
+            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref,
+            b_do_namespace_relation: $b_ns_relations, b_do_namespace_type_relation: $b_ns_type_relations,
+            b_do_type_relation: $b_type_relations
+        )->get();
     }
 
 

@@ -71,7 +71,8 @@ class ListElements extends Api\ElementApi
             namespace_id: $this->params->getGivenNamespace()?->id,
             in_namespace_ids: $belongs_to_namespaces,
             is_set: $this->params->getIsSet(),
-            b_do_relations: true
+            b_do_namespace_relation: true,
+            b_do_type_relation: true,
         );
 
         return [static::PRIMARY_SNAPSHOT_KEY=>$build->cursorPaginate(cursor: $this->params->getCursor())];

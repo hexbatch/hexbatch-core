@@ -584,7 +584,7 @@ class TypeController extends Controller {
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Type\PromotePublish::class)]
+    #[ApiTypeMarker( Root\Api\Type\Publish::class)]
     public function publish_type_promote(UserNamespace $namespace,ElementType $type) {
         $data = Root\Api\Type\Publish::doPublish(
             calling_namespace: $namespace,given_type: $type,do_permission_check: false ,tags: ['api-top']);

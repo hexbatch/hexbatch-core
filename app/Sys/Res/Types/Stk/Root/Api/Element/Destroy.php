@@ -4,20 +4,25 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 
 use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
-use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Models\Element;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 
-#[ApiParamMarker( param_class: ElementSelectParams::class)]
-class Destroy extends Api\ElementApi
+#[ApiParamMarker( param_class: SelectElementParamData::class)]
+class Destroy extends Api\ElementApi implements ICommandCallable
 {
     const UUID = 'bd9d7481-5f47-4bd6-8ec0-90f4df0c91be';
     const TYPE_NAME = 'api_element_destroy';
@@ -29,81 +34,57 @@ class Destroy extends Api\ElementApi
         Act\Cmd\Ele\ElementDestroy::class,
     ];
 
-    public function __construct(
-        protected ?ElementSelectParams $params = null,
 
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
-    }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new ElementSelectParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['elements'=>$this->getGivenElements()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiElementCollectionResponse(given_elements:  $what['elements'],thing: $this->getMyThing());
-    }
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ele\ElementDestroy(
-            given_element_uuids: $this->params->getElementRefs()
-        );
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => 'Destroying Elements','action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        Log::debug("Called api destroy element api type node");
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,data: $children_args);
 
     }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
+     * @return Collection<Element>|Thang
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function destroyElements(
+        SelectElementParamData $params, bool $is_system,
+        UserNamespace $caller_namespace,
+        array $tags = [], ?IThangBuilder $builder = null
+    ) : Collection|Thang
+    {
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['destroy-elements'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($caller_namespace)
+            ->setSharedArg('namespace',$caller_namespace)
+            ->tree($my_command);
 
-        if ($child instanceof Act\Cmd\Ele\ElementDestroy) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenElements($child->getGivenElements());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+
+        Act\Cmd\Ele\ElementDestroy::destroyElements(
+            params: $params,
+            is_system: $is_system,
+            caller_namespace: $caller_namespace,
+            builder: $builder
+        );
+
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            /** @var Collection<Element> $data */
+            $data = $thang->finished_data;
+            return  $data;
+        } else {
+            return $thang;
         }
+
     }
+
+
 
 }
 

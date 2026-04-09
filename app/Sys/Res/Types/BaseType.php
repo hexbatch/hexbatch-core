@@ -755,7 +755,7 @@ abstract class BaseType implements IDocument, \JsonSerializable
 
     const CHILD_DECISION_KEY = 'child_decision';
 
-    protected static function getDecisionUsingAndLogic(array $children_args) : bool {
+    public static function getDecisionUsingAndLogic(array $children_args) : bool {
         if (empty($children_args)) {return true;}
 
         foreach ($children_args as $key => $part) {

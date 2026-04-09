@@ -165,6 +165,7 @@ return [
     'elements_must_have_type' => 'When creating elements, the type of element must be defined',
     'elements_mising_from_give_list' => 'When changing owners, there were no elements listed to give',
     'elements_mising_from_destroy_list' => 'When deleting elements, there were no elements listed',
+    'elements_do_not_have_all_permissions' => 'The calling namespace :ref is not an admin for all the elements listed',
     'element_not_in_phase' => 'Element :ref has phase :set_phase, which is different from  :other_phase',
 
     //sets

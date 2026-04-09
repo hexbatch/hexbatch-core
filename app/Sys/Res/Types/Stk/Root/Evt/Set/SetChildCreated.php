@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Evt\Set;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Helpers\Events\EventFilter;
+use App\Helpers\Events\TreeStub;
 use App\Models\ElementSet;
 use App\Models\Server;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\SetCreate;
@@ -89,6 +90,10 @@ class SetChildCreated extends Evt\ScopeSet implements ICommandCallable
         }
 
         $builder?: $builder = ThangBuilder::createBuilder();
+        $builder->tree(
+            command_class: TreeStub::class,
+            command_tags: [TreeStub::class,static::class]
+        );
 
 
         if ( $col = Server::getEventHandlerRefs(
@@ -96,7 +101,7 @@ class SetChildCreated extends Evt\ScopeSet implements ICommandCallable
                 element_context: $this->created_set->defining_element))
         ) {
             foreach ($col as $ref) {
-                $builder->tree(
+                $builder->leaf(
                     command_class: Evt\EventHandler::class,
                     command_args: (array)new Evt\EventHandler(
                         ref: $ref,
