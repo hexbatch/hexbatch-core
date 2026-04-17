@@ -162,7 +162,7 @@ class SetCreate extends Act\Cmd\St
         $defining_element->loadMissing('element_parent_type');
         $defining_element->loadMissing('element_namespace');
 
-        if ($is_system) {
+        if (!$is_system) {
             static::checkIfGivenIsAdmin(given: $calling_namespace,target: $defining_element->element_namespace);
             //element owner can create a set, permission of type chain optionally given
         }

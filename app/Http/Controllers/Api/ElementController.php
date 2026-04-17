@@ -328,7 +328,7 @@ class ElementController extends Controller {
     public function write_attribute(Phase $working_phase, Element $element, Request $request) {
         $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
+        $api = new Root\Api\Element\WriteAttribute(params: $params, is_async: true, tags: ['api-top']);
         $api->createThingTree(tags: ['write-attribute']);
 
         $data_out = $api->getCallbackResponse($http_code);
@@ -637,7 +637,7 @@ class ElementController extends Controller {
         description: "System can destroy one or more elements without permission or events",
         summary: 'System Destroy one or more elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",

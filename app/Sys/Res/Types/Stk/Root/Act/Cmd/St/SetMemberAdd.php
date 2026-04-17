@@ -6,18 +6,21 @@ use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Sets\Params\AddElementsParamData;
 use App\Enums\Sys\TypeOfAction;
-use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\ElementSet;
+use App\Models\ElementSetMember;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Set\AddElementParams;
-use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 #[HexbatchTitle( title: "Add elements to set")]
@@ -28,30 +31,27 @@ use Illuminate\Support\Facades\DB;
 
   This adds elements to a set, the set and elements must be already existing.
 
-
-  given_set_uuid: uuid of the set
-  given_element_uuids: array of one or more element uuids to put into the set
   is_sticky: if the elements are sticky, remaining after the remove command
 
   Creation can be blocked by the following:
 
   By the set
 
-  * [SetEnter.php](../../../Evt/Set/SetEnter.php)
+  * [SetEntering.php](../../../Evt/Set/SetEntering.php)
 
 
   After the elements are added, the following notices are given
 
-   * [SetEnter.php](../../../Evt/Set/SetEnter.php)
-   * [ShapeEnter.php](../../../Evt/Set/ShapeEnter.php)
-   * [MapEnter.php](../../../Evt/Set/MapEnter.php)
+   * [SetEntered.php](../../../Evt/Set/SetEntered.php)
+   * [ShapeEntered.php](../../../Evt/Set/ShapeEntered.php)
+   * [MapEntered.php](../../../Evt/Set/MapEntered.php)
    * [TypeMapEnclosedStart.php](../../../Evt/Set/TypeMapEnclosedStart.php)
-   * [TypeMapEnclosingStart.php](../../../Evt/Set/TypeMapEnclosingStart.php)
    * [TypeShapeEnclosedStart.php](../../../Evt/Set/TypeShapeEnclosedStart.php)
-   * [TypeShapeEnclosingStart.php](../../../Evt/Set/TypeShapeEnclosingStart.php)
 
 
 ')]
+#[ApiParamMarker( param_class: AddElementsParamData::class)]
+
 class SetMemberAdd extends Act\Cmd\St
 {
     const UUID = 'ebd1275e-ecc6-486e-89cb-69e14ae4a44c';
@@ -66,250 +66,180 @@ class SetMemberAdd extends Act\Cmd\St
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetEnter::class,
-        Evt\Set\ShapeEnter::class,
-        Evt\Set\MapEnter::class,
+        Evt\Set\SetEntering::class,
+        Evt\Set\SetEntered::class,
+        Evt\Set\ShapeEntered::class,
+        Evt\Set\MapEntered::class,
         Evt\Set\TypeMapEnclosedStart::class,
-        Evt\Set\TypeMapEnclosingStart::class,
         Evt\Set\TypeShapeEnclosedStart::class,
-        Evt\Set\TypeShapeEnclosingStart::class,
     ];
 
 
-    public function getSetUsed(): ?ElementSet
-    {
-        /** @uses ActionDatum::data_set() */
-        return $this->action_data->data_set;
-    }
 
-    protected function changeSetUsed(ElementSet $set) : void {
-        $this->action_data->data_set_id = $set->id;
-        $this->given_set_uuid = $set->ref_uuid;
-        $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
-    }
-
-    /**
-     * @return Element[]
-     */
-    public function getElementsAdded(): array
-    {
-        return $this->action_data->getCollectionOfType(class: Element::class,partition_flag: 2);
-    }
-
-    /**
-     * @return Element[]
-     */
-    public function getElementsGiven(): array
-    {
-        return $this->action_data->getCollectionOfType(class: Element::class,partition_flag: 0);
-    }
-
-    /**
-     * @param Element[] $elements
-     */
-    protected function addElementsGiven(array $elements): void
-    {
-        $uuids = [];
-        foreach ($elements as $element) {
-            $uuids[] = $element->ref_uuid;
-        }
-        $this->given_element_uuids = array_unique( array_merge($this->given_element_uuids,$uuids) );
-        $this->saveCollectionKeys();
-        $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
-        if ($this->auto_allow_given_elements) {
-            $this->addElementsAllowed(elements: $elements);
-        }
-    }
-
-    /**
-     * @param Element[] $elements
-     */
-    protected function addElementsAllowed(array $elements): void
-    {
-        $uuids = [];
-        foreach ($elements as $element) {
-            $uuids[] = $element->ref_uuid;
-        }
-        $this->allowed_element_uuids = array_unique( array_merge($this->allowed_element_uuids,$uuids) );
-        $this->saveCollectionKeys();
-        $this->action_data->collection_data =$this->getInitialConstantData();
-        $this->action_data->save();
-    }
-
-    /**
-     * @return Element[]
-     */
-    public function getElementsAllowed(): array
-    {
-        return $this->action_data->getCollectionOfType(class: Element::class,partition_flag: 1);
-    }
-
-    /**
-     * @var string[] $added_element_uuids
-     */
-    protected array $added_element_uuids = [];
-
-    /**
-     * @var string[] $allowed_element_uuids
-     */
-    protected array $allowed_element_uuids = [];
-
-    const array ACTIVE_DATA_KEYS = ['given_set_uuid','is_sticky','auto_allow_given_elements'];
-
-    const array ACTIVE_COLLECTION_KEYS = [
-        'given_element_uuids'=>['class'=>Element::class,'partition'=>0] ,
-        'added_element_uuids'=>['class'=>Element::class,'partition'=>2] ,
-        'allowed_element_uuids'=>['class'=>Element::class,'partition'=>1] ,
-    ];
-
-    #[ApiParamMarker( param_class: AddElementParams::class)]
     public function __construct(
-        protected ?string       $given_set_uuid = null ,
-        /**
-         * @var string[] $given_element_uuids
-         */
-        protected array        $given_element_uuids = [],
-        protected bool         $is_sticky = false,
-        protected bool         $auto_allow_given_elements = false,
-        protected bool         $is_system = false,
-        protected bool         $send_event = true,
-        protected ?bool                $is_async = null,
-        protected ?ActionDatum $action_data = null,
-        protected ?ActionDatum        $parent_action_data = null,
-        protected ?UserNamespace      $owner_namespace = null,
-        protected bool         $b_type_init = false,
-        protected array          $tags = []
+        protected AddElementsParamData     $params,
+        protected ElementSet                $given_set,
+        protected bool                      $is_system,
+        protected UserNamespace             $calling_namespace,
+        protected ?Collection $selected_elements = null
+
     )
     {
-        if ($this->is_system) {
-            $this->allowed_element_uuids = $this->given_element_uuids;
+        if (!$this->selected_elements) {
+            $this->selected_elements = $this->getSelectedElements();
         }
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
+
+    }
+
+    protected  function toArray() :array {
+        return [
+            'params'=>$this->params->toArray(),
+            'given_set'=>$this->given_set,
+            'selected_elements'=>$this->selected_elements,
+            'is_system'=>$this->is_system,
+            'calling_namespace'=>$this->calling_namespace,
+        ];
+    }
+    protected static function fromArray(array $args) : static{
+        $params = AddElementsParamData::from($args['params']);
+        $is_system = (bool)$args['is_system'];
+        $given_set = static::getSetFromArray('given_set',$args);
+        $selected_elements = static::getElementCollectionFromArray('selected_elements',$args);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        return new static(params: $params,given_set: $given_set,is_system: $is_system,calling_namespace: $calling_namespace,selected_elements: $selected_elements);
     }
 
 
+    /**
+     * @throws \Throwable
+     */
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        $work = static::fromArray($command_args);
+        $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        if ($b_approved) {
+            $added_members = $work->addElements();
+            foreach ($added_members as $e) {
+                $work->fireNotificationsForElement($e,$children_args);
+            }
+        } else {
+            $added_members = [];
+        }
+
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
+            data: [static::CHILD_DECISION_KEY =>$b_approved,'members'=>$added_members]);
+    }
+
+    protected function getSelectedElements() : Collection {
+        //gets elements from params
+        return  Element::getElementsFromParams(
+            params: $this->params->selection, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,not_member_set_id: $this->given_set->id);
+    }
 
     /**
-     * @throws \Exception
+     * @return Collection<ElementSetMember>
+     * @throws
      */
-    protected function runActionInner(array $data = []): void
-    {
-        parent::runActionInner();
-
-        if (!$this->getSetUsed()) {
-            throw new \InvalidArgumentException("Need set before can add member");
-        }
-
-        foreach ($this->getElementsAllowed() as $ele) {
-            $namespace_to_use = $ele->element_namespace;
-            if (!$namespace_to_use) { $namespace_to_use = $this->getNamespaceInUse();} //maybe being built for a new namespace
-            $this->checkIfAdmin($namespace_to_use);
-        }
+    protected function addElements() {
+        $ids = [];
+        //anyone can add any element they can see
         try {
             DB::beginTransaction();
-            foreach ($this->getElementsAllowed() as $element) {
-                $this->getSetUsed()->addElement(ele: $element,is_sticky: $this->is_sticky);
-                $this->added_element_uuids[] = $element->ref_uuid;
+            foreach ($this->selected_elements as $element) {
+                $member = $this->given_set->addElement(ele: $element,is_sticky: $this->params->is_sticky);
+                $ids[] = $member->id;
             }
-            $this->saveCollectionKeys();
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
 
-    }
-
-
-
-
-    protected function getMyData() :array {
-        return ['set'=>$this->getSetUsed(),'elements_added'=>$this->getElementsAdded(),'elements_given'=>$this->getElementsGiven()];
-    }
-
-    public function getDataSnapshot(): array
-    {
-        $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['set'])) {
-            $ret['set'] = new SetResponse(given_set:  $what['set'],show_elements: true);
+        if (count($ids)) {
+            return ElementSetMember::buildSetMember(given_ids: $ids)->get();
         }
 
-        return $ret;
+        return new Collection;
     }
 
+    protected function fireNotificationsForElement(ElementSetMember $e,array $children_args) {
+        $callables = [
+            Evt\Set\SetEntered::class,
+            Evt\Set\ShapeEntered::class,
+            Evt\Set\MapEntered::class,
+            Evt\Set\TypeMapEnclosedStart::class,
+            Evt\Set\TypeShapeEnclosedStart::class,
+        ];
 
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-        if ($this->given_set_uuid) {
-            $this->action_data->data_set_id = ElementSet::getThisSet(uuid: $this->given_set_uuid)->id;
+        foreach ($callables as $callable_class) {
+            $r = new $callable_class($this->given_set,$e->of_element);
+            $r->callTreeByItself($children_args);
         }
-
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
     }
 
-    public function getChildrenTree(): ?Tree
-    {
-
-        if ($this->send_event) {
-            $nodes = [];
-            $events = Evt\Set\SetEnter::makeEventActions(source: $this, action_data: $this->action_data);
-            foreach ($events as $event) {
-                $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
-            }
-
-            if (count($nodes)) {
-                return new Tree(
-                    $nodes,
-                    ['rootId' => -1]
-                );
-            }
-        }
-
-        return null;
-    }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function createSetAddTree(
+         AddElementsParamData     $params,
+         ElementSet                $given_set,
+         bool                      $is_system,
+         UserNamespace             $calling_namespace,
+        ?IThangBuilder              $builder = null
+    ) : Thang|IThangBuilder
+    {
+
+        if (!$is_system) {
+            $given_set->loadMissing('defining_type');
+            $given_set->loadMissing('defining_type.owner_namespace');
+            static::checkIfGivenIsAdmin(given: $calling_namespace,target: $given_set->defining_type->owner_namespace);
+        }
+
+        $me = new static(
+            params: $params,
+            given_set: $given_set,
+            is_system: $is_system,
+            calling_namespace: $calling_namespace
+        );
+
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
+        }
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+        $builder->setNamespace($calling_namespace);
 
 
-        if ($child instanceof Evt\Set\SetEnter) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else if($child->isActionSuccess()) {
-                if ($this->given_set_uuid === $child->getAskedAboutSet()?->ref_uuid) {
-                    $this->addElementsAllowed(elements: $child->getAllowedElements());
-                }
+
+
+
+        $builder->tree(
+            command_class: static::class,
+            command_args: $me->toArray(),
+            command_tags: [static::class],
+        );
+
+        if (!$is_system)
+        {
+
+            foreach ($me->selected_elements as $el) {
+                Evt\Set\SetEntering::callEventTree(
+                    given_set: $given_set,
+                    given_element: $el,
+                    builder: $builder);
             }
         }
 
-        if ($child instanceof Act\Cmd\Ty\ElementCreate) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else if($child->isActionSuccess()) {
-                $this->addElementsGiven(elements: $child->getElementsCreated());
-            }
+
+
+        if ($ret_builder) {
+            return $builder;
         }
 
-        if ($child instanceof Act\Cmd\Ele\SetCreate) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else if($child->isActionSuccess()) {
-                $this->changeSetUsed(set: $child->getCreatedSet());
-            }
-        }
-
+        $thang = $builder->execute()->getThang();
+        return $thang;
     }
 
 }

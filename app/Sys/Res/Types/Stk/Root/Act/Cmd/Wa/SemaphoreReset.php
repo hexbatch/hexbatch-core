@@ -22,8 +22,8 @@ class SemaphoreReset extends Act\Cmd\Wa
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetEnter::class,
-        Evt\Set\SetLeave::class,
+        Evt\Set\SetEntering::class,
+        Evt\Set\SetLeaving::class,
     ];
 
 }

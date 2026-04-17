@@ -6,21 +6,27 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\Sets\Params\AddElementsParamData;
+use App\Data\ApiParams\Data\Sets\SetData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementSet;
 use App\Models\Phase;
+use App\Models\UserNamespace;
 use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
 use App\OpenApi\ApiResults\Set\ApiSetCollectionResponse;
 use App\OpenApi\ApiResults\Set\ApiSetResponse;
-use App\OpenApi\Params\Actioning\Set\AddElementParams;
 use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Params\Listing\Set\ListSetParams;
 use App\OpenApi\Params\Listing\Set\ShowSetParams;
-use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Data\ThangData;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -33,14 +39,15 @@ class SetController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/add_element',
         operationId: 'core.sets.add_element',
-        description: "Element namespace members can put element into any set that allows that ",
+        description: "Element namespace members can put element into any set they control. Union of elements selected and not there are added ",
         summary: 'Change the element owner',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementsParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -54,34 +61,37 @@ class SetController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements added', content: new JsonContent(ref: ElementList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Set was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetEnter::class)]
-    #[ApiEventMarker(Evt\Set\ShapeEnter::class)]
-    #[ApiEventMarker(Evt\Set\MapEnter::class)]
+    #[ApiEventMarker( Evt\Set\SetEntering::class)]
+    #[ApiEventMarker( Evt\Set\SetEntered::class)]
+    #[ApiEventMarker(Evt\Set\ShapeEntered::class)]
+    #[ApiEventMarker(Evt\Set\MapEntered::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingStart::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedStart::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingStart::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\AddElement::class)]
-    public function add_element(Request $request,ElementSet $set) {
-        $params = new AddElementParams(given_set: $set);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Set\AddElement(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['add-elements']);
+    public function add_element(UserNamespace $namespace,Phase $working_phase,ElementSet $set,Request $request) {
+        Utilities::ignoreVar($working_phase);
+        $params = AddElementsParamData::fromRequest($request);
+        $data_out = Root\Api\Set\AddElement::addElementsToSet(params: $params,calling_namespace: $namespace, given_set: $set,
+            is_system: false, tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+            $data_out = SetData::from($data_out);
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -125,9 +135,10 @@ class SetController extends Controller {
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/remove_element',
         operationId: 'core.sets.remove_element',
-        description: "Element namespace members can put element into any set that allows that ",
-        summary: 'Change the element owner',
+        description: "Remove selected elements from set. Union of selected elements and present elements chosen ",
+        summary: 'Remove elements from set',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -144,14 +155,13 @@ class SetController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\SetLeave::class)]
-    #[ApiEventMarker(Evt\Set\ShapeLeave::class)]
-    #[ApiEventMarker(Evt\Set\MapLeave::class)]
+    #[ApiEventMarker( Evt\Set\SetLeaving::class)]
+    #[ApiEventMarker( Evt\Set\SetLeft::class)]
+    #[ApiEventMarker(Evt\Set\ShapeLeft::class)]
+    #[ApiEventMarker(Evt\Set\MapLeft::class)]
     #[ApiEventMarker(Evt\Set\TypeMapEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeMapEnclosingEnd::class)]
     #[ApiEventMarker(Evt\Set\TypeShapeEnclosedEnd::class)]
-    #[ApiEventMarker(Evt\Set\TypeShapeEnclosingEnd::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\RemoveElement::class)]
     public function remove_element() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -163,7 +173,7 @@ class SetController extends Controller {
     #[OA\Delete(
         path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/empty_set',
         operationId: 'core.sets.empty_set',
-        description: "Element namespace members can clear out sticky elements. Event handlers can block their elements from leaving ",
+        description: "Removes all except sticky elements. Event handlers can block their elements from leaving ",
         summary: 'Removes all elements except sticky ones',
         security: [['bearerAuth' => []]],
         tags: ['set'],
@@ -182,7 +192,7 @@ class SetController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\EmptySet::class)]
     public function empty_set() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -190,11 +200,12 @@ class SetController extends Controller {
 
 
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/stick_element',
+        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/stick_elements',
         operationId: 'core.sets.stick_element',
-        description: "Set namespace members can make sticky elements in those sets ",
+        description: "Set namespace admins can stick or unstick elements in those sets ",
         summary: 'Makes element sticky in set operations',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: AddElementsParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -211,40 +222,13 @@ class SetController extends Controller {
             new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
+    #[ApiAccessMarker( TypeOfAccessMarker::SET_ADMIN)]
     #[ApiTypeMarker( Root\Api\Set\StickElement::class)]
-    public function stick_element() {
+    public function stick_elements() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
 
-    #[OA\Patch(
-        path: '/api/v1/{user_namespace}/sets/phase/{working_phase}/set/{element_set}/unstick_element',
-        operationId: 'core.sets.unstick_element',
-        description: "Set namespace members can unstick elements in those sets ",
-        summary: 'Unsticks one or more elements in one or more sets',
-        security: [['bearerAuth' => []]],
-        tags: ['set','element'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the set is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-            new OA\PathParameter(  name: 'element_set', description: "The set",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Set\UnstickElement::class)]
-    public function unstick_element() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 

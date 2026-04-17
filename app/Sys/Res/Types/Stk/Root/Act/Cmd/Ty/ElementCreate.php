@@ -232,7 +232,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
     ) : ElementType|Thang|IThangBuilder
     {
 
-        if ($is_system) {
+        if (!$is_system) {
             static::checkIfGivenIsAdmin(given: $calling_namespace,target: $element_type->owner_namespace);
         }
 

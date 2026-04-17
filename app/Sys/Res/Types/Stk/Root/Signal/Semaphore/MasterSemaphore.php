@@ -20,7 +20,7 @@ use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\OuterSet\WaitingResponseS
  *
  * That master type will have semaphores inheriting from it and @uses Semaphore
  *  Unless its given another semaphore type to use instead, this would allow master semaphores to be chained
- *   which can be used if a remote wants to be contacted, then give a response later
+ *   which can be used if a remote wants to be contacted, then give a response later;
  *   which will be handled without rules processing the middle part of the request chain
  *
  * it will have a response inheriting from that master type and
@@ -42,13 +42,13 @@ use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\Master\OuterSet\WaitingResponseS
  * if all in idle, will wait for a semaphore
  * it will make a new action set, and a new response
  * the new response goes into the @uses WaitingResponseSetType set
- * it will fill in the wait raw table with the semaphore type and the new response
+ * it will fill in the wait raw table with the semaphore type and the new response;
  * it will then put the semaphore element in idle again
  *
  * Then its in pause mode for that call (nothing happens,  not a mode)
  *
  * Then it will wait for someone to put the response element from the type made above, into the action set
- * The Action set will have an @uses SetEnter event handler, (only allowing that one element to enter) and when that happens
+ * The Action set will have an @uses SetEntering event handler, (only allowing that one element to enter) and when that happens
  * the rules will call the @uses SemaphoreReady to make it go to the ready set,
  * and the @uses \App\Models\ThingWait will wake up the thing(s) that are waiting on this
  *

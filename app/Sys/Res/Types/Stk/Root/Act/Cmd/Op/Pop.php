@@ -29,7 +29,7 @@ class Pop extends Act\Cmd\Op
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetLeave::class,
+        Evt\Set\SetLeaving::class,
     ];
 
 }

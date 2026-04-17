@@ -31,6 +31,7 @@ return new class extends Migration
         DB::statement("DROP TYPE IF EXISTS type_of_server_status;");
         DB::statement("DROP TYPE IF EXISTS type_of_intersection_category;");
         DB::statement("DROP TYPE IF EXISTS type_of_live_rule_policy;");
+        DB::statement("DROP TYPE IF EXISTS type_of_intersection_category;");
     }
 
     /**

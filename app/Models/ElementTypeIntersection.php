@@ -7,7 +7,7 @@ use App\Data\ApiParams\Enums\TypeOfLocation;
 use App\Enums\Types\TypeOfIntersectionCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
@@ -55,5 +55,9 @@ class ElementTypeIntersection extends Model
         'intersection_category' => TypeOfIntersectionCategory::class,
         'intersection_location_kind' => TypeOfLocation::class,
     ];
+
+    public function owning_set_member() : BelongsTo {
+        return $this->belongsTo(ElementSetMember::class,'type_intersection_set_member_id');
+    }
 
 }

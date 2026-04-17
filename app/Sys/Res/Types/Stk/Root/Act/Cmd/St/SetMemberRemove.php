@@ -25,6 +25,9 @@ Only the set admin group can make the elements leave, and nothing can stop them.
 The element and type owners will get an event after the fact
 
    * [SetLeave](../../../Evt/Set/SetLeave.php)
+   * [SetLeft](../../../Evt/Set/SetLeft.php)
+   * [ShapeLeft.php](../../../Evt/Set/ShapeLeft.php)
+   * [MapLeft.php](../../../Evt/Set/MapLeft.php)
 
 
 ')]
@@ -42,13 +45,12 @@ class SetMemberRemove extends Act\Cmd\St
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetLeave::class,
-        Evt\Set\ShapeLeave::class,
-        Evt\Set\MapLeave::class,
+        Evt\Set\SetLeaving::class,
+        Evt\Set\SetLeft::class,
+        Evt\Set\ShapeLeft::class,
+        Evt\Set\MapLeft::class,
         Evt\Set\TypeMapEnclosedEnd::class,
-        Evt\Set\TypeMapEnclosingEnd::class,
         Evt\Set\TypeShapeEnclosedEnd::class,
-        Evt\Set\TypeShapeEnclosingEnd::class,
     ];
 
 }

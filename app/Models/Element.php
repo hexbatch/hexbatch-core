@@ -107,9 +107,11 @@ class Element extends Model implements ISystemModel
         ?string    $phase_ref = null,
         ?string    $type_ref = null,
         ?string    $namespace_ref = null,
+        ?string    $attribute_ref = null,
         bool $b_do_namespace_relation = false,
         bool $b_do_namespace_type_relation = false,
         bool $b_do_type_relation = false,
+        ?int $not_member_set_id = null
 
     ): Builder
     {
@@ -165,6 +167,19 @@ class Element extends Model implements ISystemModel
                 }
             );
         }
+
+        if ($not_member_set_id) {
+            $build->leftJoin('element_set_members setex',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use ($not_member_set_id) {
+                    $join->on('setex.member_element_id', '=', 'elements.id')
+                        ->where('setex.holder_set_id', $not_member_set_id)
+                        ->whereNull('setex.id')
+                    ;
+                }
+            );
+        }
+
 
         if($type_id) {
             $build->where('elements.element_parent_type_id', $type_id);
@@ -248,6 +263,19 @@ class Element extends Model implements ISystemModel
                 }
             );
         }
+        //todo select att for ancestors too, based on what is currently exposed on the element with turned on types
+        if ($attribute_ref) {
+            $build->join('attributes att_ref',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($attribute_ref) {
+                    $join
+                        ->on('elements.element_parent_type_id','=','att_ref.owner_element_type_id')
+                        ->where('att.ref_uuid',$attribute_ref);
+                }
+            );
+        }
 
         if ($shape_id) {
             $build->join('attributes satt',
@@ -276,6 +304,7 @@ class Element extends Model implements ISystemModel
             /** @uses Element::element_parent_type() */
             $build->with('element_parent_type');
         }
+
 
 
         return $build;
@@ -384,14 +413,19 @@ class Element extends Model implements ISystemModel
     }
 
     /** @return Collection<Element> */
-    public function getElementsFromParams(SelectElementParamData $params,
-                                          bool $b_ns_relations,bool $b_type_relations,bool $b_ns_type_relations) {
-        return static::buildElement(
+    public static function getElementsFromParams(SelectElementParamData $params,
+                                          bool $b_ns_relations,bool $b_type_relations,bool $b_ns_type_relations,
+                                          ?int $not_member_set_id
+    ) {
+        $element_laravel =  static::buildElement(
             given_uuids: $params->element_refs, set_ref: $params->set_ref, phase_ref: $params->phase_ref,
-            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref,
+            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref,attribute_ref: $params->attribute_ref,
             b_do_namespace_relation: $b_ns_relations, b_do_namespace_type_relation: $b_ns_type_relations,
-            b_do_type_relation: $b_type_relations
-        )->get();
+            b_do_type_relation: $b_type_relations,not_member_set_id: $not_member_set_id
+        );
+
+
+        return $element_laravel->get();
     }
 
 

@@ -11,16 +11,18 @@ use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
 
-class TypeShapeEnclosedStart extends Evt\ScopeSet implements ICommandCallable
+class MapLeft extends Evt\ScopeSet implements ICommandCallable
 {
     use SetNotificationEventTree;
 
-    const UUID = '42fa5fec-df55-4e71-97b5-09f00e79337e';
-    const EVENT_NAME = TypeOfEvent::TYPE_SHAPE_ENCLOSED_START;
+    const UUID = '2cefa211-f66b-4e47-9d52-6fceb1132d4e';
+    const EVENT_NAME = TypeOfEvent::MAP_LEFT;
+
 
     const PARENT_CLASSES = [
         Evt\ScopeSet::class
     ];
+
 
     public function __construct(
         protected ElementSet            $given_set,
@@ -32,10 +34,12 @@ class TypeShapeEnclosedStart extends Evt\ScopeSet implements ICommandCallable
     }
 
 
-    /**  @throws \Throwable */
+    /**
+     * @throws \Throwable
+     */
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        return static::doCallInner($command_args,$children_args,'Shape enclosed start');
+        return static::doCallInner($command_args,$children_args,'Map left');
     }
 
 }

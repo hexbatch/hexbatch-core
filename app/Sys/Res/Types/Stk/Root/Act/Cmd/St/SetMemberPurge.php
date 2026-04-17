@@ -22,9 +22,7 @@ This includes sticky elements.
 
 Only the set admin group can make the elements leave, and nothing can stop them.
 
-The element and type owners will get an event after the fact
-
-   * [SetLeave](../../../Evt/Set/SetLeave.php)
+No events fired
 
 
 ')]

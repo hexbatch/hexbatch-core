@@ -331,16 +331,18 @@ Route::prefix('v1')->group(function () {
             Route::prefix('elements')->group(function () {
 
                 Route::delete('destroy', [Api\ElementController::class, 'destroy_elements'])->name('core.elements.destroy');
-                Route::delete('purge', [Api\ElementController::class, 'purge_elements'])->name('core.elements.purge');
+
+                Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
+                    Route::delete('purge', [Api\ElementController::class, 'purge_elements'])->name('core.elements.purge');
+                });
+
                 Route::prefix('{element}')->group(function () {
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
                         Route::patch('change_owner/{target_namespace}', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
 
                     });
 
-                    Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
 
-                    });
                 });
 
 
@@ -359,6 +361,7 @@ Route::prefix('v1')->group(function () {
                         Route::prefix('element/{element}')->group(function () {
 
                             Route::middleware(Middleware\ValidatePhaseOfElement::class)->group(function () {
+
                                 Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
                                     Route::post('promote_set', [Api\ElementController::class, 'promote_set'])->name('core.elements.promote_set');
 
@@ -424,8 +427,7 @@ Route::prefix('v1')->group(function () {
                                     Route::delete('purge_set', [Api\SetController::class, 'purge_set'])->name('core.sets.purge_set');
                                     Route::delete('purge_members', [Api\SetController::class, 'purge_members'])->name('core.sets.purge_members');
                                     Route::delete('empty', [Api\SetController::class, 'empty_set'])->name('core.sets.empty_set');
-                                    Route::patch('stick_element', [Api\SetController::class, 'stick_element'])->name('core.sets.stick_element');
-                                    Route::patch('unstick_element', [Api\SetController::class, 'unstick_element'])->name('core.sets.unstick_element');
+                                    Route::patch('stick_element', [Api\SetController::class, 'stick_elements'])->name('core.sets.stick_element');
                                     Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
                                     Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
                                 });

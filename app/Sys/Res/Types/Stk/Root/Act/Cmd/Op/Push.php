@@ -26,7 +26,7 @@ class Push extends Act\Cmd\Op
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\SetEnter::class,
+        Evt\Set\SetEntering::class,
     ];
 
 }

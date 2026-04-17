@@ -8,6 +8,7 @@ use App\Exceptions\RefCodes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 
 /**
@@ -52,6 +53,29 @@ class ElementSetMember extends Model
         return $this->belongsTo(Element::class,'member_element_id');
     }
 
+    public function hosting_intersection_state_changes() : HasManyThrough {
+        return $this->hasManyThrough(
+            SetMemberIntersectionChanges::class, //what is returned
+            ElementTypeIntersection::class, //the connecting class
+            'type_intersection_set_member_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'hosting_intersection_id' // Local key on the connecting table...
+        );
+    }
+
+
+    public function moved_intersection_state_changes() : HasManyThrough {
+        return $this->hasManyThrough(
+            SetMemberIntersectionChanges::class, //what is returned
+            ElementTypeIntersection::class, //the connecting class
+            'type_intersection_set_member_id', // Foreign key on the connecting table...
+            'id', // Foreign key on the returned table...
+            'id', // Local key on this class table...
+            'moved_intersection_id' // Local key on the connecting table...
+        );
+    }
+
 
 
 
@@ -59,6 +83,8 @@ class ElementSetMember extends Model
         ?int $id = null,
         ?int $set_id = null,
         ?int $element_id = null,
+        bool $b_relationship_element = true,
+        array   $given_ids = [],
     )
     : Builder
     {
@@ -72,6 +98,11 @@ class ElementSetMember extends Model
             $build->where('element_set_members.id', $id);
         }
 
+        if (count($given_ids)) {
+            $build->whereIn('element_set_members.id', $given_ids);
+        }
+
+
         if ($element_id) {
             $build->where('element_set_members.member_element_id', $element_id);
         }
@@ -80,10 +111,13 @@ class ElementSetMember extends Model
             $build->where('element_set_members.holder_set_id', $set_id);
         }
 
-        /**
-         * @uses ElementSetMember::of_element()
-         */
-        $build->with('of_element');
+        if ($b_relationship_element) {
+            /**
+             * @uses ElementSetMember::of_element()
+             */
+            $build->with('of_element');
+        }
+
 
         return $build;
     }

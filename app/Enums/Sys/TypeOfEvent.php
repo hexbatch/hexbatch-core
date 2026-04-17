@@ -73,8 +73,10 @@ enum TypeOfEvent: string
 
 
 
-    case SET_ENTER = 'set_enter';
-    case SET_LEAVE = 'set_leave';
+    case SET_ENTERING = 'set_entering';
+    case SET_ENTERED = 'set_entered';
+    case SET_LEAVING = 'set_leaving';
+    case SET_LEFT = 'set_left';
 
     case SET_CHILD_CREATED = 'set_child_created';
     case SET_CHILD_DESTROYED = 'set_child_destroyed';
@@ -88,23 +90,19 @@ enum TypeOfEvent: string
 
 
 
-    case SHAPE_ENTER = 'shape_enter';
-    case SHAPE_LEAVE = 'shape_leave';
+    case SHAPE_ENTERED = 'shape_entered';
+    case SHAPE_LEFT = 'shape_left';
 
-    case MAP_ENTER = 'map_enter';
-    case MAP_LEAVE = 'map_leave';
+    case MAP_ENTERED = 'map_entered';
+    case MAP_LEFT = 'map_left';
 
     case TYPE_SHAPE_ENCLOSED_START = 'type_shape_enclosed_start';
     case TYPE_SHAPE_ENCLOSED_END = 'type_shape_enclosed_end';
 
-    case TYPE_SHAPE_ENCLOSING_START = 'type_shape_enclosing_start';
-    case TYPE_SHAPE_ENCLOSING_END = 'type_shape_enclosing_end';
 
     case TYPE_MAP_ENCLOSED_START = 'type_map_enclosed_start';
     case TYPE_MAP_ENCLOSED_END = 'type_map_enclosed_end';
 
-    case TYPE_MAP_ENCLOSING_START = 'type_map_enclosing_start';
-    case TYPE_MAP_ENCLOSING_END = 'type_map_enclosing_end';
 
 
 

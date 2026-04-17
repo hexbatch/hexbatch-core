@@ -172,7 +172,7 @@ class ElementOwnerChange extends Act\Cmd\Ele implements ICommandCallable
     ) : ElementType|Thang|IThangBuilder
     {
 
-        if ($is_system) {
+        if (!$is_system) {
             static::checkPermissions(given_elements: $given_elements, calling_namespace: $calling_namespace);
         }
 

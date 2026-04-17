@@ -6,6 +6,8 @@ namespace App\Models;
 use App\Exceptions\HexbatchDifferentPhase;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
+use App\Helpers\Events\EventFilter;
+use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Sets\ISet;
@@ -17,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 
 
 /**
@@ -278,5 +281,13 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
 
     public function getName(): string {
         return $this->ref_uuid.' from '.$this->defining_element->getName();
+    }
+
+    /**
+     * @return Collection<IEventReference>
+     */
+    public  function getEventHandlerRefsFromMembers(EventFilter $event_filter) : Collection {
+        Utilities::ignoreVar($event_filter);
+        return new Collection;
     }
 }
