@@ -7,6 +7,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\Params\CreateElementParamData;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
 use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Data\ApiParams\Data\Types\ElementTypeData;
@@ -19,15 +20,12 @@ use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
-use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Data\ThangData;
 use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
@@ -213,7 +211,7 @@ class TypeController extends Controller {
         description: "Members can see all the elements created. Use the element show command to get information about element",
         summary: 'Show elements made from this type',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['type','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -224,22 +222,17 @@ class TypeController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements of this type', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements of this type', content: new JsonContent(ref: ElementList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Type\ListElementsOfType::class)]
-    public function list_elements(Request $request,ElementType $type) {
-        $params = new ListElementParams(given_type: $type);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Type\ListElementsOfType(params: $params, given_type: $type, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-elements']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_elements(UserNamespace $namespace,Request $request,ElementType $type) {
+        $params = SelectElementParamData::fromRequest($request);
+        $params->type_ref = $type->ref_uuid;
+        $data_out = Root\Api\Type\ListElementsOfType::listElements(params: $params, caller_namespace: $namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 

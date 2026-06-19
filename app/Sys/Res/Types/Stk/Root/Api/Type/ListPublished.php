@@ -2,9 +2,9 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
+use App\Data\ApiParams\Data\Types\ElementTypeData;
 use App\Data\ApiParams\Data\Types\Params\TypeSearchParams;
 use App\Enums\Types\TypeOfLifecycle;
-use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
@@ -28,7 +28,7 @@ class ListPublished extends Api\TypeApi
     ];
 
     /**
-     * @return CursorPaginatedDataCollection<ElementType>
+     * @return CursorPaginatedDataCollection<ElementTypeData>
      */
     public static function listPublished(UserNamespace $calling_namespace,?TypeSearchParams $params)
     {

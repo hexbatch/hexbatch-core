@@ -17,10 +17,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ElementSet;
 use App\Models\Phase;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
 use App\OpenApi\ApiResults\Set\ApiSetCollectionResponse;
 use App\OpenApi\ApiResults\Set\ApiSetResponse;
-use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Params\Listing\Set\ListSetParams;
 use App\OpenApi\Params\Listing\Set\ShowSetParams;
 use App\Sys\Res\Types\Stk\Root;
@@ -394,7 +392,7 @@ class SetController extends Controller {
         description: "Can search in the element list of a set ",
         summary: 'list elements in a set',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['set','element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -408,7 +406,7 @@ class SetController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ElementList::class)),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
                 content: new JsonContent(ref: ThingResponse::class))
@@ -416,14 +414,11 @@ class SetController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]
     #[ApiTypeMarker( Root\Api\Set\ListMembers::class)]
-    public function list_elements(Request $request,ElementSet $set) {
-        $params = new ListElementParams(given_set: $set);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Set\ListMembers(params: $params, given_set: $set, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-members']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_elements(UserNamespace $namespace,Request $request,ElementSet $set) {
+        $params = SelectElementParamData::fromRequest($request);
+        $params->set_ref = $set->ref_uuid;
+        $data_out = Root\Api\Set\ListMembers::listElements(params: $params, caller_namespace: $namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 

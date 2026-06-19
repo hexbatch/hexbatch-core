@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Query\JoinClause;
 
 
 /**
@@ -47,7 +48,10 @@ class ElementSetMember extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
     public function of_element() : BelongsTo {
         return $this->belongsTo(Element::class,'member_element_id');
@@ -82,8 +86,10 @@ class ElementSetMember extends Model
     public static function buildSetMember(
         ?int $id = null,
         ?int $set_id = null,
+        ?string $set_ref = null,
         ?int $element_id = null,
         bool $b_relationship_element = true,
+        bool $b_relationship_element_type = false,
         array   $given_ids = [],
     )
     : Builder
@@ -92,7 +98,7 @@ class ElementSetMember extends Model
         /**
          * @var Builder $build
          */
-        $build = Element::select('element_set_members.*');
+        $build = ElementSetMember::select('element_set_members.*');
 
         if ($id) {
             $build->where('element_set_members.id', $id);
@@ -110,12 +116,28 @@ class ElementSetMember extends Model
         if ($set_id) {
             $build->where('element_set_members.holder_set_id', $set_id);
         }
+        if ($set_ref) {
+            $build->join('element_sets s',
+                /** @param JoinClause $join */
+                function (JoinClause $join) use($set_ref) {
+                    $join->on('element_set_members.holder_set_id', '=', 's.id')
+                    ->where('s.ref_uuid',$set_ref);
+                }
+            );
+        }
 
         if ($b_relationship_element) {
             /**
              * @uses ElementSetMember::of_element()
              */
             $build->with('of_element');
+        }
+
+        if ($b_relationship_element_type) {
+            /**
+             * @uses Element::element_parent_type()
+             */
+            $build->with('of_element.element_parent_type');
         }
 
 
@@ -140,5 +162,6 @@ class ElementSetMember extends Model
         }
         return $ret;
     }
+
 
 }

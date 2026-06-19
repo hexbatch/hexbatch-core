@@ -28,7 +28,7 @@ return new class extends Migration
 
          *
          * but then need to always join between the element_type_exposed_attributes
-         *  and the element_type_set_visibilities, to get the current exposed attributes
+         *  and the element_visibilities, to get the current exposed attributes
          *
          * so, if I am in a set, and want to know, I get the visibilities for this set on up to all parents and then no set using a cte,
          *  then join that with the exposed_attributes using where to check if is_visible

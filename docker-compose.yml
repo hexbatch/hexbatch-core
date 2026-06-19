@@ -5,75 +5,85 @@ volumes:
   hbc_redis_data:
 
 networks:
-    dev_hbc_network:
-        driver: bridge
-        name: dev_hbc_network
+  dev_hbc_network:
+    name: dev_hbc_network
+    driver: bridge
 
 services:
 
-  webserver_hbc:
-    container_name: webserver_hbc
-    build:
-      context: .docker/php
-    ports:
-      - "${HBC_PHP_WEBSERVER_PORT}:80"
-    volumes:
-      - ./:/var/www/html
-    environment:
-      APACHE_DOCUMENT_ROOT: /var/www/html/public
-    depends_on:
-      - db_hbc
-      - redis_hbc
-    networks:
-      - dev_hbc_network
-    restart: on-failure
-    # after container running in its terminal
-    #  bash docker/resources/post_run_compose.sh
+    hbc_php:
+        container_name: webserver_hbc
+        build:
+          context: ./.docker/php
+        volumes:
+          - ./:/var/www/html
+        ports:
+            - "${HBC_PHP_PORT}:9000"
+        networks:
+          - dev_hbc_network
+        restart: on-failure
 
-  db_hbc:
-    container_name: db_hbc
-    build:
-      context: .docker/postgres
-    restart: always
-    environment:
-      POSTGRES_DB: "${HBC_DATABASE_ROOT_USER}"
-      POSTGRES_USER: "${HBC_DATABASE_ROOT_USER}"
-      POSTGRES_PASSWORD: "${HBC_DATABASE_ROOT_PW}"
-      APP_USERNAME: "${HBC_DATABASE_USER_NAME}"
-      APP_PASSWORD: "${HBC_DATABASE_USER_PW}"
-      PGDATAG: /var/lib/postgresql/data
-    ports:
-      - "${HBC_DATABASE_PORT}:5432"
-    volumes:
-      - hbc_db_data:/var/lib/postgresql/data
-    networks:
-      - dev_hbc_network
 
-  pgadmin_hbc:
-    container_name: pgadmin_hbc
-    depends_on:
-      - db_hbc
-    image: dpage/pgadmin4:latest
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "${HBC_DB_ADMIN_EMAIL}"
-      PGADMIN_DEFAULT_PASSWORD: "${HBC_DATABASE_ROOT_PW}"
-      PGADMIN_LISTEN_PORT: 80
-    ports:
-      - "${HBC_DB_ADMIN_PORT}:80"
-    volumes:
-      - hbc_pgadmin_data:/var/lib/pgadmin
-    networks:
-      - dev_hbc_network
+    hbc_web:
+        image: nginx
+        container_name: hbc_web
+        volumes:
+            - ./:/var/www/html
+            - .docker/ngnix/default.conf:/etc/nginx/conf.d/default.conf
+        ports:
+          - "${HBC_WEBSERVER_PORT}:80"
+        restart: always
+        networks:
+            - dev_hbc_network
+        depends_on:
+            - hbc_php
 
-  redis_hbc:
-    image: redis
-    container_name: redis_hbc
-    command: redis-server  --loglevel warning --requirepass "${REDIS_PASSWORD}"
-    volumes:
-        - hbc_redis_data:/var/lib/redis/data
-    ports:
-        - "${HBC_REDIS_PORT}:5432"
-    networks:
-        - dev_hbc_network
 
+
+
+    db_hbc:
+        container_name: db_hbc
+        build:
+          context: .docker/postgres
+        restart: always
+        environment:
+            POSTGRES_DB: "${HBC_DATABASE_ROOT_USER}"
+            POSTGRES_USER: "${HBC_DATABASE_ROOT_USER}"
+            POSTGRES_PASSWORD: "${HBC_DATABASE_ROOT_PW}"
+            APP_USERNAME: "${HBC_DATABASE_USER_NAME}"
+            APP_PASSWORD: "${HBC_DATABASE_USER_PW}"
+            PGDATAG: /var/lib/postgresql/data
+        ports:
+          - "${HBC_DATABASE_PORT}:5432"
+        volumes:
+          - hbc_db_data:/var/lib/postgresql/data
+        networks:
+          - dev_hbc_network
+
+    pgadmin_hbc:
+        container_name: pgadmin_hbc
+        depends_on:
+          - db_hbc
+        image: dpage/pgadmin4:latest
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: "${HBC_DB_ADMIN_EMAIL}"
+            PGADMIN_DEFAULT_PASSWORD: "${HBC_DATABASE_ROOT_PW}"
+            PGADMIN_LISTEN_PORT: 80
+        ports:
+          - "${HBC_DB_ADMIN_PORT}:80"
+        volumes:
+          - hbc_pgadmin_data:/var/lib/pgadmin
+        networks:
+          - dev_hbc_network
+
+    redis_hbc:
+        image: redis
+        container_name: redis_hbc
+        command: redis-server  --loglevel warning --requirepass "${REDIS_PASSWORD}"
+        volumes:
+          - hbc_redis_data:/var/lib/redis/data
+        ports:
+          - "${HBC_REDIS_PORT}:5432"
+        networks:
+          - dev_hbc_network

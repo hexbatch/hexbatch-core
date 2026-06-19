@@ -32,7 +32,7 @@ use Hexbatch\Thangs\Models\Thang;
  *
  *
  * The owner of any set is the owner of its element, but elements can have their ownership changed
- * Sets can set up action hooks in the element type of do things when its content changes, or filter what can enter
+ * Sets can set up action hooks in the element type of do actions when its content changes, or filter what can enter
 
 
  \" ' > <
@@ -110,7 +110,7 @@ class SetCreate extends Act\Cmd\St
     {
         $created_set = null;
         $work = static::fromArray($command_args);
-        $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         if ($b_approved) {
             $created_set = $work->doCreateSet();
         }

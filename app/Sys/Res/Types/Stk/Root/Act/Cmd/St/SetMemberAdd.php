@@ -116,7 +116,7 @@ class SetMemberAdd extends Act\Cmd\St
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         $work = static::fromArray($command_args);
-        $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         if ($b_approved) {
             $added_members = $work->addElements();
             foreach ($added_members as $e) {

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\JoinClause;
 
 /*
@@ -26,7 +27,7 @@ use Illuminate\Database\Query\JoinClause;
 
 /**
  * @mixin Builder
- * @mixin \Illuminate\Database\Query\Builder
+ * @mixin QueryBuilder
  * @property int id
  * @property int element_parent_type_id
  * @property int element_phase_id
@@ -111,7 +112,9 @@ class Element extends Model implements ISystemModel
         bool $b_do_namespace_relation = false,
         bool $b_do_namespace_type_relation = false,
         bool $b_do_type_relation = false,
-        ?int $not_member_set_id = null
+        ?int $not_member_set_id = null,
+        ?string $calling_namespace_ref = null,
+        bool $b_use_select = true
 
     ): Builder
     {
@@ -119,9 +122,15 @@ class Element extends Model implements ISystemModel
         /**
          * @var Builder $build
          */
-        $build = Element::select('elements.*')
-            ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
-        ;
+        $build = Element::where('id', '<>',0);
+
+        if ($b_use_select)
+        {
+            $build = $build->select('elements.*')
+                ->selectRaw(" extract(epoch from  elements.created_at) as created_at_ts,  extract(epoch from  elements.updated_at) as updated_at_ts")
+            ;
+        }
+
 
         if ($me_id) {
             $build->where('elements.id', $me_id);
@@ -290,6 +299,11 @@ class Element extends Model implements ISystemModel
             );
         }
 
+        if ($calling_namespace_ref) {
+            Utilities::ignoreVar($calling_namespace_ref);
+            //todo select for visibility from this namespace
+        }
+
         if ($b_do_namespace_relation) {
             /** @uses Element::element_namespace() */
             $build->with('element_namespace');
@@ -414,18 +428,29 @@ class Element extends Model implements ISystemModel
 
     /** @return Collection<Element> */
     public static function getElementsFromParams(SelectElementParamData $params,
-                                          bool $b_ns_relations,bool $b_type_relations,bool $b_ns_type_relations,
-                                          ?int $not_member_set_id
+                                          bool $b_ns_relations ,bool $b_type_relations,bool $b_ns_type_relations,
+                                          ?int $not_member_set_id = null,?string $calling_namespace_ref = null
     ) {
-        $element_laravel =  static::buildElement(
+
+        return static::getBuilderFromParams(params: $params, b_ns_relations: $b_ns_relations,
+            b_type_relations: $b_type_relations, b_ns_type_relations: $b_ns_type_relations, not_member_set_id: $not_member_set_id,
+            calling_namespace_ref: $calling_namespace_ref
+        )->get();
+    }
+
+    public static function getBuilderFromParams(SelectElementParamData $params,
+                                          bool $b_ns_relations ,bool $b_type_relations,bool $b_ns_type_relations,
+                                          ?int $not_member_set_id = null,?string $calling_namespace_ref = null
+    )
+    : Builder
+    {
+        return static::buildElement(
             given_uuids: $params->element_refs, set_ref: $params->set_ref, phase_ref: $params->phase_ref,
             type_ref: $params->type_ref, namespace_ref: $params->namespace_ref,attribute_ref: $params->attribute_ref,
             b_do_namespace_relation: $b_ns_relations, b_do_namespace_type_relation: $b_ns_type_relations,
-            b_do_type_relation: $b_type_relations,not_member_set_id: $not_member_set_id
+            b_do_type_relation: $b_type_relations,not_member_set_id: $not_member_set_id,calling_namespace_ref: $calling_namespace_ref
         );
 
-
-        return $element_laravel->get();
     }
 
 

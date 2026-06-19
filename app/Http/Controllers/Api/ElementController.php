@@ -16,15 +16,14 @@ use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
 use App\Models\Element;
 use App\Models\ElementSet;
+
 use App\Models\Phase;
 use App\Models\UserNamespace;
 use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
-use App\OpenApi\ApiResults\Elements\ApiElementCollectionResponse;
 use App\OpenApi\ApiResults\Elements\ApiElementResponse;
 use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
 use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Params\Listing\Elements\ListElementParams;
 use App\OpenApi\Params\Listing\Elements\ShowElementParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
@@ -93,14 +92,15 @@ class ElementController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/type_off',
-        operationId: 'core.elements.type_off',
+        path: '/api/v1/{user_namespace}/elements/switch/off',
+        operationId: 'core.elements.switch.off',
         description: "Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path ",
         summary: 'Turn off all the subtype attributes of elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -111,75 +111,70 @@ class ElementController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type on', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Switched off', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurningOff::class)]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurnedOff::class)]
+    #[ApiEventMarker( Evt\Set\SwitchingOff::class)]
+    #[ApiEventMarker( Evt\Set\SwitchedOff::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Element\TypeOff::class)]
-    public function type_off(Phase $working_phase, Request $request) {
-        $params = new ElementSelectParams(given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['type-off']);
+    #[ApiTypeMarker( Root\Api\Element\SwitchOff::class)]
+    public function switch_off(UserNamespace $namespace, Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Element\SwitchOff::doSwitch(calling_namespace: $namespace,is_system: false ,params: $params,  tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/type_on',
-        operationId: 'core.elements.type_on',
-        description: "Element admin group turn on all parent type attributes. The types, elements and sets given by a path ",
+        path: '/api/v1/{user_namespace}/elements/switch/on',
+        operationId: 'core.elements.switch.type.on',
+        description: "Element admin group turn on all parent type attributes for selected elements",
         summary: 'Turn on all the attributes of a parent type in elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Type off', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Switched on', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurningOn::class)]
-    #[ApiEventMarker( Evt\Set\ElementTypeTurnedOn::class)]
+    #[ApiEventMarker( Evt\Set\SwitchingOn::class)]
+    #[ApiEventMarker( Evt\Set\SwitchedOn::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiTypeMarker( Root\Api\Element\TypeOn::class)]
-    public function type_on(Phase $working_phase, Request $request) {
-        $params = new ElementSelectParams(given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['type-on']);
+    #[ApiTypeMarker( Root\Api\Element\SwitchOn::class)]
+    public function switch_on(UserNamespace $namespace, Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Element\SwitchOn::doSwitch(calling_namespace: $namespace,is_system: false ,params: $params,  tags: ['api-top']);
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -216,7 +211,7 @@ class ElementController extends Controller {
     public function read_attribute(Phase $working_phase, Element $element, Request $request) {
         $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
         $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\TypeOn(params: $params, is_async: true, tags: ['api-top']);
+        $api = new Root\Api\Element\ReadAttribute(params: $params, is_async: true, tags: ['api-top']);
         $api->createThingTree(tags: ['read-attribute']);
 
         $data_out = $api->getCallbackResponse($http_code);
@@ -645,15 +640,10 @@ class ElementController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Elements purged', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Deleted off', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
@@ -778,7 +768,7 @@ class ElementController extends Controller {
         description: "Element members can see a list of all the elements of namespaces they belong",
         summary: 'Shows list of elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListElementParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -789,22 +779,16 @@ class ElementController extends Controller {
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements', content: new JsonContent(ref: ApiElementCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements', content: new JsonContent(ref: ElementList::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiTypeMarker( Root\Api\Element\ListElements::class)]
-    public function list_elements(Phase $working_phase,Request $request) {
-        $params = new ListElementParams(working_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\ListElements(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['list-elements']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
+    public function list_elements(UserNamespace $namespace,Phase $working_phase,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $params->phase_ref = $working_phase->ref_uuid;
+        $data_out = Root\Api\Element\ListElements::listElements(params: $params, caller_namespace: $namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 

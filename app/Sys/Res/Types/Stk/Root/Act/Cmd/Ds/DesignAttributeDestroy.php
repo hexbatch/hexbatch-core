@@ -6,7 +6,6 @@ use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
 use App\Enums\Sys\TypeOfAction;
-use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -42,22 +41,6 @@ class DesignAttributeDestroy extends Act\Cmd\Ds implements ICommandCallable
 
 
 
-    public function __construct(
-        protected ?string                  $given_attribute_uuid = null,
-        protected ?bool                    $is_async = null,
-        protected ?ActionDatum             $action_data = null,
-        protected ?ActionDatum             $parent_action_data = null,
-        protected ?UserNamespace           $owner_namespace = null,
-        protected bool                     $b_type_init = false,
-        protected bool                     $is_system = false,
-        protected bool                     $send_event = true,
-        protected array                    $tags = []
-    )
-    {
-
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
-    }
 
 
 

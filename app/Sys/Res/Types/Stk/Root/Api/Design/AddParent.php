@@ -35,8 +35,10 @@ class AddParent extends Api\DesignApi implements ICommandCallable
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         Log::debug("Called api add type parent node");
-        return new CallableReturnStub(status: TypeOfCmdStatus::CMD_SUCCESS,data: $children_args);
+        return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
+            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved]);
     }
 
     /**

@@ -34,19 +34,6 @@ class SetLeaving extends Evt\ScopeSet implements ICommandCallable
     }
 
 
-    protected  function toArray() :array {
-        return [
-            'given_element'=>$this->given_element,
-            'given_set'=>$this->given_set,
-        ];
-    }
-
-    protected static function fromArray(array $args) : static {
-        $given_element = static::getElementFromArray('given_element',$args);
-        $given_set = static::getSetFromArray('given_set',$args);
-
-        return new static(given_set: $given_set, given_element: $given_element);
-    }
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {

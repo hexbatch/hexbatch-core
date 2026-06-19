@@ -198,7 +198,7 @@ class ElementTypeExposedAttribute extends Model
         }
 
         if ($in_set_member_id && $exposed_type_id) {
-            ElementTypeSetVisibility::buildVisibles(visible_type_id: $exposed_type_id, visible_set_member_id: $in_set_member_id,phase_id: $phase_id,
+            ElementVisibility::buildVisibles(visible_type_id: $exposed_type_id, visible_set_member_id: $in_set_member_id,phase_id: $phase_id,
                 use_builder: $build, must_be_visible_in_scope: true);
         }
 

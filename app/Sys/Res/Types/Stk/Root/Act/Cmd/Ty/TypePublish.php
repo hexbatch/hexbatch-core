@@ -80,7 +80,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         $work = static::fromArray($command_args);
-        $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         if ($b_approved) {
             $updated_type = $work->doPublishCall();
         } else {

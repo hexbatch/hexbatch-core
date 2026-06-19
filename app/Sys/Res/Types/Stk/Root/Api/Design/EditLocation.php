@@ -9,7 +9,6 @@ use App\Models\LocationBound;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Data\Params\CommandParams;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
@@ -17,8 +16,6 @@ use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
 use Illuminate\Support\Facades\Log;
 
 class EditLocation extends CreateLocation
@@ -31,54 +28,6 @@ class EditLocation extends CreateLocation
         Api\DesignApi::class,
         Act\Cmd\Ds\DesignLocationEdit::class,
     ];
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ds\DesignLocationEdit(
-            bound_name: $this->params->bound_name,
-            given_location_uuid: $this->params->ref_uuid,
-            location_type: $this->params->location_type,
-            geo_json: $this->params->geo_json,
-            display: $this->params->display_json,
-            parent_action_data: $this->action_data,tags: ['edit location bound from api']);
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => $creator->getType()->getName(),'action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    public function setChildActionResult(IThingAction $child): void {
-
-        if ($child instanceof Act\Cmd\Ds\DesignLocationEdit) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenLocationBound($child->getGivenLocationBound());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
-        }
-    }
 
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn

@@ -6,28 +6,27 @@ use App\Enums\Sys\TypeOfEvent;
 use App\Models\Element;
 use App\Models\ElementSet;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use App\Sys\Res\Types\Stk\Root\Evt\Element\Traits\ElementBlockingEventTree;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
-use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 
 
-class SetEntering extends Evt\ScopeSet implements ICommandCallable
+class SwitchingOn extends Evt\ScopeSet
 {
-    use Evt\Set\Traits\SetBlockingEventTree;
+    use ElementBlockingEventTree;
 
-    const UUID = 'b661ae85-8abd-4228-adf9-f6518788c7d1';
-    const EVENT_NAME = TypeOfEvent::SET_ENTERING;
-
+    const UUID = '96b76741-e3ff-46ad-bf59-d05cc03366e8';
+    const EVENT_NAME = TypeOfEvent::SWITCHING_ON;
 
     const PARENT_CLASSES = [
         Evt\ScopeSet::class
     ];
 
-    public function __construct(
-        protected ElementSet            $given_set,
-        protected Element             $given_element
 
+    public function __construct(
+        protected Element             $given_element,
+        ?ElementSet             $given_set
     )
     {
 
@@ -38,7 +37,7 @@ class SetEntering extends Evt\ScopeSet implements ICommandCallable
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        return static::doCallInner($children_args,$command_args,'set entering');
+        return static::doCallInner($children_args,$command_args,'turning on');
     }
 
     protected function decide() : bool {
@@ -49,15 +48,13 @@ class SetEntering extends Evt\ScopeSet implements ICommandCallable
      * @throws \Throwable
      */
     public static function callEventTree(
-         ElementSet            $given_set,
-         Element               $given_element,
+        Element               $given_element,
+        ?ElementSet             $given_set,
         ?IThangBuilder $builder = null
     ) : Thang|IThangBuilder|null
     {
-        return static::callEventTreeInner($given_set,$given_element,$builder);
+        return static::callEventTreeInner(given_element: $given_element,given_set: $given_set,builder: $builder);
     }
-
-
 
 }
 

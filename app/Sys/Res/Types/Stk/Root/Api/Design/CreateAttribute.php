@@ -48,10 +48,7 @@ class CreateAttribute extends Api\DesignApi implements ICommandCallable
     {
         Log::debug("Called api create attribute node");
 
-        $b_approved = true;
-        if (count($children_args)) {
-            $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
-        }
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
 
         return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
             data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved]);

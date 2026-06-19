@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Evt\Set\Traits;
+namespace App\Sys\Res\Types\Stk\Root\Evt\Element\Traits;
 
 use App\Models\Element;
 use App\Models\ElementSet;
@@ -15,23 +15,20 @@ use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\Log;
 
 
-trait SetBlockingEventTree
+trait ElementBlockingEventTree
 {
 
     protected  function toArray() :array {
         return [
             'given_element'=>$this->given_element,
-            'given_set'=>$this->given_set,
         ];
     }
 
     protected static function fromArray(array $args) : static {
         $given_element = static::getElementFromArray('given_element',$args);
-        $given_set = static::getSetFromArray('given_set',$args);
 
-        return new static(given_set: $given_set, given_element: $given_element);
+        return new static(given_element: $given_element);
     }
-
 
     protected function doCallInner(array $children_args, array $command_args,string $logged_name): ICmdCallReturn
     {
@@ -44,7 +41,6 @@ trait SetBlockingEventTree
         return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,data:
             [
                 'children'=> $children_args,
-                'given_set' => $work->given_set,
                 'given_element' => $work->given_element
             ]
         );
@@ -57,8 +53,8 @@ trait SetBlockingEventTree
      * @throws \Throwable
      */
     protected  static function callEventTreeInner(
-        ElementSet            $given_set,
         Element               $given_element,
+        ?ElementSet           $given_set,
         ?IThangBuilder $builder = null
     ) : Thang|IThangBuilder
     {
@@ -67,7 +63,6 @@ trait SetBlockingEventTree
         * notifications can be either for the type of the element or the type of the definer in the set
         */
 
-        $given_set->loadMissing('defining_type');
         $given_element->loadMissing('element_parent_type');
 
         $ret_builder = false;
@@ -77,7 +72,7 @@ trait SetBlockingEventTree
 
         $builder?: $builder = ThangBuilder::createBuilder();
 
-        $me = new static(given_set: $given_set,given_element: $given_element);
+        $me = new static(given_element: $given_element);
         $my_command =  CommandParams::validateAndCreate([
             'command_class' =>static::class,
             'command_tags' =>[static::class],
@@ -86,26 +81,13 @@ trait SetBlockingEventTree
 
         $builder->tree($my_command);
 
-
-        $col = $given_set->defining_type->getEventHandlersFromTypeChain( static::EVENT_NAME);
-        foreach ($col as $ref) {
-            $builder->leaf(
-                command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
-                    ref: $ref,
-                    set_context: $given_set,
-                    element_context: $given_element,
-                ),
-                command_tags: [Evt\EventHandler::class]
-            );
-        }
-
         $col = $given_element->element_parent_type->getEventHandlersFromTypeChain( static::EVENT_NAME);
         foreach ($col as $ref) {
             $builder->leaf(
                 command_class: Evt\EventHandler::class,
                 command_args: (array)new Evt\EventHandler(
                     ref: $ref,
+                    type_context: $given_element->element_parent_type,
                     set_context: $given_set,
                     element_context: $given_element,
                 ),

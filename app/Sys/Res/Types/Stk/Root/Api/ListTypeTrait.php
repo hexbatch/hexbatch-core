@@ -12,7 +12,7 @@ use Spatie\LaravelData\CursorPaginatedDataCollection;
 trait ListTypeTrait
 {
     /**
-     * @return CursorPaginatedDataCollection<ElementType>
+     * @return CursorPaginatedDataCollection<ElementTypeData>
      */
     public static function listCursoratedTypes(UserNamespace $calling_namespace,?TypeSearchParams $params,?TypeOfLifecycle $lifecycle = null) {
 

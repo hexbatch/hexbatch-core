@@ -6,8 +6,8 @@ use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Enums\Sys\TypeOfAction;
-use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
@@ -28,16 +28,16 @@ use App\Sys\Res\Types\Stk\Root\Evt;
    * if attribute private then must be an admin of the type
 
    But, event handling can be used. Each element owner and type owner is sent
-   * [ElementTypeTurningOn](../../../Evt/Set/ElementTypeTurningOn.php)
+   * [SwitchingOn](../../../Evt/Set/SwitchingOn.php)
 
    if all agree, then the type is turned on for that element
 
    and the element owner and type owners, and anyone else listening gets the following
 
-   * [ElementTypeTurnedOn](../../../Evt/Set/ElementTypeTurnedOn.php)
+   * [SwitchedOn](../../../Evt/Set/SwitchedOn.php)
 ')]
-#[ApiParamMarker( param_class: ElementSelectParams::class)]
-class TypeOn extends TypeOff
+#[ApiParamMarker( param_class: SelectElementParamData::class)]
+class SwitchOn extends SwitchOff
 {
     const UUID = '2d0a931a-be5a-4cab-b177-c9e9ec78e432';
     const ACTION_NAME = TypeOfAction::PRAGMA_TYPE_ON;
@@ -52,14 +52,14 @@ class TypeOn extends TypeOff
     ];
 
     const EVENT_CLASSES = [
-        Evt\Set\ElementTypeTurningOn::class,
-        Evt\Set\ElementTypeTurnedOn::class,
+        Evt\Set\SwitchingOn::class,
+        Evt\Set\SwitchedOn::class,
     ];
 
-    const bool MAKING_VISIBLE = true;
+    const bool SWITCH_ON = true;
 
-    const PRE_EVENT_CLASS = Evt\Set\ElementTypeTurningOn::class;
-    const POST_EVENT_CLASS = Evt\Set\ElementTypeTurnedOn::class;
+    const PRE_EVENT_CLASS = Evt\Set\SwitchingOn::class;
+    const POST_EVENT_CLASS = Evt\Set\SwitchedOn::class;
 
 }
 

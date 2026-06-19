@@ -54,7 +54,7 @@ If no event handler to handle deletion is set the type or owner ,
 Once destroyed, there is a notice given to the user and the type owner
 * [ElementDestroyed](../../../Evt/Type/ElementDestroyed.php)
 
- It is ok if an element is destroyed while things are working on it. They will fail, or they will finish without it.
+ It is ok if an element is destroyed while thangs are working on it. They will fail, or they will finish without it.
 
 ')]
 #[ApiEventMarker( Evt\Type\ElementDestruction::class)]
@@ -125,7 +125,7 @@ class ElementDestroy extends Act\Cmd\Ele implements ICommandCallable
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         $work = static::fromArray($command_args);
-        $b_approved = $children_args[static::CHILD_DECISION_KEY]??false;
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
         if ($b_approved) {
             $refs_deleted = $work->doElementDeletions();
         } else {

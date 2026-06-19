@@ -453,7 +453,7 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\ListAttributes::class)]
     public function list_attributes(UserNamespace $namespace,Request $request) {
         $params = AttributeSearchParams::fromRequest($request);
-        $data_out = Api\Design\ListAttributes::listAttributes(params: $params, caller_namespace: $namespace);//todo here
+        $data_out = Api\Design\ListAttributes::listAttributes(params: $params, caller_namespace: $namespace);
         return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
@@ -1055,7 +1055,7 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
     public function list_locatations(Request $request) {
         $params = LocationSearchParams::fromRequest($request);
-        $data_out = Api\Design\ListLocations::listLocations(params: $params);//todo here
+        $data_out = Api\Design\ListLocations::listLocations(params: $params);
         return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 

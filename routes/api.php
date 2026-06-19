@@ -339,10 +339,15 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('{element}')->group(function () {
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
                         Route::patch('change_owner/{target_namespace}', [Api\ElementController::class, 'change_owner'])->name('core.elements.change_owner');
-
                     });
 
+                });
 
+                Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                    Route::prefix('switch')->group(function () {
+                        Route::patch('off', [Api\ElementController::class, 'switch_off'])->name('core.elements.switch.off');
+                        Route::patch('on', [Api\ElementController::class, 'switch_on'])->name('core.elements.switch.on');
+                    });
                 });
 
 
@@ -352,11 +357,6 @@ Route::prefix('v1')->group(function () {
                             Route::get('list', [Api\ElementController::class, 'list_elements'])->name('core.elements.list_elements');
                         });
 
-
-                        Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
-                            Route::patch('type_off', [Api\ElementController::class, 'type_off'])->name('core.elements.type_off');
-                            Route::patch('type_on', [Api\ElementController::class, 'type_on'])->name('core.elements.type_on');
-                        });
 
                         Route::prefix('element/{element}')->group(function () {
 
