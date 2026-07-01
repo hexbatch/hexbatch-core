@@ -30,7 +30,7 @@ class EventFilter
         public ?Collection          $collection_context = null,
         public ?Server              $elsewhere_context = null,
         public ?Phase               $phase_context = null,
-        public ?ElementLink         $link_context = null
+        public ?ElementLink         $link_context = null,
     )
     {
 

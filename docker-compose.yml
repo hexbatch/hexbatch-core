@@ -12,7 +12,7 @@ networks:
 services:
 
     hbc_php:
-        container_name: webserver_hbc
+        container_name: hbc_php
         build:
           context: ./.docker/php
         volumes:

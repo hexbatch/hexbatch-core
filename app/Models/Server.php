@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\RefCodes;
@@ -170,7 +171,7 @@ class Server extends Model implements IServer,ISystemModel
         if (Utilities::is_uuid($value)) {
             $build = static::buildServer(uuid: $value);
         } else {
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
 
             if (count($parts) === 1) {
                 //by name

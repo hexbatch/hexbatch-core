@@ -21,7 +21,9 @@ return [
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
     'invalid_name' => 'name should have only letters, numbers, underscrores, be 3 or more characters, not start with a number and be less than :limit characters ',
     'not_uuid_name' => 'name cannot be a uuid or similar to a uuid',
+    'too_many_parts_in_a_name' => 'There are too many parts in this name. Each part is seperated by the namespace delimiter',
     'not_upper_case_name' => 'name cannot have upper case characters',
-    'not_reserved_word' => ':word is a reserved word'
+    'not_reserved_word' => ':word is a reserved word',
+    'not_a_uuid' => ':word is a not a uuid'
 
 ];

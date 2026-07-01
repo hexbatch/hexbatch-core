@@ -101,9 +101,14 @@ return new class extends Migration
 
             $table->string('namespace_name',30)
                 ->nullable(false)
-                ->unique()
+                ->index()
                 ->comment("All created by this user_token is prefixed by this name");
+
+
         });
+
+        DB::statement(/** @lang text */
+            "CREATE UNIQUE INDEX udx_user_namespace ON user_namespaces (namespace_server_id,namespace_name) NULLS NOT DISTINCT;");
 
         DB::statement('ALTER TABLE user_namespaces ALTER COLUMN ref_uuid SET DEFAULT uuid_generate_v4();');
 

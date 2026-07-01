@@ -7,8 +7,10 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\ElementData;
+use App\Data\ApiParams\Data\Elements\Params\ReadElementParamData;
 use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\Elements\Responses\ElementReadingList;
 use App\Data\ApiParams\Data\Sets\Params\CreateSetParamData;
 use App\Data\ApiParams\Data\Sets\SetData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
@@ -180,42 +182,44 @@ class ElementController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_attribute',
-        operationId: 'core.elements.read_attribute',
-        description: "Can select the same attribute(s) in elements(s) to read, ".
+        path: '/api/v1/{user_namespace}/elements/read',
+        operationId: 'core.elements.read',
+        description: "Can select one or more elements, and types in them, and read all or some attributes, some attributes may not be readable ".
                     "\n its up to the attribute access, the type access and the event handlers to decide who can ",
         summary: 'Read the same attributes in one or more elements',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ReadElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Results returned', content: new JsonContent(ref: ElementReadingList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Set\Reading::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
-    #[ApiTypeMarker( Root\Api\Element\ReadAttribute::class)]
-    public function read_attribute(Phase $working_phase, Element $element, Request $request) {
-        $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\ReadAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['read-attribute']);
+    #[ApiTypeMarker( Root\Api\Element\Read::class)]
+    public function read_elements(UserNamespace $namespace, Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = ReadElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\Read::readElements(params: $params,calling_namespace: $namespace,is_system: false, tags: ['api-top']);
+        $http_code = CodeOf::HTTP_ACCEPTED;
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -250,36 +254,6 @@ class ElementController extends Controller {
     }
 
 
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/read_type',
-        operationId: 'core.elements.read_type',
-        description:  "Can select the same type(s) in elements(s) to read, will either succeed if can read all of them or fail if one cannot be read ".
-            "\n its up to the attribute access, the type access and the event handlers to decide who can ",
-        summary: 'Read all the attributes of a live type in one or more elements',
-        security: [['bearerAuth' => []]],
-        tags: ['element'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Set\Reading::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
-    #[ApiTypeMarker( Root\Api\Element\ReadLiveType::class)]
-    public function read_type() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
     /**

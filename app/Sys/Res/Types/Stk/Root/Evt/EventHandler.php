@@ -45,6 +45,7 @@ class EventHandler extends Event implements ICommandCallable
         protected ?Server        $elsewhere_context = null,
         protected ?Phase         $phase_context = null,
         protected ?ElementLink   $link_context = null,
+        protected ?string        $set_ref = null,
         protected mixed          $important_value = null,
         protected array          $important_array = []
     )

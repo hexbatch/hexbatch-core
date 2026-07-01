@@ -695,25 +695,41 @@ abstract class BaseType implements IDocument, \JsonSerializable
     }
 
     /**
-     * @return Collection<Element>
+     * @return Collection<Element>|null
      */
-    protected static function getElementCollectionFromArray(string $array_key, array $source) : Collection {
+    protected static function getElementCollectionFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Collection {
         if (!isset($source[$array_key])) {throw new \LogicException("No array key set for collection");}
         /** @var Collection $found */
         if ( ($found = $source[$array_key])  instanceof Collection) {
-            if ($found->isEmpty() || $found->first() instanceof Element) {
-                return $found;
-            }
+            return $found;
         }
         //might be array of stuff that has ref
         if (is_array($found) || is_iterable($found)) {
-            $ret = new Collection;
-            foreach ($found as $what) {
-                $ret->add(static::getElementFromArray(null,$what));
-            }
-            return $ret;
+            return collect($found);
         }
-        throw new \LogicException("Could not find element collection in $array_key");
+        if ($throw_if_missing) {
+            throw new \LogicException("Could not find element collection in $array_key");
+        }
+        return null;
+
+    }
+
+
+    protected static function getCollectionFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Collection {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for generic collection");}
+        /** @var Collection $found */
+        if ( ($found = $source[$array_key])  instanceof Collection) {
+            return $found;
+        }
+        //might be array of stuff that has ref
+        if (is_array($found) || is_iterable($found)) {
+            return collect($found);
+        }
+        if ($throw_if_missing)
+        {
+            throw new \LogicException("Could not find collection in $array_key");
+        }
+
 
     }
 

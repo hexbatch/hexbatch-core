@@ -70,7 +70,7 @@ class ElementVisibility extends Model
 
         $element_builder  = Element::buildElement(
             given_uuids: $params->element_refs, set_ref: $params->set_ref, phase_ref: $params->phase_ref,
-            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref, attribute_ref: $params->attribute_ref,
+            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref, exposed_attribute_ref: $params->attribute_ref,
             b_use_select: false
         );
 

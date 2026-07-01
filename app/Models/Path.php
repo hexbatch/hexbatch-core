@@ -6,6 +6,7 @@ namespace App\Models;
 
 
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Enums\Paths\TypeOfPathStatus;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
@@ -114,7 +115,7 @@ class Path extends Model
                 if (Utilities::is_uuid($value)) {
                     $build = $this->where('ref_uuid', $value);
                 } else if (is_string($value)) {
-                    $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+                    $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
                     if (count($parts) === 2) {
                         $owner_hint = $parts[0];
                         $maybe_name = $parts[1];
@@ -178,7 +179,7 @@ class Path extends Model
     }
 
     public function getName() : string  {
-        return $this->namespace_owner->getName() .UserNamespace::NAMESPACE_SEPERATOR. $this->path_name;
+        return $this->namespace_owner->getName() .ValidateNamespaceRef::NAMESPACE_SEPERATOR. $this->path_name;
     }
 
     public function isInUse() : bool {

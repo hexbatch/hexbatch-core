@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Data\ApiParams\Enums\TypeOfLocation;
+use App\Enums\Sys\TypeOfEvent;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
+use App\Helpers\Events\EventFilter;
+use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
 use App\Sys\Res\Atr\IAttribute;
@@ -18,10 +22,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -38,6 +42,7 @@ use Illuminate\Validation\ValidationException;
  * @property bool is_system
  * @property bool is_final_attribute
  * @property bool is_abstract
+ * @property bool is_element_access
  * @property TypeOfServerAccess access_policy
  * @property string ref_uuid
  * @property string read_json_path
@@ -90,6 +95,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
         'is_system' => 'boolean',
         'is_final_attribute' => 'boolean',
         'is_abstract' => 'boolean',
+        'is_element_access' => 'boolean',
         'access_policy' => TypeOfServerAccess::class,
         'value_policy' => TypeOfElementValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,
@@ -153,7 +159,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
     public function getName(bool $short_name = true) : string  {
 
         if ($short_name) {
-            return $this->type_owner->getName() .  UserNamespace::NAMESPACE_SEPERATOR . $this->attribute_name;
+            return $this->type_owner->getName() .  ValidateNamespaceRef::NAMESPACE_SEPERATOR . $this->attribute_name;
         }
         //get ancestor chain
         $names = [];
@@ -171,42 +177,6 @@ class Attribute extends Model implements IAttribute,ISystemModel
     }
 
 
-    public static function verifyNameString(string $attr_name) : void {
-        $attribute_parts = explode(static::ATTRIBUTE_FAMILY_SEPERATOR, $attr_name);
-        $children_first = array_reverse($attribute_parts);
-
-        /**
-         * @var Attribute $next_parent
-         */
-        $next_parent = null;
-        $bad = false;
-        $count = 0;
-        foreach ($children_first as $attr) {
-
-            /**
-             * @var Attribute $node
-             */
-            $node = (new Attribute())->resolveRouteBinding($attr,true);
-            if ($next_parent && $node->attribute_parent->ref_uuid !== $next_parent->ref_uuid) {
-                //next parent is not the parent of this node
-                $bad = true; break;
-            }
-            $next_parent = $node->attribute_parent; //this should be the next node, compare to the next child
-            $count++;
-            if (!$next_parent && $count < count($children_first)) {
-                //no parent before the end,node has no parent but not finished with string
-                $bad = true; break;
-            }
-        }
-
-        if ($bad) {
-            throw new HexbatchNotFound(
-                __('msg.attribute_not_found',['ref'=>$attr_name]),
-                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                RefCodes::ATTRIBUTE_NOT_FOUND
-            );
-        }
-    }
 
 
     public static function buildAttribute(
@@ -379,7 +349,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
             $build = static::buildAttribute(uuid: $value,b_do_relations: $do_relations);
         } else {
 
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
             if (count($parts) === 2) {
                 $type_hint = $parts[0];
                 $attr_name = $parts[1];
@@ -392,7 +362,7 @@ class Attribute extends Model implements IAttribute,ISystemModel
                 $namespace_hint = $parts[0];
                 $type_hint = $parts[1];
                 $attr_name = $parts[2];
-                $owner = ElementType::resolveType($namespace_hint . UserNamespace::NAMESPACE_SEPERATOR.$type_hint);
+                $owner = ElementType::resolveType($namespace_hint . ValidateNamespaceRef::NAMESPACE_SEPERATOR.$type_hint);
                 $build = static::buildAttribute(type_id: $owner->id, b_do_relations: $do_relations,name: $attr_name);
             }
 
@@ -495,7 +465,177 @@ class Attribute extends Model implements IAttribute,ISystemModel
         }
     }
 
-    public function checkValidation(?array $data)  {
+
+
+    public static function getAttributeIdsFromInput(
+        array $references,
+        ?string $default_type = null,?string $default_ns = null,?string $default_server = null,
+        bool $b_allow_type_ids = true
+    ) : array
+    {
+        $ret = ['ids'=>[],'uuids'=>[],'names'=>[],'type_uuids'=>[],'type_names'=>[],];
+        $adjusted_refs = [];
+
+        if (!$default_server) {$default_server = config('hbc.system.server.uuid');}
+
+        foreach ($references as $ref) {
+            if (!trim($ref)) {continue;}
+
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR,$ref);
+            if (count($parts) > 4) {
+                continue;
+            }
+
+            $outs = [];
+
+            $my_id = trim($parts[0]??'');
+
+            if (count($parts) === 1 &&  ctype_digit($my_id) )
+            {
+                if (!$b_allow_type_ids) { continue;}
+                $outs = [(int)$my_id];
+            }
+            else if (count($parts) === 1 &&  Utilities::is_uuid($my_id) ) {
+                $outs = [$my_id];
+            }
+            else
+            {
+                if (count($parts) === 4) {
+                    $att_ref = trim($parts[3]??'');
+                    $type_ref = trim($parts[2]??'');
+                    $ns_ref = trim($parts[1]??'');
+                    $server_ref = trim($parts[0]??'');
+                }
+                else if (count($parts) === 3) {
+                    $att_ref = trim($parts[2]??'');
+                    $type_ref = trim($parts[1]??'');
+                    $ns_ref = trim($parts[0]??'');
+                    $server_ref = null;
+                } elseif (count($parts) === 2) {
+                    $att_ref = trim($parts[2]??'');
+                    $type_ref = trim($parts[1]??'');
+                    $ns_ref = null;
+                    $server_ref = null;
+                } elseif (count($parts) === 1) {
+                    $att_ref = trim($parts[0]??'');
+                    $type_ref = null;
+                    $ns_ref = null;
+                    $server_ref = null;
+                } else {
+                    throw new \LogicException("should never get to the count > 4 or < 1");
+                }
+                if (!$att_ref) { continue;}
+                if (!$type_ref && !$default_type) { continue;}
+                if (!$ns_ref && !$default_ns) { continue;}
+
+                if (!$type_ref) { $type_ref = $default_type;}
+                if (!$ns_ref) { $ns_ref = $default_ns;}
+                if (!$server_ref) { $server_ref = $default_server;}
+
+                $outs[] = $server_ref;
+                $outs[] = $ns_ref;
+                $outs[] = $type_ref;
+                $outs[] = $att_ref;
+            }
+
+            $adjusted_refs[] = implode(ValidateNamespaceRef::NAMESPACE_SEPERATOR,$outs);
+
+        }
+
+        if (!count($adjusted_refs)) {return $ret;}
+
+        $values_array = [];
+        foreach ($adjusted_refs as $ad) {
+            Utilities::ignoreVar($ad);
+            $values_array[] = "(?)";
+        }
+
+        $values = implode(",\n",$values_array);
+
+        $separator = ValidateNamespaceRef::NAMESPACE_SEPERATOR;
+
+        $sql = "
+            WITH
+            raw_inputs as
+                (SELECT da_input
+                 FROM (VALUES
+                           $values
+                       ) AS q (da_input))
+            SELECT a.id, a.attribute_name, a.ref_uuid,t.type_name, t.ref_uuid as type_ref
+                FROM attributes a
+                CROSS JOIN raw_inputs
+                INNER JOIN element_types t on t.id = a.owner_element_type_id
+                INNER JOIN user_namespaces u on u.id = t.owner_namespace_id
+                INNER JOIN servers s on s.id = u.namespace_server_id
+                WHERE
+                (
+                    split_part(raw_inputs.da_input, '$separator', 4) = ''
+                    AND
+                    split_part(raw_inputs.da_input, '$separator', 3) = ''
+                    AND
+                    split_part(raw_inputs.da_input, '$separator', 2) = ''
+                    AND
+                    (
+                        a.id::bigint = bigint_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                        OR
+                        a.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                    )
+                )
+                OR
+                (
+                    (
+                        -- match attribute uuid or name
+
+                        a.attribute_name = split_part(raw_inputs.da_input, '$separator', 4)::text
+                            OR
+                        a.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 4))
+
+                    )
+                    AND
+                    (
+                        -- match type uuid or name
+
+                        t.type_name = split_part(raw_inputs.da_input, '$separator', 3)::text
+                            OR
+                        t.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 3))
+
+                    )
+                    AND
+                    (
+                        -- match namespace uuid or name
+
+                        u.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 2))
+                            OR
+                        u.namespace_name = split_part(raw_inputs.da_input, '$separator', 2)::text
+                    )
+                    AND
+                    (
+                        -- match server uuid or name
+
+                        s.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                            OR
+                        s.server_name = split_part(raw_inputs.da_input, '$separator', 1)::text
+                    )
+                )
+        ;
+        ";
+
+        $what = DB::select($sql,$adjusted_refs);
+
+
+        foreach ($what as $row) {
+            $ret['ids'][] = $row->id;
+            $ret['uuids'][] = $row->ref_uuid;
+            $ret['names'][] = $row->attribute_name;
+            $ret['type_uuids'][] = $row->type_ref;
+            $ret['type_names'][] = $row->type_name;
+        }
+        return $ret;
+
+    }
+
+
+    public function checkDataValidation(?array $data)  {
         if ($data && $this->validate_json_path) {
             $b_ok_val = DB::selectOne("SELECT jsonb_path_exists(:jsonb_data, :json_path) as da_validation",
                 ['jsonb_data'=>$data,'json_path'=>$this->validate_json_path])->da_validation;
@@ -553,4 +693,11 @@ class Attribute extends Model implements IAttribute,ISystemModel
     }
 
 
+    /**
+     * @return Collection<IEventReference>
+     */
+    public static function getEventHandlerRefsFromAttributes(TypeOfEvent $event_type,array $attribute_ids) : Collection {
+        Utilities::ignoreVar($event_type,$attribute_ids);
+        return new Collection;
+    }
 }

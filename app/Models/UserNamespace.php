@@ -3,6 +3,7 @@
 namespace App\Models;
 
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -118,7 +119,6 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 
     public function namespace_members() : HasMany {
         return $this->hasMany(UserNamespaceMember::class,'member_namespace_id','id')
-            /** @uses UserNamespaceMember::namespace_member */
             ->with('namespace_member')
             ->orderBy('created_at');
     }
@@ -136,9 +136,9 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
 
     public function namespace_admins() : HasMany {
         return $this->hasMany(UserNamespaceMember::class)
+            ->with('namespace_member')
             ->where('is_admin',true)
-            /** @uses UserNamespaceMember::namespace_member */
-            ->with('member_user')
+
             ->orderBy('updated_at');
     }
 
@@ -233,12 +233,12 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         if (Utilities::is_uuid($value)) {
             $ns = static::buildNamespace(uuid: $value)->first();
         } else {
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
 
             if (count($parts) === 1) {
                 $ns_name_or_domain = $parts[0];
                 //does this have a dot?
-                if (str_contains($ns_name_or_domain,static::NAMESPACE_SEPERATOR) || mb_strtolower($ns_name_or_domain) === 'localhost') {
+                if (str_contains($ns_name_or_domain,ValidateNamespaceRef::NAMESPACE_SEPERATOR) || mb_strtolower($ns_name_or_domain) === 'localhost') {
                     $server = Server::resolveServer($ns_name_or_domain);
                     $ns = $server->owning_namespace;
                 } else {
@@ -273,11 +273,11 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return static::resolveNamespace($value);
     }
 
-    const NAMESPACE_SEPERATOR = ':';
+
     public function getName() : string {
         if ($this->namespace_server_id) {
             //do not show the server part if belongs to this server
-            return $this->namespace_home_server->getName() . static::NAMESPACE_SEPERATOR .$this->namespace_name;
+            return $this->namespace_home_server->getName() . ValidateNamespaceRef::NAMESPACE_SEPERATOR .$this->namespace_name;
         } else {
             return $this->namespace_name;
         }
@@ -332,6 +332,13 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
             return null;
         }
         return $this->isNamespaceAdmin($namespace);
+    }
+
+
+    public function getMemberIdsFromArray(array $namespace_ids,?bool $t_admin= null) : array {
+        if (empty($namespace_ids) ) {return [];}
+        $build =  UserNamespaceMember::buildGroupMembers('parent_namespace_id',$this->id, member_namespace_ids: $namespace_ids, is_admin: $t_admin, b_relations: false);
+        return  $build->pluck('parent_namespace_id')->toArray();
     }
 
     public function isNamespaceMember(?UserNamespace $namespace,bool $b_admin= false) : ?UserNamespaceMember {

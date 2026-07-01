@@ -6,6 +6,7 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 use App\Annotations\ApiParamMarker;
 use App\Data\ApiParams\Data\Elements\ElementData;
 use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Helpers\Utilities;
 use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\UserNamespace;
@@ -28,7 +29,8 @@ class ListElements extends Api\ElementApi
      * @return CursorPaginatedDataCollection<ActionDatum>
      */
     public static function listElements(SelectElementParamData $params,UserNamespace $caller_namespace) {
-
+        Utilities::ignoreVar($caller_namespace);
+        
         $build = Element::getBuilderFromParams(
             params: $params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: true);
 

@@ -104,17 +104,17 @@ class Element extends Model implements ISystemModel
         ?bool   $is_set = null,
         ?string $uuid = null,
         array   $given_uuids = [],
-        ?string    $set_ref = null,
-        ?string    $phase_ref = null,
-        ?string    $type_ref = null,
-        ?string    $namespace_ref = null,
-        ?string    $attribute_ref = null,
-        bool $b_do_namespace_relation = false,
-        bool $b_do_namespace_type_relation = false,
-        bool $b_do_type_relation = false,
-        ?int $not_member_set_id = null,
-        ?string $calling_namespace_ref = null,
-        bool $b_use_select = true
+        ?string $set_ref = null,
+        ?string $phase_ref = null,
+        ?string $type_ref = null,
+        ?string $namespace_ref = null,
+        ?string $exposed_attribute_ref = null,
+        ?string $included_attribute_ref = null,
+        bool    $b_do_namespace_relation = false,
+        bool    $b_do_namespace_type_relation = false,
+        bool    $b_do_type_relation = false,
+        ?int    $not_member_set_id = null,
+        bool    $b_use_select = true
 
     ): Builder
     {
@@ -272,16 +272,49 @@ class Element extends Model implements ISystemModel
                 }
             );
         }
-        //todo select att for ancestors too, based on what is currently exposed on the element with turned on types
-        if ($attribute_ref) {
+
+        if ($exposed_attribute_ref) {
+            $build->join('element_type_exposed_attributes att_exposed',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('elements.element_parent_type_id','=','att_exposed.exposed_type_id');
+                }
+            );
+
             $build->join('attributes att_ref',
                 /**
                  * @param JoinClause $join
                  */
-                function (JoinClause $join) use($attribute_ref) {
+                function (JoinClause $join) use($exposed_attribute_ref) {
                     $join
-                        ->on('elements.element_parent_type_id','=','att_ref.owner_element_type_id')
-                        ->where('att.ref_uuid',$attribute_ref);
+                        ->on('att_exposed.exposed_attribute_id','=','att_ref.id')
+                        ->where('att.ref_uuid',$exposed_attribute_ref);
+                }
+            );
+        }
+
+        if ($included_attribute_ref) {
+            $build->join('element_type_included_attributes att_included',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join)  {
+                    $join
+                        ->on('elements.element_parent_type_id','=','att_included.included_type_id');
+                }
+            );
+
+            $build->join('attributes att_inc_ref',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use($exposed_attribute_ref) {
+                    $join
+                        ->on('att_inc_ref.included_attribute_id','=','att_inc_ref.id')
+                        ->where('att.ref_uuid',$exposed_attribute_ref);
                 }
             );
         }
@@ -299,10 +332,6 @@ class Element extends Model implements ISystemModel
             );
         }
 
-        if ($calling_namespace_ref) {
-            Utilities::ignoreVar($calling_namespace_ref);
-            //todo select for visibility from this namespace
-        }
 
         if ($b_do_namespace_relation) {
             /** @uses Element::element_namespace() */
@@ -421,34 +450,42 @@ class Element extends Model implements ISystemModel
         return $this->ref_uuid;
     }
 
+    const DEFAULT_ELEMENT_LIMIT = 100;
 
-    public function destroyElement() {
-        $this->delete();
-    }
-
-    /** @return Collection<Element> */
+    /** @return \Illuminate\Pagination\CursorPaginator<Element>|\Illuminate\Support\Collection<Element> */
     public static function getElementsFromParams(SelectElementParamData $params,
                                           bool $b_ns_relations ,bool $b_type_relations,bool $b_ns_type_relations,
-                                          ?int $not_member_set_id = null,?string $calling_namespace_ref = null
+                                          ?int $not_member_set_id = null,?string $cursor = null
     ) {
 
-        return static::getBuilderFromParams(params: $params, b_ns_relations: $b_ns_relations,
-            b_type_relations: $b_type_relations, b_ns_type_relations: $b_ns_type_relations, not_member_set_id: $not_member_set_id,
-            calling_namespace_ref: $calling_namespace_ref
-        )->get();
+        $builder =  static::getBuilderFromParams(params: $params, b_ns_relations: $b_ns_relations,
+            b_type_relations: $b_type_relations, b_ns_type_relations: $b_ns_type_relations, not_member_set_id: $not_member_set_id
+        );
+        /** @type \Illuminate\Pagination\CursorPaginator|\Illuminate\Support\Collection */
+        return $builder->cursorPaginate(perPage: config('hbc.pagination.default_element_limit'), cursor: $cursor);
+
     }
+
+    /** @return \Illuminate\Support\Collection */
+    public static function getElementIdsFromParams(SelectElementParamData $params)
+    {
+        return static::getBuilderFromParams(params: $params, b_ns_relations: false,
+            b_type_relations: false, b_ns_type_relations: false
+        )->pluck('id');
+    }
+
 
     public static function getBuilderFromParams(SelectElementParamData $params,
                                           bool $b_ns_relations ,bool $b_type_relations,bool $b_ns_type_relations,
-                                          ?int $not_member_set_id = null,?string $calling_namespace_ref = null
+                                          ?int $not_member_set_id = null
     )
     : Builder
     {
         return static::buildElement(
             given_uuids: $params->element_refs, set_ref: $params->set_ref, phase_ref: $params->phase_ref,
-            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref,attribute_ref: $params->attribute_ref,
+            type_ref: $params->type_ref, namespace_ref: $params->namespace_ref, exposed_attribute_ref: $params->attribute_ref,
             b_do_namespace_relation: $b_ns_relations, b_do_namespace_type_relation: $b_ns_type_relations,
-            b_do_type_relation: $b_type_relations,not_member_set_id: $not_member_set_id,calling_namespace_ref: $calling_namespace_ref
+            b_do_type_relation: $b_type_relations,not_member_set_id: $not_member_set_id
         );
 
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Enums\Sys\TypeOfEvent;
 use App\Enums\Types\TypeOfLifecycle;
 use App\Exceptions\HexbatchNotFound;
@@ -304,7 +305,7 @@ class ElementType extends Model implements IType,ISystemModel
             $build = static::buildElementType(uuid: $value);
         } else {
 
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
 
             if (count($parts) === 1) {
                 if ($context_namespace_uuid) {
@@ -357,7 +358,7 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
     public function getName() :string {
-        return $this->owner_namespace?->getName().UserNamespace::NAMESPACE_SEPERATOR.$this->type_name;
+        return $this->owner_namespace?->getName().ValidateNamespaceRef::NAMESPACE_SEPERATOR.$this->type_name;
     }
 
     public function isInUse() : bool {
@@ -376,10 +377,7 @@ class ElementType extends Model implements IType,ISystemModel
         $atts = $this->getAllAttributes();
         if (count($atts) === 0) {return false;}
 
-        foreach ($atts as $att) {
-            if (!$att->isPublicDomain()) {return false;}
-        }
-        return true;
+        return array_all($atts, fn($att) => $att->isPublicDomain());
     }
 
     /**
@@ -559,6 +557,158 @@ class ElementType extends Model implements IType,ISystemModel
         return $ret;
     }
 
+    public static function getTypeIdsFromInput(
+        array $references,
+        ?string $default_ns = null,?string $default_server = null,
+        bool $b_allow_type_ids = true
+    ) : array
+    {
+        $ret = ['ids'=>[],'uuids'=>[],'names'=>[]];
+        $adjusted_refs = [];
+
+        if (!$default_server) {$default_server = config('hbc.system.server.uuid');}
+
+        foreach ($references as $ref) {
+            if (!trim($ref)) {continue;}
+
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR,$ref);
+            if (count($parts) > 3) {
+               continue;
+            }
+
+            $outs = [];
+
+            $my_id = trim($parts[0]??'');
+
+            if (count($parts) === 1 &&  ctype_digit($my_id) )
+            {
+                if (!$b_allow_type_ids) { continue;}
+                $outs = [(int)$my_id];
+            }
+            else if (count($parts) === 1 &&  Utilities::is_uuid($my_id) ) {
+                $outs = [$my_id];
+            }
+            else
+            {
+                switch (count($parts)) {
+                    case 3: {
+                        $type_ref = trim($parts[2]??'');
+                        $ns_ref = trim($parts[1]??'');
+                        $server_ref = trim($parts[0]??'');
+                        break;
+                    }
+                    case 2: {
+                        $type_ref = trim($parts[1]??'');
+                        $ns_ref = trim($parts[0]??'');
+                        $server_ref = null;
+                        break;
+                    }
+                    case 1: {
+                        $type_ref = trim($parts[0]??'');
+                        $ns_ref = null;
+                        $server_ref = null;
+                        break;
+                    }
+                    default: {
+                        throw new \LogicException("Should never get here about type search count");
+                    }
+                }
+
+
+                if (!$type_ref) {continue;}
+                if (!$ns_ref && !$default_ns) {
+                    continue;
+                }
+                if (!$ns_ref) { $ns_ref = $default_ns;}
+                if (!$server_ref) { $server_ref = $default_server;}
+
+                $outs[] = $server_ref;
+                $outs[] = $ns_ref;
+                $outs[] = $type_ref;
+            }
+
+            $adjusted_refs[] = implode(ValidateNamespaceRef::NAMESPACE_SEPERATOR,$outs);
+
+        }
+
+        if (!count($adjusted_refs)) {return $ret;}
+
+        $values_array = [];
+        foreach ($adjusted_refs as $ad) {
+            Utilities::ignoreVar($ad);
+            $values_array[] = "(?)";
+        }
+
+        $values = implode(",\n",$values_array);
+
+        $separator = ValidateNamespaceRef::NAMESPACE_SEPERATOR;
+
+        $sql = "
+            WITH
+            raw_inputs as
+                (SELECT da_input
+                 FROM (VALUES
+                           $values
+                       ) AS q (da_input))
+            SELECT t.id, t.type_name, t.ref_uuid from element_types t
+                CROSS JOIN raw_inputs
+                INNER JOIN user_namespaces u on u.id = t.owner_namespace_id
+                INNER JOIN servers s on s.id = u.namespace_server_id
+                WHERE
+                (
+                    split_part(raw_inputs.da_input, '$separator', 3) = ''
+                    AND
+                    split_part(raw_inputs.da_input, '$separator', 2) = ''
+                    AND
+                    (
+                        t.id::bigint = bigint_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                        OR
+                        t.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                    )
+                )
+                OR
+                (
+                    (
+                        -- match type uuid or name
+
+                        t.type_name = split_part(raw_inputs.da_input, '$separator', 3)::text
+                            OR
+                        t.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 3))
+
+                    )
+                    AND
+                    (
+                        -- match namespace uuid or name
+
+                        u.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 2))
+                            OR
+                        u.namespace_name = split_part(raw_inputs.da_input, '$separator', 2)::text
+                    )
+                    AND
+                    (
+                        -- match server uuid or name
+
+                        s.ref_uuid = uuid_or_null(split_part(raw_inputs.da_input, '$separator', 1))
+                            OR
+                        s.server_name = split_part(raw_inputs.da_input, '$separator', 1)::text
+                    )
+                )
+        ;
+        ";
+
+        $what = DB::select($sql,$adjusted_refs);
+
+
+        foreach ($what as $row) {
+            $ret['ids'][] = $row->id;
+            $ret['uuids'][] = $row->ref_uuid;
+            $ret['names'][] = $row->type_name;
+        }
+        return $ret;
+
+    }
+
+
     public function getEventHandlerRef(TypeOfEvent $type_event) : ?IEventReference {
         Utilities::ignoreVar($type_event);
         return null;
@@ -569,6 +719,7 @@ class ElementType extends Model implements IType,ISystemModel
      *     includes this type too
      */
     public  function getEventHandlersFromTypeChain(TypeOfEvent $type_event) : Collection {
+        //get from attribute rules/server_events
         Utilities::ignoreVar($type_event);
         return new Collection;
     }

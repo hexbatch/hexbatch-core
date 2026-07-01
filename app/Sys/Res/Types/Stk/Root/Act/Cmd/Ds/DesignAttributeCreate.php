@@ -157,6 +157,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
         $given_attribute->validate_json_path = $this->params->validate_json_path??null ;
         $given_attribute->is_final_attribute = $this->params->is_final_attribute??false ;
         $given_attribute->is_abstract = $this->params->is_abstract?? false  ;
+        $given_attribute->is_element_access = $this->params->is_element_access?? false  ;
 
         if (!empty($this->params->default_value)) {
             $given_attribute->setDefaultValue($this->params->default_value);

@@ -5,7 +5,6 @@ namespace App\OpenApi\Results\Elements;
 use App\Models\Attribute;
 use App\Models\ElementSetMember;
 use App\Models\ElementType;
-use App\Models\ElementValue;
 use App\Data\ApiParams\Common\HexbatchUuid;
 use App\OpenApi\Results\Attributes\AttributeResponse;
 use App\OpenApi\Results\ResultBase;
@@ -48,8 +47,7 @@ class ElementValueResponse extends ResultBase
         if ($attribute_levels > 0) {
             $this->attribute = new AttributeResponse(given_attribute: $att,attribute_levels: $attribute_levels - 1);
         }
-        $this->value = ElementValue::readContextValue(member: $member,att: $att,type: $type);
-
+        //todo removed early, no value read for elements here
 
     }
 

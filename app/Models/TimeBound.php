@@ -458,7 +458,7 @@ class TimeBound extends Model
             $build = static::buildTimeBound(uuid: $value,with_namespace: true);
         } else {
 
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
             if (count($parts) === 2) {
                 $owner_hint = $parts[0];
                 $maybe_name = $parts[1];

@@ -79,6 +79,10 @@ return new class extends Migration
                 ->comment('if true then child must have attribute that inherits from this');
 
 
+            $table->boolean('is_element_access')->default(false)->nullable(false)
+                ->comment('If true can only be read and set by the element owner group');
+
+
 
 
         });

@@ -3,13 +3,17 @@
 namespace App\Models;
 
 
+use App\Data\ApiParams\Common\CursoratedMetaData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementReading;
+use App\Data\ApiParams\Data\Elements\Responses\ElementReadingList;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Helpers\Utilities;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\JoinClause;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 
 /**
@@ -32,7 +36,9 @@ use Illuminate\Database\Query\JoinClause;
  * @property string created_at
  * @property string updated_at
  *
- * @property string da_json_value
+ * @property string da_value
+ *
+
  */
 class ElementValue extends Model
 {
@@ -61,21 +67,37 @@ class ElementValue extends Model
      */
     protected $casts = [
         'element_value' => AsArrayObject::class,
+        'da_value' => AsArrayObject::class,
     ];
+
+    public function value_type() : BelongsTo {
+        return $this->belongsTo(ElementType::class,'horde_type_id');
+    }
+
+    public function value_element() : BelongsTo {
+        return $this->belongsTo(Element::class,'horde_element_id');
+    }
+
+    public function value_attribute() : BelongsTo {
+        return $this->belongsTo(Attribute::class,'horde_attribute_id');
+    }
 
     public static function buildElementValue(
         ?int $me_id = null,
         ?int $horde_type_id = null,
         ?int $horde_attribute_id = null,
+        array $horde_attribute_ids = [],
+        array $horde_attribute_refs = [],
 
 
         ?int $horde_element_id = null,
+        array $horde_element_ids = [],
+        array $horde_element_refs = [],
         ?int $horde_set_id = null,
+        ?string $horde_set_ref = null,
         ?int $horde_set_member_id = null,
 
-        ?TypeOfElementValuePolicy $policy = null,
-        ?string $json_path = null,
-        bool $read_nearest = false
+        bool $b_relations = false
 
     )
     : Builder
@@ -88,17 +110,31 @@ class ElementValue extends Model
             ->selectRaw(" extract(epoch from  element_values.created_at) as created_at_ts")
             ->selectRaw( "extract(epoch from  element_values.updated_at) as updated_at_ts");
 
-        if ($json_path) {
-            $build->selectRaw("SELECT jsonb_path_query(element_values.element_value, :json_path) as da_json_value",
-                ['json_path'=>$json_path]);
-        } else {
-            $build->selectRaw( "element_values.element_value as da_json_value");
+        if ($b_relations)
+        {
+            /** @uses static::value_type(),static::value_element(),static::value_attribute() */
+            $build->with('value_type','value_element','value_attribute');
         }
+
+        $build->join('attributes val_att','element_values.horde_attribute_id','=','val_att.id');
+
+        $build->selectRaw(
+            "SELECT IF(value_element.read_json_path IS NOT NULL,
+                jsonb_path_query(element_values.element_value,
+                 value_element.read_json_path),element_values.element_value )as da_value");
+
 
         if ($me_id) {
             $build->where('element_values.id', $me_id);
         }
 
+        if ($horde_set_id) {
+            $build->where('element_values.horde_set_id', $horde_set_id);
+        }
+
+        if ($horde_set_ref) {
+            $build->join('element_sets val_set','element_values.parent_set_element_id','=','val_set.id');
+        }
 
 
         if ($horde_type_id) {
@@ -109,46 +145,30 @@ class ElementValue extends Model
             $build->where('element_values.horde_attribute_id', $horde_attribute_id);
         }
 
-        if ($policy === TypeOfElementValuePolicy::STATIC) {
-            $build->whereNull('element_values.horde_element_id');
-            $build->whereNull('element_values.horde_set_id');
-            $build->whereNull('element_values.horde_set_member_id');
-        }
-        elseif ($policy === TypeOfElementValuePolicy::PER_ELEMENT) {
-            if ($horde_element_id) {
-                $build->where('element_values.horde_element_id', $horde_element_id);
-            }
-            $build->whereNull('element_values.horde_set_id');
-            $build->whereNull('element_values.horde_set_member_id');
-        }
-        elseif ($policy === TypeOfElementValuePolicy::PER_SET) {
-            if ($horde_element_id) {
-                $build->where('element_values.horde_element_id', $horde_element_id);
-            }
-            if ($horde_set_id) {
-                $build->where('element_values.horde_set_id', $horde_set_id);
-            }
-            $build->whereNull('element_values.horde_set_member_id');
-        }
-        elseif ($policy === TypeOfElementValuePolicy::PER_CHILD || !$policy) {
-            if ($horde_element_id) {
-                $build->where('element_values.horde_element_id', $horde_element_id);
-            }
-
-            if ($horde_set_id) {
-                $build->where('element_values.horde_set_id', $horde_set_id);
-            }
-
-            if ($horde_set_member_id) {
-                $build->where('element_values.horde_set_member_id', $horde_set_member_id);
-            }
+        if (count($horde_attribute_ids)) {
+            $build->whereIn('element_values.horde_attribute_id', $horde_attribute_ids);
         }
 
-        if ($read_nearest) {
-            Utilities::ignoreVar($read_nearest);
-            //todo get nearest inherited attr in set chain if its per child, get nearest default if its per set or per element
+        if (count($horde_attribute_refs)) {
+            $build->whereIn('val_att.ref_uuid', $horde_attribute_refs);
         }
 
+        if (count($horde_element_ids)) {
+            $build->whereIn('element_values.horde_element_id', $horde_element_ids);
+        }
+
+        if (count($horde_element_refs)) {
+            $build->join('elements val_el','element_values.horde_element_id','=','val_el.id');
+            $build->whereIn('val_el.ref_uuid', $horde_element_refs);
+        }
+
+        if ($horde_element_id) {
+            $build->where('element_values.horde_element_id', $horde_element_id);
+        }
+
+        if ($horde_set_member_id) {
+            $build->where('element_values.horde_set_member_id', $horde_set_member_id);
+        }
 
 
         return $build;
@@ -194,7 +214,7 @@ class ElementValue extends Model
             $set_id = null;
         } elseif ($att->value_policy === TypeOfElementValuePolicy::PER_SET) {
             $member_id = null;
-        }
+        } // else allow any combo
 
         $exposed_and_visible = ElementTypeExposedAttribute::getExposedAndVisible(
             exposed_type_id: $type->id,exposed_attribute_id: $att->id, in_set_member_id:   $member->id,phase_id: $phase?->id
@@ -202,7 +222,7 @@ class ElementValue extends Model
         if (!$exposed_and_visible) {return;}
 
         //check if value passes validation
-        $att->checkValidation($value);
+        $att->checkDataValidation($value);
 
         ElementValue::upsert(
             [
@@ -222,73 +242,89 @@ class ElementValue extends Model
         );
     }
 
-    public static function readContextValue(
-        ElementSetMember $member,
-        Attribute $att,
-        ElementType $type,
-        ?Phase $phase = null
-    ) : string|int|array|null
+
+
+
+    public static function readValues(null|int|string $set_identifier,array $element_identifiers, array $attribute_identifier_filters = [],
+                                             ?int $page_size = null,?string $cursor = null
+    )
+    : ElementReadingList
     {
-
-        $exposed_and_visible = ElementTypeExposedAttribute::getExposedAndVisible(
-            exposed_type_id: $type->id,exposed_attribute_id: $att->id, in_set_member_id:   $member->id
-        );
-        if (!$exposed_and_visible) {return null;}
-
-
-        /** @var static[] $valrows */
-        $valrows_build = static::buildElementValue(
-            horde_type_id: $type->id,
-            horde_attribute_id: $att->id,
-            horde_element_id: $member->member_element_id,
-            horde_set_id: $member->holder_set_id,
-            horde_set_member_id: $member->id,
-            policy: $att->value_policy,
-            json_path: $att->read_json_path,
-            read_nearest: true
-
-        )
-            ->orderBy('id','desc');
-
-        if ($phase) {
-            $valrows_build->join('elements as els',
-                /**
-                 * @param JoinClause $join
-                 */
-                function (JoinClause $join) use ($phase) {
-                    $join
-                        ->on('els.id', '=', 'element_values.horde_element_id')
-                        ->where('els.element_phase_id', $phase->id);
-                }
-            );
-        }
-
-        $valrows  =    $valrows_build->get();
-
-        if (count($valrows) ) {
-            $value_json = $valrows[0]->da_json_value;
-            return Utilities::maybeDecodeJson($value_json,true);
-        } else {
-            if (($att->value_policy !== TypeOfElementValuePolicy::STATIC) && !empty($att->attribute_default_value?->getArrayCopy()) ) {
-                //try to get default value if not static, because we would already have that value, if set, if it were static
-                $vally = static::buildElementValue(
-                    horde_type_id: $type->id,
-                    horde_attribute_id: $att->id,
-                    horde_element_id: $member->member_element_id,
-                    horde_set_id: $member->holder_set_id,
-                    horde_set_member_id: $member->id,
-                    policy: TypeOfElementValuePolicy::STATIC,
-                    json_path: $att->read_json_path
-
-                )->first();
-
-                $value_json = $vally?->da_json_value;
-                return Utilities::maybeDecodeJson($value_json,true);
+        $set_id = null; $set_ref = null;
+        if ($set_identifier) {
+            if (Utilities::is_uuid($set_identifier)) {
+                $set_ref = $set_identifier;
+            } else {
+                $set_id = $set_identifier;
             }
-
-            return null;
         }
 
+        $element_ids = []; $element_refs = null;
+        if (count($element_identifiers)) {
+            foreach ($element_identifiers as $what) {
+                if (Utilities::is_uuid($what)) {
+                    $element_refs[] = $what;
+                } else {
+                    $element_ids[] = $what;
+                }
+            }
+        }
+
+        $attribute_ids = []; $attribute_refs = [];
+        if (count($attribute_identifier_filters)) {
+            foreach ($attribute_identifier_filters as $what) {
+                if (Utilities::is_uuid($what)) {
+                    $attribute_refs[] = $what;
+                } elseif (ctype_digit($what)) {
+                    $attribute_ids[] = $what;
+                }
+            }
+        }
+
+        // use cursoring
+        $vally = static::buildElementValue(
+
+            horde_attribute_ids: $attribute_ids,
+            horde_attribute_refs: $attribute_refs,
+            horde_element_ids: $element_ids,
+            horde_element_refs: $element_refs,
+            horde_set_id: $set_id,
+            horde_set_ref: $set_ref,
+            b_relations: true
+        );
+
+        /** @var \Illuminate\Pagination\CursorPaginator<ElementValue> $page */
+        $page = $vally->cursorPaginate(perPage: $page_size?:config('hbc.pagination.default_page_size'), cursor: $cursor);
+        $arr = [];
+        /** @var ElementValue $p */
+        foreach ($page as $p) {
+            $element_uuid = $p->value_element->ref_uuid;
+            if (!isset($arr[$element_uuid])) {
+                $arr[$element_uuid] = [
+                    'type_uuid'=>$p->value_type->ref_uuid,
+                    'type_name'=>$p->value_type->type_name,
+                    'element_uuid'=>$element_uuid,
+                    'data'=> []
+                ];
+            }
+            $arr[$element_uuid]['data'][$p->value_attribute->attribute_name] = $p->da_value;
+        }
+
+        $meta = new CursoratedMetaData(
+            per_page:$page->perPage(),
+            next_cursor: $page->nextCursor()?->encode(),
+            next_page_url: $page->nextPageUrl(),
+            prev_cursor: $page->previousCursor()?->encode(),
+            prev_page_url: $page->previousPageUrl()
+        );
+
+        $col = new Collection;
+        foreach ($arr as $value) {
+            $read = new ElementReading(
+                element_uuid: $value['element_uuid'],type_uuid: $value['type_uuid'],type_name: $value['type_name'],data:$value['data'] );
+            $col->add($read);
+        }
+        return new ElementReadingList(data: $col,meta: $meta);
     }
 
 }

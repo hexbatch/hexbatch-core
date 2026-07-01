@@ -76,7 +76,7 @@ class ListAttributes extends Api\DesignApi
             name: $params->attribute_name
         )->orderBy('created_at');
 
-        $cursor = $build->cursorPaginate(perPage: 15, cursor: $params->cursor);
+        $cursor = $build->cursorPaginate(perPage: config('hbc.pagination.default_page_size'), cursor: $params->cursor);
         return AttributeData::collect($cursor, CursorPaginatedDataCollection::class);
     }
 

@@ -17,7 +17,10 @@ return [
 
     'version' => env('APP_VERSION', \Hexbatch\Things\Helpers\ThingUtilities::getVersionAsString(for_lib: false)),
 
-
+    'pagination' => [
+       'default_page_size' => (int)env('DEFAULT_CURSOR_PAGE_SIZE',15),
+       'default_element_limit' => (int)env('DEFAULT_ELEMENT_LIMIT',\App\Models\Element::DEFAULT_ELEMENT_LIMIT)
+    ],
 
     'system' => [
         'user' => [

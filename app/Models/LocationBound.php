@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Data\ApiParams\Enums\TypeOfLocation;
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Exceptions\HexbatchCoreException;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -339,7 +340,7 @@ class LocationBound extends Model
             $build = static::buildLocationBound(uuid: $value);
         } else {
 
-            $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+            $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
 
             if (count($parts) === 2) {
                 $owner_hint = $parts[0];

@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Enums\Paths\TypeOfPathRelationship;
 use App\Enums\Paths\TypeOfPathReturns;
 use App\Enums\Paths\TypeOfTimeComparison;
@@ -146,14 +147,14 @@ class PathPart extends Model
                     $build = $this->where('ref_uuid', $value);
                 } else {
                     if (is_string($value)) {
-                        $parts = explode(UserNamespace::NAMESPACE_SEPERATOR, $value);
+                        $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
                         if (count($parts) === 3) {
                             $namespace_hint = $parts[0];
                             $path_hint = $parts[0];
                             $part_name = $parts[1];
 
                             /** @var Path $path */
-                            $path = (new Path())->resolveRouteBinding($namespace_hint . UserNamespace::NAMESPACE_SEPERATOR . $path_hint);
+                            $path = (new Path())->resolveRouteBinding($namespace_hint . ValidateNamespaceRef::NAMESPACE_SEPERATOR . $path_hint);
 
                             $build = $this->where('owning_path_id', $path->id)->where('path_part_name', $part_name);
                         }
@@ -261,7 +262,7 @@ class PathPart extends Model
 
         $detail =   implode(Attribute::ATTRIBUTE_FAMILY_SEPERATOR,$names);
         $root = '';
-        if ($this->path_owner) { $root = $this->path_owner->getName() . UserNamespace::NAMESPACE_SEPERATOR ;}
+        if ($this->path_owner) { $root = $this->path_owner->getName() . ValidateNamespaceRef::NAMESPACE_SEPERATOR ;}
         return $root. $detail;
     }
 

@@ -12,6 +12,7 @@ use App\Models\AttributeAncestor;
 use App\Models\ElementType;
 use App\Models\ElementTypeAncestor;
 use App\Models\ElementTypeExposedAttribute;
+use App\Models\ElementTypeIncludedAttribute;
 use App\Models\ElementValue;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -115,6 +116,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
             ElementTypeExposedAttribute::makeRecords(type: $this->given_type);
             AttributeAncestor::makeRecordsForType(type: $this->given_type);
             ElementTypeAncestor::makeRecordsForType(type: $this->given_type);
+            ElementTypeIncludedAttribute::makeRecords($this->given_type->id);
         });
 
 

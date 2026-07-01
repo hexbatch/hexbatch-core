@@ -3,6 +3,7 @@
 namespace App\Sys\Res\Atr;
 
 
+use App\Data\ApiParams\Rules\ValidateNamespaceRef;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Exceptions\HexbatchInitException;
@@ -96,7 +97,7 @@ abstract class BaseAttribute implements ISystemAttribute, IDocument
             $names[] = $parent_class::getHexbatchClassName();
         }
         $names[] = static::getHexbatchClassName();
-        return implode(UserNamespace::NAMESPACE_SEPERATOR,$names);
+        return implode(ValidateNamespaceRef::NAMESPACE_SEPERATOR,$names);
      }
 
     public function getAttribute() : Attribute {
