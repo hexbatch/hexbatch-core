@@ -42,7 +42,6 @@ use Illuminate\Validation\ValidationException;
  * @property bool is_system
  * @property bool is_final_attribute
  * @property bool is_abstract
- * @property bool is_element_access
  * @property TypeOfServerAccess access_policy
  * @property string ref_uuid
  * @property string read_json_path
@@ -95,7 +94,6 @@ class Attribute extends Model implements IAttribute,ISystemModel
         'is_system' => 'boolean',
         'is_final_attribute' => 'boolean',
         'is_abstract' => 'boolean',
-        'is_element_access' => 'boolean',
         'access_policy' => TypeOfServerAccess::class,
         'value_policy' => TypeOfElementValuePolicy::class,
         'attribute_approval' => TypeOfApproval::class,

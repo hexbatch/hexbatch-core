@@ -164,9 +164,6 @@ class DesignAttributeEdit extends Act\Cmd\Ds implements ICommandCallable
             $this->given_attribute->is_abstract = $this->params->is_abstract ;
         }
 
-        if ($this->params->is_element_access !== null ) {
-            $this->given_attribute->is_element_access = $this->params->is_element_access ;
-        }
 
         if ($this->given_attribute->isDirty()) {
             $this->given_attribute->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;

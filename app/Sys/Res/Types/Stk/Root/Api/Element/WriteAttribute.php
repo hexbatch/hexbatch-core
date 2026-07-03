@@ -4,26 +4,28 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 
 use App\Annotations\ApiParamMarker;
-use App\Models\ActionDatum;
-use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
-use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
+use App\Data\ApiParams\Data\Elements\Params\WriteElementParamData;
+use App\Models\Attribute;
+use App\Models\Element;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
-use Hexbatch\Things\Interfaces\IThingBaseResponse;
-use Illuminate\Support\Collection;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
 
 
-#[ApiParamMarker( param_class: ElementSelectParams::class)]
-class WriteAttribute extends Api\ElementApi
+#[ApiParamMarker( param_class: WriteElementParamData::class)]
+class WriteAttribute extends Api\ElementApi implements ICommandCallable
 {
     const UUID = '26a090a2-708a-4c76-b387-08f537f0c2d5';
     const TYPE_NAME = 'api_element_write';
-
-
-
 
 
     const PARENT_CLASSES = [
@@ -31,90 +33,51 @@ class WriteAttribute extends Api\ElementApi
         Act\Cmd\Ele\Write::class,
     ];
 
-    public function __construct(
-        protected ?ElementSelectParams $params = null,
 
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
+        Log::debug("Called api write attribute node");
 
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+
+        return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
+            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved]);
     }
-
-    protected function restoreParams(array $param_array) {
-        parent::restoreParams($param_array);
-        if(!$this->params) {
-            $this->params = new ElementSelectParams();
-            $this->params->fromCollection(new Collection($param_array),false);
-        }
-    }
-
-    protected function getMyData() :array {
-        return ['element'=>$this->getGivenElement(),'set'=>$this->getGivenSet(),
-            'phase'=>$this->getGivenPhase(),'value'=>$this->getImportantValue(),'attribute'=>$this->getGivenAttribute()];
-    }
-
-    public function getDataSnapshot(): array|IThingBaseResponse
-    {
-        $what =  $this->getMyData();
-        return new ApiElementActionResponse(value: $what['value'], given_element: $what['element'],
-            given_set: $what['set'], given_phase: $what['phase'],thing: $this->getMyThing());
-    }
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-
-        $nodes = [];
-        $creator = new Act\Cmd\Ele\Write(
-            given_set_uuid: $this->params->getSetRef(),
-            given_element_uuid: $this->params->getFirstElementRef(),
-            given_attribute_uuid: $this->params->getAttributeRef(),
-            given_phase_uuid: $this->params->getPhaseRef()
-        );
-        $nodes[] = ['id' => $creator->getActionData()->id, 'parent' => -1, 'title' => 'Destroying Elements','action'=>$creator];
-
-
-        //last in tree is the
-        if (count($nodes)) {
-            return new Tree(
-                $nodes,
-                ['rootId' => -1]
-            );
-        }
-        return null;
-
-    }
-
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
+    public static function write(WriteElementParamData $params,
+                                        UserNamespace $calling_namespace,
+                                        bool $is_system, array $tags = [], ?IThangBuilder $builder = null)
+    : true|Thang
+    {
 
-        if ($child instanceof Act\Cmd\Ele\Write) {
-            if ($child->isActionFail() || $child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else {
-                if ($child->isActionSuccess() && $child->getGivenType()) {
-                    $this->setGivenPhase($child->getGivenPhase());
-                    $this->setImportantValue($child->getImportantValue());
-                    $this->setGivenElement($child->getGivenElement());
-                    $this->setGivenSet($child->getGivenSet());
-                    $this->setGivenAttribute($child->getGivenAttribute());
-                    $this->setActionStatus(TypeOfThingStatus::THING_SUCCESS);
-                } else {
-                    $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-                }
-            }
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['read'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($calling_namespace)
+            ->setSharedArg('namespace',$calling_namespace)
+            ->tree($my_command);
+
+        Act\Cmd\Ele\Write::createWriteTree(
+            params: $params,
+            is_system: $is_system,
+            calling_namespace: $calling_namespace,builder: $builder);
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            return true;
+        } else {
+            return $thang;
         }
+
     }
+
 
 }
 

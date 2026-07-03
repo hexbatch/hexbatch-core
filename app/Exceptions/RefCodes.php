@@ -114,9 +114,10 @@ class RefCodes {
     const int ELEMENT_NOT_FOUND =  8001;
     const int ELEMENT_BAD_SCHEMA =  8002;
     const int ELEMENT_NOT_IN_SET =  8003;
+    const int ELEMENT_NOT_HAVE_ATTRIBUTE =  8004;
     const int ELEMENTS_NOT_LISTED_TO_GIVE =  8010;
     const int ELEMENTS_NOT_LISTED_TO_DESTROY =  8011;
-    const int ELEMENTS_NOT_IN_PERMISSION_SCOPE =  8012;
+    const int ELEMENTS_CANNOT_HAVE_ATTR_WRITTEN =  8012;
 
     //sets start at 9000
     const int SET_NOT_FOUND =  9001;
@@ -220,8 +221,9 @@ class RefCodes {
         self::ELEMENT_BAD_SCHEMA => '',
         self::ELEMENT_NOT_IN_SET => '',
         self::ELEMENTS_NOT_LISTED_TO_GIVE => '',
+        self::ELEMENT_NOT_HAVE_ATTRIBUTE => '',
         self::ELEMENTS_NOT_LISTED_TO_DESTROY => '',
-        self::ELEMENTS_NOT_IN_PERMISSION_SCOPE => '',
+        self::ELEMENTS_CANNOT_HAVE_ATTR_WRITTEN => '',
 
         self::SET_NOT_FOUND => '',
         self::SET_SCHEMA_ISSUE => '',

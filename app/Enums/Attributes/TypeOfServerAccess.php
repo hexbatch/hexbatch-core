@@ -11,6 +11,8 @@ enum TypeOfServerAccess : string {
     case IS_PUBLIC = 'is_public';
     case IS_PUBLIC_DOMAIN = 'is_public_domain';
     case IS_PROTECTED = 'is_protected';
+    case IS_ELEMENT_PRIVATE = 'is_element_private';
+    case IS_ELEMENT_PROTECTED = 'is_element_protected';
 
     public static function tryFromInput(string|int|bool|null $test ) : ?TypeOfServerAccess {
         if ($test === null) {return null;}

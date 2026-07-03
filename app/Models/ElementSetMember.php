@@ -88,6 +88,8 @@ class ElementSetMember extends Model
         ?int $set_id = null,
         ?string $set_ref = null,
         ?int $element_id = null,
+        ?string $element_ref = null,
+        array $element_ids = [],
         bool $b_relationship_element = true,
         bool $b_relationship_element_type = false,
         array   $given_ids = [],
@@ -109,8 +111,16 @@ class ElementSetMember extends Model
         }
 
 
+        if ($element_ref) {
+            $build->where('element_set_members.ref_uuid', $element_ref);
+        }
+
         if ($element_id) {
             $build->where('element_set_members.member_element_id', $element_id);
+        }
+
+        if (count($element_ids)) {
+            $build->whereIn('element_set_members.member_element_id', $element_ids);
         }
 
         if ($set_id) {

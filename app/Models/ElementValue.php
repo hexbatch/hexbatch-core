@@ -7,6 +7,8 @@ use App\Data\ApiParams\Common\CursoratedMetaData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementReading;
 use App\Data\ApiParams\Data\Elements\Responses\ElementReadingList;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
+use App\Exceptions\HexbatchNotPossibleException;
+use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
@@ -193,18 +195,36 @@ class ElementValue extends Model
         );
     }
 
+
     public static function writeContextValue(
-        ElementSetMember $member,
         Attribute $att,
-        ElementType $type,
-        ?array $value = null,
-        ?Phase $phase = null
+        ?ElementSet $set,
+        Element $el,
+        ?array $value = null
     ) :void
     {
         if ($att->is_abstract) {return;} //does not have state
-        $member_id = $member->id;
-        $set_id = $member->id;
-        $element_id = $member->id;
+        $member_id = null;
+        if ($set  && in_array($att->value_policy,[TypeOfElementValuePolicy::PER_SET,TypeOfElementValuePolicy::PER_CHILD])) {
+            $member_id = (int)ElementSetMember::buildSetMember(set_id:$set->id,element_id: $el->id,b_relationship_element: false)->pluck('id')->first();
+            if (!$member_id) {
+                throw new HexbatchNotPossibleException(__("msg.set_does_not_have_element",
+                    ['ref' => $set->ref_uuid,'ele'=>$el->ref_uuid]),
+                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                    RefCodes::ELEMENT_NOT_IN_SET);
+            }
+        }
+        //check to see if the element type has that attribute
+        $attr_found = ElementTypeIncludedAttribute::getAllAttributes(type_ids:[$el->element_parent_type_id],attribute_ids: [$att->id]);
+        if (!count($attr_found)) {
+            throw new HexbatchNotPossibleException(__("msg.element_not_have_attribute",
+                ['ref' => $el->ref_uuid,'attr'=>$att->getName()]),
+                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
+                RefCodes::ELEMENT_NOT_HAVE_ATTRIBUTE);
+        }
+        $element_id = $el->id;
+        $set_id = $set->id;
+
         if ($att->value_policy === TypeOfElementValuePolicy::STATIC) {
             $member_id = null;
             $set_id = null;
@@ -216,17 +236,13 @@ class ElementValue extends Model
             $member_id = null;
         } // else allow any combo
 
-        $exposed_and_visible = ElementTypeExposedAttribute::getExposedAndVisible(
-            exposed_type_id: $type->id,exposed_attribute_id: $att->id, in_set_member_id:   $member->id,phase_id: $phase?->id
-        );
-        if (!$exposed_and_visible) {return;}
 
         //check if value passes validation
         $att->checkDataValidation($value);
 
         ElementValue::upsert(
             [
-                'horde_type_id' => $type->id,
+                'horde_type_id' => $el->element_parent_type_id,
                 'horde_attribute_id' => $att->id,
                 'horde_element_id' => $element_id,
                 'horde_set_id' => $set_id,
@@ -245,8 +261,8 @@ class ElementValue extends Model
 
 
 
-    public static function readValues(null|int|string $set_identifier,array $element_identifiers, array $attribute_identifier_filters = [],
-                                             ?int $page_size = null,?string $cursor = null
+    public static function readValues(null|int|string $set_identifier, array $element_ids, array $attribute_ids = [],
+                                      ?int            $page_size = null, ?string $cursor = null
     )
     : ElementReadingList
     {
@@ -259,35 +275,12 @@ class ElementValue extends Model
             }
         }
 
-        $element_ids = []; $element_refs = null;
-        if (count($element_identifiers)) {
-            foreach ($element_identifiers as $what) {
-                if (Utilities::is_uuid($what)) {
-                    $element_refs[] = $what;
-                } else {
-                    $element_ids[] = $what;
-                }
-            }
-        }
-
-        $attribute_ids = []; $attribute_refs = [];
-        if (count($attribute_identifier_filters)) {
-            foreach ($attribute_identifier_filters as $what) {
-                if (Utilities::is_uuid($what)) {
-                    $attribute_refs[] = $what;
-                } elseif (ctype_digit($what)) {
-                    $attribute_ids[] = $what;
-                }
-            }
-        }
 
         // use cursoring
         $vally = static::buildElementValue(
 
             horde_attribute_ids: $attribute_ids,
-            horde_attribute_refs: $attribute_refs,
             horde_element_ids: $element_ids,
-            horde_element_refs: $element_refs,
             horde_set_id: $set_id,
             horde_set_ref: $set_ref,
             b_relations: true

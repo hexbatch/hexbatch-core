@@ -337,8 +337,9 @@ Route::prefix('v1')->group(function () {
                 });
 
                 Route::get('read', [Api\ElementController::class, 'read_elements'])->name('core.elements.read');
+                Route::get('list', [Api\ElementController::class, 'list_elements'])->name('core.elements.list_elements');
 
-
+                Route::patch('write', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
 
                 Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
                     Route::prefix('switch')->group(function () {
@@ -352,9 +353,6 @@ Route::prefix('v1')->group(function () {
 
                 Route::prefix('phase/{working_phase}')->group(function () {
 
-                        Route::middleware([])->group(function () {
-                            Route::get('list', [Api\ElementController::class, 'list_elements'])->name('core.elements.list_elements');
-                        });
 
 
                         Route::prefix('element/{element}')->group(function () {
@@ -396,14 +394,13 @@ Route::prefix('v1')->group(function () {
 
                                 Route::middleware([])->group(function () {
                                     Route::post('ping', [Api\ElementController::class, 'ping_element'])->name('core.elements.ping');
-                                    Route::get('show', [Api\ElementController::class, 'show_element'])->name('core.elements.show');
 
                                 });
 
 
                                 Route::get('read_live_type', [Api\ElementController::class, 'read_live_type'])->name('core.elements.read_live_type');
                                 Route::get('read_time', [Api\ElementController::class, 'read_time'])->name('core.elements.read_time');
-                                Route::patch('write_attribute', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
+
                             });
                         });
 

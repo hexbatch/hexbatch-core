@@ -9,4 +9,5 @@ interface IEventReference
     public function  setSourceRef(string $ref) : void ;
     public function  getReferences() : array ;
     public function  setReferences(array $whats) :void  ;
+
 }

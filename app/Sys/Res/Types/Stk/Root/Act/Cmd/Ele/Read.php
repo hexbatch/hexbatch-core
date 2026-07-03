@@ -85,26 +85,6 @@ class Read extends Act\Cmd\Ele
     {
         if ($this->allowed_reading_attribute_ids?->count()) {return;} //do not process if just reinit
 
-        /*
-         * flow of this (run after children that get values)
-         *
-         *   get selected elements, with type and its ns included, with the ns of the element, and do permission checks in bulk
-         *
-         *   get a list of the defining types in each element
-         *   if any type filtering, resolve types to ids, do intersection, if empty intersection then we are done
-         *
-         *   if any attribute filtering resolve those to ids
-         *
-         *   call getAllAttributes with the type ids,  attributes filter
-         *
-         *   do permission checks for any attribute returned with a is_element_access, fail all if any do
-         *
-         *   call ElementValue::readContextValues with optional set the params passed in, the array of element id, and the array of attribute ids
-         *
-         *   return the ElementReadingList created by the above
-         *
-         *  (done)
-         */
 
         $element_types = [];
         $elements =  Element::getElementsFromParams(params: $this->params->selector,b_ns_relations: true,
@@ -174,7 +154,8 @@ class Read extends Act\Cmd\Ele
 
         $attribute_id_element_ids = [];
         $attribute_id_element_refs = [];
-
+        /** @var array<int,Element> $attribute_id_elements */
+        $attribute_id_elements = [];
 
         foreach ($elements as $el) {
             $attribute_ids_from_type = $type_id_attributes[$el->element_parent_type_id]??[];
@@ -182,13 +163,15 @@ class Read extends Act\Cmd\Ele
             foreach ($attribute_ids_from_type as $attr_id) {
                 if (!array_key_exists($attr_id,$attribute_id_element_ids)) {
                     $attribute_id_element_ids[$attr_id] = [];
+                    $attribute_id_elements[$attr_id] = [];
                 }
                 $attribute_id_element_ids[$attr_id][] = $el->id;
+                $attribute_id_elements[$attr_id] = $el;
 
                 if (!array_key_exists($attr_id,$attribute_id_element_refs)) {
                     $attribute_id_element_refs[$attr_id] = [];
                 }
-                $attribute_id_element_refs[$attr_id][] = $el->id;
+                $attribute_id_element_refs[$attr_id][] = $el->ref_uuid;
             }
 
         }
@@ -201,7 +184,6 @@ class Read extends Act\Cmd\Ele
             $all_ns_ids = [];
             $protected_namespace_ids = [];
             $private_namespaces_ids = [];
-            $element_owner_namespace_ids = [];
             $ns_attribute_id_hash = [];
 
             foreach ($found_attributes as $found_att) {
@@ -217,36 +199,55 @@ class Read extends Act\Cmd\Ele
 
                 $ns_attribute_id_hash[$ns_id][] = $found_att->id;
 
-                if ($found_att->is_element_access) {
-                    $element_owner_namespace_ids[] = $found_att->included_type_id;
-                } else {
-                    switch ($found_att->access_policy) {
-                        case TypeOfServerAccess::IS_PUBLIC_DOMAIN:
-                        case TypeOfServerAccess::IS_PUBLIC: {
-                            if (!in_array($found_att->included_type->owner_namespace_id,$allowed_ns_ids)) {
-                                $allowed_ns_ids[] =$found_att->included_type->owner_namespace_id;
-                            }
-                            break;
-                        }
-                        case TypeOfServerAccess::IS_PROTECTED: {
-                            if (!in_array($found_att->included_type->owner_namespace_id,$protected_namespace_ids)) {
-                                $protected_namespace_ids[] =$found_att->included_type->owner_namespace_id;
-                            }
 
-                            break;
+                switch ($found_att->access_policy) {
+                    case TypeOfServerAccess::IS_PUBLIC_DOMAIN:
+                    case TypeOfServerAccess::IS_PUBLIC: {
+                        if (!in_array($found_att->included_type->owner_namespace_id,$allowed_ns_ids)) {
+                            $allowed_ns_ids[] =$found_att->included_type->owner_namespace_id;
                         }
-                        case TypeOfServerAccess::IS_PRIVATE: {
-                            if (!in_array($found_att->included_type->owner_namespace_id,$private_namespaces_ids)) {
-                                $private_namespaces_ids[] =$found_att->included_type->owner_namespace_id;
+                        break;
+                    }
+                    case TypeOfServerAccess::IS_PROTECTED: {
+                        if (!in_array($found_att->included_type->owner_namespace_id,$protected_namespace_ids)) {
+                            $protected_namespace_ids[] =$found_att->included_type->owner_namespace_id;
+                        }
+
+                        break;
+                    }
+                    case TypeOfServerAccess::IS_ELEMENT_PROTECTED: {
+                        /** @var Element $at_el */
+                        foreach ($attribute_id_elements[$found_att->id] as $at_el) {
+                            if (!in_array($at_el->element_namespace_id,$protected_namespace_ids)) {
+                                $protected_namespace_ids[] =$at_el->element_namespace_id;
                             }
-                            break;
                         }
+                        break;
+                    }
+                    case TypeOfServerAccess::IS_ELEMENT_PRIVATE: {
+                        /** @var Element $at_el */
+                        foreach ($attribute_id_elements[$found_att->id] as $at_el) {
+                            if (!in_array($at_el->element_namespace_id,$private_namespaces_ids)) {
+                                $private_namespaces_ids[] =$at_el->element_namespace_id;
+                            }
+                        }
+                        break;
+                    }
+                    case TypeOfServerAccess::IS_PRIVATE: {
+                        if (!in_array($found_att->included_type->owner_namespace_id,$private_namespaces_ids)) {
+                            $private_namespaces_ids[] =$found_att->included_type->owner_namespace_id;
+                        }
+                        break;
                     }
                 }
 
 
 
+
             } //end foreach
+
+            $protected_namespace_ids = array_unique($protected_namespace_ids,SORT_NUMERIC);
+            $private_namespaces_ids = array_unique($private_namespaces_ids,SORT_NUMERIC);
 
             if (count($private_namespaces_ids)) {
                 $allowed_private_ids = $this->calling_namespace->getMemberIdsFromArray(namespace_ids: $private_namespaces_ids,t_admin: true);
@@ -256,11 +257,6 @@ class Read extends Act\Cmd\Ele
             if (count($protected_namespace_ids)) {
                 $allowed_protected_ids = $this->calling_namespace->getMemberIdsFromArray(namespace_ids: $protected_namespace_ids);
                 $allowed_ns_ids = array_merge($allowed_ns_ids,$allowed_protected_ids);
-            }
-
-            if (count($element_owner_namespace_ids)) {
-                $allowed_element_access_ids = $this->calling_namespace->getMemberIdsFromArray(namespace_ids: $element_owner_namespace_ids);
-                $allowed_ns_ids = array_merge($allowed_ns_ids,$allowed_element_access_ids);
             }
 
             $allowed_ns_ids = array_unique($allowed_ns_ids,SORT_NUMERIC);
@@ -314,7 +310,6 @@ class Read extends Act\Cmd\Ele
             'params'=>$this->params->toArray(),
             'selected_element_ids'=>$this->selected_element_ids?->toArray(),
             'allowed_reading_attribute_ids'=>$this->allowed_reading_attribute_ids?->toArray(),
-            'read_events'=>$this->read_events?->toArray(),
             'is_system'=>$this->is_system,
             'calling_namespace'=>$this->calling_namespace,
             'attribute_ref_has_type_name'=>$this->attribute_ref_has_type_name,
@@ -327,7 +322,6 @@ class Read extends Act\Cmd\Ele
     {
         $params = ReadElementParamData::from($args['params']);
         $is_system = (bool)$args['is_system'];
-        $read_events = static::getCollectionFromArray('read_events',$args,false);
         $allowed_reading_attribute_ids = static::getCollectionFromArray('allowed_reading_attribute_ids',$args,false);
         $selected_element_ids = static::getCollectionFromArray('selected_element_ids',$args,false );
         $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
@@ -335,7 +329,7 @@ class Read extends Act\Cmd\Ele
         $attribute_ref_has_type_name = $args['attribute_ref_has_type_name']??[];
         $attribute_ref_has_name = $args['attribute_ref_has_name']??[];
         $node =  new static(params: $params,is_system: $is_system,calling_namespace: $calling_namespace,selected_element_ids: $selected_element_ids,
-            allowed_reading_attribute_ids: $allowed_reading_attribute_ids,read_events: $read_events);
+            allowed_reading_attribute_ids: $allowed_reading_attribute_ids);
         $node->attribute_ref_has_type_ref = $attribute_ref_has_type_ref;
         $node->attribute_ref_has_type_name = $attribute_ref_has_type_name;
         $node->attribute_ref_has_name = $attribute_ref_has_name;
@@ -360,7 +354,7 @@ class Read extends Act\Cmd\Ele
         $ret = null;
         if ($b_approved) {
             $ret = ElementValue::readValues(set_identifier: $work->params?->selector?->set_ref,
-                element_identifiers: $work->selected_element_ids->toArray(),attribute_identifier_filters: $work->allowed_reading_attribute_ids->toArray());
+                element_ids: $work->selected_element_ids->toArray(), attribute_ids: $work->allowed_reading_attribute_ids->toArray());
 
             foreach ($children_args['element_ref_values']??[] as $element_uuid => $data) {
                 foreach ($data as $attribute_uuid => $datum) {
@@ -426,7 +420,7 @@ class Read extends Act\Cmd\Ele
             command_tags: [static::class],
         );
 
-        if (!$me->read_events?->count())
+        if ($me->read_events?->count())
         {
             Evt\Set\Reading::callEventTree(
                 given_set_ref: $params->selector->set_ref,

@@ -79,8 +79,6 @@ return new class extends Migration
                 ->comment('if true then child must have attribute that inherits from this');
 
 
-            $table->boolean('is_element_access')->default(false)->nullable(false)
-                ->comment('If true can only be read and set by the element owner group');
 
 
 
@@ -101,7 +99,9 @@ return new class extends Migration
             'is_private',
             'is_public',
             'is_public_domain',
-            'is_protected'
+            'is_protected',
+            'is_element_private',
+            'is_element_protected'
             );");
 
         DB::statement("ALTER TABLE attributes Add COLUMN access_policy type_of_server_access NOT NULL default 'is_private';");

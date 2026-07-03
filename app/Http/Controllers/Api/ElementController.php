@@ -9,6 +9,7 @@ use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\ElementData;
 use App\Data\ApiParams\Data\Elements\Params\ReadElementParamData;
 use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
+use App\Data\ApiParams\Data\Elements\Params\WriteElementParamData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
 use App\Data\ApiParams\Data\Elements\Responses\ElementReadingList;
 use App\Data\ApiParams\Data\Sets\Params\CreateSetParamData;
@@ -16,17 +17,14 @@ use App\Data\ApiParams\Data\Sets\SetData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
+use App\Models\Attribute;
 use App\Models\Element;
 use App\Models\ElementSet;
 
 use App\Models\Phase;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Elements\ApiElementActionResponse;
-use App\OpenApi\ApiResults\Elements\ApiElementResponse;
 use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
-use App\OpenApi\Params\Actioning\Element\ElementSelectParams;
 use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Params\Listing\Elements\ShowElementParams;
 use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -254,54 +252,45 @@ class ElementController extends Controller {
     }
 
 
-
-
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Patch(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/write_attribute',
+        path: '/api/v1/{user_namespace}/elements/write',
         operationId: 'core.elements.write_attribute',
         description: "Write one or more elements found in a path, that have the same attributes. If one can. ",
         summary: 'Write json to the same attributes of one or more elements',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ElementSelectParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: WriteElementParamData::class)),
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Write attribute', content: new JsonContent(ref: ApiElementActionResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_NO_CONTENT, description: 'Wrote the attribute'),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Set\AttributeWrite::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
     #[ApiTypeMarker( Root\Api\Element\WriteAttribute::class)]
-    public function write_attribute(Phase $working_phase, Element $element, Request $request) {
-        $params = new ElementSelectParams(elements: [$element], given_phase: $working_phase);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\WriteAttribute(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['write-attribute']);
+    public function write_attribute( UserNamespace $namespace,Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = WriteElementParamData::fromRequest($request);
+        $data_out = Root\Api\Element\WriteAttribute::write(params: $params,calling_namespace: $namespace,is_system: false, tags: ['api-top']);
+        $http_code = CodeOf::HTTP_NO_CONTENT;
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+
+        return  response()->json($data_out,$http_code);
     }
 
 
@@ -695,49 +684,7 @@ class ElementController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/show',
-        operationId: 'core.elements.show_element',
-        description: "Element members can see details about an element",
-        summary: 'Shows the value and information about an element',
-        security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ShowElementParams::class)),
-        tags: ['element'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-        ],
-        responses: [
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Element info returned', content: new JsonContent(ref: ApiElementResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Element\ShowElement::class)]
-    public function show_element(Element $element,Request $request) {
-        $params = new ShowElementParams(given_element: $element);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\ShowElement(params: $params, is_async: false, tags: ['api-top']);
-        $api->createThingTree(tags: ['show-element']);
-
-        $data_out = $api->getDataSnapshot();
-        return  response()->json(['response'=>$data_out],$api->getCode());
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/list',
+        path: '/api/v1/{user_namespace}/elements/list',
         operationId: 'core.elements.list_elements',
         description: "Element members can see a list of all the elements of namespaces they belong",
         summary: 'Shows list of elements',
@@ -746,10 +693,7 @@ class ElementController extends Controller {
         tags: ['element'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) )
 
         ],
         responses: [

@@ -75,6 +75,14 @@ class ElementTypeIncludedAttribute extends Model
             ->get();
     }
 
+    /**
+     * @return int[]
+     */
+    public static function filterTypeIdsByAttributes( array $type_ids,array $attribute_ids ) {
+        $found_type_ids =  static::buildIncluded(included_type_ids: $type_ids,included_attribute_ids: $attribute_ids)->pluck('included_type_id')->toArray();
+        return array_intersect($type_ids,$found_type_ids);
+    }
+
 
     /**
      * Clears out records from before for this type and then gets all the included attributes

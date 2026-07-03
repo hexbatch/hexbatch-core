@@ -6,8 +6,6 @@ namespace App\Sys\Res\Types;
 use App\Enums\Sys\TypeOfFlag;
 use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchInitException;
-use App\Exceptions\HexbatchPermissionException;
-use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Models\ActionCollection;
 use App\Models\ActionDatum;
@@ -39,12 +37,11 @@ use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds\DesignParentAdd;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\TypePublish;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\Response;
 
 
 abstract class BaseType implements IDocument, \JsonSerializable
 {
-    use ActionableBaseTrait,DocumentTrait;
+    use ActionableBaseTrait,DocumentTrait, GetFromArrayTrait,ChildrenTrait,GroupTrait;
 
     protected ?ElementType $type = null;
 
@@ -557,241 +554,12 @@ abstract class BaseType implements IDocument, \JsonSerializable
         return $this->toArray();
     }
 
-    protected static function checkIfGivenIsAdmin(UserNamespace $given , ?UserNamespace $target) {
-        if (!$target) {
-            throw new \LogicException("target namespace is null");
-        }
-        if (!$target->isNamespaceAdmin($given)  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_admin",['ref'=>$target->getName()]),
-                Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
-        }
-    }
-
-    protected static function checkIfGivenIsOwner(UserNamespace $given , ?UserNamespace $target) {
-        if (!$target) {
-            throw new \LogicException("target namespace is null");
-        }
-        if (!$target->isNamespaceOwner($given)  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_owner",['ref'=>$target->getName()]),
-                Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
-        }
-    }
-
-    protected static function checkIfGivenIsMember(UserNamespace $given , ?UserNamespace $target) {
-        if (!$target) {
-            throw new \LogicException("target namespace is null");
-        }
-        if (!$target->isNamespaceMember($given)  ) {
-            throw new HexbatchPermissionException(__("msg.namespace_not_member",['ref'=>$target->getName()]),
-                Response::HTTP_FORBIDDEN,
-                RefCodes::NAMESPACE_NOT_ADMIN);
-        }
-    }
-
-
-    protected static function getNamespaceFromArray(string $array_key, array $source) : UserNamespace {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set namespace");}
-        if ( ($found = $source[$array_key])  instanceof UserNamespace) {return $found;}
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return UserNamespace::getThisNamespace(uuid: $ref );
-        }
-        throw new \LogicException("Could not find namespace in $array_key");
-    }
-
-    protected static function getPhaseFromArray(string $array_key, array $source) : Phase {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for phase");}
-        if ( ($found = $source[$array_key])  instanceof UserNamespace) {return $found;}
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return Phase::getThisPhase(uuid: $ref );
-        }
-        throw new \LogicException("Could not find phase in $array_key");
-    }
-
-    protected static function getServerFromArray(string $array_key, array $source,bool $b_throw_exception = false) : ?Server {
-        if (!isset($source[$array_key])) {
-            if ($b_throw_exception) {
-                throw new \LogicException("No array key set for server");
-            } else {
-                return null;
-            }
-
-        }
-        if ( ($found = $source[$array_key])  instanceof Server) {return $found;}
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return Server::getThisServer(uuid: $ref );
-        }
-        throw new \LogicException("Could not find server in $array_key");
-    }
 
 
 
-    protected static function getTypeFromArray(string $array_key, array $source) : ElementType {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for type");}
-        if ( ($found = $source[$array_key])  instanceof ElementType) {return $found;}
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return ElementType::getElementType(uuid: $ref );
-        }
-        throw new \LogicException("Could not find element type in $array_key");
-    }
-
-    protected static function getElementFromArray(?string $array_key, array $source) : Element {
-        if ($array_key)
-        {
-            if (!isset($source[$array_key])) {throw new \LogicException("No array key set for element");}
-            if ( ($found = $source[$array_key])  instanceof Element) {return $found;}
-        } else {
-            $found = $source;
-        }
-
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return Element::getThisElement(uuid: $ref );
-        }
-        throw new \LogicException("Could not find element in $array_key");
-    }
-
-    protected static function getSetFromArray(?string $array_key, array $source,bool $throw_if_missing = true)
-    : null|ElementSet
-    {
-        if ($array_key)
-        {
-            if (!isset($source[$array_key])) {
-                if ($throw_if_missing)
-                {
-                    throw new \LogicException("No array key made for set");
-                } else {
-                    return null;
-                }
-
-            }
-            if ( ($found = $source[$array_key])  instanceof ElementSet) {return $found;}
-        } else {
-            $found = $source;
-        }
-
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return ElementSet::getThisSet(uuid: $ref );
-        }
-        throw new \LogicException("Could not find set in $array_key");
-    }
-
-    /**
-     * @return Collection<Element>|null
-     */
-    protected static function getElementCollectionFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Collection {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for collection");}
-        /** @var Collection $found */
-        if ( ($found = $source[$array_key])  instanceof Collection) {
-            return $found;
-        }
-        //might be array of stuff that has ref
-        if (is_array($found) || is_iterable($found)) {
-            return collect($found);
-        }
-        if ($throw_if_missing) {
-            throw new \LogicException("Could not find element collection in $array_key");
-        }
-        return null;
-
-    }
 
 
-    protected static function getCollectionFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Collection {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for generic collection");}
-        /** @var Collection $found */
-        if ( ($found = $source[$array_key])  instanceof Collection) {
-            return $found;
-        }
-        //might be array of stuff that has ref
-        if (is_array($found) || is_iterable($found)) {
-            return collect($found);
-        }
-        if ($throw_if_missing)
-        {
-            throw new \LogicException("Could not find collection in $array_key");
-        }
 
-
-    }
-
-    protected static function getLocationFromArray(string $array_key, array $source) : ?LocationBound {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for location");}
-        if ( ($found = $source[$array_key])  instanceof LocationBound) {return $found;}
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return LocationBound::getThisLocation(uuid: $ref );
-        }
-        throw new \LogicException("Could not find location bound in $array_key");
-    }
-
-    protected static function getScheduleFromArray(string $array_key, array $source) : ?TimeBound {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for schedule");}
-        if ( ($found = $source[$array_key])  instanceof TimeBound) {return $found;}
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return TimeBound::getThisSchedule(uuid: $ref );
-        }
-        throw new \LogicException("Could not find schedule bound in $array_key");
-    }
-
-    protected static function getAttributeFromArray(string $array_key, array $source) : ?Attribute {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for attribute");}
-        if ( ($found = $source[$array_key])  instanceof Attribute) {return $found;}
-        $ref = null;
-        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
-        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
-        if ($ref) {
-            return Attribute::getThisAttribute(uuid: $ref );
-        }
-        throw new \LogicException("Could not find attribute in $array_key");
-    }
-
-    const CHILD_DECISION_KEY = 'child_decision';
-
-    public static function getDecisionUsingAndLogic(array $children_args) : bool {
-        if (empty($children_args)) {return true;}
-
-        foreach ($children_args as $key => $part) {
-            if ($key === static::CHILD_DECISION_KEY) {
-                if ($part === false) {
-                    return false;
-                }
-            }
-            if (is_array($part)) {
-                foreach ($part as $p_key => $p_part) {
-                    if ($p_key === static::CHILD_DECISION_KEY) {
-                        if ($p_part === false) {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-       return true;
-    }
 
 }
 

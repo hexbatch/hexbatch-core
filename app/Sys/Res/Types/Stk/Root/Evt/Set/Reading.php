@@ -45,7 +45,7 @@ class Reading extends Evt\ScopeSet implements ICommandCallable
     }
 
     protected static function fromArray(array $args) : static {
-        $read_events = static::getCollectionFromArray('read_events',$args);
+        $read_events = static::getEventCollectionFromArray('read_events',$args,false);;
         $given_set_ref = $args['given_set_ref']??null;
 
         return new static(given_set_ref: $given_set_ref, read_events: $read_events);

@@ -114,7 +114,8 @@ class Element extends Model implements ISystemModel
         bool    $b_do_namespace_type_relation = false,
         bool    $b_do_type_relation = false,
         ?int    $not_member_set_id = null,
-        bool    $b_use_select = true
+        bool    $b_use_select = true,
+        bool    $b_check_visiblity = false
 
     ): Builder
     {
@@ -190,6 +191,8 @@ class Element extends Model implements ISystemModel
         }
 
 
+
+
         if($type_id) {
             $build->where('elements.element_parent_type_id', $type_id);
         }
@@ -258,6 +261,44 @@ class Element extends Model implements ISystemModel
                         ->where('sem.ref_uuid', $set_ref);
                 }
             );
+        }
+
+
+        if ($b_check_visiblity) {
+
+
+            if ($set_id) {
+                $build->leftJoin('element_visibilities el_vis',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join) use($set_id,$set_ref) {
+                        $join->on('el_vis.visible_element_id', '=', 'elements.id')
+                            ->where('sem.id','=','el_vis.visible_set_member_id')
+                            ->orWhere('el_vis.is_visible',true);
+                    }
+                );
+            } elseif ($set_ref) {
+                $build->leftJoin('element_visibilities el_vis',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join) use($set_id,$set_ref) {
+                        $join->on('el_vis.visible_element_id', '=', 'elements.id')
+                            ->where('semp.id','=','el_vis.visible_set_member_id')
+                            ->orWhere('el_vis.is_visible',true);
+                    }
+                );
+            } else {
+                $build->leftJoin('element_visibilities el_vis',
+                    /** @param JoinClause $join */
+                    function (JoinClause $join) use($set_id,$set_ref) {
+                        $join->on('el_vis.visible_element_id', '=', 'elements.id')
+                            ->whereNull('el_vis.visible_set_member_id')
+                            ->orWhere('el_vis.is_visible',true);
+                    }
+                );
+
+            }
+
+            $build->whereNull('el_vis.id');
+
         }
 
         if ($attribute_id) {
@@ -466,13 +507,6 @@ class Element extends Model implements ISystemModel
 
     }
 
-    /** @return \Illuminate\Support\Collection */
-    public static function getElementIdsFromParams(SelectElementParamData $params)
-    {
-        return static::getBuilderFromParams(params: $params, b_ns_relations: false,
-            b_type_relations: false, b_ns_type_relations: false
-        )->pluck('id');
-    }
 
 
     public static function getBuilderFromParams(SelectElementParamData $params,
@@ -485,7 +519,7 @@ class Element extends Model implements ISystemModel
             given_uuids: $params->element_refs, set_ref: $params->set_ref, phase_ref: $params->phase_ref,
             type_ref: $params->type_ref, namespace_ref: $params->namespace_ref, exposed_attribute_ref: $params->attribute_ref,
             b_do_namespace_relation: $b_ns_relations, b_do_namespace_type_relation: $b_ns_type_relations,
-            b_do_type_relation: $b_type_relations,not_member_set_id: $not_member_set_id
+            b_do_type_relation: $b_type_relations,not_member_set_id: $not_member_set_id,b_check_visiblity: true
         );
 
     }

@@ -167,6 +167,8 @@ return [
     'elements_mising_from_destroy_list' => 'When deleting elements, there were no elements listed',
     'elements_do_not_have_all_permissions' => 'The calling namespace :ref is not an admin for all the elements listed',
     'element_not_in_phase' => 'Element :ref has phase :set_phase, which is different from  :other_phase',
+    'element_not_have_attribute' => 'Element :ref does not have attribute :attr',
+    'cannot_write_to_element_attribute' => 'The attrribute :ref cannot be written for you selection of elements',
 
     //sets
     'set_not_found' => 'Set not found using :ref',
