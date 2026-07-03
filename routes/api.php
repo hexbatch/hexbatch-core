@@ -417,9 +417,17 @@ Route::prefix('v1')->group(function () {
 
 
             Route::prefix('sets')->group(function () {
+                Route::get('list', [Api\SetController::class, 'list_sets'])->name('core.sets.list');
+
+                Route::prefix('set')->group(function () {
+                    Route::prefix('{element_set}')->group(function () {
+                        Route::get('show_set', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
+                        Route::get('list_elements', [Api\SetController::class, 'list_elements'])->name('core.sets.list_elements');
+                    });
+                });
 
                 Route::prefix('phase/{working_phase}')->group(function () {
-                    Route::get('list', [Api\SetController::class, 'list_sets'])->name('core.sets.list');
+
                     Route::prefix('set')->group(function () {
                         Route::prefix('{element_set}')->group(function () {
                             Route::middleware(Middleware\ValidatePhaseOfSet::class)->group(function () {
@@ -431,16 +439,6 @@ Route::prefix('v1')->group(function () {
                                     Route::patch('stick_element', [Api\SetController::class, 'stick_elements'])->name('core.sets.stick_element');
                                     Route::post('add_element', [Api\SetController::class, 'add_element'])->name('core.sets.add_element');
                                     Route::delete('remove_element', [Api\SetController::class, 'remove_element'])->name('core.sets.remove_element');
-                                });
-
-
-                                Route::middleware([])->group(function () {
-
-
-                                    Route::get('show_set', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
-                                    Route::get('list_children', [Api\SetController::class, 'list_children'])->name('core.sets.list_children');
-                                    Route::get('list_elements', [Api\SetController::class, 'list_elements'])->name('core.sets.list_elements');
-
                                 });
                             });
                         });

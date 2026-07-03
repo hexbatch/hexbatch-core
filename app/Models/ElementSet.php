@@ -95,7 +95,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
     }
 
     public function defining_element() : BelongsTo {
-        return $this->belongsTo(Element::class,'parent_set_element_id');
+        return $this->belongsTo(Element::class,'parent_set_element_id')->with('element_phase')->with('element_namespace');
     }
 
     public function defining_type() : HasOneThrough {
@@ -125,6 +125,7 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         ?int            $type_id = null,
         ?int            $phase_id = null,
         ?int            $namespace_id = null,
+        array           $defining_element_ids = [],
         array           $in_namespace_ids = [],
         bool            $b_do_relations = false
 
@@ -146,6 +147,11 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         if ($uuid) {
             $build->where('element_sets.ref_uuid', $uuid);
         }
+
+        if (count($defining_element_ids)) {
+            $build->whereIn('element_sets.parent_set_element_id', $defining_element_ids);
+        }
+
 
         if ($parent_set_id ) {
             $build->join('element_set_members sim',

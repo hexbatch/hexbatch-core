@@ -55,7 +55,7 @@ trait ListTypeTrait
             is_system: $is_system,
             lifecycle: $lifecycle
         )->orderBy('type_name');
-        $cursor = $build->cursorPaginate(perPage: 15, cursor: $params->cursor);
+        $cursor = $build->cursorPaginate(perPage: config('hbc.pagination.default_page_size'), cursor: $params->cursor);
         return ElementTypeData::collect($cursor, CursorPaginatedDataCollection::class);
     }
 }

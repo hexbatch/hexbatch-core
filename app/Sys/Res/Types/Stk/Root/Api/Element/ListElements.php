@@ -30,11 +30,11 @@ class ListElements extends Api\ElementApi
      */
     public static function listElements(SelectElementParamData $params,UserNamespace $caller_namespace) {
         Utilities::ignoreVar($caller_namespace);
-        
+
         $build = Element::getBuilderFromParams(
             params: $params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: true);
 
-        $cursor = $build->cursorPaginate(perPage: 15, cursor: $params->cursor);
+        $cursor = $build->cursorPaginate(perPage: config('hbc.pagination.default_element_limit'), cursor: $params->cursor);
         return ElementData::collect($cursor, CursorPaginatedDataCollection::class);
     }
 

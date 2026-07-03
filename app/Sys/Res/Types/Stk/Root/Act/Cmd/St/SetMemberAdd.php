@@ -86,7 +86,10 @@ class SetMemberAdd extends Act\Cmd\St
     )
     {
         if (!$this->selected_elements) {
-            $this->selected_elements = $this->getSelectedElements();
+            $this->params->selection->phase_ref = $this->given_set->defining_element->element_phase->ref_uuid;
+            $this->selected_elements = Element::getElementsFromParams(
+                params: $this->params->selection, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,not_member_set_id: $this->given_set->id);
+
         }
 
     }
@@ -130,11 +133,7 @@ class SetMemberAdd extends Act\Cmd\St
             data: [static::CHILD_DECISION_KEY =>$b_approved,'members'=>$added_members]);
     }
 
-    protected function getSelectedElements() : Collection {
-        //gets elements from params
-        return  Element::getElementsFromParams(
-            params: $this->params->selection, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,not_member_set_id: $this->given_set->id);
-    }
+
 
     /**
      * @return Collection<ElementSetMember>
