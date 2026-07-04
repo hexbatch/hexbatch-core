@@ -330,7 +330,7 @@ Route::prefix('v1')->group(function () {
 
             Route::prefix('elements')->group(function () {
 
-                Route::delete('destroy', [Api\ElementController::class, 'destroy_elements'])->name('core.elements.destroy');
+
 
                 Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
                     Route::delete('purge', [Api\ElementController::class, 'purge_elements'])->name('core.elements.purge');
@@ -339,9 +339,12 @@ Route::prefix('v1')->group(function () {
                 Route::get('read', [Api\ElementController::class, 'read_elements'])->name('core.elements.read');
                 Route::get('list', [Api\ElementController::class, 'list_elements'])->name('core.elements.list_elements');
 
-                Route::patch('write', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
 
                 Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                    Route::patch('write', [Api\ElementController::class, 'write_attribute'])->name('core.elements.write_attribute');
+                    Route::patch('change_phase/{phase}', [Api\ElementController::class, 'change_phase'])->name('core.elements.change_phase');
+                    Route::delete('destroy', [Api\ElementController::class, 'destroy_elements'])->name('core.elements.destroy');
+
                     Route::prefix('switch')->group(function () {
                         Route::patch('off', [Api\ElementController::class, 'switch_off'])->name('core.elements.switch.off');
                         Route::patch('on', [Api\ElementController::class, 'switch_on'])->name('core.elements.switch.on');
@@ -352,8 +355,6 @@ Route::prefix('v1')->group(function () {
 
 
                 Route::prefix('phase/{working_phase}')->group(function () {
-
-
 
                         Route::prefix('element/{element}')->group(function () {
 

@@ -137,6 +137,7 @@ enum TypeOfEvent: string
     case PHASE_CUTTING = 'phase_cutting';
     case PHASE_REPLACING = 'phase_replacing';
     case ELEMENT_PHASE_CHANGE_BATCH = 'element_phase_change_batch';
+    case ELEMENT_PHASE_CHANGED_QUIET = 'element_phase_changed_quiet';
 
     /*
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._

@@ -95,6 +95,50 @@ class ElementController extends Controller {
      * @throws \Throwable
      */
     #[OA\Patch(
+        path: '/api/v1/{user_namespace}/elements/change_phase/phase',
+        operationId: 'core.elements.change_phase',
+        description: "Element admin group can change the elements to another phase, but need to be in the phase's group",
+        summary: 'Change the phase of elements',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
+        tags: ['element'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'phase', description: "The phase to use",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'phase changed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiEventMarker( Evt\Type\PhaseChangedQuiet::class)]
+    public function change_phase(UserNamespace $namespace, Phase $phase ,Request $request) {
+        $params = SelectElementParamData::fromRequest($request);
+        $data_out =  Root\Api\Element\ChangePhase::doElementChangePhase(
+            params: $params,  given_phase: $phase, calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    #[OA\Patch(
         path: '/api/v1/{user_namespace}/elements/switch/off',
         operationId: 'core.elements.switch.off',
         description: "Element admin group turn off attributes in groups of subtype (parent types) in elements inside sets given by a path ",

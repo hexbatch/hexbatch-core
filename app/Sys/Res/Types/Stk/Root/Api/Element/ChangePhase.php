@@ -3,9 +3,10 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Element;
 
 
-use App\Data\ApiParams\Data\Elements\ElementData;
+use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
-use App\Models\Element;
+use App\Models\Phase;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
@@ -17,15 +18,14 @@ use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Spatie\LaravelData\CursorPaginatedDataCollection;
 
-
-class ChangeOwner extends Api\ElementApi implements ICommandCallable
+#[ApiParamMarker( param_class: SelectElementParamData::class)]
+class ChangePhase extends Api\ElementApi implements ICommandCallable
 {
-    const UUID = '513a16a3-cbb5-4f6e-a6e4-4e7b90b0a1c6';
-    const TYPE_NAME = 'api_element_change_owner';
+    const UUID = '4d95fc86-a5ae-4c08-8d73-6d1810263c62';
+    const TYPE_NAME = 'api_element_change_phase';
 
 
 
@@ -40,7 +40,7 @@ class ChangeOwner extends Api\ElementApi implements ICommandCallable
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        Log::debug("Called api create element node");
+        Log::debug("Called api change phase node");
         $b_approved = static::getDecisionUsingAndLogic($children_args);
         return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,data: $children_args);
     }
@@ -48,13 +48,12 @@ class ChangeOwner extends Api\ElementApi implements ICommandCallable
     /**
      * @throws \Throwable
      */
-    public static function doElementChangeOwner(
-        UserNamespace             $owner_namespace,
+    public static function doElementChangePhase(
+        SelectElementParamData    $params,
+        Phase                     $given_phase,
         UserNamespace             $calling_namespace,
         bool                      $is_system,
 
-        /** @var Collection<Element>        $given_elements */
-        Collection                $given_elements,
         array $tags = [], ?IThangBuilder $builder = null
     ) : ElementList|Thang|CursorPaginatedDataCollection
     {
@@ -70,9 +69,10 @@ class ChangeOwner extends Api\ElementApi implements ICommandCallable
             ->tree($my_command);
 
 
-        Act\Cmd\Ele\ElementOwnerChange::changeElementOwnerTree(
-            owner_namespace: $owner_namespace, is_system: $is_system, calling_namespace: $calling_namespace,
-            given_elements: $given_elements, builder: $builder);
+        Act\Cmd\Ele\ElementPhaseChange::changeElementPhaseTree(
+            params: $params,
+            given_phase: $given_phase, is_system: $is_system, calling_namespace: $calling_namespace,
+            builder: $builder);
 
 
         $thang = $builder->execute()->getThang();

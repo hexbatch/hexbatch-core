@@ -3,6 +3,8 @@
 
 namespace App\Sys\Res\Types;
 
+use App\Data\ApiParams\Data\Elements\ElementData;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
 use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
@@ -15,6 +17,8 @@ use App\Models\Server;
 use App\Models\TimeBound;
 use App\Models\UserNamespace;
 use Illuminate\Support\Collection;
+use Spatie\LaravelData\CursorPaginatedDataCollection;
+use Spatie\LaravelData\DataCollection;
 use TorMorten\Eventy\Facades\Eventy;
 
 trait GetFromArrayTrait
@@ -247,5 +251,41 @@ trait GetFromArrayTrait
             return Attribute::getThisAttribute(uuid: $ref );
         }
         throw new \LogicException("Could not find attribute in $array_key");
+    }
+
+    const CURSOR_ALL_LENGTH = -1;
+    protected static function rebuildElementList(array $data,string $key,$cursor = null,?int $length = null ): ElementList
+    {
+        /** @var Collection<Element> $elements */
+        $elements = $data[$key]??null;
+        if ($elements === null) {
+            throw new \LogicException("[rebuildElementList] Key $key not set");
+        }
+        if (count($elements) === 0) {
+            /** @type ElementList */
+            return ElementData::collect([], DataCollection::class);
+
+        }
+
+        $refs = [];
+        foreach ($elements as $el) {
+            $refs[] = $el->ref_uuid;
+        }
+        $build = Element::buildElement(
+            given_uuids: $refs
+        )->orderBy('id');
+
+        if ($length === static::CURSOR_ALL_LENGTH) {
+            $out = $build->cursorPaginate(perPage: count($refs));
+        }
+        elseif ($length === null ) {
+            $out = $build->cursorPaginate(perPage: config('hbc.pagination.default_element_limit'), cursor: $cursor);
+        }
+        else {
+            $out = $build->cursorPaginate(perPage: $length, cursor: $cursor);
+        }
+
+        /** @type ElementList */
+        return ElementData::collect($out, CursorPaginatedDataCollection::class);
     }
 }

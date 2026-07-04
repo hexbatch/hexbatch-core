@@ -72,21 +72,7 @@ class SwitchOff extends Api\ElementApi implements ICommandCallable
 
         $thang = $builder->execute()->getThang();
         if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
-            $data = $thang->finished_data;
-
-            /** @var Collection $elements */
-            $elements = $data['elements']??null;
-            $refs = [];
-            foreach ($elements as $el) {
-                $refs[] = $el->ref_uuid;
-            }
-            $build = Element::buildElement(
-                given_uuids: $refs
-            )->orderBy('id');
-
-            $cursor = $build->cursorPaginate(perPage: $elements->count());
-
-            return ElementData::collect($cursor, CursorPaginatedDataCollection::class);
+            return static::rebuildElementList(data: $thang->finished_data,key: 'elements',length: static::CURSOR_ALL_LENGTH);
         } else {
             return $thang;
         }

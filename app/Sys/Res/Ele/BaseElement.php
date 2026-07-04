@@ -15,7 +15,7 @@ use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Namespaces\ISystemNamespace;
 use App\Sys\Res\Namespaces\Stock\ThisNamespace;
 use App\Sys\Res\Types\ISystemType;
-use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementEdit;
+use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\ElementPhaseChange;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ty\ElementCreate;
 
 
@@ -110,12 +110,12 @@ class BaseElement implements ISystemElement
             return;
         }
         try {
-            $changer = new ElementEdit(given_element_uuid: $this->getElementObject()->getUuid(),
-                change_phase_uuid: Phase::getDefaultPhase()->ref_uuid,is_system: true,send_event: false );
 
-            $changer->runAction();
+            ElementPhaseChange::changeElementPhaseTree(params: null,given_phase: Phase::getDefaultPhase(),
+                is_system: true,calling_namespace: static::getSystemNamespaceClass()::getDictionaryObject()->getNamespaceObject() );
 
-        } catch (\Exception $e) {
+
+        } catch (\Throwable $e) {
             throw new HexbatchInitException(message: $e->getMessage() . ': code ' . $e->getCode(), prev: $e);
         }
     }
