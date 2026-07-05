@@ -3,13 +3,16 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt\Type;
 
 use App\Enums\Sys\TypeOfEvent;
+use App\Models\Element;
+use App\Models\ElementSet;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
 /**
  * there was a phase edit action and the type was added into one or more places
  */
-class PhaseChangedQuiet extends Evt\ScopeType
+class PhaseChangedQuiet extends Evt\ScopeType implements ICommandCallable
 {
     use Evt\Element\Traits\ElementNotificationEventTree;
 
@@ -20,6 +23,14 @@ class PhaseChangedQuiet extends Evt\ScopeType
     const PARENT_CLASSES = [
         Evt\ScopeType::class
     ];
+
+    public function __construct(
+        protected Element             $given_element,
+        protected ?ElementSet             $given_set
+    )
+    {
+
+    }
 
     /**
      * @throws \Throwable

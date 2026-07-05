@@ -7,9 +7,10 @@ use App\Models\Element;
 use App\Models\ElementSet;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
 
-class SwitchedOff extends Evt\ScopeSet
+class SwitchedOff extends Evt\ScopeSet  implements ICommandCallable
 {
     use Evt\Element\Traits\ElementNotificationEventTree;
 

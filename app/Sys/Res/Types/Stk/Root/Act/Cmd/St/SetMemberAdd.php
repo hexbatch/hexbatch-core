@@ -88,7 +88,8 @@ class SetMemberAdd extends Act\Cmd\St
         if (!$this->selected_elements) {
             $this->params->selection->phase_ref = $this->given_set->defining_element->element_phase->ref_uuid;
             $this->selected_elements = Element::getElementsFromParams(
-                params: $this->params->selection, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,not_member_set_id: $this->given_set->id);
+                params: $this->params->selection, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,
+                not_member_set_id: $this->given_set->id,cursor: $this->params->selection->cursor);
 
         }
 

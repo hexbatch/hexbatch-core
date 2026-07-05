@@ -17,20 +17,15 @@ use App\Data\ApiParams\Data\Sets\SetData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
-use App\Models\Attribute;
 use App\Models\Element;
 use App\Models\ElementSet;
 
 use App\Models\Phase;
 use App\Models\UserNamespace;
-use App\OpenApi\ApiResults\Set\ApiLinkerResponse;
-use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Results\Callbacks\HexbatchCallbackCollectionResponse;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Data\ThangData;
 use Hexbatch\Thangs\Models\Thang;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use OpenApi\Attributes as OA;
@@ -673,54 +668,101 @@ class ElementController extends Controller {
 
     /**
      * @throws \Exception
+     * @throws \Throwable
      */
     #[OA\Post(
-        path: '/api/v1/{user_namespace}/elements/phase/{working_phase}/element/{element}/link/{element_set}',
+        path: '/api/v1/{user_namespace}/elements/link/add',
         operationId: 'core.elements.link',
         description: "Anyone can make a link from an element they administer to a target set, or sets. The element does not have to belong to the set ".
         "\n The link can be assigned to another namespace, they can reject that. The linked set can reject the link",
         summary: 'Makes a link between an element and a set',
         security: [['bearerAuth' => []]],
-        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LinkCreateParams::class)),
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
         tags: ['element','set','link'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'working_phase', description: "The phase the element is in",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-            new OA\PathParameter(  name: 'element', description: "The element",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
             new OA\PathParameter(  name: 'element_set', description: "The set",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
 
         ],
         responses: [
-            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: ApiLinkerResponse::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThingResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Success but other callbacks',
-                content: new JsonContent(ref: HexbatchCallbackCollectionResponse::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Link created', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
     #[ApiEventMarker( Evt\Server\LinkCreated::class)]
     #[ApiEventMarker( Evt\Server\LinkCreating::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Link::class)]
-    public function create_link(Request $request,Element $element,ElementSet $set) {
-        $params = new LinkCreateParams(given_element: $element,given_set: $set);
-        $params->fromCollection(new Collection($request->all()));
-        $api = new Root\Api\Element\Link(params: $params, is_async: true, tags: ['api-top']);
-        $api->createThingTree(tags: ['create-link']);
+    public function create_link(UserNamespace $namespace,ElementSet $set,Request $request) {
 
-        $data_out = $api->getCallbackResponse($http_code);
-        return  response()->json(['response'=>$data_out],$http_code);
+        $params = SelectElementParamData::fromRequest($request);
+        $params->phase_ref = $set->defining_element->element_phase->ref_uuid;
+        $data_out =  Root\Api\Element\Link::doAddLink(
+            params: $params,  given_set: $set, calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+
+    /**
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    #[OA\Delete(
+        path: '/api/v1/{user_namespace}/elements/link/unlink/{element_set}',
+        operationId: 'core.links.unlink',
+        description: "Link admin can remove a links they control",
+        summary: 'Destroys a link',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: SelectElementParamData::class)),
+        tags: ['link'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'element_set', description: "The set used",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) )
+
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Link removed', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
+        ]
+    )]
+    #[ApiEventMarker( Evt\Server\LinkDestroyed::class)]
+    #[ApiEventMarker( Evt\Server\LinkDestroying::class)]
+    #[ApiAccessMarker( TypeOfAccessMarker::LINK_OWNER)]
+    #[ApiTypeMarker( Root\Api\Element\UnLink::class)]
+    public function unlink_link(UserNamespace $namespace,ElementSet $set,Request $request) {
+
+
+        $params = SelectElementParamData::fromRequest($request);
+        $params->phase_ref = $set->defining_element->element_phase->ref_uuid;
+        $data_out =  Root\Api\Element\UnLink::doRemoveLink(
+            params: $params,  given_set: $set, calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 

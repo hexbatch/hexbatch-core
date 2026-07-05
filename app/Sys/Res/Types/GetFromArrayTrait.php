@@ -272,7 +272,8 @@ trait GetFromArrayTrait
             $refs[] = $el->ref_uuid;
         }
         $build = Element::buildElement(
-            given_uuids: $refs
+            given_uuids: $refs,
+            b_do_namespace_relation: true, b_do_namespace_type_relation: true, b_do_type_relation: true,b_do_link_relation: true
         )->orderBy('id');
 
         if ($length === static::CURSOR_ALL_LENGTH) {

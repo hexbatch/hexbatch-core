@@ -89,7 +89,7 @@ class ElementDestroy extends Act\Cmd\Ele implements ICommandCallable
     {
         if (!$this->elements) {
             $this->elements = Element::getElementsFromParams(params: $this->params,
-                b_ns_relations: true,b_type_relations: true,b_ns_type_relations: true);
+                b_ns_relations: true,b_type_relations: true,b_ns_type_relations: true,cursor: $this->params->cursor);
 
             if (count($this->elements)  <= 0) {
                 throw new HexbatchNothingDoneException(__("msg.elements_mising_from_destroy_list"),

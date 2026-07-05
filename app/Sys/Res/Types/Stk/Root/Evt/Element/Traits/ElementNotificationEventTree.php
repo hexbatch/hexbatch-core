@@ -96,6 +96,40 @@ trait ElementNotificationEventTree
             );
         }
 
+        $col = $this->given_element->element_namespace->getEventHandlersFromNamespace( static::EVENT_NAME);
+        foreach ($col as $ref) {
+            $builder->leaf(
+                command_class: Evt\EventHandler::class,
+                command_args: (array)new Evt\EventHandler(
+                    ref: $ref,
+                    type_context: $this->given_element->element_parent_type,
+                    set_context: $this->given_set,
+                    element_context: $this->given_element,
+                    important_array: $children_args
+                ),
+                command_tags: [Evt\EventHandler::class]
+            );
+        }
+
+        if ($this->given_set) {
+            $this->given_set->loadMissing('defining_type');
+
+            $col = $this->given_set->defining_type->getEventHandlersFromTypeChain( static::EVENT_NAME);
+            foreach ($col as $ref) {
+                $builder->leaf(
+                    command_class: Evt\EventHandler::class,
+                    command_args: (array)new Evt\EventHandler(
+                        ref: $ref,
+                        type_context: $this->given_element->element_parent_type,
+                        set_context: $this->given_set,
+                        element_context: $this->given_element,
+                        important_array: $children_args
+                    ),
+                    command_tags: [Evt\EventHandler::class]
+                );
+            }
+        }
+
         if ($ret_builder) {
             return $builder;
         }

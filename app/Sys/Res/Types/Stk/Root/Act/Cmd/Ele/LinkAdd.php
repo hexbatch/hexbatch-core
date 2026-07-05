@@ -2,24 +2,28 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 
+use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Enums\Sys\TypeOfAction;
-use App\Enums\Sys\TypeOfFlag;
-use App\Models\ActionDatum;
+use App\Models\Element;
 use App\Models\ElementLink;
+use App\Models\ElementSet;
+use App\Models\ElementType;
 use App\Models\UserNamespace;
-use App\OpenApi\Params\Actioning\Element\LinkCreateParams;
-use App\OpenApi\Results\Elements\ElementResponse;
-use App\OpenApi\Results\Set\LinkResponse;
-use App\OpenApi\Results\Set\SetResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use BlueM\Tree;
-use Hexbatch\Things\Enums\TypeOfThingStatus;
-use Hexbatch\Things\Interfaces\IThingAction;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 
@@ -37,17 +41,21 @@ given_element_uuid: the element being the anchor
 Any set can be linked, if no event handler for the element,
 then only permission check is that the calling namespace is in element admin group
 
-The element and type owners will recieve a
+The element and set types  will recieve a
 
    * [LinkCreating](../../../Evt/Server/LinkCreating.php)
 
 If all report back ok, then the link is made.
 
-Once the link is made, the element and type owners will get an event
+Once the link is made, the element and type owners, and set, will get an event
    * [LinkCreated](../../../Evt/Server/LinkCreated.php)
 
 
 ')]
+#[ApiParamMarker( param_class: SelectElementParamData::class)]
+#[ApiEventMarker( Evt\Server\LinkCreated::class)] //post
+#[ApiEventMarker( Evt\Server\LinkCreating::class)] //post
+
 class LinkAdd extends Act\Cmd\Ele
 {
     const UUID = '6eaef3f7-a458-459f-85aa-75d863677101';
@@ -66,183 +74,194 @@ class LinkAdd extends Act\Cmd\Ele
         Evt\Server\LinkCreating::class,
     ];
 
-    const PRE_EVENT_CLASS = Evt\Server\LinkCreating::class;
-    const POST_EVENT_CLASS = Evt\Server\LinkCreated::class;
 
-    const bool IS_ADDING = true;
-
-    public static function getPreEventClass() : Evt\ScopeSet|string  { return static::PRE_EVENT_CLASS; }
-    public static function getPostEventClass() : Evt\ScopeSet|string  { return static::POST_EVENT_CLASS; }
-
-
-    const array ACTIVE_DATA_KEYS = ['given_set_uuid','given_element_uuid','check_permission'];
-
-
-
-    #[ApiParamMarker( param_class: LinkCreateParams::class)]
     public function __construct(
-        protected ?string              $given_set_uuid =null,
-        protected ?string              $given_element_uuid =null,
+        protected ?SelectElementParamData $params,
+        protected  ElementSet                  $given_set,
+        protected bool                    $is_system,
+        protected UserNamespace           $calling_namespace,
+
+        /** @var Collection<Element>|null        $selected_elements */
+        protected ?Collection             $selected_elements = null,
 
 
-        protected bool                $check_permission = true,
-        protected bool                $is_system = false,
-        protected bool                $send_event = true,
-        protected ?bool                $is_async = null,
-        protected ?ActionDatum        $action_data = null,
-        protected ?ActionDatum        $parent_action_data = null,
-        protected ?UserNamespace      $owner_namespace = null,
-        protected bool                $b_type_init = false,
-        protected array               $tags = []
     )
     {
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    protected function runActionInner(array $data = []): void
-    {
-        parent::runActionInner();
-
-        if (!$this->getGivenSet()) {
-            throw new \InvalidArgumentException("Need given set before making link");
-        }
-
-
-        if (!$this->getGivenElement()) {
-            throw new \InvalidArgumentException("Need given element before making link");
-        }
-
-
-        if ($this->check_permission) {
-            //must have flag set or be in admin group
-            if (!$this->hasFlag(TypeOfFlag::CAN_WRITE)) {
-                //element admin check only
-                $this->checkIfAdmin($this->getGivenElement()->element_namespace);
-            }
-        }
-
-
-        try {
-
-            DB::beginTransaction();
-            if (static::IS_ADDING) {
-               $link =  ElementLink::makeLink(el: $this->getGivenElement(),set: $this->getGivenSet());
-            } else {
-                $link = ElementLink::destroyLink(el: $this->getGivenElement(),set: $this->getGivenSet());
-            }
-            $this->setGivenLink(what: $link,b_save: true);
-            if ($this->send_event) {
-                $this->post_events_to_send = static::getPostEventClass()::makeEventActions(
-                    source: $this, action_data: $this->action_data,
-                    type_context: $this->getGivenType(),
-                    set_context: $this->getGivenSet(),
-                    element_context: $this->getGivenElement(),
-                    link_context: $link
-                );
-            }
-            DB::commit();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
+        if (!$this->selected_elements && $this->params) {
+            $this->selected_elements = Element::getElementsFromParams(
+                params: $this->params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,cursor: $this->params->cursor);
         }
 
     }
 
 
 
-    protected function getMyData() :array {
+    protected  function toArray() :array {
         return [
-            'element'=>$this->getGivenElement(),
-            'link'=>$this->getGivenLink(),
-            'set'=>$this->getGivenSet()
+            'params'=>$this->params?->toArray(),
+            'is_system'=> $this->is_system,
+            'given_set'=> $this->given_set,
+            'calling_namespace'=> $this->calling_namespace,
+            'selected_elements'=> $this->selected_elements,
         ];
     }
-
-    public function getDataSnapshot(): array
-    {
-        $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['element'])) {
-            $ret['element'] = new ElementResponse(given_element:  $what['element']);
+    protected static function fromArray(array $args) : static{
+        $params = null;
+        if (!empty($args['params']??null)) {
+            $params = SelectElementParamData::from($args['params']);
         }
 
-        if (isset($what['link'])) {
-            $ret['link'] = new LinkResponse(linker:  $what['link']);
-        }
-        if (isset($what['set'])) {
-            $ret['set'] = new SetResponse(given_set:  $what['set']);
-        }
-
-        return $ret;
-    }
-
-
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-        $this->setGivenSet($this->given_set_uuid)
-            ->setGivenElement($this->given_element_uuid);
-
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
-    }
-
-
-
-    public function getChildrenTree(): ?Tree
-    {
-
-        if ($this->send_event && $this->getGivenSet() &&  $this->getGivenElement()) {
-
-            $nodes = [];
-            $events = static::getPreEventClass()::makeEventActions(
-                source: $this, action_data: $this->action_data,
-                type_context: $this->getGivenType(),
-                set_context: $this->getGivenSet(),
-                element_context: $this->getGivenElement()
-            );
-
-
-            foreach ($events as $event) {
-                $nodes[] = ['id' => $event->getActionData()->id, 'parent' => -1, 'title' => $event->getType()->getName(),'action'=>$event];
-            }
-
-            if (count($nodes)) {
-                return new Tree(
-                    $nodes,
-                    ['rootId' => -1]
-                );
-            }
-        }
-
-        return null;
+        $is_system = (bool)$args['is_system'];
+        $given_elements = static::getElementCollectionFromArray('selected_elements',$args);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $given_set = static::getSetFromArray('given_set',$args);
+        return new static(
+            params: $params,
+            given_set: $given_set, is_system: $is_system,
+            calling_namespace: $calling_namespace, selected_elements: $given_elements);
     }
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    public function setChildActionResult(IThingAction $child): void {
-
-
-        if ($child instanceof (static::getPreEventClass()) ) {
-            if ($child->isActionError()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else if($child->isActionFail()) {
-                $this->setActionStatus(TypeOfThingStatus::THING_FAIL);
-            }
-            else if($child->isActionSuccess()) {
-                $this->setFlag(TypeOfFlag::CAN_WRITE,true);
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        $work = static::fromArray($command_args);
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        if ($b_approved) {
+            $work->doLinkOfElements();
+            foreach ($work->selected_elements as $e) {
+                $work->fireNotificationsForElement(e:$e,s:$work->given_set,children_args: $children_args);
             }
         }
 
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
+            data: [static::CHILD_DECISION_KEY =>$b_approved,'elements'=>$work->selected_elements->toArray()]);
     }
+
+
+    /**
+     * @throws \Throwable
+     */
+    protected function doLinkOfElements()
+    : void
+    {
+        if ($this->is_system) {
+            static::checkPermissions(given_elements: $this->selected_elements, calling_namespace: $this->calling_namespace);
+        }
+
+        DB::transaction(function() {
+            foreach ($this->selected_elements as $el) {
+                ElementLink::makeLink(el: $el,set: $this->given_set);
+            }
+        });
+
+
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function fireNotificationsForElement(Element $e, ?ElementSet $s, array $children_args) {
+        $callables = [
+            Evt\Server\LinkCreated::class
+        ];
+
+        foreach ($callables as $callable_class) {
+            $r = new $callable_class($e->of_element,$s);
+            $r->callTreeByItself($children_args);
+        }
+    }
+
+    /**
+     * @param Collection<Element> $given_elements
+     */
+    protected static function checkPermissions(Collection  $given_elements, UserNamespace  $calling_namespace)
+    {
+        $ns = [];
+        foreach ($given_elements as $el) {
+            $ns[$el->element_namespace->ref_uuid] = $el->element_namespace;
+        }
+        foreach ($ns as $a_ns) {
+            static::checkIfGivenIsAdmin(given: $calling_namespace,target: $a_ns);
+        }
+    }
+
+
+    /**
+     * @throws \Throwable
+     */
+    public static function linkAddTree(
+        ?SelectElementParamData    $params,
+        ElementSet                $given_set,
+        bool                      $is_system,
+        UserNamespace             $calling_namespace,
+
+        /** @var Collection<Element>        $given_elements */
+        Collection|null                $given_elements = null,
+        ?IThangBuilder $builder = null
+    ) : ElementType|Thang|IThangBuilder
+    {
+
+        if (!$is_system) {
+            static::checkPermissions(given_elements: $given_elements, calling_namespace: $calling_namespace);
+        }
+
+        $me = new static(
+            params: $params,
+            given_set: $given_set,
+            is_system: $is_system,
+            calling_namespace: $calling_namespace,
+            selected_elements: $given_elements
+        );
+
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
+        }
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+        $builder->setNamespace($calling_namespace);
+
+
+        $builder->tree(
+            command_class: static::class,
+            command_args: $me->toArray(),
+            command_tags: [static::class],
+        );
+
+        if (!$is_system)
+        {
+            $given_set = null;
+            if ($params->set_ref) {
+                $given_set = ElementSet::getThisSet(uuid:$params->set_ref);
+            }
+            foreach ($me->selected_elements as $el) {
+                Evt\Server\LinkCreating::callEventTree(
+                    given_element: $el,
+                    given_set: $given_set,
+                    builder: $builder);
+            }
+        }
+
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  ElementType::getElementType(uuid: $data['ref_uuid']);
+        } else {
+            return $thang;
+        }
+    }
+
+
+
+
 
 }
 

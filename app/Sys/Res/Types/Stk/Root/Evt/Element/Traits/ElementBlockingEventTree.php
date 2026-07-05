@@ -49,13 +49,15 @@ trait ElementBlockingEventTree
 
 
 
+
     /**
      * @throws \Throwable
      */
     protected  static function callEventTreeInner(
         Element               $given_element,
         ?ElementSet           $given_set,
-        ?IThangBuilder $builder = null
+        ?IThangBuilder $builder = null,
+        bool $b_ask_set = false
     ) : Thang|IThangBuilder
     {
 
@@ -93,6 +95,24 @@ trait ElementBlockingEventTree
                 ),
                 command_tags: [Evt\EventHandler::class]
             );
+        }
+
+        if ($b_ask_set && $me->given_set) {
+            $me->given_set->loadMissing('defining_type');
+
+            $col = $me->given_set->defining_type->getEventHandlersFromTypeChain( static::EVENT_NAME);
+            foreach ($col as $ref) {
+                $builder->leaf(
+                    command_class: Evt\EventHandler::class,
+                    command_args: (array)new Evt\EventHandler(
+                        ref: $ref,
+                        type_context: $me->given_element->element_parent_type,
+                        set_context: $me->given_set,
+                        element_context: $me->given_element
+                    ),
+                    command_tags: [Evt\EventHandler::class]
+                );
+            }
         }
 
 

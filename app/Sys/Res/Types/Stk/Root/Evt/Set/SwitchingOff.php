@@ -8,11 +8,12 @@ use App\Models\ElementSet;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use App\Sys\Res\Types\Stk\Root\Evt\Element\Traits\ElementBlockingEventTree;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 
 
-class SwitchingOff extends Evt\ScopeSet
+class SwitchingOff extends Evt\ScopeSet  implements ICommandCallable
 {
     use ElementBlockingEventTree;
 
@@ -26,7 +27,7 @@ class SwitchingOff extends Evt\ScopeSet
 
     public function __construct(
         protected Element             $given_element,
-        ?ElementSet                   $given_set
+        protected ?ElementSet                   $given_set
     )
     {
 

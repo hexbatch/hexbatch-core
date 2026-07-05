@@ -265,9 +265,6 @@ Route::prefix('v1')->group(function () {
                     Route::prefix('link')->group(function () {
                         Route::prefix('{element_link}')->group(function () {
                             Route::middleware(Middleware\ValidatePhaseOfLink::class)->group(function () {
-                                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
-                                    Route::delete('unlink', [Api\LinkController::class, 'unlink_link'])->name('core.links.unlink');
-                                });
 
                                 Route::middleware(Middleware\ValidateNamespaceMember::class)->group(function () {
                                     Route::get('show', [Api\LinkController::class, 'show_link'])->name('core.links.show');
@@ -349,6 +346,11 @@ Route::prefix('v1')->group(function () {
                         Route::patch('off', [Api\ElementController::class, 'switch_off'])->name('core.elements.switch.off');
                         Route::patch('on', [Api\ElementController::class, 'switch_on'])->name('core.elements.switch.on');
                     });
+
+                    Route::prefix('link')->group(function () {
+                        Route::post('add/{element_set}', [Api\ElementController::class, 'create_link'])->name('core.elements.link');
+                        Route::delete('unlink/{element_set}', [Api\ElementController::class, 'unlink_link'])->name('core.elements.unlink');
+                    });
                 });
 
 
@@ -384,10 +386,6 @@ Route::prefix('v1')->group(function () {
                                         });
                                     });
 
-
-                                    Route::middleware(Middleware\ValidatePhaseOfSet::class)->group(function () {
-                                        Route::post('link/{element_set}', [Api\ElementController::class, 'create_link'])->name('core.elements.link');
-                                    });
 
                                     Route::post('create_set', [Api\ElementController::class, 'create_set'])->name('core.elements.create_set');
 

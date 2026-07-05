@@ -4,6 +4,7 @@ namespace App\Models;
 
 
 use App\Data\ApiParams\Rules\ValidateNamespaceRef;
+use App\Enums\Sys\TypeOfEvent;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
@@ -21,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -570,6 +572,12 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn ($value) => $this->private_element?->ref_uuid??null,
         );
+    }
+
+    public  function getEventHandlersFromNamespace(TypeOfEvent $type_event) : Collection {
+        //get from attribute rules/server_events
+        Utilities::ignoreVar($type_event);
+        return new Collection;
     }
 
 }

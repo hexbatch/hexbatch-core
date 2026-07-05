@@ -76,7 +76,7 @@ class ElementPhaseChange extends Act\Cmd\Ele implements ICommandCallable
     {
         if (!$this->selected_elements && $this->params) {
             $this->selected_elements = Element::getElementsFromParams(
-                params: $this->params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false);
+                params: $this->params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,cursor: $this->params->cursor);
         }
 
     }
@@ -117,6 +117,9 @@ class ElementPhaseChange extends Act\Cmd\Ele implements ICommandCallable
         $b_approved = static::getDecisionUsingAndLogic($children_args);
         if ($b_approved) {
             $moved_elements = $work->changePhaseOfElements();
+            foreach ($work->selected_elements as $e) {
+                $work->fireNotificationsForElement(e:$e,s:null,children_args: $children_args);
+            }
         } else {
             $moved_elements = new Collection();
         }
@@ -143,9 +146,7 @@ class ElementPhaseChange extends Act\Cmd\Ele implements ICommandCallable
             }
         });
 
-        foreach ($this->g as $e) {
-            $this->fireNotificationsForElement(e:$e,s:$given_set,children_args: $children_args);
-        }
+
         return $this->selected_elements;
 
     }

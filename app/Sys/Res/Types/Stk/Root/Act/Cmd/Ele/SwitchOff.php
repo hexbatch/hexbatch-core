@@ -147,7 +147,7 @@ class SwitchOff extends Act\Cmd\Ele
         //gets elements from params
 
         return  Element::getElementsFromParams(
-            params: $this->params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false);
+            params: $this->params, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,cursor: $this->params->cursor);
     }
 
     protected function checkPermissions()
