@@ -15,6 +15,7 @@ use App\Models\LocationBound;
 use App\Models\Phase;
 use App\Models\Server;
 use App\Models\TimeBound;
+use App\Models\User;
 use App\Models\UserNamespace;
 use Illuminate\Support\Collection;
 use Spatie\LaravelData\CursorPaginatedDataCollection;
@@ -23,9 +24,18 @@ use TorMorten\Eventy\Facades\Eventy;
 
 trait GetFromArrayTrait
 {
-    protected static function getNamespaceFromArray(string $array_key, array $source) : UserNamespace {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set namespace");}
-        if ( ($found = $source[$array_key])  instanceof UserNamespace) {return $found;}
+    protected static function getNamespaceFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?UserNamespace {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for namespace");}
+        $found = $source[$array_key];
+        if ( $found instanceof UserNamespace) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of namespace is null");
+            } else {
+                return null;
+            }
+        }
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
         if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
@@ -35,9 +45,18 @@ trait GetFromArrayTrait
         throw new \LogicException("Could not find namespace in $array_key");
     }
 
-    protected static function getPhaseFromArray(string $array_key, array $source) : Phase {
+    protected static function getPhaseFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Phase {
         if (!isset($source[$array_key])) {throw new \LogicException("No array key set for phase");}
-        if ( ($found = $source[$array_key])  instanceof UserNamespace) {return $found;}
+        $found = $source[$array_key];
+        if ( $found instanceof Phase) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of phase is null");
+            } else {
+                return null;
+            }
+        }
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
         if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
@@ -47,16 +66,19 @@ trait GetFromArrayTrait
         throw new \LogicException("Could not find phase in $array_key");
     }
 
-    protected static function getServerFromArray(string $array_key, array $source,bool $b_throw_exception = false) : ?Server {
-        if (!isset($source[$array_key])) {
-            if ($b_throw_exception) {
-                throw new \LogicException("No array key set for server");
+    protected static function getServerFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Server {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for server");}
+        $found = $source[$array_key];
+        if ( $found instanceof Server) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of server is null");
             } else {
                 return null;
             }
-
         }
-        if ( ($found = $source[$array_key])  instanceof Server) {return $found;}
+
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
         if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
@@ -67,10 +89,43 @@ trait GetFromArrayTrait
     }
 
 
+    protected static function getUserFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?User {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for user");}
+        $found = $source[$array_key];
+        if ( $found instanceof User) {return $found;}
 
-    protected static function getTypeFromArray(string $array_key, array $source) : ElementType {
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of user is null");
+            } else {
+                return null;
+            }
+        }
+
+        $ref = null;
+        if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
+        if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
+        if ($ref) {
+            return User::getThisUser(uuid: $ref );
+        }
+        throw new \LogicException("Could not find user in $array_key");
+    }
+
+
+
+    protected static function getTypeFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?ElementType {
         if (!isset($source[$array_key])) {throw new \LogicException("No array key set for type");}
-        if ( ($found = $source[$array_key])  instanceof ElementType) {return $found;}
+        $found = $source[$array_key];
+        if ( $found instanceof ElementType) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of type is null");
+            } else {
+                return null;
+            }
+        }
+
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
         if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
@@ -80,13 +135,17 @@ trait GetFromArrayTrait
         throw new \LogicException("Could not find element type in $array_key");
     }
 
-    protected static function getElementFromArray(?string $array_key, array $source) : Element {
-        if ($array_key)
-        {
-            if (!isset($source[$array_key])) {throw new \LogicException("No array key set for element");}
-            if ( ($found = $source[$array_key])  instanceof Element) {return $found;}
-        } else {
-            $found = $source;
+    protected static function getElementFromArray(?string $array_key, array $source,bool $throw_if_missing = true) : ?Element {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for element");}
+        $found = $source[$array_key];
+        if ( $found instanceof Element) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of element is null");
+            } else {
+                return null;
+            }
         }
 
         $ref = null;
@@ -98,23 +157,19 @@ trait GetFromArrayTrait
         throw new \LogicException("Could not find element in $array_key");
     }
 
-    protected static function getSetFromArray(?string $array_key, array $source,bool $throw_if_missing = true)
+    protected static function getSetFromArray(string $array_key, array $source,bool $throw_if_missing = true)
     : null|ElementSet
     {
-        if ($array_key)
-        {
-            if (!isset($source[$array_key])) {
-                if ($throw_if_missing)
-                {
-                    throw new \LogicException("No array key made for set");
-                } else {
-                    return null;
-                }
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key for Set");}
+        $found = $source[$array_key];
+        if ( $found instanceof ElementSet) {return $found;}
 
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of set is null");
+            } else {
+                return null;
             }
-            if ( ($found = $source[$array_key])  instanceof ElementSet) {return $found;}
-        } else {
-            $found = $source;
         }
 
         $ref = null;
@@ -130,10 +185,15 @@ trait GetFromArrayTrait
      * @return Collection<Element>|null
      */
     protected static function getElementCollectionFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Collection {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for collection");}
-        /** @var Collection $found */
-        if ( ($found = $source[$array_key])  instanceof Collection) {
-            return $found;
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key for element collection");}
+        $found = $source[$array_key];
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of element collection is null");
+            } else {
+                return null;
+            }
         }
         //might be array of stuff that has ref
         if (is_array($found) || is_iterable($found)) {
@@ -166,17 +226,22 @@ trait GetFromArrayTrait
      * @return Collection<IEventReference>|null
      */
     protected static function getEventCollectionFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Collection {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for collection");}
-        /** @var Collection $found */
-        if ( ($found = $source[$array_key])  instanceof Collection) {
-            return $found;
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key for event collection");}
+        $found = $source[$array_key];
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of event collection is null");
+            } else {
+                return null;
+            }
         }
         //might be array of stuff that has ref
         if (is_array($found) || is_iterable($found)) {
             $els = [];
             $refs = [];
             foreach ($found as $el) {
-                if ($el instanceof Element) { $els[] = $el;}
+                if ($el instanceof IEventReference) { $els[] = $el;}
                 elseif (is_string($el) && Utilities::is_uuid($el)) {
                     $refs[] = $el;
                 }
@@ -200,10 +265,16 @@ trait GetFromArrayTrait
 
 
     protected static function getCollectionFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Collection {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for generic collection");}
-        /** @var Collection $found */
-        if ( ($found = $source[$array_key])  instanceof Collection) {
-            return $found;
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key for collection");}
+        $found = $source[$array_key];
+        if ( $found instanceof Collection) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of collection is null");
+            } else {
+                return null;
+            }
         }
         //might be array of stuff that has ref
         if (is_array($found) || is_iterable($found)) {
@@ -217,9 +288,18 @@ trait GetFromArrayTrait
         return null;
     }
 
-    protected static function getLocationFromArray(string $array_key, array $source) : ?LocationBound {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for location");}
-        if ( ($found = $source[$array_key])  instanceof LocationBound) {return $found;}
+    protected static function getLocationFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?LocationBound {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key for location");}
+        $found = $source[$array_key];
+        if ( $found instanceof LocationBound) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of location is null");
+            } else {
+                return null;
+            }
+        }
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
         if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
@@ -229,9 +309,18 @@ trait GetFromArrayTrait
         throw new \LogicException("Could not find location bound in $array_key");
     }
 
-    protected static function getScheduleFromArray(string $array_key, array $source) : ?TimeBound {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for schedule");}
-        if ( ($found = $source[$array_key])  instanceof TimeBound) {return $found;}
+    protected static function getScheduleFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?TimeBound {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key for schedule");}
+        $found = $source[$array_key];
+        if ( $found instanceof TimeBound) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of schedule is null");
+            } else {
+                return null;
+            }
+        }
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
         if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}
@@ -241,9 +330,18 @@ trait GetFromArrayTrait
         throw new \LogicException("Could not find schedule bound in $array_key");
     }
 
-    protected static function getAttributeFromArray(string $array_key, array $source) : ?Attribute {
-        if (!isset($source[$array_key])) {throw new \LogicException("No array key set for attribute");}
-        if ( ($found = $source[$array_key])  instanceof Attribute) {return $found;}
+    protected static function getAttributeFromArray(string $array_key, array $source,bool $throw_if_missing = true) : ?Attribute {
+        if (!isset($source[$array_key])) {throw new \LogicException("No array key for attribute");}
+        $found = $source[$array_key];
+        if ( $found instanceof Attribute) {return $found;}
+
+        if (!$found) {
+            if ($throw_if_missing) {
+                throw new \LogicException("Value of attribute is null");
+            } else {
+                return null;
+            }
+        }
         $ref = null;
         if (is_array($found) && isset($found['ref_uuid'])) {$ref = $found['ref_uuid'];}
         if (!$ref && is_object($found) && property_exists($found,'ref_uuid')) {$ref = $found->ref_uuid;}

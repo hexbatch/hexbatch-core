@@ -104,7 +104,7 @@ class NamespaceEdit extends Act\Cmd\Ns
         }
 
         if ($this->given_user_uuid) {
-            $this->action_data->data_user_id = User::getUser(uuid: $this->given_user_uuid)->id;
+            $this->action_data->data_user_id = User::getThisUser(uuid: $this->given_user_uuid)->id;
         }
         $this->action_data->save();
         $this->action_data->refresh();

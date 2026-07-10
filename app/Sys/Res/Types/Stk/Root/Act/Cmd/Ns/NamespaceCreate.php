@@ -2,13 +2,14 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
 
+use App\Annotations\ApiParamMarker;
+
+use App\Data\ApiParams\Data\Namespaces\UserNamespaceData;
+use App\Data\ApiParams\Data\User\Params\NamespaceParamData;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Types\TypeOfApproval;
-use App\Models\ActionDatum;
-use App\Models\Element;
-use App\Models\ElementSet;
-use App\Models\ElementType;
+
 use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
@@ -20,10 +21,19 @@ use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
 use App\Sys\Res\Types\Stk\Root\Namespace\PrivateType;
 use App\Sys\Res\Types\Stk\Root\Namespace\PublicType;
 use BlueM\Tree;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\Enums\TypeOfThingStatus;
 use Hexbatch\Things\Interfaces\IThingAction;
+
 use Illuminate\Support\Facades\DB;
 
+
+#[ApiParamMarker( param_class: NamespaceParamData::class)]
 class NamespaceCreate extends Act\Cmd\Ns
 {
     const UUID = '2eb062ae-f06e-4b01-8a9f-2059f2fbc40b';
@@ -41,127 +51,189 @@ class NamespaceCreate extends Act\Cmd\Ns
         Evt\Server\NamespaceCreated::class
     ];
 
-    const BASE_TYPE_POSTFIX = '_base';
 
-    protected function getBaseTypePostfix() : string {
-        return $this->base_postfix? : static::BASE_TYPE_POSTFIX;
+    public function __construct(
+        protected NamespaceParamData $params,
+        protected User $given_user,
+        protected Server $given_server,
+        protected bool                    $is_system,
+        protected ?string $use_ref = null
+    )
+    {
+
     }
+
+
+    protected  function toArray() :array {
+        return [
+            'params'=>$this->params?->toArray(),
+            'is_system'=> $this->is_system,
+            'use_ref'=> $this->use_ref,
+            'given_server'=> $this->given_server,
+            'given_user'=> $this->given_user
+        ];
+    }
+    protected static function fromArray(array $args) : static{
+        $params = null;
+        if (!empty($args['params']??null)) {
+            $params = NamespaceParamData::from($args['params']);
+        }
+
+        $is_system = (bool)$args['is_system'];
+        $use_ref = $args['use_ref']??null;
+        $given_user = static::getUserFromArray('given_user',$args);
+        $given_server = static::getServerFromArray('given_server',$args);
+
+        return new static(
+            params: $params,
+            given_user: $given_user, given_server: $given_server,
+            is_system: $is_system,
+            use_ref: $use_ref);
+    }
+
+
+    /**
+     * @throws \Throwable
+     */
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        $work = static::fromArray($command_args);
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        $namespace = null;
+        if ($b_approved) {
+            $namespace = $work->makeNamespace($children_args);
+
+            if (!$work->is_system)
+            {
+                $r = new Evt\Server\NamespaceCreated(given_type: $namespace->namespace_base_type,given_namespace: $namespace);
+                $r->callTreeByItself($children_args);
+            }
+
+        }
+
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
+            data: [static::CHILD_DECISION_KEY =>$b_approved,'namespace'=>$namespace]);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    protected function makeNamespace(array $children_args) : UserNamespace
+    {
+        $created_namespace = null;
+        DB::transaction(function() use($children_args,&$created_namespace) {
+            $base_type = static::getTypeFromArray('base_type',$children_args);
+            $public_element = static::getElementFromArray('public_element',$children_args);
+            $private_element = static::getElementFromArray('private_element',$children_args);
+            $home_set = static::getSetFromArray('home_set',$children_args);
+            $created_namespace = UserNamespace::createNamespace(
+                namespace_name: $this->params->username, owning_user_id: $this->given_user->id,
+                server_id: $this->given_server->id, ref: $this->use_ref,
+                type_id: $base_type->id,
+                public_element_id: $public_element->id,
+                private_element_id: $private_element->id,
+                home_set_id: $home_set->id,
+                public_key: $this->params->public_key, is_system: $this->is_system
+            );
+            $public_element->element_namespace_id = $created_namespace->id;
+            $public_element->save();
+
+            $public_element->element_parent_type->owner_namespace_id = $created_namespace->id;
+            $public_element->element_parent_type->save();
+
+            $private_element->element_namespace_id = $created_namespace->id;
+            $private_element->save();
+
+            $private_element->element_parent_type->owner_namespace_id = $created_namespace->id;
+            $private_element->element_parent_type->save();
+
+            $home_set->defining_element->element_namespace_id = $created_namespace->id;
+            $home_set->defining_element->save();
+
+            $home_set->defining_element->element_parent_type->owner_namespace_id = $created_namespace->id;
+            $home_set->defining_element->element_parent_type->save();
+
+            $base_type->owner_namespace_id = $created_namespace->id;
+            $base_type->save();
+        });
+
+        return $created_namespace;
+    }
+
+    const BASE_TYPE_POSTFIX = '_base';
 
     const PUBLIC_TYPE_POSTFIX = '_public';
 
-    protected function getPublicTypePostfix() : string {
-        return $this->public_postfix? : static::PUBLIC_TYPE_POSTFIX;
-    }
-
     const PRIVATE_TYPE_POSTFIX = '_private';
-
-    protected function getPrivateTypePostfix() : string {
-        return $this->private_postfix? : static::PRIVATE_TYPE_POSTFIX;
-    }
 
     const HOME_TYPE_POSTFIX = '_home';
 
-    protected function getHomeTypePostfix() : string {
-        return $this->home_postfix? : static::HOME_TYPE_POSTFIX;
-    }
 
-
-    public function getCreatedNamespace(): ?UserNamespace
+    /**
+     * @throws \Throwable
+     */
+    public static function makeCreateNamespaceTree(
+         NamespaceParamData $params,
+         User|null $given_user,
+         ?Server $given_server,
+         bool                    $is_system,
+         ?UserNamespace           $calling_namespace,
+         ?string $use_ref = null,
+         ?IThangBuilder $builder = null
+    ) : UserNamespaceData|Thang|IThangBuilder
     {
-        return $this->getGivenNamespace();
-    }
 
-
-    public function getGivenUser(): ?User
-    {   /** @uses ActionDatum::data_user() */
-        return $this->action_data->data_user;
-    }
-
-    public function getGeneratedSet(): ?ElementSet
-    {   /** @uses ActionDatum::data_set() */
-        return $this->action_data->data_set;
-    }
-
-    protected function changeHomeSet(ElementSet $set) : void {
-        $this->setGivenSet($set,true);
-    }
-
-    public function getBaseType(): ?ElementType
-    {
-        return $this->getGivenType();
-    }
-
-    protected function changeBaseType(ElementType $type) : void {
-        $this->setGivenType($type,true);
-    }
-
-    public function getGeneratedPublicElement(): ?Element
-    {   /** @uses ActionDatum::data_second_element() */
-        return $this->action_data->data_second_element;
-    }
-
-    public function getGeneratedPrivateElement(): ?Element
-    {   /** @uses ActionDatum::data_element() */
-        return $this->action_data->data_element;
-    }
-
-    protected function changePublicElement(Element $el): void
-    {
-         $this->action_data->data_second_element_id = $el->id;
-         $this->action_data->save();
-    }
-
-    protected function changePrivateElement(Element $el): void
-    {
-        $this->setGivenElement($el,true);
-    }
-
-
-    const array ACTIVE_DATA_KEYS = ['namespace_name','public_key','uuid','given_user_uuid','given_server_uuid', 'is_stub',
-        'base_postfix','public_postfix','private_postfix','home_postfix'];
-
-    public function __construct(
-        protected ?string        $namespace_name = null,
-        protected ?string        $public_key = null,
-        protected ?string        $uuid = null,
-        protected ?string        $given_user_uuid = null,
-        protected ?string        $given_server_uuid = null,
-        protected ?string        $base_postfix = null,
-        protected ?string        $public_postfix = null,
-        protected ?string        $private_postfix = null,
-        protected ?string        $home_postfix = null,
-        protected bool           $is_stub = false,
-        protected bool           $is_system = false,
-        protected bool           $send_event = true,
-        protected ?bool                $is_async = null,
-        protected ?ActionDatum   $action_data = null,
-        protected ?ActionDatum   $parent_action_data = null,
-        protected ?UserNamespace $owner_namespace = null,
-        protected bool           $b_type_init = false,
-        protected array          $tags = []
-    )
-    {
-        if (!$this->given_server_uuid) {
-            $this->given_server_uuid = Server::getDefaultServer(b_throw_on_missing: false)?->ref_uuid;
-        }
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
-    }
-
-
-
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-        if ($this->given_user_uuid) {
-            $this->action_data->data_user_id = User::getUser(uuid: $this->given_user_uuid)->id;
+        if (!$given_user && !$calling_namespace) {
+            throw new \LogicException("Need a calling namespace or a user here");
+        } else if(!$given_user) {
+            $given_user = $calling_namespace->owner_user;
         }
 
-        $this->setGivenServer($this->given_server_uuid);
+        if (!$given_server) {$given_server = Server::getDefaultServer();}
+        $node = new static(
+            params: $params,
+            given_user:$given_user,
+            given_server:$given_server,
+            is_system: $is_system,
+            use_ref: $use_ref
+        );
 
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
+        $ret_builder = false;
+        if ($builder) { $ret_builder = true;}
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+
+        $builder->tree(
+            command_class: static::class,
+            command_args: (array)$node,
+            command_tags: [static::class]
+        );
+
+
+        //todo add tree here
+        // use proxy nodes to wait until the master is filled (so one real creation of master type and then proxies the rest of them)
+
+
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            $data = $thang->finished_data;
+            return  UserNamespaceData::from($data['namespace']);
+        } else {
+            return $thang;
+        }
     }
+
+
+
+
+
+
 
 
     /**

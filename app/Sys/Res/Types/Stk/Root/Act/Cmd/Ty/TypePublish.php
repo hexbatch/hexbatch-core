@@ -53,7 +53,8 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
     public function __construct(
         protected ElementType   $given_type,
         protected UserNamespace $caller_namespace,
-        protected bool          $do_permission_check
+        protected bool          $do_permission_check,
+        protected string        $child_key_to_use
 
     )
     {
@@ -62,6 +63,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
 
     protected  function toArray() :array {
         return [
+            'child_key_to_use'=>$this->child_key_to_use,
             'given_type'=>$this->given_type,
             'caller_namespace'=>$this->caller_namespace,
             'do_permission_check'=>$this->do_permission_check,
@@ -69,10 +71,11 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
     }
 
     protected static function fromArray(array $args) : static {
+        $child_key_to_use = $args['child_key_to_use']??'type';
         $given_type = static::getTypeFromArray('given_type',$args);
         $caller_namespace =  static::getNamespaceFromArray('caller_namespace',$args) ;
         $do_permission_check = $args['do_permission_check'];
-        return new static(given_type: $given_type, caller_namespace: $caller_namespace,do_permission_check: $do_permission_check);
+        return new static(given_type: $given_type, caller_namespace: $caller_namespace,do_permission_check: $do_permission_check,child_key_to_use: $child_key_to_use);
     }
 
     /**
@@ -89,7 +92,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
         }
 
         return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
-            data: [static::CHILD_DECISION_KEY =>$b_approved,'type'=>$updated_type]);
+            data: [static::CHILD_DECISION_KEY =>$b_approved,$work->child_key_to_use=>$updated_type]);
     }
 
     /**
@@ -181,6 +184,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
      */
     public static function publish(
         UserNamespace $calling_namespace,ElementType $given_type, bool $do_permission_check,
+        string $child_key_to_use ,
         ?IThangBuilder $builder = null
     ) : ElementType|Thang|IThangBuilder
     {
@@ -202,7 +206,8 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
         $node = new static(
             given_type:$given_type,
             caller_namespace: $calling_namespace,
-            do_permission_check: true
+            do_permission_check: true,
+            child_key_to_use: $child_key_to_use
         );
         if ($do_permission_check)
         {

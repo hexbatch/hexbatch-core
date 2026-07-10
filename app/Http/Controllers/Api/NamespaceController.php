@@ -7,12 +7,19 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\User\Params\NamespaceParamData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Data\ThangData;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\JsonContent;
 use Symfony\Component\HttpFoundation\Response as CodeOf;
 
 class NamespaceController extends Controller {
@@ -147,30 +154,44 @@ class NamespaceController extends Controller {
     }
 
 
-
-
-
+    /**
+     * @throws \Throwable
+     */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/namespaces/create',
         operationId: 'core.namespaces.create',
-        description: "user make new namespace. ".
+        description: "User can make additional namespace. ".
         "\n can set new homesets, public and private elements, source server,name, user, other data ",
         summary: 'The user creates a new namespace with themself as the owner',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: NamespaceParamData::class)),
         tags: ['namespace'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Namespace created', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
         ]
     )]
     #[ApiEventMarker( Evt\Server\NamespaceCreated::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
     #[ApiTypeMarker( Root\Api\Namespace\Create::class)]
-    public function create_namespace() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function create_namespace(UserNamespace $namespace,Request $request) {
+        $params = NamespaceParamData::fromRequest($request);
+        $data_out =  Root\Api\Namespace\Create::doNamespaceCreate(
+            params: $params,   calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 

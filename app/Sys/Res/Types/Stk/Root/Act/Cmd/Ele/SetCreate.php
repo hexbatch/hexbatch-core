@@ -68,7 +68,8 @@ class SetCreate extends Act\Cmd\St
         protected bool                      $is_system,
         protected UserNamespace             $calling_namespace,
         protected ?string                   $preassinged_uuid = null,
-        protected ?ElementSet               $parent_set = null
+        protected ?ElementSet               $parent_set = null,
+        protected string                    $child_key_to_use            = 'elements',
 
 
     )
@@ -84,6 +85,7 @@ class SetCreate extends Act\Cmd\St
             'is_system'=> $this->is_system,
             'has_events'=> $this->has_events,
             'calling_namespace'=> $this->calling_namespace,
+            'child_key_to_use'=> $this->child_key_to_use,
         ];
     }
     protected static function fromArray(array $args) : static{
@@ -93,8 +95,9 @@ class SetCreate extends Act\Cmd\St
         $parent_set = static::getSetFromArray('parent_set',$args,false);
         $defining_element = static::getElementFromArray('defining_element',$args);
         $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $child_key_to_use = $args['child_key_to_use'];
         return new static(defining_element: $defining_element, has_events: $has_events, is_system: $is_system,
-            calling_namespace: $calling_namespace,preassinged_uuid: $preassinged_uuid,parent_set: $parent_set);
+            calling_namespace: $calling_namespace,preassinged_uuid: $preassinged_uuid,parent_set: $parent_set,child_key_to_use: $child_key_to_use);
     }
 
 
@@ -116,7 +119,7 @@ class SetCreate extends Act\Cmd\St
         }
 
         return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
-            data: [static::CHILD_DECISION_KEY =>$b_approved,static::SET_KEY_IN_ARGS=>$created_set]);
+            data: [static::CHILD_DECISION_KEY =>$b_approved,static::SET_KEY_IN_ARGS=>$created_set,$work->child_key_to_use => $created_set]);
     }
 
     /**
@@ -155,6 +158,7 @@ class SetCreate extends Act\Cmd\St
          UserNamespace             $calling_namespace,
          ?string                   $preassinged_uuid = null,
          ?ElementSet               $parent_set = null,
+         string                    $child_key_to_use            = 'elements',
          ?IThangBuilder            $builder = null
     ) : ElementSet|Thang|IThangBuilder
     {
@@ -173,7 +177,8 @@ class SetCreate extends Act\Cmd\St
             has_events: $has_events,
             is_system: $is_system,
             calling_namespace: $calling_namespace,
-            preassinged_uuid: $preassinged_uuid
+            preassinged_uuid: $preassinged_uuid,
+            child_key_to_use: $child_key_to_use
         );
 
         $ret_builder = false;

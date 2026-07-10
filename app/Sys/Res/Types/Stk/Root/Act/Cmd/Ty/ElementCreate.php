@@ -100,7 +100,8 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         protected UserNamespace             $owner_namespace,
         protected bool                      $is_system,
         protected UserNamespace             $calling_namespace,
-        protected array                     $preassinged_uuids = []
+        protected array                     $preassinged_uuids = [],
+        protected string                    $child_key_to_use            = 'elements'
 
 
     )
@@ -117,6 +118,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
             'owner_namespace'=> $this->owner_namespace,
             'calling_namespace'=> $this->calling_namespace,
             'preassinged_uuids'=> $this->preassinged_uuids,
+            'child_key_to_use'=>$this->child_key_to_use,
         ];
     }
     protected static function fromArray(array $args) : static{
@@ -127,9 +129,10 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         $element_type = static::getTypeFromArray('element_type',$args);
         $owner_namespace = static::getNamespaceFromArray('owner_namespace',$args);
         $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $child_key_to_use = $args['child_key_to_use'];
         return new static(element_type: $element_type, phase: $phase, number_to_create: $number_to_create,
              owner_namespace: $owner_namespace, is_system: $is_system,
-            calling_namespace: $calling_namespace,preassinged_uuids: $preassinged_uuids);
+            calling_namespace: $calling_namespace,preassinged_uuids: $preassinged_uuids,child_key_to_use: $child_key_to_use);
     }
 
     /**
@@ -146,7 +149,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         }
 
         return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
-            data: [static::CHILD_DECISION_KEY =>$b_approved,'elements'=>$created_elements]);
+            data: [static::CHILD_DECISION_KEY =>$b_approved,$work->child_key_to_use =>$created_elements]);
     }
 
     /**
@@ -228,6 +231,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
          bool                      $is_system,
          UserNamespace             $calling_namespace,
          array                     $preassinged_uuids = [],
+         string                    $child_key_to_use            = 'elements',
         ?IThangBuilder $builder = null
     ) : ElementType|Thang|IThangBuilder
     {
@@ -243,7 +247,8 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
             owner_namespace: $owner_namespace,
             is_system: $is_system,
             calling_namespace: $calling_namespace,
-            preassinged_uuids: $preassinged_uuids
+            preassinged_uuids: $preassinged_uuids,
+            child_key_to_use: $child_key_to_use
         );
 
         $ret_builder = false;

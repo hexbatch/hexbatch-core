@@ -139,7 +139,7 @@ class User extends Authenticatable implements ISystemModel
 
     }
 
-    public static function getUser(
+    public static function getThisUser(
         ?int $id = null ,
         ?string          $uuid = null
     ): User

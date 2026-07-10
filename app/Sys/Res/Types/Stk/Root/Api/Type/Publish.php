@@ -2,6 +2,7 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Api\Type;
 
+use App\Data\ApiParams\Data\Types\ElementTypeData;
 use App\Models\ElementType;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -47,7 +48,7 @@ class Publish extends Api\TypeApi implements ICommandCallable
     public static function doPublish(
         UserNamespace $calling_namespace,ElementType $given_type,bool $do_permission_check,
         array $tags = [], ?IThangBuilder $builder = null
-    ) : ElementType|Thang
+    ) : ElementTypeData|Thang
     {
 
 
@@ -64,14 +65,14 @@ class Publish extends Api\TypeApi implements ICommandCallable
 
 
         Act\Cmd\Ty\TypePublish::publish(calling_namespace: $calling_namespace,given_type: $given_type,
-            do_permission_check: $do_permission_check,builder: $builder);
+            do_permission_check: $do_permission_check,child_key_to_use:'type',builder: $builder);
 
 
 
         $thang = $builder->execute()->getThang();
         if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
             $data = $thang->finished_data;
-            return  ElementType::getElementType(uuid: $data['ref_uuid']);
+            return  ElementTypeData::from($data );
         } else {
             return $thang;
         }
