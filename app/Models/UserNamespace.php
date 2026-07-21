@@ -11,11 +11,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Rules\NamespaceNameReq;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Namespaces\INamespace;
-use Hexbatch\Things\Enums\TypeOfOwnerGroup;
-use Hexbatch\Things\Interfaces\IThingOwner;
-use Hexbatch\Things\Models\Thing;
-use Hexbatch\Things\Models\ThingHook;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +19,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -64,7 +59,7 @@ use Illuminate\Validation\ValidationException;
  * @property UserNamespace[] namespaces_member_of
  * @property UserNamespace[] namespace_admins
  */
-class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
+class UserNamespace extends Model implements ISystemModel
 {
 
     protected $table = 'user_namespaces';
@@ -453,50 +448,13 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return $ret;
     }
 
-    public function getNamespaceObject(): UserNamespace {
-        return $this;
-    }
+
 
     public function getUuid(): string {
         return $this->ref_uuid;
     }
 
-    public function getOwnerId(): int
-    {
-        return $this->id;
-    }
 
-    public function getOwnerUuid() : string {
-        return $this->ref_uuid;
-    }
-
-    public function setReadGroupBuilding($builder, string $connecting_table_name, string $connecting_owner_type_column,
-                                         string $connecting_owner_id_column, TypeOfOwnerGroup $hint, ?string $alias = null
-    ): void
-    {
-
-
-        $owner_type = $this->getOwnerType();
-
-        $query_members = DB::table("user_namespace_members as mem")
-            ->selectRaw("mem.id as member_id, $connecting_table_name.id as connector_id")
-            ->where("mem.is_admin",true)
-            ->join($connecting_table_name, 'mem.id', '=', "$connecting_table_name.$connecting_owner_id_column")
-            ->where("$connecting_table_name.$connecting_owner_type_column", $owner_type)
-        ;
-
-
-
-        $builder->withExpression('members_only',$query_members);
-
-        if ($hint !== TypeOfOwnerGroup::HOOK_CALLBACK_CREATION) {
-            $operator = "join";
-        } else {
-            $operator = "leftJoin";
-        }
-
-        $builder->$operator("members_only as $alias","$alias.connector_id","$connecting_table_name.id");
-    }
 
     const NAMESPACE_TAG = 'namespace';
 
@@ -505,41 +463,6 @@ class UserNamespace extends Model implements INamespace,ISystemModel,IThingOwner
         return [static::NAMESPACE_TAG];
     }
 
-    const string OWNER_TYPE = 'namespace';
-    public function getOwnerType(): string
-    {
-       return static::getOwnerTypeStatic();
-    }
-
-    public static function getOwnerTypeStatic(): string
-    {
-        return static::OWNER_TYPE;
-    }
-
-    public static function resolveOwner(int $owner_id): IThingOwner
-    {
-        /** @var static|null  $ret */
-        $ret = static::buildNamespace(me_id: $owner_id)->first();
-        if (!$ret) {
-            throw new \InvalidArgumentException("namespace not found using $owner_id");
-        }
-        return $ret;
-    }
-
-    public static function resolveOwnerFromUiid(string $uuid) : IThingOwner {
-        /** @var static|null  $ret */
-        $ret = static::buildNamespace(uuid: $uuid)->first();
-        if (!$ret) {
-            throw new \InvalidArgumentException("namespace not found using $uuid");
-        }
-        return $ret;
-    }
-
-    public static function registerOwner(): void
-    {
-        Thing::registerOwnerType(static::class);
-        ThingHook::registerOwnerType(static::class);
-    }
 
     public static function getSystemNamespace() : UserNamespace {
         return UserNamespace::where('ref_uuid',config('hbc.system.namespace.uuid') )->first();

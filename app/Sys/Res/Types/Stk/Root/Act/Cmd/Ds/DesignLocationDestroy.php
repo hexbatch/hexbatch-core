@@ -2,15 +2,12 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ds;
 
-use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
-use App\Data\ApiParams\Data\Locations\Location;
 use App\Enums\Sys\TypeOfAction;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Models\ActionDatum;
 use App\Models\LocationBound;
 use App\Models\UserNamespace;
 
@@ -39,26 +36,7 @@ class DesignLocationDestroy extends DesignLocationCreate
         DesignLocationCreate::class
     ];
 
-    #[ApiParamMarker(param_class: Location::class)]
-    public function __construct(
-        protected ?string           $given_location_uuid = null,
-        protected bool              $is_system = false,
-        protected bool              $send_event = true,
-        protected ?bool             $is_async = null,
-        protected ?ActionDatum      $action_data = null,
-        protected ?ActionDatum      $parent_action_data = null,
-        protected ?UserNamespace    $owner_namespace = null,
-        protected bool                $b_type_init = false,
-        protected array          $tags = []
-    )
-    {
 
-        parent::__construct(given_location_uuid: $this->given_location_uuid, is_deleting: true,
-            is_system: $this->is_system, send_event: $this->send_event,
-            is_async: $this->is_async,
-            action_data: $this->action_data, parent_action_data: $this->parent_action_data, owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init,  tags: $this->tags);
-    }
 
 
     /**

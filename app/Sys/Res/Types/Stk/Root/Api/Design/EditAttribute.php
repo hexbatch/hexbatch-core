@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Log;
 use App\Sys\Res\Types\Stk\Root\Evt;
 
 #[ApiParamMarker( param_class: AttributeParamData::class)]
-#[ApiEventMarker( Evt\Server\AttributePending::class)]
+#[ApiEventMarker( Evt\Type\AttributePending::class)]
 class EditAttribute extends Api\DesignApi implements ICommandCallable
 {
     const UUID = '40a60d68-5fb3-472d-9c90-bc033501ab1b';

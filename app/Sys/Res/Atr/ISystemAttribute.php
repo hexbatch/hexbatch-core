@@ -5,7 +5,7 @@ namespace App\Sys\Res\Atr;
 use App\Sys\Res\ISystemResource;
 use App\Sys\Res\Types\ISystemType;
 
-interface ISystemAttribute extends ISystemResource,IAttribute
+interface ISystemAttribute extends ISystemResource
 {
     public function getAttributeName() :string;
     public static function getDictionaryObject() :ISystemAttribute;
@@ -22,7 +22,6 @@ interface ISystemAttribute extends ISystemResource,IAttribute
     public static function isSystem(): bool;
     public static function isAbstract(): bool;
     public static function isFinal() : bool;
-    public static function isSeenChildrenTypes() : bool;
 
 
     public function getISystemAttribute() : ISystemAttribute;

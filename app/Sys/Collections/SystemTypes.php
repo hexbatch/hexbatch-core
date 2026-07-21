@@ -27,7 +27,7 @@ class SystemTypes extends SystemBase
     }
 
     protected static function makeNewClass(string $some_class_name) : ISystemResource {
-        /** @type BaseType*/
+        /** @type ISystemResource*/
         return new $some_class_name(b_type_init:true);
     }
 
@@ -63,7 +63,7 @@ class SystemTypes extends SystemBase
         $uuids_comma_delimited = implode(',',$prepped_uuids);
         $models = ElementType::whereRaw("ref_uuid  in ($uuids_comma_delimited)",$uuids)
             /** @uses ElementType::owner_namespace(),\App\Models\UserNamespace::namespace_home_server() */
-            ->with('owner_namespace','owner_namespace.namespace_home_server')
+            ->with(['owner_namespace','owner_namespace.namespace_home_server'])
             ->get();
         $ret = [];
         foreach ($models as $mod) {
@@ -84,7 +84,7 @@ class SystemTypes extends SystemBase
         $models = ElementType::where('is_system',true)
             ->whereRaw("ref_uuid not in ($uuids_comma_delimited)",$uuids)
             /** @uses ElementType::owner_namespace(),\App\Models\UserNamespace::namespace_home_server() */
-            ->with('owner_namespace','owner_namespace.namespace_home_server')
+            ->with(['owner_namespace','owner_namespace.namespace_home_server'])
             ->get();
         $ret = [];
         foreach ($models as $mod) {

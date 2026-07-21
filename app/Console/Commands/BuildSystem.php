@@ -208,8 +208,7 @@ class BuildSystem extends Command
                 Evt\ScopeType::class,
                 Evt\ScopeSet::class,
                 Evt\ScopeElsewhere::class,
-                Evt\ScopeServer::class,
-                Evt\Server\Nothing::class
+                Evt\ScopeServer::class
             ];
             foreach ($all_events_maybe as $maybe_event) {
                 if (in_array($maybe_event,$structure_only)) {continue;}
@@ -266,7 +265,7 @@ class BuildSystem extends Command
             foreach ($load->type_elements as $type_guid => $element_array) {
                 /** @var ISystemType $type_class */
                 $type_class = $load->uuid_classes[$type_guid];
-
+                /** @uses \App\Sys\Res\Types\BaseType::getFlatInheritance() */
                 $sorter[$type_class::getFlatInheritance()] = $element_array;
             }
             $sorter_names = array_keys($sorter);

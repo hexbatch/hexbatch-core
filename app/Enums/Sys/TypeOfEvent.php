@@ -21,7 +21,6 @@ namespace App\Enums\Sys;
 
 enum TypeOfEvent: string
 {
-    case NOTHING = 'nothing';
     case BASE_EVENT = 'base_event';
     case EVENT_HANDLER = 'event_handler';
     case EVENT_SCOPE_ELEMENT = 'event_scope_element';
@@ -62,8 +61,6 @@ enum TypeOfEvent: string
     case ATTRIBUTE_READING = 'attribute_reading';
     case ATTRIBUTE_WRITE = 'attribute_write';
 
-    case DISPLAY_READING = 'display_reading';
-    case TIME_READING = 'time_reading';
 
     case SWITCHING_OFF = 'switching_off';
     case SWITCHED_OFF = 'switched_off';
@@ -109,8 +106,7 @@ enum TypeOfEvent: string
     case LIVE_TYPE_ADDED = 'live_type_added';
     case LIVE_TYPE_REMOVED = 'live_type_removed';
     case LIVE_TYPE_PASTED = 'live_type_pasted';
-    case TIME_IN_AFTER = 'time_in_after'; //notice after it happened
-    case TIME_OUT_AFTER = 'time_out_after';
+
 
 
 
@@ -131,11 +127,12 @@ enum TypeOfEvent: string
 
     case ELEMENT_OWNER_CHANGE = 'element_owner_change'; //element given ownership to a ns, can be first time or to a new owner, have access to both ns vis ns placeholders
 
-    case PHASE_REMOVED = 'phase_removed';
+    case PHASE_PURGED = 'phase_purged';
     case PHASE_ADDED = 'phase_added';
-    case PHASE_MOVING = 'phase_moving';
-    case PHASE_CUTTING = 'phase_cutting';
-    case PHASE_REPLACING = 'phase_replacing';
+
+    case PHASE_TREE_DELETED = 'phase_tree_deleted';
+    case PHASE_TREE_MOVED = 'phase_tree_moved';
+    case PHASE_TREE_COPIED = 'phase_tree_copied';
     case ELEMENT_PHASE_CHANGE_BATCH = 'element_phase_change_batch';
     case ELEMENT_PHASE_CHANGED_QUIET = 'element_phase_changed_quiet';
 
@@ -143,7 +140,7 @@ enum TypeOfEvent: string
     _.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-.__.--.__.-'""`-._
     "`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'""`--'""`-.__.-'"
      */
-    //system wide
+    //system-wide
 
     case SERVER_EDITED = 'server_edited';
     case LINK_CREATED = 'link_created';
@@ -175,7 +172,7 @@ enum TypeOfEvent: string
     case USER_DELETION_PREPARING = 'user_deletion_preparing';
     case USER_DELETION_STARTING = 'user_deletion_starting';
     case USER_REGISTRATION_STARTING = 'user_registration_starting';
-    case USER_REGISTRATION_PROCESSING = 'user_registration_processing';
+    case USER_REGISTERED = 'user_registered';
     case USER_LOGGING_IN = 'user_logging_in';
     case USER_EDIT = 'user_edit';
 
@@ -187,9 +184,6 @@ enum TypeOfEvent: string
 
     case NAMESPACE_HANDLE_ADDED = 'namespace_handle_added';
     case NAMESPACE_HANDLE_REMOVED = 'namespace_handle_removed';
-
-    case WAIT_FAIL = 'wait_fail';
-    case WAIT_SUCCESS = 'wait_success';
 
 
 

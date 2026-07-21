@@ -18,11 +18,10 @@ class UserLogin extends Act\Cmd\Us
 
     const PARENT_CLASSES = [
         Act\Cmd\Us::class,
-        Act\SystemPrivilege::class,
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\UserLoggingIn::class
+        Evt\Server\UserLoggingIn::class //todo passes the default namespace to event
     ];
 
 }

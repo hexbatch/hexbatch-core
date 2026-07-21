@@ -13,6 +13,7 @@ use App\Enums\Sys\TypeOfAction;
 use App\Helpers\Utilities;
 use App\Models\Element;
 use App\Models\ElementType;
+use App\Models\ElementTypeParent;
 use App\Models\ElementTypeServerLevel;
 use App\Models\Server;
 use App\Models\TimeBound;
@@ -61,7 +62,7 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
         protected TypeParamData     $params,
         protected bool              $is_system,
         protected ?string              $use_ref,
-        protected UserNamespace      $owner_namespace,
+        protected ?UserNamespace      $owner_namespace,
         protected Server            $server
 
     )
@@ -82,7 +83,7 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
         $params = TypeParamData::from($args['design_params']);
         $is_system = (bool)$args['is_system'];
         $use_ref = $args['use_ref'];
-        $owner_namespace = static::getNamespaceFromArray('namespace',$args);
+        $owner_namespace = static::getNamespaceFromArray('namespace',$args,false);
         $server = static::getServerFromArray('server',$args);
         return new DesignCreate(params: $params,is_system: $is_system,use_ref: $use_ref,owner_namespace: $owner_namespace,server: $server);
     }
@@ -100,7 +101,7 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
     /**
      * @throws \Throwable
      */
-    protected  function createDesign() : ElementType {
+    public  function createDesign() : ElementType {
         if ($this->use_ref) {
             if (!Utilities::is_uuid($this->use_ref)) {
                 throw new \LogicException("Type use ref is not uuid ". $this->use_ref);
@@ -132,6 +133,8 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
             $access->to_server_id = $type->imported_from_server_id;
             $access->access_type = $this->params->access??TypeOfServerAccess::IS_PRIVATE;
             $access->save();
+
+            ElementTypeParent::addOrUpdateParent(parent: ElementType::getSystemType(), child: $type);
 
             DB::commit();
             return $type;

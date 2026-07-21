@@ -2,7 +2,7 @@
 
 namespace App\Exceptions;
 
-use App\OpenApi\ErrorResponse;
+use App\Data\ApiParams\Data\ErrorData;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -31,8 +31,8 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
-        if (ErrorResponse::handlesThisException($e)) {
-            $ex = ErrorResponse::fromException($e);
+        if (ErrorData::handlesThisException($e)) {
+            $ex = ErrorData::fromException($e);
             return response()->json( $ex, $ex->getHttpCode());
         }
 

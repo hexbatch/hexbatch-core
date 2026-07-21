@@ -4,8 +4,8 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
 
 
 use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Namespaces\Params\NamespaceParamData;
 use App\Data\ApiParams\Data\Namespaces\UserNamespaceData;
-use App\Data\ApiParams\Data\User\Params\NamespaceParamData;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
@@ -38,7 +38,7 @@ class Create extends Api\NamespaceApi implements ICommandCallable
         $b_approved = static::getDecisionUsingAndLogic($children_args);
 
         return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
-            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved]);
+            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved,'namespace'=>$children_args['namespace']]);
     }
 
     /**

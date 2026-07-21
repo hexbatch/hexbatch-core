@@ -22,7 +22,7 @@ class PhasePurge extends Act\Cmd\Ph
     ];
 
     const EVENT_CLASSES = [
-        Evt\Type\PhaseRemoved::class,
+        Evt\Server\PhasePurged::class,
     ];
 
 }

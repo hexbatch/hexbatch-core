@@ -70,7 +70,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\DesignParentAdding::class
+        Evt\Type\DesignParentAdding::class
     ];
 
 
@@ -80,9 +80,9 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
         protected AttributeParamData     $params,
         protected bool              $is_system,
         protected ?string              $use_ref,
-        protected UserNamespace      $calling_namespace,
-        protected ElementType            $given_type
-
+        protected ?UserNamespace      $calling_namespace,
+        protected ElementType            $given_type,
+        protected bool          $do_permission_check = true,
     )
     {
 
@@ -93,6 +93,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
             'params'=>$this->params->toArray(),
             'use_ref'=>$this->use_ref,
             'is_system'=>$this->is_system,
+            'do_permission_check'=>$this->do_permission_check,
             'calling_namespace'=>$this->calling_namespace,
             'given_type'=>$this->given_type,
         ];
@@ -100,19 +101,20 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
     protected static function fromArray(array $args) : static{
         $params = AttributeParamData::from($args['params']);
         $is_system = (bool)$args['is_system'];
+        $do_permission_check = (bool)$args['do_permission_check'];
         $use_ref = $args['use_ref'];
-        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args,false);
         $given_type = static::getTypeFromArray('given_type',$args);
-        return new static(params: $params,is_system: $is_system,use_ref: $use_ref,calling_namespace: $calling_namespace,given_type: $given_type);
+        return new static(params: $params,is_system: $is_system,use_ref: $use_ref,calling_namespace: $calling_namespace,given_type: $given_type,do_permission_check: $do_permission_check);
     }
 
 
 
 
-    protected  function doCreateAttribute()
+    public  function doCreateAttribute()
     : Attribute
     {
-        if (!$this->is_system) {
+        if ($this->do_permission_check) {
             static::checkIfGivenIsAdmin(given: $this->calling_namespace,target: $this->given_type->owner_namespace);
         }
 
@@ -143,7 +145,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
 
         if( $this->params->design_ref_uuid) {
             $design_attribute = Attribute::getThisAttribute(uuid: $this->params->design_ref_uuid);
-            if (!($given_attribute->is_system || $design_attribute->isPublicDomain()) ) {
+            if ($this->do_permission_check || !$design_attribute->isPublicDomain())  {
                 static::checkIfGivenIsMember(given: $this->calling_namespace,target: $design_attribute->type_owner->owner_namespace );
             }
             $given_attribute->design_attribute_id = $design_attribute->id ;
@@ -225,7 +227,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
         ]);
         $builder->tree($my_command);
         if (!$is_system && $params->parent_ref_uuid) {
-            Evt\Server\AttributePending::callParentTree(ancestor_attribute: $me->parent_attribute, given_attribute: $attribute, builder: $builder);
+            Evt\Type\AttributePending::callParentTree(ancestor_attribute: $me->parent_attribute, given_attribute: $attribute, builder: $builder);
         }
 
 

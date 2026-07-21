@@ -7,7 +7,6 @@ use App\Annotations\ApiParamMarker;
 use App\Data\ApiParams\Data\Elements\ElementData;
 use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Helpers\Utilities;
-use App\Models\ActionDatum;
 use App\Models\Element;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Api;
@@ -26,7 +25,7 @@ class ListElements extends Api\ElementApi
 
 
     /**
-     * @return CursorPaginatedDataCollection<ActionDatum>
+     * @return CursorPaginatedDataCollection<ElementData>
      */
     public static function listElements(SelectElementParamData $params,UserNamespace $caller_namespace) {
         Utilities::ignoreVar($caller_namespace);

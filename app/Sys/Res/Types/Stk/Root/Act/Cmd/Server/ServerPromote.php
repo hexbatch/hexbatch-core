@@ -36,10 +36,10 @@ class ServerPromote extends Act\Cmd\Server
 
     public static function createServer(
         ElementType              $given_type,
-        UserNamespace              $given_namespace,
-        string             $server_name = null,
-        string             $server_domain = null,
-        string             $server_url = null,
+        ?UserNamespace              $given_namespace,
+        string             $server_name ,
+        string             $server_domain ,
+        string             $server_url ,
         TypeOfServerStatus  $server_status = TypeOfServerStatus::UNKNOWN_SERVER,
         ?string             $access_token_expires_at = null,
         ?string             $server_access_token = null,
@@ -54,7 +54,7 @@ class ServerPromote extends Act\Cmd\Server
             $server->ref_uuid = $uuid;
         }
 
-        $server->owning_namespace_id = $given_namespace->id;
+        $server->owning_namespace_id = $given_namespace?->id;
         $server->server_type_id = $given_type->id;
         $server->server_status = $server_status ;
 

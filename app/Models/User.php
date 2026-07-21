@@ -100,7 +100,8 @@ class User extends Authenticatable implements ISystemModel
 
     public function default_namespace() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'default_namespace_id')
-            ->with('home_set','home_set.defining_element','home_set.defining_element.element_parent_type');
+            ->with('home_set','home_set.defining_element','home_set.defining_element.element_parent_type',
+                'public_element','namespace_base_type','private_element');
     }
 
     /**
@@ -141,10 +142,11 @@ class User extends Authenticatable implements ISystemModel
 
     public static function getThisUser(
         ?int $id = null ,
-        ?string          $uuid = null
+        ?string          $uuid = null,
+        bool $b_relations = false
     ): User
     {
-        $ret = static::buildUser(me_id:$id,uuid: $uuid)->first();
+        $ret = static::buildUser(me_id:$id,uuid: $uuid,b_relations: $b_relations)->first();
 
         if (!$ret) {
             $arg_types = [];
@@ -164,19 +166,22 @@ class User extends Authenticatable implements ISystemModel
 
     public static function buildUser(
         ?int $me_id = null ,
-        ?string         $uuid = null
+        ?string         $uuid = null,
+        bool $b_relations = false
     )
     : Builder
     {
 
+        /** @var Builder $build */
         $build =  User::select('users.*')
-            ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts")
+            ->selectRaw(" extract(epoch from  users.created_at) as created_at_ts,  extract(epoch from  users.updated_at) as updated_at_ts");
 
+        if ($b_relations) {
             /** @uses User::my_namespaces(),User::default_namespace() */
-            ->with('my_namespaces','default_namespace')
+            $build->with('my_namespaces','default_namespace');
+        }
 
 
-        ;
 
         if ($me_id) {
             $build->where('users.id',$me_id);

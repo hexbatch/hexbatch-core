@@ -25,6 +25,7 @@ use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
@@ -39,7 +40,7 @@ use Symfony\Component\HttpFoundation\Response;
  If no write events, value is put into the set context of element values
 ')]
 #[ApiParamMarker( param_class: WriteElementParamData::class)]
-class Write extends Act\Cmd\Ele
+class Write extends Act\Cmd\Ele implements ICommandCallable
 {
     const UUID = '51e9a358-c2b1-4876-a518-0ab65d1be224';
     const ACTION_NAME = TypeOfAction::PRAGMA_WRITE;

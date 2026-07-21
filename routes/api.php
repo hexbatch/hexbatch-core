@@ -163,7 +163,6 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('{target_namespace}')->group(function () {
 
                     Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
-                        Route::patch('edit_promotion', [Api\NamespaceController::class, 'edit_promotion'])->name('core.namespaces.edit_promotion');
                         Route::delete('purge', [Api\NamespaceController::class, 'purge_namespace'])->name('core.namespaces.purge');
                         Route::delete('purge_admin', [Api\NamespaceController::class, 'purge_admin'])->name('core.namespaces.purge_admin');
                         Route::delete('purge_member', [Api\NamespaceController::class, 'purge_member'])->name('core.namespaces.purge_member');
@@ -287,43 +286,6 @@ Route::prefix('v1')->group(function () {
             });
 
 
-            Route::prefix('waits')->group(function () {
-
-                Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
-                    Route::post('create_master', [Api\WaitController::class, 'create_master'])->name('core.waits.create_master');
-                });
-
-                Route::middleware([])->group(function () {
-                    Route::get('list', [Api\WaitController::class, 'list_masters'])->name('core.waits.list_masters');
-                    Route::get('list_semaphores', [Api\WaitController::class, 'list_semaphores'])->name('core.waits.list_semaphores');
-                    Route::get('list_waits', [Api\WaitController::class, 'list_waits'])->name('core.waits.list_waits');
-                    Route::get('list_mutexes', [Api\WaitController::class, 'list_mutexes'])->name('core.waits.list_mutexes');
-                });
-
-                Route::prefix('{element_type}')->group(function () {
-
-                    Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
-                        Route::post('update_master', [Api\WaitController::class, 'update_master'])->name('core.waits.update_master');
-                        Route::post('reset_semaphore', [Api\WaitController::class, 'reset_semaphore'])->name('core.waits.reset_semaphore');
-                        Route::post('ready_semaphore', [Api\WaitController::class, 'ready_semaphore'])->name('core.waits.ready_semaphore');
-                    });
-
-                    Route::middleware([])->group(function () {
-                        Route::post('run', [Api\WaitController::class, 'run_master'])->name('core.waits.run_master');
-                        Route::get('show', [Api\WaitController::class, 'show_master'])->name('core.waits.show_master');
-                        Route::get('status', [Api\WaitController::class, 'show_master_status'])->name('core.waits.show_master_run');
-                        Route::get('show_semaphore', [Api\WaitController::class, 'show_semaphore'])->name('core.waits.show_semaphore');
-                        Route::get('show_wait', [Api\WaitController::class, 'show_wait'])->name('core.waits.show_wait');
-                        Route::get('show_mutex', [Api\WaitController::class, 'show_mutex'])->name('core.waits.show_mutex');
-                        Route::post('wait_if_available', [Api\WaitController::class, 'wait_if_available'])->name('core.waits.wait_if_available');
-                        Route::post('wait_for_any', [Api\WaitController::class, 'wait_for_any'])->name('core.waits.wait_for_any');
-                        Route::post('wait_for_all', [Api\WaitController::class, 'wait_for_all'])->name('core.waits.wait_for_all');
-                        Route::post('wait_for_mutex', [Api\WaitController::class, 'wait_for_mutex'])->name('core.waits.wait_for_mutex');
-                        Route::post('wait_for_semaphore', [Api\WaitController::class, 'wait_for_semaphore'])->name('core.waits.wait_for_semaphore');
-                    });
-
-                });
-            });
 
             Route::prefix('elements')->group(function () {
 

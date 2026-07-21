@@ -17,6 +17,7 @@ use App\Models\ElementValue;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use App\Sys\Res\Types\Stk\Root\Evt\Type\TypePublishing;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
@@ -45,16 +46,17 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\TypePublishing::class
+        Evt\Type\TypePublishing::class
     ];
 
 
+    const string DEFAULT_CHILD_KEY = 'updated_type';
 
     public function __construct(
         protected ElementType   $given_type,
-        protected UserNamespace $caller_namespace,
+        protected ?UserNamespace $caller_namespace,
         protected bool          $do_permission_check,
-        protected string        $child_key_to_use
+        protected string        $child_key_to_use = self::DEFAULT_CHILD_KEY
 
     )
     {
@@ -73,7 +75,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
     protected static function fromArray(array $args) : static {
         $child_key_to_use = $args['child_key_to_use']??'type';
         $given_type = static::getTypeFromArray('given_type',$args);
-        $caller_namespace =  static::getNamespaceFromArray('caller_namespace',$args) ;
+        $caller_namespace =  static::getNamespaceFromArray('caller_namespace',$args,false) ;
         $do_permission_check = $args['do_permission_check'];
         return new static(given_type: $given_type, caller_namespace: $caller_namespace,do_permission_check: $do_permission_check,child_key_to_use: $child_key_to_use);
     }
@@ -95,10 +97,11 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
             data: [static::CHILD_DECISION_KEY =>$b_approved,$work->child_key_to_use=>$updated_type]);
     }
 
+
     /**
      * @throws \Throwable
      */
-    protected  function doPublishCall() : ElementType {
+    public  function doPublishCall() : ElementType {
 
         $this->checkForAbstractAttributes();
 
@@ -233,7 +236,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
 
         if ($do_permission_check)
         {
-            Evt\Server\TypePublishing::callEventsForApprovalInPublishing(given_type: $given_type,builder: $builder);
+            Evt\Type\TypePublishing::callEventsForApprovalInPublishing(given_type: $given_type,builder: $builder);
         }
 
 

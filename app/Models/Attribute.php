@@ -11,11 +11,9 @@ use App\Enums\Types\TypeOfApproval;
 use App\Exceptions\HexbatchNotFound;
 use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
-use App\Helpers\Events\EventFilter;
 use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
-use App\Sys\Res\Atr\IAttribute;
 use App\Sys\Res\ISystemModel;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,7 +63,7 @@ use Illuminate\Validation\ValidationException;
  * @property LocationBound attribute_location
  * @property ServerEvent attached_event
  */
-class Attribute extends Model implements IAttribute,ISystemModel
+class Attribute extends Model implements ISystemModel
 {
 
     protected $table = 'attributes';
@@ -440,11 +438,6 @@ class Attribute extends Model implements IAttribute,ISystemModel
     }
 
 
-
-
-    public function getAttributeObject() : ?Attribute {
-        return $this;
-    }
 
     public function getUuid(): string {
         return $this->ref_uuid;

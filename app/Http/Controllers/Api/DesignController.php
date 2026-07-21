@@ -513,7 +513,7 @@ class DesignController extends Controller {
      * @throws \Throwable
      */
     #[ApiTypeMarker( Root\Api\Design\CreateAttribute::class)]
-    #[ApiEventMarker( Evt\Server\AttributePending::class)]
+    #[ApiEventMarker( Evt\Type\AttributePending::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/create_attribute',
@@ -595,7 +595,7 @@ class DesignController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\EditAttribute::class)]
-    #[ApiEventMarker( Evt\Server\AttributePending::class)]
+    #[ApiEventMarker( Evt\Type\AttributePending::class)]
     public function edit_attribute(UserNamespace $namespace,Attribute $attribute,Request $request) {
         $params = AttributeParamData::fromRequest($request);
         $data_out = Root\Api\Design\EditAttribute::editAttribute(
@@ -697,7 +697,7 @@ class DesignController extends Controller {
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
-    #[ApiEventMarker( Evt\Server\DesignParentAdding::class)]
+    #[ApiEventMarker( Evt\Type\DesignParentAdding::class)]
     #[ApiTypeMarker( Root\Api\Design\AddParent::class)]
     public function add_parent(UserNamespace $namespace,ElementType $type,Request $request) {
         $params = TypeParentsParamData::fromRequest($request);
@@ -788,7 +788,7 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\EditTime::class)]
     public function show_schedule(UserNamespace $namespace, TimeBound $bound) {
         Utilities::ignoreVar($namespace);
-        $data_out = Root\Api\Design\ShowTime::showSchedule(bound: $bound);
+        $data_out = Root\Api\Design\ShowTime::showSchedule(given_bound: $bound);
         return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
@@ -1087,7 +1087,7 @@ class DesignController extends Controller {
     #[ApiTypeMarker( Root\Api\Design\ListLocations::class)]
     public function show_location(UserNamespace $namespace, LocationBound $bound) {
         Utilities::ignoreVar($namespace);
-        $data_out = Root\Api\Design\ShowLocation::showSchedule(bound: $bound);
+        $data_out = Root\Api\Design\ShowLocation::showLocation(given_bound: $bound);
         return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 

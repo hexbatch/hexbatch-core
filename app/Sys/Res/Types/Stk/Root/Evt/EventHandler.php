@@ -37,6 +37,7 @@ class EventHandler extends Event implements ICommandCallable
         protected ?ElementType   $type_context = null,
         protected ?ElementType   $parent_type_context = null,
         protected ?UserNamespace $namespace_context = null,
+        protected ?UserNamespace $old_namespace_context = null,
         protected ?Attribute     $attribute_context = null,
         protected ?ElementSet    $set_context = null,
         protected ?ElementSet    $parent_set_context = null,

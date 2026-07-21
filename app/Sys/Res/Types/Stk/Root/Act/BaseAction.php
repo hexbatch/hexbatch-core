@@ -3,11 +3,7 @@
 namespace App\Sys\Res\Types\Stk\Root\Act;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Helpers\Utilities;
-use App\Models\ActionDatum;
-use App\Models\UserNamespace;
 use App\Sys\Res\Atr\Stk\Act\ActionMetric;
-use App\Sys\Res\IAction;
 use App\Sys\Res\Types\BaseType;
 use App\Sys\Res\Types\Stk\Root\Action;
 

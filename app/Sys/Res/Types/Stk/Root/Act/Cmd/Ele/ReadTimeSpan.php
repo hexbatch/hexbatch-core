@@ -5,7 +5,6 @@ namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele;
 use App\Enums\Sys\TypeOfAction;
 
 use App\Sys\Res\Types\Stk\Root\Act;
-use App\Sys\Res\Types\Stk\Root\Evt;
 
 /**
  * Gets the current or next time span of the element's type, its parents and live
@@ -25,7 +24,7 @@ class ReadTimeSpan extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Element\ReadingTime::class
+
     ];
 
 }

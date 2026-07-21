@@ -108,7 +108,7 @@ class DesignOwnerChange extends Act\Cmd\Ds implements ICommandCallable
             static::checkIfGivenIsAdmin(given: $this->caller_namespace,target: $this->given_type->owner_namespace);
         }
 
-        $this->given_type->owner_namespace_id = $this->getGivenNamespace()->id ;
+        $this->given_type->owner_namespace_id = $this->caller_namespace->id ;
         $this->given_type->save();
         return $this->given_type;
     }

@@ -10,8 +10,6 @@ use App\Helpers\Events\EventFilter;
 use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Servers\IServer;
-use App\Sys\Res\Types\Stk\Root\Signal\Semaphore\MasterSemaphore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -44,7 +42,7 @@ use Illuminate\Support\Collection;
  *  @property string updated_at
  *
  */
-class Server extends Model implements IServer,ISystemModel
+class Server extends Model implements ISystemModel
 {
 
     /*
@@ -233,12 +231,6 @@ class Server extends Model implements IServer,ISystemModel
     }
 
 
-
-
-    public function getServerObject(): ?Server
-    {
-        return $this;
-    }
 
     public function getUuid(): string{
         return $this->ref_uuid;

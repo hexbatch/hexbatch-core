@@ -4,7 +4,6 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Design;
 
 
 use App\Data\ApiParams\Data\Attributes\AttributeData;
-use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Sys\Res\Types\Stk\Root\Api;
 
@@ -20,19 +19,6 @@ class ShowAttribute extends Api\DesignApi
     ];
 
 
-    public function __construct(
-        protected ?Attribute $att = null,
-
-        protected ?ActionDatum   $action_data = null,
-        protected bool $b_type_init = false,
-        protected ?bool $is_async = null,
-        protected array          $tags = []
-    )
-    {
-
-        parent::__construct(action_data: $this->action_data,  b_type_init: $this->b_type_init,
-            is_async: $this->is_async,tags: $this->tags);
-    }
 
 
 

@@ -4,7 +4,6 @@ namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Helpers\Events\EventFilter;
-use App\Models\ElementSet;
 use App\Models\Server;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd\Ele\SetCreate;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -29,22 +28,17 @@ class SetCreated extends Evt\ScopeServer implements ICommandCallable
         Evt\ScopeServer::class
     ];
 
-    public function __construct(
-        protected ?ElementSet $created_set = null
-    )
-    {
 
-    }
 
     protected  function toArray() :array {
         return [
-            'created_set'=>$this->created_set?->toArray(),
+            'created_set'=>$this->given_set?->toArray(),
         ];
     }
 
     protected static function fromArray(array $args) : static {
         $set = static::getSetFromArray('created_set',$args,false);
-        return new static(created_set: $set);
+        return new static(given_set: $set);
     }
 
 
@@ -67,8 +61,8 @@ class SetCreated extends Evt\ScopeServer implements ICommandCallable
      * @throws \Throwable
      */
     protected function doWork(array $children_args) {
-        $this->created_set = $children_args[SetCreate::SET_KEY_IN_ARGS]??null;
-        if (!$this->created_set) {throw new \LogicException("Did not find set in event");}
+        $this->given_set = $children_args[SetCreate::SET_KEY_IN_ARGS]??null;
+        if (!$this->given_set) {throw new \LogicException("Did not find set in event");}
         $this->callEventTree();
     }
 
@@ -90,14 +84,14 @@ class SetCreated extends Evt\ScopeServer implements ICommandCallable
 
 
         if ( $col = Server::getEventHandlerRefs(
-            new EventFilter(event_type: TypeOfEvent::SET_CREATED, type_context: $this->created_set->defining_type, element_context: $this->created_set->defining_element))
+            new EventFilter(event_type: TypeOfEvent::SET_CREATED, type_context: $this->given_set->defining_type, element_context: $this->given_set->defining_element))
         ) {
             foreach ($col as $ref) {
                 $builder->tree(
                     command_class: Evt\EventHandler::class,
                     command_args: (array)new Evt\EventHandler(
                         ref: $ref,
-                        set_context: $this->created_set,
+                        set_context: $this->given_set,
                     ),
                     command_tags: [Evt\EventHandler::class]
                 );

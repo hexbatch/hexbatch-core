@@ -19,6 +19,7 @@ use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
@@ -48,7 +49,7 @@ Once the link is removed, the element ns and type owners and set will get an eve
 
 ')]
 #[ApiParamMarker( param_class: SelectElementParamData::class)]
-class LinkRemove extends Act\Cmd\Ele
+class LinkRemove extends Act\Cmd\Ele implements ICommandCallable
 {
     const UUID = 'c0f2f5b9-3030-4e60-9bd0-742299a6b83b';
     const ACTION_NAME = TypeOfAction::CMD_LINK_REMOVE;
@@ -226,7 +227,7 @@ class LinkRemove extends Act\Cmd\Ele
                 $given_set = ElementSet::getThisSet(uuid:$params->set_ref);
             }
             foreach ($me->selected_links as $el) {
-                Evt\Server\LinkCreating::callEventTree(
+                Evt\Element\LinkCreating::callEventTree(
                     given_element: $el,
                     given_set: $given_set,
                     builder: $builder);

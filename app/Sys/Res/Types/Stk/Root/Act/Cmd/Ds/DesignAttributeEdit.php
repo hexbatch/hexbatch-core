@@ -55,7 +55,7 @@ class DesignAttributeEdit extends Act\Cmd\Ds implements ICommandCallable
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\DesignParentAdding::class
+        Evt\Type\DesignParentAdding::class
     ];
 
     #[ApiParamMarker( param_class: AttributeParamData::class)]
@@ -223,7 +223,7 @@ class DesignAttributeEdit extends Act\Cmd\Ds implements ICommandCallable
         ]);
         $builder->tree($my_command);
         if ($attribute->attribute_parent) {
-            Evt\Server\AttributePending::callParentTree(ancestor_attribute: $attribute->attribute_parent, given_attribute: $attribute, builder: $builder);
+            Evt\Type\AttributePending::callParentTree(ancestor_attribute: $attribute->attribute_parent, given_attribute: $attribute, builder: $builder);
         }
 
 

@@ -19,6 +19,7 @@ use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 
@@ -40,7 +41,7 @@ use Hexbatch\Thangs\Models\Thang;
 #[ApiEventMarker( Evt\Type\SetCreating::class)] //pre
 #[ApiEventMarker( Evt\Server\SetCreated::class)] //post d
 #[ApiEventMarker( Evt\Set\SetChildCreated::class)] //post d
-class SetCreate extends Act\Cmd\St
+class SetCreate extends Act\Cmd\St implements ICommandCallable
 {
     const UUID = '06c6d184-1230-4bd1-9ee4-80657a9e3620';
     const ACTION_NAME = TypeOfAction::CMD_SET_CREATE;
@@ -66,7 +67,7 @@ class SetCreate extends Act\Cmd\St
         protected Element                   $defining_element,
         protected bool                      $has_events,
         protected bool                      $is_system,
-        protected UserNamespace             $calling_namespace,
+        protected ?UserNamespace             $calling_namespace,
         protected ?string                   $preassinged_uuid = null,
         protected ?ElementSet               $parent_set = null,
         protected string                    $child_key_to_use            = 'elements',
@@ -94,7 +95,7 @@ class SetCreate extends Act\Cmd\St
         $preassinged_uuid = $args['preassinged_uuid']??null;
         $parent_set = static::getSetFromArray('parent_set',$args,false);
         $defining_element = static::getElementFromArray('defining_element',$args);
-        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args,false );
         $child_key_to_use = $args['child_key_to_use'];
         return new static(defining_element: $defining_element, has_events: $has_events, is_system: $is_system,
             calling_namespace: $calling_namespace,preassinged_uuid: $preassinged_uuid,parent_set: $parent_set,child_key_to_use: $child_key_to_use);
@@ -125,9 +126,9 @@ class SetCreate extends Act\Cmd\St
     /**
      * @throws \Throwable
      */
-    protected function doCreateSet() : ElementSet {
+    public function doCreateSet(bool $b_do_refresh = true ) : ElementSet {
 
-        if (!$this->is_system) {
+        if (!$this->calling_namespace) {
             static::checkIfGivenIsAdmin(given: $this->calling_namespace,target: $this->defining_element->element_namespace);
         }
 
@@ -140,10 +141,14 @@ class SetCreate extends Act\Cmd\St
         $set->has_events = $this->has_events;
         $set->is_system = $this->is_system;
         $set->save();
-        $set = ElementSet::getThisSet(id: $set->id);
-        $set->loadMissing('defining_element');
-        $set->loadMissing('defining_type');
-        $set->loadMissing('defining_element.element_parent_type');
+
+        if ($b_do_refresh) {
+            $set = ElementSet::getThisSet(id: $set->id);
+            $set->loadMissing('defining_element');
+            $set->loadMissing('defining_type');
+            $set->loadMissing('defining_element.element_parent_type');
+        }
+
         return $set;
     }
 

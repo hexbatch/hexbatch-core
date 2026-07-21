@@ -10,7 +10,7 @@ use App\Helpers\Events\EventFilter;
 use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Sets\ISet;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,7 +40,7 @@ use Illuminate\Support\Collection;
  * @property ElementSet[] children_sets
  *
  */
-class ElementSet extends Model implements ISet,ISystemModel
+class ElementSet extends Model implements ISystemModel
 {
 
     /*
@@ -257,10 +257,6 @@ Parent children can do unlimited nesting, but a child can never be a parent to t
         );
     }
 
-
-    public function getSetObject(): ?ElementSet {
-        return $this;
-    }
 
     public function getUuid(): string{
         return $this->ref_uuid;

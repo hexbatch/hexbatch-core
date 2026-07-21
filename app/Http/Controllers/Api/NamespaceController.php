@@ -8,7 +8,7 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
-use App\Data\ApiParams\Data\User\Params\NamespaceParamData;
+use App\Data\ApiParams\Data\Namespaces\Params\NamespaceParamData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
 use App\Http\Controllers\Controller;
@@ -92,38 +92,6 @@ class NamespaceController extends Controller {
     public function list_namespaces() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
-
-
-
-
-
-    #[OA\Patch(
-        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/edit_promotion',
-        operationId: 'core.namespaces.edit_promotion',
-        description: "System can set data in namespaces without events going off. ".
-            "\n can set new homesets, public and private elements, source server,name ".
-            "\n can change ownership",
-        summary: 'Allows the system to set namespace data',
-        security: [['bearerAuth' => []]],
-        tags: ['namespace'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Namespace\EditPromotion::class)]
-    public function edit_promotion() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
 
 
 

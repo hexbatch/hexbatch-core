@@ -360,7 +360,6 @@ class ElementController extends Controller {
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_MEMBER)]
     #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
-    #[ApiEventMarker( Evt\Element\ReadingTime::class)]
     #[ApiTypeMarker( Root\Api\Element\ReadTime::class)]
     public function read_time() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
@@ -694,8 +693,8 @@ class ElementController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Server\LinkCreated::class)]
-    #[ApiEventMarker( Evt\Server\LinkCreating::class)]
+    #[ApiEventMarker( Evt\Element\LinkCreated::class)]
+    #[ApiEventMarker( Evt\Element\LinkCreating::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::ELEMENT_ADMIN)]
     #[ApiTypeMarker( Root\Api\Element\Link::class)]
     public function create_link(UserNamespace $namespace,ElementSet $set,Request $request) {

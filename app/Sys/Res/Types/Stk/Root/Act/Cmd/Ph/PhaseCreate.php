@@ -2,16 +2,26 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ph;
 
+use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Phases\Params\PhaseParamData;
 use App\Enums\Sys\TypeOfAction;
-use App\Models\ActionDatum;
+use App\Models\ElementType;
 use App\Models\Phase;
 use App\Models\UserNamespace;
-use App\OpenApi\Results\Phase\PhaseResponse;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\DB;
 
-class PhaseCreate extends Act\Cmd\Ph
+
+#[ApiParamMarker( param_class: PhaseParamData::class)]
+class PhaseCreate extends Act\Cmd\Ph implements ICommandCallable
 {
     const UUID = '24d33a5b-ed63-48f4-b45d-f729734af6ef';
     const ACTION_NAME = TypeOfAction::CMD_PHASE_CREATE;
@@ -22,126 +32,153 @@ class PhaseCreate extends Act\Cmd\Ph
 
     const PARENT_CLASSES = [
         Act\Cmd\Ph::class,
-        Act\SystemPrivilege::class
     ];
 
     const EVENT_CLASSES = [
-        Evt\Type\PhaseAdded::class,
+        Evt\Server\PhaseAdded::class,
     ];
 
 
 
-    public function getGivenEditPhase(): ?Phase
-    {
-        return $this->getGivenPhase();
-    }
-
-    public function getCreatedPhase(): ?Phase
-    {
-        /** @uses ActionDatum::data_second_phase() */
-        return $this->action_data->data_second_phase;
-    }
-
-
-
-
-    const array ACTIVE_DATA_KEYS = ['given_type_uuid','given_edit_phase_uuid','uuid','phase_name','is_default_phase'];
-
-
     public function __construct(
-        protected ?string             $given_type_uuid = null ,
-        protected ?string             $given_edit_phase_uuid = null,
-        protected ?string             $phase_name = null,
-        protected ?string             $uuid = null,
-        protected bool                $is_default_phase = false,
-        protected bool                $is_system = false,
-        protected bool                $send_event = true,
-        protected ?bool                $is_async = null,
-        protected ?ActionDatum        $action_data = null,
-        protected ?ActionDatum        $parent_action_data = null,
-        protected ?UserNamespace      $owner_namespace = null,
-        protected bool                $b_type_init = false,
-        protected array          $tags = []
+        protected ?PhaseParamData $params,
+        protected ?ElementType    $origin_type,
+        protected bool            $is_system,
+        protected ?UserNamespace  $calling_namespace,
+        protected ?string         $use_ref = null,
+        protected ?Phase $editing_phase = null,
+
     )
     {
-
-        parent::__construct(action_data: $this->action_data, parent_action_data: $this->parent_action_data,owner_namespace: $this->owner_namespace,
-            b_type_init: $this->b_type_init, is_system: $this->is_system, send_event: $this->send_event,is_async: $this->is_async,tags: $this->tags);
+        if (!$this->editing_phase && $this->params->editing_phase_ref) {
+            $this->editing_phase = Phase::getThisPhase(uuid: $this->params->editing_phase_ref);
+        }
     }
 
-    protected function initData(bool $b_save = true) : ActionDatum {
-        parent::initData(b_save: false);
-
-        $this->setGivenSet($this->given_edit_phase_uuid)->setGivenType($this->given_type_uuid);
-
-        $this->action_data->save();
-        $this->action_data->refresh();
-        return $this->action_data;
+    protected  function toArray() :array {
+        return [
+            'params'=>$this->params?->toArray(),
+            'use_ref'=>$this->use_ref,
+            'given_set'=>$this->origin_type,
+            'is_system'=>$this->is_system,
+            'calling_namespace'=>$this->calling_namespace,
+        ];
+    }
+    protected static function fromArray(array $args) : static{
+        $params = $args['params'] ? PhaseParamData::from($args['params']) : null ;
+        $is_system = (bool)$args['is_system'];
+        $use_ref = $args['use_ref'];
+        $given_set = static::getSetFromArray('given_set',$args);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args,false );
+        return new static(params: $params, origin_type: $given_set,is_system: $is_system,calling_namespace: $calling_namespace,use_ref: $use_ref);
     }
 
 
     /**
-     * @throws \Exception
+     * @throws \Throwable
      */
-    protected function runActionInner(array $data = []): void
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        parent::runActionInner();
-
-        if (!$this->getGivenType() || !$this->phase_name) {
-            throw new \InvalidArgumentException("Need type and name");
+        $work = static::fromArray($command_args);
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+        if ($b_approved) {
+            $phase = $work->makePhase();
+            if (!$work->is_system)
+            {
+                $r = new Evt\Server\PhaseAdded(given_type: $work->origin_type,given_phase: $phase);
+                $r->callTreeByItself($children_args);
+            }
+        } else {
+            $phase = null ;
         }
-        $this->checkIfAdmin($this->getGivenType()->owner_namespace);
+
+        return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL,
+            data: [static::CHILD_DECISION_KEY =>$b_approved,'phase'=>$phase]);
+    }
+
+
+
+    /**
+     * @throws
+     */
+    public function makePhase( bool $is_default_phase = false,bool $b_do_refresh = true ) : Phase{
 
         try {
             DB::beginTransaction();
+
             $phase = new Phase();
-            if ($this->uuid) {
-                $phase->ref_uuid = $this->uuid;
+            if ($this->use_ref) {
+                $phase->ref_uuid = $this->use_ref;
             }
 
-            $phase->phase_type_id = $this->getGivenType()->id;
-            $phase->setPhaseName($this->phase_name);
-            if ($this->getGivenEditPhase()) {
-                $phase->edited_by_phase_id = $this->getGivenEditPhase()->id;
-            }
-            if ($this->is_system) {
-                $phase->is_default_phase = $this->is_default_phase;
-            }
+            $phase->phase_type_id = $this->origin_type->id;
+            $phase->setPhaseName($this->params->name);
+            $phase->is_default_phase = $is_default_phase;
+            $phase->edited_by_phase_id = $this->editing_phase?->id;
+            $phase->is_system = $this->is_system;
             $phase->save();
-            $this->action_data->data_second_phase_id = $phase->id;
-            $this->action_data->save();
-            $this->action_data->refresh();
-            if ($this->send_event) {
-                $this->post_events_to_send = Evt\Type\PhaseAdded::makeEventActions(
-                    source: $this, action_data: $this->action_data,phase_context: $phase);
-            }
 
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
-    }
 
-
-
-    protected function getMyData() :array {
-        return ['phase'=>$this->getCreatedPhase(),'given_edit_phase'=>$this->getGivenEditPhase(),'given_type'=>$this->getGivenType()];
-    }
-
-    public function getDataSnapshot(): array
-    {
-        $what =  $this->getMyData();
-        $ret = [];
-        if (isset($what['phase'])) {
-            $ret['phase'] = new PhaseResponse(given_phase:  $what['phase']);
+        if ($b_do_refresh) {
+            $phase->refresh();
         }
 
-        return $ret;
+        return $phase;
     }
 
 
 
+    /**
+     * @throws \Throwable
+     */
+    public static function createPhase(
+        PhaseParamData     $params,
+        ElementType                $originating_type,
+        bool                      $is_system,
+        UserNamespace             $calling_namespace,
+        ?IThangBuilder              $builder = null
+    ) : Thang|IThangBuilder
+    {
+
+        if (!$is_system) {
+            static::checkIfGivenIsAdmin(given: $calling_namespace,target: $originating_type->owner_namespace);
+        }
+
+        $me = new static(
+            params: $params,
+            origin_type: $originating_type,
+            is_system: $is_system,
+            calling_namespace: $calling_namespace
+        );
+
+        $ret_builder = false;
+        if ($builder) {
+            $ret_builder = true;
+        }
+
+        $builder?: $builder = ThangBuilder::createBuilder();
+        $builder->setNamespace($calling_namespace);
+
+
+        $builder->tree(
+            command_class: static::class,
+            command_args: $me->toArray(),
+            command_tags: [static::class],
+        );
+
+
+        if ($ret_builder) {
+            return $builder;
+        }
+
+        $thang = $builder->execute()->getThang();
+        return $thang;
+    }
 
 
 }

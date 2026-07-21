@@ -72,7 +72,7 @@ class ChangeOwner extends Api\DesignApi implements ICommandCallable
                 command_class: Evt\Server\TypeOwnerChanged::class,
                 command_args: (array)new Evt\Server\TypeOwnerChanged(
                     given_type:$given_type,
-                    new_namespace:$given_namespace,
+                    given_namespace:$given_namespace,
                     old_namespace: $given_type->owner_namespace
                 ),
                 command_tags: [Evt\Server\TypeOwnerChanged::class]
@@ -98,7 +98,7 @@ class ChangeOwner extends Api\DesignApi implements ICommandCallable
                 command_class: Evt\Server\TypeOwnerChanging::class,
                 command_args: (array)new Evt\Server\TypeOwnerChanging(
                     given_type:$given_type,
-                    new_namespace:$given_namespace,
+                    given_namespace:$given_namespace,
                     old_namespace: $given_type->owner_namespace
                 ),
                 command_tags: [Evt\Server\TypeOwnerChanging::class]

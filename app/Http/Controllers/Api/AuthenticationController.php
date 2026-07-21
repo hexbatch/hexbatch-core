@@ -7,6 +7,7 @@ use App\Annotations\Access\TypeOfAccessMarker;
 use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
+use App\Data\ApiParams\Data\ErrorData;
 use App\Data\ApiParams\Data\User\Params\CreateTokenParamData;
 use App\Data\ApiParams\Data\User\Params\LoginParamData;
 use App\Data\ApiParams\Data\User\Params\RegistrationParamData;
@@ -14,16 +15,15 @@ use App\Data\ApiParams\Data\User\Response\CreateTokenResponseData;
 use App\Data\ApiParams\Data\User\Response\LoginResponseData;
 use App\Data\ApiParams\Data\User\Response\MeResponseData;
 use App\Exceptions\HexbatchAuthException;
-use App\Exceptions\HexbatchCodeRollbackException;
 use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\OpenApi\ErrorResponse;
 use App\Sys\Res\Types\Stk\Root\Api;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Carbon\Carbon;
 use Hexbatch\Thangs\Data\ThangData;
+use Hexbatch\Thangs\Models\Thang;
 use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -49,7 +49,7 @@ class AuthenticationController extends Controller
         tags: ['user'],
         responses: [
             new OA\Response( response: 200, description: 'This is you',content: new JsonContent(ref: MeResponseData::class)),
-            new OA\Response( response: CodeOf::HTTP_FORBIDDEN, description: 'Not logged in',content: new JsonContent(ref: ErrorResponse::class))
+            new OA\Response( response: CodeOf::HTTP_FORBIDDEN, description: 'Not logged in',content: new JsonContent(ref: ErrorData::class))
         ]
     )]
     public function me(Request $request) {
@@ -83,7 +83,7 @@ class AuthenticationController extends Controller
         tags: ['user'],
         responses: [
             new OA\Response( response: CodeOf::HTTP_OK, description: 'Login returns a token',content: new JsonContent(ref: LoginResponseData::class)),
-            new OA\Response( response: CodeOf::HTTP_UNAUTHORIZED, description: 'Wrong credentials',content: new JsonContent(ref: ErrorResponse::class))
+            new OA\Response( response: CodeOf::HTTP_UNAUTHORIZED, description: 'Wrong credentials',content: new JsonContent(ref: ErrorData::class))
         ]
     )]
     public function login(Request $request): JsonResponse
@@ -97,7 +97,7 @@ class AuthenticationController extends Controller
                 CodeOf::HTTP_UNAUTHORIZED,
                 RefCodes::BAD_LOGIN);
         }
-
+        //todo do api for login after logging in, to dispatch events
         $user->tokens()->delete(); //change later to keep reserved tokens
 
         $token = $user->createToken($request->username);
@@ -123,39 +123,26 @@ class AuthenticationController extends Controller
         tags: ['user','public'],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Registered', content: new JsonContent(ref: MeResponseData::class)),
-            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting',
-                content: new JsonContent(ref: ThangData::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue', content: new JsonContent(ref: ErrorData::class)),
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
         ]
     )]
-    #[ApiEventMarker( Evt\Server\UserRegistrationProcessing::class)]
-    #[ApiTypeMarker( Api\User\UserRegister::class)]
+    #[ApiEventMarker( Evt\Server\UserRegistered::class)]
+    #[ApiEventMarker( Evt\Server\NamespaceCreated::class)]
+    #[ApiTypeMarker( Api\User\Register::class)]
     public function register(Request $request): JsonResponse
     {
-
-        $what = null;
-        try {
-            DB::beginTransaction();
-            $params = RegistrationParamData::fromRequest($request);
-            $api = new Api\User\UserRegister(is_async: false, params: $params, tags: [ 'api-top']);
-            $api->createThingTree(tags: ['registration']);
-
-            $data_out = $api->getCallbackResponse($http_code);
-            if ($http_code > 299) {throw new HexbatchCodeRollbackException("Registration Failed");}
-            $what =  response()->json(['response' => $data_out], $http_code);
-            DB::commit();
-            return $what;
+        $params = RegistrationParamData::fromRequest($request);
+        $data_out = Api\User\Register::doRegistration(params: $params,tags: ['api-top']);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
         }
-        catch (HexbatchCodeRollbackException) {
-            DB::rollBack();
-            return $what;
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
         }
-        catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        return  response()->json($data_out,$http_code);
 
     }
 
@@ -170,7 +157,7 @@ class AuthenticationController extends Controller
         tags: ['user'],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'All the tokens owned by the user were destroyed'),
-            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorResponse::class))
+            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorData::class))
         ]
     )]
     public function logout(): JsonResponse
@@ -200,7 +187,7 @@ class AuthenticationController extends Controller
         responses: [
             new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Returns a new token set to that lifetime',
                                 content: new JsonContent(ref: CreateTokenResponseData::class)),
-            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorResponse::class))
+            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorData::class))
         ]
     )]
     public function create_token(Request $request): JsonResponse
@@ -245,7 +232,7 @@ class AuthenticationController extends Controller
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK,  description: 'Gets any immutable passthrough data stored when the token was created',
                 content: new JsonContent(type: 'object', nullable: true) ),
-            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorResponse::class))
+            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorData::class))
 
         ]
     )]
@@ -272,7 +259,7 @@ class AuthenticationController extends Controller
         tags: ['user'],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_NO_CONTENT, description: 'Nothing returned'),
-            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorResponse::class))
+            new OA\Response( response: CodeOf::HTTP_BAD_REQUEST, description: 'Something happened',content: new JsonContent(ref: ErrorData::class))
         ]
     )]
     public function remove_current_token(Request $request): JsonResponse

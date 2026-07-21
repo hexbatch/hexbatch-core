@@ -24,6 +24,7 @@ class EventFilter
         public ?ElementType         $type_context = null,
         public ?ElementType         $set_type_context = null,
         public ?UserNamespace       $namespace_context = null,
+        protected ?UserNamespace    $old_namespace_context = null,
         public ?Attribute           $attribute_context = null,
         public ?ElementSet          $set_context = null,
         public ?Element             $element_context = null,

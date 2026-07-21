@@ -10,8 +10,6 @@ use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
 use App\Rules\ResourceNameReq;
-use App\Sys\Res\Namespaces\Stock\ThisNamespace;
-use App\Sys\Res\Servers\Stock\ThisServer;
 use Carbon\Carbon;
 use ErrorException;
 use Illuminate\Support\Facades\DB;
@@ -214,17 +212,9 @@ class Utilities {
         return $user?->default_namespace;
     }
 
-    public static function getSystemNamespace() : UserNamespace {
-        return UserNamespace::getThisNamespace(uuid: ThisNamespace::getClassUuid());
-    }
 
     protected static ?Server $my_server = null;
 
-    public static function getThisServer() : Server {
-        if (static::$my_server) {return static::$my_server; }
-        static::$my_server = Server::getThisServer(uuid: ThisServer::getClassUuid());
-        return static::$my_server;
-    }
 
 
     public static function getCurrentOrUserNamespace() : ?UserNamespace {
@@ -249,7 +239,7 @@ class Utilities {
             if (!$namespace) {
                 $user_namespace_name = $what_route->originalParameter('user_namespace');
                 if ($user_namespace_name) {
-                    $namespace = (new UserNamespace())->resolveRouteBinding($user_namespace_name);
+                    $namespace = new UserNamespace()->resolveRouteBinding($user_namespace_name);
                 }
 
             }

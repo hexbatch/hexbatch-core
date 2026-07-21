@@ -85,7 +85,7 @@ class ElementRecieved extends Evt\ScopeElement implements ICommandCallable
         $builder->tree($my_command);
 
 
-        if ( ($ref = $recipient_namespace->namespace_base_type->getEventHandlerRef(TypeOfEvent::ELEMENT_RECIEVED)))
+        if ( ($ref = $recipient_namespace->namespace_base_type->getEventHandlerRef(static::EVENT_NAME)))
         {
             $builder->leaf(
                 command_class: Evt\EventHandler::class,

@@ -96,7 +96,7 @@ class DesignParentRemove extends Act\Cmd\Ds implements ICommandCallable
             }
         }
 
-        throw new HexbatchFailException( __('msg.parent_type_is_invalid_cannot_remove',['ref'=>$this->getGivenType()->getName()]),
+        throw new HexbatchFailException( __('msg.parent_type_is_invalid_cannot_remove',['ref'=>$this->given_type->getName()]),
             \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
             RefCodes::TYPE_PARENT_CANNOT_BE_REMOVED);
 

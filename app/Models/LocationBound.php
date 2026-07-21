@@ -84,6 +84,7 @@ class LocationBound extends Model
         return $this->belongsTo(UserNamespace::class,'location_bound_namespace_id');
     }
 
+
     public function getName() {
         return $this->bound_name;
     }
@@ -386,7 +387,7 @@ class LocationBound extends Model
 
             if (is_string($collect) && Utilities::is_uuid($collect) && !$bound) {
                 /** @var LocationBound $bound */
-                $bound = (new LocationBound())->resolveRouteBinding($collect);
+                $bound = new LocationBound()->resolveRouteBinding($collect);
             } else {
                 if (!$bound) {
                     $bound = new LocationBound();

@@ -7,7 +7,6 @@ use App\Annotations\ApiParamMarker;
 
 use App\Data\ApiParams\Data\Attributes\AttributeData;
 use App\Data\ApiParams\Data\Attributes\Params\AttributeSearchParams;
-use App\Models\ActionDatum;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\LocationBound;
@@ -34,7 +33,7 @@ class ListAttributes extends Api\DesignApi
 
 
     /**
-     * @return CursorPaginatedDataCollection<ActionDatum>
+     * @return CursorPaginatedDataCollection<AttributeData>
      */
     public static function listAttributes(AttributeSearchParams $params,UserNamespace $caller_namespace) {
 

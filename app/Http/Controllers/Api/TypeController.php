@@ -415,6 +415,7 @@ class TypeController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[ApiTypeMarker( Root\Api\Type\PromoteOwner::class)]
     public function promote_owner(UserNamespace $namespace,ElementType $element_type,UserNamespace $target_namespace) {
+        Utilities::ignoreVar($namespace,$element_type,$target_namespace);
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 
@@ -532,7 +533,7 @@ class TypeController extends Controller {
             new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'A resource was not found')
         ]
     )]
-    #[ApiEventMarker( Evt\Server\TypePublishing::class)]
+    #[ApiEventMarker( Evt\Type\TypePublishing::class)]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Type\Publish::class)]
     public function publish_type(UserNamespace $namespace,ElementType $type) {

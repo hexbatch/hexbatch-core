@@ -24,6 +24,7 @@ use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
@@ -40,7 +41,7 @@ if the attribute is not public,
 
 If no read events, value is from the set context of element values. Read events only called if there is permission to read attribute
 ')]
-class Read extends Act\Cmd\Ele
+class Read extends Act\Cmd\Ele implements ICommandCallable
 {
     const UUID = '6280f4c3-f2de-49c1-8b4e-5f3e7aab008c';
     const ACTION_NAME = TypeOfAction::PRAGMA_READ;

@@ -14,7 +14,7 @@ use App\Sys\Res\Types\Stk\Root\Signal;
 
 each mutex type only has one element, other elements cannot be made,
 
-mutexes are only allowed to be in two set types. Each element can only be in one set at a time
+mutexes are only allowed to be in two set types (or maybe any set). Each element can only be in one set at a time
 	global system set mutex_waiting is where mutexes that are not claimed are at. There is only one set of this per server.
 	set type local_signal_claimed is where a thing collection root can put mutexes into when they are claimed by the rules.
 	This is made when the rule is waiting, and deleted when the rule is done

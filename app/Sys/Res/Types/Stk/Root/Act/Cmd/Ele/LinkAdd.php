@@ -20,6 +20,7 @@ use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 
@@ -53,10 +54,10 @@ Once the link is made, the element and type owners, and set, will get an event
 
 ')]
 #[ApiParamMarker( param_class: SelectElementParamData::class)]
-#[ApiEventMarker( Evt\Server\LinkCreated::class)] //post
-#[ApiEventMarker( Evt\Server\LinkCreating::class)] //post
+#[ApiEventMarker( Evt\Element\LinkCreated::class)] //post
+#[ApiEventMarker( Evt\Element\LinkCreating::class)] //post
 
-class LinkAdd extends Act\Cmd\Ele
+class LinkAdd extends Act\Cmd\Ele implements ICommandCallable
 {
     const UUID = '6eaef3f7-a458-459f-85aa-75d863677101';
     const ACTION_NAME = TypeOfAction::CMD_LINK_ADD;
@@ -70,8 +71,8 @@ class LinkAdd extends Act\Cmd\Ele
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\LinkCreated::class,
-        Evt\Server\LinkCreating::class,
+        Evt\Element\LinkCreated::class,
+        Evt\Element\LinkCreating::class,
     ];
 
 
@@ -164,7 +165,7 @@ class LinkAdd extends Act\Cmd\Ele
      */
     protected function fireNotificationsForElement(Element $e, ?ElementSet $s, array $children_args) {
         $callables = [
-            Evt\Server\LinkCreated::class
+            Evt\Element\LinkCreated::class
         ];
 
         foreach ($callables as $callable_class) {
@@ -237,7 +238,7 @@ class LinkAdd extends Act\Cmd\Ele
                 $given_set = ElementSet::getThisSet(uuid:$params->set_ref);
             }
             foreach ($me->selected_elements as $el) {
-                Evt\Server\LinkCreating::callEventTree(
+                Evt\Element\LinkCreating::callEventTree(
                     given_element: $el,
                     given_set: $given_set,
                     builder: $builder);

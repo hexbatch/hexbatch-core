@@ -18,6 +18,7 @@ use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Collection;
@@ -52,7 +53,7 @@ use Illuminate\Support\Facades\DB;
 ')]
 #[ApiParamMarker( param_class: AddElementsParamData::class)]
 
-class SetMemberAdd extends Act\Cmd\St
+class SetMemberAdd extends Act\Cmd\St implements ICommandCallable
 {
     const UUID = 'ebd1275e-ecc6-486e-89cb-69e14ae4a44c';
     const ACTION_NAME = TypeOfAction::CMD_SET_MEMBER_ADD;
@@ -77,15 +78,15 @@ class SetMemberAdd extends Act\Cmd\St
 
 
     public function __construct(
-        protected AddElementsParamData     $params,
-        protected ElementSet                $given_set,
+        protected ?AddElementsParamData     $params,
+        protected ?ElementSet                $given_set,
         protected bool                      $is_system,
-        protected UserNamespace             $calling_namespace,
+        protected ?UserNamespace             $calling_namespace,
         protected ?Collection $selected_elements = null
 
     )
     {
-        if (!$this->selected_elements) {
+        if (!$this->selected_elements && $this->params) {
             $this->params->selection->phase_ref = $this->given_set->defining_element->element_phase->ref_uuid;
             $this->selected_elements = Element::getElementsFromParams(
                 params: $this->params->selection, b_ns_relations: true, b_type_relations: true, b_ns_type_relations: false,
@@ -97,7 +98,7 @@ class SetMemberAdd extends Act\Cmd\St
 
     protected  function toArray() :array {
         return [
-            'params'=>$this->params->toArray(),
+            'params'=>$this->params?->toArray(),
             'given_set'=>$this->given_set,
             'selected_elements'=>$this->selected_elements,
             'is_system'=>$this->is_system,
@@ -105,11 +106,11 @@ class SetMemberAdd extends Act\Cmd\St
         ];
     }
     protected static function fromArray(array $args) : static{
-        $params = AddElementsParamData::from($args['params']);
+        $params = $args['params'] ? AddElementsParamData::from($args['params']) : null ;
         $is_system = (bool)$args['is_system'];
         $given_set = static::getSetFromArray('given_set',$args);
         $selected_elements = static::getElementCollectionFromArray('selected_elements',$args);
-        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args,false );
         return new static(params: $params,given_set: $given_set,is_system: $is_system,calling_namespace: $calling_namespace,selected_elements: $selected_elements);
     }
 
@@ -140,13 +141,14 @@ class SetMemberAdd extends Act\Cmd\St
      * @return Collection<ElementSetMember>
      * @throws
      */
-    protected function addElements() {
+    public function addElements(bool $b_do_refresh = true, bool $b_sticky_override = false  ) {
         $ids = [];
+        $sticky = $b_sticky_override ?: $this->params?->is_sticky??false ;
         //anyone can add any element they can see
         try {
             DB::beginTransaction();
             foreach ($this->selected_elements as $element) {
-                $member = $this->given_set->addElement(ele: $element,is_sticky: $this->params->is_sticky);
+                $member = $this->given_set->addElement(ele: $element,is_sticky: $sticky);
                 $ids[] = $member->id;
             }
             DB::commit();
@@ -155,7 +157,7 @@ class SetMemberAdd extends Act\Cmd\St
             throw $e;
         }
 
-        if (count($ids)) {
+        if (count($ids) && $b_do_refresh) {
             return ElementSetMember::buildSetMember(given_ids: $ids)->get();
         }
 

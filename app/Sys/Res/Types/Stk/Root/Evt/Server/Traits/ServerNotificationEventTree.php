@@ -2,7 +2,10 @@
 
 namespace App\Sys\Res\Types\Stk\Root\Evt\Server\Traits;
 
+use App\Helpers\Events\EventFilter;
 use App\Helpers\Events\TreeStub;
+use App\Helpers\Utilities;
+use App\Models\Server;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
@@ -63,6 +66,7 @@ trait ServerNotificationEventTree
         ?IThangBuilder $builder = null
     ) : Thang|IThangBuilder
     {
+        Utilities::ignoreVar($children_args);
         $ret_builder = false;
         if ($builder) {
             $ret_builder = true;
@@ -84,10 +88,39 @@ trait ServerNotificationEventTree
                 command_args: (array)new Evt\EventHandler(
                     ref: $ref,
                     type_context: $this->given_type,
-                    namespace_context: $this->given_namespace
+                    namespace_context: $this->given_namespace,
+                    old_namespace_context: $this->old_namespace,
+                    attribute_context: $this->given_attribute,
+                    set_context: $this->given_set,
+                    element_context: $this->given_element,
+                    phase_context: $this->given_phase
                 ),
                 command_tags: [Evt\EventHandler::class]
             );
+        }
+
+        if ( $col = Server::getEventHandlerRefs(
+            new EventFilter(event_type: static::EVENT_NAME,
+                type_context: $this->given_type,
+                namespace_context: $this->given_namespace, old_namespace_context: $this->given_namespace,
+                attribute_context: $this->given_attribute, set_context: $this->given_set, element_context: $this->given_element, phase_context: $this->given_phase))
+        ) {
+            foreach ($col as $ref) {
+                $builder->tree(
+                    command_class: Evt\EventHandler::class,
+                    command_args: (array)new Evt\EventHandler(
+                        ref: $ref,
+                        type_context: $this->given_type,
+                        namespace_context: $this->given_namespace,
+                        old_namespace_context: $this->old_namespace,
+                        attribute_context: $this->given_attribute,
+                        set_context: $this->given_set,
+                        element_context: $this->given_element,
+                        phase_context: $this->given_phase
+                    ),
+                    command_tags: [Evt\EventHandler::class]
+                );
+            }
         }
 
 

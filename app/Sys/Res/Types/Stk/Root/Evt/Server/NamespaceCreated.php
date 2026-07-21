@@ -3,8 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
-use App\Models\ElementType;
-use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use App\Sys\Res\Types\Stk\Root\Evt\Server\Traits\ServerNotificationEventTree;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
@@ -22,13 +20,7 @@ class NamespaceCreated extends Evt\ScopeServer implements ICommandCallable
         Evt\ScopeServer::class
     ];
 
-    public function __construct(
-        protected ElementType               $given_type,
-        protected ?UserNamespace             $given_namespace
-    )
-    {
 
-    }
 
     /**
      * @throws \Throwable

@@ -18,7 +18,6 @@ class UserEdit extends Act\Cmd\Us
 
     const PARENT_CLASSES = [
         Act\Cmd\Us::class,
-        Act\SystemPrivilege::class,
     ];
 
     const EVENT_CLASSES = [

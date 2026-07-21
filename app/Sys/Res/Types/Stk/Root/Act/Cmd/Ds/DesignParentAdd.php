@@ -37,7 +37,7 @@ class DesignParentAdd extends Act\Cmd\Ds implements ICommandCallable
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\DesignParentAdding::class
+        Evt\Type\DesignParentAdding::class
     ];
 
 
@@ -88,13 +88,12 @@ class DesignParentAdd extends Act\Cmd\Ds implements ICommandCallable
             static::checkIfGivenIsAdmin(given: $this->caller_namespace,target: $this->given_type->owner_namespace);
         }
 
-        $this->parent_type->loadMissing('type_parents');
+
         if ($this->do_permission_check) {
-            foreach ($this->parent_type->type_parents as $par) {
-                if ($par->ref_uuid === $this->parent_type->ref_uuid) {
-                    //already added
-                    return $this->given_type;
-                }
+            $this->parent_type->loadMissing('type_parents');
+            //already added
+            if (array_any($this->parent_type->type_parents, fn($par) => $par->ref_uuid === $this->parent_type->ref_uuid)) {
+                return $this->given_type;
             }
         }
 
@@ -123,7 +122,7 @@ class DesignParentAdd extends Act\Cmd\Ds implements ICommandCallable
 
         if ($do_permission_check)
         {
-            $tree = Evt\Server\DesignParentAdding::callParentTree(given_type: $given_type,parent_type: $parent_type,builder: $builder);
+            $tree = Evt\Type\DesignParentAdding::callParentTree(given_type: $given_type,parent_type: $parent_type,builder: $builder);
 
             $tree->leaf(
                 command_class: Act\Cmd\Ds\DesignParentAdd::class,

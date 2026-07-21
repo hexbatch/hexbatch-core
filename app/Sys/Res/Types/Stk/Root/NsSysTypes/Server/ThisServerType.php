@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\NsSysTypes\Server;
 
 use App\Exceptions\HexbatchInitException;
-use App\Sys\Res\Ele\Stk\SystemNS\SystemHandleElement;
 use App\Sys\Res\Types\Stk\Root\About;
 use App\Sys\Res\Types\Stk\Root\NsSysTypes\ThisNsType;
 use App\Sys\Res\Types\Stk\Root\Server;
@@ -22,7 +21,6 @@ class ThisServerType extends Server
 
     const TYPE_NAME = 'system_server';
 
-    const HANDLE_ELEMENT_CLASS = SystemHandleElement::class;
 
 
     const PARENT_CLASSES = [

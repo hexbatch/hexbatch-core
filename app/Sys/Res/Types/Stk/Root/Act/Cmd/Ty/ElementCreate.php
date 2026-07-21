@@ -90,18 +90,18 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         Evt\Type\ElementRecieved::class,
     ];
 
-
+    const string DEFAULT_CHILD_KEY = 'elements';
 
     #[ApiParamMarker( param_class: CreateElementParamData::class)]
     public function __construct(
         protected ElementType               $element_type,
         protected Phase                     $phase,
         protected int                       $number_to_create,
-        protected UserNamespace             $owner_namespace,
+        protected ?UserNamespace             $owner_namespace,
         protected bool                      $is_system,
-        protected UserNamespace             $calling_namespace,
+        protected ?UserNamespace             $calling_namespace,
         protected array                     $preassinged_uuids = [],
-        protected string                    $child_key_to_use            = 'elements'
+        protected string                    $child_key_to_use            = self::DEFAULT_CHILD_KEY
 
 
     )
@@ -127,8 +127,8 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         $number_to_create = (int)$args['number_to_create'];
         $phase = static::getPhaseFromArray('phase',$args);
         $element_type = static::getTypeFromArray('element_type',$args);
-        $owner_namespace = static::getNamespaceFromArray('owner_namespace',$args);
-        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
+        $owner_namespace = static::getNamespaceFromArray('owner_namespace',$args,false);
+        $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args, false);
         $child_key_to_use = $args['child_key_to_use'];
         return new static(element_type: $element_type, phase: $phase, number_to_create: $number_to_create,
              owner_namespace: $owner_namespace, is_system: $is_system,
@@ -157,7 +157,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
      */
     protected function doCreateElement() : array {
 
-        if ($this->is_system) {
+        if ($this->calling_namespace) {
             static::checkIfGivenIsAdmin(given: $this->calling_namespace,target: $this->element_type->owner_namespace);
         }
 
@@ -188,8 +188,6 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
             } //end non set creation
 
 
-            $this->saveCollectionKeys();
-
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
@@ -199,11 +197,11 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         return $elements;
     }
 
-    private function makeElement(int $loop_number) : Element
+    public function makeElement(int $loop_number = 0,bool $b_do_refresh = true) : Element
     {
 
         $phase_id = $this->phase->id;
-        $namespace_owner_id = $this->owner_namespace->id;
+        $namespace_owner_id = $this->owner_namespace?->id;
         $type_id = $this->element_type->id;
 
         $ele = new Element();
@@ -215,7 +213,10 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         }
         $ele->is_system = $this->is_system;
         $ele->save();
-        $ele->refresh();
+        if ($b_do_refresh) {
+            $ele->refresh();
+        }
+
         return $ele;
     }
 

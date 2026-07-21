@@ -8,6 +8,7 @@ use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\ErrorData;
 use App\Data\ApiParams\Data\Sets\Params\AddElementsParamData;
 use App\Data\ApiParams\Data\Sets\Responses\SetList;
 use App\Data\ApiParams\Data\Sets\SetData;
@@ -22,7 +23,6 @@ use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Data\ThangData;
 use Hexbatch\Thangs\Models\Thang;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
@@ -377,8 +377,7 @@ class SetController extends Controller {
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Listed elements in this set', content: new JsonContent(ref: ElementList::class)),
 
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue', content: new JsonContent(ref: ErrorData::class))
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::SET_MEMBER)]

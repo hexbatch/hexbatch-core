@@ -13,8 +13,11 @@ use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
 use App\Sys\Res\ISystemModel;
-use App\Sys\Res\Types\IType;
 use App\Sys\Res\Types\Stk\Root;
+use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
+use App\Sys\Res\Types\Stk\Root\Namespace\NamespaceBase;
+use App\Sys\Res\Types\Stk\Root\Namespace\PrivateType;
+use App\Sys\Res\Types\Stk\Root\Namespace\PublicType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -61,7 +64,7 @@ use Illuminate\Validation\ValidationException;
  * @property string updated_at
  *
  */
-class ElementType extends Model implements IType,ISystemModel
+class ElementType extends Model implements ISystemModel
 {
 
     protected $table = 'element_types';
@@ -177,13 +180,15 @@ class ElementType extends Model implements IType,ISystemModel
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
+        bool             $b_throw_if_missing = true
     )
     : ElementType
     {
+        /** @var static|null $ret */
         $ret = static::buildElementType(id:$id,uuid: $uuid, namespace_id: $owner_namespace_id,name: $type_name,
             shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle)->first();
 
-        if (!$ret) {
+        if (!$ret && $b_throw_if_missing) {
             $arg_types = [];
             $arg_vals = [];
             if ($id) { $arg_types[] = 'id'; $arg_vals[] = $id;}
@@ -501,10 +506,6 @@ class ElementType extends Model implements IType,ISystemModel
     }
 
 
-    public function getTypeObject(): ?ElementType {
-        return $this;
-    }
-
     public function getUuid(): string{
         return $this->ref_uuid;
     }
@@ -706,6 +707,34 @@ class ElementType extends Model implements IType,ISystemModel
         }
         return $ret;
 
+    }
+
+    protected static ?ElementType $system_type = null;
+    public static function getSystemType(bool $b_throw_on_missing = true) : ?ElementType {
+        if (static::$system_type) { return static::$system_type;}
+
+        $sys = ElementType::buildElementType(uuid: Root::UUID)->first();
+        if (!$sys && $b_throw_on_missing) {
+            throw new \LogicException("No system type made");
+        }
+        return static::$system_type = $sys;
+    }
+
+
+    public static function getNamespaceBaseType() : ElementType {
+        return ElementType::getElementType(uuid: NamespaceBase::UUID);
+    }
+
+    public static function getNamespaceSetType() : ?ElementType {
+        return ElementType::getElementType(uuid: HomeSet::UUID);
+    }
+
+    public static function getNamespacePublicType() : ?ElementType {
+        return ElementType::getElementType(uuid: PublicType::UUID);
+    }
+
+    public static function getNamespacePrivateType() : ?ElementType {
+        return ElementType::getElementType(uuid: PrivateType::UUID);
     }
 
 

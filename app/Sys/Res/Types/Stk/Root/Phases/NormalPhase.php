@@ -14,7 +14,7 @@ class NormalPhase extends Phase
 
     const EDITED_BY_PHASE_SYSTEM_CLASS = EditPhase::class;
 
-
+    const PHASE_UUID = '43aaa6b7-6155-4a15-8228-eeead83b0971';
 
     const PARENT_CLASSES = [
         Phase::class
