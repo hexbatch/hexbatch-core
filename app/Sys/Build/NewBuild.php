@@ -599,7 +599,7 @@ class NewBuild
         $base_type_params = TypeParamData::MakingUsingCodeArray([
             'handle_ref_uuid'=>null,
             'type_name'=> $info::getTypeName(),
-            'is_final_type'=> $info::isFinal(),
+            'is_final_type'=> $info::isTypeFinal(),
             'access'=> $info::getTypeAccessPolicy(),
         ]);
         $base_type_factory = new DesignCreate(

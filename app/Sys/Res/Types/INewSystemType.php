@@ -10,7 +10,7 @@ interface INewSystemType
 {
     public static function getTypeUuid(): string;
     public static function getTypeName(): string;
-    public static function isFinal() : bool;
+    public static function isTypeFinal() : bool;
 
     public static function getTypeAccessPolicy() : TypeOfServerAccess;
 

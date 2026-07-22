@@ -5,7 +5,7 @@ namespace App\Sys\Res\Types;
 
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Models\ElementType;
-use App\Sys\Res\Atr\ISystemAttribute;
+use App\Sys\Res\Atr\INewSystemAttribute;
 use App\Sys\Res\DocumentTrait;
 use App\Sys\Res\IDocument;
 
@@ -58,7 +58,7 @@ class BaseType implements IDocument, \JsonSerializable,INewSystemType
         return static::ACCESS_POLICY;
     }
 
-    public static  function isFinal(): bool { return static::IS_FINAL; }
+    public static  function isTypeFinal(): bool { return static::IS_FINAL; }
 
 
 
@@ -70,60 +70,13 @@ class BaseType implements IDocument, \JsonSerializable,INewSystemType
 
 
     /**
-     * @return ISystemAttribute[]
+     * @return INewSystemAttribute[]
      */
     public static function getAttributeClasses() :array {
         return static::ATTRIBUTE_CLASSES;
     }
 
 
-
-
-
-    public static function getParentNameTree() :array  {
-        $ret = [];
-        $ret[static::getHexbatchClassName()] = [] ;
-        foreach (static::PARENT_CLASSES as $full_class_name) {
-            $interfaces = class_implements($full_class_name);
-            if (isset($interfaces['App\Sys\Res\Types\ISystemType'])) {
-                /**
-                 * @type ISystemType $full_class_name
-                 */
-                $ret[static::getHexbatchClassName()][] = $full_class_name::getParentNameTree();
-            }
-        }
-        return $ret;
-    }
-
-    public static function getFlatInheritance() : string  {
-        $raw = static::renderSubtree(static::getParentNameTree());
-        return preg_replace('/(\|~\|\d)/', "\n   ",$raw);
-    }
-
-    public static function renderSubtree(array $tree) : string  {
-        $ret = [];
-
-        $count = 0;
-        foreach ($tree as $k => $v) {
-            if ($count) {
-                $ret[] = '~';
-            }
-            if ($k) {
-                $ret[] = $k;
-            }
-
-            if (count($v) ) {
-                $what = static::renderSubtree($v);
-                $ret[] = $what;
-
-            }
-            $count++;
-
-        }
-
-
-        return implode('|',$ret);
-    }
 
 
 
