@@ -76,9 +76,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
     const UUID = 'c21c5d03-685f-467b-afce-3ec449197eda';
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
@@ -101,6 +99,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         protected bool                      $is_system,
         protected ?UserNamespace             $calling_namespace,
         protected array                     $preassinged_uuids = [],
+        protected bool           $do_permission_check = true,
         protected string                    $child_key_to_use            = self::DEFAULT_CHILD_KEY
 
 
@@ -115,6 +114,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
             'phase'=> $this->phase->toArray(),
             'number_to_create'=> $this->number_to_create,
             'is_system'=> $this->is_system,
+            'do_permission_check'=> $this->do_permission_check,
             'owner_namespace'=> $this->owner_namespace,
             'calling_namespace'=> $this->calling_namespace,
             'preassinged_uuids'=> $this->preassinged_uuids,
@@ -123,6 +123,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
     }
     protected static function fromArray(array $args) : static{
         $is_system = (bool)$args['is_system'];
+        $do_permission_check = (bool)$args['do_permission_check'];
         $preassinged_uuids = $args['preassinged_uuids'];
         $number_to_create = (int)$args['number_to_create'];
         $phase = static::getPhaseFromArray('phase',$args);
@@ -132,7 +133,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
         $child_key_to_use = $args['child_key_to_use'];
         return new static(element_type: $element_type, phase: $phase, number_to_create: $number_to_create,
              owner_namespace: $owner_namespace, is_system: $is_system,
-            calling_namespace: $calling_namespace,preassinged_uuids: $preassinged_uuids,child_key_to_use: $child_key_to_use);
+            calling_namespace: $calling_namespace,preassinged_uuids: $preassinged_uuids,do_permission_check: $do_permission_check,child_key_to_use: $child_key_to_use);
     }
 
     /**
@@ -157,7 +158,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
      */
     protected function doCreateElement() : array {
 
-        if ($this->calling_namespace) {
+        if ($this->do_permission_check) {
             static::checkIfGivenIsAdmin(given: $this->calling_namespace,target: $this->element_type->owner_namespace);
         }
 
@@ -232,12 +233,13 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
          bool                      $is_system,
          UserNamespace             $calling_namespace,
          array                     $preassinged_uuids = [],
+         bool                       $do_permission_check = true,
          string                    $child_key_to_use            = 'elements',
         ?IThangBuilder $builder = null
     ) : ElementType|Thang|IThangBuilder
     {
 
-        if (!$is_system) {
+        if ($do_permission_check) {
             static::checkIfGivenIsAdmin(given: $calling_namespace,target: $element_type->owner_namespace);
         }
 
@@ -249,6 +251,7 @@ class ElementCreate extends Act\Cmd\Ele implements ICommandCallable
             is_system: $is_system,
             calling_namespace: $calling_namespace,
             preassinged_uuids: $preassinged_uuids,
+            do_permission_check: $do_permission_check,
             child_key_to_use: $child_key_to_use
         );
 

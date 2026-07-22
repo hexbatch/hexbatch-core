@@ -11,7 +11,7 @@ class Region extends Meta
     const TYPE_NAME = 'meta_region';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

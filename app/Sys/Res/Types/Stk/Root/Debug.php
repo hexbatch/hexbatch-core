@@ -57,7 +57,7 @@ class Debug extends BaseType
         Action::class
     ];
 
-    public function isFinal(): bool { return true; } //just to organize the attributes
+    public static function isFinal(): bool { return true; } //just to organize the attributes
 
 }
 

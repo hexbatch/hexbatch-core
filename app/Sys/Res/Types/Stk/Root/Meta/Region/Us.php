@@ -11,7 +11,7 @@ class Us extends Meta\Region
     const TYPE_NAME = 'region_usa';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

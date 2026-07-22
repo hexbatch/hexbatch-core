@@ -19,8 +19,12 @@ namespace App\Enums\Sys;
  *
  */
 
+use App\Data\ApiParams\Enums\EnumTryTrait;
+
 enum TypeOfEvent: string
 {
+    use EnumTryTrait;
+    case EVENTS = 'events';
     case BASE_EVENT = 'base_event';
     case EVENT_HANDLER = 'event_handler';
     case EVENT_SCOPE_ELEMENT = 'event_scope_element';
@@ -228,21 +232,6 @@ enum TypeOfEvent: string
     case ELSEWHERE_SHARING_ELEMENT = 'elsewhere_sharing_element';
     case ELSEWHERE_ELEMENT_REENTERED = 'elsewhere_element_reentered'; //element with same uuid come back after copied out
 
-
-
-
-
-
-
-    public static function tryFromInput(string|int|bool|null $test): TypeOfEvent
-    {
-        $maybe = TypeOfEvent::tryFrom($test);
-        if (!$maybe) {
-            $delimited_values = implode('|', array_column(TypeOfEvent::cases(), 'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum", ['ref' => $test, 'enum_list' => $delimited_values]));
-        }
-        return $maybe;
-    }
 }
 
 

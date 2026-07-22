@@ -4,7 +4,7 @@ namespace App\Sys\Res\Servers;
 
 use App\Enums\Server\TypeOfServerStatus;
 use App\Exceptions\HexbatchInitException;
-use App\Sys\Res\Types\Stk\Root\NsSysTypes\Server\ThisServerType;
+use App\Sys\Res\Types\Stk\Root\Server\ThisServerType;
 
 
 class ThisServer {

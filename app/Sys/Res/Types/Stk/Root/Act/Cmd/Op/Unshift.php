@@ -18,9 +18,7 @@ class Unshift extends Act\Cmd\Op
     const UUID = 'c4f79042-3be1-4c9a-9342-235341d5f0d0';
     const ACTION_NAME = TypeOfAction::OP_UNSHIFT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class

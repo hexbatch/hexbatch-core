@@ -399,17 +399,17 @@ class UserNamespace extends Model implements ISystemModel
      * //todo when the user home set is created from the user type element, its put into the Standard set, all_users
      *
      */
-    public static function createNamespace(string $namespace_name,?int $owning_user_id = null,?int $server_id = null,
-                                           ?string $ref = null,
-        ?int $type_id = null,?int $public_element_id = null,?int $private_element_id = null,?int $home_set_id = null,
-        ?string $public_key = null, bool $is_system = false
+    public static function createNamespace(string  $namespace_name,?int $owning_user_id = null,?int $server_id = null,
+                                           ?string $use_ref = null,
+        ?int                                       $type_id = null,?int $public_element_id = null,?int $private_element_id = null,?int $home_set_id = null,
+        ?string                                    $public_key = null, bool $is_system = false
     )
     : UserNamespace
     {
         $node = new UserNamespace();
         $node->namespace_user_id = $owning_user_id;
         $node->namespace_server_id = $server_id;
-        if ($ref) {$node->ref_uuid = $ref;}
+        if ($use_ref) {$node->ref_uuid = $use_ref;}
         if ($type_id) {$node->namespace_type_id = $type_id;}
         if ($public_element_id) {$node->public_element_id = $public_element_id;}
         if ($private_element_id) {$node->private_element_id = $private_element_id;}
@@ -464,7 +464,7 @@ class UserNamespace extends Model implements ISystemModel
     }
 
 
-    public static function getSystemNamespace() : UserNamespace {
+    public static function getSystemNamespace() : ?UserNamespace {
         return UserNamespace::where('ref_uuid',config('hbc.system.namespace.uuid') )->first();
     }
 

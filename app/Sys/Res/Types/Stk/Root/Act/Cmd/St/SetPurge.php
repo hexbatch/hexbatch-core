@@ -27,9 +27,7 @@ class SetPurge extends Act\Cmd\St
     const UUID = 'd0d23dc0-d588-4a51-b10b-b2f3a8cfd49a';
     const ACTION_NAME = TypeOfAction::CMD_SET_PURGE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\St::class,

@@ -15,9 +15,7 @@ class ServerEdit extends Act\Cmd\Server
     const UUID = '880b0ed8-13ed-486e-ae85-f6e96d5fa681';
     const ACTION_NAME = TypeOfAction::CMD_SERVER_EDIT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Server::class,

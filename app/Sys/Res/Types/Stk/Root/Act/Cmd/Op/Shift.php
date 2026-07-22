@@ -19,9 +19,7 @@ class Shift extends Act\Cmd\Op
     const UUID = '917a84ec-c17c-40d3-b218-da35edc62ac6';
     const ACTION_NAME = TypeOfAction::OP_SHIFT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class

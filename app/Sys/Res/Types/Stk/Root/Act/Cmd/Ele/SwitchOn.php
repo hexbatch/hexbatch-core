@@ -42,9 +42,7 @@ class SwitchOn extends SwitchOff
     const UUID = '2d0a931a-be5a-4cab-b177-c9e9ec78e432';
     const ACTION_NAME = TypeOfAction::PRAGMA_TYPE_ON;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class,

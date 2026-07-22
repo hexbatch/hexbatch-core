@@ -46,7 +46,7 @@ class ElementTypeParent extends Model
         'child_type_id',
         'parent_type_id',
         'parent_rank',
-        'approval',
+        'parent_type_approval',
     ];
 
     /**
@@ -197,7 +197,7 @@ class ElementTypeParent extends Model
                 SELECT 0 as level, t.id::text as chain,
                        t.id as type_id, t.type_name,u.namespace_name
                 from element_types t
-                         INNER JOIN user_namespaces u ON u.id = t.owner_namespace_id
+                         LEFT JOIN user_namespaces u ON u.id = t.owner_namespace_id
                 WHERE t.id = $my_id
                 UNION ALL
 
@@ -209,7 +209,7 @@ class ElementTypeParent extends Model
                 from rec
                          INNER JOIN element_type_parents par ON par.child_type_id = rec.type_id
                          INNER JOIN element_types t ON t.id = par.parent_type_id
-                         INNER JOIN user_namespaces u ON u.id = t.owner_namespace_id
+                         LEFT JOIN user_namespaces u ON u.id = t.owner_namespace_id
 
             )
             SELECT  distinct rec.level,rec.type_name,rec.namespace_name,rec.type_id,rec.chain

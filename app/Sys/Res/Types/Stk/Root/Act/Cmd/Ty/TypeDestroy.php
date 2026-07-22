@@ -16,9 +16,7 @@ class TypeDestroy extends Act\Cmd\Ty
     const ACTION_NAME = TypeOfAction::CMD_TYPE_DESTROY;
 
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class

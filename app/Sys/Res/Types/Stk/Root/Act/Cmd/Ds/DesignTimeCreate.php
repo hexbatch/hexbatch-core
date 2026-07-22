@@ -35,9 +35,7 @@ class DesignTimeCreate extends Act\Cmd\Ds implements ICommandCallable
     const UUID = '777c5080-dc81-40f8-8017-1a3a8a831a07';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_TIME_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

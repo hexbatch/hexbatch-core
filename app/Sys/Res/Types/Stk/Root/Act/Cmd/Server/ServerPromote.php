@@ -19,9 +19,7 @@ class ServerPromote extends Act\Cmd\Server
     const UUID = '3fc91919-845c-4a9a-8261-db6de25db4b4';
     const ACTION_NAME = TypeOfAction::CMD_SERVER_PROMOTE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Server::class,
@@ -35,7 +33,7 @@ class ServerPromote extends Act\Cmd\Server
 
 
     public static function createServer(
-        ElementType              $given_type,
+        ?ElementType              $given_type,
         ?UserNamespace              $given_namespace,
         string             $server_name ,
         string             $server_domain ,
@@ -55,7 +53,7 @@ class ServerPromote extends Act\Cmd\Server
         }
 
         $server->owning_namespace_id = $given_namespace?->id;
-        $server->server_type_id = $given_type->id;
+        $server->server_type_id = $given_type?->id;
         $server->server_status = $server_status ;
 
         if ($access_token_expires_at) {

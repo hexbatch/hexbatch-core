@@ -28,9 +28,7 @@ class DesignParentAdd extends Act\Cmd\Ds implements ICommandCallable
     const UUID = '362a3cdf-f013-4bc0-afce-315cba179544';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_ADD;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

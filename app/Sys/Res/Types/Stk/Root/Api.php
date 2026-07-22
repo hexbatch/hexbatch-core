@@ -17,6 +17,7 @@ class Api extends BaseType
     const UUID = 'd314149a-0f51-4b1e-b954-590a890e7c44';
     const TYPE_NAME = 'api';
 
+    const  ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Root::class

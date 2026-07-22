@@ -12,9 +12,7 @@ class NamespaceMemberPromote extends Act\Cmd\Ns
     const UUID = '91ff937c-240d-44cb-ab0e-247948e17d07';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_MEMBER_PROMOTE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ns::class,

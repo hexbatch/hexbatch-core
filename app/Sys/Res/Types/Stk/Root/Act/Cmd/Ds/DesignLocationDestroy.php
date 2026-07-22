@@ -28,9 +28,7 @@ class DesignLocationDestroy extends DesignLocationCreate
     const UUID = 'f6986ecb-de5e-4551-86cf-2cbc855b9780';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION_DESTROY;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         DesignLocationCreate::class

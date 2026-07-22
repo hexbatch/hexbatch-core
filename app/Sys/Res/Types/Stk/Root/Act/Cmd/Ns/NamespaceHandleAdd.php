@@ -12,9 +12,7 @@ class NamespaceHandleAdd extends Act\Cmd\Ns
     const UUID = '9ab8300d-01a6-4d7e-bbb5-f54cb93b3232';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_HANDLE_ADD;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Pa::class

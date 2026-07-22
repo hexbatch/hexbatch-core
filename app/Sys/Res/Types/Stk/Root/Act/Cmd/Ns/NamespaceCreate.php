@@ -33,9 +33,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
     const UUID = '2eb062ae-f06e-4b01-8a9f-2059f2fbc40b';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ns::class,
@@ -68,7 +66,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
     protected static function fromArray(array $args) : static{
         $params = null;
         if (!empty($args['params']??null)) {
-            $params = NamespaceParamData::from($args['params']);
+            $params = NamespaceParamData::MakingUsingCodeArray($args['params']);
         }
 
         $is_system = (bool)$args['is_system'];
@@ -127,12 +125,12 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
             # ───── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ─────
             $base_type = null;
             if ($preset->base_type_uuid) {
-                $base_type = ElementType::where('ref_uuid',$preset->base_type_uuid);
+                $base_type = ElementType::where('ref_uuid',$preset->base_type_uuid)->first();
             }
             if (!$base_type)
             {
                 // make base type
-                $base_type_params = TypeParamData::from([
+                $base_type_params = TypeParamData::MakingUsingCodeArray([
                     'type_name'=> $this->params->name . static::BASE_TYPE_POSTFIX,
                     'is_final_type'=> false,
                     'access'=> TypeOfServerAccess::IS_PUBLIC,
@@ -154,7 +152,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             # ───── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ─────
             // make home type
-            $home_type_params = TypeParamData::from([
+            $home_type_params = TypeParamData::MakingUsingCodeArray([
                 'type_name'=> $this->params->name . static::HOME_TYPE_POSTFIX,
                 'is_final_type'=> false,
                 'access'=> TypeOfServerAccess::IS_PUBLIC,
@@ -176,7 +174,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             # ───── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ─────
             // make public type
-            $home_type_params = TypeParamData::from([
+            $home_type_params = TypeParamData::MakingUsingCodeArray([
                 'type_name'=> $this->params->name . static::PUBLIC_TYPE_POSTFIX,
                 'is_final_type'=> false,
                 'access'=> TypeOfServerAccess::IS_PUBLIC,
@@ -198,7 +196,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             # ───── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ─────
             // make private type
-            $private_type_params = TypeParamData::from([
+            $private_type_params = TypeParamData::MakingUsingCodeArray([
                 'type_name'=> $this->params->name . static::PRIVATE_TYPE_POSTFIX,
                 'is_final_type'=> false,
                 'access'=> TypeOfServerAccess::IS_ELEMENT_PRIVATE,
@@ -254,7 +252,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
             # make home set
 
             $home_set_factory = new Act\Cmd\Ele\SetCreate(defining_element: $home_element,has_events: true,is_system: $this->is_system,calling_namespace: null,
-                preassinged_uuid: $preset->home_set_uuid);
+                use_ref: $preset->home_set_uuid,do_permission_check: false);
 
             $home_set = $home_set_factory->doCreateSet(b_do_refresh: false);
 
@@ -270,7 +268,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             $created_namespace = UserNamespace::createNamespace(
                 namespace_name: $this->params->name, owning_user_id: $this->given_user->id,
-                server_id: $this->given_server->id, ref: $preset->namespace_uuid,
+                server_id: $this->given_server->id, use_ref: $preset->namespace_uuid,
                 type_id: $base_type->id,
                 public_element_id: $public_element->id,
                 private_element_id: $private_element->id,
@@ -297,6 +295,10 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             $base_type->owner_namespace_id = $created_namespace->id;
             $base_type->save();
+            $base_type::validateTypeName($base_type->type_name,namespace: $created_namespace,me: $base_type);
+            $home_type::validateTypeName($home_type->type_name,namespace: $created_namespace,me: $home_type);
+            $private_type::validateTypeName($private_type->type_name,namespace: $created_namespace,me: $private_type);
+            $public_type::validateTypeName($public_type->type_name,namespace: $created_namespace,me: $public_type);
         });
 
         if ($created_namespace && $b_refresh_with_dependencies) {

@@ -20,5 +20,7 @@ class NormalPhase extends Phase
         Phase::class
     ];
 
+    const ATTRIBUTE_CLASSES = [];
+
 }
 

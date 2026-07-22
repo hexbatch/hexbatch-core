@@ -11,7 +11,7 @@ class Us extends Cmd
     const UUID = '6f421997-1182-48ae-b526-a89e9a274fb7';
     const ACTION_NAME = TypeOfAction::BASE_USER;
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

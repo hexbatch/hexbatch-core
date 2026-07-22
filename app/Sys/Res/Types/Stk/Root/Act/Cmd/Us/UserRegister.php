@@ -27,9 +27,7 @@ class UserRegister extends Act\Cmd\Us implements ICommandCallable
     const string UUID = '2cca7cb0-4bde-4b66-ac54-302fba98853e';
     const TypeOfAction ACTION_NAME = TypeOfAction::CMD_USER_REGISTER;
 
-    const array ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const array PARENT_CLASSES = [
         Act\Cmd\Us::class,

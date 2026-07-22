@@ -20,9 +20,7 @@ class Search extends Act\Cmd\Ele
     const UUID = '5b8ff68a-8748-4323-8088-04a8e6fa73fc';
     const ACTION_NAME = TypeOfAction::PRAGMA_SEARCH;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class,

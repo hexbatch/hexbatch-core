@@ -20,9 +20,7 @@ class Pop extends Act\Cmd\Op
     const ACTION_NAME = TypeOfAction::OP_POP;
 
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class

@@ -15,9 +15,7 @@ class UserPrepareDeletion extends Act\Cmd\Us
     const UUID = '0a221da7-3e9b-46b0-b181-a67a27aa4065';
     const ACTION_NAME = TypeOfAction::CMD_USER_PREPARE_DELETION;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Us::class,

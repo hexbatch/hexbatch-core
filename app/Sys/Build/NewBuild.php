@@ -6,13 +6,11 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Data\ApiParams\Data\Attributes\Params\AttributeParamData;
 use App\Data\ApiParams\Data\Namespaces\Params\NamespaceParamData;
 use App\Data\ApiParams\Data\Types\Params\TypeParamData;
-
 use App\Helpers\NamespacePresetUuids;
 use App\Helpers\Utilities;
 use App\Models\Attribute;
 use App\Models\ElementType;
 use App\Models\ElementTypeParent;
-
 use App\Models\Phase;
 use App\Models\Server;
 use App\Models\User;
@@ -40,20 +38,54 @@ class NewBuild
         Stk\Root\Action::class,
         Stk\Root\Api::class,
         Stk\Root\Container::class,
+        Stk\Root\Meta::class,
         Stk\Root\Content::class,
         Stk\Root\Debug::class,
         Stk\Root\Display::class,
         Stk\Root\Event::class,
         Stk\Root\Handle::class,
         Stk\Root\LiveRules::class,
+        Stk\Root\Media::class,
         Stk\Root\NamespaceType::class,
-        Stk\Root\Meta::class,
+
         Stk\Root\Phase::class,
         Stk\Root\Placeholder::class,
         Stk\Root\Server::class,
         Stk\Root\Signal::class,
-        Stk\Root\About::class,
         Stk\Root\TrackingExported::class,
+
+
+
+        Stk\Root\Content\Blog::class,
+        Stk\Root\Content\Message::class,
+        Stk\Root\Content\News::class,
+
+        Stk\Root\Media\Audio::class,
+        Stk\Root\Media\Image::class,
+        Stk\Root\Media\Video::class,
+        Stk\Root\Meta\Language::class,
+        Stk\Root\Meta\Region::class,
+        Stk\Root\Meta\Language\En::class,
+        Stk\Root\Meta\Region\Us::class,
+
+        Stk\Root\Namespace\NamespaceBase::class,
+        Stk\Root\Namespace\DeletingUserMarker::class,
+        Stk\Root\Namespace\HomeSet::class,
+        Stk\Root\Namespace\PrivateType::class,
+        Stk\Root\Namespace\PublicType::class,
+        Stk\Root\Namespace\TransferNamespace::class,
+
+
+        Stk\Root\Server\ThisServerType::class,
+
+
+        Stk\Root\Phases\AdvicePhase::class,
+        Stk\Root\Phases\EditPhase::class,
+        Stk\Root\Phases\NormalPhase::class,
+
+
+        Stk\Root\Signal\Mutex::class,
+        Stk\Root\Signal\Semaphore::class,
 
 
 
@@ -72,7 +104,6 @@ class NewBuild
         Stk\Root\Evt\Element\NamespaceLogin::class,
         Stk\Root\Evt\Element\NamespaceMemberAdding::class,
         Stk\Root\Evt\Element\NamespaceMemberRemoving::class,
-        Stk\Root\Evt\Element\SearchResults::class,
         Stk\Root\Evt\Element\SearchResults::class,
         Stk\Root\Evt\Elsewhere\ElsewhereAskingElement::class,
         Stk\Root\Evt\Elsewhere\ElsewhereAskingNamespace::class,
@@ -170,7 +201,6 @@ class NewBuild
 
 
 
-        Stk\Root\Act\BaseAction::class,
         Stk\Root\Act\Cmd::class,
         Stk\Root\Act\CmdNoSideEffects::class,
         Stk\Root\Act\NoEventsTriggered::class,
@@ -186,9 +216,11 @@ class NewBuild
         Stk\Root\Act\Cmd\Server::class,
         Stk\Root\Act\Cmd\St::class,
         Stk\Root\Act\Cmd\Time::class,
-        Stk\Root\Act\Cmd\Ds::class,
-        Stk\Root\Act\Cmd\Ds::class,
-        Stk\Root\Act\Cmd\Ds::class,
+        Stk\Root\Act\Cmd\Ty::class,
+        Stk\Root\Act\Cmd\Us::class,
+
+
+
         Stk\Root\Act\Cmd\Ds\DesignAttributeCreate::class,
         Stk\Root\Act\Cmd\Ds\DesignAttributeDestroy::class,
         Stk\Root\Act\Cmd\Ds\DesignAttributeEdit::class,
@@ -330,7 +362,6 @@ class NewBuild
         Stk\Root\Api\DesignApi::class,
         Stk\Root\Api\ElementApi::class,
         Stk\Root\Api\ElsewhereApi::class,
-        Stk\Root\Api\ListTypeTrait::class,
         Stk\Root\Api\NamespaceApi::class,
         Stk\Root\Api\OperationApi::class,
         Stk\Root\Api\PathApi::class,
@@ -511,56 +542,27 @@ class NewBuild
         Stk\Root\Api\User\Login::class,
         Stk\Root\Api\User\PrepareUserDeletion::class,
         Stk\Root\Api\User\Register::class,
-        Stk\Root\Api\User\StartUserDeletion::class,
-
-
-
-
-        Stk\Root\Content\Blog::class,
-        Stk\Root\Content\Message::class,
-        Stk\Root\Content\News::class,
-
-        Stk\Root\Media\Audio::class,
-        Stk\Root\Media\Image::class,
-        Stk\Root\Media\Video::class,
-        Stk\Root\Meta\Language::class,
-        Stk\Root\Meta\Region::class,
-        Stk\Root\Meta\Language\En::class,
-        Stk\Root\Meta\Region\Us::class,
-
-        Stk\Root\Namespace\NamespaceBase::class,
-        Stk\Root\Namespace\DeletingUserMarker::class,
-        Stk\Root\Namespace\HomeSet::class,
-        Stk\Root\Namespace\PrivateType::class,
-        Stk\Root\Namespace\PublicType::class,
-        Stk\Root\Namespace\TransferNamespace::class,
-
-
-        Stk\Root\NsSystypes\ThisNsType::class,
-        Stk\Root\NsSystypes\Server\ThisServerType::class,
-
-
-        Stk\Root\Phases\AdvicePhase::class,
-        Stk\Root\Phases\EditPhase::class,
-        Stk\Root\Phases\NormalPhase::class,
-
-
-        Stk\Root\Signal\Mutex::class,
-        Stk\Root\Signal\Semaphore::class,
-        Stk\Root\Signal\Semaphore::class
+        Stk\Root\Api\User\StartUserDeletion::class
 
     ];
 
+    public function __construct(
+        protected ?\Illuminate\Console\Command $output = null
+    )
+    {
+
+    }
 
 
     protected ?Server $server = null;
     protected ?UserNamespace $ns = null;
     protected ?User $user = null;
-
+    //todo do scan for duplicate uuids, new and old
+    // do update for only new things
     /**
      * @throws \Throwable
      */
-    public function doBuild() {
+    public function doBuild( ) {
         /*
          * Make system user
          * Make system server without type or namespace
@@ -591,8 +593,11 @@ class NewBuild
     /**
      * @throws \Throwable
      */
-    function register_type(INewSystemType $info) : ElementType {
-        $base_type_params = TypeParamData::from([
+    function register_type(string|INewSystemType $info) : ElementType {
+
+        $this->output?->info(sprintf("started type: %s %s ",$info::getTypeName(),$info::getTypeUuid()));
+        $base_type_params = TypeParamData::MakingUsingCodeArray([
+            'handle_ref_uuid'=>null,
             'type_name'=> $info::getTypeName(),
             'is_final_type'=> $info::isFinal(),
             'access'=> $info::getTypeAccessPolicy(),
@@ -617,11 +622,14 @@ class NewBuild
             Utilities::ignoreVar($attr);
         }
 
-        return new TypePublish(given_type: $base_type, caller_namespace: null, do_permission_check: false)->doPublishCall();
+        $type =  new TypePublish(given_type: $base_type, caller_namespace: null, do_permission_check: false)->doPublishCall();
+        $this->output?->info(sprintf("published type: %s %s ",$type->id,$type->type_name));
+        return $type;
     }
 
-    function register_attribute(ElementType $type, INewSystemAttribute $info) : Attribute {
-        $params = AttributeParamData::from([
+    function register_attribute(ElementType $type, string|INewSystemAttribute $info) : Attribute {
+        $this->output?->info(sprintf("started attribute: %s %s ",$info::getAttributeName(),$info::getAttributeUuid()));
+        $params = AttributeParamData::MakingUsingCodeArray([
             'parent_ref_uuid' => $info::getAttributeParentUuid(),
             'design_ref_uuid' => $info::getAttributeDesignUuid(),
             'location_uuid' => $info::getAttributeLocationUuid(),
@@ -637,7 +645,9 @@ class NewBuild
 
         $factory = new DesignAttributeCreate(params: $params,is_system: true,use_ref: $info::getAttributeUuid(),
             calling_namespace: null,given_type: $type,do_permission_check: false);
-        return $factory->doCreateAttribute();
+        $att =  $factory->doCreateAttribute();
+        $this->output?->info(sprintf("made attribute: %s %s ",$att->id,$type->type_name.':'.$att->attribute_name));
+        return $att;
     }
 
     function createServer() {
@@ -653,12 +663,14 @@ class NewBuild
             uuid: ThisServer::getServerUuid(),
             is_system: true
         );
+        $this->output?->info(sprintf("made server: %s %s ",$this->server->id,$this->server->server_name));
     }
 
     function attachTypeToServer() : void {
         $type = ElementType::getElementType(uuid: ThisServer::getServerTypeUUID());
         $this->server->server_type_id = $type->id;
         $this->server->save();
+        $this->output?->info("attached type to server");
     }
 
     function createPhases() {
@@ -680,6 +692,7 @@ class NewBuild
             $phase->is_default_phase = ($index === 'normal');
             $phase->is_system = true;
             $phase->save();
+            $this->output?->info(sprintf("made phase: #%s %s ",$phase->id,$phase->phase_name));
             $phases[$index] = $phase;
         }
 
@@ -699,6 +712,7 @@ class NewBuild
         $phase->phase_type_id = ElementType::getElementType(uuid: Stk\Root\Phases\NormalPhase::getTypeUuid())->id;
         $phase->save();
 
+
         $phase = Phase::getThisPhase(uuid:Stk\Root\Phases\EditPhase::PHASE_UUID);
         $phase->phase_type_id = ElementType::getElementType(uuid: Stk\Root\Phases\EditPhase::getTypeUuid())->id;
         $phase->save();
@@ -706,13 +720,14 @@ class NewBuild
         $phase = Phase::getThisPhase(uuid:Stk\Root\Phases\AdvicePhase::PHASE_UUID);
         $phase->phase_type_id = ElementType::getElementType(uuid: Stk\Root\Phases\AdvicePhase::getTypeUuid())->id;
         $phase->save();
+        $this->output?->info("attached types to phases");
     }
 
     /**
      * @throws \Throwable
      */
     function createNamespace() {
-        $params = NamespaceParamData::from(['name'=>SystemNamespace::getNamespaceName(),'public_key'=>SystemNamespace::getNamespacePublicKey()]);
+        $params = NamespaceParamData::MakingUsingCodeArray(['name'=>SystemNamespace::getNamespaceName(),'public_key'=>SystemNamespace::getNamespacePublicKey()]);
         $namespace_factory = new NamespaceCreate(params: $params,given_user: $this->user,given_server: $this->server,is_system: true);
         $preset = new NamespacePresetUuids;
         $preset->home_set_uuid = SystemNamespace::getHomeSetUuid();
@@ -722,15 +737,18 @@ class NewBuild
         $preset->base_type_uuid = SystemNamespace::getBaseTypeUuid();
         $preset->namespace_uuid = SystemNamespace::getNamespaceUuid();
         $this->ns = $namespace_factory->makeNamespace(preset: $preset);
+        $this->output?->info(sprintf("made namespace: %s %s ",$this->ns->id,$this->ns->namespace_name));
     }
 
     function setAllSystemTypesToNamespace() {
         ElementType::where('is_system',true)->update(['owner_namespace_id' => $this->ns->id]);
+        $this->output?->info("attached ns to system types");
     }
 
     function attachUserToNamespace() {
         $this->user->default_namespace_id = $this->ns->id;
         $this->user->save();
+        $this->output?->info("attached ns to user");
     }
 
     function createUser() {
@@ -743,6 +761,7 @@ class NewBuild
         $this->user->is_system = true;
         $this->user->ref_uuid = SystemUser::getUserUuid();
         $this->user->save();
+        $this->output?->info(sprintf("made user: %s %s ",$this->user->id,$this->user->username));
     }
 
 }

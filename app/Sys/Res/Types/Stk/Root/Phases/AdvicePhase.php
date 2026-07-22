@@ -12,7 +12,7 @@ class AdvicePhase extends Phase
     const EDITED_BY_PHASE_SYSTEM_CLASS = NormalPhase::class;
     const PHASE_UUID = '8d82682d-ce43-4b92-8547-53b95b890dee';
 
-
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Phase::class

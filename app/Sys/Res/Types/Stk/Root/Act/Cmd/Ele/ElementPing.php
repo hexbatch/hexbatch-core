@@ -36,9 +36,7 @@ class ElementPing extends Act\Cmd\Ele
     const UUID = '54e60992-c545-4280-9469-b1c02e0f6fc5';
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PING;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class

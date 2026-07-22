@@ -15,9 +15,7 @@ class PhaseTreeMove extends Act\Cmd\Ph
     const UUID = '417eb53e-1615-42c9-9bfc-4349bfb5daa9';
     const ACTION_NAME = TypeOfAction::CMD_PHASE_TREE_MOVE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ph::class

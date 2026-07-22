@@ -13,9 +13,7 @@ class ElsewhereGiveEvent extends Act\Cmd\Ew
     const UUID = '5d45cd0c-c8ca-4b02-8887-10f280ee3839';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_GIVE_EVENT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class

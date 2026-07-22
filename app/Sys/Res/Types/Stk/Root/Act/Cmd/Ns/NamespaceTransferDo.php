@@ -15,9 +15,7 @@ class NamespaceTransferDo extends Act\Cmd\Ns
     const UUID = 'fe81b6d9-88ae-44d3-aa7e-790b72e3c68c';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_DO_TRANSFER;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ns::class,

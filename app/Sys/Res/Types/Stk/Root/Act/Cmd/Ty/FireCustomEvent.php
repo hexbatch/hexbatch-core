@@ -12,9 +12,7 @@ class FireCustomEvent extends Act\Cmd\Ty
     const UUID = 'ba763bab-9cec-4e03-b9b4-7004381250f0';
     const ACTION_NAME = TypeOfAction::CMD_FIRE_CUSTOM_EVENT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class

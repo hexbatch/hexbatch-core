@@ -62,8 +62,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
     const UUID = '47661774-8acc-45fb-8c22-77663177e92c';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_ATTRIBUTE_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
@@ -123,6 +122,11 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
         $given_attribute->owner_element_type_id = $this->given_type->id;
         $given_attribute->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
         $given_attribute->is_system = $this->is_system;
+
+        if ($this->use_ref) {
+            $given_attribute->ref_uuid = $this->use_ref;
+        }
+
         $given_attribute->setAttributeName($this->params->attribute_name??null);
 
         if ($this->params->parent_ref_uuid) {

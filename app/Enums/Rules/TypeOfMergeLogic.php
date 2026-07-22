@@ -1,13 +1,15 @@
 <?php /** @noinspection DuplicatedCode */
 namespace App\Enums\Rules;
-use App\Models\ActionDatum;
+
+
+use App\Data\ApiParams\Enums\EnumTryTrait;
 
 /**
  * postgres enum type_of_merge_logic
  */
 enum TypeOfMergeLogic : string {
 
-
+    use EnumTryTrait;
 
 
     /**
@@ -32,15 +34,6 @@ enum TypeOfMergeLogic : string {
      */
     case UNION = 'union'; //union, keys combined, arrays combined
 
-
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfMergeLogic {
-        $maybe  = TypeOfMergeLogic::tryFrom($test);
-        if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfMergeLogic::cases(),'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
-        }
-        return $maybe;
-    }
 
 
     public static function mergeArrays(TypeOfMergeLogic $logic,array $array_of_arrays) : array {
@@ -71,7 +64,7 @@ enum TypeOfMergeLogic : string {
 
 
     /**
-     *  each array can have elements, each element can be a key or list: with primitives, arrays (list or hash) or ActionDatum
+     *  each array can have elements, each element can be a key or list: with primitives, arrays (list or hash)
      *  The first array has the items all the other arrays must have
      *  the second array can have matching items anywhere if both are a list, but if hash the keys must match
      *
@@ -88,16 +81,10 @@ enum TypeOfMergeLogic : string {
         if (array_is_list($b) && !array_is_list($a)) {return [];}
         $ret = [];
         if (array_is_list($b) && array_is_list($a)) {
-            //primitives and ActionDatum can be in different indexes, and repeated, but we will combine any repeats. Arrays are index dependent, same index arrays are intersected
+            //primitives  can be in different indexes, and repeated, but we will combine any repeats. Arrays are index dependent, same index arrays are intersected
             $rem = [];
 
-            //build hash of ActionDatum
-            $b_data = [];
-            foreach ($b as  $b_val) {
-                if ($b_val instanceof ActionDatum) {
-                    $b_data[strval($b_val->id)] = $b_val;
-                }
-            }
+
 
 
             foreach ($a as $a_index => $a_val) {
@@ -109,12 +96,7 @@ enum TypeOfMergeLogic : string {
                         $ret[] =$a_val;
                     }
                 }
-                elseif ($a_val instanceof ActionDatum) {
-                    if (array_key_exists(strval($a_val->id),$b_data)) {
-                        unset($b_data[$a_val->id]); //keep data unique
-                        $ret[] = $a_val;
-                    }
-                }
+
                 elseif ($a_type === 'array') {
                     if (is_array($b[$a_index]??null)) {
                         $maybe = TypeOfMergeLogic::mergeIntersection($a_val,$b[$a_index]);
@@ -134,7 +116,7 @@ enum TypeOfMergeLogic : string {
             }
         } else {
 
-            //do the hashes get common keys and compare the value of the key, the value can be a primitive, array or ActionDatum
+            //do the hashes get common keys and compare the value of the key, the value can be a primitive, array
             $distict_keys = array_intersect_key($a,$b);
             foreach ($distict_keys as $some_key) {
                 $a_val = $a[$some_key];
@@ -142,8 +124,6 @@ enum TypeOfMergeLogic : string {
                 $a_type = gettype($a_val);
                 if ($a_type==='boolean' || $a_type==='integer' || $a_type==='double' || $a_type==='string') {
                     if ($a_val === $b_val) { $ret[$some_key]= $a_val;}
-                } else if ($a_val instanceof ActionDatum && $b_val instanceof ActionDatum) {
-                    if ($a_val->id === $b_val->id) { $ret[$some_key] = $a_val; }
                 } else if( is_array($a_val) && is_array($b_val)) {
                     $maybe = TypeOfMergeLogic::mergeIntersection($a_val,$b_val);
                     if (!empty($maybe)) { $ret[$some_key] = $maybe;}
@@ -158,14 +138,14 @@ enum TypeOfMergeLogic : string {
 
 
     /**
-     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash) or ActionDatum
+     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash)
      * the results is items not in either array
      * if one array is a list and the other is a hash, then return empty array
      * if both are lists, then only unique items, any arrays kept have their original structure
      * if both are hashes, then only keys that are different
-     * @param array|ActionDatum[] $a
-     * @param array|ActionDatum[]  $b
-     * @return array|ActionDatum[]
+     * @param array $a
+     * @param array  $b
+     * @return array
      */
     protected static function mergeDifference(array $a, array $b) : array {
 
@@ -189,20 +169,10 @@ enum TypeOfMergeLogic : string {
             }
 
 
-            //build hash of ActionDatum
-            $b_data = [];
-            foreach ($b as  $b_val) {
-                if ($b_val instanceof ActionDatum) {
-                    $b_data[strval($b_val->id)] = $b_val;
-                }
-            }
+
 
             $a_data = [];
-            foreach ($a as  $a_val) {
-                if ($a_val instanceof ActionDatum) {
-                    $a_data[strval($a_val->id)] = $a_val;
-                }
-            }
+
 
 
             foreach ($a as $a_val) {
@@ -211,11 +181,7 @@ enum TypeOfMergeLogic : string {
                     if (!in_array($json,$rem_b_arrays)) {
                         $ret[] = $a_val;
                     }
-                } elseif ($a_val instanceof ActionDatum) {
-                    if (!array_key_exists(strval($a_val->id),$b_data)) {
-                        $ret[] = $a_val;
-                    }
-                } else {
+                }  else {
                     if (!in_array($a_val,$b,true)) { $ret[] = $a_val;}
                 }
             }
@@ -226,11 +192,7 @@ enum TypeOfMergeLogic : string {
                     if (!in_array($json,$rem_a_arrays)) {
                         $ret[] = $b_val;
                     }
-                } elseif ($b_val instanceof ActionDatum) {
-                    if (!array_key_exists(strval($b_val->id),$a_data)) {
-                        $ret[] = $b_val;
-                    }
-                } else {
+                }  else {
                     if (!in_array($b_val,$a,true)) { $ret[] = $b_val;}
                 }
             }
@@ -252,14 +214,11 @@ enum TypeOfMergeLogic : string {
 
 
     /**
-     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash) or ActionDatum
+     * each array can have elements, each element can be a key or list:  with primitives, arrays (list or hash)
      * the result is items in both arrays
      * if one array is a list and the other is a hash, then return empty array
      * if both are lists, then only unique items, any arrays kept have their original structure, so no array merging
      * if both are hashes, then common keys are combined, with array merging (this call recursive) and the others are kept
-     * @param array|ActionDatum[] $a
-     * @param array|ActionDatum[]  $b
-     * @return array|ActionDatum[]
      */
     protected static function mergeUnion(array $a, array $b) : array
     {
@@ -277,12 +236,7 @@ enum TypeOfMergeLogic : string {
                         $ret[] = $a_val;
                         $rem[] = $json;
                     }
-                } elseif ($a_val instanceof ActionDatum) {
-                    if (!in_array($a_val->id . '-data-key',$rem)) {
-                        $ret[] = $a_val;
-                        $rem[] = $a_val->id . '-data-key';
-                    }
-                } else {
+                }  else {
                     if (!in_array($a_val,$rem,true)) { $ret[] = $a_val;}
                 }
             }
@@ -294,12 +248,7 @@ enum TypeOfMergeLogic : string {
                         $ret[] = $b_val;
                         $rem[] = $json;
                     }
-                } elseif ($b_val instanceof ActionDatum) {
-                    if (!in_array($b_val->id . '-data-key',$rem)) {
-                        $ret[] = $b_val;
-                        $rem[] = $b_val->id . '-data-key';
-                    }
-                } else {
+                }  else {
                     if (!in_array($b_val,$rem,true)) { $ret[] = $b_val;}
                 }
             }

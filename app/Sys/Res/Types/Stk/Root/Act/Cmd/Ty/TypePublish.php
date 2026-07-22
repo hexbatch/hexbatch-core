@@ -13,6 +13,7 @@ use App\Models\ElementType;
 use App\Models\ElementTypeAncestor;
 use App\Models\ElementTypeExposedAttribute;
 use App\Models\ElementTypeIncludedAttribute;
+use App\Models\ElementTypeParent;
 use App\Models\ElementValue;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
@@ -37,9 +38,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
     const ACTION_NAME = TypeOfAction::CMD_TYPE_PUBLISH;
 
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class
@@ -114,8 +113,9 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
         DB::transaction(function() {
             $this->given_type->lifecycle = TypeOfLifecycle::PUBLISHED;
             $this->given_type->save();
-
+            ElementTypeParent::where('child_type_id',$this->given_type->id)->update(['parent_type_approval' => TypeOfApproval::PUBLISHING_APPROVED]);
             foreach ($this->given_type->type_attributes as $att) {
+                $att->attribute_approval = TypeOfApproval::DESIGN_APPROVED;
                 ElementValue::maybeAssignStaticValue(att: $att);
             }
 

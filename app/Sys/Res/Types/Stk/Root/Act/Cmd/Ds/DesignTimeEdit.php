@@ -16,8 +16,7 @@ class DesignTimeEdit extends DesignTimeCreate
     const UUID = '3e223f14-621b-4ba2-8d93-4822c07f727d';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_TIME_EDIT;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

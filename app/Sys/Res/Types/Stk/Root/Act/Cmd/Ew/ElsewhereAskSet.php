@@ -18,9 +18,7 @@ class ElsewhereAskSet extends Act\Cmd\Ew
     const UUID = '91a1fecd-f40b-441f-b550-60e742bdd618';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_ASK_SET;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

@@ -16,9 +16,7 @@ class ElsewherePushCredentials extends Act\Cmd\Ew
     const UUID = '75ebb720-7ed4-4648-9d6e-09f2fe33198e';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_PUSH_CREDENTIALS;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

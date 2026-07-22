@@ -49,7 +49,7 @@ class BaseType implements IDocument, \JsonSerializable,INewSystemType
     {
         $ret = [];
         foreach (static::PARENT_CLASSES as $c) {
-            $ret[] = $c->getTypeUuid();
+            $ret[] = $c::getTypeUuid();
         }
         return $ret;
     }

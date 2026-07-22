@@ -61,9 +61,7 @@ class SwitchOff extends Act\Cmd\Ele implements ICommandCallable
     const UUID = '2269dcbd-813d-431f-a8d4-c905012c927f';
     const ACTION_NAME = TypeOfAction::PRAGMA_TYPE_OFF;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class,

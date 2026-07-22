@@ -35,8 +35,7 @@ class DesignLocationCreate extends Act\Cmd\Ds implements ICommandCallable
     const UUID = 'f26dcdcb-09e4-41df-b435-3e7b106c6282';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_LOCATION_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

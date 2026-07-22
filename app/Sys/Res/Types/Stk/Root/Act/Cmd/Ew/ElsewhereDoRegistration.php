@@ -13,9 +13,7 @@ class ElsewhereDoRegistration extends Act\Cmd\Ew
     const UUID = 'ef63444b-45e6-4dea-a6c7-a9caee216ee2';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_DO_REGISTRATION;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

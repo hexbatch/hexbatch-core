@@ -64,9 +64,7 @@ class ElementDestroy extends Act\Cmd\Ele implements ICommandCallable
     const UUID = '557bbc2e-f589-4874-91f0-5d5e96fe115f';
     const ACTION_NAME = TypeOfAction::CMD_ELEMENT_DESTROY;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class

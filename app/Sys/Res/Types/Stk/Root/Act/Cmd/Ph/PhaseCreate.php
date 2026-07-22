@@ -26,9 +26,7 @@ class PhaseCreate extends Act\Cmd\Ph implements ICommandCallable
     const UUID = '24d33a5b-ed63-48f4-b45d-f729734af6ef';
     const ACTION_NAME = TypeOfAction::CMD_PHASE_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ph::class,

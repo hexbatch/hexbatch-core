@@ -95,7 +95,10 @@ class ElementType extends Model implements ISystemModel
     protected $casts = [
         'lifecycle'=> TypeOfLifecycle::class,
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
+        'is_system' => 'boolean',
+        'is_final_type' => 'boolean',
+
     ];
 
     protected static function booted(): void
@@ -182,7 +185,7 @@ class ElementType extends Model implements ISystemModel
         ?TypeOfLifecycle $lifecycle = null,
         bool             $b_throw_if_missing = true
     )
-    : ElementType
+    : ?ElementType
     {
         /** @var static|null $ret */
         $ret = static::buildElementType(id:$id,uuid: $uuid, namespace_id: $owner_namespace_id,name: $type_name,
@@ -531,8 +534,11 @@ class ElementType extends Model implements ISystemModel
         }
     }
 
-    function setTypeName(string $name,? UserNamespace $namespace = null) {
-       static::validateTypeName(name:$name,namespace: $this->owner_namespace?: $namespace,me: $this);
+    function setTypeName(string $name,? UserNamespace $namespace = null,bool $b_do_check = true) {
+        if ($b_do_check) {
+            static::validateTypeName(name:$name,namespace: $this->owner_namespace?: $namespace,me: $this);
+        }
+
        $this->type_name = $name;
     }
 
@@ -546,9 +552,13 @@ class ElementType extends Model implements ISystemModel
 
 
     public static function getRootType() : ElementType {
-        return ElementType::where('type_name',Root::TYPE_NAME)
-            ->where('owner_namespace_id',UserNamespace::getSystemNamespace()->id)
-            ->first();
+        $ns_id = UserNamespace::getSystemNamespace()?->id;
+        if ($ns_id) {
+            return ElementType::where('type_name',Root::ROOT_NAME)
+                ->where('owner_namespace_id',UserNamespace::getSystemNamespace()->id)
+                ->first();
+        }
+        return ElementType::where('type_name',Root::ROOT_NAME)->first();
     }
 
     /** @return Collection<ElementType> */
@@ -709,15 +719,14 @@ class ElementType extends Model implements ISystemModel
 
     }
 
-    protected static ?ElementType $system_type = null;
+
     public static function getSystemType(bool $b_throw_on_missing = true) : ?ElementType {
-        if (static::$system_type) { return static::$system_type;}
 
         $sys = ElementType::buildElementType(uuid: Root::UUID)->first();
         if (!$sys && $b_throw_on_missing) {
             throw new \LogicException("No system type made");
         }
-        return static::$system_type = $sys;
+        return  $sys;
     }
 
 

@@ -11,7 +11,7 @@ class Ew extends Cmd
     const UUID = 'c01c6248-8ff8-4fb1-9823-3ecb24d63a02';
     const ACTION_NAME = TypeOfAction::BASE_ELSEWHERE;
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

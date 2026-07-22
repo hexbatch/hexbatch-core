@@ -45,9 +45,7 @@ class Write extends Act\Cmd\Ele implements ICommandCallable
     const UUID = '51e9a358-c2b1-4876-a518-0ab65d1be224';
     const ACTION_NAME = TypeOfAction::PRAGMA_WRITE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class,

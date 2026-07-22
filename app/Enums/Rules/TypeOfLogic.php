@@ -1,12 +1,14 @@
 <?php
 
 namespace App\Enums\Rules;
+use App\Data\ApiParams\Enums\EnumTryTrait;
+
 /**
  * postgres enum type_of_logic
  */
 enum TypeOfLogic: string
 {
-
+    use EnumTryTrait;
     case NOP = 'nop';
     case AND = 'and';
 
@@ -20,17 +22,6 @@ enum TypeOfLogic: string
     case ALWAYS_TRUE = 'always_true';
     case ALWAYS_FALSE = 'always_false';
 
-
-
-    public static function tryFromInput(string|int|bool|null $test): TypeOfLogic
-    {
-        $maybe = TypeOfLogic::tryFrom($test);
-        if (!$maybe) {
-            $delimited_values = implode('|', array_column(TypeOfLogic::cases(), 'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum", ['ref' => $test, 'enum_list' => $delimited_values]));
-        }
-        return $maybe;
-    }
 }
 
 

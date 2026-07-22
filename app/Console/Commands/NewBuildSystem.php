@@ -31,9 +31,9 @@ class NewBuildSystem extends Command
     public function handle()
     {
 
-
-       NewBuild::doBuild();
-
+        $builder = new NewBuild(output: $this);
+        $builder->doBuild();
+        $this->info("done");
 
         return 0;
     }

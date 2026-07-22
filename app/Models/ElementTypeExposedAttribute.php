@@ -81,6 +81,7 @@ class ElementTypeExposedAttribute extends Model
             }
         }
         $all_type_ids = array_values($all_type_ids_hash);
+
         if (empty($all_type_ids)) {return [];}
 
         /** @var Collection<Attribute> $all_attributes */

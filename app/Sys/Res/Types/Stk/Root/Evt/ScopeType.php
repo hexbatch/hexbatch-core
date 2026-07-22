@@ -11,7 +11,7 @@ class ScopeType extends BaseEvent
     const EVENT_NAME = TypeOfEvent::EVENT_SCOPE_TYPE;
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
 

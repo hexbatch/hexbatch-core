@@ -15,9 +15,7 @@ class DesignRuleDestroy extends Act\Cmd\Ds
     const UUID = '49d036b2-9f53-4fad-afed-b7d628ac060c';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_RULE_DESTROY;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

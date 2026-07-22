@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root;
 
 
 
+use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Atr\Stk\Event\Scope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ChainScope;
 use App\Sys\Res\Atr\Stk\Event\Scope\ElementScope;
@@ -21,6 +22,7 @@ class Event extends BaseType
     const TYPE_NAME = 'events';
 
 
+    const EVENT_NAME = TypeOfEvent::EVENTS;
 
     const ATTRIBUTE_CLASSES = [
         Scope::class,
@@ -33,6 +35,14 @@ class Event extends BaseType
     const PARENT_CLASSES = [
         Root::class
     ];
+
+    public static function getHexbatchClassName() :string { return static::EVENT_NAME->value; }
+
+
+    public static function getTypeName(): string
+    {
+        return static::EVENT_NAME->value;
+    }
 
 
 }

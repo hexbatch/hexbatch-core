@@ -41,15 +41,6 @@ return [
                 'home_uuid' => env('HBC_SYSTEM_NAMESPACE_HOME_UUID',''),
                 'handle_uuid' => env('HBC_SYSTEM_NAMESPACE_HANDLE_UUID',''),
                 'set_uuid' => env('HBC_SYSTEM_NAMESPACE_SET_UUID',''),
-            ],
-
-
-            'types' => [
-                'ns_uuid' => env('',''),
-                'public_type_uuid' => env('HBC_SYSTEM_NAMESPACE_PUBLIC_TYPE_UUID',''),
-                'private_type_uuid' => env('HBC_SYSTEM_NAMESPACE_PRIVATE_TYPE_UUID',''),
-                'homeset_type_uuid' => env('HBC_SYSTEM_NAMESPACE_HOME_SET_TYPE_UUID',''),
-                'handle_type_uuid' => env('HBC_SYSTEM_NAMESPACE_HANDLE_TYPE_UUID',''),
             ]
         ],
         'server' => [

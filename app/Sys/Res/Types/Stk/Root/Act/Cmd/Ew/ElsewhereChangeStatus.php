@@ -13,9 +13,7 @@ class ElsewhereChangeStatus extends Act\Cmd\Ew
     const UUID = '09a2c919-9f98-4d1c-b438-2132fbc2ff2c';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_CHANGE_STATUS;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class,

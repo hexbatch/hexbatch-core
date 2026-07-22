@@ -13,9 +13,7 @@ class TypePurge extends Act\Cmd\Ty
     const ACTION_NAME = TypeOfAction::CMD_TYPE_PURGE;
 
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ty::class,

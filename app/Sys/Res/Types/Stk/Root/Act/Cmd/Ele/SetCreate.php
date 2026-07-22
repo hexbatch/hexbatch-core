@@ -46,9 +46,7 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
     const UUID = '06c6d184-1230-4bd1-9ee4-80657a9e3620';
     const ACTION_NAME = TypeOfAction::CMD_SET_CREATE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\St::class
@@ -64,13 +62,14 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
 
     #[ApiParamMarker( param_class: CreateSetParamData::class)]
     public function __construct(
-        protected Element                   $defining_element,
-        protected bool                      $has_events,
-        protected bool                      $is_system,
-        protected ?UserNamespace             $calling_namespace,
-        protected ?string                   $preassinged_uuid = null,
-        protected ?ElementSet               $parent_set = null,
-        protected string                    $child_key_to_use            = 'elements',
+        protected Element        $defining_element,
+        protected bool           $has_events,
+        protected bool           $is_system,
+        protected ?UserNamespace $calling_namespace,
+        protected ?string        $use_ref = null,
+        protected ?ElementSet    $parent_set = null,
+        protected bool           $do_permission_check = true,
+        protected string         $child_key_to_use            = 'elements',
 
 
     )
@@ -84,6 +83,8 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
             'defining_element'=> $this->defining_element->toArray(),
             'parent_set'=> $this->parent_set->toArray(),
             'is_system'=> $this->is_system,
+            'do_permission_check'=> $this->do_permission_check,
+            'use_ref'=> $this->use_ref,
             'has_events'=> $this->has_events,
             'calling_namespace'=> $this->calling_namespace,
             'child_key_to_use'=> $this->child_key_to_use,
@@ -92,13 +93,14 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
     protected static function fromArray(array $args) : static{
         $is_system = (bool)$args['is_system'];
         $has_events = (bool)$args['has_events'];
-        $preassinged_uuid = $args['preassinged_uuid']??null;
+        $do_permission_check = (bool)$args['do_permission_check'];
+        $use_ref = $args['use_ref']??null;
         $parent_set = static::getSetFromArray('parent_set',$args,false);
         $defining_element = static::getElementFromArray('defining_element',$args);
         $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args,false );
         $child_key_to_use = $args['child_key_to_use'];
         return new static(defining_element: $defining_element, has_events: $has_events, is_system: $is_system,
-            calling_namespace: $calling_namespace,preassinged_uuid: $preassinged_uuid,parent_set: $parent_set,child_key_to_use: $child_key_to_use);
+            calling_namespace: $calling_namespace, use_ref: $use_ref,parent_set: $parent_set,do_permission_check: $do_permission_check,child_key_to_use: $child_key_to_use);
     }
 
 
@@ -128,13 +130,13 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
      */
     public function doCreateSet(bool $b_do_refresh = true ) : ElementSet {
 
-        if (!$this->calling_namespace) {
+        if ($this->do_permission_check) {
             static::checkIfGivenIsAdmin(given: $this->calling_namespace,target: $this->defining_element->element_namespace);
         }
 
         $set = new ElementSet();
-        if ($this->preassinged_uuid) {
-            $set->ref_uuid = $this->preassinged_uuid;
+        if ($this->use_ref) {
+            $set->ref_uuid = $this->use_ref;
         }
 
         $set->parent_set_element_id = $this->defining_element->id;
@@ -157,21 +159,22 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
      * @throws \Throwable
      */
     public static function createSetTree(
-         Element                   $defining_element,
-         bool                      $has_events,
-         bool                      $is_system,
-         UserNamespace             $calling_namespace,
-         ?string                   $preassinged_uuid = null,
-         ?ElementSet               $parent_set = null,
-         string                    $child_key_to_use            = 'elements',
-         ?IThangBuilder            $builder = null
+         Element        $defining_element,
+         bool           $has_events,
+         bool           $is_system,
+         UserNamespace  $calling_namespace,
+         ?string        $use_ref = null,
+         ?ElementSet    $parent_set = null,
+         bool           $do_permission_check = true,
+         string         $child_key_to_use            = 'elements',
+         ?IThangBuilder $builder = null
     ) : ElementSet|Thang|IThangBuilder
     {
 
         $defining_element->loadMissing('element_parent_type');
         $defining_element->loadMissing('element_namespace');
 
-        if (!$is_system) {
+        if ($do_permission_check) {
             static::checkIfGivenIsAdmin(given: $calling_namespace,target: $defining_element->element_namespace);
             //element owner can create a set, permission of type chain optionally given
         }
@@ -182,7 +185,8 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
             has_events: $has_events,
             is_system: $is_system,
             calling_namespace: $calling_namespace,
-            preassinged_uuid: $preassinged_uuid,
+            use_ref: $use_ref,
+            do_permission_check: $do_permission_check,
             child_key_to_use: $child_key_to_use
         );
 

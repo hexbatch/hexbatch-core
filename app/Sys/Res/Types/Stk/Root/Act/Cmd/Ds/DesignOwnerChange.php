@@ -46,8 +46,7 @@ class DesignOwnerChange extends Act\Cmd\Ds implements ICommandCallable
     const UUID = '3baa3285-5dff-42b5-bd22-071ad39101db';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_OWNER_CHANGE;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

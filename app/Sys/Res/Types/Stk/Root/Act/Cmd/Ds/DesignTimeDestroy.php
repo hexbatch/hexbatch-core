@@ -28,8 +28,7 @@ class DesignTimeDestroy extends DesignTimeCreate
     const UUID = '1f104a48-34f4-4338-9723-a62fccbbe83a';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_TIME_DESTROY;
 //
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

@@ -14,7 +14,7 @@ class TransferNamespace extends NamespaceType
     const TYPE_NAME = 'transfer_namesapce';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

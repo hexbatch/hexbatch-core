@@ -15,9 +15,7 @@ class ElsewhereSharingElement extends Act\Cmd\Ew
     const UUID = '5e15f311-4023-43b6-bb27-3c3e7b2badd3';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_SHARING_ELEMENT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class

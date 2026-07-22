@@ -17,9 +17,7 @@ class Push extends Act\Cmd\Op
     const UUID = 'ae5cf895-fee6-4042-93d2-ce83cfa77d05';
     const ACTION_NAME = TypeOfAction::OP_PUSH;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class

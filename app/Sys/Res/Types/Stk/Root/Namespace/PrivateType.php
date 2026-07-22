@@ -11,7 +11,7 @@ class PrivateType extends NamespaceType
     const TYPE_NAME = 'private';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

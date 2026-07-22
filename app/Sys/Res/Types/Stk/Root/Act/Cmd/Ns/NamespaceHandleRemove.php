@@ -12,9 +12,7 @@ class NamespaceHandleRemove extends Act\Cmd\Ns
     const UUID = 'd8b51500-107d-4cd1-99b4-9efe283f8903';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_HANDLE_REMOVE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Pa::class

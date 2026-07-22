@@ -12,9 +12,7 @@ class UserEdit extends Act\Cmd\Us
     const UUID = '0682ab9c-266d-418a-b017-52026da88737';
     const ACTION_NAME = TypeOfAction::CMD_USER_EDIT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Us::class,

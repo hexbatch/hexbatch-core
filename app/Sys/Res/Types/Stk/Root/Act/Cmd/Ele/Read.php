@@ -46,9 +46,7 @@ class Read extends Act\Cmd\Ele implements ICommandCallable
     const UUID = '6280f4c3-f2de-49c1-8b4e-5f3e7aab008c';
     const ACTION_NAME = TypeOfAction::PRAGMA_READ;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Pragma::class,

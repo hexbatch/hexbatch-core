@@ -47,11 +47,9 @@ use Illuminate\Support\Facades\DB;
 class ElementPhaseChange extends Act\Cmd\Ele implements ICommandCallable
 {
     const UUID = '28af2e60-d1a9-43c5-bb25-a1ab445b8b1a';
-    const ACTION_NAME = TypeOfAction::CMD_ELEMENT_CHANGE_OWNER;
+    const ACTION_NAME = TypeOfAction::CMD_ELEMENT_PHASE_CHANGE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class

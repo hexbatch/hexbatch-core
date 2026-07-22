@@ -34,8 +34,7 @@ class DesignDestroy extends Act\Cmd\Ds implements ICommandCallable
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_DESTROY;
 
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

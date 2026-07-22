@@ -13,10 +13,13 @@ namespace App\Enums\Sys;
  *
  *  if reading very large results, then the same pagination happens, and each page has merged data from that page sent through the rule
  */
+
+use App\Data\ApiParams\Enums\EnumTryTrait;
+
 enum TypeOfAction: string
 {
+    use EnumTryTrait;
 
-    case BASE_ACTION = 'base_action';
     case BASE_COMMAND = 'base_command';
     case BASE_PRAGMA = 'base_pragma';
     case BASE_OPERATION = 'base_op';
@@ -32,7 +35,6 @@ enum TypeOfAction: string
     case BASE_SET = 'base_set';
     case BASE_TYPE = 'base_type';
     case BASE_USER = 'base_user';
-    case BASE_WAIT = 'base_wait';
 
 
 
@@ -146,6 +148,7 @@ enum TypeOfAction: string
     case CMD_ELEMENT_CREATE = 'cmd_element_create';
 
     case CMD_ELEMENT_CHANGE_OWNER = 'cmd_element_change_owner';
+    case CMD_ELEMENT_PHASE_CHANGE = 'cmd_element_phase_change';
 
     case CMD_ELEMENT_DESTROY = 'cmd_element_destroy';
     case CMD_LIVE_TYPE_ADD = 'cmd_live_type_add';
@@ -236,15 +239,6 @@ enum TypeOfAction: string
     case CMD_ELSEWHERE_PUSH_NAMESPACE = 'cmd_elsewhere_push_namespace';
     case CMD_ELSEWHERE_PUSH_EVENT = 'cmd_elsewhere_push_event';
 
-
-    public static function tryFromInput(string|int|bool|null $test ) : TypeOfAction {
-        $maybe  = TypeOfAction::tryFrom($test);
-        if (!$maybe ) {
-            $delimited_values = implode('|',array_column(TypeOfAction::cases(),'value'));
-            throw new \InvalidArgumentException(__("msg.invalid_enum",['ref'=>$test,'enum_list'=>$delimited_values]));
-        }
-        return $maybe;
-    }
 
 }
 

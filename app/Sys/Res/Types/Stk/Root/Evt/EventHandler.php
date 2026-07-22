@@ -32,6 +32,8 @@ class EventHandler extends Event implements ICommandCallable
         Event::class
     ];
 
+    const ATTRIBUTE_CLASSES = [];
+
     public function __construct(
         protected IEventReference         $ref,
         protected ?ElementType   $type_context = null,

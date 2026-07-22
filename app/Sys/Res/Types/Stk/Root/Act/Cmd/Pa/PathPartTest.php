@@ -12,9 +12,7 @@ class PathPartTest extends Act\Cmd\Pa
     const UUID = '6fe4e299-be8c-4d45-b19a-31ffaebf21ad';
     const ACTION_NAME = TypeOfAction::CMD_PATH_PART_TEST;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Pa::class

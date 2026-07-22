@@ -28,9 +28,7 @@ class DesignParentRemove extends Act\Cmd\Ds implements ICommandCallable
     const UUID = 'bf333396-fdcc-45ac-977c-2a9be8f9840c';
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_PARENT_REMOVE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class

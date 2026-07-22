@@ -36,8 +36,7 @@ class Combine extends Act\Cmd\Op
     const UUID = 'c8833a43-8e2a-4a88-995f-f27c816dc073';
     const ACTION_NAME = TypeOfAction::OP_COMBINE;
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Op::class

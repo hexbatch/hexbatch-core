@@ -3,7 +3,6 @@
 namespace App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 use App\Enums\Sys\TypeOfAction;
-use App\Sys\Res\Types\Stk\Root\Act\BaseAction;
 use App\Sys\Res\Types\Stk\Root\Act\Cmd;
 
 
@@ -13,10 +12,10 @@ class Op extends Cmd
     const ACTION_NAME = TypeOfAction::BASE_OPERATION;
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
-        BaseAction::class
+        Cmd::class
     ];
 
 

@@ -11,7 +11,7 @@ class Language extends Meta
     const TYPE_NAME = 'meta_language';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

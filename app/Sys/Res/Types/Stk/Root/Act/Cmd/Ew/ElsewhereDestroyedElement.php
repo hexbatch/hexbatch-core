@@ -15,9 +15,7 @@ class ElsewhereDestroyedElement extends Act\Cmd\Ew
     const UUID = '4288f35c-f178-44d8-9c47-22214bc7d822';
     const ACTION_NAME = TypeOfAction::CMD_ELSEWHERE_DESTROYED_ELEMENT;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ew::class

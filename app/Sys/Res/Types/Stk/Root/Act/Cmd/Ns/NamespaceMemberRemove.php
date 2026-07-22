@@ -12,9 +12,7 @@ class NamespaceMemberRemove extends Act\Cmd\Ns
     const UUID = '6bf0c720-38f4-4387-8ef0-95780141846e';
     const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_MEMBER_REMOVE;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ns::class

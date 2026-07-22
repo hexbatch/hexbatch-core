@@ -47,8 +47,7 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
     const ACTION_NAME = TypeOfAction::CMD_DESIGN_CREATE;
 
 
-    const ATTRIBUTE_CLASSES = [
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ds::class
@@ -111,12 +110,15 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
             DB::beginTransaction();
 
             $type = new ElementType();
-            $type->setTypeName(name: $this->params->type_name,namespace: $this->owner_namespace);
+            $type->setTypeName(name: $this->params->type_name,namespace: $this->owner_namespace,b_do_check: !!$this->owner_namespace);
             if ($this->params->schedule_ref_uuid) {
                 $type->type_time_bound_id = TimeBound::getThisSchedule($this->params->schedule_ref_uuid)->id;
             }
-            $type->ref_uuid = $this->use_ref;
-            $type->owner_namespace_id = $this->owner_namespace->id;
+            if ($this->use_ref) {
+                $type->ref_uuid = $this->use_ref;
+            }
+
+            $type->owner_namespace_id = $this->owner_namespace?->id;
             $type->imported_from_server_id = $this->server->id;
 
 
@@ -134,7 +136,11 @@ class DesignCreate extends Act\Cmd\Ds implements ICommandCallable
             $access->access_type = $this->params->access??TypeOfServerAccess::IS_PRIVATE;
             $access->save();
 
-            ElementTypeParent::addOrUpdateParent(parent: ElementType::getSystemType(), child: $type);
+            $root = ElementType::getSystemType();
+            if ($root->id !== $type->id) {
+                ElementTypeParent::addOrUpdateParent(parent: $root, child: $type);
+            }
+
 
             DB::commit();
             return $type;

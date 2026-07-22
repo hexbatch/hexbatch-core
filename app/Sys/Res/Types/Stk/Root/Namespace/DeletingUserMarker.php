@@ -14,7 +14,7 @@ class DeletingUserMarker extends NamespaceType
     const TYPE_NAME = 'delete_user';
 
 
-
+    const ATTRIBUTE_CLASSES = [];
 
 
     const PARENT_CLASSES = [

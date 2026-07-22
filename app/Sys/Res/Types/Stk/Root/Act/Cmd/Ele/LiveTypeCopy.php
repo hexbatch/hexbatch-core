@@ -15,9 +15,7 @@ class LiveTypeCopy extends Act\Cmd\Ele
     const UUID = '49390d1b-5ed0-49ea-9867-9615c2a1235e';
     const ACTION_NAME = TypeOfAction::CMD_LIVE_TYPE_COPY;
 
-    const ATTRIBUTE_CLASSES = [
-
-    ];
+    const ATTRIBUTE_CLASSES = [];
 
     const PARENT_CLASSES = [
         Act\Cmd\Ele::class
