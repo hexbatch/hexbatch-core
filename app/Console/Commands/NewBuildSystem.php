@@ -13,7 +13,7 @@ class NewBuildSystem extends Command
      *
      * @var string
      */
-    protected $signature = 'hex:new-build';
+    protected $signature = 'hex:new-build {--update} {--all} {--list-new}';
 
 
     /**
@@ -32,9 +32,21 @@ class NewBuildSystem extends Command
     {
 
         $builder = new NewBuild(output: $this);
-        $builder->doBuild();
-        $this->info("done");
 
+        if ($this->option('update')) {
+            $builder->doUpdateBuild();
+        }
+        elseif ($this->option('list-new')) {
+            $builder->doListInOutput();
+        }
+        elseif ($this->option('all'))  {
+            $builder->doNewBuild();
+        } else {
+            $this->warn("pick an option");
+            return 1;
+        }
+
+        $this->info("done");
         return 0;
     }
 }

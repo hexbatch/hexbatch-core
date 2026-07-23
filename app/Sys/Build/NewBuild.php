@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 class NewBuild
 {
 
+    /** @type array<INewSystemType>   */
     const array TYPES = [
         Stk\Root::class,
         Stk\Root\About::class,
@@ -553,16 +554,57 @@ class NewBuild
 
     }
 
+    /**
+     * @throws \Throwable
+     */
+    public function doUpdateBuild( ) {
+        //get any new uuids not in the db for the types
+        DB::transaction(function() {
+            $uuids = [];
+
+            foreach (static::TYPES as $blueprint) {
+                $uuids[] = $blueprint::getTypeUuid();
+            }
+
+            $existing_uuids = ElementType::whereIn('ref_uuid', $uuids)->pluck('ref_uuid')->toArray();
+            $uuids_to_build = array_diff($uuids, $existing_uuids);
+
+            foreach (static::TYPES as $blueprint) {
+                if (in_array($blueprint::getTypeUuid(), $uuids_to_build)) {
+                    $this->register_type(info: $blueprint);
+                }
+            }
+        });
+    }
+
+    public function doListInOutput( ) {
+        $uuids = [];
+
+        foreach (static::TYPES as $blueprint) {
+            $uuids[] = $blueprint::getTypeUuid();
+        }
+
+        $existing_uuids = ElementType::whereIn('ref_uuid', $uuids)->pluck('ref_uuid')->toArray();
+        $uuids_to_build = array_diff($uuids, $existing_uuids);
+
+        foreach (static::TYPES as $blueprint) {
+            if (in_array($blueprint::getTypeUuid(), $uuids_to_build)) {
+                $this->output?->info(sprintf("New type: %s %s ",$blueprint::getTypeName(),$blueprint::getTypeUuid()));
+                foreach ($blueprint::getAttributeClasses() as $attr_blueprint) {
+                    $this->output?->info(sprintf("New attribute: %s %s ",$attr_blueprint::getAttributeUuid(),
+                        $blueprint::getTypeName().':'.$attr_blueprint::getAttributeName()));
+                }
+            }
+        }
+    }
 
     protected ?Server $server = null;
     protected ?UserNamespace $ns = null;
     protected ?User $user = null;
-    //todo do scan for duplicate uuids, new and old
-    // do update for only new things
     /**
      * @throws \Throwable
      */
-    public function doBuild( ) {
+    public function doNewBuild( ) {
         /*
          * Make system user
          * Make system server without type or namespace
