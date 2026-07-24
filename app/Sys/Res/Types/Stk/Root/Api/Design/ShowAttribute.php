@@ -30,7 +30,7 @@ class ShowAttribute extends Api\DesignApi
              'attribute_design',
             'attribute_ancestors'
         );
-        $att->type = $att->type_owner;
+
         return AttributeData::MakingUsingCodeArray($att);
     }
 

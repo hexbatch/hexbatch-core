@@ -21,21 +21,31 @@ class Show extends Api\NamespaceApi
         Api\NamespaceApi::class
     ];
 
-    public static function showNamespace(UserNamespace $caller,UserNamespace $target) : UserNamespaceData {
-        if ($target->isNamespaceAdmin($caller)) {
-            $target->loadMissing(
-                'private_element',
-            );
-        }
-        $target->loadMissing(
-            'namespace_admins',
-            'home_set',
-            'home_set.element_members',
-            'public_element',
-            'namespace_base_type',
-            'namespace_base_type.type_exposed_attributes',
-            'owner_user'
-        );
+    public static function showNamespace(UserNamespace $caller,UserNamespace $target, bool $b_public_only = false) : UserNamespaceData {
+
+       if ($b_public_only) {
+           $target->loadMissing(
+               'home_set',
+               'public_element',
+               'namespace_base_type',
+           );
+       } else {
+           if ($target->isNamespaceAdmin($caller)) {
+               $target->loadMissing(
+                   'private_element',
+               );
+           }
+           $target->loadMissing(
+               'namespace_admins',
+               'home_set',
+               'home_set.element_members',
+               'public_element',
+               'namespace_base_type',
+               'namespace_base_type.type_exposed_attributes',
+               'owner_user'
+           );
+       }
+
         return UserNamespaceData::MakingUsingCodeArray($target);
     }
 

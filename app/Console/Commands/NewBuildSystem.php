@@ -14,7 +14,7 @@ class NewBuildSystem extends Command
      *
      * @var string
      */
-    protected $signature = 'hex:new-build {--update} {--all} {--list-new}';
+    protected $signature = 'hex:new-build {--update} {--all} {--list-new} {--mapper}';
 
 
     /**
@@ -36,12 +36,17 @@ class NewBuildSystem extends Command
 
         if ($this->option('update')) {
             $builder->doUpdateBuild();
+            NewBuild::doMap();
         }
         elseif ($this->option('list-new')) {
             $builder->doListInOutput();
         }
+        elseif ($this->option('mapper')) {
+            NewBuild::doMap();
+        }
         elseif ($this->option('all'))  {
             $builder->doNewBuild();
+            NewBuild::doMap();
         } else {
             $this->warn("pick an option");
             return 1;

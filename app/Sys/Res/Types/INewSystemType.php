@@ -20,7 +20,7 @@ interface INewSystemType
     public static function getParentUuids() : array ;
 
     /**
-     * @return array<INewSystemAttribute>
+     * @return array<INewSystemAttribute|string>
      */
     public static function getAttributeClasses() : array ;
 }

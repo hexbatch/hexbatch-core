@@ -12,6 +12,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\ElementTypeNameReq;
+use App\Sys\Build\NewBuild;
 use App\Sys\Res\ISystemModel;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Namespace\HomeSet;
@@ -231,6 +232,7 @@ class ElementType extends Model implements ISystemModel
     : Builder
     {
 
+        /** @var Builder $build */
         $build = ElementType::select('element_types.*')
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts")
             ->selectRaw("extract(epoch from  element_types.updated_at) as updated_at_ts")
@@ -731,6 +733,7 @@ class ElementType extends Model implements ISystemModel
 
     public static function getSystemType(bool $b_throw_on_missing = true) : ?ElementType {
 
+        /** @var static  $sys */
         $sys = ElementType::buildElementType(uuid: Root::UUID)->first();
         if (!$sys && $b_throw_on_missing) {
             throw new \LogicException("No system type made");
@@ -771,6 +774,17 @@ class ElementType extends Model implements ISystemModel
         return new Collection;
     }
 
+    public function getNotesAttribute(): ?string
+    {
+        $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
+        return $class::getHexbatchDescriptionMarkdown();
+    }
+
+    public function getBlurbAttribute(): ?string
+    {
+        $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
+        return $class::getHexbatchBlurb();
+    }
 
 
 }

@@ -16,6 +16,7 @@ use App\Models\Server;
 use App\Models\User;
 use App\Models\UserNamespace;
 use App\Sys\Res\Atr\INewSystemAttribute;
+use App\Sys\Res\IDocument;
 use App\Sys\Res\Namespaces\SystemNamespace;
 use App\Sys\Res\Servers\ThisServer;
 use App\Sys\Res\Types\INewSystemType;
@@ -31,6 +32,7 @@ use Illuminate\Support\Facades\DB;
 
 class NewBuild
 {
+    const MAP_FILE = 'bootstrap/cache/hbc_cache.php';
 
     /** @type array<INewSystemType>   */
     const array TYPES = [
@@ -471,7 +473,6 @@ class NewBuild
         Stk\Root\Api\Namespace\RemoveHandle::class,
         Stk\Root\Api\Namespace\RemoveMember::class,
         Stk\Root\Api\Namespace\Show::class,
-        Stk\Root\Api\Namespace\ShowPublic::class,
         Stk\Root\Api\Namespace\StartTransfer::class,
         Stk\Root\Api\Namespace\TransferOwner::class,
         Stk\Root\Api\Operation\Combine::class,
@@ -810,6 +811,56 @@ class NewBuild
         $this->user->ref_uuid = SystemUser::getUserUuid();
         $this->user->save();
         $this->output?->info(sprintf("made user: %s %s ",$this->user->id,$this->user->username));
+    }
+
+
+    /** @return array<MapEntry> */
+    protected static function getMapData() {
+        $ret = [];
+        foreach (static::TYPES as $blueprint) {
+
+            $ret[] = new MapEntry(full_class_name: $blueprint,name: $blueprint::getTypeName(), uuid: $blueprint::getTypeUuid());
+
+            foreach ($blueprint::getAttributeClasses() as $attr_blueprint) {
+                    $ret[] = new MapEntry(full_class_name: $attr_blueprint,name: $attr_blueprint::getAttributeName(), uuid: $attr_blueprint::getAttributeUuid());
+            }
+
+        }
+        return $ret;
+    }
+
+    public static function doMap() : void {
+        $file_path = base_path(static::MAP_FILE);
+        $map_data = static::getMapData();
+        $pre = '<?php return ';
+        if (empty($map_data)) {
+            $b_result = file_put_contents($file_path,$pre. ' [];');
+            if ($b_result === false) {
+                throw new \LogicException("Could not write (C) to $file_path");
+            }
+            return;
+        }
+        $out = [];
+        foreach ( $map_data as $entry) {
+            $out[$entry->uuid] = $entry->toArray() ;
+        }
+
+        $all = $pre . json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK | JSON_PRETTY_PRINT) . "\n;"
+                |> (fn($x) => str_replace(":", "=>", $x))
+                |> (fn($x) => str_replace("}", "]", $x))
+                |> (fn($x) => str_replace("{", "[", $x));
+
+        $b_result = file_put_contents($file_path,$all);
+        if ($b_result === false) {
+            throw new \LogicException("Could not write to $file_path");
+        }
+    }
+
+    public static function getClassFromUuid(string $uuid) : IDocument|INewSystemType|INewSystemAttribute|null|string  {
+        $file_path = base_path(static::MAP_FILE);
+        $content = include($file_path);
+        $node = $content[$uuid]??null ;
+        return $node['class']??null;
     }
 
 }

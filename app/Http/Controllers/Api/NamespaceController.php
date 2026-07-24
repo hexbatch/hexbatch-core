@@ -57,26 +57,6 @@ class NamespaceController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/namespaces/public',
-        operationId: 'core.namespaces.show_public',
-        description: "Anyone can run this to see some info about the namespace. Will only show public data",
-        summary: 'Shows a summary of the namespace',
-        tags: ['namespace','public'],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::IS_PUBLIC)]
-    #[ApiTypeMarker( Root\Api\Namespace\ShowPublic::class)]
-    public function show_namespace_public() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-
-    #[OA\Get(
         path: '/api/v1/{user_namespace}/namespaces/list_namespaces',
         operationId: 'core.namespaces.list',
         description: "Will show owned, admin and member status of all namespaces this caller is part of. Can filter by handle or namespace name",

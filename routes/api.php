@@ -22,9 +22,6 @@ Route::prefix('v1')->group(function () {
         Route::get('public', [Api\ElementController::class, 'show_public'])->name('core.elements.show_public');
     });
 
-    Route::prefix('namespaces')->group(function () {
-        Route::get('public/{user_namespace}', [Api\NamespaceController::class, 'show_namespace_public'])->name('core.namespaces.show_public');
-    });
 
     Route::prefix('sets')->group(function () {
         Route::get('public', [Api\SetController::class, 'show_public'])->name('core.sets.show_public');

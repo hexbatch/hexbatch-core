@@ -14,6 +14,7 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Events\IEventReference;
 use App\Helpers\Utilities;
 use App\Rules\AttributeNameReq;
+use App\Sys\Build\NewBuild;
 use App\Sys\Res\ISystemModel;
 use ArrayObject;
 use Illuminate\Database\Eloquent\Builder;
@@ -678,9 +679,16 @@ class Attribute extends Model implements ISystemModel
         return $this->access_policy === TypeOfServerAccess::IS_PUBLIC_DOMAIN;
     }
 
-    public function getFullNameAttribute(): string
+    public function getNotesAttribute(): ?string
     {
-        return $this->getName(short_name: false);
+        $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
+        return $class::getHexbatchDescriptionMarkdown();
+    }
+
+    public function getBlurbAttribute(): ?string
+    {
+        $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
+        return $class::getHexbatchBlurb();
     }
 
 
