@@ -9,8 +9,11 @@ use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
 use App\Data\ApiParams\Data\Namespaces\Params\NamespaceParamData;
+use App\Data\ApiParams\Data\Namespaces\UserNamespaceData;
+use App\Data\ApiParams\Data\User\Response\MeResponseData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
+use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root;
@@ -39,13 +42,14 @@ class NamespaceController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response( response: CodeOf::HTTP_OK, description: 'Lists ns info, if caller admin of name, will list private',content: new JsonContent(ref: UserNamespaceData::class)),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_MEMBER)]
     #[ApiTypeMarker( Root\Api\Namespace\Show::class)]
-    public function show_namespace() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function show_namespace(UserNamespace $namespace,UserNamespace $target) {
+        $out = Root\Api\Namespace\Show::showNamespace(caller: $namespace,target:$target);
+        return response()->json($out, CodeOf::HTTP_OK);
     }
 
 

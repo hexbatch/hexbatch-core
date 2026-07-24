@@ -122,6 +122,7 @@ class DesignAttributeCreate extends Act\Cmd\Ds implements ICommandCallable
         $given_attribute->owner_element_type_id = $this->given_type->id;
         $given_attribute->attribute_approval = TypeOfApproval::PENDING_DESIGN_APPROVAL;
         $given_attribute->is_system = $this->is_system;
+        $given_attribute->type_uuid = $this->given_type->ref_uuid;
 
         if ($this->use_ref) {
             $given_attribute->ref_uuid = $this->use_ref;

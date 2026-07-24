@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AttributeAncestor;
 use Illuminate\Console\Command;
 use App\Sys\Build\NewBuild;
 

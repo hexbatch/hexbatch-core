@@ -56,16 +56,13 @@ class AuthenticationController extends Controller
         $user = $request->user();
         $user->loadMissing(
             'default_namespace',
-            'default_namespace.namespace_members',
+            'default_namespace.namespace_admins',
             'default_namespace.home_set.element_members',
-            'default_namespace.home_set.element_members.element_parent_type',
             'default_namespace.home_set.children_sets',
             'default_namespace.public_element',
-            'default_namespace.public_element.element_parent_type',
-            'default_namespace.private_element',
-            'default_namespace.private_element.element_parent_type',
+            'default_namespace.private_element'
         );
-        $out = MeResponseData::from($user);
+        $out = MeResponseData::from(['user'=>$user,'default_namespace'=>$user->default_namespace,'"token_expires_at'=>$user->token_expires_at]);
         return response()->json($out, CodeOf::HTTP_OK);
     }
 

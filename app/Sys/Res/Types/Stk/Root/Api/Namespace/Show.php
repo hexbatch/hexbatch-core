@@ -3,6 +3,8 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
 
 
+use App\Data\ApiParams\Data\Namespaces\UserNamespaceData;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Api;
 
 
@@ -18,6 +20,24 @@ class Show extends Api\NamespaceApi
     const PARENT_CLASSES = [
         Api\NamespaceApi::class
     ];
+
+    public static function showNamespace(UserNamespace $caller,UserNamespace $target) : UserNamespaceData {
+        if ($target->isNamespaceAdmin($caller)) {
+            $target->loadMissing(
+                'private_element',
+            );
+        }
+        $target->loadMissing(
+            'namespace_admins',
+            'home_set',
+            'home_set.element_members',
+            'public_element',
+            'namespace_base_type',
+            'namespace_base_type.type_exposed_attributes',
+            'owner_user'
+        );
+        return UserNamespaceData::MakingUsingCodeArray($target);
+    }
 
 }
 

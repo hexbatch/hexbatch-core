@@ -100,8 +100,7 @@ class User extends Authenticatable implements ISystemModel
 
     public function default_namespace() : BelongsTo {
         return $this->belongsTo(UserNamespace::class,'default_namespace_id')
-            ->with('home_set','home_set.defining_element','home_set.defining_element.element_parent_type',
-                'public_element','namespace_base_type','private_element');
+            ->with('home_set', 'public_element','namespace_base_type','private_element');
     }
 
     /**

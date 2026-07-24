@@ -23,8 +23,15 @@ class ShowAttribute extends Api\DesignApi
 
 
     public static function showAttribute(Attribute $att) : AttributeData {
-        $att->loadMissing('attribute_parent','type_owner','attribute_location','attribute_design');
-        return AttributeData::validateAndCreate($att);
+        $att->loadMissing(
+            'attribute_parent',
+            'type_owner',
+            'attribute_location',
+             'attribute_design',
+            'attribute_ancestors'
+        );
+        $att->type = $att->type_owner;
+        return AttributeData::MakingUsingCodeArray($att);
     }
 
 }

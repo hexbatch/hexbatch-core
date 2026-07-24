@@ -134,6 +134,12 @@ return new class extends Migration
 
         Schema::table('attributes', function (Blueprint $table) {
 
+            $table->uuid('type_uuid')
+                ->index()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+
             $table->timestamps();
 
             $table->rawColumn('read_json_path','jsonpath')->nullable()->default(null)
@@ -190,6 +196,7 @@ return new class extends Migration
             $table->dropColumn('access_policy');
             $table->dropColumn('value_policy');
             $table->dropColumn('attribute_approval');
+            $table->dropColumn('type_uuid');
 
         });
 

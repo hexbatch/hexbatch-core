@@ -32,7 +32,7 @@ class ServerController extends Controller {
     #[ApiTypeMarker( Root\Api\Server\Show::class)]
     public function us() {
         $server = Server::getDefaultServer();
-        $server->server_type->loadMissing(['type_attributes','type_attributes.type_owner','type_schedule','type_parents','type_exposed_attributes','type_exposed_attributes.type_owner']);
+        $server->server_type->loadMissing(['type_attributes','type_attributes.type_owner','type_schedule','type_exposed_attributes']);
         $server_info = ServerInformation::from($server);
         $server_info->server_version = Utilities::getVersionAsString();
         $server_info->server_version_time = Utilities::getVersionDateAsCarbon();

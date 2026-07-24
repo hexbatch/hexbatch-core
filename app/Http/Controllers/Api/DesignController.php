@@ -394,8 +394,8 @@ class DesignController extends Controller {
      * @throws \Exception
      */
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/design/{element_type}/attribute/{attribute}/show',
-        operationId: 'core.design.show_attribute',
+        path: '/api/v1/{user_namespace}/attributes/{attribute}/show',
+        operationId: 'core.design.attributes.show',
         description: "See information about an attribute. Will list the settings and bounds, will show parent, and status ".
                     "\nShows stats about its descendants".
                     "\nif the type is marked as public, and the attribute is marked as public then any namespace can use this, ".

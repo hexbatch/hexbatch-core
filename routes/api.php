@@ -509,6 +509,11 @@ Route::prefix('v1')->group(function () {
 
 
 
+                Route::prefix('attributes')->group(function () {
+                    Route::prefix('{attribute}')->group(function () {
+                        Route::get('show', [Api\DesignController::class, 'show_attribute'])->name('core.design.attributes.show');
+                    });
+                });
 
 
 
@@ -580,12 +585,12 @@ Route::prefix('v1')->group(function () {
 
                         Route::prefix('attribute/{attribute}')->group(function () {
                             Route::middleware(Middleware\ValidateAttributeOwnership::class)->group(function () {
-                                Route::get('show', [Api\DesignController::class, 'show_attribute'])->name('core.design.show_attribute');
-
                                 Route::get('show_listener', [Api\DesignController::class, 'show_listener'])->name('core.design.show_listener');
                                 Route::get('test_listener', [Api\DesignController::class, 'test_listener'])->name('core.design.test_listener');
                             });
                         });
+
+
 
 
                     }); //end design members

@@ -299,6 +299,12 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
             $home_type::validateTypeName($home_type->type_name,namespace: $created_namespace,me: $home_type);
             $private_type::validateTypeName($private_type->type_name,namespace: $created_namespace,me: $private_type);
             $public_type::validateTypeName($public_type->type_name,namespace: $created_namespace,me: $public_type);
+
+            $created_namespace->home_set_uuid = $home_set->ref_uuid;
+            $created_namespace->private_uuid = $private_element->ref_uuid;
+            $created_namespace->public_uuid = $public_element->ref_uuid;
+            $created_namespace->type_uuid = $base_type->ref_uuid;
+            $created_namespace->save();
         });
 
         if ($created_namespace && $b_refresh_with_dependencies) {

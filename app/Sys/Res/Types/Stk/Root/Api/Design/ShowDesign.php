@@ -20,8 +20,16 @@ class ShowDesign extends Api\DesignApi
     ];
 
     public static function showDesign(ElementType $given_type) : ElementTypeData {
-        $given_type->loadMissing('type_attributes','type_schedule','type_exposed_attributes','type_parents',
-            'type_handle','owner_namespace', 'type_server', 'type_server_levels');
+        $given_type->loadMissing(
+            'type_attributes',
+            'type_schedule',
+            'type_exposed_attributes',
+        //    'type_parents',
+            'type_handle',
+            'owner_namespace',
+            'type_server',
+            'type_server_levels'
+        );
         return ElementTypeData::validateAndCreate($given_type);
     }
 

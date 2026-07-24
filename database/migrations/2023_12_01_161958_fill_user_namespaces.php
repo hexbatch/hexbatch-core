@@ -105,6 +105,27 @@ return new class extends Migration
                 ->comment("All created by this user_token is prefixed by this name");
 
 
+            $table->uuid('home_set_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('public_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('private_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('type_uuid')
+                ->unique()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+
         });
 
         DB::statement(/** @lang text */
@@ -151,6 +172,12 @@ return new class extends Migration
             $table->dropColumn('ref_uuid');
             $table->dropColumn('namespace_public_key');
             $table->dropColumn('is_system');
+
+            $table->dropColumn('home_set_uuid');
+            $table->dropColumn('public_uuid');
+            $table->dropColumn('private_uuid');
+            $table->dropColumn('type_uuid');
+
         });
 
     }

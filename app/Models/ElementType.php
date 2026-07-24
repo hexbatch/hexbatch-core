@@ -171,7 +171,7 @@ class ElementType extends Model implements ISystemModel
 
     public function type_parents() : HasMany {
         return $this->hasMany(ElementTypeParent::class,'child_type_id','id')
-            ->with(['parent_type','parent_type.type_attributes','parent_type.type_attributes.type_owner','parent_type.type_schedule','parent_type.type_parents']);
+            ->with(['parent_type']);
     }
 
 
@@ -225,6 +225,8 @@ class ElementType extends Model implements ISystemModel
         array            $only_uuids = [],
         bool             $b_child_parent_relations = false,
         bool             $b_server_relations = false,
+        bool            $b_schedule_relations = false,
+        bool            $b_attribute_relations = false,
     )
     : Builder
     {
@@ -233,11 +235,18 @@ class ElementType extends Model implements ISystemModel
             ->selectRaw(" extract(epoch from  element_types.created_at) as created_at_ts")
             ->selectRaw("extract(epoch from  element_types.updated_at) as updated_at_ts")
 
-            ->with( 'type_attributes','type_schedule','type_exposed_attributes')
             ;
 
         if ($b_child_parent_relations) {
             $build->with('type_children', 'type_parents','type_handle');
+        }
+
+        if ($b_schedule_relations) {
+            $build->with('type_schedule','type_schedule.time_spans');
+        }
+
+        if ($b_attribute_relations) {
+            $build->with('type_attributes','type_exposed_attributes');
         }
 
         if ($b_server_relations) {

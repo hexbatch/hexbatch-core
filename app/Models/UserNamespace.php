@@ -117,6 +117,7 @@ class UserNamespace extends Model implements ISystemModel
     public function namespace_members() : HasMany {
         return $this->hasMany(UserNamespaceMember::class,'member_namespace_id','id')
             ->with('namespace_member')
+            ->where('is_admin',false)
             ->orderBy('created_at');
     }
 
@@ -132,10 +133,9 @@ class UserNamespace extends Model implements ISystemModel
     }
 
     public function namespace_admins() : HasMany {
-        return $this->hasMany(UserNamespaceMember::class)
+        return $this->hasMany(UserNamespaceMember::class,'member_namespace_id','id')
             ->with('namespace_member')
             ->where('is_admin',true)
-
             ->orderBy('updated_at');
     }
 
@@ -419,7 +419,7 @@ class UserNamespace extends Model implements ISystemModel
         $node->setNamespaceName($namespace_name);
         $node->save();
         $node->addMember(child:$node,is_admin: true);
-        return static::buildNamespace(me_id:$node->id)->first();
+        return $node;
     }
 
     public static function getThisNamespace(
@@ -469,33 +469,6 @@ class UserNamespace extends Model implements ISystemModel
     }
 
 
-    protected function homeSetUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $this->home_set?->ref_uuid??null,
-        );
-    }
-
-    protected function typeUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $this->namespace_base_type?->ref_uuid??null,
-        );
-    }
-
-    protected function publicUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $this->public_element?->ref_uuid??null,
-        );
-    }
-
-    protected function privateUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $this->private_element?->ref_uuid??null,
-        );
-    }
 
     public  function getEventHandlersFromNamespace(TypeOfEvent $type_event) : Collection {
         //get from attribute rules/server_events

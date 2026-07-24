@@ -93,7 +93,8 @@ class TimeBound extends Model
             ->select('*')
             ->selectRaw(" extract(epoch from lower(time_slice_range)) as bound_start_ts")
             ->selectRaw(" extract(epoch from upper(time_slice_range)) as bound_stop_ts")
-            ->orderBy('bound_start_ts');
+            ->orderBy('bound_start_ts')
+            ;
     }
 
 

@@ -115,7 +115,8 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
             $this->given_type->save();
             ElementTypeParent::where('child_type_id',$this->given_type->id)->update(['parent_type_approval' => TypeOfApproval::PUBLISHING_APPROVED]);
             foreach ($this->given_type->type_attributes as $att) {
-                $att->attribute_approval = TypeOfApproval::DESIGN_APPROVED;
+                $att->attribute_approval = TypeOfApproval::PUBLISHING_APPROVED;
+                $att->save();
                 ElementValue::maybeAssignStaticValue(att: $att);
             }
 

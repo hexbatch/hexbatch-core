@@ -8,7 +8,6 @@ use App\Exceptions\RefCodes;
 use App\Helpers\Utilities;
 use App\Sys\Res\ISystemModel;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -411,47 +410,6 @@ class Element extends Model implements ISystemModel
         return $build;
     }
 
-    /**
-     * @param string[]|\Illuminate\Support\Collection $values
-     * @param bool $throw_exception
-     * @return Collection|Element[]
-     */
-    public static function resolveElements( $values, bool $throw_exception = true)
-    {
-
-        $refs = [];
-        foreach ($values as $val) {
-            if (!Utilities::is_uuid($val)) {
-                if ($throw_exception) {
-                    throw new HexbatchNotFound(
-                        __('msg.element_not_found',['ref'=>$val]),
-                        \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                        RefCodes::ELEMENT_NOT_FOUND
-                    );
-                } else {
-                    continue;
-                }
-            }
-
-            $refs[] = $val;
-
-        }
-
-       /** @var Collection|Element[] $ret */
-        $ret = static::buildElement(given_uuids:$refs)->get();
-
-        if (count($ret) !== count($values) ) {
-            if ($throw_exception) {
-                throw new HexbatchNotFound(
-                    __('msg.element_list_not_found',['ref'=>implode('|',$values)]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
-                    RefCodes::ELEMENT_NOT_FOUND
-                );
-            }
-        }
-
-        return $ret;
-    }
 
 
     public static function getThisElement(

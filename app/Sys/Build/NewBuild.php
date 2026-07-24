@@ -626,6 +626,7 @@ class NewBuild
             $this->setPhaseTypes();
             $this->createNamespace();
             $this->attachUserToNamespace();
+            $this->attachServerToNamespace();
             $this->setAllSystemTypesToNamespace();
         });
 
@@ -637,7 +638,6 @@ class NewBuild
      */
     function register_type(string|INewSystemType $info) : ElementType {
 
-        $this->output?->info(sprintf("started type: %s %s ",$info::getTypeName(),$info::getTypeUuid()));
         $base_type_params = TypeParamData::MakingUsingCodeArray([
             'handle_ref_uuid'=>null,
             'type_name'=> $info::getTypeName(),
@@ -664,13 +664,13 @@ class NewBuild
             Utilities::ignoreVar($attr);
         }
 
+        $base_type->loadMissing('type_attributes');
         $type =  new TypePublish(given_type: $base_type, caller_namespace: null, do_permission_check: false)->doPublishCall();
-        $this->output?->info(sprintf("published type: %s %s ",$type->id,$type->type_name));
+        $this->output?->info(sprintf("published type: %s %s %s",$type->id,$type->type_name,$info::getTypeUuid()));
         return $type;
     }
 
     function register_attribute(ElementType $type, string|INewSystemAttribute $info) : Attribute {
-        $this->output?->info(sprintf("started attribute: %s %s ",$info::getAttributeName(),$info::getAttributeUuid()));
         $params = AttributeParamData::MakingUsingCodeArray([
             'parent_ref_uuid' => $info::getAttributeParentUuid(),
             'design_ref_uuid' => $info::getAttributeDesignUuid(),
@@ -688,7 +688,7 @@ class NewBuild
         $factory = new DesignAttributeCreate(params: $params,is_system: true,use_ref: $info::getAttributeUuid(),
             calling_namespace: null,given_type: $type,do_permission_check: false);
         $att =  $factory->doCreateAttribute();
-        $this->output?->info(sprintf("made attribute: %s %s ",$att->id,$type->type_name.':'.$att->attribute_name));
+        $this->output?->info(sprintf("made attribute: %s %s %s",$att->id,$type->type_name.':'.$att->attribute_name,$info::getAttributeUuid()));
         return $att;
     }
 
@@ -791,6 +791,12 @@ class NewBuild
         $this->user->default_namespace_id = $this->ns->id;
         $this->user->save();
         $this->output?->info("attached ns to user");
+    }
+
+    function attachServerToNamespace() {
+        $this->server->owning_namespace_id = $this->ns->id;
+        $this->server->save();
+        $this->output?->info("attached ns to server");
     }
 
     function createUser() {

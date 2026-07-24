@@ -59,7 +59,9 @@ class UserNamespaceMember extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'is_admin' => 'boolean'
+        'is_admin' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     public function namespace_member() : BelongsTo {
@@ -75,6 +77,7 @@ class UserNamespaceMember extends Model
         array $member_namespace_ids = [], ?bool $is_admin = null, bool  $b_relations = true, bool $b_select = true
     ) : Builder {
 
+        /** @var Builder $build */
         $build =  UserNamespaceMember::where('id','>',0);
 
         if ($b_select)
@@ -110,5 +113,12 @@ class UserNamespaceMember extends Model
             $build->where('user_namespace_members.is_admin', $is_admin);
         }
         return $build;
+    }
+
+    protected function memberNamespaceUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $this->namespace_member?->ref_uuid??null,
+        );
     }
 }
