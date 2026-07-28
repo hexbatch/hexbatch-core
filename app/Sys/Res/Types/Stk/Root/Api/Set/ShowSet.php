@@ -62,8 +62,7 @@ class ShowSet extends Api\SetApi
 
 
         if (count($el_ids)) {
-            $values = ElementValue::readValues(set_id: $set->id,element_ids: $el_ids);
-            //todo make sure do not show if protected for element ns
+            $values = ElementValue::readValues(set_id: $set->id,element_ids: $el_ids,caller_namespace_id: $caller_namespace->id );
             $el_readings = [];
             foreach ($values->data as $val) {
                 if (!isset($el_readings[$val->element_uuid])) {
