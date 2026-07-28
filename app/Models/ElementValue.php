@@ -326,6 +326,8 @@ class ElementValue extends Model
                      INNER JOIN user_namespaces el_ns ON el_ns.id = e.element_namespace_id
                      LEFT JOIN user_namespace_members el_mems ON el_mems.parent_namespace_id = el_ns.id AND el_mems.member_namespace_id = $caller_namespace_id
 
+                     LEFT JOIN element_visibilities vis ON vis.visible_element_id = e.id
+
                      INNER JOIN  element_type_exposed_attributes xx ON xx.exposed_type_id = t.id
                      INNER JOIN attributes att on xx.exposed_attribute_id = att.id
                      INNER JOIN element_values v on v.horde_attribute_id = xx.exposed_attribute_id AND (        v.horde_element_id IS NULL
@@ -334,6 +336,7 @@ class ElementValue extends Model
                      LEFT JOIN LATERAL jsonb_path_query(v.element_value,att.read_json_path) AS filtered_data ON att.read_json_path IS NOT NULL
             WHERE e.id IN ($element_id_array)
               AND (v.horde_set_id = $set_id OR v.horde_set_id IS NULL)
+              AND (vis.id IS NULL or vis.is_visible)
               AND $attribute_where_clause
 
             ORDER BY element_uuid,exposed_att_uuid,maybe_horde_set_id,maybe_horde_element_id
