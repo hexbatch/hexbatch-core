@@ -25,7 +25,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('horde_live_attributes_id')
-                ->nullable(false)
+                ->nullable()->default(null)
                 ->comment("From a live type added onto the element")
                 ->index()
                 ->constrained('live_attributes')
@@ -97,6 +97,11 @@ return new class extends Migration
             "CREATE UNIQUE INDEX udx_type_org_attr_member ON element_values
             (horde_type_id,horde_attribute_id,horde_element_id,horde_set_id,horde_set_member_id) NULLS NOT DISTINCT;");
 
+        DB::statement("ALTER TABLE element_values ALTER COLUMN created_at SET DEFAULT NOW();");
+
+        DB::statement("
+            CREATE TRIGGER update_modified_time BEFORE UPDATE ON element_values FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+        ");
 
     }
 

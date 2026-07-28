@@ -147,14 +147,14 @@ Route::prefix('v1')->group(function () {
 
 
                 Route::middleware(Middleware\ValidateNamespaceIsSystem::class)->group(function () {
-                    Route::post('promote', [Api\NamespaceController::class, 'promote_namespace'])->name('core.namespaces.promote');
+                    Route::post('promote/{user}', [Api\NamespaceController::class, 'promote_namespace'])->name('core.namespaces.promote');
                 });
 
                 Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
                     Route::post('create', [Api\NamespaceController::class, 'create_namespace'])->name('core.namespaces.create');
                 });
 
-                Route::get('list', [Api\NamespaceController::class, 'list_namespaces'])->name('core.namespaces.list_namespaces');
+                Route::get('list', [Api\NamespaceController::class, 'list_namespaces'])->name('core.namespaces.list');
 
 
                 Route::prefix('{target_namespace}')->group(function () {
@@ -170,18 +170,20 @@ Route::prefix('v1')->group(function () {
 
 
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
+
                         Route::post('start_transfer', [Api\NamespaceController::class, 'start_transfer'])->name('core.namespaces.start_transfer');
                         Route::post('transfer_owner', [Api\NamespaceController::class, 'transfer_owner'])->name('core.namespaces.transfer_owner');
+
                         Route::post('add_admin', [Api\NamespaceController::class, 'add_admin'])->name('core.namespaces.add_admin');
                         Route::delete('remove_admin', [Api\NamespaceController::class, 'remove_admin'])->name('core.namespaces.remove_admin');
+
+                        Route::post('start_deletion', [Api\NamespaceController::class, 'start_deletion'])->name('core.namespaces.start_deletion');
                         Route::delete('destroy', [Api\NamespaceController::class, 'destroy_namespace'])->name('core.namespaces.destroy');
 
                     });
 
 
                     Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
-                        Route::patch('add_handle', [Api\NamespaceController::class, 'add_handle'])->name('core.namespaces.add_handle');
-                        Route::patch('remove_handle', [Api\NamespaceController::class, 'remove_handle'])->name('core.namespaces.remove_handle');
                         Route::post('add_member', [Api\NamespaceController::class, 'add_member'])->name('core.namespaces.add_member');
                         Route::delete('remove_member', [Api\NamespaceController::class, 'remove_member'])->name('core.namespaces.remove_member');
 
@@ -189,7 +191,6 @@ Route::prefix('v1')->group(function () {
 
 
                     Route::get('show', [Api\NamespaceController::class, 'show_namespace'])->name('core.namespaces.show');
-                    Route::get('list_admins', [Api\NamespaceController::class, 'list_admins'])->name('core.namespaces.list_admins');
                     Route::get('list_members', [Api\NamespaceController::class, 'list_members'])->name('core.namespaces.list_members');//will was here
 
                 });
@@ -379,7 +380,7 @@ Route::prefix('v1')->group(function () {
 
                 Route::prefix('set')->group(function () {
                     Route::prefix('{element_set}')->group(function () {
-                        Route::get('show_set', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
+                        Route::get('show', [Api\SetController::class, 'show_set'])->name('core.sets.show_set');
                         Route::get('list_elements', [Api\SetController::class, 'list_elements'])->name('core.sets.list_elements');
                     });
                 });

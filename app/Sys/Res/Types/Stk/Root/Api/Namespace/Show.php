@@ -46,7 +46,7 @@ class Show extends Api\NamespaceApi
            );
        }
 
-        return UserNamespaceData::MakingUsingCodeArray($target);
+        return UserNamespaceData::makingUsingCodeArray($target);
     }
 
 }

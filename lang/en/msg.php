@@ -48,6 +48,7 @@ return [
     'namespace_member_not_found' => 'The namespace :ref is not an admin of :me',
     'namespace_cannot_delete_default' => 'The namespace :ref is the default namespace for :user_name',
     'namespace_cannot_delete_while_in_use' => 'The namespace :ref is still in use, cannot delete',
+    'namespace_cannot_delete_when_no_precursor' => 'The namespace :ref cannot be deleted because there was not a permission element matching the uuid given :uuid',
 
 
     //bounds

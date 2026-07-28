@@ -95,12 +95,12 @@ trait SetNotificationEventTree
         foreach ($col as $ref) {
             $builder->tree(
                 command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
+                command_args: new Evt\EventHandler(
                     ref: $ref,
                     set_context: $this->given_set,
                     element_context: $this->given_element,
                     important_array: $children_args
-                ),
+                )->toArray(),
                 command_tags: [Evt\EventHandler::class]
             );
         }

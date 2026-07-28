@@ -121,11 +121,11 @@ class ElementDestroyed extends Evt\ScopeType implements ICommandCallable
             foreach ($col as $ref) {
                 $builder->leaf(
                     command_class: Evt\EventHandler::class,
-                    command_args: (array)new Evt\EventHandler(
+                    command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $type,
                         collection_context: $els
-                    ),
+                    )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );
             }

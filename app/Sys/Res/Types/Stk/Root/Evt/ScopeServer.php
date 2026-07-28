@@ -31,6 +31,7 @@ class ScopeServer extends BaseEvent
         protected ?ElementSet                  $given_set = null,
         protected ?Phase                    $given_phase = null ,
         protected ?Attribute            $given_attribute = null,
+        protected ?string               $given_uuid = null,
 
     )
     {

@@ -59,6 +59,7 @@ class Element extends Model implements ISystemModel
      */
     protected $fillable = [
         'element_parent_type_id',
+        'element_namespace_id',
     ];
 
     /**
@@ -130,7 +131,7 @@ class Element extends Model implements ISystemModel
         /**
          * @var Builder $build
          */
-        $build = Element::where('id', '<>',0);
+        $build = Element::where('elements.id', '<>',0);
 
         if ($b_use_select)
         {
@@ -161,7 +162,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($phase_ref) {
-            $build->join('phases p',
+            $build->join('phases as p',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($phase_ref) {
                     $join->on('p.id', '=', 'elements.element_phase_id')
@@ -180,7 +181,7 @@ class Element extends Model implements ISystemModel
 
 
         if ($namespace_ref) {
-            $build->join('user_namespaces nee',
+            $build->join('user_namespaces as nee',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($namespace_ref) {
                     $join->on('nee.id', '=', 'elements.element_namespace_id')
@@ -210,7 +211,7 @@ class Element extends Model implements ISystemModel
 
 
         if ($type_ref) {
-            $build->join('element_types tee',
+            $build->join('element_types as tee',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($type_ref) {
                     $join->on('nee.id', '=', 'elements.element_parent_type_id')
@@ -221,14 +222,14 @@ class Element extends Model implements ISystemModel
 
         if ($is_set !== null) {
             if ($is_set) {
-                $build->join('element_sets s',
+                $build->join('element_sets as s',
                     /** @param JoinClause $join */
                     function (JoinClause $join)  {
                         $join->on('s.parent_set_element_id', '=', 'elements.id');
                     }
                 );
             } else {
-                $build->leftJoin('element_sets s',
+                $build->leftJoin('element_sets as s',
                     /** @param JoinClause $join */
                     function (JoinClause $join)  {
                         $join->on('s.parent_set_element_id', '=', 'elements.id');
@@ -238,7 +239,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($schedule_id) {
-            $build->join('element_types aet',
+            $build->join('element_types as aet',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($schedule_id) {
                     $join->on('aet.id', '=', 'elements.element_parent_type_id')
@@ -248,7 +249,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($set_id) {
-            $build->join('element_set_members sem',
+            $build->join('element_set_members as  sem',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($set_id) {
                     $join->on('sem.member_element_id', '=', 'elements.id')
@@ -258,18 +259,18 @@ class Element extends Model implements ISystemModel
         }
 
         if ($set_ref) {
-            $build->join('element_set_members semp',
+            $build->join('element_set_members as semp',
                 /** @param JoinClause $join */
                 function (JoinClause $join)  {
                     $join->on('semp.member_element_id', '=', 'elements.id');
                 }
             );
 
-            $build->join('element_sets sempe',
+            $build->join('element_sets as sempe',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use ($set_ref) {
                     $join->on('semp.holder_set_id', '=', 'sempe.id')
-                        ->where('sem.ref_uuid', $set_ref);
+                        ->where('sempe.ref_uuid', $set_ref);
                 }
             );
         }
@@ -279,41 +280,38 @@ class Element extends Model implements ISystemModel
 
 
             if ($set_id) {
-                $build->leftJoin('element_visibilities el_vis',
+                $build->leftJoin('element_visibilities as el_vis',
                     /** @param JoinClause $join */
                     function (JoinClause $join) use($set_id,$set_ref) {
                         $join->on('el_vis.visible_element_id', '=', 'elements.id')
-                            ->where('sem.id','=','el_vis.visible_set_member_id')
-                            ->orWhere('el_vis.is_visible',true);
+                            ->on('sem.id','=','el_vis.visible_set_member_id');
                     }
                 );
             } elseif ($set_ref) {
-                $build->leftJoin('element_visibilities el_vis',
+                $build->leftJoin('element_visibilities as el_vis',
                     /** @param JoinClause $join */
                     function (JoinClause $join) use($set_id,$set_ref) {
                         $join->on('el_vis.visible_element_id', '=', 'elements.id')
-                            ->where('semp.id','=','el_vis.visible_set_member_id')
-                            ->orWhere('el_vis.is_visible',true);
+                            ->on('semp.id','=','el_vis.visible_set_member_id');
                     }
                 );
             } else {
-                $build->leftJoin('element_visibilities el_vis',
+                $build->leftJoin('element_visibilities as el_vis',
                     /** @param JoinClause $join */
                     function (JoinClause $join) use($set_id,$set_ref) {
                         $join->on('el_vis.visible_element_id', '=', 'elements.id')
-                            ->whereNull('el_vis.visible_set_member_id')
-                            ->orWhere('el_vis.is_visible',true);
+                            ->whereNull('el_vis.visible_set_member_id');
                     }
                 );
 
             }
 
-            $build->whereNull('el_vis.id');
+            $build->whereNull('el_vis.id')->orWhere('el_vis.is_visible',true);
 
         }
 
         if ($attribute_id) {
-            $build->join('attributes att',
+            $build->join('attributes as att',
                 /**
                  * @param JoinClause $join
                  */
@@ -326,7 +324,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($exposed_attribute_ref) {
-            $build->join('element_type_exposed_attributes att_exposed',
+            $build->join('element_type_exposed_attributes as att_exposed',
                 /**
                  * @param JoinClause $join
                  */
@@ -336,7 +334,7 @@ class Element extends Model implements ISystemModel
                 }
             );
 
-            $build->join('attributes att_ref',
+            $build->join('attributes as att_ref',
                 /**
                  * @param JoinClause $join
                  */
@@ -349,7 +347,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($included_attribute_ref) {
-            $build->join('element_type_included_attributes att_included',
+            $build->join('element_type_included_attributes as  att_included',
                 /**
                  * @param JoinClause $join
                  */
@@ -359,7 +357,7 @@ class Element extends Model implements ISystemModel
                 }
             );
 
-            $build->join('attributes att_inc_ref',
+            $build->join('attributes as att_inc_ref',
                 /**
                  * @param JoinClause $join
                  */
@@ -372,7 +370,7 @@ class Element extends Model implements ISystemModel
         }
 
         if ($shape_id) {
-            $build->join('attributes satt',
+            $build->join('attributes as satt',
                 /**
                  * @param JoinClause $join
                  */

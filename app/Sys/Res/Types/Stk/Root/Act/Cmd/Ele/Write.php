@@ -263,7 +263,7 @@ class Write extends Act\Cmd\Ele implements ICommandCallable
             foreach ($work->selected_elements as $el) {
                 if (isset($children_args['element_ref_values'][$el->ref_uuid])) { continue;}
                 ElementValue::writeContextValue(att: $work->given_attribute,
-                    set: $work->given_set, el: $el);
+                    set: $work->given_set, el: $el,value: $work->params->data);
             }
 
         }

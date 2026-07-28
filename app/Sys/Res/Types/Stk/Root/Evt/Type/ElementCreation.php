@@ -98,13 +98,13 @@ class ElementCreation extends Evt\ScopeType implements ICommandCallable
             {
                 $builder->leaf(
                     command_class: Evt\EventHandler::class,
-                    command_args: (array)new Evt\EventHandler(
+                    command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $element_type,
                         namespace_context: $recipient_namespace,
                         collection_context: $given_elements,
                         important_value: $number_of_elements
-                    ),
+                    )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );
             }

@@ -56,12 +56,13 @@ class Create extends Api\DesignApi implements ICommandCallable
             ->tree($my_command)
             ->leaf(
                 command_class: Act\Cmd\Ds\DesignCreate::class,
-                command_args: (array)new Act\Cmd\Ds\DesignCreate(
+                command_args: new Act\Cmd\Ds\DesignCreate(
                     params:$params,
                     is_system:$is_system,
+                    use_ref: null,
                     owner_namespace: $namespace,
                     server: Server::getDefaultServer()
-                ),
+                )->toArray(),
                 command_tags: [Act\Cmd\Ds\DesignCreate::class]
             );
 

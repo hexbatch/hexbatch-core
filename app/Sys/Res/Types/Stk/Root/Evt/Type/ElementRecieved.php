@@ -89,12 +89,12 @@ class ElementRecieved extends Evt\ScopeElement implements ICommandCallable
         {
             $builder->leaf(
                 command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
+                command_args: new Evt\EventHandler(
                     ref: $ref,
                     namespace_context: $recipient_namespace,
                     collection_context: $given_elements,
                     important_value: $number_of_elements,
-                ),
+                )->toArray(),
                 command_tags: [Evt\EventHandler::class]
             );
         }

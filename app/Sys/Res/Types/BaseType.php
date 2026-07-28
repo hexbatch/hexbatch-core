@@ -62,13 +62,6 @@ class BaseType implements IDocument, \JsonSerializable,INewSystemType
 
 
 
-
-    public static function getClassUuid() : string {
-        return static::UUID;
-    }
-
-
-
     /**
      * @return INewSystemAttribute[]
      */

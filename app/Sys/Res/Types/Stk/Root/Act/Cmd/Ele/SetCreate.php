@@ -200,15 +200,15 @@ class SetCreate extends Act\Cmd\St implements ICommandCallable
 
         $builder->tree(
             command_class: Evt\Set\SetChildCreated::class,
-            command_args: (array)new Evt\Set\SetChildCreated(
+            command_args: new Evt\Set\SetChildCreated(
                 parent_set: $parent_set
-            ),
+            )->toArray(),
             command_tags: [Evt\Set\SetChildCreated::class]
         );
 
         $builder->leaf(
             command_class: Evt\Server\SetCreated::class,
-            command_args: (array)new Evt\Server\SetCreated(),
+            command_args: new Evt\Server\SetCreated()->toArray(),
             command_tags: [Evt\Server\SetCreated::class]
         );
 

@@ -8,13 +8,17 @@ use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\Namespaces\Params\DeleteNamespacesParamData;
+use App\Data\ApiParams\Data\Namespaces\Params\ListMembersParamData;
+use App\Data\ApiParams\Data\Namespaces\Params\ListNamespacesParamData;
 use App\Data\ApiParams\Data\Namespaces\Params\NamespaceParamData;
+use App\Data\ApiParams\Data\Namespaces\Responses\NamespaceMemberListData;
+use App\Data\ApiParams\Data\Namespaces\Responses\UserNamespaceListData;
 use App\Data\ApiParams\Data\Namespaces\UserNamespaceData;
-use App\Data\ApiParams\Data\User\Response\MeResponseData;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchNamespace;
 use App\Data\ApiParams\OpenApi\Common\Resources\HexbatchResource;
-use App\Helpers\Utilities;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
@@ -57,35 +61,38 @@ class NamespaceController extends Controller {
 
 
     #[OA\Get(
-        path: '/api/v1/{user_namespace}/namespaces/list_namespaces',
+        path: '/api/v1/{user_namespace}/namespaces/list',
         operationId: 'core.namespaces.list',
-        description: "Will show owned, admin and member status of all namespaces this caller is part of. Can filter by handle or namespace name",
-        summary: 'Shows all the namespaces this caller is part of',
+        description: "Will list namespaces searched",
+        summary: 'Shows cursored list of namespaces filtered by search params',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListNamespacesParamData::class)),
         tags: ['namespace'],
+
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: UserNamespaceListData::class)),
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Namespace\ListAll::class)]
-    public function list_namespaces() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    #[ApiAccessMarker( TypeOfAccessMarker::MIXED)]
+    #[ApiTypeMarker( Root\Api\Namespace\ListNamespaces::class)]
+    public function list_namespaces(UserNamespace $namespace,Request $request) {
+        $params = ListNamespacesParamData::fromRequest($request);
+        $data_out = Root\Api\Namespace\ListNamespaces::listNamespaces(params: $params,caller_namespace: $namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
-
-
-    #[OA\Delete(
-        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/destroy',
-        operationId: 'core.namespaces.destroy',
-        description: "User can destroy any namespace they own except their default namespace ",
-        summary: 'The owner can destroy a namespace',
+    #[OA\Get(
+        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/list_members',
+        operationId: 'core.namespaces.list_members',
+        description: "Any member can use this to get a full list of all the members. Can filter by handle or member uuid/name",
+        summary: 'Shows a list of all the members from this namespace',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: ListMembersParamData::class)),
         tags: ['namespace'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -95,14 +102,15 @@ class NamespaceController extends Controller {
                 in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Location results returned', content: new JsonContent(ref: NamespaceMemberListData::class)),
         ]
     )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiEventMarker( Evt\Server\NamespaceDestroyed::class)]
-    #[ApiTypeMarker( Root\Api\Namespace\Destroy::class)]
-    public function destroy_namespace() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Namespace\ListMembers::class)]
+    public function list_members(UserNamespace $namespace,UserNamespace $target_namespace,Request $request) {
+        $params = ListMembersParamData::fromRequest($request);
+        $data_out = Root\Api\Namespace\ListMembers::listMembers(params: $params,caller_namespace: $namespace,target_namespace: $target_namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
     }
 
 
@@ -134,7 +142,7 @@ class NamespaceController extends Controller {
     public function create_namespace(UserNamespace $namespace,Request $request) {
         $params = NamespaceParamData::fromRequest($request);
         $data_out =  Root\Api\Namespace\Create::doNamespaceCreate(
-            params: $params,   calling_namespace: $namespace, is_system: false, tags: ['api-top']);
+            params: $params,   calling_namespace: $namespace, given_user: null , is_system: false, tags: ['api-top']);
 
         if ($data_out instanceof Thang) {
             $http_code = CodeOf::HTTP_OK;
@@ -145,6 +153,173 @@ class NamespaceController extends Controller {
         }
         return  response()->json($data_out,$http_code);
     }
+
+
+    /**
+     * @throws \Throwable
+     */
+    #[OA\Post(
+        path: '/api/v1/{user_namespace}/namespaces/promote/{user}',
+        operationId: 'core.namespaces.promote',
+        description: "System make new namespaces and assign anyone as the owner. ".
+        "\n can set new homesets, public and private elements, source server,name, user, other data ",
+        summary: 'Allows the system to make a new namespace',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: NamespaceParamData::class)),
+        tags: ['namespace'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Namespace created', content: new JsonContent(ref: ElementList::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiTypeMarker( Root\Api\Namespace\Promote::class)]
+    public function promote_namespace(UserNamespace $namespace,User $user,Request $request) {
+        $params = NamespaceParamData::fromRequest($request);
+        $data_out =  Root\Api\Namespace\Create::doNamespaceCreate(
+            params: $params,   calling_namespace: $namespace, given_user: $user , is_system: false, tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+
+    /**
+     * @throws \Throwable
+     */
+    #[OA\Post(
+        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/start_deletion',
+        operationId: 'core.namespaces.start_deletion',
+        description: "The selected namespaces is marked as deleted.  Not deleted here, must call delete. ",
+        summary: 'The user gives permission for the transfer of the namespace(s)',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DeleteNamespacesParamData::class)),
+        tags: ['namespace'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Deletion marked', content: new JsonContent(ref: DeleteNamespacesParamData::class)),
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
+    #[ApiTypeMarker( Root\Api\Namespace\StartDeletion::class)]
+    public function start_deletion(UserNamespace $namespace,UserNamespace $target_namespace,Request $request) {
+        $params = DeleteNamespacesParamData::fromRequest($request);
+        $data_out = Root\Api\Namespace\StartDeletion::doStartDeletion(params: $params,calling_namespace: $namespace,target_namespace: $target_namespace);
+        return  response()->json($data_out,CodeOf::HTTP_OK);
+    }
+
+
+    /**
+     * @throws \Throwable
+     */
+    #[OA\Delete(
+        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/destroy',
+        operationId: 'core.namespaces.destroy',
+        description: "User can destroy any namespace they own except their default namespace ",
+        summary: 'The owner can destroy a namespace',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DeleteNamespacesParamData::class)),
+        tags: ['namespace'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Namespace deleted', content: new JsonContent(ref: UserNamespaceData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Set was not found')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiEventMarker( Evt\Server\NamespaceDestroyed::class)]
+    #[ApiTypeMarker( Root\Api\Namespace\Destroy::class)]
+    public function destroy_namespace(UserNamespace $namespace,UserNamespace $target_namespace,Request $request) {
+        $params = DeleteNamespacesParamData::fromRequest($request);
+        $data_out = Root\Api\Namespace\Destroy::doDeletion(params: $params,calling_namespace: $namespace,target_namespace: $target_namespace);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+
+    /**
+     * @throws \Throwable
+     */
+    #[OA\Delete(
+        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/purge',
+        operationId: 'core.namespaces.purge',
+        description: "System can destroy any non default namespaces ",
+        summary: 'Allows the system to destroy any namespace',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: DeleteNamespacesParamData::class)),
+        tags: ['namespace'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_ACCEPTED, description: 'Namespace deleted', content: new JsonContent(ref: UserNamespaceData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Set was not found')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
+    #[ApiTypeMarker( Root\Api\Namespace\Purge::class)]
+    public function purge_namespace(UserNamespace $namespace,UserNamespace $target_namespace,Request $request) {
+        $params = DeleteNamespacesParamData::fromRequest($request);
+        $data_out = Root\Api\Namespace\Destroy::doDeletion(params: $params,calling_namespace: $namespace,target_namespace: $target_namespace,do_permission_check: false);
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -205,55 +380,16 @@ class NamespaceController extends Controller {
 
 
 
-    #[OA\Post(
-        path: '/api/v1/{user_namespace}/namespaces/promote',
-        operationId: 'core.namespaces.promote',
-        description: "System make new namespaces and assign anyone as the owner. ".
-        "\n can set new homesets, public and private elements, source server,name, user, other data ",
-        summary: 'Allows the system to make a new namespace',
-        security: [['bearerAuth' => []]],
-        tags: ['namespace'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Namespace\Promote::class)]
-    public function promote_namespace() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 
 
 
-    #[OA\Delete(
-        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/purge',
-        operationId: 'core.namespaces.purge',
-        description: "System can destroy any namespaces without events going off ",
-        summary: 'Allows the system to destroy any namespace',
-        security: [['bearerAuth' => []]],
-        tags: ['namespace'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
-            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
-    #[ApiTypeMarker( Root\Api\Namespace\Purge::class)]
-    public function purge_namespace() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
+
+
+
+
 
 
 
@@ -288,29 +424,6 @@ class NamespaceController extends Controller {
 
 
 
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/list_admins',
-        operationId: 'core.namespaces.list_admins',
-        description: "Any member can use this to get a full list of all the admins (includes owner). Can filter by handle or admin uuid or name",
-        summary: 'Shows a list of all the admins from this namespace',
-        security: [['bearerAuth' => []]],
-        tags: ['namespace'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Namespace\ListAdmins::class)]
-    public function list_admins() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 
@@ -506,86 +619,6 @@ class NamespaceController extends Controller {
     #[ApiAccessMarker( TypeOfAccessMarker::SYSTEM)]
     #[ApiTypeMarker( Root\Api\Namespace\PurgeMember::class)]
     public function purge_member() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-
-
-
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/list_members',
-        operationId: 'core.namespaces.list_members',
-        description: "Any member can use this to get a full list of all the members. Can filter by handle or member uuid/name",
-        summary: 'Shows a list of all the members from this namespace',
-        security: [['bearerAuth' => []]],
-        tags: ['namespace'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Namespace\ListMembers::class)]
-    public function list_members() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-    #[OA\Patch(
-        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/add_handle',
-        operationId: 'core.namespaces.add_handle',
-        description: "Namespaces can be grouped, organized and controlled together",
-        summary: 'Add element handle to a namespace',
-        security: [['bearerAuth' => []]],
-        tags: ['namespace'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Server\NamespaceHandleAdded::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
-    #[ApiTypeMarker( Root\Api\Namespace\AddHandle::class)]
-    public function add_handle() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
-
-
-    #[OA\Patch(
-        path: '/api/v1/{user_namespace}/namespaces/{target_namespace}/remove_handle',
-        operationId: 'core.namespaces.remove_handle',
-        description: "Handles can be removed at any time, and left empty or new ones added",
-        summary: 'Remove element handle from a namespaces',
-        security: [['bearerAuth' => []]],
-        tags: ['namespace'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
-
-            new OA\PathParameter(  name: 'target_namespace', description: "The namespace this acts on",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Server\NamespaceHandleRemoved::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::NAMESPACE_OWNER)]
-    #[ApiTypeMarker( Root\Api\Namespace\RemoveHandle::class)]
-    public function remove_handle() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
     }
 

@@ -55,7 +55,13 @@ class ElementVisibility extends Model
      *
      * @var array<string, string>
      */
-    protected $casts = [];
+    protected $casts = [
+        'is_visible' => 'boolean',
+        'is_visible_for_schedule' => 'boolean',
+        'is_turned_on' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
     public static function switchVisibility(SelectElementParamData $params,
                                             ?bool                   $is_turned_on = null,

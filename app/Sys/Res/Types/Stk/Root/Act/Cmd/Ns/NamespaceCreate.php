@@ -66,7 +66,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
     protected static function fromArray(array $args) : static{
         $params = null;
         if (!empty($args['params']??null)) {
-            $params = NamespaceParamData::MakingUsingCodeArray($args['params']);
+            $params = NamespaceParamData::makingUsingCodeArray($args['params']);
         }
 
         $is_system = (bool)$args['is_system'];
@@ -130,7 +130,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
             if (!$base_type)
             {
                 // make base type
-                $base_type_params = TypeParamData::MakingUsingCodeArray([
+                $base_type_params = TypeParamData::makingUsingCodeArray([
                     'type_name'=> $this->params->name . static::BASE_TYPE_POSTFIX,
                     'is_final_type'=> false,
                     'access'=> TypeOfServerAccess::IS_PUBLIC,
@@ -152,7 +152,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             # ───── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ─────
             // make home type
-            $home_type_params = TypeParamData::MakingUsingCodeArray([
+            $home_type_params = TypeParamData::makingUsingCodeArray([
                 'type_name'=> $this->params->name . static::HOME_TYPE_POSTFIX,
                 'is_final_type'=> false,
                 'access'=> TypeOfServerAccess::IS_PUBLIC,
@@ -174,7 +174,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             # ───── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ─────
             // make public type
-            $home_type_params = TypeParamData::MakingUsingCodeArray([
+            $home_type_params = TypeParamData::makingUsingCodeArray([
                 'type_name'=> $this->params->name . static::PUBLIC_TYPE_POSTFIX,
                 'is_final_type'=> false,
                 'access'=> TypeOfServerAccess::IS_PUBLIC,
@@ -196,7 +196,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
             # ───── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ────────── ⋆⋅☆⋅⋆ ─────
             // make private type
-            $private_type_params = TypeParamData::MakingUsingCodeArray([
+            $private_type_params = TypeParamData::makingUsingCodeArray([
                 'type_name'=> $this->params->name . static::PRIVATE_TYPE_POSTFIX,
                 'is_final_type'=> false,
                 'access'=> TypeOfServerAccess::IS_ELEMENT_PRIVATE,
@@ -357,7 +357,7 @@ class NamespaceCreate extends Act\Cmd\Ns implements ICommandCallable
 
         $builder->tree(
             command_class: static::class,
-            command_args: (array)$node,
+            command_args: $node->toArray(),
             command_tags: [static::class]
         );
 

@@ -127,7 +127,7 @@ class ElementSetMember extends Model
             $build->where('element_set_members.holder_set_id', $set_id);
         }
         if ($set_ref) {
-            $build->join('element_sets s',
+            $build->join('element_sets as s',
                 /** @param JoinClause $join */
                 function (JoinClause $join) use($set_ref) {
                     $join->on('element_set_members.holder_set_id', '=', 's.id')

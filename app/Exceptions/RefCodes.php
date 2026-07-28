@@ -35,11 +35,14 @@ class RefCodes {
     const int NAMESPACE_NOT_FOUND = 2003;
     const int NAMESPACE_NOT_OWNER = 2004;
     const int NAMESPACE_NOT_ADMIN = 2005;
-    const int NAMESPACE_NOT_MEMBER = 2008;
+
     const int NAMESPACE_MEMBER_MISSING_ISSUE = 2006;
     const int NAMESPACE_CANNOT_DELETE_CORE_PARTS = 2007;
+    const int NAMESPACE_NOT_MEMBER = 2008;
     const int NAMESPACE_SCHEMA_ISSUE = 2010;
     const int NAMESPACE_NOT_DEFAULT_OWNER = 2011;
+
+    const int NAMESPACE_CANNOT_DELETE_WITHOUT_UUID = 2015;
 
 
     // bounds start at 3000
@@ -169,6 +172,7 @@ class RefCodes {
         self::NAMESPACE_NOT_MEMBER => '',
         self::NAMESPACE_MEMBER_MISSING_ISSUE => '',
         self::NAMESPACE_CANNOT_DELETE_CORE_PARTS => '',
+        self::NAMESPACE_CANNOT_DELETE_WITHOUT_UUID => '',
         self::NAMESPACE_SCHEMA_ISSUE => '',
 
 

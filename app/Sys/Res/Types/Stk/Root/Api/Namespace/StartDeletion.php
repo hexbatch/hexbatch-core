@@ -4,9 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
 
 
 use App\Annotations\ApiParamMarker;
-use App\Data\ApiParams\Data\Namespaces\Params\NamespaceParamData;
-use App\Data\ApiParams\Data\Namespaces\UserNamespaceData;
-use App\Models\User;
+use App\Data\ApiParams\Data\Namespaces\Params\DeleteNamespacesParamData;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
@@ -20,11 +18,11 @@ use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\Log;
 
-#[ApiParamMarker( param_class: NamespaceParamData::class)]
-class Create extends Api\NamespaceApi implements ICommandCallable
+#[ApiParamMarker( param_class: DeleteNamespacesParamData::class)]
+class StartDeletion extends Api\NamespaceApi implements ICommandCallable
 {
-    const UUID = 'ba68ba5e-37c5-45bd-9ca5-eadf0c798ef4';
-    const TYPE_NAME = 'api_namespace_create';
+    const UUID = '49ec661b-610b-47bd-a427-b7ea0e61422d';
+    const TYPE_NAME = 'api_start_deletion';
 
 
     const PARENT_CLASSES = [
@@ -34,21 +32,21 @@ class Create extends Api\NamespaceApi implements ICommandCallable
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        Log::debug("Called api create namespace");
+        Log::debug("Called api pre delete");
 
         $b_approved = static::getDecisionUsingAndLogic($children_args);
 
         return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
-            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved,'namespace'=>$children_args['namespace']]);
+            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved]);
     }
 
     /**
      * @throws \Throwable
      */
-    public static function doNamespaceCreate(NamespaceParamData $params,UserNamespace      $calling_namespace,
-                                             User|null $given_user,
-                                        bool $is_system, array $tags = [], ?IThangBuilder $builder = null)
-    : UserNamespaceData|Thang
+    public static function doStartDeletion(DeleteNamespacesParamData $params,
+                                           UserNamespace      $calling_namespace,UserNamespace      $target_namespace,
+                                         array $tags = [], ?IThangBuilder $builder = null)
+    : DeleteNamespacesParamData|Thang
     {
 
         $my_command =  CommandParams::validateAndCreate([
@@ -60,16 +58,14 @@ class Create extends Api\NamespaceApi implements ICommandCallable
             ->setSharedArg('namespace',$calling_namespace)
             ->tree($my_command);
 
-        Act\Cmd\Ns\NamespaceCreate::makeCreateNamespaceTree(
+        Act\Cmd\Ns\NamespaceDeletionStart::doStartDeletion(
             params: $params,
-            given_user: $given_user,given_server: null,
-            is_system: $is_system,
-            calling_namespace: $calling_namespace,builder: $builder);
+            calling_namespace: $calling_namespace,target_namespace: $target_namespace,builder: $builder);
 
 
         $thang = $builder->execute()->getThang();
         if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
-            return UserNamespaceData::from($thang->finished_data);
+            return DeleteNamespacesParamData::from($thang->finished_data['children_args']);
         } else {
             return $thang;
         }

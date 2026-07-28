@@ -777,13 +777,13 @@ class ElementType extends Model implements ISystemModel
     public function getNotesAttribute(): ?string
     {
         $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
-        return $class::getHexbatchDescriptionMarkdown();
+        return $class?$class::getHexbatchDescriptionMarkdown(): null ;
     }
 
     public function getBlurbAttribute(): ?string
     {
         $class = NewBuild::getClassFromUuid(uuid: $this->ref_uuid);
-        return $class::getHexbatchBlurb();
+        return $class?$class::getHexbatchBlurb(): null;
     }
 
 

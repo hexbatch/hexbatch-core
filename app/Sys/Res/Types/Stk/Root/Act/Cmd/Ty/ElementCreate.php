@@ -15,6 +15,7 @@ use App\Exceptions\HexbatchNotPossibleException;
 use App\Exceptions\RefCodes;
 use App\Models\Element;
 use App\Models\ElementType;
+use App\Models\ElementValue;
 use App\Models\Phase;
 
 use App\Models\UserNamespace;

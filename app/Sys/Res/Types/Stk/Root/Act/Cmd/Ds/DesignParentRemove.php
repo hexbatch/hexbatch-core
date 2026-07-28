@@ -121,12 +121,12 @@ class DesignParentRemove extends Act\Cmd\Ds implements ICommandCallable
 
         $builder->tree(
             command_class: Act\Cmd\Ds\DesignParentRemove::class,
-            command_args: (array)new Act\Cmd\Ds\DesignParentRemove(
+            command_args: new Act\Cmd\Ds\DesignParentRemove(
                 given_type:$given_type,
                 parent_type: $parent_type,
                 caller_namespace: $calling_namespace,
                 do_permission_check: $do_permission_check
-            ),
+            )->toArray(),
             command_tags: [Act\Cmd\Ds\DesignParentRemove::class]
         );
 

@@ -198,15 +198,15 @@ class ElementDestroy extends Act\Cmd\Ele implements ICommandCallable
 
         $builder->tree(
             command_class: Evt\Type\ElementDestroyed::class,
-            command_args: (array)new Evt\Type\ElementDestroyed(
+            command_args: new Evt\Type\ElementDestroyed(
                 elements: $me->elements
-            ),
+            )->toArray(),
             command_tags: [Evt\Type\ElementDestroyed::class]
         );
 
         $builder->tree(
             command_class: static::class,
-            command_args: (array)$me,
+            command_args: $me->toArray(),
             command_tags: [static::class],
             command_priority: -1
         );

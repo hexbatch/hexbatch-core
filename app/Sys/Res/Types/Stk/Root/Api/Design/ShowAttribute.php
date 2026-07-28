@@ -31,7 +31,7 @@ class ShowAttribute extends Api\DesignApi
             'attribute_ancestors'
         );
 
-        return AttributeData::MakingUsingCodeArray($att);
+        return AttributeData::makingUsingCodeArray($att);
     }
 
 }

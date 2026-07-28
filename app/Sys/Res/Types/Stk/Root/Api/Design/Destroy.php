@@ -56,11 +56,11 @@ class Destroy extends Api\DesignApi implements ICommandCallable
             ->tree($my_command)
             ->leaf(
                 command_class: Act\Cmd\Ds\DesignDestroy::class,
-                command_args: (array)new Act\Cmd\Ds\DesignDestroy(
+                command_args: new Act\Cmd\Ds\DesignDestroy(
                     given_type: $given_type,
                     caller_namespace: $namespace,
                     do_permission_check: $do_permission_check
-                ),
+                )->toArray(),
                 command_tags: [Act\Cmd\Ds\DesignDestroy::class]
             );
 

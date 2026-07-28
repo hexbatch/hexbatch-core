@@ -186,8 +186,6 @@ enum TypeOfEvent: string
     case NAMESPACE_TRANSFERRED = 'namespace_transferred';
     case NAMESPACE_DESTROYED = 'namespace_destroyed';
 
-    case NAMESPACE_HANDLE_ADDED = 'namespace_handle_added';
-    case NAMESPACE_HANDLE_REMOVED = 'namespace_handle_removed';
 
 
 

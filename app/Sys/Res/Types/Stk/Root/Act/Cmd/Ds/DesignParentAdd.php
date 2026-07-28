@@ -124,24 +124,24 @@ class DesignParentAdd extends Act\Cmd\Ds implements ICommandCallable
 
             $tree->leaf(
                 command_class: Act\Cmd\Ds\DesignParentAdd::class,
-                command_args: (array)new Act\Cmd\Ds\DesignParentAdd(
+                command_args: new Act\Cmd\Ds\DesignParentAdd(
                     given_type:$given_type,
                     parent_type: $parent_type,
                     caller_namespace: $calling_namespace,
                     do_permission_check: true
-                ),
+                )->toArray(),
                 command_tags: [Act\Cmd\Ds\DesignParentAdd::class],
                 command_priority: -1
             );
         } else {
             $builder->tree(
                 command_class: Act\Cmd\Ds\DesignParentAdd::class,
-                command_args: (array)new Act\Cmd\Ds\DesignParentAdd(
+                command_args: new Act\Cmd\Ds\DesignParentAdd(
                     given_type:$given_type,
                     parent_type: $parent_type,
                     caller_namespace: $calling_namespace,
                     do_permission_check: false
-                ),
+                )->toArray(),
                 command_tags: [Act\Cmd\Ds\DesignParentAdd::class]
             );
         }

@@ -33,7 +33,7 @@ class ShowType extends Api\TypeApi
 //        $what = $given_type->toArray();
 //        $what['created_at'] = Carbon::createFromTimeString($what['created_at'])->toAtomString();
 //        $what['updated_at'] = Carbon::createFromTimeString($what['updated_at'])->toAtomString();
-        return ElementTypeData::MakingUsingCodeArray($given_type);
+        return ElementTypeData::makingUsingCodeArray($given_type);
     }
 
 }

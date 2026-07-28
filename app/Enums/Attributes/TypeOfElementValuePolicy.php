@@ -14,9 +14,12 @@ enum TypeOfElementValuePolicy : string {
     case STATIC = 'static';
 
     case PER_ELEMENT = 'per_element';
-    case PER_CHILD = 'per_set_chain';
 
     case PER_SET = 'per_set';
+
+    case PER_CHILD = 'per_set_chain';
+
+
 }
 
 

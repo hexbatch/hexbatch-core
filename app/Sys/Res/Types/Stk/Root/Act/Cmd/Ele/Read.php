@@ -6,14 +6,15 @@ use App\Annotations\ApiParamMarker;
 use App\Annotations\Documentation\HexbatchBlurb;
 use App\Annotations\Documentation\HexbatchDescription;
 use App\Annotations\Documentation\HexbatchTitle;
+use App\Data\ApiParams\Data\Elements\ElementValData;
 use App\Data\ApiParams\Data\Elements\Params\ReadElementParamData;
-use App\Data\ApiParams\Data\Elements\Responses\ElementReading;
 use App\Enums\Attributes\TypeOfServerAccess;
 use App\Enums\Sys\TypeOfAction;
 use App\Enums\Sys\TypeOfEvent;
 use App\Helpers\Events\IEventReference;
 use App\Models\Attribute;
 use App\Models\Element;
+use App\Models\ElementSet;
 use App\Models\ElementType;
 use App\Models\ElementTypeIncludedAttribute;
 use App\Models\ElementValue;
@@ -352,28 +353,13 @@ class Read extends Act\Cmd\Ele implements ICommandCallable
         $b_approved = static::getDecisionUsingAndLogic($children_args);
         $ret = null;
         if ($b_approved) {
-            $ret = ElementValue::readValues(set_identifier: $work->params?->selector?->set_ref,
-                element_ids: $work->selected_element_ids->toArray(), attribute_ids: $work->allowed_reading_attribute_ids->toArray());
+            $set = $work->params?->selector?->set_ref ? ElementSet::getThisSet(uuid: $work->params?->selector?->set_ref) : null;
+            $ret = ElementValue::readValues(set_id: $set?->id,
+                element_ids: $work->selected_element_ids->toArray(), attribute_ids: $work->allowed_reading_attribute_ids->toArray(),caller_namespace_id: $work->calling_namespace->id );
 
-            foreach ($children_args['element_ref_values']??[] as $element_uuid => $data) {
-                foreach ($data as $attribute_uuid => $datum) {
-                    $type_name = $work->attribute_ref_has_type_name[$attribute_uuid]??null;
-                    $type_ref = $work->attribute_ref_has_type_ref[$attribute_uuid]??null;
-                    //search ret collection for that element and type, if found add it there, or add a new one
-                    $node = $ret->findElementType(element_uuid: $element_uuid,type_uuid: $type_ref);
-                    if ($node) {
-                        $attr_name = $work->attribute_ref_has_name[$attribute_uuid]??null;
-                        if ($attr_name) {
-                            $node->data[$attr_name] = $datum;
-                        }
-                    }
-                    else {
-                        $node = new ElementReading(element_uuid: $element_uuid,type_uuid: $type_ref,type_name: $type_name,data: $datum);
-                        $ret->data->add($node);
-                    }
-
-                }
-
+            foreach ($children_args['element_ref_values']??[] as  $node) {
+                $extra = ElementValData::makingUsingCodeArray($node);
+                $ret->data->add($extra);
             }
         }
 

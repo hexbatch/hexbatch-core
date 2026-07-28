@@ -74,7 +74,7 @@ class UserNamespaceMember extends Model
 
     public static function buildGroupMembers(
         ?int $id = null,?int $member_namespace_id = null, ?int $namespace_parent_id = null,
-        array $member_namespace_ids = [], ?bool $is_admin = null, bool  $b_relations = true, bool $b_select = true
+        array $member_namespace_ids = [], ?bool $is_admin = null, bool  $b_relations = false, bool $b_select = true
     ) : Builder {
 
         /** @var Builder $build */
@@ -115,10 +115,5 @@ class UserNamespaceMember extends Model
         return $build;
     }
 
-    protected function memberNamespaceUuid(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $this->namespace_member?->ref_uuid??null,
-        );
-    }
+
 }

@@ -230,7 +230,7 @@ class TypePublish extends Act\Cmd\Ty implements ICommandCallable
 
         $builder->tree(
             command_class: static::class,
-            command_args: (array)$node,
+            command_args: $node->toArray(),
             command_tags: [static::class],
             command_priority: -1
         );

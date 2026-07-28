@@ -59,11 +59,11 @@ class Edit extends Api\DesignApi implements ICommandCallable
             ->tree($my_command)
             ->leaf(
                 command_class: Act\Cmd\Ds\DesignEdit::class,
-                command_args: (array)new Act\Cmd\Ds\DesignEdit(
+                command_args: new Act\Cmd\Ds\DesignEdit(
                     given_type: $given_type,
                     params:$params,
                     caller_namespace: $namespace
-                ),
+                )->toArray(),
                 command_tags: [Act\Cmd\Ds\DesignEdit::class]
             );
 

@@ -87,10 +87,10 @@ class TypePublishing extends Evt\ScopeType implements ICommandCallable
             {
                 $builder->leaf(
                     command_class: Evt\EventHandler::class,
-                    command_args: (array)new Evt\EventHandler(
+                    command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $given_type
-                    ),
+                    )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );
             }
@@ -106,11 +106,11 @@ class TypePublishing extends Evt\ScopeType implements ICommandCallable
             {
                 $builder->leaf(
                     command_class: Evt\EventHandler::class,
-                    command_args: (array)new Evt\EventHandler(
+                    command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $given_type,
                         attribute_context: $att
-                    ),
+                    )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );
             }

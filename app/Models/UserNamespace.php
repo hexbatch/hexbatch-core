@@ -30,7 +30,6 @@ use Illuminate\Validation\ValidationException;
  * @property int id
  * @property int namespace_user_id
  * @property int namespace_server_id
- * @property int namespace_handle_element_id
  * @property int namespace_type_id
  * @property int public_element_id
  * @property int private_element_id
@@ -146,6 +145,8 @@ class UserNamespace extends Model implements ISystemModel
         ?int             $id_is_member_of_namespace = null,
         ?int             $id_is_admin_of_namespace = null,
         ?int             $server_id = null,
+        ?string         $link_uuid = null,
+        ?string         $base_type_handle_uuid = null,
         ?string         $namespace_name = null,
         bool            $b_relations = false
     )
@@ -194,18 +195,34 @@ class UserNamespace extends Model implements ISystemModel
             $build->where('user_namespaces.ref_uuid', $uuid);
         }
 
-        if ($id_is_member_of_namespace) {
-            $build->join('user_namespace_members as ms',
+        if ($link_uuid) {
+            $build->join('element_sets as home_sets','user_namespaces.namespace_home_set_id','=','home_sets.id');
+            $build->join('element_links as home_links',
                 /**
                  * @param JoinClause $join
                  */
-                function (JoinClause $join) use ($id_is_member_of_namespace) {
+                function (JoinClause $join) use ($link_uuid) {
                     $join
-                        ->on('user_namespaces.id', '=', 'ms.parent_namespace_id')
-                        ->where('ms.member_namespace_id', $id_is_member_of_namespace);
+                        ->on('home_links.link_to_set_id', '=', 'home_sets.id')
+                        ->where('home_links.ref_uuid', $link_uuid);
                 }
             );
         }
+
+        if ($base_type_handle_uuid) {
+            $build->join('element_types as base_types','user_namespaces.namespace_home_set_id','=','base_types.id');
+            $build->join('elements as handles',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($base_type_handle_uuid) {
+                    $join
+                        ->on('base_types.type_handle_element_id','=','handles.id')
+                        ->where('handles.ref_uuid', $base_type_handle_uuid);
+                }
+            );
+        }
+
 
         if ($id_is_admin_of_namespace) {
             $build->join('user_namespace_members as ma',
@@ -218,6 +235,20 @@ class UserNamespace extends Model implements ISystemModel
                         ->where('ma.member_namespace_id', $id_is_admin_of_namespace);
                 }
             )->where('ma.is_admin',true);
+        }
+
+
+        if ($id_is_member_of_namespace) {
+            $build->join('user_namespace_members as ms',
+                /**
+                 * @param JoinClause $join
+                 */
+                function (JoinClause $join) use ($id_is_member_of_namespace) {
+                    $join
+                        ->on('user_namespaces.id', '=', 'ms.parent_namespace_id')
+                        ->where('ms.member_namespace_id', $id_is_member_of_namespace);
+                }
+            );
         }
         return $build;
     }
@@ -334,7 +365,7 @@ class UserNamespace extends Model implements ISystemModel
 
     public function getMemberIdsFromArray(array $namespace_ids,?bool $t_admin= null) : array {
         if (empty($namespace_ids) ) {return [];}
-        $build =  UserNamespaceMember::buildGroupMembers('parent_namespace_id',$this->id, member_namespace_ids: $namespace_ids, is_admin: $t_admin, b_relations: false);
+        $build =  UserNamespaceMember::buildGroupMembers('parent_namespace_id',$this->id, member_namespace_ids: $namespace_ids, is_admin: $t_admin);
         return  $build->pluck('parent_namespace_id')->toArray();
     }
 
@@ -353,6 +384,8 @@ class UserNamespace extends Model implements ISystemModel
         $member->member_namespace_id = $child->id;
         $member->parent_namespace_id = $this->id;
         $member->is_admin = $is_admin;
+        $member->member_namespace_uuid = $child->ref_uuid;
+        $member->parent_namespace_uuid = $this->ref_uuid;
         $member->save();
         return $member;
     }

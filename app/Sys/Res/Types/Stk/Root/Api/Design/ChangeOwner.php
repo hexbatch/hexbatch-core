@@ -70,11 +70,11 @@ class ChangeOwner extends Api\DesignApi implements ICommandCallable
         {
             $builder->tree(
                 command_class: Evt\Server\TypeOwnerChanged::class,
-                command_args: (array)new Evt\Server\TypeOwnerChanged(
+                command_args: new Evt\Server\TypeOwnerChanged(
                     given_type:$given_type,
                     given_namespace:$given_namespace,
                     old_namespace: $given_type->owner_namespace
-                ),
+                )->toArray(),
                 command_tags: [Evt\Server\TypeOwnerChanged::class]
             );
         }
@@ -82,12 +82,12 @@ class ChangeOwner extends Api\DesignApi implements ICommandCallable
 
         $builder->tree(
             command_class: Act\Cmd\Ds\DesignOwnerChange::class,
-            command_args: (array)new Act\Cmd\Ds\DesignOwnerChange(
+            command_args: new Act\Cmd\Ds\DesignOwnerChange(
                 given_type:$given_type,
                 given_namespace:$given_namespace,
                 caller_namespace: $calling_namespace,
                 do_permission_check: $do_permission_check
-            ),
+            )->toArray(),
             command_tags: [Act\Cmd\Ds\DesignOwnerChange::class]
         );
 
@@ -96,11 +96,11 @@ class ChangeOwner extends Api\DesignApi implements ICommandCallable
             $builder
             ->tree(
                 command_class: Evt\Server\TypeOwnerChanging::class,
-                command_args: (array)new Evt\Server\TypeOwnerChanging(
+                command_args: new Evt\Server\TypeOwnerChanging(
                     given_type:$given_type,
                     given_namespace:$given_namespace,
                     old_namespace: $given_type->owner_namespace
-                ),
+                )->toArray(),
                 command_tags: [Evt\Server\TypeOwnerChanging::class]
             );
         }

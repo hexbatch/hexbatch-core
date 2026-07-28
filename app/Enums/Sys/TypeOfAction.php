@@ -186,6 +186,7 @@ enum TypeOfAction: string
 
 
     case CMD_NAMESPACE_CREATE = 'cmd_namespace_create'; //logged in ns is owner
+    case CMD_NAMESPACE_PREP_DELETION = 'cmd_namespace_prep_deletion';
     case CMD_NAMESPACE_PREP_TRANSFER = 'cmd_namespace_prep_transfer';
     case CMD_NAMESPACE_DO_TRANSFER = 'cmd_namespace_do_transfer';
     case CMD_NAMESPACE_PROMOTE = 'cmd_namespace_promote';
@@ -193,8 +194,6 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_PURGE = 'cmd_namespace_purge'; //server admin
 
 
-    case CMD_NAMESPACE_HANDLE_ADD = 'cmd_namespace_handle_add';
-    case CMD_NAMESPACE_HANDLE_REMOVE = 'cmd_namespace_handle_remove';
 
 
     case CMD_USER_PREPARE_DELETION = 'cmd_user_prepare_deletion';

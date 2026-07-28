@@ -91,11 +91,11 @@ trait SetBlockingEventTree
         foreach ($col as $ref) {
             $builder->leaf(
                 command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
+                command_args: new Evt\EventHandler(
                     ref: $ref,
                     set_context: $given_set,
                     element_context: $given_element,
-                ),
+                )->toArray(),
                 command_tags: [Evt\EventHandler::class]
             );
         }
@@ -104,11 +104,11 @@ trait SetBlockingEventTree
         foreach ($col as $ref) {
             $builder->leaf(
                 command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
+                command_args: new Evt\EventHandler(
                     ref: $ref,
                     set_context: $given_set,
                     element_context: $given_element,
-                ),
+                )->toArray(),
                 command_tags: [Evt\EventHandler::class]
             );
         }

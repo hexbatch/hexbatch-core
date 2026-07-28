@@ -4,7 +4,7 @@ namespace App\Models;
 
 
 use App\Data\ApiParams\Common\CursoratedMetaData;
-use App\Data\ApiParams\Data\Elements\Responses\ElementReading;
+use App\Data\ApiParams\Data\Elements\ElementValData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementReadingList;
 use App\Enums\Attributes\TypeOfElementValuePolicy;
 use App\Exceptions\HexbatchNotPossibleException;
@@ -15,7 +15,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -108,9 +110,20 @@ class ElementValue extends Model
         /**
          * @var Builder $build
          */
-        $build = Element::select('element_values.*')
+        $build = ElementValue::select('element_values.*')
             ->selectRaw(" extract(epoch from  element_values.created_at) as created_at_ts")
-            ->selectRaw( "extract(epoch from  element_values.updated_at) as updated_at_ts");
+            ->selectRaw( "extract(epoch from  element_values.updated_at) as updated_at_ts")
+            ->selectRaw("IF(attributes.read_json_path IS NOT NULL,filtered_data,element_values.element_value ) as da_value");
+
+
+        $build->join('attributes','element_values.horde_attribute_id','=','attributes.id');
+
+//        $build->leftJoinLateral(
+//                Attribute::selectRaw('jsonb_path_query(element_values.element_value,attributes.read_json_path)')
+//                ->whereNotNull('attributes.read_json_path'),
+//            "filtered_data");
+
+        $build->leftJoinLateral('jsonb_path_query(element_values.element_value,attributes.read_json_path) as filtered_data on attributes.read_json_path',"filtered_data");
 
         if ($b_relations)
         {
@@ -118,24 +131,22 @@ class ElementValue extends Model
             $build->with('value_type','value_element','value_attribute');
         }
 
-        $build->join('attributes val_att','element_values.horde_attribute_id','=','val_att.id');
-
-        $build->selectRaw(
-            "SELECT IF(value_element.read_json_path IS NOT NULL,
-                jsonb_path_query(element_values.element_value,
-                 value_element.read_json_path),element_values.element_value )as da_value");
-
 
         if ($me_id) {
             $build->where('element_values.id', $me_id);
         }
 
         if ($horde_set_id) {
-            $build->where('element_values.horde_set_id', $horde_set_id);
+            $build->where(function (Builder $query) use($horde_set_id){
+                $query->where('element_values.horde_set_id', $horde_set_id)->orWhereNull('element_values.horde_set_id');
+            });
         }
 
         if ($horde_set_ref) {
-            $build->join('element_sets val_set','element_values.parent_set_element_id','=','val_set.id');
+            $build->leftJoin('element_sets val_set','element_values.parent_set_element_id','=','val_set.id');
+            $build->where(function (Builder $query) use($horde_set_ref){
+                $query->where('val_set.ref_uuid', $horde_set_ref)->orWhereNull('val_set.id');
+            });
         }
 
 
@@ -196,6 +207,9 @@ class ElementValue extends Model
     }
 
 
+    /**
+     * @throws \JsonException
+     */
     public static function writeContextValue(
         Attribute $att,
         ?ElementSet $set,
@@ -239,7 +253,7 @@ class ElementValue extends Model
 
         //check if value passes validation
         $att->checkDataValidation($value);
-
+        $value_json = json_encode($value,JSON_THROW_ON_ERROR);
         ElementValue::upsert(
             [
                 'horde_type_id' => $el->element_parent_type_id,
@@ -247,77 +261,118 @@ class ElementValue extends Model
                 'horde_element_id' => $element_id,
                 'horde_set_id' => $set_id,
                 'horde_set_member_id' => $member_id,
-                'element_value' => $value,
+                'element_value' => $value_json,
             ],
             [
                 'horde_type_id','horde_attribute_id','horde_element_id','horde_set_id','horde_set_member_id'
             ],
             [
-                'element_value' => $value
+                'element_value' => $value_json
             ]
         );
     }
 
 
-
-
-    public static function readValues(null|int|string $set_identifier, array $element_ids, array $attribute_ids = [],
-                                      ?int            $page_size = null, ?string $cursor = null
-    )
-    : ElementReadingList
+    public static function readValues(?int $set_id, array $element_ids,array $attribute_ids = [], ?int $caller_namespace_id = null )
+    : ?ElementReadingList
     {
-        $set_id = null; $set_ref = null;
-        if ($set_identifier) {
-            if (Utilities::is_uuid($set_identifier)) {
-                $set_ref = $set_identifier;
-            } else {
-                $set_id = $set_identifier;
-            }
+        if (!$set_id) {$set_id = -1;}
+        if (!$caller_namespace_id) {$caller_namespace_id = -2;}
+        $clean_el_ids = Utilities::cleanMaybeIntArrayToUniqueAndSorted($element_ids);
+        if (!count($clean_el_ids)) { return null;}
+        $element_id_array = implode(',',$clean_el_ids);
+
+        $attribute_where_clause = 'true';
+        $clean_att_ids = Utilities::cleanMaybeIntArrayToUniqueAndSorted($attribute_ids);
+        if (count($clean_att_ids)) {
+
+            $att_id_array = implode(',',$clean_att_ids);
+            $attribute_where_clause = " xx.exposed_attribute_id in ($att_id_array)";
         }
 
+        $sql = "
+            SELECT xx.exposed_attribute_id,
+                   e.id AS exposed_element_id,
+                   v.horde_element_id AS maybe_horde_element_id,
+                   v.horde_set_id AS maybe_horde_set_id,
 
-        // use cursoring
-        $vally = static::buildElementValue(
+                   att.ref_uuid AS exposed_att_uuid,
+                   e.ref_uuid AS element_uuid,
+                   t.ref_uuid AS exposed_type_uuid,
+                   u.ref_uuid as exposed_namespace_uuid,
 
-            horde_attribute_ids: $attribute_ids,
-            horde_element_ids: $element_ids,
-            horde_set_id: $set_id,
-            horde_set_ref: $set_ref,
-            b_relations: true
-        );
+                   u.namespace_name as exposed_namespace_name,
+                   t.type_name AS exposed_type_name,
+                   att.attribute_name AS exposed_att_name,
 
-        /** @var \Illuminate\Pagination\CursorPaginator<ElementValue> $page */
-        $page = $vally->cursorPaginate(perPage: $page_size?:config('hbc.pagination.default_page_size'), cursor: $cursor);
+                   (CASE
+                        WHEN att.read_json_path IS NOT NULL
+                            THEN filtered_data
+                        ELSE  v.element_value
+                       END) AS da_value,
+
+                    (CASE
+                        WHEN att.access_policy = 'is_element_private'
+                            THEN el_mems.is_admin
+                        WHEN att.access_policy = 'is_element_protected'
+                            THEN el_mems IS NOT NULL
+                        ELSE  true
+                       END) AS can_access
+
+            FROM elements e
+                     INNER JOIN element_types t ON t.id = e.element_parent_type_id
+                     INNER JOIN user_namespaces u ON u.id = t.owner_namespace_id
+
+                     INNER JOIN user_namespaces el_ns ON el_ns.id = e.element_namespace_id
+                     LEFT JOIN user_namespace_members el_mems ON el_mems.parent_namespace_id = el_ns.id AND el_mems.member_namespace_id = $caller_namespace_id
+
+                     INNER JOIN  element_type_exposed_attributes xx ON xx.exposed_type_id = t.id
+                     INNER JOIN attributes att on xx.exposed_attribute_id = att.id
+                     INNER JOIN element_values v on v.horde_attribute_id = xx.exposed_attribute_id AND (        v.horde_element_id IS NULL
+                                                                                                            OR (v.horde_element_id = e.id AND v.horde_set_id IS NULL)
+                                                                                                            OR (v.horde_element_id = e.id AND v.horde_set_id = $set_id))
+                     LEFT JOIN LATERAL jsonb_path_query(v.element_value,att.read_json_path) AS filtered_data ON att.read_json_path IS NOT NULL
+            WHERE e.id IN ($element_id_array)
+              AND (v.horde_set_id = $set_id OR v.horde_set_id IS NULL)
+              AND $attribute_where_clause
+
+            ORDER BY element_uuid,exposed_att_uuid,maybe_horde_set_id,maybe_horde_element_id
+        ";
+
+        $res = DB::select($sql);
+
         $arr = [];
-        /** @var ElementValue $p */
-        foreach ($page as $p) {
-            $element_uuid = $p->value_element->ref_uuid;
+        $rem = [];
+        foreach ($res as $p) {
+            if (!$p->can_access) { continue;}
+
+            $element_uuid = $p->element_uuid;
+            $attribute_uuid = $p->exposed_att_uuid;
+            $rem_key = "$element_uuid-$attribute_uuid";
+            if (isset($rem[$rem_key])) { continue;}
+            $rem[$rem_key] = true;
+
             if (!isset($arr[$element_uuid])) {
                 $arr[$element_uuid] = [
-                    'type_uuid'=>$p->value_type->ref_uuid,
-                    'type_name'=>$p->value_type->type_name,
+                    'type_uuid'=>$p->exposed_type_uuid,
+                    'type_name'=>$p->exposed_type_name,
+                    'namespace_name'=>$p->exposed_namespace_name,
+                    'namespace_uuid'=>$p->exposed_namespace_uuid,
                     'element_uuid'=>$element_uuid,
                     'data'=> []
                 ];
             }
-            $arr[$element_uuid]['data'][$p->value_attribute->attribute_name] = $p->da_value;
+            $arr[$element_uuid]['data'][$p->exposed_att_name] = json_decode($p->da_value);
         }
 
-        $meta = new CursoratedMetaData(
-            per_page:$page->perPage(),
-            next_cursor: $page->nextCursor()?->encode(),
-            next_page_url: $page->nextPageUrl(),
-            prev_cursor: $page->previousCursor()?->encode(),
-            prev_page_url: $page->previousPageUrl()
-        );
-
-        $col = new Collection;
-        foreach ($arr as $value) {
-            $read = new ElementReading(
-                element_uuid: $value['element_uuid'],type_uuid: $value['type_uuid'],type_name: $value['type_name'],data:$value['data'] );
-            $col->add($read);
+        $obs = [];
+        foreach ($arr as $what) {
+            $obs[] = ElementValData::makingUsingCodeArray($what);
         }
-        return new ElementReadingList(data: $col,meta: $meta);
+
+        return new ElementReadingList(data: collect($obs),meta: null);
+
     }
+
 
 }

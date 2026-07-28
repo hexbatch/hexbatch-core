@@ -85,7 +85,7 @@ trait ServerNotificationEventTree
         foreach ($col as $ref) {
             $builder->leaf(
                 command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
+                command_args: new Evt\EventHandler(
                     ref: $ref,
                     type_context: $this->given_type,
                     namespace_context: $this->given_namespace,
@@ -94,7 +94,7 @@ trait ServerNotificationEventTree
                     set_context: $this->given_set,
                     element_context: $this->given_element,
                     phase_context: $this->given_phase
-                ),
+                )->toArray(),
                 command_tags: [Evt\EventHandler::class]
             );
         }
@@ -108,7 +108,7 @@ trait ServerNotificationEventTree
             foreach ($col as $ref) {
                 $builder->tree(
                     command_class: Evt\EventHandler::class,
-                    command_args: (array)new Evt\EventHandler(
+                    command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $this->given_type,
                         namespace_context: $this->given_namespace,
@@ -117,7 +117,7 @@ trait ServerNotificationEventTree
                         set_context: $this->given_set,
                         element_context: $this->given_element,
                         phase_context: $this->given_phase
-                    ),
+                    )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );
             }

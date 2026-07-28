@@ -89,10 +89,10 @@ class SetCreated extends Evt\ScopeServer implements ICommandCallable
             foreach ($col as $ref) {
                 $builder->tree(
                     command_class: Evt\EventHandler::class,
-                    command_args: (array)new Evt\EventHandler(
+                    command_args: new Evt\EventHandler(
                         ref: $ref,
                         set_context: $this->given_set,
-                    ),
+                    )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );
             }

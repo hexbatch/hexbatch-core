@@ -322,7 +322,7 @@ class SetController extends Controller {
         $data_out =  Root\Api\Set\ShowSet::showSet(set: $set,params: $params, caller_namespace:$namespace);
         if ($data_out instanceof Thang) {
             $data_out = ThangData::from($data_out);
-            $http_code = CodeOf::HTTP_CREATED;
+            $http_code = CodeOf::HTTP_OK;
         }
         else {
             $http_code = CodeOf::HTTP_ACCEPTED;

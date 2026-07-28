@@ -109,11 +109,11 @@ class AttributeWrite extends Evt\ScopeSet implements ICommandCallable
         foreach ($write_events as $ref) {
             $builder->leaf(
                 command_class: Evt\EventHandler::class,
-                command_args: (array)new Evt\EventHandler(
+                command_args: new Evt\EventHandler(
                     ref: $ref,
                     collection_context: $ref->getReferences(),
                     set_ref: $given_set_ref,
-                ),
+                )->toArray(),
                 command_tags: [Evt\EventHandler::class]
             );
         }

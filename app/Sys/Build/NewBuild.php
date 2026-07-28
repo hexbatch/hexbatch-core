@@ -52,7 +52,7 @@ class NewBuild
         Stk\Root\NamespaceType::class,
 
         Stk\Root\Phase::class,
-        Stk\Root\Placeholder::class,
+        Stk\Root\Marker::class,
         Stk\Root\Server::class,
         Stk\Root\Signal::class,
         Stk\Root\TrackingExported::class,
@@ -63,6 +63,8 @@ class NewBuild
         Stk\Root\Content\Message::class,
         Stk\Root\Content\News::class,
 
+        Stk\Root\Marker\ChangeOwnershipMarker::class,
+        Stk\Root\Marker\DeletionMarker::class,
         Stk\Root\Media\Audio::class,
         Stk\Root\Media\Image::class,
         Stk\Root\Media\Video::class,
@@ -140,8 +142,6 @@ class NewBuild
         Stk\Root\Evt\Server\LinkDestroying::class,
         Stk\Root\Evt\Server\NamespaceCreated::class,
         Stk\Root\Evt\Server\NamespaceDestroyed::class,
-        Stk\Root\Evt\Server\NamespaceHandleAdded::class,
-        Stk\Root\Evt\Server\NamespaceHandleRemoved::class,
         Stk\Root\Evt\Server\NamespaceStartingTransfer::class,
         Stk\Root\Evt\Server\NamespaceTransfered::class,
         Stk\Root\Evt\Server\PathHandleAdded::class,
@@ -292,9 +292,8 @@ class NewBuild
         Stk\Root\Act\Cmd\Ns\NamespaceAdminPurge::class,
         Stk\Root\Act\Cmd\Ns\NamespaceAdminRemove::class,
         Stk\Root\Act\Cmd\Ns\NamespaceCreate::class,
+        Stk\Root\Act\Cmd\Ns\NamespaceDeletionStart::class,
         Stk\Root\Act\Cmd\Ns\NamespaceDestroy::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceHandleAdd::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceHandleRemove::class,
         Stk\Root\Act\Cmd\Ns\NamespaceMemberAdd::class,
         Stk\Root\Act\Cmd\Ns\NamespaceMemberPromote::class,
         Stk\Root\Act\Cmd\Ns\NamespaceMemberPurge::class,
@@ -456,12 +455,11 @@ class NewBuild
         Stk\Root\Api\Elsewhere\ShowAdmin::class,
         Stk\Root\Api\Elsewhere\SuspendedType::class,
         Stk\Root\Api\Namespace\AddAdmin::class,
-        Stk\Root\Api\Namespace\AddHandle::class,
         Stk\Root\Api\Namespace\AddMember::class,
         Stk\Root\Api\Namespace\Create::class,
         Stk\Root\Api\Namespace\Destroy::class,
         Stk\Root\Api\Namespace\ListAdmins::class,
-        Stk\Root\Api\Namespace\ListAll::class,
+        Stk\Root\Api\Namespace\ListNamespaces::class,
         Stk\Root\Api\Namespace\ListMembers::class,
         Stk\Root\Api\Namespace\Promote::class,
         Stk\Root\Api\Namespace\PromoteAdmin::class,
@@ -470,9 +468,9 @@ class NewBuild
         Stk\Root\Api\Namespace\PurgeAdmin::class,
         Stk\Root\Api\Namespace\PurgeMember::class,
         Stk\Root\Api\Namespace\RemoveAdmin::class,
-        Stk\Root\Api\Namespace\RemoveHandle::class,
         Stk\Root\Api\Namespace\RemoveMember::class,
         Stk\Root\Api\Namespace\Show::class,
+        Stk\Root\Api\Namespace\StartDeletion::class,
         Stk\Root\Api\Namespace\StartTransfer::class,
         Stk\Root\Api\Namespace\TransferOwner::class,
         Stk\Root\Api\Operation\Combine::class,
@@ -639,7 +637,7 @@ class NewBuild
      */
     function register_type(string|INewSystemType $info) : ElementType {
 
-        $base_type_params = TypeParamData::MakingUsingCodeArray([
+        $base_type_params = TypeParamData::makingUsingCodeArray([
             'handle_ref_uuid'=>null,
             'type_name'=> $info::getTypeName(),
             'is_final_type'=> $info::isTypeFinal(),
@@ -672,7 +670,7 @@ class NewBuild
     }
 
     function register_attribute(ElementType $type, string|INewSystemAttribute $info) : Attribute {
-        $params = AttributeParamData::MakingUsingCodeArray([
+        $params = AttributeParamData::makingUsingCodeArray([
             'parent_ref_uuid' => $info::getAttributeParentUuid(),
             'design_ref_uuid' => $info::getAttributeDesignUuid(),
             'location_uuid' => $info::getAttributeLocationUuid(),
@@ -770,7 +768,7 @@ class NewBuild
      * @throws \Throwable
      */
     function createNamespace() {
-        $params = NamespaceParamData::MakingUsingCodeArray(['name'=>SystemNamespace::getNamespaceName(),'public_key'=>SystemNamespace::getNamespacePublicKey()]);
+        $params = NamespaceParamData::makingUsingCodeArray(['name'=>SystemNamespace::getNamespaceName(),'public_key'=>SystemNamespace::getNamespacePublicKey()]);
         $namespace_factory = new NamespaceCreate(params: $params,given_user: $this->user,given_server: $this->server,is_system: true);
         $preset = new NamespacePresetUuids;
         $preset->home_set_uuid = SystemNamespace::getHomeSetUuid();
