@@ -12,7 +12,7 @@ use App\Sys\Res\IDocument;
 
 class BaseType implements IDocument, \JsonSerializable,INewSystemType
 {
-    use ActionableBaseTrait,DocumentTrait, GetFromArrayTrait,ChildrenTrait,GroupTrait;
+    use DocumentTrait, GetFromArrayTrait,ChildrenTrait,GroupTrait;
 
     protected ?ElementType $type = null;
 

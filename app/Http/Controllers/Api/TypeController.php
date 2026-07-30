@@ -24,7 +24,6 @@ use App\Sys\Res\Types\Stk\Root;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Data\ThangData;
 use Hexbatch\Thangs\Models\Thang;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\JsonContent;
@@ -139,9 +138,7 @@ class TypeController extends Controller {
         ],
         responses: [
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Type info listeed', content: new JsonContent(ref: ElementTypeList::class)),
-
-            new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]

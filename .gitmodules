@@ -1,9 +1,6 @@
 [submodule "api-docs"]
 	path = api-docs
 	url = git@github.com:hexbatch/apple-core.git
-[submodule "libs/hbc-things"]
-	path = libs/hbc-things
-	url = git@github.com:hexbatch/hbc-things.git
 [submodule "app/Data/ApiParams"]
 	path = app/Data/ApiParams
 	url = ssh://git@codeberg.org/Hexbatch/core-api-params.git

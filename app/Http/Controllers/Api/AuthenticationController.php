@@ -22,7 +22,6 @@ use App\Sys\Res\Types\Stk\Root\Evt;
 use Carbon\Carbon;
 use Hexbatch\Thangs\Data\ThangData;
 use Hexbatch\Thangs\Models\Thang;
-use Hexbatch\Things\OpenApi\Things\ThingResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -280,10 +279,10 @@ class AuthenticationController extends Controller
         responses: [
 
             new OA\Response(    response: CodeOf::HTTP_OK, description: 'Results about the name query',
-                content: new JsonContent(ref: ThingResponse::class)),
+                content: new JsonContent()),
 
             new OA\Response(    response: CodeOf::HTTP_BAD_REQUEST, description: 'There was an issue',
-                content: new JsonContent(ref: ThingResponse::class))
+                content: new JsonContent())
         ]
     )]
     public function available(): JsonResponse

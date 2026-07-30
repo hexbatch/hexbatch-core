@@ -15,7 +15,7 @@ return [
 
 
 
-    'version' => env('APP_VERSION', \Hexbatch\Things\Helpers\ThingUtilities::getVersionAsString(for_lib: false)),
+    'version' => env('APP_VERSION', \App\Helpers\Utilities::getVersionAsString()),
 
     'pagination' => [
        'default_page_size' => (int)env('DEFAULT_CURSOR_PAGE_SIZE',15),
