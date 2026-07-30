@@ -5,11 +5,11 @@ window.onload = function() {
   window.ui = SwaggerUIBundle({
     url: "../openapi.yaml",
     dom_id: '#swagger-ui',
-    deepLinking: true,
-    displayOperationId: false,
-    filter: true,
-    requestSnippetsEnabled: true,
-    tryItOutEnabled: true,
+      deepLinking: true,
+      displayOperationId: false,
+      filter: true,
+      requestSnippetsEnabled: true,
+      tryItOutEnabled: true,
     presets: [
       SwaggerUIBundle.presets.apis,
       SwaggerUIStandalonePreset
