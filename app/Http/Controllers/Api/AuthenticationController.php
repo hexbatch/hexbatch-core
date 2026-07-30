@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Annotations\Access\TypeOfAccessMarker;
-use App\Annotations\ApiAccessMarker;
 use App\Annotations\ApiEventMarker;
 use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\ErrorData;
@@ -269,39 +267,7 @@ class AuthenticationController extends Controller
 
 
 
-    #[OA\Delete(
-        path: '/api/v1/users/auth/start_deletion',
-        operationId: 'core.users.auth.start_deletion',
-        description: "The user is deleted. Event can stop this ",
-        summary: 'The user deletes the account',
-        security: [['bearerAuth' => []]],
-        tags: ['user'],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Server\UserDeletionStarting::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::USER)]
-    #[ApiTypeMarker( Api\User\StartUserDeletion::class)]
-    public function start_user_deletion() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
-    #[OA\Post(
-        path: '/api/v1/users/auth/prepare_deletion',
-        operationId: 'core.users.auth.prepare_deletion',
-        description: "The user is marked to allow deletion. Event can stop this. Not deleted yet. ",
-        summary: 'The user gives permission for its own deletion',
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiEventMarker( Evt\Server\UserDeletionPreparing::class)]
-    #[ApiAccessMarker( TypeOfAccessMarker::USER)]
-    #[ApiTypeMarker( Api\User\PrepareUserDeletion::class)]
-    public function prepare_user_deletion() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
 

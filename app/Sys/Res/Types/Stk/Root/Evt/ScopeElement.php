@@ -4,6 +4,8 @@ namespace App\Sys\Res\Types\Stk\Root\Evt;
 
 
 use App\Enums\Sys\TypeOfEvent;
+use App\Models\Element;
+use App\Models\ElementSet;
 
 class ScopeElement extends BaseEvent
 {
@@ -17,6 +19,18 @@ class ScopeElement extends BaseEvent
     const PARENT_CLASSES = [
         BaseEvent::class
     ];
+
+    public function __construct(
+        protected Element             $given_element,
+        protected ?ElementSet             $given_set
+    )
+    {
+
+    }
+
+    protected function decide() : bool {
+        return true;
+    }
 
 }
 

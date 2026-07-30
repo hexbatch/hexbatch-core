@@ -57,7 +57,7 @@ class Register extends Api\UserApi implements  ICommandCallable
     {
         $my_command =  CommandParams::validateAndCreate([
             'command_class' =>static::class,
-            'command_tags' =>array_merge(['read'],$tags)
+            'command_tags' =>array_merge(['register'],$tags)
         ]);
         ($builder?: $builder = ThangBuilder::createBuilder())
             ->tree($my_command);

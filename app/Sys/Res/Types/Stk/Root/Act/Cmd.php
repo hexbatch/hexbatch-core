@@ -20,7 +20,6 @@ class Cmd extends Action
 
     const ATTRIBUTE_CLASSES = [];
 
-    public static function getHexbatchClassName() :string { return static::ACTION_NAME->value; }
 
 
     const EVENT_CLASSES = [];

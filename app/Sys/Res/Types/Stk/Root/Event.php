@@ -19,8 +19,6 @@ use App\Sys\Res\Types\Stk\Root;
 class Event extends BaseType
 {
     const UUID = '25df7e1f-7825-4528-b331-9e93d613a962';
-    const TYPE_NAME = 'events';
-
 
     const EVENT_NAME = TypeOfEvent::EVENTS;
 
@@ -36,7 +34,6 @@ class Event extends BaseType
         Root::class
     ];
 
-    public static function getHexbatchClassName() :string { return static::EVENT_NAME->value; }
 
 
     public static function getTypeName(): string

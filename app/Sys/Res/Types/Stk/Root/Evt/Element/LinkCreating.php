@@ -25,22 +25,13 @@ class LinkCreating extends Evt\ScopeElement implements ICommandCallable
         Evt\ScopeElement::class
     ];
 
-    public function __construct(
-        protected Element             $given_element,
-        protected ?ElementSet             $given_set
-    )
-    {
-
-    }
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
         return static::doCallInner($children_args,$command_args,'turning on');
     }
 
-    protected function decide() : bool {
-        return true;
-    }
+
 
     /**
      * @throws \Throwable

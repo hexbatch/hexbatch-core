@@ -18,6 +18,18 @@ use Illuminate\Support\Facades\Log;
 trait ElementBlockingEventTree
 {
 
+    /**
+     * @throws \Throwable
+     */
+    public static function callEventTree(
+        Element               $given_element,
+        ?ElementSet             $given_set,
+        ?IThangBuilder $builder = null
+    ) : Thang|IThangBuilder|null
+    {
+        return static::callEventTreeInner(given_element: $given_element,given_set: $given_set,builder: $builder);
+    }
+
     protected  function toArray() :array {
         return [
             'given_element'=>$this->given_element,

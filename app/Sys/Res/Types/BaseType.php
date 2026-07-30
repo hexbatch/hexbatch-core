@@ -20,7 +20,7 @@ class BaseType implements IDocument, \JsonSerializable,INewSystemType
 
 
 
-    const IS_FINAL = false;
+    const bool IS_FINAL = false;
 
 
     const TYPE_NAME = '';
@@ -68,14 +68,6 @@ class BaseType implements IDocument, \JsonSerializable,INewSystemType
     public static function getAttributeClasses() :array {
         return static::ATTRIBUTE_CLASSES;
     }
-
-
-
-
-
-    public static function getHexbatchClassName() :string { return static::TYPE_NAME; }
-
-
 
 
 

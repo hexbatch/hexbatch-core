@@ -1,23 +1,17 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns;
+namespace App\Sys\Res\Types\Stk\Root\Act\Cmd\Ns\Traits;
 
-use App\Data\ApiParams\Data\Namespaces\Params\DeleteNamespacesParamData;
+use App\Data\ApiParams\Data\Namespaces\Params\ChangeNamespacesParamData;
 use App\Data\ApiParams\Data\Namespaces\UserNamespaceData;
-use App\Enums\Sys\TypeOfAction;
-
 use App\Exceptions\HexbatchPermissionException;
 use App\Exceptions\RefCodes;
 use App\Models\Attribute;
-use App\Models\Element;
 use App\Models\ElementSetMember;
 use App\Models\ElementType;
 use App\Models\ElementValue;
+use App\Models\User;
 use App\Models\UserNamespace;
-use App\Sys\Res\Atr\Stk\Placeholder\MarkerData;
-use App\Sys\Res\Types\Stk\Root\Act;
-use App\Sys\Res\Types\Stk\Root\Evt;
-use App\Sys\Res\Types\Stk\Root\Marker\DeletionMarker;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
 use Hexbatch\Thangs\Helpers\ThangBuilder;
@@ -25,30 +19,16 @@ use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\IThangBuilder;
 use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Database\Query\JoinClause;
-use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
-class NamespaceDestroy extends Act\Cmd\Ns
+trait NamespaceDoAction
 {
-    const UUID = '0253a9c0-78db-4f8d-b648-7d2abd5ac47c';
-    const ACTION_NAME = TypeOfAction::CMD_NAMESPACE_DESTROY;
-
-    const ATTRIBUTE_CLASSES = [];
-
-    const PARENT_CLASSES = [
-        Act\Cmd\Ns::class
-    ];
-
-    const EVENT_CLASSES = [
-        Evt\Server\NamespaceDestroyed::class
-    ];
-
-
     public function __construct(
-        protected DeleteNamespacesParamData $params,
-        protected UserNamespace           $target_namespace,
-        protected UserNamespace           $calling_namespace,
-        protected bool           $do_permission_check = true,
+        protected ChangeNamespacesParamData $params,
+        protected UserNamespace             $target_namespace,
+        protected UserNamespace             $calling_namespace,
+        protected ?User                     $target_user = null,
+        protected bool                      $do_permission_check = true,
     )
     {
 
@@ -61,21 +41,24 @@ class NamespaceDestroy extends Act\Cmd\Ns
             'target_namespace'=> $this->target_namespace,
             'calling_namespace'=> $this->calling_namespace,
             'do_permission_check'=> $this->do_permission_check,
+            'target_user'=> $this->target_user,
         ];
     }
     protected static function fromArray(array $args) : static{
         $params = null;
         if (!empty($args['params']??null)) {
-            $params = DeleteNamespacesParamData::makingUsingCodeArray($args['params']);
+            $params = ChangeNamespacesParamData::makingUsingCodeArray($args['params']);
         }
         $target_namespace = static::getNamespaceFromArray('target_namespace',$args);
         $calling_namespace = static::getNamespaceFromArray('calling_namespace',$args);
         $do_permission_check = (bool)$args['do_permission_check'];
+        $target_user = static::getUserFromArray('target_user',$args, false);
 
         return new static(
             params: $params,
             target_namespace: $target_namespace,
             calling_namespace: $calling_namespace,
+            target_user: $target_user,
             do_permission_check: $do_permission_check
         );
     }
@@ -90,28 +73,39 @@ class NamespaceDestroy extends Act\Cmd\Ns
         $b_approved = static::getDecisionUsingAndLogic($children_args);
         $info = null;
         if ($b_approved) {
-            $info = $work->doTheDeletion();
-
-            $r = new Evt\Server\NamespaceDestroyed(given_type: $work->target_namespace->owner_user->default_namespace->namespace_base_type,
-                given_uuid: $work->target_namespace->ref_uuid);
-
-            $r->callTreeByItself($children_args);
+            $info = $work->doAction();
+            if (static::POST_EVENT_CLASS) {
+                static::POST_EVENT_CLASS::callEventTreeByItself(
+                    children_args: $children_args,
+                    given_type: $work->getInnerType(),
+                    given_uuid: $work->getInnerUuid()
+                );
+            }
         }
 
         return new CallableReturnStub(status: $b_approved?TypeOfCmdStatus::CMD_SUCCESS:TypeOfCmdStatus::CMD_FAIL, data: $info);
     }
 
+    protected abstract function getInnerUuid() : ?string ;
+
+    protected abstract function getInnerType() : ?ElementType ;
+
+    /**
+     * @throws \Throwable
+     */
+    protected abstract function doInnerAction() ;
+
     /**
      * @throws \Throwable
      * does not reload ns after attaching stuff together
      */
-    public function doTheDeletion(
+    public function doAction(
 
     ) : array
     {
         //see if element is in the target home ns, and that it has the same uuid
 
-        $attr = Attribute::getThisAttribute(uuid: MarkerData::getAttributeUuid());
+        $attr = Attribute::getThisAttribute(uuid: static::ATTRIBUTE_CLASS::getAttributeUuid());
 
         $sys_element_ids = ElementSetMember::where('holder_set_id',$this->target_namespace->namespace_home_set_id)->join('elements as e',
             /** @param JoinClause $join */
@@ -128,15 +122,15 @@ class NamespaceDestroy extends Act\Cmd\Ns
         {
             $found_params = null;
             foreach ($list->data as $datum) {
-                if ($datum->type_uuid !== DeletionMarker::getTypeUuid()) { continue;}
-                $params = DeleteNamespacesParamData::makingUsingCodeArray($datum->data);
+                if ($datum->type_uuid !== static::MARKER_CLASS::getTypeUuid()) { continue;}
+                $params = ChangeNamespacesParamData::makingUsingCodeArray($datum->data);
                 if ($params->permission_uuid === $this->params->permission_uuid) {
                     $found_params = $params;
                 }
             }
 
             if (!$found_params) {
-                throw new HexbatchPermissionException(__("msg.namespace_cannot_delete_when_no_precursor",
+                throw new HexbatchPermissionException(__("msg.operation_cannot_delete_when_no_precursor",
                     ['ref'=>$this->target_namespace->getName(),'uuid'=>$this->params->permission_uuid]),
                     Response::HTTP_FORBIDDEN,
                     RefCodes::NAMESPACE_CANNOT_DELETE_WITHOUT_UUID);
@@ -144,18 +138,7 @@ class NamespaceDestroy extends Act\Cmd\Ns
         }
 
 
-        DB::transaction(function (){
-            if ($this->params->transfer_elements_to_default) {
-                Element::where('element_namespace_id',$this->target_namespace->id)
-                    ->update(['element_namespace_id' => $this->target_namespace->owner_user->default_namespace->id]);
-            }
-
-            if ($this->params->transfer_types_to_default) {
-                ElementType::where('owner_namespace_id',$this->target_namespace->id)
-                    ->update(['owner_namespace_id' => $this->target_namespace->owner_user->default_namespace->id]);
-            }
-            $this->target_namespace->delete();
-        });
+        $this->doInnerAction();
 
         $ret = [];
 
@@ -167,12 +150,13 @@ class NamespaceDestroy extends Act\Cmd\Ns
     /**
      * @throws \Throwable
      */
-    public static function doDeletion(
-        DeleteNamespacesParamData $params,
-        ?UserNamespace           $calling_namespace,
-        ?UserNamespace           $target_namespace,
-        bool $do_permission_check = true,
-        ?IThangBuilder $builder = null
+    public static function makeTree(
+        ChangeNamespacesParamData $params,
+        ?UserNamespace            $calling_namespace,
+        ?UserNamespace            $target_namespace,
+        ?User                     $target_user = null ,
+        bool                      $do_permission_check = true,
+        ?IThangBuilder            $builder = null
     ) : UserNamespaceData|Thang|IThangBuilder
     {
 
@@ -202,6 +186,7 @@ class NamespaceDestroy extends Act\Cmd\Ns
             params: $params,
             target_namespace: $target_namespace,
             calling_namespace: $calling_namespace,
+            target_user: $target_user,
             do_permission_check: $do_permission_check
         );
 
@@ -228,6 +213,4 @@ class NamespaceDestroy extends Act\Cmd\Ns
             return $thang;
         }
     }
-
 }
-

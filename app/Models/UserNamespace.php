@@ -253,13 +253,13 @@ class UserNamespace extends Model implements ISystemModel
         return $build;
     }
 
-    public static function resolveNamespace(?string $value, bool $throw_exception = true) : ?UserNamespace {
+    public static function resolveNamespace(?string $value, bool $throw_exception = true,bool $b_relations = false) : ?UserNamespace {
 
         if (empty($value)) {return null;}
         /** @var UserNamespace|null $ns */
         $ns = null;
         if (Utilities::is_uuid($value)) {
-            $ns = static::buildNamespace(uuid: $value)->first();
+            $ns = static::buildNamespace(uuid: $value,b_relations: $b_relations)->first();
         } else {
             $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
 
@@ -270,7 +270,7 @@ class UserNamespace extends Model implements ISystemModel
                     $server = Server::resolveServer($ns_name_or_domain);
                     $ns = $server->owning_namespace;
                 } else {
-                    $ns = static::buildNamespace(namespace_name: $ns_name_or_domain)->first();
+                    $ns = static::buildNamespace(namespace_name: $ns_name_or_domain,b_relations: $b_relations)->first();
                 }
 
 
@@ -281,7 +281,7 @@ class UserNamespace extends Model implements ISystemModel
                 $ns_name = $parts[1];
                 /** @var Server $owner */
                 $owner = Server::resolveServer($server_name);
-                $ns = static::buildNamespace(server_id: $owner->id,namespace_name: $ns_name)->first();
+                $ns = static::buildNamespace(server_id: $owner->id,namespace_name: $ns_name,b_relations: $b_relations)->first();
             }
         }
 
@@ -418,20 +418,7 @@ class UserNamespace extends Model implements ISystemModel
         return $this->namespace_user_id && ($this->id === $this->owner_user->default_namespace_id);
     }
 
-    public function freeResources() :void {
-        //todo namespace {foreach resource} } not in use delete
-    }
 
-    public function purgeHome() :void {
-        //todo delete the contents of the home set, including the set
-    }
-
-    /**
-     *
-     *
-     * //todo when the user home set is created from the user type element, its put into the Standard set, all_users
-     *
-     */
     public static function createNamespace(string  $namespace_name,?int $owning_user_id = null,?int $server_id = null,
                                            ?string $use_ref = null,
         ?int                                       $type_id = null,?int $public_element_id = null,?int $private_element_id = null,?int $home_set_id = null,
@@ -505,6 +492,7 @@ class UserNamespace extends Model implements ISystemModel
 
     public  function getEventHandlersFromNamespace(TypeOfEvent $type_event) : Collection {
         //get from attribute rules/server_events
+        //todo how do namespaces themselves hook into stored events?
         Utilities::ignoreVar($type_event);
         return new Collection;
     }

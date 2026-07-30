@@ -63,8 +63,11 @@ class NewBuild
         Stk\Root\Content\Message::class,
         Stk\Root\Content\News::class,
 
-        Stk\Root\Marker\ChangeOwnershipMarker::class,
-        Stk\Root\Marker\DeletionMarker::class,
+
+        Stk\Root\Marker\DeletingNamespaceMarker::class,
+        Stk\Root\Marker\DeletingUserMarker::class,
+        Stk\Root\Marker\TransferNamespaceMarker::class,
+
         Stk\Root\Media\Audio::class,
         Stk\Root\Media\Image::class,
         Stk\Root\Media\Video::class,
@@ -74,11 +77,10 @@ class NewBuild
         Stk\Root\Meta\Region\Us::class,
 
         Stk\Root\Namespace\NamespaceBase::class,
-        Stk\Root\Namespace\DeletingUserMarker::class,
         Stk\Root\Namespace\HomeSet::class,
         Stk\Root\Namespace\PrivateType::class,
         Stk\Root\Namespace\PublicType::class,
-        Stk\Root\Namespace\TransferNamespace::class,
+        Stk\Root\Marker\TransferNamespaceMarker::class,
 
 
         Stk\Root\Server\ThisServerType::class,
@@ -104,12 +106,19 @@ class NewBuild
         Stk\Root\Evt\ScopeType::class,
         Stk\Root\Evt\Element\LinkCreated::class,
         Stk\Root\Evt\Element\LinkCreating::class,
-        Stk\Root\Evt\Element\NamespaceAdminAdding::class,
-        Stk\Root\Evt\Element\NamespaceAdminRemoving::class,
+        Stk\Root\Evt\Element\NamespaceAdminAdded::class,
+        Stk\Root\Evt\Element\NamespaceAdminRemoved::class,
         Stk\Root\Evt\Element\NamespaceLogin::class,
-        Stk\Root\Evt\Element\NamespaceMemberAdding::class,
-        Stk\Root\Evt\Element\NamespaceMemberRemoving::class,
+        Stk\Root\Evt\Element\NamespaceMemberAdded::class,
+        Stk\Root\Evt\Element\NamespaceMemberRemoved::class,
+        Stk\Root\Evt\Element\NamespaceStartingTransfer::class,
         Stk\Root\Evt\Element\SearchResults::class,
+        Stk\Root\Evt\Element\SwitchingOff::class,
+        Stk\Root\Evt\Element\SwitchingOn::class,
+        Stk\Root\Evt\Element\UserDeletionPreparing::class,
+
+
+
         Stk\Root\Evt\Elsewhere\ElsewhereAskingElement::class,
         Stk\Root\Evt\Elsewhere\ElsewhereAskingNamespace::class,
         Stk\Root\Evt\Elsewhere\ElsewhereAskingSet::class,
@@ -142,7 +151,6 @@ class NewBuild
         Stk\Root\Evt\Server\LinkDestroying::class,
         Stk\Root\Evt\Server\NamespaceCreated::class,
         Stk\Root\Evt\Server\NamespaceDestroyed::class,
-        Stk\Root\Evt\Server\NamespaceStartingTransfer::class,
         Stk\Root\Evt\Server\NamespaceTransfered::class,
         Stk\Root\Evt\Server\PathHandleAdded::class,
         Stk\Root\Evt\Server\PathHandleRemoved::class,
@@ -159,8 +167,7 @@ class NewBuild
         Stk\Root\Evt\Server\TypeOwnerChanging::class,
         Stk\Root\Evt\Server\TypeRetired::class,
         Stk\Root\Evt\Server\TypeSuspended::class,
-        Stk\Root\Evt\Server\UserDeletionPreparing::class,
-        Stk\Root\Evt\Server\UserDeletionStarting::class,
+        Stk\Root\Evt\Server\UserDeleted::class,
         Stk\Root\Evt\Server\UserEdit::class,
         Stk\Root\Evt\Server\UserLoggingIn::class,
         Stk\Root\Evt\Server\UserRegistered::class,
@@ -181,8 +188,6 @@ class NewBuild
         Stk\Root\Evt\Set\ShapeLeft::class,
         Stk\Root\Evt\Set\SwitchedOff::class,
         Stk\Root\Evt\Set\SwitchedOn::class,
-        Stk\Root\Evt\Set\SwitchingOff::class,
-        Stk\Root\Evt\Set\SwitchingOn::class,
         Stk\Root\Evt\Set\TypeMapEnclosedEnd::class,
         Stk\Root\Evt\Set\TypeMapEnclosedStart::class,
         Stk\Root\Evt\Set\TypeShapeEnclosedEnd::class,
@@ -288,20 +293,17 @@ class NewBuild
         Stk\Root\Act\Cmd\Ew\ElsewhereSharingElement::class,
         Stk\Root\Act\Cmd\Ew\ElsewhereSuspendedType::class,
         Stk\Root\Act\Cmd\Ns\NamespaceAdminAdd::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceAdminPromote::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceAdminPurge::class,
         Stk\Root\Act\Cmd\Ns\NamespaceAdminRemove::class,
         Stk\Root\Act\Cmd\Ns\NamespaceCreate::class,
         Stk\Root\Act\Cmd\Ns\NamespaceDeletionStart::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceDestroy::class,
+        Stk\Root\Act\Cmd\Ns\NamespaceDestroyDo::class,
         Stk\Root\Act\Cmd\Ns\NamespaceMemberAdd::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceMemberPromote::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceMemberPurge::class,
         Stk\Root\Act\Cmd\Ns\NamespaceMemberRemove::class,
-        Stk\Root\Act\Cmd\Ns\NamespacePromote::class,
-        Stk\Root\Act\Cmd\Ns\NamespacePurge::class,
         Stk\Root\Act\Cmd\Ns\NamespaceTransferDo::class,
-        Stk\Root\Act\Cmd\Ns\NamespaceTransferPre::class,
+        Stk\Root\Act\Cmd\Ns\NamespaceTransferStart::class,
+        Stk\Root\Act\Cmd\Ns\UserDeleteDo::class,
+        Stk\Root\Act\Cmd\Ns\UserStartDeletion::class,
+
         Stk\Root\Act\Cmd\Op\Combine::class,
         Stk\Root\Act\Cmd\Op\Mutual::class,
         Stk\Root\Act\Cmd\Op\Pop::class,
@@ -351,9 +353,8 @@ class NewBuild
         Stk\Root\Act\Cmd\Ty\TypeSuspend::class,
         Stk\Root\Act\Cmd\Us\UserEdit::class,
         Stk\Root\Act\Cmd\Us\UserLogin::class,
-        Stk\Root\Act\Cmd\Us\UserPrepareDeletion::class,
         Stk\Root\Act\Cmd\Us\UserRegister::class,
-        Stk\Root\Act\Cmd\Us\UserStartDeletion::class,
+
 
 
 
@@ -454,25 +455,21 @@ class NewBuild
         Stk\Root\Api\Elsewhere\Show::class,
         Stk\Root\Api\Elsewhere\ShowAdmin::class,
         Stk\Root\Api\Elsewhere\SuspendedType::class,
+
         Stk\Root\Api\Namespace\AddAdmin::class,
         Stk\Root\Api\Namespace\AddMember::class,
         Stk\Root\Api\Namespace\Create::class,
+        Stk\Root\Api\Namespace\DoUserDeletion::class,
         Stk\Root\Api\Namespace\Destroy::class,
-        Stk\Root\Api\Namespace\ListAdmins::class,
         Stk\Root\Api\Namespace\ListNamespaces::class,
         Stk\Root\Api\Namespace\ListMembers::class,
-        Stk\Root\Api\Namespace\Promote::class,
-        Stk\Root\Api\Namespace\PromoteAdmin::class,
-        Stk\Root\Api\Namespace\PromoteMember::class,
-        Stk\Root\Api\Namespace\Purge::class,
-        Stk\Root\Api\Namespace\PurgeAdmin::class,
-        Stk\Root\Api\Namespace\PurgeMember::class,
         Stk\Root\Api\Namespace\RemoveAdmin::class,
         Stk\Root\Api\Namespace\RemoveMember::class,
         Stk\Root\Api\Namespace\Show::class,
         Stk\Root\Api\Namespace\StartDeletion::class,
         Stk\Root\Api\Namespace\StartTransfer::class,
         Stk\Root\Api\Namespace\TransferOwner::class,
+
         Stk\Root\Api\Operation\Combine::class,
         Stk\Root\Api\Operation\Mutual::class,
         Stk\Root\Api\Operation\Pop::class,
@@ -540,9 +537,7 @@ class NewBuild
         Stk\Root\Api\Type\ShowType::class,
         Stk\Root\Api\Type\Suspend::class,
         Stk\Root\Api\User\Login::class,
-        Stk\Root\Api\User\PrepareUserDeletion::class,
-        Stk\Root\Api\User\Register::class,
-        Stk\Root\Api\User\StartUserDeletion::class
+        Stk\Root\Api\User\Register::class
 
     ];
 

@@ -177,11 +177,6 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_MEMBER_REMOVE = 'cmd_namespace_remove_member';
 
 
-    case CMD_NAMESPACE_MEMBER_PROMOTE = 'cmd_namespace_member_promote';
-    case CMD_NAMESPACE_ADMIN_PROMOTE = 'cmd_namespace_admin_promote';
-    case CMD_NAMESPACE_ADMIN_PURGE = 'cmd_namespace_admin_purge';
-    case CMD_NAMESPACE_MEMBER_PURGE = 'cmd_namespace_member_purge';
-
 
 
 
@@ -189,14 +184,12 @@ enum TypeOfAction: string
     case CMD_NAMESPACE_PREP_DELETION = 'cmd_namespace_prep_deletion';
     case CMD_NAMESPACE_PREP_TRANSFER = 'cmd_namespace_prep_transfer';
     case CMD_NAMESPACE_DO_TRANSFER = 'cmd_namespace_do_transfer';
-    case CMD_NAMESPACE_PROMOTE = 'cmd_namespace_promote';
     case CMD_NAMESPACE_DESTROY = 'cmd_namespace_destroy'; //the owner, cannot destroy default ns
-    case CMD_NAMESPACE_PURGE = 'cmd_namespace_purge'; //server admin
 
 
 
 
-    case CMD_USER_PREPARE_DELETION = 'cmd_user_prepare_deletion';
+    case CMD_USER_DELETE = 'cmd_user_delete';
     case CMD_USER_START_DELETION = 'cmd_user_start_deletion';
     case CMD_USER_REGISTER = 'cmd_user_register';
     case CMD_USER_LOGIN = 'cmd_user_login';

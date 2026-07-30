@@ -8,23 +8,23 @@ use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
 
-class LinkCreated extends Evt\ScopeElement implements ICommandCallable
+class NamespaceAdminAdded extends Evt\ScopeElement implements ICommandCallable
 {
     use Evt\Element\Traits\ElementNotificationEventTree;
 
-    const UUID = 'b1c70fce-690b-418f-827d-982f6d84e256';
-    const EVENT_NAME = TypeOfEvent::LINK_CREATED;
-
+    const UUID = '00e105a0-5b7f-4a8c-b80f-84f8f83b56ba';
+    const EVENT_NAME = TypeOfEvent::NAMESPACE_ADMIN_ADDING;
 
 
     const PARENT_CLASSES = [
         Evt\ScopeElement::class
     ];
 
+
     /** @throws \Throwable */
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        return static::doCallInner($command_args,$children_args,'link created~ ');
+        return static::doCallInner($command_args,$children_args,'Admin added~ ');
     }
 
 }

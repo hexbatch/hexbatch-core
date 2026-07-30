@@ -59,24 +59,23 @@ Route::prefix('v1')->group(function () {
 
             Route::delete('/logout', [Api\AuthenticationController::class, 'logout'])->name('core.users.logout');
 
+            Route::delete('do_deletion', [Api\NamespaceController::class, 'do_user_deletion'])
+                ->name('core.users.start_deletion');
 
+            Route::post('prepare_deletion', [Api\NamespaceController::class, 'start_user_deletion'])
+                ->name('core.users.prepare_deletion');
 
             Route::prefix('auth')->group(function () {
 
-                Route::post('/create/{seconds_to_live?}', [Api\AuthenticationController::class, 'create_token'])
+                Route::post('create/{seconds_to_live?}', [Api\AuthenticationController::class, 'create_token'])
                     ->name('core.users.auth.create')->whereNumber('seconds_to_live');
 
-                Route::get('/passthrough', [Api\AuthenticationController::class, 'get_token_passthrough'])
+                Route::get('passthrough', [Api\AuthenticationController::class, 'get_token_passthrough'])
                     ->name('core.users.auth.passthrough');
 
-                Route::delete('/remove_current_token', [Api\AuthenticationController::class, 'remove_current_token'])
+                Route::delete('remove_current_token', [Api\AuthenticationController::class, 'remove_current_token'])
                     ->name('core.users.auth.remove_current_token');
 
-                Route::delete('/start_deletion', [Api\AuthenticationController::class, 'start_user_deletion'])
-                    ->name('core.users.auth.start_deletion');
-
-                Route::post('/prepare_deletion', [Api\AuthenticationController::class, 'prepare_user_deletion'])
-                    ->name('core.users.auth.prepare_deletion');
             });
         });
 
@@ -171,8 +170,8 @@ Route::prefix('v1')->group(function () {
 
                     Route::middleware(Middleware\ValidateNamespaceOwner::class)->group(function () {
 
-                        Route::post('start_transfer', [Api\NamespaceController::class, 'start_transfer'])->name('core.namespaces.start_transfer');
-                        Route::post('transfer_owner', [Api\NamespaceController::class, 'transfer_owner'])->name('core.namespaces.transfer_owner');
+                        Route::post('start_transfer/{user}', [Api\NamespaceController::class, 'start_transfer'])->name('core.namespaces.start_transfer');
+                        Route::post('transfer_owner/{user}', [Api\NamespaceController::class, 'transfer_owner'])->name('core.namespaces.transfer_owner');
 
                         Route::post('add_admin', [Api\NamespaceController::class, 'add_admin'])->name('core.namespaces.add_admin');
                         Route::delete('remove_admin', [Api\NamespaceController::class, 'remove_admin'])->name('core.namespaces.remove_admin');

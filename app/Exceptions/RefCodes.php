@@ -41,6 +41,7 @@ class RefCodes {
     const int NAMESPACE_NOT_MEMBER = 2008;
     const int NAMESPACE_SCHEMA_ISSUE = 2010;
     const int NAMESPACE_NOT_DEFAULT_OWNER = 2011;
+    const int NAMESPACE_CANNOT_REMOVE_OWNER_AS_ADMIN = 2014;
 
     const int NAMESPACE_CANNOT_DELETE_WITHOUT_UUID = 2015;
 
@@ -173,6 +174,7 @@ class RefCodes {
         self::NAMESPACE_MEMBER_MISSING_ISSUE => '',
         self::NAMESPACE_CANNOT_DELETE_CORE_PARTS => '',
         self::NAMESPACE_CANNOT_DELETE_WITHOUT_UUID => '',
+        self::NAMESPACE_CANNOT_REMOVE_OWNER_AS_ADMIN => '',
         self::NAMESPACE_SCHEMA_ISSUE => '',
 
 

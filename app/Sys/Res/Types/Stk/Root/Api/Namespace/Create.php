@@ -39,7 +39,7 @@ class Create extends Api\NamespaceApi implements ICommandCallable
         $b_approved = static::getDecisionUsingAndLogic($children_args);
 
         return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
-            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved,'namespace'=>$children_args['namespace']]);
+            data: $children_args['namespace']);
     }
 
     /**
@@ -53,7 +53,7 @@ class Create extends Api\NamespaceApi implements ICommandCallable
 
         $my_command =  CommandParams::validateAndCreate([
             'command_class' =>static::class,
-            'command_tags' =>array_merge(['read'],$tags)
+            'command_tags' =>array_merge(['create-ns'],$tags)
         ]);
         ($builder?: $builder = ThangBuilder::createBuilder())
             ->setNamespace($calling_namespace)

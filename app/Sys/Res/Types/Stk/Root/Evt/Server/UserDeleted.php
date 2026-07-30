@@ -9,12 +9,12 @@ use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
 
-class NamespaceDestroyed extends Evt\ScopeServer implements ICommandCallable, Traits\IServerEvent
+class UserDeleted extends Evt\ScopeServer implements ICommandCallable, Traits\IServerEvent
 {
     use ServerNotificationEventTree;
+    const UUID = '3cb134f3-3143-41b3-b929-08e1c240349d';
+    const EVENT_NAME = TypeOfEvent::USER_DELETED;
 
-    const UUID = 'af3524d0-8c56-4c74-99e3-337a6238c01c';
-    const EVENT_NAME = TypeOfEvent::NAMESPACE_DESTROYED;
 
 
     const PARENT_CLASSES = [
@@ -26,7 +26,7 @@ class NamespaceDestroyed extends Evt\ScopeServer implements ICommandCallable, Tr
      */
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        return static::doCallInner($command_args,$children_args,'Namespace destroyed~ ');
+        return static::doCallInner($command_args,$children_args,'User deleted~ ');
     }
 
 }

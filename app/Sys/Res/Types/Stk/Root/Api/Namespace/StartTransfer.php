@@ -3,24 +3,77 @@
 namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
 
 
+use App\Annotations\ApiParamMarker;
+use App\Data\ApiParams\Data\Namespaces\Params\ChangeNamespacesParamData;
+use App\Models\User;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
+use Hexbatch\Thangs\Callables\CallableReturnStub;
+use Hexbatch\Thangs\Data\Params\CommandParams;
+use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
+use Hexbatch\Thangs\Helpers\ThangBuilder;
+use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
+use Hexbatch\Thangs\Interfaces\ICommandCallable;
+use Hexbatch\Thangs\Interfaces\IThangBuilder;
+use Hexbatch\Thangs\Models\Thang;
+use Illuminate\Support\Facades\Log;
 
 
-class StartTransfer extends Api\NamespaceApi
+#[ApiParamMarker( param_class: ChangeNamespacesParamData::class)]
+class StartTransfer extends Api\NamespaceApi implements ICommandCallable
 {
     const UUID = 'f126f48f-9872-4b4a-924c-5d60a4f87c53';
     const TYPE_NAME = 'api_namespace_start_transfer';
 
 
-
-
-
     const PARENT_CLASSES = [
         Api\NamespaceApi::class,
-        Act\Cmd\Pa\Search::class,
-        Act\Cmd\Ns\NamespaceTransferPre::class,
+        Act\Cmd\Ns\NamespaceTransferStart::class,
     ];
+
+    public static function doCall(array $children_args, array $command_args): ICmdCallReturn
+    {
+        Log::debug("Called api pre transfer");
+
+        $b_approved = static::getDecisionUsingAndLogic($children_args);
+
+        return new CallableReturnStub(status: $b_approved? TypeOfCmdStatus::CMD_SUCCESS: TypeOfCmdStatus::CMD_FAIL,
+            data: ['children_args'=>$children_args,static::CHILD_DECISION_KEY=>$b_approved]);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function doStartTransfer(ChangeNamespacesParamData $params,
+                                           UserNamespace             $calling_namespace, UserNamespace $target_namespace,
+                                           User $target_user,
+                                           array                     $tags = [], ?IThangBuilder $builder = null)
+    : ChangeNamespacesParamData|Thang
+    {
+
+        $my_command =  CommandParams::validateAndCreate([
+            'command_class' =>static::class,
+            'command_tags' =>array_merge(['start-transfer'],$tags)
+        ]);
+        ($builder?: $builder = ThangBuilder::createBuilder())
+            ->setNamespace($calling_namespace)
+            ->setSharedArg('namespace',$calling_namespace)
+            ->tree($my_command);
+
+        Act\Cmd\Ns\NamespaceTransferStart::makeTree(
+            params: $params,
+            calling_namespace: $calling_namespace,target_namespace: $target_namespace,target_user: $target_user,builder: $builder);
+
+
+        $thang = $builder->execute()->getThang();
+        if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
+            return ChangeNamespacesParamData::from($thang->finished_data['children_args']);
+        } else {
+            return $thang;
+        }
+
+    }
 
 }
 

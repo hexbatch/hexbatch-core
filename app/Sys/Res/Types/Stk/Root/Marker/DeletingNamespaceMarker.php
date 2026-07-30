@@ -14,12 +14,12 @@ use App\Sys\Res\Types\Stk\Root\Marker;
 #[HexbatchDescription( description: "
   When an element of this is inside the homeset, the namespace can be deleted. Default namespaces cannot be deleted
 ")]
-class DeletionMarker extends Marker
+class DeletingNamespaceMarker extends Marker
 {
     const UUID = '244663d2-7d47-4497-b8af-9efde3c5d7e9';
     const TYPE_NAME = 'deletion_marker';
 
-
+    const bool IS_FINAL = true;
 
     const ATTRIBUTE_CLASSES = [];
 

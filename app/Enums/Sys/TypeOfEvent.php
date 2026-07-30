@@ -174,8 +174,7 @@ enum TypeOfEvent: string
 
 
     case USER_DELETION_PREPARING = 'user_deletion_preparing';
-    case USER_DELETION_STARTING = 'user_deletion_starting';
-    case USER_REGISTRATION_STARTING = 'user_registration_starting';
+    case USER_DELETED = 'user_deleted';
     case USER_REGISTERED = 'user_registered';
     case USER_LOGGING_IN = 'user_logging_in';
     case USER_EDIT = 'user_edit';

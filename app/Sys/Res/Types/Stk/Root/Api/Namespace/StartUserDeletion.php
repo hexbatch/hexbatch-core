@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Sys\Res\Types\Stk\Root\Api\Element;
+namespace App\Sys\Res\Types\Stk\Root\Api\Namespace;
 
 
-use App\Annotations\ApiParamMarker;
-use App\Data\ApiParams\Data\Elements\Params\WriteElementParamData;
+use App\Data\ApiParams\Data\Namespaces\Params\ChangeNamespacesParamData;
+use App\Models\User;
 use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Act;
 use App\Sys\Res\Types\Stk\Root\Api;
@@ -19,23 +19,21 @@ use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\Log;
 
 
-#[ApiParamMarker( param_class: WriteElementParamData::class)]
-class WriteAttribute extends Api\ElementApi implements ICommandCallable
+class StartUserDeletion extends Api\NamespaceApi implements ICommandCallable
 {
-    const UUID = '26a090a2-708a-4c76-b387-08f537f0c2d5';
-    const TYPE_NAME = 'api_element_write';
+    const UUID = '910756fc-4964-452f-9360-cfed59bd6938';
+    const TYPE_NAME = 'api_user_prepare_deletion';
 
 
     const PARENT_CLASSES = [
-        Api\ElementApi::class,
-        Act\Cmd\Ele\Write::class,
+        Api\NamespaceApi::class,
+        Act\Cmd\Ns\UserStartDeletion::class,
     ];
-
 
 
     public static function doCall(array $children_args, array $command_args): ICmdCallReturn
     {
-        Log::debug("Called api write attribute node");
+        Log::debug("Called api pre user deletion");
 
         $b_approved = static::getDecisionUsingAndLogic($children_args);
 
@@ -46,36 +44,35 @@ class WriteAttribute extends Api\ElementApi implements ICommandCallable
     /**
      * @throws \Throwable
      */
-    public static function write(WriteElementParamData $params,
-                                        UserNamespace $calling_namespace,
-                                        bool $is_system, array $tags = [], ?IThangBuilder $builder = null)
-    : true|Thang
+    public static function doStartUserDeletion(ChangeNamespacesParamData $params,
+                                           UserNamespace             $calling_namespace, UserNamespace $target_namespace,
+                                           User $target_user,
+                                           array                     $tags = [], ?IThangBuilder $builder = null)
+    : ChangeNamespacesParamData|Thang
     {
 
         $my_command =  CommandParams::validateAndCreate([
             'command_class' =>static::class,
-            'command_tags' =>array_merge(['write'],$tags)
+            'command_tags' =>array_merge(['start-transfer'],$tags)
         ]);
         ($builder?: $builder = ThangBuilder::createBuilder())
             ->setNamespace($calling_namespace)
             ->setSharedArg('namespace',$calling_namespace)
             ->tree($my_command);
 
-        Act\Cmd\Ele\Write::createWriteTree(
+        Act\Cmd\Ns\UserStartDeletion::makeTree(
             params: $params,
-            is_system: $is_system,
-            calling_namespace: $calling_namespace,builder: $builder);
+            calling_namespace: $calling_namespace,target_namespace: $target_namespace,target_user: $target_user,builder: $builder);
 
 
         $thang = $builder->execute()->getThang();
         if ($thang->getRootStatus() === TypeOfCmdStatus::CMD_SUCCESS) {
-            return true;
+            return ChangeNamespacesParamData::from($thang->finished_data['children_args']);
         } else {
             return $thang;
         }
 
     }
-
 
 }
 

@@ -5,7 +5,13 @@ namespace App\Sys\Res\Types\Stk\Root\Evt\Server\Traits;
 use App\Helpers\Events\EventFilter;
 use App\Helpers\Events\TreeStub;
 use App\Helpers\Utilities;
+use App\Models\Attribute;
+use App\Models\Element;
+use App\Models\ElementSet;
+use App\Models\ElementType;
+use App\Models\Phase;
 use App\Models\Server;
+use App\Models\UserNamespace;
 use App\Sys\Res\Types\Stk\Root\Evt;
 use Hexbatch\Thangs\Callables\CallableReturnStub;
 use Hexbatch\Thangs\Enums\TypeOfCmdStatus;
@@ -81,23 +87,26 @@ trait ServerNotificationEventTree
         );
 
 
-        $col = $this->given_type->getEventHandlersFromTypeChain( static::EVENT_NAME);
-        foreach ($col as $ref) {
-            $builder->leaf(
-                command_class: Evt\EventHandler::class,
-                command_args: new Evt\EventHandler(
-                    ref: $ref,
-                    type_context: $this->given_type,
-                    namespace_context: $this->given_namespace,
-                    old_namespace_context: $this->old_namespace,
-                    attribute_context: $this->given_attribute,
-                    set_context: $this->given_set,
-                    element_context: $this->given_element,
-                    phase_context: $this->given_phase
-                )->toArray(),
-                command_tags: [Evt\EventHandler::class]
-            );
+        if ($this->given_type) {
+            $col = $this->given_type->getEventHandlersFromTypeChain( static::EVENT_NAME);
+            foreach ($col as $ref) {
+                $builder->leaf(
+                    command_class: Evt\EventHandler::class,
+                    command_args: new Evt\EventHandler(
+                        ref: $ref,
+                        type_context: $this->given_type,
+                        namespace_context: $this->given_namespace,
+                        old_namespace_context: $this->old_namespace,
+                        attribute_context: $this->given_attribute,
+                        set_context: $this->given_set,
+                        element_context: $this->given_element,
+                        phase_context: $this->given_phase
+                    )->toArray(),
+                    command_tags: [Evt\EventHandler::class]
+                );
+            }
         }
+
 
         if ( $col = Server::getEventHandlerRefs(
             new EventFilter(event_type: static::EVENT_NAME,
@@ -131,5 +140,22 @@ trait ServerNotificationEventTree
         return  $builder->execute()->getThang();
 
     }
+
+    /**
+     * @throws \Throwable
+     */
+    public static function callEventTreeByItself(
+                                         array $children_args,
+                                         ?ElementType $given_type = null, ?ElementType $parent_type = null, ?UserNamespace $given_namespace = null,
+                                         ?UserNamespace $old_namespace = null, ?Element $given_element = null, ?ElementSet $given_set = null, ?Phase $given_phase = null,
+                                         ?Attribute $given_attribute = null, ?string $given_uuid = null,?IThangBuilder $builder = null)
+    : Thang|IThangBuilder|null
+    {
+        $r = new static(given_type: $given_type, parent_type: $parent_type,given_namespace: $given_namespace,old_namespace: $old_namespace,given_element: $given_element,
+            given_set: $given_set,given_phase: $given_phase,given_attribute: $given_attribute,
+            given_uuid: $given_uuid);
+        return $r->callEventTreeInner($children_args,$builder);
+    }
+
 }
 
