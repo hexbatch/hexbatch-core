@@ -12,7 +12,6 @@ return new class extends Migration
     {
         DB::statement("DROP FUNCTION IF EXISTS update_modified_column();");
         DB::statement("DROP FUNCTION IF EXISTS update_location_bounds_geo_column();");
-        DB::statement("DROP FUNCTION IF EXISTS update_live_types_geo_columns();");
         DB::statement("DROP FUNCTION IF EXISTS update_type_geo_columns();");
 
         DB::statement("DROP TYPE IF EXISTS type_of_location;");

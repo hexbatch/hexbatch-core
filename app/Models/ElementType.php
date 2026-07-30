@@ -125,6 +125,10 @@ class ElementType extends Model implements ISystemModel
         return $this->belongsTo(Server::class,'imported_from_server_id');
     }
 
+    public function type_live_rules() : BelongsTo {
+        return $this->belongsTo(LiveRule::class,'live_rule_owner_type_id');
+    }
+
 
     public function type_schedule() : BelongsTo {
         return $this->belongsTo(TimeBound::class,'type_time_bound_id');

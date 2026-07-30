@@ -64,6 +64,17 @@ class NewBuild
         Stk\Root\Content\News::class,
 
 
+        Stk\Root\Live\LiveRuleApplied::class,
+        Stk\Root\Live\LiveRule\ApplyLiveOnEntry::class,
+        Stk\Root\Live\LiveRule\BlockLiveOnEntry::class,
+        Stk\Root\Live\LiveRule\DisableLiveOnEntry::class,
+        Stk\Root\Live\LiveRule\DisableLiveOnExit::class,
+        Stk\Root\Live\LiveRule\DropLiveOnExit::class,
+        Stk\Root\Live\LiveRule\EnableLiveOnEntry::class,
+        Stk\Root\Live\LiveRule\EnableLiveOnExit::class,
+        Stk\Root\Live\LiveRule\RequireLiveOnEntry::class,
+
+
         Stk\Root\Marker\DeletingNamespaceMarker::class,
         Stk\Root\Marker\DeletingUserMarker::class,
         Stk\Root\Marker\TransferNamespaceMarker::class,
@@ -80,7 +91,6 @@ class NewBuild
         Stk\Root\Namespace\HomeSet::class,
         Stk\Root\Namespace\PrivateType::class,
         Stk\Root\Namespace\PublicType::class,
-        Stk\Root\Marker\TransferNamespaceMarker::class,
 
 
         Stk\Root\Server\ThisServerType::class,

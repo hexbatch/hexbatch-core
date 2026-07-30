@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->foreignId('phase_type_id')
                 ->nullable() //needs to be nullable so that types can be made first when sys boots
-                ->comment("The type which owns this live requirement")
+                ->comment("The type this phase is based")
                 ->unique()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()

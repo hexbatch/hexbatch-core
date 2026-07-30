@@ -32,7 +32,7 @@ return new class extends Migration
          *
          * so, if I am in a set, and want to know, I get the visibilities for this set on up to all parents and then no set using a cte,
          *  then join that with the exposed_attributes using where to check if is_visible
-         *  and join with the live_types and live_attributes to get the live attributes added onto an element
+         *  and join with the live_applied and live_attributes to get the live attributes added onto an element
          */
 
         Schema::create('element_type_exposed_attributes', function (Blueprint $table) {

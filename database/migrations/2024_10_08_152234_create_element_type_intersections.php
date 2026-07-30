@@ -43,7 +43,7 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("if the earlier was a live type")
                 ->index()
-                ->constrained('live_types')
+                ->constrained('live_applied')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
@@ -51,7 +51,7 @@ return new class extends Migration
                 ->nullable()->default(null)
                 ->comment("If the later was a live type")
                 ->index()
-                ->constrained('live_types')
+                ->constrained('live_applied')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 

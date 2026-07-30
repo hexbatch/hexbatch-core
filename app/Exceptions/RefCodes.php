@@ -146,6 +146,11 @@ class RefCodes {
 
     const int LINK_NOT_FOUND =  60001;
 
+
+    //live start at 70k
+
+    const int LIVE_RULE_NOT_FOUND =  70001;
+
     /**
      * @type string[]
      */
@@ -243,6 +248,8 @@ class RefCodes {
 
         self::DESIGN_API_SCHEMA_ISSUE => '',
         self::LINK_NOT_FOUND => '',
+
+        self::LIVE_RULE_NOT_FOUND => '',
 
     ];
 }

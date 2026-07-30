@@ -12,6 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        /*
+         * Live attributes record which live attributes mask the regular attribute of the type
+         * A live attribute can mask something if it has an attribute derived from the earlier attribute.
+         * It does not matter much which subtype that exposed attribute on the live is from
+         * Identical attributes do not mask each other
+         */
         Schema::create('live_attributes', function (Blueprint $table) {
             $table->id();
 
@@ -19,7 +25,7 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("The live id this is about")
                 ->index()
-                ->constrained('live_types')
+                ->constrained('live_applied')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 

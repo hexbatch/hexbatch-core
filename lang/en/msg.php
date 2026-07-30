@@ -228,5 +228,8 @@ return [
     'link_not_found_by' => 'Link not found using :types : :values ',
     'link_not_found' => 'Link not found using :ref',
 
+    //Live
+    'live_rule_not_found_by' => 'Live rule not found using :types : :values ',
+
 
 ];

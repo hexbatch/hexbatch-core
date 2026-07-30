@@ -13,6 +13,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        /*
+         *
+         */
         Schema::create('server_events', function (Blueprint $table) {
             $table->id();
 
@@ -63,7 +66,7 @@ return new class extends Migration
 
             $table->foreignId('blocked_by_server_event_id')
                 ->nullable()->default(null)
-                ->comment("This event is being blocked because of a live type")
+                ->comment("This event is being blocked by another server event")
                 ->index()
                 ->constrained('server_events')
                 ->cascadeOnUpdate()
@@ -71,19 +74,12 @@ return new class extends Migration
 
             $table->foreignId('filtered_by_server_event_id')
                 ->nullable()->default(null)
-                ->comment("This event is being filtered because of a  live type")
+                ->comment("This event is being filtered because of another server event")
                 ->index()
                 ->constrained('server_events')
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
 
-            $table->foreignId('source_live_attribute_id')
-                ->nullable()->default(null)
-                ->comment("This rule was provided by this live attribute id, when it goes away so does this row, and the earlier rows are at the top")
-                ->index()
-                ->constrained('live_attributes')
-                ->cascadeOnUpdate()
-                ->cascadeOnDelete();
 
 
             $table->boolean('is_listening_before')

@@ -32,7 +32,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-            $table->foreignId('live_rule_about_live_type_id')
+            $table->foreignId('live_rule_target_type_id')
                 ->nullable(false)
                 ->comment("The live type this rule is about")
                 ->index()
@@ -49,14 +49,34 @@ return new class extends Migration
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
+            $table->uuid('type_owner_uuid')
+                ->index()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('type_trigger_uuid')
+                ->index()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
+            $table->uuid('type_target_uuid')
+                ->index()
+                ->nullable()->default(null)
+                ->comment("used for quick lookup");
+
 
         });
 
         DB::statement("CREATE TYPE type_of_live_rule_policy AS ENUM (
                 'no_rule',
-                'apply_live', 'required_for_entry','blocked_from_entry',
-                'disable_if_exists_on_entry','enable_if_exists_on_entry',
-                'enforce_stack','drop_when_leaving','drop_when_leaving_stack'
+                'apply_live_on_entry',
+                'required_for_entry',
+                'blocked_from_entry',
+                'disable_if_exists_on_entry',
+                'enable_if_exists_on_entry',
+                'drop_when_leaving',
+                'disable_when_leaving',
+                'enable_when_leaving'
                 );");
 
         DB::statement("ALTER TABLE live_rules Add COLUMN live_rule_policy type_of_live_rule_policy NOT NULL default 'no_rule';");

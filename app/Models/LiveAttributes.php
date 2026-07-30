@@ -46,6 +46,8 @@ class LiveAttributes extends Model
      */
     protected $casts = [
         'live_attribute_behavior' => TypeOfLiveAttributeBehavior::class,
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
 }

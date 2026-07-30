@@ -5,17 +5,11 @@ namespace App\Models;
 
 
 use App\Enums\Types\TypeOfServerEventAccess;
-use App\Exceptions\HexbatchCoreException;
 
-use App\Exceptions\HexbatchNotPossibleException;
-use App\Exceptions\RefCodes;
-use App\Helpers\Utilities;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 
 /*
@@ -43,7 +37,6 @@ use Illuminate\Support\Facades\DB;
  * @property int event_target_attribute_id
  * @property int blocked_by_server_event_id
  * @property int filtered_by_server_event_id
- * @property int source_live_attribute_id
 
  * @property bool is_listening_before
  * @property TypeOfServerEventAccess event_access
@@ -162,119 +155,6 @@ class ServerEvent extends Model
     }
 
 
-    public static function collectEvent(Collection|string $collect,?Attribute $owner = null,?ServerEvent $event = null ) : ServerEvent {
-
-
-
-        try {
-            DB::beginTransaction();
-            if(!$event) {
-                $event = new ServerEvent();
-
-            }
-            if ($owner) {
-                $event->owning_attribute_id = $owner->id;
-            }
-            $event->editEvent($collect);
-
-            DB::commit();
-
-            return ServerEvent::buildEvent(id:$event->id)->first();
-        } catch (\Exception $e) {
-            DB::rollBack();
-            if ($e instanceof HexbatchCoreException) {
-                throw $e;
-            }
-            throw new HexbatchNotPossibleException(
-                $e->getMessage(),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::ATTRIBUTE_SCHEMA_ISSUE);
-
-        }
-    }
-
-
-    /**
-     * @throws \Exception
-     */
-    public function editEvent(Collection $collect) : void {
-
-        if ($this->isInUse()) {
-            throw new HexbatchNotPossibleException(
-                __('msg.event_in_use'),
-                \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                RefCodes::RULE_CANNOT_EDIT);
-        }
-        try {
-            DB::beginTransaction();
-
-
-
-            if ($collect->has('rules')) {
-                collect($collect->get('rules'))->each(function ($hint_child, int $key) {
-                    Utilities::ignoreVar($key);
-                    AttributeRule::collectRule(collect: $hint_child,owner_event: $this);
-                });
-            }
-
-            if ($collect->has('event')) {
-                $hint_event = $collect->get('event');
-                if (is_string($hint_event) && Utilities::is_uuid($hint_event)) {
-                    /**
-                     * @var ElementType $event_type
-                     */
-                    $event_type = (new ElementType())->resolveRouteBinding($hint_event);
-                    //todo see if the event type is a valid event
-                    $this->event_trigger_type_id = $event_type->id;
-                }
-            }
-
-            if ($collect->has('target_type')) {
-                $hint_target = $collect->get('target_type');
-                if (is_string($hint_target) && Utilities::is_uuid($hint_target)) {
-                    /**
-                     * @var ElementType $target_type
-                     */
-                    $target_type = (new ElementType())->resolveRouteBinding($hint_target);
-                    $this->event_target_type_id = $target_type->id;
-                }
-            }
-
-            if ($collect->has('target_attribute')) {
-                $hint_attr = $collect->get('target_attribute');
-                if (is_string($hint_attr) && Utilities::is_uuid($hint_attr)) {
-                    /**
-                     * @var Attribute $event_type
-                     */
-                    $event_type = (new Attribute())->resolveRouteBinding($hint_attr);
-                    $this->event_target_attribute_id = $event_type->id;
-                }
-            }
-
-
-            if ($collect->has('is_listening_before')) {
-                $this->is_listening_before = Utilities::boolishToBool($collect->get('is_listening_before',true));
-            }
-
-
-
-            try {
-                $this->save();
-            } catch (\Exception $f) {
-                throw new HexbatchNotPossibleException(
-                    __('msg.event_cannot_be_edited',['error'=>$f->getMessage()]),
-                    \Symfony\Component\HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY,
-                    RefCodes::RULE_SCHEMA_ISSUE);
-            }
-
-
-            DB::commit();
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
 
 
     public function isInUse() : bool {

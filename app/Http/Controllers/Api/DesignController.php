@@ -12,6 +12,8 @@ use App\Data\ApiParams\Data\Attributes\AttributeData;
 use App\Data\ApiParams\Data\Attributes\Params\AttributeParamData;
 use App\Data\ApiParams\Data\Attributes\Params\AttributeSearchParams;
 use App\Data\ApiParams\Data\Attributes\Responses\AttributeList;
+use App\Data\ApiParams\Data\Live\LiveRuleData;
+use App\Data\ApiParams\Data\Live\Params\LiveRuleParamData;
 use App\Data\ApiParams\Data\Locations\Location;
 use App\Data\ApiParams\Data\Locations\Params\LocationSearchParams;
 use App\Data\ApiParams\Data\Locations\Responses\LocationList;
@@ -1468,12 +1470,16 @@ class DesignController extends Controller {
     }
 
 
+    /**
+     * @throws \Throwable
+     */
     #[OA\Post(
         path: '/api/v1/{user_namespace}/design/{element_type}/live_rules/add',
         operationId: 'core.design.add_live_rule',
         description: "Owner admin group can add live rules to be applied after the publishing and making sets out of this " ,
         summary: 'Adds a new live rule to the type before its published ',
         security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LiveRuleParamData::class)),
         tags: ['design','live'],
         parameters: [
             new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
@@ -1484,13 +1490,25 @@ class DesignController extends Controller {
 
         ],
         responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Deletion marked', content: new JsonContent(ref: LiveRuleData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
         ]
     )]
     #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
     #[ApiTypeMarker( Root\Api\Design\AddLiveRule::class)]
-    public function add_live_rule() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    public function add_live_rule(UserNamespace $namespace,ElementType $type,Request $request) {
+
+        $params = LiveRuleParamData::fromRequest($request);
+        $data_out = Root\Api\Design\AddLiveRule::createRule(params: $params,calling_namespace: $namespace,given_type: $type);
+        if ($data_out instanceof Thang) {
+            $http_code = CodeOf::HTTP_OK;
+            $data_out = ThangData::from($data_out);
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 
