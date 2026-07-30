@@ -569,12 +569,14 @@ Route::prefix('v1')->group(function () {
 
 
                     Route::middleware([])->group( function () {
-                        Route::get('show', [Api\DesignController::class, 'show_design'])->name('core.design.show');
+                        Route::middleware(Middleware\ValidateTypeMembership::class)->group(function () {
+                            Route::get('show', [Api\DesignController::class, 'show_design'])->name('core.design.show');
 
-                        Route::get('list_listeners', [Api\DesignController::class, 'list_listeners'])->name('core.design.list_listeners');
+                            Route::get('list_listeners', [Api\DesignController::class, 'list_listeners'])->name('core.design.list_listeners');
 
-                        Route::prefix('live_rules')->group(function () {
-                            Route::get('list', [Api\DesignController::class, 'list_live_rules'])->name('core.design.list_live_rules');
+                            Route::prefix('live_rules')->group(function () {
+                                Route::get('list', [Api\DesignController::class, 'list_live_rules'])->name('core.design.list_live_rules');
+                            });
                         });
 
 

@@ -369,10 +369,11 @@ class UserNamespace extends Model implements ISystemModel
         return  $build->pluck('parent_namespace_id')->toArray();
     }
 
-    public function isNamespaceMember(?UserNamespace $namespace,bool $b_admin= false) : ?UserNamespaceMember {
-        if (!$namespace?->id ) {return null;}
+    public function isNamespaceMember(?UserNamespace $namespace,?int $ns_id = null, bool $b_admin= false) : ?UserNamespaceMember {
+        if (!$ns_id) { $ns_id = $namespace?->id;}
+        if (!$ns_id ) {return null;}
         // a user is a member if any of his namespaces he owns is in the membership
-        $build =  UserNamespaceMember::where('parent_namespace_id',$this->id)->where('member_namespace_id',$namespace->id);
+        $build =  UserNamespaceMember::where('parent_namespace_id',$this->id)->where('member_namespace_id',$ns_id);
         if ($b_admin) {
             $build->where('is_admin',true);
         }
