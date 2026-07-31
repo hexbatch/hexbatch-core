@@ -54,7 +54,6 @@ class NewBuild
         Stk\Root\Phase::class,
         Stk\Root\Marker::class,
         Stk\Root\Server::class,
-        Stk\Root\Signal::class,
         Stk\Root\TrackingExported::class,
 
 
@@ -100,9 +99,6 @@ class NewBuild
         Stk\Root\Phases\EditPhase::class,
         Stk\Root\Phases\NormalPhase::class,
 
-
-        Stk\Root\Signal\Mutex::class,
-        Stk\Root\Signal\Semaphore::class,
 
 
 
