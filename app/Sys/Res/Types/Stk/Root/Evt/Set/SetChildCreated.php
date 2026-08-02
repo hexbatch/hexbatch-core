@@ -106,7 +106,7 @@ class SetChildCreated extends Evt\ScopeSet implements ICommandCallable
                     command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $this->created_set->defining_type,
-                        parent_type_context: $this->parent_set->defining_type,
+                        other_type_context: $this->parent_set->defining_type,
                         set_context: $this->created_set,
                         parent_set_context: $this->parent_set,
                     )->toArray(),

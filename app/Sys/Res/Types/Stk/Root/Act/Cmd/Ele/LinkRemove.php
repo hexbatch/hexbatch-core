@@ -61,8 +61,8 @@ class LinkRemove extends Act\Cmd\Ele implements ICommandCallable
     ];
 
     const EVENT_CLASSES = [
-        Evt\Server\LinkDestroyed::class,
-        Evt\Server\LinkDestroying::class
+        Evt\Element\LinkDestroyed::class,
+        Evt\Element\LinkDestroying::class
     ];
 
 
@@ -152,7 +152,7 @@ class LinkRemove extends Act\Cmd\Ele implements ICommandCallable
      */
     protected function fireNotificationsForElement(Element $e, ?ElementSet $s, array $children_args) {
         $callables = [
-            Evt\Server\LinkDestroyed::class
+            Evt\Element\LinkDestroyed::class
         ];
 
         foreach ($callables as $callable_class) {
@@ -225,7 +225,7 @@ class LinkRemove extends Act\Cmd\Ele implements ICommandCallable
                 $given_set = ElementSet::getThisSet(uuid:$params->set_ref);
             }
             foreach ($me->selected_links as $el) {
-                Evt\Element\LinkCreating::callEventTree(
+                Evt\Element\LinkDestroying::callEventTree(
                     given_element: $el,
                     given_set: $given_set,
                     builder: $builder);

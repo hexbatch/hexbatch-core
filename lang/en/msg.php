@@ -230,6 +230,7 @@ return [
 
     //Live
     'live_rule_not_found_by' => 'Live rule not found using :types : :values ',
+    'permission_not_found' => 'Permission not found using target of :target and trigger :trigger ',
 
 
 ];

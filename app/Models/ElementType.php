@@ -188,13 +188,14 @@ class ElementType extends Model implements ISystemModel
         ?int             $shape_bound_id = null,
         ?int             $time_bound_id = null,
         ?TypeOfLifecycle $lifecycle = null,
-        bool             $b_throw_if_missing = true
+        bool             $b_throw_if_missing = true,
+        bool             $b_server_relations = false,
     )
     : ?ElementType
     {
         /** @var static|null $ret */
         $ret = static::buildElementType(id:$id,uuid: $uuid, namespace_id: $owner_namespace_id,name: $type_name,
-            shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle)->first();
+            shape_bound_id: $shape_bound_id,time_bound_id: $time_bound_id, lifecycle: $lifecycle,b_server_relations: $b_server_relations)->first();
 
         if (!$ret && $b_throw_if_missing) {
             $arg_types = [];
@@ -316,16 +317,25 @@ class ElementType extends Model implements ISystemModel
 
 
     public static function resolveType(
-        ?string $value, ?string $context_namespace_uuid = null, bool $throw_exception = true
+        ?string $value, ?string $context_namespace_uuid = null, bool $throw_exception = true,
+        bool $b_allow_null = true,
+        bool $b_server_relations = false
     )
     : null|static
     {
-        if (!$value) {return null;}
+        if (!$value) {
+            if ($b_allow_null) {return null;}
+            throw new HexbatchNotFound(
+                __('msg.type_not_found',['ref'=>'null']),
+                \Symfony\Component\HttpFoundation\Response::HTTP_NOT_FOUND,
+                RefCodes::TYPE_NOT_FOUND
+            );
+        }
         /** @var Builder $build */
         $build = null;
 
         if (Utilities::is_uuid($value)) {
-            $build = static::buildElementType(uuid: $value);
+            $build = static::buildElementType(uuid: $value,b_server_relations: $b_server_relations);
         } else {
 
             $parts = explode(ValidateNamespaceRef::NAMESPACE_SEPERATOR, $value);
@@ -338,7 +348,7 @@ class ElementType extends Model implements ISystemModel
                      * @var UserNamespace $owner
                      */
                     $owner = UserNamespace::resolveNamespace($owner_hint);
-                    $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
+                    $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name,b_server_relations: $b_server_relations);
                 }
 
             }
@@ -350,7 +360,7 @@ class ElementType extends Model implements ISystemModel
                  * @var UserNamespace $owner
                  */
                 $owner = UserNamespace::resolveNamespace($owner_hint);
-                $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name);
+                $build = static::buildElementType(namespace_id: $owner->id,name: $maybe_name,b_server_relations: $b_server_relations);
             }
         }
         /** @var ElementType|null $ret $ret */

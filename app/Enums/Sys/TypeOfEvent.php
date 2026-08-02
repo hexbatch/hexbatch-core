@@ -111,7 +111,11 @@ enum TypeOfEvent: string
     case LIVE_TYPE_REMOVED = 'live_type_removed';
     case LIVE_TYPE_PASTED = 'live_type_pasted';
 
+    case LIVE_PERMISSION_ADDED = 'live_permission_added';
+    case LIVE_PERMISSION_REMOVED = 'live_permission_removed';
 
+    case LIVE_PERMISSION_ADDING = 'live_permission_adding';
+    case LIVE_PERMISSION_REMOVING = 'live_permission_removing';
 
 
 

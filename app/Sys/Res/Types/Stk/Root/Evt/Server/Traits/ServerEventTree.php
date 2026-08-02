@@ -22,21 +22,54 @@ use Hexbatch\Thangs\Models\Thang;
 use Illuminate\Support\Facades\Log;
 
 
-trait ServerNotificationEventTree
+trait ServerEventTree
 {
+
+
+    public function __construct(
+        protected ?ElementType   $given_type = null  ,
+        protected ?ElementType   $other_type =null ,
+        protected ?UserNamespace $given_namespace = null,
+        protected ?UserNamespace $old_namespace = null,
+        protected ?Element       $given_element = null,
+        protected ?ElementSet    $given_set = null,
+        protected ?Phase         $given_phase = null ,
+        protected ?Attribute     $given_attribute = null,
+        protected ?string        $given_uuid = null,
+
+    )
+    {
+
+    }
 
     protected  function toArray() :array {
         return [
             'given_type'=>$this->given_type,
+            'other_type'=>$this->other_type,
             'given_namespace'=>$this->given_namespace,
+            'old_namespace'=>$this->old_namespace,
+            'given_element'=>$this->given_element,
+            'given_set'=>$this->given_set,
+            'given_phase'=>$this->given_phase,
+            'given_attribute'=>$this->given_attribute,
+            'given_uuid'=>$this->given_uuid,
         ];
     }
 
     protected static function fromArray(array $args) : static {
-        $given_type = static::getElementFromArray('given_type',$args);
-        $given_namespace = static::getSetFromArray('given_namespace',$args,throw_if_missing: false);
+        $given_type = static::getTypeFromArray('given_type',$args,false);
+        $other_type = static::getTypeFromArray('other_type',$args);
+        $given_namespace = static::getNamespaceFromArray('given_namespace',$args,throw_if_missing: false);
+        $old_namespace = static::getNamespaceFromArray('old_namespace',$args,throw_if_missing: false);
+        $given_element = static::getElementFromArray('given_element',$args,throw_if_missing: false);
+        $given_set = static::getSetFromArray('given_set',$args,throw_if_missing: false);
+        $given_phase = static::getSetFromArray('given_phase',$args,throw_if_missing: false);
+        $given_attribute = static::getSetFromArray('given_attribute',$args,throw_if_missing: false);
+        $given_uuid = $args['given_uuid']??null ;
 
-        return new static(given_type: $given_type,given_namespace: $given_namespace);
+        return new static(given_type: $given_type, other_type:$other_type,given_namespace: $given_namespace,
+            old_namespace: $old_namespace,given_element: $given_element,given_set: $given_set,given_phase: $given_phase,
+            given_attribute: $given_attribute,given_uuid: $given_uuid);
     }
 
     /**
@@ -63,6 +96,10 @@ trait ServerNotificationEventTree
         return $this->callEventTreeInner($children_args);
     }
 
+    protected function decide() : bool {
+        return true;
+    }
+
 
     /**
      * @throws \Throwable
@@ -72,7 +109,7 @@ trait ServerNotificationEventTree
         ?IThangBuilder $builder = null
     ) : Thang|IThangBuilder
     {
-        Utilities::ignoreVar($children_args);
+
         $ret_builder = false;
         if ($builder) {
             $ret_builder = true;
@@ -95,12 +132,14 @@ trait ServerNotificationEventTree
                     command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $this->given_type,
+                        other_type_context: $this->other_type,
                         namespace_context: $this->given_namespace,
                         old_namespace_context: $this->old_namespace,
                         attribute_context: $this->given_attribute,
                         set_context: $this->given_set,
                         element_context: $this->given_element,
-                        phase_context: $this->given_phase
+                        phase_context: $this->given_phase,
+                        important_array: $children_args
                     )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );
@@ -144,14 +183,14 @@ trait ServerNotificationEventTree
     /**
      * @throws \Throwable
      */
-    public static function callEventTreeByItself(
-                                         array $children_args,
-                                         ?ElementType $given_type = null, ?ElementType $parent_type = null, ?UserNamespace $given_namespace = null,
-                                         ?UserNamespace $old_namespace = null, ?Element $given_element = null, ?ElementSet $given_set = null, ?Phase $given_phase = null,
-                                         ?Attribute $given_attribute = null, ?string $given_uuid = null,?IThangBuilder $builder = null)
+    public static function makeEventTree(
+        array          $children_args = [],
+        ?ElementType   $given_type = null, ?ElementType $other_type = null, ?UserNamespace $given_namespace = null,
+        ?UserNamespace $old_namespace = null, ?Element $given_element = null, ?ElementSet $given_set = null, ?Phase $given_phase = null,
+        ?Attribute     $given_attribute = null, ?string $given_uuid = null, ?IThangBuilder $builder = null)
     : Thang|IThangBuilder|null
     {
-        $r = new static(given_type: $given_type, parent_type: $parent_type,given_namespace: $given_namespace,old_namespace: $old_namespace,given_element: $given_element,
+        $r = new static(given_type: $given_type, other_type: $other_type,given_namespace: $given_namespace,old_namespace: $old_namespace,given_element: $given_element,
             given_set: $given_set,given_phase: $given_phase,given_attribute: $given_attribute,
             given_uuid: $given_uuid);
         return $r->callEventTreeInner($children_args,$builder);

@@ -12,17 +12,17 @@ use Hexbatch\Thangs\Models\Thang;
 
 interface IServerEvent
 {
-    public static function callEventTreeByItself(
-        array $children_args,
-          ?ElementType               $given_type = null  ,
-          ?ElementType               $parent_type =null ,
-          ?UserNamespace             $given_namespace = null,
-          ?UserNamespace            $old_namespace = null,
-          ?Element                  $given_element = null,
-          ?ElementSet                  $given_set = null,
-          ?Phase                    $given_phase = null ,
-          ?Attribute            $given_attribute = null,
-          ?string               $given_uuid = null,
-        ?IThangBuilder $builder = null
+    public static function makeEventTree(
+        array            $children_args,
+          ?ElementType   $given_type = null  ,
+          ?ElementType   $other_type =null ,
+          ?UserNamespace $given_namespace = null,
+          ?UserNamespace $old_namespace = null,
+          ?Element       $given_element = null,
+          ?ElementSet    $given_set = null,
+          ?Phase         $given_phase = null ,
+          ?Attribute     $given_attribute = null,
+          ?string        $given_uuid = null,
+        ?IThangBuilder   $builder = null
     ) : Thang|IThangBuilder|null;
 }

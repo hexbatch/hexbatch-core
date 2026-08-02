@@ -60,17 +60,17 @@ return new class extends Migration
                 ->index()
                 ->comment('if false then data kept, but not accesable and live type does not exist for rules');
 
+
+            $table->boolean('is_passive')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true, then live does not modify rules or data on the element. Or mask attributes of element. Its attributes can be used in the set_meta api but only seen to the set group');
+
             $table->uuid('ref_uuid')
                 ->unique()
                 ->nullable(false)
                 ->comment("used for display and id outside the code");
 
 
-
-            $table->uuid('live_applied_phase_uuid')
-                ->index()
-                ->nullable()->default(null)
-                ->comment("used for quick lookup");
 
             $table->uuid('live_applied_element_uuid')
                 ->index()

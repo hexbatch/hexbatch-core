@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 
-
+//todo child sets have location bounds inside the parent set, this is determined by the defining element of the set. and live can affect those
+   // that means children sets have a shape or map inside the parent set that can overlap just like elements there
 /**
  * @mixin Builder
  * @mixin \Illuminate\Database\Query\Builder

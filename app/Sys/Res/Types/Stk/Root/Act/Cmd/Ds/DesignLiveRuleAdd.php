@@ -82,6 +82,13 @@ class DesignLiveRuleAdd extends Act\Cmd\Ds implements ICommandCallable
         $given_rule->live_rule_trigger_type_id = $trigger_type->id;
         $given_rule->live_rule_target_type_id = $target_type->id;
         $given_rule->live_rule_policy = $this->params->live_rule_policy;
+        $given_rule->is_passive = $this->params->is_passive;
+        $given_rule->for_child_set_definers = $this->params->for_child_set_definers;
+        $given_rule->live_rule_min_triggers = $this->params->live_rule_min_triggers;
+        $given_rule->live_rule_max_triggers = $this->params->live_rule_max_triggers;
+        $given_rule->type_owner_uuid = $this->given_type->owner_namespace->ref_uuid;
+        $given_rule->type_target_uuid = $target_type->ref_uuid;
+        $given_rule->type_trigger_uuid = $trigger_type->ref_uuid;
         $given_rule->save();
         return $given_rule;
     }

@@ -92,7 +92,7 @@ class SetCreating extends Evt\ScopeType implements ICommandCallable
                     command_args: new Evt\EventHandler(
                         ref: $ref,
                         type_context: $defining_element->element_parent_type,
-                        parent_type_context: $parent_set?->defining_type
+                        other_type_context: $parent_set?->defining_type
                     )->toArray(),
                     command_tags: [Evt\EventHandler::class]
                 );

@@ -93,16 +93,13 @@ class ChangeOwner extends Api\DesignApi implements ICommandCallable
 
         if ($do_permission_check)
         {
-            $builder
-            ->tree(
-                command_class: Evt\Server\TypeOwnerChanging::class,
-                command_args: new Evt\Server\TypeOwnerChanging(
-                    given_type:$given_type,
-                    given_namespace:$given_namespace,
-                    old_namespace: $given_type->owner_namespace
-                )->toArray(),
-                command_tags: [Evt\Server\TypeOwnerChanging::class]
+            $builder = Evt\Server\TypeOwnerChanging::makeEventTree(
+                given_type:$given_type,
+                given_namespace:$given_namespace,
+                old_namespace: $given_type->owner_namespace,
+                builder: $builder
             );
+
         }
 
 

@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->foreignId('horde_live_attributes_id')
                 ->nullable()->default(null)
-                ->comment("From a live type added onto the element")
+                ->comment("From a live type added onto the element. This includes set meta data")
                 ->index()
                 ->constrained('live_attributes')
                 ->restrictOnDelete()
@@ -81,8 +81,25 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->timestamps();
 
+            $table->foreignId('horde_meta_set_id')
+                ->nullable()->default(null)
+                ->comment("When not null, this is meta data for a live attributge on an element, and not read as element data. Children sets can read this, but writing make their own line that masks")
+                ->index()
+                ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+
+            $table->foreignId('horde_subset_id')
+                ->nullable(false)
+                ->comment("This is a live attribute on the child set, which is not an element in the set")
+                ->index()
+                ->constrained('element_sets')
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
+
+            $table->timestamps();
 
 
             $table->jsonb('element_value')

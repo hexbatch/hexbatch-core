@@ -24,8 +24,8 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->foreignId('live_rule_trigger_type_id')
-                ->nullable(false)
-                ->comment("When an element of this type enters this rule is triggered")
+                ->nullable(true)
+                ->comment("When an element of this type enters this rule is triggered. Null means apply to all elements")
                 ->index()
                 ->constrained('element_types')
                 ->cascadeOnUpdate()
@@ -41,8 +41,25 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
 
-
             $table->timestamps();
+
+            $table->boolean('is_passive')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true, then no permission needed to apply target, but target does not modify element at all, just used in rules and meta');
+
+
+            $table->boolean('for_child_set_definers')->default(false)->nullable(false)
+                ->index()
+                ->comment('if true, then this rule is only for child sets created or placed into the set, and not elements. Applied to definer element');
+
+
+            $table->integer('live_rule_min_triggers')
+                ->nullable()->default(null)
+                ->comment("Minimum triggers (each element) in set for this rule");
+
+            $table->integer('live_rule_max_triggers')
+                ->nullable()->default(null)
+                ->comment("Maximum triggers (each element) in set for this rule");
 
             $table->uuid('ref_uuid')
                 ->unique()

@@ -4,7 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use App\Sys\Res\Types\Stk\Root\Evt\Server\Traits\ServerNotificationEventTree;
+use App\Sys\Res\Types\Stk\Root\Evt\Server\Traits\ServerEventTree;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
@@ -13,7 +13,7 @@ use Hexbatch\Thangs\Interfaces\ICommandCallable;
  */
 class PhasePurged extends Evt\ScopeServer implements ICommandCallable
 {
-    use ServerNotificationEventTree;
+    use ServerEventTree;
     const UUID = '27aff549-4d9f-47a9-b7f9-769743928b2e';
     const EVENT_NAME = TypeOfEvent::PHASE_PURGED;
 

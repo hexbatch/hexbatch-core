@@ -156,6 +156,10 @@ enum TypeOfAction: string
     case CMD_LIVE_TYPE_DEMOTE = 'cmd_live_type_demote';
     case CMD_LIVE_TYPE_COPY = 'cmd_live_type_copy';
     case CMD_LIVE_TYPE_REMOVE = 'cmd_live_type_remove';
+    case CMD_LIVE_READ_META = 'cmd_live_read_meta';
+    case CMD_LIVE_WRITE_META = 'cmd_live_write_meta';
+    case CMD_LIVE_PERMISSION_REMOVE = 'cmd_live_permission_remove';
+    case CMD_LIVE_PERMISSION_ADD = 'cmd_live_permission_add';
 
 
     case CMD_PHASE_TREE_DELETE = 'cmd_phase_tree_delete';
@@ -193,7 +197,6 @@ enum TypeOfAction: string
     case CMD_USER_START_DELETION = 'cmd_user_start_deletion';
     case CMD_USER_REGISTER = 'cmd_user_register';
     case CMD_USER_LOGIN = 'cmd_user_login';
-    case CMD_USER_EDIT = 'cmd_user_edit';
 
 
 

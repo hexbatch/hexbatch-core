@@ -9,6 +9,8 @@ use App\Annotations\ApiTypeMarker;
 use App\Data\ApiParams\Data\Elements\Params\CreateElementParamData;
 use App\Data\ApiParams\Data\Elements\Params\SelectElementParamData;
 use App\Data\ApiParams\Data\Elements\Responses\ElementList;
+use App\Data\ApiParams\Data\Live\LivePermissionData;
+use App\Data\ApiParams\Data\Live\Params\LivePermissionParamData;
 use App\Data\ApiParams\Data\Schedules\Schedule;
 use App\Data\ApiParams\Data\Types\ElementTypeData;
 use App\Data\ApiParams\Data\Types\Params\TypeParamData;
@@ -173,30 +175,7 @@ class TypeController extends Controller {
 
 
 
-    #[OA\Get(
-        path: '/api/v1/{user_namespace}/types/{element_type}/list_live',
-        operationId: 'core.types.list_live',
-        description: "Members can see all the currently applied live using this type",
-        summary: 'Show live types made from this type',
-        security: [['bearerAuth' => []]],
-        tags: ['type','live'],
-        parameters: [
-            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
 
-            new OA\PathParameter(  name: 'element_type', description: "The type",
-                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
-
-        ],
-        responses: [
-            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
-        ]
-    )]
-    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
-    #[ApiTypeMarker( Root\Api\Type\ListLive::class)]
-    public function list_live() {
-        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
-    }
 
 
     /**
@@ -725,6 +704,115 @@ class TypeController extends Controller {
     #[ApiTypeMarker( Root\Api\Type\PromoteElement::class)]
     public function promote_element() {
         return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    #[OA\Get(
+        path: '/api/v1/{user_namespace}/types/{element_type}/live/list',
+        operationId: 'core.types.live.list',
+        description: "Members can see all the currently applied live using this type",
+        summary: 'Show live types made from this type',
+        security: [['bearerAuth' => []]],
+        tags: ['type','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+            new OA\PathParameter(  name: 'element_type', description: "The type",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchResource::class) ),
+
+        ],
+        responses: [
+            new OA\Response( response: CodeOf::HTTP_NOT_IMPLEMENTED, description: 'Not yet implemented')
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_MEMBER)]
+    #[ApiTypeMarker( Root\Api\Type\ListLive::class)]
+    public function list_live() {
+        return response()->json([], CodeOf::HTTP_NOT_IMPLEMENTED);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[OA\Post(
+        path: '/api/v1/{user_namespace}/types/live/permissions/add',
+        operationId: 'core.types.permissions.add',
+        description: "Admin can add permissions for live to be used on their types",
+        summary: 'Add a permission for live',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LivePermissionParamData::class)),
+        tags: ['type','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Permission created', content: new JsonContent(ref: LivePermissionData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Not found'),
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Type\AddPermission::class)]
+    #[ApiEventMarker(Evt\Server\LivePermissionAdded::class)]
+    #[ApiEventMarker(Evt\Server\LivePermissionAdding::class)]
+    public function add_permission(UserNamespace $namespace,Request $request) {
+        $params = LivePermissionParamData::fromRequest($request);
+        $data_out = Root\Api\Type\AddPermission::doAddPermission(params: $params,calling_namespace: $namespace, do_permission_check: true,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_CREATED;
+        }
+        return  response()->json($data_out,$http_code);
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    #[OA\Delete(
+        path: '/api/v1/{user_namespace}/types/live/permissions/remove',
+        operationId: 'core.types.permissions.remove',
+        description: "Admin can add permissions for live to be used on their types",
+        summary: 'Add a permission for live',
+        security: [['bearerAuth' => []]],
+        requestBody: new OA\RequestBody( required: true, content: new JsonContent(type: LivePermissionParamData::class)),
+        tags: ['type','live'],
+        parameters: [
+            new OA\PathParameter(  name: 'user_namespace', description: "Namespace this is run under",
+                in: 'path', required: true,  schema: new OA\Schema(type: HexbatchNamespace::class) ),
+
+        ],
+        responses: [
+            new OA\Response(    response: CodeOf::HTTP_CREATED, description: 'Permission created', content: new JsonContent(ref: LivePermissionData::class)),
+            new OA\Response(    response: CodeOf::HTTP_OK, description: 'Processing|waiting', content: new JsonContent(ref: ThangData::class)),
+            new OA\Response(    response: CodeOf::HTTP_UNPROCESSABLE_ENTITY, description: 'There was an issue') ,
+            new OA\Response(    response: CodeOf::HTTP_FORBIDDEN, description: 'Not allowed'),
+            new OA\Response(    response: CodeOf::HTTP_NOT_FOUND, description: 'Not found'),
+        ]
+    )]
+    #[ApiAccessMarker( TypeOfAccessMarker::TYPE_ADMIN)]
+    #[ApiTypeMarker( Root\Api\Type\RemovePermission::class)]
+    #[ApiEventMarker(Evt\Server\LivePermissionRemoving::class)]
+    #[ApiEventMarker(Evt\Server\LivePermissionRemoved::class)]
+    public function remove_permission(UserNamespace $namespace,Request $request) {
+        $params = LivePermissionParamData::fromRequest($request);
+        $data_out = Root\Api\Type\RemovePermission::doRemovePermission(params: $params,calling_namespace: $namespace, do_permission_check: true,tags: ['api-top']);
+
+        if ($data_out instanceof Thang) {
+            $data_out = ThangData::from($data_out);
+            $http_code = CodeOf::HTTP_OK;
+        }
+        else {
+            $http_code = CodeOf::HTTP_ACCEPTED;
+        }
+        return  response()->json($data_out,$http_code);
     }
 
 }

@@ -125,6 +125,8 @@ return new class extends Migration
 
         Schema::table('attribute_rules', function (Blueprint $table) {
 
+            $table->rawColumn('filter_data_json_path','jsonpath')->nullable()->default(null)
+                ->comment("When set, rule is only done if data matches from children or event info");
 
             $table->string('rule_name',256)->nullable(false)
                 ->comment("The name of the rule (does not have to be unique and is optional. Can also have notes");

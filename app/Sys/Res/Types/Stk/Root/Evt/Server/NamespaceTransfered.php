@@ -4,6 +4,7 @@ namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
+use App\Sys\Res\Types\Stk\Root\Evt\Server\Traits\ServerEventTree;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
@@ -13,7 +14,7 @@ use Hexbatch\Thangs\Interfaces\ICommandCallable;
  */
 class NamespaceTransfered extends Evt\ScopeServer implements ICommandCallable, Traits\IServerEvent
 {
-    use \App\Sys\Res\Types\Stk\Root\Evt\Server\Traits\ServerNotificationEventTree;
+    use ServerEventTree;
     const UUID = '5fbaad48-f51b-466b-94f0-19a63264d808';
     const EVENT_NAME = TypeOfEvent::NAMESPACE_TRANSFERRED;
 

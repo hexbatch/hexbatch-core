@@ -150,6 +150,7 @@ class RefCodes {
     //live start at 70k
 
     const int LIVE_RULE_NOT_FOUND =  70001;
+    const int LIVE_PERMISSION_NOT_FOUND = 70005;
 
     /**
      * @type string[]
@@ -250,6 +251,7 @@ class RefCodes {
         self::LINK_NOT_FOUND => '',
 
         self::LIVE_RULE_NOT_FOUND => '',
+        self::LIVE_PERMISSION_NOT_FOUND => '',
 
     ];
 }

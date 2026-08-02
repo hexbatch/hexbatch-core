@@ -4,14 +4,14 @@ namespace App\Sys\Res\Types\Stk\Root\Evt\Server;
 
 use App\Enums\Sys\TypeOfEvent;
 use App\Sys\Res\Types\Stk\Root\Evt;
-use App\Sys\Res\Types\Stk\Root\Evt\Server\Traits\ServerNotificationEventTree;
+use App\Sys\Res\Types\Stk\Root\Evt\Server\Traits\ServerEventTree;
 use Hexbatch\Thangs\Interfaces\ICmdCallReturn;
 use Hexbatch\Thangs\Interfaces\ICommandCallable;
 
 
 class UserDeleted extends Evt\ScopeServer implements ICommandCallable, Traits\IServerEvent
 {
-    use ServerNotificationEventTree;
+    use ServerEventTree;
     const UUID = '3cb134f3-3143-41b3-b929-08e1c240349d';
     const EVENT_NAME = TypeOfEvent::USER_DELETED;
 

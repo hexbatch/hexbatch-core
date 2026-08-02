@@ -22,21 +22,7 @@ class ScopeServer extends BaseEvent
     ];
 
 
-    public function __construct(
-        protected ?ElementType               $given_type = null  ,
-        protected ?ElementType               $parent_type =null ,
-        protected ?UserNamespace             $given_namespace = null,
-        protected ?UserNamespace            $old_namespace = null,
-        protected ?Element                  $given_element = null,
-        protected ?ElementSet                  $given_set = null,
-        protected ?Phase                    $given_phase = null ,
-        protected ?Attribute            $given_attribute = null,
-        protected ?string               $given_uuid = null,
 
-    )
-    {
-
-    }
 
 }
 

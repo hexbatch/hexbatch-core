@@ -419,6 +419,12 @@ Route::prefix('v1')->group(function () {
                     Route::get('list_suspended', [Api\TypeController::class, 'list_suspended'])->name('core.types.list_suspended');
                 });
 
+                Route::middleware(Middleware\ValidateNamespaceAdmin::class)->group(function () {
+                    Route::prefix('permissions')->group(function () {
+                        Route::patch('add', [Api\TypeController::class, 'add_permission'])->name('core.types.permissions.add');
+                        Route::patch('remove', [Api\TypeController::class, 'remove_permission'])->name('core.types.permissions.remove');
+                    });
+                });
 
                 Route::prefix('{element_type}')->group(function () {
 
@@ -444,15 +450,21 @@ Route::prefix('v1')->group(function () {
                         Route::patch('publish_type', [Api\TypeController::class, 'publish_type'])->name('core.types.publish_type');
                         Route::patch('retire', [Api\TypeController::class, 'retire_type'])->name('core.types.retire');
                         Route::post('create_element', [Api\TypeController::class, 'create_element'])->name('core.types.create_element');
+                        Route::prefix('live')->group(function () {
+
+                        });
 
                     });
 
                     Route::middleware([])->group(function () {
                         Route::get('show', [Api\TypeController::class, 'show_type'])->name('core.types.show');
-                        Route::get('list_live', [Api\TypeController::class, 'list_live'])->name('core.types.list_live');
+
                         Route::get('list_elements', [Api\TypeController::class, 'list_elements'])->name('core.types.list_elements');
                         Route::get('list_descendants', [Api\TypeController::class, 'list_descendants'])->name('core.types.list_descendants');
                         Route::get('list_attribute_descendants', [Api\TypeController::class, 'list_attribute_descendants'])->name('core.types.list_attribute_descendants');
+                        Route::prefix('live')->group(function () {
+                            Route::get('list', [Api\TypeController::class, 'list_live'])->name('core.types.live.list');
+                        });
                     });
                 });
 
